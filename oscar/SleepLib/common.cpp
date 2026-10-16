@@ -419,6 +419,15 @@ QString weightString(float kg, UnitSystem us, bool rounded)
     return ("Bad UnitSystem");
 }
 
+QString durationString(std::chrono::nanoseconds d)
+{
+    using namespace std::chrono;
+    if (d < 10us) return QString("%1 ns").arg(d.count());
+    if (d < 10ms) return QString("%1 us").arg(duration_cast<microseconds>(d).count());
+    if (d < 10s)  return QString("%1 ms").arg(duration_cast<milliseconds>(d).count());
+    return QString("%1 s").arg(duration_cast<seconds>(d).count());
+}
+
 // Format perssure relief
 QString formatRelief (QString relief)
 {

@@ -10,11 +10,13 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <chrono>
 #include <QString>
 #include <QColor>
 #include <QObject>
 #include <QThread>
 #include <QSettings>
+#include <QElapsedTimer>
 
 #include "qprogressdialog.h"
 
@@ -102,20 +104,30 @@ void copyPath(QString src, QString dst, bool overwrite=false);
 // Primarily sort by value
 bool operator <(const ValueCount &a, const ValueCount &b);
 
-const float ounce_convert = 28.3495231F; // grams
-const float pound_convert = ounce_convert * 16;
-const float gram_ounce_convert = 0.0352754; // ounces in a gram
-const float pounds_per_kg = 2.2046226218 ; // kg to pounds
-const float kgs_per_pound = (1.0/pounds_per_kg) ; //pounds to kg.
-const float cms_per_inch  = 2.54 ; // inches to cm
-const float cms_per_foot  = (12.0*cms_per_inch) ; // feet to cm
-const float inches_per_cm = (1.0/cms_per_inch) ; // cm to inch
-
+// Weight and length conversion constants
+constexpr float ounce_convert = 28.3495231F; // grams
+constexpr float pound_convert = ounce_convert * 16;
+constexpr float gram_ounce_convert = 0.0352754; // ounces in a gram
+constexpr float pounds_per_kg = 2.2046226218 ; // kg to pounds
+constexpr float kgs_per_pound = (1.0/pounds_per_kg) ; //pounds to kg.
+constexpr float cms_per_inch  = 2.54 ; // inches to cm
+constexpr float cms_per_foot  = (12.0*cms_per_inch) ; // feet to cm
+constexpr float inches_per_cm = (1.0/cms_per_inch) ; // cm to inch
 
 /*! \brief Format a weight value for display.
  *  \param rounded When true, English rounds to nearest pound (no oz); metric rounds to whole kg.
  *                 Use true for axis tick labels; false for detailed tooltips. */
 QString weightString(float kg, UnitSystem us = US_Undefined, bool rounded = false);
+
+/*! \brief Format a duration for log output, choosing ns, us, ms or s so the
+ *         value stays below 10000 (truncated, not rounded). Not translated; not for UI text. */
+QString durationString(std::chrono::nanoseconds d);
+
+//! \brief Elapsed time of a running QElapsedTimer as a typed duration.
+inline std::chrono::nanoseconds elapsedDuration(const QElapsedTimer & t)
+{
+    return std::chrono::nanoseconds(t.nsecsElapsed());
+}
 
 //! \brief Format pressure relief by placing a space before cmH2O if not already there
 QString formatRelief (QString relief);

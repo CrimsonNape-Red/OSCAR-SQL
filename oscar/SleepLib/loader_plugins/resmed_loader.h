@@ -11,6 +11,7 @@
 #define RESMED_LOADER_H
 
 #include <QVector>
+#include <chrono>
 #include "SleepLib/machine.h" // Base class: MachineLoader
 #include "SleepLib/machine_loader.h"
 #include "SleepLib/profiles.h"
@@ -165,21 +166,18 @@ protected:
 
     QMap<QDate, ResMedDay> resdayList;
 
-#ifdef DEBUG_EFFICIENCY
     QHash<ChannelID, qint64> channel_efficiency;
-    QHash<ChannelID, qint64> channel_time;
-    // Cumulative profiling times in ms. Worker threads update them under timeMutex.
-    qint64 timeInLoadBRP;       //!< Time spent in LoadBRP().
-    qint64 timeInLoadPLD;       //!< Time spent in LoadPLD().
-    qint64 timeInLoadEVE;       //!< Time spent in LoadEVE().
-    qint64 timeInLoadCSL;       //!< Time spent in LoadCSL().
-    qint64 timeInLoadSAD;       //!< Time spent in LoadSAD().
-    qint64 timeInEDFOpen;       //!< Time spent opening EDF files.
-    qint64 timeInEDFInfo;       //!< Time spent parsing EDF headers.
-    qint64 timeInAddWaveform;   //!< Time spent in AddWaveform() for BRP data.
-    qint64 timeInTimeDelta;     //!< Time spent computing time deltas.
-    QMutex timeMutex;
-#endif
+    QHash<ChannelID, std::chrono::nanoseconds> channel_time;
+    // Cumulative profiling times. Imports are single-threaded, so no locking is needed.
+    std::chrono::nanoseconds timeInLoadBRP{};     //!< Time spent in LoadBRP().
+    std::chrono::nanoseconds timeInLoadPLD{};     //!< Time spent in LoadPLD().
+    std::chrono::nanoseconds timeInLoadEVE{};     //!< Time spent in LoadEVE().
+    std::chrono::nanoseconds timeInLoadCSL{};     //!< Time spent in LoadCSL().
+    std::chrono::nanoseconds timeInLoadSAD{};     //!< Time spent in LoadSAD().
+    std::chrono::nanoseconds timeInEDFOpen{};     //!< Time spent opening EDF files.
+    std::chrono::nanoseconds timeInEDFInfo{};     //!< Time spent parsing EDF headers.
+    std::chrono::nanoseconds timeInAddWaveform{}; //!< Time spent in AddWaveform() for BRP data.
+    std::chrono::nanoseconds timeInTimeDelta{};   //!< Time spent computing time deltas.
 
     // TODO: This really belongs in a generic location that all loaders can use.
     // But that will require retooling the overall call structure so that there's

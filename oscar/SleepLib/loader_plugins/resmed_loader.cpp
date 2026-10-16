@@ -29,10 +29,7 @@
 #include "SleepLib/loader_plugins/resmed_loader.h"
 #include "SleepLib/loader_plugins/resmed_EDFinfo.h"
 
-#ifdef DEBUG_EFFICIENCY
-#include <QElapsedTimer>  // only available in 4.8 and later
-#endif
-
+#include <QElapsedTimer>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
     #define QTCOMBINE insert
@@ -90,7 +87,9 @@ static const QVector<int> AS11TestedModels {
 0};
 #endif
 
-ResmedLoader::ResmedLoader() {
+ResmedLoader::ResmedLoader() :
+    saveCallback(SaveSession)
+{
 #ifndef UNITTEST_MODE
     const QString RMS9_ICON = ":/icons/rms9.png";
     const QString RM10_ICON = ":/icons/airsense10.png";
@@ -113,14 +112,8 @@ ResmedLoader::ResmedLoader() {
     m_pixmaps[STR_ResMed_Lumis150] = QPixmap(RM150_ICON);
     m_pixmap_paths[STR_ResMed_Lumis150] = RM150_ICON;
 #endif
+
     m_type = MT_CPAP;
-
-#ifdef DEBUG_EFFICIENCY
-    timeInTimeDelta = timeInLoadBRP = timeInLoadPLD = timeInLoadEVE = 0;
-    timeInLoadCSL = timeInLoadSAD = timeInEDFInfo = timeInEDFOpen = timeInAddWaveform = 0;
-#endif
-
-    saveCallback = SaveSession;
 }
 
 ResmedLoader::~ResmedLoader() { }
@@ -675,6 +668,20 @@ int ResmedLoader::Open(const QString & dirpath)
 void edfDebugInit();
     edfDebugInit();
 #endif
+
+    // Reset all latency tracking variables
+    timeInTimeDelta = {};
+    timeInLoadBRP = {};
+    timeInLoadPLD = {};
+    timeInLoadEVE = {};
+    timeInLoadCSL = {};
+    timeInLoadSAD = {};
+    timeInEDFInfo = {};
+    timeInEDFOpen = {};
+    timeInAddWaveform = {};
+    channel_efficiency.clear();
+    channel_time.clear();
+
     qDebug() << "ResmedLoader::Open starting ( with " << dirpath << ")";
     QString datalogPath;
     QHash<QString, QString> idmap;  // Temporary device ID properties hash
@@ -1109,40 +1116,32 @@ void edfDebugInit();
     // Save machine and all sessions to database
 //    mach->Save();
 
-#ifdef DEBUG_EFFICIENCY
-    {
-        qint64 totalbytes = 0;
-        qint64 totalns = 0;
-        qDebug() << "Performance / Efficiency Information";
+    qint64 totalbytes = 0;
+    std::chrono::nanoseconds totalns{};
+    qDebug() << "Performance / Efficiency Information";
 
-        for (auto it = channel_efficiency.begin(), end=channel_efficiency.end(); it != end; it++) {
-            ChannelID code = it.key();
-            qint64 value = it.value();
-            qint64 ns = channel_time[code];
-            totalbytes += value;
-            totalns += ns;
-            double secs = double(ns) / 1000000000.0L;
-            QString s = value < 0 ? "saved" : "cost";
-            qDebug() << "Time-Delta conversion for " + schema::channel[code].label() + " " + s + " " +
-                     QString::number(qAbs(value)) + " bytes and took " + QString::number(secs, 'f', 4) + "s";
-        }
-
-        qDebug() << "Total toTimeDelta function usage:" << totalbytes << "in" << double(totalns) / 1000000000.0 << "seconds";
-
-        qDebug() << "Total CPU time in EDF Open" << timeInEDFOpen;
-        qDebug() << "Total CPU time in EDF Parser" << timeInEDFInfo;
-        qDebug() << "Total CPU time in LoadBRP" << timeInLoadBRP;
-        qDebug() << "Total CPU time in LoadPLD" << timeInLoadPLD;
-        qDebug() << "Total CPU time in LoadSAD" << timeInLoadSAD;
-        qDebug() << "Total CPU time in LoadEVE" << timeInLoadEVE;
-        qDebug() << "Total CPU time in LoadCSL" << timeInLoadCSL;
-        qDebug() << "Total CPU time in (BRP) AddWaveform" << timeInAddWaveform;
-        qDebug() << "Total CPU time in TimeDelta function" << timeInTimeDelta;
-
-        channel_efficiency.clear();
-        channel_time.clear();
+    for (auto it = channel_efficiency.begin(), end=channel_efficiency.end(); it != end; it++) {
+        ChannelID code = it.key();
+        qint64 value = it.value();
+        std::chrono::nanoseconds ns = channel_time[code];
+        totalbytes += value;
+        totalns += ns;
+        const char *s = value > 0 ? "saved" : "cost";
+        qDebug().noquote() << "Time-Delta conversion for" << schema::channel[code].label() << s <<
+            qAbs(value) << "bytes and took" << durationString(ns);
     }
-#endif
+
+    qDebug().noquote() << "Total toTimeDelta function usage:" << totalbytes << "in" << durationString(totalns);
+
+    qDebug().noquote() << "Total time in EDF Open" << durationString(timeInEDFOpen);
+    qDebug().noquote() << "Total time in EDF Parser" << durationString(timeInEDFInfo);
+    qDebug().noquote() << "Total time in LoadBRP" << durationString(timeInLoadBRP);
+    qDebug().noquote() << "Total time in LoadPLD" << durationString(timeInLoadPLD);
+    qDebug().noquote() << "Total time in LoadSAD" << durationString(timeInLoadSAD);
+    qDebug().noquote() << "Total time in LoadEVE" << durationString(timeInLoadEVE);
+    qDebug().noquote() << "Total time in LoadCSL" << durationString(timeInLoadCSL);
+    qDebug().noquote() << "Total time in (BRP) AddWaveform" << durationString(timeInAddWaveform);
+    qDebug().noquote() << "Total time in TimeDelta function" << durationString(timeInTimeDelta);
 
 //    sessfiles.clear();
 //    strsess.clear();
@@ -1285,9 +1284,7 @@ void ResmedLoader::checkSummaryDay( ResMedDay & resday, QDate date, Machine * ma
 ///////////////////////////////////////////////////////////////////////////////////////////
 int ResmedLoader::ScanFiles(Machine * mach, const QString & datalog_path, QDate firstImport)
 {
-#ifdef DEBUG_EFFICIENCY
-    QTime time;
-#endif
+    QElapsedTimer time;
 
     bool create_backups = p_profile->session->backupCardData();
     QString backup_path = mach->getBackupPath();
@@ -1304,9 +1301,7 @@ int ResmedLoader::ScanFiles(Machine * mach, const QString & datalog_path, QDate 
     qDebug() << "Generating list of EDF files";
     qDebug() << "First Import date is " << firstImport;
 
-#ifdef DEBUG_EFFICIENCY
     time.start();
-#endif
 
     QDir dir(datalog_path);
 
@@ -1350,7 +1345,7 @@ int ResmedLoader::ScanFiles(Machine * mach, const QString & datalog_path, QDate 
                 continue;
             }
         } else {
-            qDebug() << "Skipping directory - bad name size " << filename;
+            qDebug() << "Skipping directory - bad name size" << filename;
             continue;
         }
         // Get file lists under this directory
@@ -1361,24 +1356,18 @@ int ResmedLoader::ScanFiles(Machine * mach, const QString & datalog_path, QDate 
         // Append all files to one big QFileInfoList
         EDFfiles.append(dir.entryInfoList());
     }
-#ifdef DEBUG_EFFICIENCY
-    qDebug() << "Generating EDF files list took" << time.elapsed() << "ms";
-#endif
-    qDebug() << "EDFfiles list size is " << EDFfiles.size();
+    qDebug().noquote() << "Generating" << EDFfiles.size() << "EDF files list took" << durationString(elapsedDuration(time));
 
     ////////////////////////////////////////////////////////////////////////////////////////
     // Scan through EDF files, Extracting EDF Durations, and skipping already imported files
     // Check for duplicates along the way from compressed/uncompressed files
     ////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef DEBUG_EFFICIENCY
     time.start();
-#endif
     QString datestr;
     QDateTime datetime;
     QDate date;
     int totalfiles = EDFfiles.size();
-    qDebug() << "Scanning " << totalfiles << " EDF files";
 
     // Calculate number of files for progress bar for this stage
     int pbarFreq = totalfiles / 50;
@@ -1389,7 +1378,6 @@ int ResmedLoader::ScanFiles(Machine * mach, const QString & datalog_path, QDate 
     emit setProgressMax(totalfiles);
     QCoreApplication::processEvents();
 
-    qDebug() << "Starting EDF duration scan pass";
     for (int i=0; i < totalfiles; ++i) {
         if (isAborted())
             return 0;
@@ -1463,11 +1451,9 @@ int ResmedLoader::ScanFiles(Machine * mach, const QString & datalog_path, QDate 
             resday.files[filename] = newpath;
         }
     }
-#ifdef DEBUG_EFFICIENCY
-    qDebug() << "Scanning EDF files took" << time.elapsed() << "ms";
-#endif
+    qDebug().noquote() << "Scanning EDF files took" << durationString(elapsedDuration(time));
 
-    qDebug() << "resdayList size is " << resdayList.size();
+    qDebug() << "resdayList size is" << resdayList.size();
 
     return resdayList.size();
 }           // end of scanFiles
@@ -3551,7 +3537,6 @@ void ResDayTask::run()
             }
         }           // end else no STR record for these edf files
 
-        qDebug() << "ResmedLoader run(): calling sess->UpdateSummaries()";
         sess->UpdateSummaries();
 #ifdef SESSION_DEBUG
         qDebug() << "Adding session" << sess->session()
@@ -3668,37 +3653,31 @@ bool ResmedLoader::repairEDFStartFromSession(ResMedEDFInfo &edf,
 
 bool ResmedLoader::LoadCSL(Session *sess, const QString & path)
 {
-#ifdef DEBUG_EFFICIENCY
-    QTime time;
+    QElapsedTimer time;
     time.start();
-#endif
 
     //QString filename = path.section(-2, -1); generates error: conversion from ‘int’ to ‘QChar’ is ambiguous
     // Filename is only used for display purposes.
     ResMedEDFInfo edf;
     QString filename = path.section("/",-2, -1);
-    if ( ! edf.Open(path) ) {
+    bool opened = edf.Open(path);
+    timeInEDFOpen += elapsedDuration(time);
+    time.start();
+    if (!opened) {
         qDebug() << "LoadCSL failed to open" << filename;
         return false;
     }
 
-#ifdef DEBUG_EFFICIENCY
-    int edfopentime = time.elapsed();
+    bool parsed = edf.Parse();
+    timeInEDFInfo += elapsedDuration(time);
     time.start();
-#endif
-
-    if (!edf.Parse()) {
+    if (!parsed) {
         qDebug() << "LoadCSL failed to parse" << filename;
         return false;
     }
 
 //    if (!repairEDFStartFromSession(edf, sess, path))
 //        return false;
-
-#ifdef DEBUG_EFFICIENCY
-    int edfparsetime = time.elapsed();
-    time.start();
-#endif
 
     // Create the CSR event list lazily, only when an actual CSR span is found.
     // Creating it unconditionally registered CPAP_CSR in the session's available
@@ -3745,46 +3724,35 @@ bool ResmedLoader::LoadCSL(Session *sess, const QString & path)
         qDebug() << "Unfinished csr event in " << edf.filename;
     }
 
-#ifdef DEBUG_EFFICIENCY
-    timeMutex.lock();
-    timeInLoadCSL += time.elapsed();
-    timeInEDFOpen += edfopentime;
-    timeInEDFInfo += edfparsetime;
-    timeMutex.unlock();
-#endif
+    timeInLoadCSL += elapsedDuration(time);
 
     return true;
 }
 
 bool ResmedLoader::LoadEVE(Session *sess, const QString & path)
 {
-#ifdef DEBUG_EFFICIENCY
-    QTime time;
+    QElapsedTimer time;
     time.start();
-#endif
     ResMedEDFInfo edf;
     QString filename = path.section("/",-2, -1);
-    if ( ! edf.Open(path) ) {
+    bool opened = edf.Open(path);
+    timeInEDFOpen += elapsedDuration(time);
+    time.start();
+    if (!opened) {
         qDebug() << "LoadEVE failed to open" << filename;
         return false;
     }
-#ifdef DEBUG_EFFICIENCY
-    int edfopentime = time.elapsed();
-    time.start();
-#endif
 
-    if (!edf.Parse()) {
+    bool parsed = edf.Parse();
+    timeInEDFInfo += elapsedDuration(time);
+    time.start();
+    if (!parsed) {
         qDebug() << "LoadEVE failed to parse" << filename;
         return false;
     }
 
 //    if (!repairEDFStartFromSession(edf, sess, path))
 //        return false;
-
-#ifdef DEBUG_EFFICIENCY
-    int edfparsetime = time.elapsed();
-    time.start();
-#endif
 
     // Notes: Event records have useless duration record.
     // Do not update session start / end times because they are needed to determine if events belong in this session or not...
@@ -3842,48 +3810,40 @@ bool ResmedLoader::LoadEVE(Session *sess, const QString & path)
         }
     }
 
-#ifdef DEBUG_EFFICIENCY
-    timeMutex.lock();
-    timeInLoadEVE += time.elapsed();
-    timeInEDFOpen += edfopentime;
-    timeInEDFInfo += edfparsetime;
-    timeMutex.unlock();
-#endif
+    timeInLoadEVE += elapsedDuration(time);
 
     return true;
 }
 
 bool ResmedLoader::LoadBRP(Session *sess, const QString & path)
 {
-#ifdef DEBUG_EFFICIENCY
-    QTime time;
+    QElapsedTimer time;
     time.start();
-#endif
     ResMedEDFInfo edf;
     QString filename = path.section("/",-2, -1);
-    if ( ! edf.Open(path) ) {
+    bool opened = edf.Open(path);
+    timeInEDFOpen += elapsedDuration(time);
+    time.start();
+    if (!opened) {
         qDebug() << "LoadBRP failed to open" << filename;
         return false;
     }
-#ifdef DEBUG_EFFICIENCY
-    int edfopentime = time.elapsed();
+    bool parsed = edf.Parse();
+    timeInEDFInfo += elapsedDuration(time);
     time.start();
-#endif
-    if (!edf.Parse()) {
+    if (!parsed) {
 #ifdef EDF_DEBUG
         qDebug() << "LoadBRP failed to parse" << filename.section("/", -2, -1);
 #endif
         return false;
     }
 
-    if (!repairEDFStartFromSession(edf, sess, path))
+    if (!repairEDFStartFromSession(edf, sess, path)) {
+        timeInLoadBRP += elapsedDuration(time);
         return false;
-#ifdef DEBUG_EFFICIENCY
-    int edfparsetime = time.elapsed();
-    time.start();
-    int AddWavetime = 0;
-    QTime time2;
-#endif
+    }
+    std::chrono::nanoseconds AddWavetime{};
+    QElapsedTimer time2;
     sess->updateFirst(edf.startdate);
 
     qint64 duration = edf.GetNumDataRecords() * edf.GetDurationMillis();
@@ -3922,13 +3882,9 @@ bool ResmedLoader::LoadBRP(Session *sess, const QString & path)
             double rate = double(duration) / double(recs);
             EventList *a = sess->AddEventList(code, EVL_Waveform, es.gain, es.offset, 0, 0, rate);
             a->setDimension(es.physical_dimension);
-#ifdef DEBUG_EFFICIENCY
             time2.start();
-#endif
             a->AddWaveform(edf.startdate, es.dataArray, recs, duration);
-#ifdef DEBUG_EFFICIENCY
-            AddWavetime+= time2.elapsed();
-#endif
+            AddWavetime += elapsedDuration(time2);
 
             EventDataType min = a->Min();
             EventDataType max = a->Max();
@@ -3946,14 +3902,8 @@ bool ResmedLoader::LoadBRP(Session *sess, const QString & path)
         }
     }
 
-#ifdef DEBUG_EFFICIENCY
-    timeMutex.lock();
-    timeInLoadBRP += time.elapsed();
-    timeInEDFOpen += edfopentime;
-    timeInEDFInfo += edfparsetime;
+    timeInLoadBRP += elapsedDuration(time);
     timeInAddWaveform += AddWavetime;
-    timeMutex.unlock();
-#endif
 
     return true;
 }
@@ -3961,37 +3911,34 @@ bool ResmedLoader::LoadBRP(Session *sess, const QString & path)
 // Load SAD Oximetry Signals
 bool ResmedLoader::LoadSAD(Session *sess, const QString & path)
 {
-#ifdef DEBUG_EFFICIENCY
-    QTime time;
+    QElapsedTimer time;
     time.start();
-#endif
 
     ResMedEDFInfo edf;
     QString filename = path.section("/",-2, -1);
-    if ( ! edf.Open(path) ) {
+    bool opened = edf.Open(path);
+    timeInEDFOpen += elapsedDuration(time);
+    time.start();
+    if (!opened) {
         qDebug() << "LoadSAD failed to open" << filename;
         return false;
     }
 
-#ifdef DEBUG_EFFICIENCY
-    int edfopentime = time.elapsed();
+    bool parsed = edf.Parse();
+    timeInEDFInfo += elapsedDuration(time);
     time.start();
-#endif
-
-    if (!edf.Parse()) {
+    if (!parsed) {
 #ifdef EDF_DEBUG
         qDebug() << "LoadSAD failed to parse" << filename.section("/", -2, -1);
 #endif
         return false;
     }
 
-    if (!repairEDFStartFromSession(edf, sess, path))
+    if (!repairEDFStartFromSession(edf, sess, path)) {
+        timeInLoadSAD += elapsedDuration(time);
         return false;
+    }
 
-#ifdef DEBUG_EFFICIENCY
-    int edfparsetime = time.elapsed();
-    time.start();
-#endif
 
     sess->updateFirst(edf.startdate);
     qint64 duration = edf.GetNumDataRecords() * edf.GetDurationMillis();
@@ -4029,48 +3976,41 @@ bool ResmedLoader::LoadSAD(Session *sess, const QString & path)
         }
     }
 
-#ifdef DEBUG_EFFICIENCY
-    timeMutex.lock();
-    timeInLoadSAD += time.elapsed();
-    timeInEDFOpen += edfopentime;
-    timeInEDFInfo += edfparsetime;
-    timeMutex.unlock();
-#endif
+    timeInLoadSAD += elapsedDuration(time);
+
     return true;
 }
 
 
 bool ResmedLoader::LoadPLD(Session *sess, const QString & path)
 {
-#ifdef DEBUG_EFFICIENCY
-    QTime time;
+    QElapsedTimer time;
     time.start();
-#endif
     ResMedEDFInfo edf;
     QString filename = path.section("/",-2, -1);
-    if ( ! edf.Open(path) ) {
+    bool opened = edf.Open(path);
+    timeInEDFOpen += elapsedDuration(time);
+    time.start();
+    if (!opened) {
         qDebug() << "LoadPLD failed to open" << filename;
         return false;
     }
-#ifdef DEBUG_EFFICIENCY
-    int edfopentime = time.elapsed();
-    time.start();
-#endif
 
-    if (!edf.Parse()) {
+    bool parsed = edf.Parse();
+    timeInEDFInfo += elapsedDuration(time);
+    time.start();
+    if (!parsed) {
 #ifdef EDF_DEBUG
         qDebug() << "LoadPLD failed to parse" << filename.section("/", -2, -1);
 #endif
         return false;
     }
 
-    if (!repairEDFStartFromSession(edf, sess, path))
+    if (!repairEDFStartFromSession(edf, sess, path)) {
+        timeInLoadPLD += elapsedDuration(time);
         return false;
+    }
 
-#ifdef DEBUG_EFFICIENCY
-    int edfparsetime = time.elapsed();
-    time.start();
-#endif
 
     // Is it safe to assume the order does not change here?
     enum PLDType { MaskPres = 0, TherapyPres, ExpPress, Leak, RR, Vt, Mv, SnoreIndex, FFLIndex, U1, U2 };
@@ -4239,13 +4179,7 @@ bool ResmedLoader::LoadPLD(Session *sess, const QString & path)
 
     }
 
-#ifdef DEBUG_EFFICIENCY
-    timeMutex.lock();
-    timeInLoadPLD += time.elapsed();
-    timeInEDFOpen += edfopentime;
-    timeInEDFInfo += edfparsetime;
-    timeMutex.unlock();
-#endif
+    timeInLoadPLD += elapsedDuration(time);
 
     return true;
 }
@@ -4269,10 +4203,8 @@ void ResmedLoader::ToTimeDelta(Session *sess, ResMedEDFInfo &edf, EDFSignal &es,
         t_max = es.physical_maximum;
     }
 
-#ifdef DEBUG_EFFICIENCY
     QElapsedTimer time;
     time.start();
-#endif
 
     double rate = (duration / samples); // milliseconds per record
     double tt = edf.startdate;
@@ -4343,11 +4275,7 @@ void ResmedLoader::ToTimeDelta(Session *sess, ResMedEDFInfo &edf, EDFSignal &es,
             qWarning() << "No eventList for" << QDateTime::fromMSecsSinceEpoch(sess->first()).toString() << "code"
 //                          << channel.channels[code]->code();
                             << QString::number(code, 16);
-#ifdef DEBUG_EFFICIENCY
-            timeMutex.lock();
-            timeInTimeDelta += time.elapsed();
-            timeMutex.unlock();
-#endif
+            timeInTimeDelta += elapsedDuration(time);
             return;
         }
 
@@ -4411,13 +4339,11 @@ void ResmedLoader::ToTimeDelta(Session *sess, ResMedEDFInfo &edf, EDFSignal &es,
                             << QString::number(code, 16);
     }
 
-#ifdef DEBUG_EFFICIENCY
-    timeMutex.lock();
     if (el != nullptr) {
-        qint64 t = time.nsecsElapsed();
+        auto t = elapsedDuration(time);
         int cnt = el->count();
-        int bytes = cnt * (sizeof(EventStoreType) + sizeof(quint32));
-        int wvbytes = samples * (sizeof(EventStoreType));
+        qint64 bytes = qint64(cnt) * (sizeof(EventStoreType) + sizeof(quint32));
+        qint64 wvbytes = qint64(samples) * sizeof(EventStoreType);
         auto it = channel_efficiency.find(code);
 
         if (it == channel_efficiency.end()) {
@@ -4428,9 +4354,7 @@ void ResmedLoader::ToTimeDelta(Session *sess, ResMedEDFInfo &edf, EDFSignal &es,
             channel_time[code] += t;
         }
     }
-    timeInTimeDelta += time.elapsed();
-    timeMutex.unlock();
-#endif
+    timeInTimeDelta += elapsedDuration(time);
 }       // end ResMedLoader::ToTimeDelta
 
 EventList * buildEventList( EventStoreType est, EventDataType t_min, EventDataType t_max, EDFSignal &es,
