@@ -518,9 +518,6 @@ class gGraphView
     //! \brief Sends day object to be distributed to all Graphs Layers objects
     void setDay(Day *day);
 
-    //! \brief pops a graph off the list for multithreaded drawing code
-    gGraph *popGraph(); // exposed for multithreaded drawing
-
     //! \brief Hides the splitter, used in report printing code
     void hideSplitter() { m_showsplitter = false; }
 

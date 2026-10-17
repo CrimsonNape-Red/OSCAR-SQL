@@ -156,9 +156,6 @@ class Session
     qint64 length() {
         qint64 duration=s_last - s_first;
         return duration<0?0:duration;
-//        qint64 t;
-//        } else {
-
     }
 
     //! \brief Set this Sessions ID (Not does not update indexes)

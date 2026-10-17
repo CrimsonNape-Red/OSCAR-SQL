@@ -452,14 +452,12 @@ bool PRDS2File::parseDS2Header()
     m_guid = readBytes();
     if (m_guid.size() != 36) {
         qWarning() << "DS2 guid unexpected length" << m_guid.size();
-    } else {
     }
 
     m_iv = readBytes();  // 96-bit IV
     m_salt = readBytes();  // 128-bit salt used to decrypt export key
     if (m_iv.size() != 12 || m_salt.size() != 16) {
         qWarning() << "DS2 IV,salt sizes =" << m_iv.size() << m_salt.size();
-    } else {
     }
     
     int f = read16();
@@ -472,20 +470,17 @@ bool PRDS2File::parseDS2Header()
     QByteArray import_key_tag = readBytes();  // tag of import key
     if (import_key.size() != 32 || import_key_tag.size() != 16) {
         qWarning() << "DS2 import_key sizes =" << import_key.size() << import_key_tag.size();
-    } else {
     }
 
     m_export_key = readBytes();      // payload key encrypted with salted common key
     m_export_key_tag = readBytes();  // tag of export key
     if (m_export_key.size() != 32 || m_export_key_tag.size() != 16) {
         qWarning() << "DS2 export_key sizes =" << m_export_key.size() << m_export_key_tag.size();
-    } else {
     }
 
     m_payload_tag = readBytes();
     if (m_payload_tag.size() != 16) {
         qWarning() << "DS2 payload tag size =" << m_payload_tag.size();
-    } else {
     }
 
     if (m_device.pos() != m_header_size) {

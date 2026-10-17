@@ -494,7 +494,6 @@ bool Machine::Purge(int secret)
         Session * sess = sessions[i];
         if (!sess->Destroy()) {
             qDebug() << "Could not destroy "+ info.loadername +" ("+info.serial+") session" << sess->session();
-        } else {
         }
 
         delete sess;
@@ -949,7 +948,6 @@ bool Machine::Save()
                 ownTransaction = true;
                 qDebug() << "Machine::Save(): Started transaction for batch session save";
             }
-        } else {
         }
         
         int savedCount = 0;

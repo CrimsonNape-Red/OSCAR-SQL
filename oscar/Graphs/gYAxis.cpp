@@ -194,9 +194,6 @@ void gYAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
         double mxy = maxy; // MAX(fabs(maxy), fabs(miny));
         double mny = miny;
 
-        if (miny < 0) {
-        }
-
         double rxy = mxy - mny;
 
         int myt;

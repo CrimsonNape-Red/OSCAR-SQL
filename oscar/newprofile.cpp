@@ -226,9 +226,6 @@ void NewProfile::on_nextButton_clicked()
             return;
         }
 
-        if (ui->genderCombo->currentIndex() == 0) {
-        }
-
         break;
 
     case 2:

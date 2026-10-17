@@ -502,7 +502,6 @@ int IntellipapLoader::OpenDV5(const QString & path)
                 EventDataType mv = tv * rr; // MinuteVent=TidalVolume * Respiratory Rate
                 sess->eventlist[CPAP_MinuteVent][0]->AddEvent(time, mv / 1000.0);
                 break;
-            } else {
             }
         }
 

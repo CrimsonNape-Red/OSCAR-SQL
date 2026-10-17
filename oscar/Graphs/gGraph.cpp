@@ -1026,8 +1026,7 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
                 if (a1 == a2)  // Don't zoom into a block if range is zero
                     return;
 
-                if (a1 <= rmin_x && a2 <= rmin_x) {
-                } else {
+                if (a1 > rmin_x || a2 > rmin_x) {
                     if (a2 - a1 < zoom_hard_limit) { a2 = a1 + zoom_hard_limit; }
 
                     m_graphview->SetXBounds(a1, a2, m_group);

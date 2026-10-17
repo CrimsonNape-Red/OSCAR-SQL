@@ -1605,8 +1605,6 @@ Profile *Get()
     return profiles[getUserName()];;
 }
 
-//profiles.xml is never read so it does not need to be saved.
-
 int CleanupProfile(Profile *prof)
 {
     // Migrate old per Profile settings that should have been put in program main preferences.
@@ -3118,20 +3116,16 @@ bool Profile::saveExtendedDataToDatabase()
     
     qint64 profileId = profileData.id;
     
-    // Debug: Check what data we're trying to save
-    
     // Save user info
     UserInfoRepository userRepo;
     if (!userRepo.saveFromUserInfo(profileId, user)) {
         qWarning() << "Profile::saveExtendedDataToDatabase() - Failed to save user info";
-    } else {
     }
     
     // Save doctor info
     DoctorInfoRepository doctorRepo;
     if (!doctorRepo.saveFromDoctorInfo(profileId, doctor)) {
         qWarning() << "Profile::saveExtendedDataToDatabase() - Failed to save doctor info";
-    } else {
     }
     
     // Save all preferences
@@ -3163,26 +3157,22 @@ bool Profile::loadExtendedDataFromDatabase()
     
     // Load user info
     UserInfoRepository userRepo;
-    if (!userRepo.loadIntoUserInfo(profileId, user)) {
-    }
+    userRepo.loadIntoUserInfo(profileId, user);
     
     // Load doctor info
     DoctorInfoRepository doctorRepo;
-    if (!doctorRepo.loadIntoDoctorInfo(profileId, doctor)) {
-    }
+    doctorRepo.loadIntoDoctorInfo(profileId, doctor);
     
     // Load all preferences
     PreferencesRepository prefRepo;
-    if (!prefRepo.loadAllPreferences(profileId, cpap, oxi, session, appearance, general)) {
-    }
+    prefRepo.loadAllPreferences(profileId, cpap, oxi, session, appearance, general);
 
     // Load Profile-level preferences
     // NOTE: saveProfilePreferencesToDatabase() saves ALL p_preferences keys under category
     // "profile", overwriting the category-specific entries saved by saveAllPreferences().
     // So the authoritative values for session/cpap/etc. keys are in category "profile",
     // not "session"/"cpap"/etc.  This call populates p_preferences with the correct values.
-    if (!loadProfilePreferencesFromDatabase()) {
-    }
+    loadProfilePreferencesFromDatabase();
 
     // Refresh cached member variables in settings classes AFTER all DB loading is done.
     // The settings classes cache values in member variables (e.g. m_preloadSummaries) set

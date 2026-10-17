@@ -358,19 +358,6 @@ void gGraphView::trashGraphs(bool destroy)
     m_graphsbyname.clear();
 }
 
-// Take the next graph to render from the drawing list
-gGraph *gGraphView::popGraph()
-{
-    gGraph *g;
-
-    if (!m_drawlist.isEmpty()) {
-        g = m_drawlist.at(0);
-        m_drawlist.pop_front();
-    } else { g = nullptr; }
-
-    return g;
-}
-
 gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
 #ifdef BROKEN_OPENGL_BUILD
     : QWidget(parent),
@@ -2815,8 +2802,6 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
             py += h + graphSpacer;
             done=true;
         }
-    }
-    if (!done) {
     }
 }
 
