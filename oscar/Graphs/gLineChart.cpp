@@ -657,8 +657,8 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
                 if (accel) {
 
                     double XR = xx / sr;
-                    double Z1 = MAX(x0, minx);
-                    double Z2 = MIN(xL, maxx);
+                    double Z1 = qMax(x0, minx);
+                    double Z2 = qMin(xL, maxx);
                     double ZD = Z2 - Z1;
                     double ZR = ZD / sr;
                     double ZQ = ZR / XR;

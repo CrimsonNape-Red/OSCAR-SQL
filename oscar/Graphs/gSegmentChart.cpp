@@ -87,7 +87,7 @@ void gSegmentChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
     int start_py = top;
 
     width--;
-    float diameter = MIN(width, height);
+    float diameter = qMin(width, height);
     diameter -= 8;
     float radius = diameter / 2.0;
 

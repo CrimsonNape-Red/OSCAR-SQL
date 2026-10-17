@@ -846,8 +846,8 @@ void gGraph::mouseMoveEvent(QMouseEvent *event)
     if (m_graphview->m_selected_graph == this) {  // Left Mouse button dragging
         if (event->buttons() & Qt::LeftButton) {
 
-            int a1 = MIN(x, x2);
-            int a2 = MAX(x, x2);
+            int a1 = qMin(x, x2);
+            int a2 = qMax(x, x2);
 
             if (a1 < left) { a1 = left; }
 
@@ -1018,8 +1018,8 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
                 xmult = xx / double(w);
                 qint64 j1 = min_x + xmult * x;
                 qint64 j2 = min_x + xmult * x2;
-                qint64 a1 = MIN(j1, j2)
-                            qint64 a2 = MAX(j1, j2)
+                qint64 a1 = qMin(j1, j2);
+                qint64 a2 = qMax(j1, j2);
 
                 if (a2 > rmax_x) { a2 = rmax_x; }
 
@@ -1037,8 +1037,8 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
                 xmult = xx / double(w);
                 qint64 j1 = rmin_x + xmult * x;
                 qint64 j2 = rmin_x + xmult * x2;
-                qint64 a1 = MIN(j1, j2)
-                qint64 a2 = MAX(j1, j2)
+                qint64 a1 = qMin(j1, j2);
+                qint64 a2 = qMax(j1, j2);
 
                 if (a2 > rmax_x) { a2 = rmax_x; }
 
