@@ -529,7 +529,6 @@ HEADERS  += \
     sessionbar.h \
     speedcheck.h \
     treecheckdelegate.h \
-#    updateparser.h \
     version.h \
     VERSION \
     Graphs/gFlagsLine.h \

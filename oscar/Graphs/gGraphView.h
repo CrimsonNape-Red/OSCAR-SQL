@@ -223,29 +223,6 @@ class MyScrollBar : public QScrollBar
     }
 };
 
-/*! \class gThread
-    \brief Part of the Threaded drawing code
-
-    This is currently broken, as Qt didn't behave anyway, and it offered no performance improvement drawing-wise
-    */
-class gThread : public QThread
-{
-  public:
-    gThread(gGraphView *g);
-    ~gThread();
-
-    //! \brief Start thread process
-    void run();
-
-    //! \brief Kill thread process
-    void die() { m_running = false; }
-    QMutex mutex;
-
-  protected:
-    gGraphView *graphview;
-    volatile bool m_running;
-};
-
 /*! \class gToolTip
     \brief Popup Tooltip to display information over the OpenGL graphs
     */
@@ -541,15 +518,6 @@ class gGraphView
     inline const float &devicePixelRatio() { return m_dpr; }
     void setDevicePixelRatio(float dpr) { m_dpr = dpr; }
 
-#ifdef ENABLE_THREADED_DRAWING
-    QMutex text_mutex;
-    QMutex gl_mutex;
-    QSemaphore *masterlock;
-    bool useThreads() { return m_idealthreads > 1; }
-    QVector<gThread *> m_threads;
-    int m_idealthreads;
-    QMutex dl_mutex;
-#endif
 
     //! \brief Sends day object to be distributed to all Graphs Layers objects
     void setDay(Day *day);

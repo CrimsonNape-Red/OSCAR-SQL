@@ -382,61 +382,11 @@ bool gParentToolTip::visible() {
 
 
 
-#ifdef ENABLE_THREADED_DRAWING
-
-gThread::gThread(gGraphView *g)
-{
-    graphview = g;
-    mutex.lock();
-}
-gThread::~gThread()
-{
-    if (isRunning()) {
-        m_running = false;
-        mutex.unlock();
-        wait();
-        terminate();
-    }
-}
-
-void gThread::run()
-{
-    m_running = true;
-    gGraph *g;
-
-    while (m_running) {
-        mutex.lock();
-
-        //mutex.unlock();
-        if (!m_running) { break; }
-
-        do {
-            g = graphview->popGraph();
-
-            if (g) {
-                g->paint(QRegion(g->m_lastbounds));
-                //int i=0;
-            } else {
-                //mutex.lock();
-                graphview->masterlock->release(1); // This thread gives up for now..
-
-            }
-        } while (g);
-    }
-}
-
-#endif // ENABLE_THREADED_DRAWING
 
 void gGraphView::queGraph(gGraph *g, int left, int top, int width, int height)
 {
     g->m_rect = QRect(left, top, width, height);
-#ifdef ENABLED_THREADED_DRAWING
-    dl_mutex.lock();
-#endif
     m_drawlist.push_back(g);
-#ifdef ENABLED_THREADED_DRAWING
-    dl_mutex.unlock();
-#endif
 }
 
 void gGraphView::trashGraphs(bool destroy)
@@ -455,18 +405,12 @@ void gGraphView::trashGraphs(bool destroy)
 gGraph *gGraphView::popGraph()
 {
     gGraph *g;
-#ifdef ENABLED_THREADED_DRAWING
-    dl_mutex.lock();
-#endif
 
     if (!m_drawlist.isEmpty()) {
         g = m_drawlist.at(0);
         m_drawlist.pop_front();
     } else { g = nullptr; }
 
-#ifdef ENABLED_THREADED_DRAWING
-    dl_mutex.unlock();
-#endif
     return g;
 }
 
@@ -510,20 +454,8 @@ gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
     m_emptytext = STR_Empty_NoData;
     m_emptyimage = QPixmap(":/icons/logo-md.png");
     InitGraphGlobals(); // FIXME: sstangl: handle error return.
-#ifdef ENABLE_THREADED_DRAWING
-    m_idealthreads = QThread::idealThreadCount();
-
-    if (m_idealthreads <= 0) { m_idealthreads = 1; }
-
-    masterlock = new QSemaphore(m_idealthreads);
-#endif
     m_tooltip = new gToolTip(this);
     m_parent_tooltip = new gParentToolTip(this);
-    /*for (int i=0;i<m_idealthreads;i++) {
-        gThread * gt=new gThread(this);
-        m_threads.push_back(gt);
-        //gt->start();
-    }*/
 
     setFocusPolicy(Qt::StrongFocus);
     m_showsplitter = true;
@@ -800,14 +732,6 @@ gGraphView::~gGraphView()
     doneCurrent();
 #endif
 
-#ifdef ENABLE_THREADED_DRAWING
-
-    for (int i=0; i < m_threads.size(); i++) {
-        delete m_threads[i];
-    }
-
-    delete masterlock;
-#endif
 
     // Note: This will cause a crash if two graphs accidentally have the same name
     for (auto & graph : m_graphs) {
@@ -1156,24 +1080,12 @@ void gGraphView::DrawTextQueCached(QPainter &painter)
 
 void gGraphView::AddTextQue(const QString &text, QRectF rect, quint32 flags, float angle, QColor color, QFont *font, bool antialias)
 {
-#ifdef ENABLED_THREADED_DRAWING
-    text_mutex.lock();
-#endif
     m_textqueRect.append(TextQueRect(rect,flags,text,angle,color,font,antialias));
-#ifdef ENABLED_THREADED_DRAWING
-    text_mutex.unlock();
-#endif
 }
 
 void gGraphView::AddTextQue(const QString &text, short x, short y, float angle, QColor color, QFont *font, bool antialias)
 {
-#ifdef ENABLED_THREADED_DRAWING
-    text_mutex.lock();
-#endif
     m_textque.append(TextQue(x,y,angle,text,color,font,antialias));
-#ifdef ENABLED_THREADED_DRAWING
-    text_mutex.unlock();
-#endif
 }
 
 void gGraphView::addGraph(gGraph *g, short group)
@@ -1425,19 +1337,6 @@ bool gGraphView::renderGraphs(QPainter &painter)
     float h, w;
     //ax=px;//-m_offsetX;
 
-    //bool threaded;
-
-    // Tempory hack using this pref..
-    //#ifdef ENABLED_THREADED_DRAWING
-    /*if (profile->session->multithreading()) { // && (m_idealthreads>1)) {
-        threaded=true;
-        for (int i=0;i<m_idealthreads;i++) {
-            if (!m_threads[i]->isRunning())
-                m_threads[i]->start();
-        }
-    } else threaded=false; */
-    //#endif
-    //threaded=false;
     if (height() < 40) return false;
 
     if (m_scaleY < 0.0000001) {
@@ -1570,28 +1469,11 @@ bool gGraphView::renderGraphs(QPainter &painter)
         py = ceil(py + h + graphSpacer);
     }
 
-    //int thr=m_idealthreads;
-#ifdef ENABLED_THREADED_DRAWING
-    if (threaded) {
-        for (int i = 0; i < m_idealthreads; i++) {
-            masterlock->acquire(1);
-            m_threads[i]->mutex.unlock();
-        }
-
-        // wait till all the threads are done
-        // ask for all the CPU's back..
-        masterlock->acquire(m_idealthreads);
-        masterlock->release(m_idealthreads);
-    } else {
-#endif
-        for (const auto & g : m_drawlist) {
-            g->paint(painter, QRegion(g->m_rect));
-        }
-        m_drawlist.clear();
-
-#ifdef ENABLED_THREADED_DRAWING
+    for (const auto & g : m_drawlist) {
+        g->paint(painter, QRegion(g->m_rect));
     }
-#endif
+    m_drawlist.clear();
+
     //int elapsed=time.elapsed();
     //QColor col=Qt::black;
 
