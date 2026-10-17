@@ -366,43 +366,13 @@ int FPIconLoader::OpenMachine(Machine *mach, const QString & path)
         } while (it != Sessions.begin());
 
     }
-        //    qDebug() << "Unmatched Sessions";
         //    QList<FPWaveChunk> chunks;
-        //    for (QMap<int,QDate>::iterator dit=FLWDate.begin();dit!=FLWDate.end();dit++) {
-        //        int k=dit.key();
         //        //QDate date=dit.value();
         ////        QList<Session *> values = SessDate.values(date);
-        //        for (int j=0;j<FLWTS[k].size();j++) {
 
-        //            FPWaveChunk chunk(FLWTS[k].at(j),FLWDuration[k].at(j),k);
-        //            chunk.flow=FLWMapFlow[k].at(j);
-        //            chunk.leak=FLWMapLeak[k].at(j);
-        //            chunk.pressure=FLWMapPres[k].at(j);
 
-        //            chunks.push_back(chunk);
 
-        //            zz=FLWTS[k].at(j)/1000;
-        //            dur=double(FLWDuration[k].at(j))/60000.0;
-        //            bool b,c=false;
-        //            if (Sessions.contains(zz)) b=true; else b=false;
-        //            if (b) {
-        //                if (Sessions[zz]->channelDataExists(CPAP_FlowRate)) c=true;
-        //            }
-        //            qDebug() << k << "-" <<j << ":" << zz << qRound(dur) << "minutes" << (b ? "*" : "") << (c ? QDateTime::fromSecsSinceEpoch(zz).toString() : "");
-        //        }
-        //    }
-        //    std::sort(chunks.begin(), chunks.end());
         //    bool b,c;
-        //    for (int i=0;i<chunks.size();i++) {
-        //        const FPWaveChunk & chunk=chunks.at(i);
-        //        zz=chunk.st/1000;
-        //        dur=double(chunk.duration)/60000.0;
-        //        if (Sessions.contains(zz)) b=true; else b=false;
-        //        if (b) {
-        //            if (Sessions[zz]->channelDataExists(CPAP_FlowRate)) c=true;
-        //        }
-        //        qDebug() << chunk.file << ":" << i << zz << dur << "minutes" << (b ? "*" : "") << (c ? QDateTime::fromSecsSinceEpoch(zz).toString() : "");
-        //    }
 
     int c = Sessions.size();
 
@@ -430,11 +400,7 @@ quint32 convertDate(quint32 timestamp)
 
     QDateTime dt = QDateTime(QDate(year, month, day), QTime(hour, minute, second),QTimeZone("UTC"));
 
-//    Q NO!!! _ASSERT(dt.isValid());
-//    if ((year == 2013) && (month == 9) && (day == 18)) {
 //        // this is for testing.. set a breakpoint on here and
-//        int i=5;
-//    }
 
 
     // From Rudd's data set compared to times reported from his F&P software's report (just the time bits left over)
@@ -463,19 +429,13 @@ quint32 convertFLWDate(quint32 timestamp) // Bit format: hhhhhmmmmmmssssssYYYYYY
 
     if(!dt.isValid()){
         // make this date too early, then change test later
-        // dt = QDateTime(QDate(2015,1,1), QTime(0,0,1));
         dt = QDateTime(QDate(2010,1,1), QTime(0,0,0));
     }
-//    Q NO!!! _ASSERT(dt.isValid());
-//    if ((year == 2013) && (month == 9) && (day == 18)) {
-//        int i=5;
-//    }
     // 87922 23:23:50 WET
     return dt.addSecs(-54).toSecsSinceEpoch();
 }
 
 //QDateTime FPIconLoader::readFPDateTime(quint8 *data)
-//{
 //    quint32 ts = (data[3] << 24) | (data[2] << 16) | ((data[1] << 8) | data[0]); // ^ 0xc00000;
 //    // 0x20a41b18
 
@@ -490,11 +450,6 @@ quint32 convertFLWDate(quint32 timestamp) // Bit format: hhhhhmmmmmmssssssYYYYYY
 //    quint8 minute = ts & 0x3f; // 0A        10
 //    ts >>= 6;               // 10
 //    quint8 hour = ts & 0x1f; // 10        16
-//    QDate date = QDate(2000 + year, month, day);
-//    QTime time = QTime(hour, minute, second);
-//    QDateTime datetime = QDateTime(date, time, Qt::UTC);
-//    return datetime;
-//}
 
 /*
  *in >> a1;
@@ -607,7 +562,6 @@ bool FPIconLoader::OpenFLW(Machine *mach, const QString & filename)
 
     if (sit != Sessions.end()) {
         sess = sit.value();
- //       qDebug() << filenum << ":" << date << sess->session() << ":" << sess->hours() * 60.0;
     } else {
         // Create a session
         qint64 k = -1;
@@ -639,7 +593,6 @@ bool FPIconLoader::OpenFLW(Machine *mach, const QString & filename)
             sess->setFirst(CPAP_FlowRate, ti);
             sess->setFirst(CPAP_MaskPressure, ti);
             newsess = true;
-//            qDebug() << filenum << ":" << date << "couldn't find matching session for" << ts;
         }
     }
     const int samples_per_block = 50;
@@ -842,11 +795,6 @@ bool FPIconLoader::OpenSummary(Machine *mach, const QString & filename)
 
             SessDate.insert(date, sess);
 
-            //            sess->setCount(CPAP_Obstructive,j1);
-            //            sess->setCount(CPAP_Hypopnea,j2);
-            //            sess->setCount(CPAP_ClearAirway,j3);
-            //            sess->setCount(CPAP_Apnea,j4);
-            //sess->setCount(CPAP_,j5);
             if (p1 != p2) {
                 sess->settings[CPAP_Mode] = (int)MODE_APAP;
                 sess->settings[CPAP_PressureMin] = p3 / 10.0;
@@ -857,7 +805,6 @@ bool FPIconLoader::OpenSummary(Machine *mach, const QString & filename)
             }
 
             sess->settings[CPAP_HumidSetting] = x2;
-            //sess->settings[CPAP_PresReliefType]=PR_SENSAWAKE;
             Sessions[ts] = sess;
 
             addSession(sess);
@@ -1004,7 +951,6 @@ bool FPIconLoader::OpenDetail(Machine *mach, const QString & filename)
                 a3 = data[idx + 4];   // [0..5] Flow Limitation,  [6..7] SensAwake bitflags, 1 per minute
 
                 // Sure there isn't 6 SenseAwake bits?
-                //  a4 = (a1 >> 6) << 4 | ((a2 >> 6) << 2) | (a3 >> 6);
 
                 // this does the same thing as behaviour
                 a4 = (a3 >> 7) << 3 | ((a3 >> 6) & 1);
@@ -1024,9 +970,6 @@ bool FPIconLoader::OpenDetail(Machine *mach, const QString & filename)
             }
         }
 
-        //  sess->really_set_last(ti-360000L);
-        //        sess->SetChanged(true);
-        //       addSession(sess,profile);
     }
     if (p_profile->session->backupCardData()) {
         unsigned char *data = (unsigned char *)index.data();
@@ -1054,6 +997,5 @@ void FPIconLoader::Register()
 
     qDebug() << "Registering F&P Icon Loader";
     RegisterLoader(new FPIconLoader());
-    //InitModelMap();
     fpicon_initialized = true;
 }

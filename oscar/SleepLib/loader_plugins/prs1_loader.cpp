@@ -453,7 +453,6 @@ bool PRDS2File::parseDS2Header()
     if (m_guid.size() != 36) {
         qWarning() << "DS2 guid unexpected length" << m_guid.size();
     } else {
-        //qDebug() << "DS2 guid {" << m_guid << "}";
     }
 
     m_iv = readBytes();  // 96-bit IV
@@ -461,7 +460,6 @@ bool PRDS2File::parseDS2Header()
     if (m_iv.size() != 12 || m_salt.size() != 16) {
         qWarning() << "DS2 IV,salt sizes =" << m_iv.size() << m_salt.size();
     } else {
-        //qDebug() << "DS2 IV,salt =" << m_iv.toHex() << m_salt.toHex();
     }
     
     int f = read16();
@@ -475,7 +473,6 @@ bool PRDS2File::parseDS2Header()
     if (import_key.size() != 32 || import_key_tag.size() != 16) {
         qWarning() << "DS2 import_key sizes =" << import_key.size() << import_key_tag.size();
     } else {
-        //qDebug() << "DS2 import_key,tag =" << import_key.toHex() << import_key_tag.toHex();
     }
 
     m_export_key = readBytes();      // payload key encrypted with salted common key
@@ -483,14 +480,12 @@ bool PRDS2File::parseDS2Header()
     if (m_export_key.size() != 32 || m_export_key_tag.size() != 16) {
         qWarning() << "DS2 export_key sizes =" << m_export_key.size() << m_export_key_tag.size();
     } else {
-        //qDebug() << "DS2 export_key,tag =" << m_export_key.toHex() << m_export_key_tag.toHex();
     }
 
     m_payload_tag = readBytes();
     if (m_payload_tag.size() != 16) {
         qWarning() << "DS2 payload tag size =" << m_payload_tag.size();
     } else {
-        //qDebug() << "DS2 payload tag =" << m_payload_tag.toHex();
     }
 
     if (m_device.pos() != m_header_size) {
@@ -723,7 +718,6 @@ bool PRS1Loader::PeekProperties(const QString & filePath, QHash<QString,QString>
         // If it's a DS2 file, insert the DS2 wrapper to decode the chunk stream.
         PRDS2File* ds2 = new PRDS2File(f, m_keycache);
         if (!ds2->isValid()) {
-            //qWarning() << filename << "unable to decrypt";
             delete ds2;
             return false;
         }
@@ -1114,7 +1108,6 @@ void PRS1Loader::ScanFiles(const QStringList & paths, int sessionid_base)
             if (context()->SessionExists(sid)) {
                 // Skip already imported session
                 // TODO: Consider reinstating this debug statement if/when we scan only new/changed files.
-                //qDebug() << path << "session already exists, skipping" << sid;
                 continue;
             }
 
@@ -1185,7 +1178,6 @@ void PRS1Loader::ScanFiles(const QStringList & paths, int sessionid_base)
                     //
                     // Because the card was present and previous sessions were written with their filenames,
                     // the first available filename isn't the first session contained in the file.
-                    //qDebug() << fi.canonicalFilePath() << "first session is" << chunk_sid << "instead of" << sid;
                 }
                 if (context()->SessionExists(chunk_sid)) {
                     qDebug() << path << "session already imported, skipping" << sid << chunk_sid;
@@ -1234,7 +1226,6 @@ void PRS1Loader::ScanFiles(const QStringList & paths, int sessionid_base)
                             // duplicate files between e.g. a P1 and P0 directory.
                             //
                             // It's common enough that we don't emit a message about it by default.
-                            //qDebug() << chunkComparison(chunk, task->summary);
                         } else {
                             // Warn about any non-identical duplicate session IDs.
                             //
@@ -1267,7 +1258,6 @@ void PRS1Loader::ScanFiles(const QStringList & paths, int sessionid_base)
                             previous = task->m_event_chunks.first();
                             if (chunksIdentical(chunk, previous)) {
                                 // See comment above regarding identical summary chunks.
-                                //qDebug() << chunkComparison(chunk, previous);
                             } else {
                                 qWarning() << chunkComparison(chunk, previous);
                             }
@@ -2211,7 +2201,6 @@ bool PRS1Import::ImportSummary()
     if (summary->duration == 0) {
         // This does occasionally happen and merely indicates a brief session with no useful data.
         // This requires the use of really_set_last below, which otherwise rejects 0 length.
-        //qDebug() << summary->sessionid << "session duration == 0";
     }
     session->really_set_last(qint64(summary->timestamp + summary->duration) * 1000L);
     
@@ -2577,7 +2566,6 @@ void PRS1Import::ImportWaveforms()
             // data is not identical, so it seems like these discontinuities are simply an artifact
             // of timestamping at 1-second intervals right around the 1-second boundary.
 
-            //qDebug() << waveform->sessionid << "waveform discontinuity:" << (diff / 1000L) << "s @" << ts(waveform->timestamp * 1000L);
             discontinuities++;
         }
 
@@ -2770,7 +2758,6 @@ QList<PRS1DataChunk *> PRS1Loader::ParseFile(const QString & path)
 
     if (path.isEmpty()) {
         // ParseSession passes empty filepaths for waveforms if none exist.
-        //qWarning() << path << "ParseFile given empty path";
         return CHUNKS;
     }
 
@@ -2791,7 +2778,6 @@ QList<PRS1DataChunk *> PRS1Loader::ParseFile(const QString & path)
         // If it's a DS2 file, insert the DS2 wrapper to decode the chunk stream.
         PRDS2File* ds2 = new PRDS2File(f, m_keycache);
         if (!ds2->isValid()) {
-            //qWarning() << path << "unable to decrypt";
             delete ds2;
             return CHUNKS;
         }

@@ -181,7 +181,6 @@ void MachineLoader::runTasks(bool threaded)
                     break;
                 }
             }
-            //QThread::sleep(100);
         }
         QThreadPool::globalInstance()->waitForDone(-1);
     }
@@ -284,11 +283,6 @@ QList<ChannelID> CPAPLoader::eventFlags(Day * day)
 
     for (int i = 0; i < ahiChannels.size(); i++)
         list.push_back(ahiChannels.at(i));
-//    list.push_back(CPAP_ClearAirway);
-//    list.push_back(CPAP_AllApnea);
-//    list.push_back(CPAP_Obstructive);
-//    list.push_back(CPAP_Hypopnea);
-//    list.push_back(CPAP_Apnea);
 
     return list;
 }
@@ -378,7 +372,6 @@ bool compressFile(QString infile, QString outfile)
 
     gzFile gz = gzopen(outfile.toLatin1(), "wb");
 
-    //gzbuffer(gz,65536*2);
     if (!gz) {
         qDebug() << "compressFile() Couldn't open" << outfile << "for writing";
         delete [] buf;

@@ -23,7 +23,6 @@
 
 extern MainWindow * mainwin;
 
-// short SummaryCalcItem::midcalc;
 
 QString gUsageChart::tooltipData(Day * day, int)
 {

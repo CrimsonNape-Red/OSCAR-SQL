@@ -114,7 +114,6 @@ void init()
 
     EmptyChannel = Channel(0, DATA, MT_UNKNOWN, DAY, "Empty", "Empty", "Empty Channel", "", "");
     ChanTypes["data"] = DATA;
-    //Types["waveform"]=WAVEFORM;
     ChanTypes["setting"] = SETTING;
 
     Scopes["session"] = SESSION;
@@ -571,7 +570,6 @@ bool ChannelList::Load(QString filename)
     qDebug() << "Schema::ChannelList::Load(): Opening " << filename;
 
     if (!file.open(QIODevice::ReadOnly)) {
-//        qWarning() << "Could not open" << filename;
         qWarning() << "Schema::ChannelList::Load(): Could not open" << filename << "for reading, error code" << file.error() << file.errorString();
         return false;
     }
@@ -615,7 +613,6 @@ bool ChannelList::Load(QString filename)
     for (int i = 0; i < grp.size(); i++) {
         node = grp.at(i);
         group = node.toElement().attribute("name");
-        //qDebug() << "Group Name" << group;
         // Why do I have to skip the first node here? (shows up empty)
         n = node.firstChildElement();
 
@@ -653,7 +650,6 @@ bool ChannelList::Load(QString filename)
 
             if (scopestr.at(0) == QChar('!')) {
                 scopestr = scopestr.mid(1);
-                //multi=true;
             } //multi=false;
 
             if (!Scopes.contains(scopestr)) {
@@ -714,14 +710,12 @@ bool ChannelList::Load(QString filename)
             chan = new Channel(id, type, MT_UNKNOWN, scope, name, name, details, label, unit, datatype, color, linkid);
             channels[id] = chan;
             names[name] = chan;
-            //qDebug() << "Channel" << id << name << label;
             groups[group][name] = chan;
 
             if (linkid > 0) {
                 if (channels.contains(linkid)) {
                     Channel *it = channels[linkid];
                     it->m_links.push_back(chan);
-                    //int i=0;
                 } else {
                     qWarning() << "Linked channel" << name << ":" << linkid << "should be defined first in" << filename << "line" << line;
                 }
@@ -738,7 +732,6 @@ bool ChannelList::Load(QString filename)
                     id2str = e.attribute("id");
                     id2 = id2str.toInt(&ok, 10);
                     name2str = e.attribute("value");
-                    //qDebug() << sub << id2 << name2str;
                     chan->addOption(id2, name2str);
                 } else if (sub == "color") {
                 }
@@ -775,7 +768,6 @@ void ChannelList::add(QString group, Channel *chan)
     if (channels.contains(chan->linkid())) {
         Channel *it = channels[chan->linkid()];
         it->m_links.push_back(chan);
-        //int i=0;
     } else {
         if (chan->linkid()>0) {
             qWarning() << "Linked channel must be defined first for" << chan->code();
@@ -820,4 +812,3 @@ QString ChannelCalc::label()
 
 }
 
-//typedef schema::Channel * ChannelID;

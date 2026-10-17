@@ -58,7 +58,6 @@ MSeriesLoader::~MSeriesLoader()
 //    quint16  b4;            //0x66
 //    quint16  b5;            //0xff
 
-//} __attribute__((packed));
 /*
 
 blockLayoutOffsets   {
@@ -148,13 +147,9 @@ int MSeriesLoader::Open(const QString & path)
         return 0;
     }
 
-    //quint8 cardtype=cardinfo[2];
-    //quint8 cardver=cardinfo[3];
 
     quint16 user_offset = (cardinfo[4] << 8) | cardinfo[5];
-    //quint16 rx_offset=(cardinfo[8] << 8) | cardinfo[9];
     quint16 control_offset = (cardinfo[12] << 8) | cardinfo[13];
-    //quint16 data_offset=(cardinfo[16] << 8) | cardinfo[17];
 
 
     const char *userinfo = block.data() + user_offset;
@@ -209,7 +204,6 @@ int MSeriesLoader::Open(const QString & path)
     controlblock += 6;
     count -= 2;
 
-    //tmp16 = controlblock[0] | controlblock[1] << 8;
 
     controlblock += 2;
 
@@ -245,7 +239,6 @@ int MSeriesLoader::Open(const QString & path)
 
     for (int chk = 0; chk < 7; chk++) {
         ts = cb[0] << 24 | cb[1] << 16 | cb[2] << 8 | cb[3];
-        //ts-=epoch;
         dt = QDateTime::fromSecsSinceEpoch(ts);
         date = dt.date();
         time = dt.time();
@@ -272,7 +265,6 @@ int MSeriesLoader::Open(const QString & path)
         ts = cb[0] << 24 | cb[1] << 16 | cb[2] << 8 | cb[3];
         //lt =
         st = ts;
-        //ti = qint64(ts) * 1000L;
         dt = QDateTime::fromSecsSinceEpoch(ts);
         date = dt.date();
         time = dt.time();
@@ -301,9 +293,7 @@ int MSeriesLoader::Open(const QString & path)
                 if ((cb[0] & 0xc0) == 0xc0) {
                     cb += 2;
                     u1 &= 0x0fff; // time delta??
-                    //lt = ts;
                     ts = st + (u1 * 60);
-                    //ti = qint64(ts) * 1000L;
 
                     d1 = cb[0] << 8 | cb[1];
                     u2 = cb[2] << 8 | cb[3];
@@ -342,8 +332,6 @@ int MSeriesLoader::Open(const QString & path)
         } while (cb < endcard && !done);
     } while (cb < endcard && !done);
 
-   // done = false;
-    //bool first=true;
     //quint8 exch;
     cnt = 0;
 
@@ -351,7 +339,6 @@ int MSeriesLoader::Open(const QString & path)
         u1 = cb[0] << 8 | cb[1];
 
         if (u1 != 0xfe0b) {
-           // done = true;
             break;
         }
 
@@ -360,13 +347,11 @@ int MSeriesLoader::Open(const QString & path)
         dt = QDateTime::fromSecsSinceEpoch(ts);
         date = dt.date();
         time = dt.time();
-        //qDebug() << "Summary Data Chunk" << cnt << dt << QTHEX << ts;
         cb += 4;
 
         while (cb < endcard) {
             if (((cb[0] & 0xc0) != 0xc0) || ((cb[0] & 0xf0) == 0xf0)) {
                 // what is this for??
-                //exch = cb[0];
                 cb++;
             }
 
@@ -375,7 +360,6 @@ int MSeriesLoader::Open(const QString & path)
             u2 = (cb[2] << 8 | cb[3]) & 0x7ff; // 0xBX XX??
             ts = st + u1 * 60;
             dt = QDateTime::fromSecsSinceEpoch(ts);
-            //qDebug() << "Summary Sub Chunk" << dt << u1 << u2 << QTHEX << ts;
             cb += 4;
 
             if (cb[0] == 0xff) { break; }
@@ -420,21 +404,6 @@ int MSeriesLoader::Open(const QString & path)
     //    tailPtrTwo = 12,
     //    cdbChecksumTwo = 14,
 
-    //    const char * datablock=block.data()+data_offset;
-    //    quint8 basicCompliance=datablock[1];
-    //    quint8 fosq=datablock[2];
-    //    quint8 smartAutoCPAPProfile=datablock[3];
-    //    quint8 smartAutoCPAPTrend=datablock[4];
-    //    quint8 ventProfile=datablock[6];
-    //    quint8 ventCompliance1=datablock[7];
-    //    quint8 sleepProfile1=datablock[8];
-    //    quint8 sleepTrend1=datablock[9];
-    //    quint8 sleepProfile2=datablock[10];
-    //    quint8 sleepTrend2=datablock[11];
-    //    quint8 ventProfile2=datablock[12];
-    //    quint8 ventCompliance2=datablock[13];
-    //    quint8 sleepProfile3=datablock[14];
-    //    quint8 sleepTrend3=datablock[15];
 
 
     // 0xa6: 01 00 b2 7f ff 31
@@ -479,7 +448,6 @@ int MSeriesLoader::Open(const QString & path)
     //    stopChar = 0x7f
 
 
-    //Machine *mach=CreateMachine(serial,profile);
 
 
     // 0xcount till next block (between f3 02... blocks)
@@ -497,7 +465,6 @@ void MSeriesLoader::Register()
 
     qDebug() << "Registering RemStar M-Series Loader";
     RegisterLoader(new MSeriesLoader());
-    //InitModelMap();
     mseries_initialized = true;
 }
 #endif // REMSTAR_M_SUPPORT

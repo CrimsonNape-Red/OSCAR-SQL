@@ -87,7 +87,6 @@ void gSummaryChart::SetDay(Day *unused_day)
     daylist.clear();
 
     if (!firstday.isValid() || !lastday.isValid()) return;
-   // daylist.reserve(firstday.daysTo(lastday)+1);
     QDate date = firstday;
     int idx = 0;
     do {
@@ -322,7 +321,6 @@ void gSummaryChart::afterDraw(QPainter &painter, gGraph &graph, QRectF rect)
     rec.moveBottom(rect.top()-3*graph.printScaleY());
     painter.drawText(rec, Qt::AlignTop, str);
 
-//    graph.renderText(str, rect.left(), rect.top()-5*graph.printScaleY(), 0);
 
 
 }
@@ -442,7 +440,6 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
 
     int days = ceil(double(m_maxx - m_minx) / 86400000.0);
 
-    //float lasty1 = rect.bottom();
 
     auto it = dayindex.find(date);
     idx_start = 0;
@@ -488,18 +485,8 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     if ((daylist.size() == 0) || (it == dayindex.end()))
         return;
 
-    //Day * lastday = nullptr;
 
-    //    int dc = 0;
-//    for (int i=idx; i<=idx_end; ++i) {
-//        Day * day = daylist.at(i);
-//        if (day || lastday) {
 //            dc++;
-//        }
-//        lastday = day;
-//    }
-//    days = dc;
-//    lastday = nullptr;
     float barw = float(rect.width()) / float(days);
 
     QString hl2_text = "";
@@ -577,15 +564,12 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
 
         if (!day)
         {
-           // lasty1 = rect.bottom();
             lastx1 += barw;
             it++;
             nousedays++;
-            //lastday = day;
             continue;
         }
 
-        //lastday = day;
 
         float x1 = lastx1 + barw;
 
@@ -642,7 +626,6 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
                     gradient.setColorAt(0,color);
                     gradient.setColorAt(1,brighten(color, 2.0));
                     painter.fillRect(rec, QBrush(gradient));
-//                    painter.fillRect(rec, slice.brush);
                     outlines.append(rec);
                 } else {
                     painter.fillRect(rec, brighten(color, 1.25));
@@ -670,7 +653,6 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
             if (!hl2_text.isEmpty()) {
                 QColor col = Qt::yellow;
                 col.setAlpha(255);
-           //     painter.fillRect(hl2_rect, QBrush(col));
                 txt += hl2_text;
             }
         }
@@ -764,7 +746,6 @@ QString gSummaryChart::durationInSecondsToHhMmSs(double duration) {
         height = copy.height;
         name = copy.name;
         color = copy.color;
-//        brush = copy.brush;
     }
     
     SummaryChartSlice& SummaryChartSlice::operator=(SummaryChartSlice & other) {

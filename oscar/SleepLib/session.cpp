@@ -187,16 +187,13 @@ bool Session::Store(QString path)
         dir.mkpath(path);
     }
 
-    //qDebug() << "Storing Session: " << base;
     bool a = true;
 
     // ===== SUMMARY FILE STORAGE DISABLED - NOW IN DATABASE =====
     // .000 summary files are no longer saved - data is in database
     // Uncomment this line to re-enable summary file storage:
-    //a = StoreSummary();
     // ===== END SUMMARY FILE STORAGE =====
 
-    //qDebug() << " Summary done";
     
     // Database-only storage
     // IMPORTANT: Must call StoreToDatabase() FIRST to get m_database_id
@@ -212,7 +209,6 @@ bool Session::Store(QString path)
         qWarning() << "Session::Store() - Machine not in database yet, skipping database storage";
     }
 
-    //qDebug() << " Events done";
     s_changed = false;
     s_events_loaded = true;
 
@@ -220,66 +216,30 @@ bool Session::Store(QString path)
 }
 
 //QDataStream & operator<<(QDataStream & out, const Session & session)
-//{
-//    session.StoreSummaryData(out);
-//    return out;
-//}
 //
 //void Session::StoreSummaryData(QDataStream & out) const
-//{
-//    out << summary_version;
-//    out << (quint32)s_session;
 //    out << s_first;  // Session Start Time
 //    out << s_last;   // Duration of sesion in seconds.
 //
-//    out << settings;
-//    out << m_cnt;
-//    out << m_sum;
-//    out << m_avg;
-//    out << m_wavg;
 //
-//    out << m_min;
-//    out << m_max;
 //
-//    out << m_physmin;
-//    out << m_physmax;
 //
-//    out << m_cph;
-//    out << m_sph;
 //
-//    out << m_firstchan;
-//    out << m_lastchan;
 //
-//    out << m_valuesummary;
-//    out << m_timesummary;
 //
-//    out << m_gain;
 //
-//    out << m_availableChannels;
 //
-//    out << m_timeAboveTheshold;
-//    out << m_upperThreshold;
-//    out << m_timeBelowTheshold;
-//    out << m_lowerThreshold;
 //
-//    out << s_summaryOnly;
-//}
 //
 //QDataStream & operator>>(QDataStream & in, Session & session)
-//{
-//    session.LoadSummaryData(in);
-//    return in;
-//}
 //
 //
 //void Session::LoadSummaryData(QDataStream & in)
-//{
 //    quint16 version;
 //    in >> version;
 //
 //    quint32 t32;
 //    in >> t32;      // Sessionid;
-//    s_session = t32;
 //
 //    in >> s_first;  // Start time
 //    in >> s_last;   // Duration
@@ -314,8 +274,6 @@ bool Session::Store(QString path)
 //
 //    in >> s_summaryOnly;
 //
-//    s_enabled = 1;
-//}
 
 QDataStream & operator>>(QDataStream & in, SessionSlice & slice)
 {
@@ -384,7 +342,6 @@ bool Session::LoadSummary(bool debug)
         return false;
     }
 
-//    qDebug() << "Loading" << s_machine->loaderName() << "Summary" << filename << sumcnt++;
 
     QDataStream in(&file);
     in.setVersion(QDataStream::Qt_4_6);
@@ -406,7 +363,6 @@ bool Session::LoadSummary(bool debug)
     in >> version;      // DB Version
 
     if (version < 6) {
-        //throw OldDBVersion();
         qWarning() << "Old dbversion " << version <<
                    "summary file.. Sorry, you need to purge and reimport";
         return false;
@@ -531,7 +487,6 @@ bool Session::LoadSummary(bool debug)
             m_lastchan[code] = i.value();
         }
 
-        //SetChanged(true);
     } else {
         // version > 7
 
@@ -608,7 +563,6 @@ bool Session::LoadSummary(bool debug)
             in >> s_noSettings;
 //            qDebug() << "Session::LoadSummary" << s_session << "["
 //                     << QDateTime::fromSecsSinceEpoch(s_session).toString("MM/dd/yyyy hh:mm:ss")
-//                     << "] s_noSettings" << s_noSettings << "size" << settings.size();
         } else {
             s_noSettings = (settings.size() == 0);
         }
@@ -755,18 +709,14 @@ bool Session::StoreEvents()
             out.writeRawData((char *)ptr, e.count() << 1);
 
             // *** Don't delete these comments ***
-            //            for (quint32 c=0;c<e.count();c++) {
             //                out << *ptr++;//e.raw(c);
-            //            }
 
             // Store the second field, only if there
             if (e.hasSecondField()) {
                 ptr = e.m_data2.data();
                 out.writeRawData((char *)ptr, e.count() << 1);
                 // *** Don't delete these comments ***
-                //                for (quint32 c=0;c<e.count();c++) {
                 //                    out << *ptr++; //e.raw2(c);
-                //                }
             }
 
             // Store the time delta fields for non-waveform EventLists
@@ -774,9 +724,7 @@ bool Session::StoreEvents()
                 quint32 *tptr = e.m_time.data();
                 out.writeRawData((char *)tptr, e.count() << 2);
                 // *** Don't delete these comments ***
-                //                for (quint32 c=0;c<e.count();c++) {
                 //                    out << *tptr++; //e.getTime()[c];
-                //                }
             }
         }
     }
@@ -869,7 +817,6 @@ bool Session::LoadEvents(QString filename, bool debug)
     QFile file(filename);
 
     if ( ! file.open(QIODevice::ReadOnly)) {
-//        qDebug() << "No Event/Waveform data available for" << s_session;
         if (debug) qWarning() << "No Event/Waveform data available for" << s_session << "filename" << filename << "error code" << file.error() << file.errorString();
         return false;
     }
@@ -1009,7 +956,6 @@ bool Session::LoadEvents(QString filename, bool debug)
             EventList *elist = AddEventList(code, elt, gain, offset, mn, mx, rate, second_field);
             elist->setDimension(dim);
 
-            //eventlist[code].push_back(elist);
             elist->m_count = evcount;
             elist->m_first = ts1;
             elist->m_last = ts2;
@@ -1042,10 +988,7 @@ bool Session::LoadEvents(QString filename, bool debug)
 
             // *** Don't delete these comments ***
             // *** They explain what the above ReadRawData is doing!
-            //            for (quint32 c=0;c<evec.m_count;c++) {
             //                in >> t;
-            //                *ptr++=t;
-            //            }
             if (evec.hasSecondField()) {
                 evec.m_data2.resize(evec.m_count);
                 ptr = evec.m_data2.data();
@@ -1053,10 +996,7 @@ bool Session::LoadEvents(QString filename, bool debug)
                 in.readRawData((char *)ptr, evec.m_count << 1);
                 // *** Don't delete these comments ***
                 // *** They explain what the above ReadRawData is doing!
-                //                for (quint32 c=0;c<evec.m_count;c++) {
                 //                    in >> t;
-                //                    *ptr++=t;
-                //                }
             }
 
             if (evec.type() != EVL_Waveform) {
@@ -1065,10 +1005,7 @@ bool Session::LoadEvents(QString filename, bool debug)
 
                 in.readRawData((char *)tptr, evec.m_count << 2);
                 // *** Don't delete these comments ***
-                //                for (quint32 c=0;c<evec.m_count;c++) {
                 //                    in >> x;
-                //                    *tptr++=x;
-                //                }
             }
         }
     }
@@ -1135,8 +1072,6 @@ void Session::updateCountSummary(ChannelID code)
     QHash<EventStoreType, EventStoreType> valsum;
     QHash<EventStoreType, quint32> timesum;
 
-    //QHash<EventStoreType, EventStoreType>::iterator it;
-    //QHash<EventStoreType, EventStoreType>::iterator valsum_end;
 
     EventDataType raw, lastraw = 0;
     qint64 start, time, lasttime = 0;
@@ -1996,15 +1931,12 @@ EventDataType Session::count(ChannelID id)
 
     if (i != m_cnt.end()) {
 //        if (i.value() != static_cast<int>(i.value()))
-//            qDebug() << "Session::count() says i != m_cnt.end, returning" << qSetRealNumberPrecision(9) <<  i.value();
         return i.value();
     }
 
     QHash<ChannelID, QVector<EventList *> >::iterator j = eventlist.find(id);
 
     if (j == eventlist.end()) {
-//        m_cnt[id] = 0;
-//        qDebug() << "Session::count() says j != eventlist.end, returning 0";
         return 0;
     }
 
@@ -2020,7 +1952,6 @@ EventDataType Session::count(ChannelID id)
 
     m_cnt[id] = sum;
 //    if (sum != static_cast<int>(sum))
-//        qDebug() << "Session::count() for channel" << id << "returning and setting m_cnt to" << qSetRealNumberPrecision(9) << sum;
     return sum;
 }
 
@@ -2640,18 +2571,15 @@ EventList *Session::AddEventList(ChannelID code, EventListType et, EventDataType
 
     if (!channel) {
         qWarning() << "Channel" << code << "does not exist!";
-        //return nullptr;
     }
 
     EventList *el = new EventList(et, gain, offset, min, max, rate, second_field);
 
     eventlist[code].push_back(el);
-    //s_machine->registerChannel(chan);
     return el;
 }
 void Session::offsetSession(qint64 offset)
 {
-    //qDebug() << "Session starts" << QDateTime::fromSecsSinceEpoch(s_first/1000).toString("yyyy-MM-dd HH:mm:ss");
     s_first += offset;
     s_last += offset;
     QHash<ChannelID, quint64>::iterator it;
@@ -3354,7 +3282,6 @@ bool Session::StoreSummaryToDatabase()
     if (success) {
 #ifdef DBDEBUG
         qDebug() << "Session::StoreSummaryToDatabase() - Saved or updated summary for session" << s_session;
-//                 << "AHI:" << data.ahi << "hours:" << data.hoursUsed;
 #endif
     } else {
         qWarning() << "Session::StoreSummaryToDatabase() - Failed to save summary for session" << s_session;
@@ -3418,7 +3345,6 @@ QList<RespiratoryEventData> Session::extractRespiratoryEvents()
     int channelsProcessed = 0;
     int flagChannels = 0;
 #endif
-//    qDebug() << "    Checking channel types:";
     for (auto channelIt = eventlist.begin(); channelIt != eventlist.end(); ++channelIt) {
         ChannelID channelId = channelIt.key();
 #ifdef DBDEBUG
@@ -3731,7 +3657,6 @@ bool Session::LoadEventsFromDatabase()
 
 bool Session::LoadSummaryFromFile(const QString& filename)
 {
-//    qDebug() << "Session::LoadSummaryFromFile() - Loading from" << filename;
     
     if (filename.isEmpty()) {
         qDebug() << "Empty summary filename";
@@ -3781,9 +3706,7 @@ bool Session::LoadSummaryFromFile(const QString& filename)
     quint32 ts32;
     in >> ts32;      // MachineID (dont need this result)
 
-//    bool upgrade = false;
     if ( ts32 != s_machine->id()) {
-//        upgrade = true;
         qWarning() << "Machine ID does not match in" << filename <<
                    " I will try to load anyway in case you know what your doing.";
     }
@@ -4000,14 +3923,12 @@ bool Session::LoadSummaryFromFile(const QString& filename)
     s_enabled = 1;
     
 //    qDebug() << "Session::LoadSummaryFromFile() - Successfully loaded session" << s_session
-//             << "from" << filename;
     
     return true;
 }
 
 bool Session::LoadEventsFromFile(const QString& filename)
 {
-//    qDebug() << "Session::LoadEventsFromFile() - Loading from" << filename;
     
     // Skip event loading for journal machines - they only have settings
     if (s_machine->type() == MT_JOURNAL) {
@@ -4201,7 +4122,6 @@ bool Session::LoadEventsFromFile(const QString& filename)
     s_events_loaded = true;
     
 //    qDebug() << "Session::LoadEventsFromFile() - Successfully loaded events for session" << s_session
-//             << "from" << filename;
     
     return true;
 }

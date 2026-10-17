@@ -124,9 +124,6 @@ void gXAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
         double px, py;
 
         int start_px = left;
-        //int start_py=top;
-        //int width=scrx-(w.GetLeftMargin()+w.GetRightMargin());
-        //    float height=scry-(w.GetTopMargin()+w.GetBottomMargin());
 
         if (width < 40) {
             return;
@@ -191,7 +188,6 @@ void gXAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
             fitmode = 3;
         }
 
-        //if (divmax>divcnt) divmax=divcnt;
 
         int x, y;
         // grab the text extent of the dummy text fields above to know how much space is needed
@@ -267,7 +263,6 @@ void gXAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
         py = left + float(aligned_start - minx) * xmult;
 
-        //py+=usepixmap ? 20 : left;
 
         int mintop = top + 3.0 * (float(y) / 10.0);
         int majtop = top + 6.0 * (float(y) / 10.0);
@@ -319,7 +314,6 @@ void gXAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
             s = (j / 1000L) % 60L;
             m = (j / 60000L) % 60L;
             h = (j / 3600000L) % 24L;
-            //int d=(j/86400000) % 7;
             #endif
 
             if (fitmode == 0) {
@@ -327,13 +321,10 @@ void gXAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
                 QDateTime dt = QDateTime::fromSecsSinceEpoch(d).toLocalTime();
                 QDate date = dt.date();
                 // SLOW SLOW SLOW!!! On Mac especially, this function is pathetically slow.
-                //dt.toString("MMM dd");
 
                 // Doing it this way instead because it's MUUUUUUCH faster
                 tmpstr = QString(dayFirst?"%1 %2":"%2 %1").arg(date.day()).arg(months[date.month() - 1]);
 
-                //} else if (fitmode==0) {
-                //            tmpstr=QString("%1 %2:%3").arg(dow[d]).arg(h,2,10,QChar('0')).arg(m,2,10,QChar('0'));
             } else if (fitmode == 1) { // minute
                 tmpstr = QString("%1:%2").arg(h, 2, 10, QChar('0')).arg(m, 2, 10, QChar('0'));
             } else if (fitmode == 2) { // second
@@ -417,7 +408,6 @@ void gXAxisDay::paint(QPainter &painter, gGraph &graph, const QRegion &region)
     float left = region.boundingRect().left();
     float top = region.boundingRect().top();
     float width = region.boundingRect().width();
-    //float height = region.boundingRect().height();
 
     QString months[] = {
         QObject::tr("Jan"), QObject::tr("Feb"), QObject::tr("Mar"), QObject::tr("Apr"), QObject::tr("May"), QObject::tr("Jun"),
@@ -430,12 +420,9 @@ void gXAxisDay::paint(QPainter &painter, gGraph &graph, const QRegion &region)
     maxx = graph.max_x;
 
     QDateTime date2 = QDateTime::fromMSecsSinceEpoch(minx, QTimeZone::systemTimeZone());
- //   QDateTime enddate2 = QDateTime::fromMSecsSinceEpoch(maxx, Qt::UTC);
 
-    //qInfo() << "Drawing date axis from " << date2 << " to " << enddate2;
 
     QDate date = date2.date();
-//    QDate enddate = enddate2.date();
 
     int days = ceil(double(maxx - minx) / 86400000.0);
 
@@ -466,7 +453,6 @@ void gXAxisDay::paint(QPainter &painter, gGraph &graph, const QRegion &region)
         QString tmpstr = QString(dayFirst?"%2 %1":"%1 %2").arg(months[date.month() - 1]).arg(date.day(), 2, 10, QChar('0'));
 
         float x1 = lastx + xpos;
-        //lines.append(QLine(lastx, top, lastx, top+6));
         if (x1 > (lastxpos + x + 8*graph.printScaleX())) {
             graph.renderText(tmpstr, x1, y1 + y + 8);
             lastxpos = x1;

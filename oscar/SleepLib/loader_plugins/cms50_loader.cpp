@@ -109,7 +109,6 @@ int CMS50Loader::Open(const QString & path)
         for (int i=0; i<5; ++i) {
             resetDevice();
             serial.flush();
-//            QThread::msleep(50);
             QApplication::processEvents();
         }
         serial.clear();
@@ -175,7 +174,6 @@ void CMS50Loader::processBytes(QByteArray bytes)
         break;
     default:
         ;
-//        qDebug() << "Device mode not supported by" << loaderName();
     }
 
     if (idx >= available) {
@@ -430,8 +428,6 @@ int CMS50Loader::doLiveMode()
 
 void CMS50Loader::resetDevice() // Switch CMS50D+ device to live streaming mode
 {
-    //qDebug() << "Sending reset code to CMS50 device";
-    //m_port->flush();
 
     static unsigned char b1[3]={0xf6,0xf6,0xf6};
 
@@ -446,7 +442,6 @@ void CMS50Loader::requestData() // Switch CMS50D+ device to record transmission 
 {
     static unsigned char b1[2]={0xf5,0xf5};
 
-    //qDebug() << "Sending request code to CMS50 device";
     if (serial.write((char *)b1,2) == -1) {
         qDebug() << "Couldn't write data request bytes to CMS50";
     }
@@ -472,7 +467,6 @@ void CMS50Loader::startImportTimeout()
         return;
     }
 
-    //qDebug() << "Starting oximeter import timeout";
 
     // Wait until events really are jammed on the CMS50D+ before re-requesting data.
 
@@ -529,13 +523,7 @@ void CMS50Loader::resetImportTimeout()
             resetDevice(); // Send Reset to CMS50D+
             serial.flush();
             serial.clear();
-            //started_import = false;
-           // finished_import = true;
-            //m_streaming=false;
 
-            //closeDevice();
-            //emit transferComplete();
-            //doImportComplete();
             return;
         }
         qDebug() << "Should CMS50 resetImportTimeout reach here?";
@@ -586,7 +574,6 @@ bool CMS50Loader::readSpoRFile(QString path)
 
     in.skipRawData(pos - 2);
 
-    //long size = data.size();
     int bytes_per_record = 2;
 
     if (!spo2header) {
@@ -680,12 +667,6 @@ bool CMS50Loader::readSpoRFile(QString path)
     } while (!in.atEnd());
 
 
-//    for (int i = pos; i < size - 2;) {
-//        o2 = (unsigned char)(data.at(i + 1));
-//        pr = (unsigned char)(data.at(i + 0));
-//        oxirec->append(OxiRecord(pr, o2));
-//        i += 2;
-//    }
 
     // processing gets done later
     return true;
@@ -696,10 +677,7 @@ void CMS50Loader::process()
     // Just clean up any extra crap before oximeterimport parses the oxirecords..
     return;
 //    if (!oxirec)
-//        return;
-//    int size=oxirec->size();
 //    if (size<10)
-//        return;
 
 }
 

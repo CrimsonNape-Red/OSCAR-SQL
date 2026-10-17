@@ -55,7 +55,6 @@ qint64 DoctorInfoRepository::create(const DoctorInfoData& data)
     }
 
     qint64 id = query.lastInsertId().toLongLong();
-//    qDebug() << "DoctorInfoRepository: Created doctor_info record with id" << id;
     return id;
 }
 
@@ -183,7 +182,6 @@ bool DoctorInfoRepository::loadIntoDoctorInfo(qint64 profileId, DoctorInfo* doct
     doctorInfo->setAddress(data.address);
     doctorInfo->setPatientID(data.patientId);
 
-//    qDebug() << "DoctorInfoRepository: Loaded doctor_info for profile" << profileId;
     return true;
 }
 

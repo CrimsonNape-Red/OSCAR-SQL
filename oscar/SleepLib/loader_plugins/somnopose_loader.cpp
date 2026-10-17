@@ -258,7 +258,6 @@ void SomnoposeLoader::Register()
 
     qDebug("Registering SomnoposeLoader");
     RegisterLoader(new SomnoposeLoader());
-    //InitModelMap();
     somnopose_initialized = true;
 }
 

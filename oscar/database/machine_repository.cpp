@@ -278,7 +278,6 @@ QList<MachineData> MachineRepository::findByProfile(qint64 profileId)
         machines.append(recordToData(query));
     }
     
-//    qDebug() << "MachineRepository: Found" << machines.size() << "machines for profile" << profileId;
     
     return machines;
 }

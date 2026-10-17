@@ -166,15 +166,12 @@ Session* DreemLoader::readNextSession()
         // "Type" always seems to be "night"
         stop_time = readDateTime(row["Stop Time"]);
         sleep_onset = readDuration(row["Sleep Onset Duration"]);
-        //sleep_duration = readDuration(row["Sleep Duration"]);
         light_sleep_duration = readDuration(row["Light Sleep Duration"]);
         deep_sleep_duration = readDuration(row["Deep Sleep Duration"]);
         rem_duration = readDuration(row["REM Duration"]);
         awakened_duration = readDuration(row["Wake After Sleep Onset Duration"]);
         awakenings = readInt(row["Number of awakenings"]);
-        //position_changes = readInt(row["Position Changes"]);
         //average_hr = readInt(row["Mean Heart Rate"]);  // TODO: sometimes "None"
-        //average_rr = readInt(row["Mean Respiration CPM"]);
         // "Number of Stimulations" is 0 for US models
         sleep_efficiency = readInt(row["Sleep efficiency"]) / 100.0;
         
@@ -204,8 +201,6 @@ Session* DreemLoader::readNextSession()
         sess->settings[SLEEP_TimeInREM] = rem_duration / 60;
         sess->settings[SLEEP_TimeInLight] = light_sleep_duration / 60;
         sess->settings[SLEEP_TimeInDeep] = deep_sleep_duration / 60;
-        //sess->settings[OXI_Pulse] = average_hr;
-        //sess->settings[CPAP_RespRate] = average_rr;
         // Dreem also provides:
         // total sleep duration
         // # position changes

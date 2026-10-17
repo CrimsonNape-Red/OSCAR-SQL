@@ -287,7 +287,6 @@ void gTAPGraph::SetDay(Day *d)
                         tap[lastval] = v;
                     }
 
-                    //changed=true;
                     lasttime = time;
                     lastval = data;
                 }

@@ -62,7 +62,6 @@ void Welcome::refreshPage()
 
     if (!b) {
         qDebug() << "No devices in Profile";
-//        sleep(3);
         ui->cpapIcon->setPixmap(pixmap);
     }
 
@@ -228,7 +227,6 @@ QString Welcome::GenerateCPAPHTML()
             QDate endtime = date.addDays(-1);
 
 
-//            EventDataType ahi = (day->count(CPAP_AllApnea) + day->count(CPAP_Obstructive) + day->count(CPAP_Hypopnea) + day->count(CPAP_ClearAirway) + day->count(CPAP_Apnea)) / hours;
             EventDataType ahi = (hours > 0) ? day->count(AllAhiChannels) / hours : 0;
             EventDataType ahidays = calcAHI(starttime, endtime);
 
@@ -293,9 +291,6 @@ QString Welcome::GenerateCPAPHTML()
                         .arg(schema::channel[pressChanID].units())
                         .arg(perc);
             } else if (cpapmode == MODE_BILEVEL_FIXED) {
-//                pressSettingChanID = CPAP_IPAP;
-//                EventDataType ipap = day->settings_max(pressSettingChanID);
-//                EventDataType epap = day->settings_min(CPAP_EPAP);
                 html += tr("Your device used a constant %1-%2 %3 of air.")
                         .arg(day->validPressure(day->settings_min(CPAP_EPAP)))
                         .arg(day->validPressure(day->settings_max(CPAP_IPAP)))
@@ -353,8 +348,6 @@ QString Welcome::GenerateCPAPHTML()
             }
             html += "<br/>";
 
-            //EventDataType lat = day->timeAboveThreshold(CPAP_Leak, p_profile->cpap->leakRedline())/ 60.0;
-            //EventDataType leaks = 1.0/hours * lat;
 
             EventDataType leak = day->wavg(CPAP_Leak);
             EventDataType leakdays = p_profile->calcWavg(CPAP_Leak, MT_CPAP, starttime, endtime);

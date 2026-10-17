@@ -159,7 +159,6 @@ public:
 
     QLabel * getDateDisplay();
 
-    //void populateSessionWidget();
 
     void showAllGraphs(bool show);
     void showGraph(int index,bool show, bool updateGraph=true);

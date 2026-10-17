@@ -44,7 +44,6 @@ Q_OBJECT
     }
 
 
-  //  Machine *CreateMachine();
 
     virtual void process();
 
@@ -91,7 +90,6 @@ protected:
     bool readSpoRFile(const QString & path);
     virtual void processBytes(QByteArray bytes);
 
-//    int doLiveMode();
 
     virtual void killTimers();
 

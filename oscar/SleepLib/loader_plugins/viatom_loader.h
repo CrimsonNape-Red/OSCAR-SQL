@@ -42,7 +42,6 @@ class ViatomLoader : public MachineLoader
 
     virtual QStringList getNameFilter();
 
-  //Machine *CreateMachine();
 
   protected:
     int OpenFile(const QString & filename);

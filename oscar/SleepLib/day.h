@@ -144,10 +144,8 @@ class Day
 
 
     // //! \brief Sets the first session time of this day
-    // void setFirst(qint64 val) { d_first=val; }
 
     // //! \brief Sets the last session time of this day
-    // void setLast(qint64 val) { d_last=val; }
 
     //! \brief Returns the last session time of this day for the supplied Channel code
     qint64 first(ChannelID code);

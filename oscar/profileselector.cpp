@@ -157,7 +157,6 @@ void ProfileSelector::updateProfileList()
     ui->profileView->setStyleSheet("QHeaderView::section { background-color: lightgrey; color: black; }");
 
     int row = 0;
-//    int sel = -1;
 
     QFontMetrics fm(ui->profileView->font());
     //#if QT_VERSION < QT_VERSION_CHECK(5,11,0) // not sure when this was fixed
@@ -169,7 +168,6 @@ void ProfileSelector::updateProfileList()
 
     ui->profileView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->profileView->setFocusPolicy(Qt::NoFocus);
-//    ui->profileView->setSelectionMode(QAbstractItemView::NoSelection);
     ui->profileView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->profileView->setSelectionMode(QAbstractItemView::SingleSelection);
 
@@ -290,7 +288,6 @@ void ProfileSelector::updateProfileList()
     }
     w+=20;
 ***/
-//    ui->profileView->setMinimumWidth(w);
 
     // Rebuilding the model always replaces the selection model, so any previously
     // selected profile's info is no longer valid. Reset the panel and buttons to
@@ -390,9 +387,7 @@ void ProfileSelector::on_profileView_doubleClicked(const QModelIndex &index)
     QModelIndex idx = proxy->index(index.row(), 0, QModelIndex());
     QString profname = proxy->data(idx, Qt::UserRole+2).toString();
 
-    //if (SelectProfile(profname)) {
     mainwin->OpenProfile(profname);
-    //}
 }
 
 void ProfileSelector::on_profileFilter_textChanged(const QString &arg1)
@@ -448,7 +443,6 @@ void ProfileSelector::on_buttonEditProfile_clicked()
 
             proxy->setData(proxy->index(ui->profileView->currentIndex().row(), 5, QModelIndex()), usersname);
             proxy->setData(proxy->index(ui->profileView->currentIndex().row(), 5, QModelIndex()), nameSortKey(prof->user->lastName(), prof->user->firstName()), MySortFilterProxyModel2::NameSortRole);
-            //updateProfileList();
             if (prof == p_profile) updateProfileHighlight(name);
         }
 
@@ -597,7 +591,6 @@ void ProfileSelector::on_buttonDestroyProfile_clicked()
                 return;
             }
 //        } else {
-//            dbProgress->close();
 //            delete dbProgress;
         }
 
@@ -608,12 +601,8 @@ void ProfileSelector::on_buttonDestroyProfile_clicked()
             int itemsProcessed = 0;
             dbProgress->setLabelText(tr("Deleting backup files..."));
             QCoreApplication::processEvents();  // Keep UI responsive
-//            if (progressCallback) {
-//                progressCallback(80, QObject::tr("Deleting backup files..."));
-//            }
             bool deleteSuccess = removeDirWithProgress(path, dbProgress, 75, 100);
             
-//            fileProgress->close();
 //            delete fileProgress;
             
             if (!deleteSuccess) {
@@ -694,7 +683,6 @@ QString ProfileSelector::getProfileDiskInfo(Profile *profile)
     QString html;
     if (profile) {
 //        qint64 sizeSummaries = profile->diskSpaceSummaries(); // Remove for OSCAR 2.0
-//        qint64 sizeEvents = profile->diskSpaceEvents();
         qint64 sizeDatabase = getDatabaseTotalSize();
         qint64 sizeBackups = profile->diskSpaceBackups();
 

@@ -25,11 +25,6 @@ public:
         for (int i = 0; i < ahiChannels.size(); i++)
             addCalc(ahiChannels.at(i), ST_CPH);
 
-//        addCalc(CPAP_ClearAirway, ST_CPH);
-//        addCalc(CPAP_AllApnea, ST_CPH);
-//        addCalc(CPAP_Obstructive, ST_CPH);
-//        addCalc(CPAP_Apnea, ST_CPH);
-//        addCalc(CPAP_Hypopnea, ST_CPH);
         if (p_profile->general->calculateRDI())
             addCalc(CPAP_RERA, ST_CPH);
     }
@@ -51,14 +46,6 @@ public:
     }
 
     void CloneInto(gAHIChart * /* layer */) {
-//        layer->ahicalc = ahicalc;
-//        layer->ahi_wavg = ahi_wavg;
-//        layer->ahi_avg = ahi_avg;
-//        layer->total_hours = total_hours;
-//        layer->max_ahi = max_ahi;
-//        layer->min_ahi = min_ahi;
-//        layer->total_days = total_days;
-//        layer->ahi_data = ahi_data;
     }
 
   //  SummaryCalcItem ahicalc;

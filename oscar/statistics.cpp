@@ -88,7 +88,6 @@ QString formatTime(float time)
     int hours = time;
     int seconds = time * 3600.0;
     int minutes = (seconds / 60) % 60;
-    //seconds %= 60;
     return QString::asprintf("%02i:%02i", hours, minutes); //,seconds);
 }
 
@@ -383,7 +382,6 @@ void Statistics::updateRXChanges()
             continue;
 
         if (day->first() == 0) {  // Ignore invalid dates
-            //qDebug() << "Statistics::updateRXChanges ignoring day with first=0";
             continue;
         }
 
@@ -475,7 +473,6 @@ void Statistics::updateRXChanges()
                     rxitems.insert(date, rx1);
 
                     // now zonk it so we can reuse the variable later
-                    //rx1 = RXItem();
 
                     // Now that's out of the way, we need to splitting the old rx into two,
                     // and recalculate everything before and after today
@@ -603,7 +600,6 @@ void Statistics::updateRXChanges()
         QMap<QDate, RXItem>::iterator lastri = rxitems.end();
 
         for (ri = rxitems.begin(); ri != ri_end; ++ri) {
-//            RXItem & rx = ri.value();
 
             // break after any date newer
             if (ri.key() > date)
@@ -955,7 +951,6 @@ QString Statistics::generateHeader(bool onScreen)
         html += "p,a,td,body { font-family: 'Helvetica'; }";
 //                "p,a,td,body { font-size: 10px; }";
     }
-//    qDebug() << "generateHeader font" << html;
     html += "table.curved {"  // Borders not supported without webkit
 //            "border: 1px solid gray;"
 //            "border-radius:10px;"
@@ -1061,7 +1056,6 @@ EventDataType calcAHIorRDI(QDate start, QDate end , RDI_MODE mode)
     } else {
         ahi = 0;
     }
-//    qDebug() << "calcAHIorRDI: count" << cnt << "hours" << hours << "AHI" << ahi << "rounded" <<  QString("%1").arg(ahi, 0, 'f', 2);
 
     return ahi;
 }
@@ -1233,7 +1227,6 @@ struct Period {
         if (finished) return;
         // adds date range to header.
         // replaces the following
-        // periods.push_back(Period(qMax(last.addDays(-6), first), last, tr("Last Week")));
         QDate next;
         if (month) {
             // note add days or addmonths returns the start of the next day or the next month.
@@ -1314,7 +1307,6 @@ QString Statistics::GenerateMachineList()
             m = mach.at(i);
 
             if (m->type() == MT_JOURNAL) { continue; }
-//qDebug() << "Device" << m->brand() << "series" << m->series() << "model" << m->model() << "model number" << m->modelnumber();
             QDate d1 = m->FirstDay();
             QDate d2 = m->LastDay();
             adjustRange(d1,d2);
@@ -1384,13 +1376,8 @@ QString Statistics::GenerateRXChanges()
     }
     html+="</tr>";
     html += "</thead>";
-//    html += "<tfoot>";
-//    html += "<tr><td colspan=10 align=center>";
 //    html += QString("<i>") +
 //            tr("Efficacy highlighting ignores prescription settings with less than %1 days of recorded data.").
-//            arg(rxthresh) + QString("</i><br>");
-//    html += "</td></tr>";
-//    html += "</tfoot>";
 
     QMapIterator<QDate, RXItem> it(rxitems);
     it.toBack();
@@ -1523,7 +1510,6 @@ QString Statistics::GenerateCPAPUsage()
         if (number_periods < 1) {
             number_periods = 1;
         }
-        //qDebug() << "Number of months for stats (trim to 12 max)" << number_periods;
         // But not more than one year
         if (number_periods > 12) {
             // should never get here.
@@ -1576,12 +1562,10 @@ QString Statistics::GenerateCPAPUsage()
 
                 periods.push_back(Period(last,last,tr("Last Session")));
 
-                //bool done=false;
                 int j=0;
                 do {
                     s=QDate(l.year(), l.month(), 1);
                     if (s < first) {
-                        //done = true;
                         s = first;
                     }
 
@@ -1741,14 +1725,12 @@ QString Statistics::GenerateCPAPUsage()
             }
             line += "</td>";
         }
-//        qDebug() << "line" << line.size();
         html += line;
         html += "</tr>";
     }
 
     html += "</table>";
     html += "</div>";
-//    qDebug() << "html" << html.size();
 
     return html;
 }
@@ -1833,8 +1815,6 @@ void Statistics::printReport(QWidget * parent) {
         doc.setHtml(htmlReportHeaderPrint + htmlUsage + htmlReportFooter + htmlMachineSettings + htmlMachines + htmlReportFooter);
 
         // Dump HTML for use with HTML4 validator
-//        QString html = htmlReportHeaderPrint + htmlUsage + htmlMachineSettings + htmlMachines + htmlReportFooter;
-//        qDebug() << "Html:" << html;
 
         doc.print(&printer);
     }

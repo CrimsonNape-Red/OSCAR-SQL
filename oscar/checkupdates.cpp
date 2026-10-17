@@ -104,24 +104,19 @@ VersionInfo getVersionInfo (QString type, QString platform) {
 
        if (reader.readNextStartElement()) {
            if (reader.name() == QStringLiteral("oscar")){
-                //qDebug() << "expecting oscar, read" << reader.name();
                while(reader.readNextStartElement()){
-                    //qDebug() << "expecting group, read" << reader.name() << "with id" << reader.attributes().value("id").toString();
                    if(reader.name() == QStringLiteral("group") &&
                         reader.attributes().hasAttribute("id")){
                         if (reader.attributes().value("id").toString() == type) {
                             while(reader.readNextStartElement()) {
-                                //qDebug() << "expecting url or platform, read" << reader.name();
                                 if (reader.name() == QStringLiteral("installers"))
                                     foundInfo.urlInstaller = reader.readElementText();
                                 if (reader.name() == QStringLiteral("platform")) {
                                     QString plat=reader.attributes().value("id").toString();
-                                    //qDebug() << "expecting platform, read " << reader.name()  << "with id" << reader.attributes().value("id").toString();
 
                                     if ((plat == platform) || (plat == "all" && foundInfo.platform.length() == 0)) {
                                         foundInfo.platform = plat;
                                         while(reader.readNextStartElement()) {
-                                            //qDebug() << "expecting version or notes, read" << reader.name();
                                             if (reader.name() == QStringLiteral("version")) {
                                                 QString fileVersion = reader.readElementText();
                                                 Version fv(fileVersion);
@@ -191,7 +186,6 @@ void CheckUpdates::compareVersions () {
     if (msg.length() > 0) {
         // Add elapsed time in test versions only
 //        if (elapsedTime > 0 && !getVersion().IsReleaseVersion())
-//            msg += "<font size='-1'><p>" + QString(QObject::tr("(Reading %1 took %2 seconds)")).arg("versions.xml").arg(elapsedTime) + "</p></font>";
         msgIsReady = true;
     }
 
@@ -257,7 +251,6 @@ void CheckUpdates::checkForUpdates(bool showWhenCurrent)
 
     if (showIfCurrent) {
         checkingBox = new QProgressDialog (this);
-//        checkingBox->setWindowModality(Qt::WindowModal);
         checkingBox->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
         checkingBox->setWindowFlags(this->windowFlags() & ~Qt::WindowMinMaxButtonsHint);
         checkingBox->setLabelText(tr("Checking for newer OSCAR versions"));
@@ -292,9 +285,6 @@ void CheckUpdates::replyFinished(QNetworkReply *reply)
         qDebug() << "Update check HTML return"
                  << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt()
                  << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
-//      qDebug() << reply->header(QNetworkRequest::ContentTypeHeader).toString();
-//      qDebug() << reply->header(QNetworkRequest::LastModifiedHeader).toDateTime().toString();
-//      qDebug() << reply->header(QNetworkRequest::ContentLengthHeader).toULongLong();
 
         versionXML = reply->readAll().toLower();
         reply->deleteLater();

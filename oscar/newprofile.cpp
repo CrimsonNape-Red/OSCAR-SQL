@@ -73,7 +73,6 @@ NewProfile::NewProfile(QWidget *parent, const QString *user) :
     if (user) {
       originalProfileName=*user;
       ui->userNameEdit->setText(*user);
-//    ui->userNameEdit->setText(getUserName());
     }
     QLocale locale = QLocale::system();
     QString shortformat = locale.dateFormat(QLocale::ShortFormat);
@@ -96,7 +95,6 @@ NewProfile::NewProfile(QWidget *parent, const QString *user) :
 
     {
         // Get all available countries
-//        QList<QLocale::Country> countries = QLocale::Country::allCountries();
         QMap<QString, QLocale::Country> countryMap;
 
         for (int i = QLocale::AnyCountry; i <= QLocale::LastCountry; ++i) {
@@ -229,7 +227,6 @@ void NewProfile::on_nextButton_clicked()
         }
 
         if (ui->genderCombo->currentIndex() == 0) {
-            //QMessageBox::information(this,tr("Notice"),tr("You did not specify Gender."),QMessageBox::Ok);
         }
 
         break;
@@ -258,9 +255,7 @@ void NewProfile::on_nextButton_clicked()
         } else {
             profileName = originalProfileName;
             ui->userNameEdit->setText(originalProfileName);
-            //QString profileName = originalProfileName.isEmpty()? newProfileName : originalProfileName;
         }
-        //QString profileName = originalProfileName.isEmpty()? newProfileName : originalProfileName;
 
         if ( staticQMessageBox::question(this, tr("Profile Changes"), tr("Accept and save this information?"),
                                   QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
@@ -448,7 +443,6 @@ void NewProfile::edit(const QString name)
     }
 
     ui->userNameEdit->setText(name);
-    // ui->userNameEdit->setReadOnly(true);
     ui->firstNameEdit->setText(profile->user->firstName());
     ui->lastNameEdit->setText(profile->user->lastName());
 

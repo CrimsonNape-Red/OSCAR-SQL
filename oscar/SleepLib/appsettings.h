@@ -162,7 +162,6 @@ public:
   bool combineSimilarMachines() const { return getPref(STR_AS_CombineSimilarMachines).toBool(); }
   //! \brief Whether to print reports in black and white, which can be more legible on non-color printers
   bool monochromePrinting() const { return getPref(STR_AS_MonochromePrinting).toBool(); }
-  //bool eventFlagSessionBar() const { return getPref(STR_AS_EventFlagSessionBar).toBool(); }
   bool disableDailyGraphTitles() const { return getPref(STR_AS_DisableDailyGraphTitles).toBool(); }
 #if defined(STEADY_BREATHING)
   SteadyBreathingState steadyBreathing() const { return (SteadyBreathingState)getPref(STR_AS_SteadyBreathing).toInt(); }
@@ -251,7 +250,6 @@ public:
   void setCombineSimilarMachines(bool b) { setPref(STR_AS_CombineSimilarMachines, b); }
   //! \brief Sets whether to print reports in black and white, which can be more legible on non-color printers
   void setMonochromePrinting(bool b) { setPref(STR_AS_MonochromePrinting, b); }
-  // void setEventFlagSessionBar(bool b) { setPref(STR_AS_EventFlagSessionBar, b); }
   void setDisableDailyGraphTitles(bool b) { setPref(STR_AS_DisableDailyGraphTitles, b); }
   #if defined(STEADY_BREATHING)
   void setSteadyBreathing(SteadyBreathingState b) { setPref(STR_AS_SteadyBreathing, (int)b); }

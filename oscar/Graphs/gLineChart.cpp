@@ -91,7 +91,6 @@ bool gLineChart::isEmpty()
 
 void gLineChart::SetDay(Day *d)
 {
-    //    Layer::SetDay(d);
     m_day = d;
 
     m_minx = 0, m_maxx = 0;
@@ -329,7 +328,6 @@ EventDataType gLineChart::Maxy()
     m_maxy = max;
     return max;
 
-//    return Layer::Maxy() - subtract_offset;
 }
 
 bool gLineChart::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
@@ -395,7 +393,6 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
         return;
     }
 
-    //if (!m_day->channelExists(m_code)) return;
 
     if (width < 0) {
         return;
@@ -457,9 +454,7 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     painter.setRenderHint(QPainter::Antialiasing, AppSetting->antiAliasing());
 
-    //bool mouseover = false;
     if (rect.contains(w.graphView()->currentMousePos())) {
-        //mouseover = true;
 
         painter.fillRect(rect, QBrush(QColor(255,255,245,128)));
     }
@@ -508,15 +503,12 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
     height -= 2;
 
     int num_points = 0;
-    //int visible_points = 0;
     int total_points = 0;
-    //int total_visible = 0;
     bool square_plot, accel;
     qint64 drift = 0;
 
     QHash<ChannelID, QVector<EventList *> >::iterator ci;
 
-    //m_line_color=schema::channel[m_code].defaultColor();
     int legendx = left + width;
 
     int codepoints;
@@ -550,7 +542,6 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
                 if ((dot.code != code) || (!m_dot_enabled[dot.code][dot.type]) || (!dot.available) || (!m_enabled[dot.code])) {
                     continue;
                 }
-                //schema::Channel & chan = schema::channel[code];
 
                 dot.visible = true;
                 QColor color = chan.calc[dot.type].color;
@@ -660,12 +651,10 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
                     } else {
                         qDebug() << "Reversed order sample fed to gLineChart - ignored.";
                         continue;
-                        //assert(x1<x2);
                     }
                 }
 
                 if (accel) {
-                    //x1=el.time(1);
 
                     double XR = xx / sr;
                     double Z1 = MAX(x0, minx);
@@ -674,11 +663,7 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
                     double ZR = ZD / sr;
                     double ZQ = ZR / XR;
                     double ZW = ZR / (width * ZQ);
-                    //visible_points += ZR * ZQ;
 
-//                    if (accel && n > 0) {
-//                        sam = 1;
-//                    }
 
                     if (ZW < num_averages) {
                         sam = 1;
@@ -703,7 +688,6 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
                         maxz = 0;
                     }
 
-                    //total_visible += visible_points;
                 } else {
                     sam = 1;
                 }
@@ -719,8 +703,6 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
                     if (minx > x0) {
                         double j = minx - x0; // == starting min of first sample in this segment
                         idx = (j / sr);
-                        //idx/=(sam*num_averages);
-                        //idx*=(sam*num_averages);
                         // Loose the precision
                         idx += sam - (idx % sam);
 
@@ -814,7 +796,6 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
 
                         // Cap within VertexBuffer capacity, one vertex per line point
-//                        int np = (maxz - minz) * 2;
 
                         // Each pixel column is drawn as a vertical line spanning that
                         // column's min/max Y. For a slowly-changing signal (pressure,
@@ -932,11 +913,7 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
                     siz -= idx;
 
-//                    int gs = siz << 1;
 
-//                    if (square_plot) {
-//                        gs <<= 1;
-//                    }
 
                     // Unrolling square plot outside of loop to gain a minor speed improvement.
                     EventStoreType *eptr = dptr + siz;
@@ -962,7 +939,6 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
                             // Letting the scissor do the dirty work for non horizontal lines
                             // This really should be changed, as it might be cause that weird
                             // display glitch on Linux..
-                        //}
                         if (square_plot) {
                             lines.append(QLine(lastpx, lastpy, px, lastpy));
                             lines.append(QLine(px, lastpy, px, py));
@@ -995,10 +971,6 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
         }
 
 
-//        painter.setPen(QPen(m_colors[gi],lineThickness));
-//        painter.drawLines(lines);
-//        w.graphView()->lines_drawn_this_frame+=lines.count();
-//        lines.clear();
 
         ////////////////////////////////////////////////////////////////////
         // Draw Legends on the top line
@@ -1101,18 +1073,12 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
     for (int i = 0; i < ahiChannels.size(); i++)
         ahilist.push_back(ahiChannels.at(i));
 
-//    ahilist.push_back(CPAP_Hypopnea);
-//    ahilist.push_back(CPAP_AllApnea);
-//    ahilist.push_back(CPAP_Obstructive);
-//    ahilist.push_back(CPAP_Apnea);
-//    ahilist.push_back(CPAP_ClearAirway);
 
     QList<ChannelID> extras;
     extras.push_back(CPAP_NRI);
     extras.push_back(CPAP_UserFlag1);
     extras.push_back(CPAP_UserFlag2);
 
-    //double sum = 0;
     int cnt = 0;
 
     //Draw the linechart overlays (Event flags) independant of line Cursor mode
@@ -1131,7 +1097,6 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
             if (lob->hover()) blockhover = true; // did it render a hover over?
 
             if (ahilist.contains(code)) {
-                //sum += lob->sum();
                 cnt += lob->count();
             }
         }
@@ -1152,7 +1117,6 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
     }
 
 
-   // painter.setRenderHint(QPainter::Antialiasing, false);
 
     if (actual_max_y>0) {
         m_actual_min_y=actual_min_y;

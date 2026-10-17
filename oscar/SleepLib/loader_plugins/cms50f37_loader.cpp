@@ -158,7 +158,6 @@ int CMS50F37Loader::Open(const QString & path)
         sequence = 0;
         buffer.clear();
 
-//        nextCommand();
         setStatus(IMPORTING);
 
         return 1;
@@ -493,12 +492,10 @@ void CMS50F37Loader::processBytes(QByteArray bytes)
 
             // COMMAND_CMS50_HELLO1 && COMMAND_CMS50_HELLO2
         case 0xc: // a7 & a2  // responds with: c,80
-            //data = buffer.at(idx+1);
             break;
 
             // Query Perfusion Index available (0 is yes, 1 is no)
         case 0x0e: // e,80,81
-            //data = buffer.at(idx+2);
             break;
 
             // Get User Count
@@ -561,7 +558,6 @@ void CMS50F37Loader::processBytes(QByteArray bytes)
             pi = buffer.at(idx+4) | (buffer.at(idx+5) << 8);
             pulse = buffer.at(idx+3);
             spo2 = buffer.at(idx+2);
-//            qDebug() << "cms50f37 - pB: Pulse=" << pulse << "SPO2=" << spo2 << "PI=" << pi;
 
             oxirec->append(((spo2 == 0) || (pulse == 0)) ? OxiRecord(0,0,0) : OxiRecord(pulse, spo2, pi));
         } else if (res == 0x0f) {
@@ -569,17 +565,14 @@ void CMS50F37Loader::processBytes(QByteArray bytes)
 
             pulse = buffer.at(idx+3);
             spo2 = buffer.at(idx+2);
-//            qDebug() << "cms50f37 - pB: Pulse=" << pulse << "SPO2=" << spo2;
             oxirec->append((pulse == 0xff) ? OxiRecord(0,0) : OxiRecord(pulse, spo2));
 
             pulse = buffer.at(idx+5);
             spo2 = buffer.at(idx+4);
-//            qDebug() << "cms50f37 - pB: Pulse=" << pulse << "SPO2=" << spo2;
             oxirec->append((pulse == 0xff) ? OxiRecord(0,0) : OxiRecord(pulse, spo2));
 
             pulse = buffer.at(idx+7);
             spo2 = buffer.at(idx+6);
-//            qDebug() << "cms50f37 - pB: Pulse=" << pulse << "SPO2=" << spo2;
             oxirec->append((pulse == 0xff) ? OxiRecord(0,0) : OxiRecord(pulse, spo2));
         }
 
@@ -589,12 +582,10 @@ void CMS50F37Loader::processBytes(QByteArray bytes)
         }
 
         if (!started_import) {
-          //  startTimer.singleShot(2000, this, SLOT(requestData()));
             importCount = 0;
             qDebug() << "cms50f37 - pB: Read:" << len << size << str.join(",");
         } else {
             importCount++;
-//            qDebug() << "cms50f37 - pB: Import:" << len << size << str.join(",");
         }
 
         idx += len;
@@ -614,33 +605,14 @@ void CMS50F37Loader::processBytes(QByteArray bytes)
 
 
 //int CMS50F37Loader::doLiveMode()
-//{
 //    if (oxirec == nullptr) { // warn
-//}
 //
-//    int available = buffer.size();
-//    int idx = 0;
 //
 //    QByteArray plethy;
-//    while (idx < available-5) {
-//        if (((unsigned char)buffer.at(idx) & 0x80) != 0x80) {
 //            idx++;
-//            continue;
-//        }
-//        int pwave=(unsigned char)buffer.at(idx + 1);
-//        int pbeat=(unsigned char)buffer.at(idx + 2);
-//        int pulse=((unsigned char)buffer.at(idx + 3) & 0x7f) | ((pbeat & 0x40) << 1);
-//        int spo2=(unsigned char)buffer.at(idx + 4) & 0x7f;
 //
-//        oxirec->append(OxiRecord(pulse, spo2));
-//        plethy.append(pwave);
 //
-//        idx += 5;
-//    }
-//    emit updatePlethy(plethy);
 //
-//    return idx;
-//}
 
 
 void CMS50F37Loader::sendCommand(quint8 c)
@@ -916,7 +888,6 @@ bool CMS50F37Loader::readSpoRFile(const QString & path)
 
     in.skipRawData(pos - 2);
 
-    //long size = data.size();
     int bytes_per_record = 2;
 
     if (!spo2header) {
@@ -1010,12 +981,6 @@ bool CMS50F37Loader::readSpoRFile(const QString & path)
     } while (!in.atEnd());
 
 
-//    for (int i = pos; i < size - 2;) {
-//        o2 = (unsigned char)(data.at(i + 1));
-//        pr = (unsigned char)(data.at(i + 0));
-//        oxirec->append(OxiRecord(pr, o2));
-//        i += 2;
-//    }
 
     // processing gets done later
     return true;
@@ -1026,10 +991,7 @@ void CMS50F37Loader::process()
     // Just clean up any extra crap before oximeterimport parses the oxirecords..
     return;
 //    if (!oxirec)
-//        return;
-//    int size=oxirec->size();
 //    if (size<10)
-//        return;
 
 }
 

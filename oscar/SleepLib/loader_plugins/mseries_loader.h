@@ -64,7 +64,6 @@ class MSeriesLoader : public MachineLoader
     virtual const QString & loaderName() { return mseries_class_name; }
 
     //! \brief Create a new PRS1 device record, indexed by Serial number.
-   // Machine *CreateMachine(QString serial);
 
     virtual MachineInfo newInfo() {
         return MachineInfo(MT_CPAP, 0, mseries_class_name, QObject::tr("Respironics"), QString(), QString(), QString(), QObject::tr("M-Series"), QDateTime::currentDateTime(), mseries_data_version);

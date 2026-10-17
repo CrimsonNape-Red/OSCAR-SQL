@@ -85,7 +85,6 @@ class Overview : public QWidget
     void ResetFont();
 
     //! \brief Recalculates Overview chart info, but keeps the date set
-    //void ResetGraphs();
 
     //! \brief Reset graphs to uniform heights
     void ResetGraphLayout();

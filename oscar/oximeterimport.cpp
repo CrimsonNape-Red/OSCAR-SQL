@@ -339,9 +339,6 @@ void OximeterImport::on_directImportButton_clicked()
 
             item = new QTableWidgetItem(startTime.date().toString(QLocale::system().dateFormat(QLocale::ShortFormat))+" "+startTime.time().toString("HH:mm:ss"));
             ui->tableOxiSessions->setItem(i, 0, item);
-       //   item->setData(Qt::UserRole+1, datetime);
-       //   item->setData(Qt::UserRole, i);
-       //   item->setData(Qt::UserRole+2, duration);
             item->setFlags(item->flags() & ~Qt::ItemIsEditable);
 
             item = new QTableWidgetItem( QString::asprintf("%02i:%02i:%02i", h,m,s));
@@ -396,7 +393,6 @@ void OximeterImport::doImport()
 
     // Wait to start import streaming..
     while (!oximodule->isImporting() && !oximodule->isAborted()) {
-//        QThread::msleep(10);
         QApplication::processEvents();
         if (!isVisible()) {
             disconnect(oximodule, SIGNAL(updateProgress(int,int)), this, SLOT(doUpdateProgress(int,int)));
@@ -741,7 +737,6 @@ void OximeterImport::updateLiveDisplay()
         session->really_set_last(ti);
 
 
-        //liveView->SetXBounds(sti, ti, 0, true);
         session->setMin(OXI_Plethy, ELplethy->Min());
         session->setMax(OXI_Plethy, ELplethy->Max());
         session->setLast(OXI_Plethy, ti);

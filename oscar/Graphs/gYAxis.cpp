@@ -30,7 +30,6 @@ gXGrid::gXGrid(QColor col)
     Q_UNUSED(col)
 
     m_major_color = QColor(180, 180, 180, 64);
-    //m_major_color=QColor(180,180,180,92);
     m_minor_color = QColor(230, 230, 230, 64);
     m_show_major_lines = true;
     m_show_minor_lines = true;
@@ -52,24 +51,18 @@ void gXGrid::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     w.roundY(miny, maxy);
 
-    //EventDataType dy=maxy-miny;
 
     if (height < 0) { return; }
 
 //    static QString fd = "0";
-//    GetTextExtent(fd, x, y);
     QFontMetrics fm(*defaultfont);
     int y=fm.height();
 
     double max_yticks = round(height / (y + 14.0*w.printScaleY())); // plus spacing between lines
-    //double yt=1/max_yticks;
 
     double mxy = maxy; //MAX(fabs(maxy), fabs(miny));
     double mny = miny;
 
-//    if (miny < 0) {
-//        mny = -mxy;
-//    }
 
     double rxy = mxy - mny;
 
@@ -125,10 +118,6 @@ void gXGrid::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
             if (g > top + height) { break; }
 
-            //if (vertcnt>=maxverts) {
-            //  qWarning() << "vertarray bounds exceeded in gYAxis for " << w.title() << "graph" << "MinY =" <<miny << "MaxY =" << maxy << "min_ytick=" <<min_ytick;
-            //                break;
-            //          }
             if (m_show_minor_lines) {// && (i > miny)) {
                 minorlines.append(QLineF(left, g, left + width, g));
             }
@@ -193,9 +182,7 @@ void gYAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
         EventDataType dy = maxy - miny;
 
-//        GetTextExtent(fd, x, y);
         y=fm.height();
-        //x=0;
 
 #ifdef DEBUG_LAYOUT
         painter.setPen(Qt::green);
@@ -208,7 +195,6 @@ void gYAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
         double mny = miny;
 
         if (miny < 0) {
-//            mny = -mxy;
         }
 
         double rxy = mxy - mny;
@@ -234,11 +220,8 @@ void gYAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
         double min_ytick = rxy * yt;
 
 
-        //if (dy>5) {
-        //    min_ytick=round(min_ytick);
         //} else {
 
-        //}
 
         float ty, h;
 
@@ -320,7 +303,6 @@ bool gYAxis::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
 
     if (!graph->units().isEmpty()) {
         graph->ToolTip(graph->unitsTooltip(), x+10, y+10, TT_AlignLeft);
-        //   graph->redraw();
     }
 
     return false;

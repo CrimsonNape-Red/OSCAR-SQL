@@ -207,11 +207,9 @@ MainWindow::MainWindow(QWidget *parent) :
         a->setEnabled(false);
         systraymenu->addSeparator();
         systraymenu->addAction(tr("About"), this, SLOT(on_action_About_triggered()));
-//        systraymenu->addAction(tr("Check for &Updates"), this, SLOT(on_actionCheck_for_Updates_triggered()));
         systraymenu->addSeparator();
         systraymenu->addAction(tr("Exit"), this, SLOT(close()));
 
-//      systraymenu = nullptr;
     } else { // if not available, the messages will popup in the taskbar
         qDebug() << "No System Tray menues";
         systray = nullptr;
@@ -321,9 +319,7 @@ void MainWindow::SetupGUI(bool batchMode)
     init_reportModeUi() ;
 
 #ifdef Q_OS_MAC
-    //p_profile->appearance->setAntiAliasing(false);
 #endif
-    //ui->action_Link_Graph_Groups->setChecked(p_profile->general->linkGroups());
 
     first_load = true;
 
@@ -555,11 +551,7 @@ QString getCPAPPixmap(QString mach_class)
 }
 
 //QIcon getCPAPIcon(QString mach_class)
-//{
-//    QString cpapimage = getCPAPPixmap(mach_class);
 
-//    return QIcon(cpapimage);
-//}
 
 void MainWindow::PopulatePurgeMenu()
 {
@@ -620,7 +612,6 @@ void MainWindow::firstRunMessage()
     }
 }
 
-// QString GenerateWelcomeHTML();
 
 bool MainWindow::OpenProfile(QString profileName)
 {
@@ -794,8 +785,6 @@ bool MainWindow::OpenProfile(QString profileName)
     progress->setMessage(tr("Finishing profile \"%1\"").arg(profileName));
 
     // Show the logo?
-//    QPixmap logo=QPixmap(":/icons/logo-md.png").scaled(64,64);
-//    progress->setPixmap(logo);
 
     QApplication::processEvents();
 
@@ -938,9 +927,7 @@ void MainWindow::TestWindowsOpenGL()
     QOpenGLWidget* gl;
     gl = new QOpenGLWidget(ui->tabWidget);
     ui->tabWidget->insertTab(2, gl, "");
-    //qDebug() << __LINE__;
     QCoreApplication::processEvents();  // this triggers the SIGSEGV
-    //qDebug() << __LINE__;
     // If we get here, OpenGL won't crash the application.
     ui->tabWidget->removeTab(2);
     delete gl;
@@ -1188,7 +1175,6 @@ void MainWindow::finishCPAPImport()
 
     if (overview) { overview->ReloadGraphs(); }
     if (daily) {
-//        daily->populateSessionWidget();
         daily->ReloadGraphs();
     }
     if (AppSetting->openTabAfterImport()>0) {
@@ -1345,7 +1331,6 @@ QList<ImportPath> MainWindow::detectCPAPCards()
     progress.setValue(0);
     progress.setMaximum(timeout);
     progress.setVisible(true);
-//    importScanCancelled = false;
     popup.show();
     QApplication::processEvents();
 
@@ -1606,7 +1591,6 @@ QList<ImportPath> MainWindow::selectCPAPDataCards(const QString & prompt, bool a
 
             QPixmap pixmap = datacards[0].loader->getPixmap(datacards[0].loader->PeekInfo(datacards[0].path).series).scaled(64,64);
 
-            //QPixmap pixmap = QPixmap(getCPAPPixmap(datacards[0].loader->loaderName())).scaled(64,64);
             mbox.setIconPixmap(pixmap);
             mbox.exec();
             QAbstractButton *clicked = mbox.clickedButton();
@@ -1617,13 +1601,11 @@ QList<ImportPath> MainWindow::selectCPAPDataCards(const QString & prompt, bool a
             } else if (clicked == yesBtn) {
                 // let it fall through.
             } else {
-                //waitmsg->setText(tr("Please wait, launching file dialog..."));
                 datacards.clear();
                 asknew = true;
             }
         }
     } else {
-        //waitmsg->setText(tr("No CPAP data card detected, launching file dialog..."));
         asknew = true;
     }
 
@@ -1633,7 +1615,6 @@ QList<ImportPath> MainWindow::selectCPAPDataCards(const QString & prompt, bool a
     // It doesn't look like there's any way to implement such a programmatic filter within the file
     // selection dialog without resorting to a non-native dialog.
     if (asknew) {
-       // popup.show();
         mainwin->Notify(tr("Please remember to select the root folder or drive letter of your data card, and not a folder inside it."),
                         tr("Import Reminder"),8000);
 
@@ -1807,8 +1788,6 @@ void MainWindow::updateFavourites()
                     bool found = !filtered;
 
                     if (sess->settings.contains(Bookmark_Start)) {
-                        //QVariantList start=sess->settings[Bookmark_Start].toList();
-                        //QVariantList end=sess->settings[Bookmark_End].toList();
                         QStringList notes = sess->settings[Bookmark_Notes].toStringList();
 
                         if (notes.size() > 0) {
@@ -1822,7 +1801,6 @@ void MainWindow::updateFavourites()
                             tmp += "<list>";
 
                             for (int i = 0; i < notes.size(); i++) {
-                                //QDate d=start[i].toDate();
                                 QString note = notes[i];
 
                                 if (filtered && note.contains(bookmarkFilter, Qt::CaseInsensitive)) {
@@ -1885,7 +1863,6 @@ void MainWindow::on_actionDebug_toggled(bool checked)
     } else {
         ui->logText->hide();
     }
-  //  QApplication::processEvents();
     logger->strlock.unlock();
 }
 
@@ -2282,7 +2259,6 @@ void MainWindow::on_action_Rebuild_Oximetry_Index_triggered()
 
     for (int z = 0; z < machines.size(); z++) {
         m = machines.at(z);
-        //m->sessionlist.erase(m->sessionlist.find(0));
         QList<ChannelID> valid = m->availableChannels(schema::ChanType::ALL);
         valid.removeAll(OXI_PulseChange);  // Delete only these and recalculate.
         valid.removeAll(OXI_SPO2Drop);
@@ -2433,8 +2409,6 @@ void MainWindow::RestartApplication(QString cmdline)
     // If this doesn't work on windoze, try uncommenting this method
     // Technically should be the same thing..
 
-    //if (QDesktopServices::openUrl(apppath)) {
-    //    QApplication::instance()->exit();
     //} else
     QStringList args;
     args << "-p";
@@ -2442,12 +2416,10 @@ void MainWindow::RestartApplication(QString cmdline)
 
     if (!cmdline.isEmpty()) { args << cmdline; }
 
-    //if (change_datafolder) { args << "-d"; }
 
     if (QProcess::startDetached(apppath, args)) {
         QApplication::instance()->exit();
 
-//        ::exit(0);
     } else {
         staticQMessageBox::warning(this,  STR_MessageBox_Error,
             tr("If you can read this, the restart command didn't work. You will have to do it yourself manually."), QMessageBox::Ok);
@@ -2886,7 +2858,6 @@ void MainWindow::purgeMachine(Machine * mach)
         if (welcome)
             welcome->refreshPage();
 
-        //GenerateStatistics();
         return;
     }
 
@@ -2909,7 +2880,6 @@ void MainWindow::purgeMachine(Machine * mach)
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     Q_UNUSED(event)
-    //qDebug() << "Keypress:" << event->key();
 }
 
 void MainWindow::on_action_Sidebar_Toggle_toggled(bool visible)
@@ -2940,7 +2910,6 @@ void MainWindow::on_actionView_Statistics_triggered()
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
     Q_UNUSED(index);
-   // QWidget *widget = ui->tabWidget->currentWidget();
 }
 
 
@@ -3283,9 +3252,6 @@ void MainWindow::on_actionHelp_Support_OSCAR_Development_triggered()
 
 void MainWindow::on_actionChange_Language_triggered()
 {
-//    if (staticQMessageBox::question(this,STR_MessageBox_Warning,tr("Changing the language will reset custom Event and Waveform names/labels/descriptions.")+"\n\n"+tr("Are you sure you want to do this?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
-//        return;
-//    }
 
     RestartApplication("--language");
 }
@@ -3989,7 +3955,6 @@ void MainWindow::GenerateStatistics()
 void MainWindow::JumpDaily()
 {
     qDebug() << "Set current Widget to Daily";
-//    sleep(3);
     ui->tabWidget->setCurrentWidget(daily);
 }
 void MainWindow::JumpOverview()
@@ -4209,7 +4174,6 @@ void MainWindow::on_actionPie_Chart_toggled(bool visible)
     AppSetting->setShowPieChart(visible);
     if (!setupRunning && daily) {
         daily->updateLeftSidebar();
-//        daily->ReloadGraphs();
     }
 }
 
@@ -4840,7 +4804,6 @@ void MainWindow::on_actionCreate_OSCAR_Data_zip_triggered()
 void MainWindow::on_actionReport_a_Bug_triggered()
 {
 //    QSettings settings;
-//    QString language = settings.value(LangSetting).toString();
 //
     staticQMessageBox::information(this, STR_MessageBox_Error, tr("Reporting issues is not yet implemented"));
 }

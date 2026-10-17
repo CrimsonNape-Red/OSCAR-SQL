@@ -38,10 +38,8 @@ class Machine;
     \brief This class is used in the multithreaded save code.. It accelerates the indexing of summary data.
     */
 //class SaveThread: public QThread
-//{
 //    Q_OBJECT
 //  public:
-//    SaveThread(Machine *m, QString p) { machine = m; path = p; }
 //
 //    //! \brief Static millisecond sleep function.. Can be used from anywhere
 //    static void msleep(unsigned long msecs) { QThread::msleep(msecs); }
@@ -53,7 +51,6 @@ class Machine;
 //    QString path;
 //  signals:
 //    //! \brief Signal sent to update the Progress Bar
-//    void UpdateProgress(int i);
 //};
 
 class ImportTask:public QRunnable
@@ -256,23 +253,14 @@ class Machine
 
     // //! \brief The multi-threading methods follow
     // //! \brief Add a new task to the multithreaded save code
-    //void queSaveList(Session * sess);
 
     //! \brief Grab the next task in the multithreaded save code
-    //Session *popSaveList();
 
     // //! \brief Start the save threads which handle indexing, file storage and waveform processing
-    //void StartSaveThreads();
 
     // //! \brief Finish the save threads and safely close them
-    //void FinishSaveThreads();
 
-//    void lockSaveMutex() { listMutex.lock(); }
-//    void unlockSaveMutex() { listMutex.unlock(); }
-//    void skipSaveTask() { lockSaveMutex(); m_donetasks++; unlockSaveMutex(); }
 //
-//    void clearSkipped() { skipped_sessions = 0; }
-//    int skippedSessions() { return skipped_sessions; }
 //
 //    inline int totalTasks() { return m_totaltasks; }
 //    inline void setTotalTasks(int value) { m_totaltasks = value; }

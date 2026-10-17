@@ -56,8 +56,6 @@ void RawDataTests::testQIODeviceInterface()
 
     // waitForReadyRead and ready signals
     Q_ASSERT(raw.waitForReadyRead(10000) == false);
-    //Q_ASSERT(sink.m_channelReadyRead != -1);
-    //Q_ASSERT(sink.m_readyRead == true);
 
 
     // Channels
@@ -214,7 +212,6 @@ void RawDataTests::testQIODeviceInterface()
     raw.close();
     Q_ASSERT(raw.isOpen() == qio.isOpen());
     Q_ASSERT(sink.m_aboutToClose);
-    //Q_ASSERT(sink.m_readChannelFinished);
 
 
     // Unimplemented/untested:

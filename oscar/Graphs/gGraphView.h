@@ -66,8 +66,6 @@ public:
     void setComboIndex(int i) { combobox->setCurrentIndex(i); }
     int comboIndex() { return combobox->currentIndex(); }
 
-//    void setChecked(bool b) { checkbox->setChecked(b); }
-//    bool checked() { return checkbox->isChecked(); }
 
 public slots:
     void onMinChanged(double d);
@@ -87,7 +85,6 @@ protected:
 enum FlagType { FT_Bar, FT_Dot, FT_Span };
 
 
-//void setEmptyImage(QString text, QPixmap pixmap);
 
 class MyLabel:public QWidget
 {
@@ -474,7 +471,6 @@ class gGraphView
                     QColor color = Qt::black, QFont *font = defaultfont, bool antialias = true);
 
 //    //! \brief Draw all Text in the text drawing queue
-//    void DrawTextQue();
 
     //! \brief Draw all text components using QPainter object painter
     void DrawTextQue(QPainter &painter);

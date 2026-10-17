@@ -42,7 +42,6 @@ Q_OBJECT
     }
 
 
-  //  Machine *CreateMachine();
 
     virtual void process();
 

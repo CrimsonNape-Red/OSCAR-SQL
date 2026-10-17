@@ -127,10 +127,6 @@ bool ProfileImporter::importProfile(const QString& sourcePath,
     // Load source profile to copy user data
     Profile* sourceProfile = new Profile(sourcePath, true);
     if (sourceProfile && sourceProfile->isOpen()) {
-//        qDebug() << "ProfileImporter: Source profile opened successfully";
-//        qDebug() << "ProfileImporter: Source user firstname:" << sourceProfile->user->firstName();
-//        qDebug() << "ProfileImporter: Source user lastname:" << sourceProfile->user->lastName();
-//        qDebug() << "ProfileImporter: Source doctor name:" << sourceProfile->doctor->name();
         
         // Copy user info (keep the new username we already set)
         profile->user->setDOB(sourceProfile->user->DOB());
@@ -528,7 +524,6 @@ bool ProfileImporter::migrateMetadata(Profile* profile, const QString& oldPath)
 
 bool ProfileImporter::migrateJournalFromSource(Profile* profile, const QString& sourcePath)
 {
-//    qDebug() << "ProfileImporter::migrateJournalFromSource() - Starting";
     
     // Get journal machine
     Machine* journalMachine = profile->GetMachine(MT_JOURNAL);
@@ -544,7 +539,6 @@ bool ProfileImporter::migrateJournalFromSource(Profile* profile, const QString& 
         return false;
     }
     
-//    qDebug() << "ProfileImporter::migrateJournalFromSource() - Journal machine database ID:" << machineDbId;
     
     // Find journal folder in source directory
     QDir sourceDir(sourcePath);
@@ -578,7 +572,6 @@ bool ProfileImporter::migrateJournalFromSource(Profile* profile, const QString& 
     QStringList files = dir.entryList(QDir::Files);
     
     if (files.isEmpty()) {
-//        qDebug() << "ProfileImporter::migrateJournalFromSource() - No .000 files found in source";
         return true;  // Not an error
     }
 
@@ -594,7 +587,6 @@ bool ProfileImporter::migrateJournalFromSource(Profile* profile, const QString& 
         delete srcProfile;
     }
 
-//    qDebug() << "ProfileImporter::migrateJournalFromSource() - Found" << files.size() << ".000 files to migrate";
 
     // Migrate each file
     int migratedCount = 0;
@@ -685,7 +677,6 @@ bool ProfileImporter::migrateJournalFromSource(Profile* profile, const QString& 
             continue;
         }
         
-//        qDebug() << "ProfileImporter::migrateJournalFromSource() - Migrated" << date.toString() << "to database";
         migratedCount++;
         
         delete sess;
@@ -693,7 +684,6 @@ bool ProfileImporter::migrateJournalFromSource(Profile* profile, const QString& 
     
 //    qDebug() << "ProfileImporter::migrateJournalFromSource() - Migration complete:"
 //             << migratedCount << "sessions migrated,"
-//             << errorCount << "errors";
     
     return (errorCount == 0);
 }
@@ -757,7 +747,6 @@ bool ProfileImporter::loadSessionsFromFiles(Profile* profile,
             continue;
         }
 
-//        qDebug() << "Loading sessions for machine:" << machine->hexid() << "from folder:" << entry;
 
         // Each machine gets its own transaction so the commit covers only one machine's
         // session data, keeping individual commits small and the UI responsive.
@@ -777,8 +766,6 @@ bool ProfileImporter::loadSessionsFromFiles(Profile* profile,
             return false;
         }
 
-//        qDebug() << "Machine now has" << machine->sessionlist.size() << "sessions";
-//        qDebug() << "Machine day list size:" << machine->day.size();
     }
 
     if (!skippedFolders.isEmpty()) {
@@ -858,10 +845,6 @@ bool ProfileImporter::loadSessionsFromFiles(Profile* profile,
     }
 
     // Debug: Check profile's overall daylist
-//    qDebug() << "ProfileImporter: Total sessions loaded:" << m_loadedSessions;
-//    qDebug() << "ProfileImporter: Profile daylist size:" << profile->daylist.size();
-//    qDebug() << "ProfileImporter: Profile first day:" << profile->FirstDay();
-//    qDebug() << "ProfileImporter: Profile last day:" << profile->LastDay();
 
     return true;
 }
@@ -1062,10 +1045,7 @@ bool ProfileImporter::loadMachineSessions(Machine* machine,
         }
         
         // Add to machine
-//        qDebug() << "ProfileImporter: Adding session" << sessionId << "to machine";
         machine->AddSession(session);
-//        qDebug() << "ProfileImporter: Machine now has" << machine->sessionlist.size() << "sessions";
-//        qDebug() << "ProfileImporter: Machine day list size:" << machine->day.size();
         
         m_loadedSessions++;
         

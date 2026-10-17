@@ -23,7 +23,6 @@
 
 extern MainWindow * mainwin;
 
-// short SummaryCalcItem::midcalc;
 
 ////////////////////////////////////////////////////////////////////////////
 /// Total Time in Apnea Chart Stuff
@@ -47,8 +46,6 @@ void gTTIAChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
     QStringList txtlist;
 
     for (auto & calc : calcitems) {
-        //ChannelID code = calc.code;
-        //schema::Channel & chan = schema::channel[code];
         float mid = 0;
         switch (midcalc) {
         case 0:
@@ -77,7 +74,6 @@ void gTTIAChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
 void gTTIAChart::populate(Day *day, int idx)
 {
     QVector<SummaryChartSlice> & slices = cache[idx];
-//    float ttia = day->sum(CPAP_AllApnea) + day->sum(CPAP_Obstructive) + day->sum(CPAP_ClearAirway) + day->sum(CPAP_Apnea) + day->sum(CPAP_Hypopnea);
     float ttia = day->sum(AllAhiChannels);
 
     slices.append(SummaryChartSlice(&calcitems[0], ttia / 60.0, ttia / 60.0, QObject::tr("\nTTIA: %1").arg(durationInSecondsToHhMmSs(ttia)), QColor(255,147,150)));

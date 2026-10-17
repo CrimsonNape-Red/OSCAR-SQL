@@ -24,7 +24,6 @@ class SBSeg
   public:
     SBSeg();
     SBSeg(Session *sess, QColor col);
-    //    SBSeg(const SBSeg & a);
 
     QColor color;
     bool highlight;
@@ -38,7 +37,6 @@ class SessionBar : public QWidget
   public:
     SessionBar(QWidget *parent = 0);
     //    // Q_DECLARE_METATYPE requires a copy-constructor
-    //  SessionBar(const SessionBar &);
 
     virtual ~SessionBar();
     void clear() { segments.clear(); m_selectIDX = -1; }

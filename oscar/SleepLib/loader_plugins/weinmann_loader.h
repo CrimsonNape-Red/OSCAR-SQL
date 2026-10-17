@@ -109,7 +109,6 @@ class WeinmannLoader : public CPAPLoader
 
 
     //! \brief Creates a device object, indexed by serial number
- //   Machine *CreateMachine(QString serial);
 
     //! \brief Registers this MachineLoader with the master list, so Weinmann data can load
     static void Register();

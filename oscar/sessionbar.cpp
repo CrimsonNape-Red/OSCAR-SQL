@@ -32,11 +32,6 @@ SBSeg::SBSeg(Session *sess, QColor col)
 }
 
 //SBSeg::SBSeg(const SBSeg & a)
-//{
-//    session=(Session *)a.session;
-//    color=a.color;
-//    highlight=a.highlight;
-//}
 
 SessionBar::SessionBar(QWidget *parent) :
     QWidget(parent)
@@ -48,13 +43,6 @@ SessionBar::SessionBar(QWidget *parent) :
 }
 //SessionBar::SessionBar(const SessionBar & copy)
 //    :QWidget(this)
-//{
-//    timer.setParent(this);
-//    QVector<SBSeg>::const_iterator i;
-//    for (i=copy.segments.begin();i!=copy.segments.end();++i) {
-//        segments.push_back(*i);
-//    }
-//}
 
 SessionBar::~SessionBar()
 {
@@ -159,7 +147,6 @@ void SessionBar::mousePressEvent(QMouseEvent *ev)
 
         if (ex > width()) { ex = width(); }
 
-        //ex-=sx;
 
         if ((evx >= sx) && (evx < ex)
                 && (evy > 0) && (evy < height())) {
@@ -207,7 +194,6 @@ void SessionBar::mouseMoveEvent(QMouseEvent *ev)
 
         if (ex > width() - 5) { ex = width() - 5; }
 
-        //ex-=sx;
 
         if ((evx > sx) && (evx < ex)
                 && (evy > 0) && (evy < height())) {
@@ -257,10 +243,8 @@ void SessionBar::paintEvent(QPaintEvent *)
         int len = L / 1000L;
         int h = len / 3600;
         int m = (len / 60) % 60;
-        //int s=len % 60;
 
         QString msg = tr("%1h %2m").arg((short)h, 1, 10, QChar('0')).arg((short)m, 1, 10, QChar('0'));
-        //painter.setBrush(QBrush((*i).color);
         QRect segrect(3 + sx, 3, ex, height() - 6);
 
         if (seg.session->enabled()) {
@@ -268,7 +252,6 @@ void SessionBar::paintEvent(QPaintEvent *)
             linearGrad.setSpread(QGradient::ReflectSpread);
             QColor col = seg.color;
             if (m_selectMode && (cnt == m_selectIDX)) {
-//                col = m_selectColor;
             } else if (seg.highlight) { col = brighten(col); }
 
             linearGrad.setColorAt(0, col);
@@ -281,7 +264,6 @@ void SessionBar::paintEvent(QPaintEvent *)
                 painter.fillRect(segrect, col);
             }
 
-            //msg="Off";
         }
 
         QRect rect = painter.boundingRect(segrect, Qt::AlignCenter, msg);

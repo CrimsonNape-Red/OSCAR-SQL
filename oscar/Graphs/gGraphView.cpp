@@ -136,11 +136,9 @@ gToolTip::~gToolTip()
     delete timer;
 }
 //void gToolTip::calcSize(QString text,int &w, int &h)
-//{
 /*GetTextExtent(text,w,h);
 w+=m_spacer*2;
 h+=m_spacer*2; */
-//}
 
 void gToolTip::display(QString text, int x, int y, ToolTipAlignment align, int timeout,bool alwaysShow)
 {
@@ -156,14 +154,10 @@ void gToolTip::display(QString text, int x, int y, ToolTipAlignment align, int t
     // for testing add mouse position to tooltip. QString("%1:(%2,%3)").arg(text).arg(m_graphview->currentMousePos().x()).arg(m_graphview->currentMousePos().y());
     m_visible = true;
     // TODO: split multiline here
-    //calcSize(m_text,tw,th);
 
     m_pos.setX(x);
     m_pos.setY(y);
 
-    //tw+=m_spacer*2;
-    //th+=m_spacer*2;
-    //th*=2;
     if (timer->isActive()) {
         timer->stop();
     }
@@ -389,14 +383,8 @@ gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
 {
     this->caller = caller;
 
-//    this->grabGesture(Qt::SwipeGesture);
-//    this->grabGesture(Qt::PanGesture);
-//    this->grabGesture(Qt::TapGesture);
-//    this->grabGesture(Qt::TapAndHoldGesture);
-//    this->grabGesture(Qt::CustomGesture);
     this->grabGesture(Qt::PinchGesture);
     this->setAttribute(Qt::WA_AcceptTouchEvents);
-//    this->setAttribute(Qt::WA_TouchPadAcceptSingleTouchEvents);
 
     m_shared = shared;
     m_sizer_index = m_graph_index = 0;
@@ -439,7 +427,6 @@ gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
 
     pin_graph = nullptr;
     popout_graph = nullptr;
-   // pixmapcache.setCacheLimit(10240*2);
 
     m_dpr = devicePixelRatio();
     m_dpr = 1; // meh???
@@ -475,7 +462,6 @@ gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
     plots_menu = context_menu->addMenu(tr("Plots"));
     connect(plots_menu, SIGNAL(triggered(QAction*)), this, SLOT(onPlotsClicked(QAction*)));
 
-//    overlay_menu = context_menu->addMenu("Overlays");
 
     cpap_menu = context_menu->addMenu(tr("CPAP Overlays"));
     connect(cpap_menu, SIGNAL(triggered(QAction*)), this, SLOT(onOverlaysClicked(QAction*)));
@@ -568,7 +554,6 @@ void gGraphView::popoutGraph()
         *************/
         /////////////////////////////////////////
 
-//        dock->updateGeometry();
         if (!dock->isVisible()) dock->show();
 
         gGraph * graph = popout_graph;
@@ -610,7 +595,6 @@ void gGraphView::popoutGraph()
             group = qMax(g->group(), group);
         }
         newgraph->setGroup(group+1);
-        //newgraph->setMinHeight(pm.height());
 
         newgraph->setDay(graph->m_day);
         if (graph->m_day) {
@@ -727,7 +711,6 @@ bool gGraphView::pinchTriggered(QPinchGesture * gesture)
 {
     gGraph * graph = nullptr;
     int group =0;
-//    if (!graph) {
         // just pick any graph then
         for (const auto & g : m_graphs) {
             if (!g) continue;
@@ -737,13 +720,11 @@ bool gGraphView::pinchTriggered(QPinchGesture * gesture)
                 break;
             }
         }
-//    } else group=graph->group();
 
     if (!graph) { return true; }
 
     Q_UNUSED(group)
 
-//  qDebug() << gesture << gesture->scaleFactor();
     if (gesture->state() == Qt::GestureStarted) {
         pinch_min = m_minx;
         pinch_max = m_maxx;
@@ -752,7 +733,6 @@ bool gGraphView::pinchTriggered(QPinchGesture * gesture)
      int origin_px = gesture->centerPoint().x() - titleWidth;
 
      // could use this instead, and have it more dynamic
-     // graph->ZoomX(gesture->scaleFactor(), x);
 
      static const double zoom_hard_limit = 500.0;
 
@@ -848,9 +828,6 @@ void gGraphView::dumpInfo()
             mainwin->log(text);
         }
     }
-//    for (int i=0;i<m_graphs.size();i++) {
-//        m_graphs[i]->dumpInfo();
-//    }
 }
 
 // Render graphs with QPainter or pixmap caching, depending on preferences
@@ -1068,7 +1045,6 @@ void gGraphView::addGraph(gGraph *g, short group)
             qDebug() << "Can't have two graphs with the same code string in the same GraphView!!";
         }
 
-        // updateScrollBar();
     }
 }
 
@@ -1156,7 +1132,6 @@ void gGraphView::resizeEvent(QResizeEvent *e)
 
 void gGraphView::scrollbarValueChanged(int val)
 {
-    //qDebug() << "Scrollbar Changed" << val;
     if (m_offsetY != val) {
         m_offsetY = val;
 #if QT_VERSION >= QT_VERSION_CHECK(5,4,0)
@@ -1207,12 +1182,6 @@ void gGraphView::ResetBounds(bool refresh) //short group)
         if (!m2 || g->max_x > m2) { m2 = g->max_x; }
     }
 
-//    if (p_profile->general->linkGroups()) {
-//        for (int i = 0; i < m_graphs.size(); i++) {
-//            m_graphs[i]->SetMinX(m1);
-//            m_graphs[i]->SetMaxX(m2);
-//        }
-//    }
 
     if (!graph) {
         graph = m_graphs[0];
@@ -1272,7 +1241,6 @@ void gGraphView::updateScrollBar()
         m_scrollbar->setMaximum(0); // turn scrollbar off.
 
     } else {  // more graphs than fit on screen
-        //m_scaleY=1.0;
         float avgheight = th / vis;
         m_scrollbar->setPageStep(avgheight);
         m_scrollbar->setSingleStep(avgheight / 8.0);
@@ -1437,14 +1405,9 @@ bool gGraphView::renderGraphs(QPainter &painter)
     }
     m_drawlist.clear();
 
-    //int elapsed=time.elapsed();
-    //QColor col=Qt::black;
 
-    //    lines->setSize(linesize);
 
     AppSetting->usePixmapCaching() ? DrawTextQueCached(painter) :DrawTextQue(painter);
-    //glDisable(GL_TEXTURE_2D);
-    //glDisable(GL_DEPTH_TEST);
 
     return numgraphs > 0;
 }
@@ -1476,8 +1439,6 @@ void gGraphView::paintGL()
     bool graphs_drawn = paintView(painter);
     painter.end();
 
-//        qDebug() << "Break 4";
-//        sleep(3);
 
 #ifndef BROKEN_OPENGL_BUILD
 #if QT_VERSION < QT_VERSION_CHECK(5,4,0)
@@ -1490,8 +1451,6 @@ void gGraphView::paintGL()
         redrawtimer->start();
     }
 
-//        qDebug() << "Break 5";
-//        sleep(3);
 
 }
 
@@ -1538,8 +1497,6 @@ bool gGraphView::paintView(QPainter &painter)
     strings_drawn_this_frame = 0;
     strings_cached_this_frame = 0;
 
-//    qDebug() << "About to call renderGraphs from paintGL()";
-//    sleep(3);
 
     graphs_drawn = renderGraphs(painter);
 
@@ -1575,10 +1532,8 @@ bool gGraphView::paintView(QPainter &painter)
 
         QRectF rec(0,0,width(),0);
         // To put text in center of screen:
-//        QRectF rec(0,0,width(),height(0));
 
         painter.setFont(*mediumfont);
-//        rec = painter.boundingRect(rec, Qt::AlignCenter, txt);
         rec = painter.boundingRect(rec, Qt::AlignHCenter | Qt::AlignBottom, txt);
         rec.moveBottom(height()-15);
 
@@ -1629,16 +1584,10 @@ bool gGraphView::paintView(QPainter &painter)
             painter.fillRect(width() - m_graphs[0]->marginRight(), 0, m_graphs[0]->marginRight(), w, QBrush(col));
         }
 #ifndef Q_OS_MAC
-        //   if (usePixmapCache()) xx+=4; else xx-=3;
 #endif
         AddTextQue(ss, width(), w / 2, 90, QColor(Qt::black), defaultfont);
         AppSetting->usePixmapCaching() ? DrawTextQueCached(painter) :DrawTextQue(painter);
     }
-//    painter.setPen(Qt::lightGray);
-//    painter.drawLine(0, 0, 0, height());
-//    painter.drawLine(0, 0, width(), 0);
-//    painter.setPen(Qt::darkGray);
-    //painter.drawLine(width(), 0, width(), height());
 
 #endif
 
@@ -1817,7 +1766,6 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
 
     if (m_sizer_dragging) { // Resize handle being dragged
         float my = y - m_sizer_point.y();
-        //qDebug() << "Sizer moved vertically" << m_sizer_index << my*m_scaleY;
         float h = m_graphs[m_sizer_index]->height();
         h += my / m_scaleY;
 
@@ -1854,7 +1802,6 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
                 yy2 += m_graphs[m_graph_index]->height() * m_scaleY;
 
                 if (y < yy2) {
-                    //qDebug() << "Graph Reorder" << m_graph_index;
                     p = m_graphs[m_graph_index];
                     m_graphs[m_graph_index] = m_graphs[i];
                     m_graphs[i] = p;
@@ -1872,10 +1819,8 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
             }
         } else if (y > yy + graphSpacer + m_graphs[m_graph_index]->height()*m_scaleY) {
             // swapping downwards
-            //qDebug() << "Graph Reorder" << m_graph_index;
             for (int i = m_graph_index + 1; i < m_graphs.size(); i++) {
                 if (m_graphs[i]->isPinned() != m_graphs[m_graph_index]->isPinned()) {
-                    //m_graph_dragging=false;
                     // fix cursor
                     continue;
                 }
@@ -1941,8 +1886,6 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
             m_horiz_travel += qAbs(x - m_lastxpos) + qAbs(y - m_lastypos);
             m_lastxpos = x;
             m_lastypos = y;
-            //           QPoint p(x,y);
-            //           QMouseEvent e(event->type(),p,event->button(),event->buttons(),event->modifiers());
 
             graph->mouseMoveEvent(event);
 
@@ -2014,7 +1957,6 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
 
                                 m_graphs[i]->mouseMoveEvent(&e);
                                 if (!m_button_down && (x<=titleWidth+(gYAxis::Margin-5))) {
-                                    //qDebug() << "Hovering over" << m_graphs[i]->title();
                                     if (m_graphsbytitle[STR_TR_EventFlags]==m_graphs[i]) {
                                         QVector<Layer *> & layers=m_graphs[i]->layers();
                                         gFlagsGroup *fg;
@@ -2032,7 +1974,6 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
                                                         QString ttip=schema::channel[code].description();
                                                         m_tooltip->display(ttip,x,y-20,AppSetting->tooltipTimeout());
                                                         redraw();
-                                                        //qDebug() << code << ttip;
                                                     }
                                                 }
 
@@ -2053,7 +1994,6 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
 
                         } */
 
-            //   }
             py += h + graphSpacer;
         }
 
@@ -2232,11 +2172,9 @@ void gGraphView::populateMenu(gGraph * graph)
     if (graph->isSnapshot()) {
         snap_action->setText(tr("Remove Clone"));
         snap_action->setData(graph->name()+"|remove");
-       // zoom100_action->setVisible(false);
     } else {
         snap_action->setText(tr("Clone %1 Graph").arg(graph->title()));
         snap_action->setData(graph->name()+"|snapshot");
-      //  zoom100_action->setVisible(true);
     }
 
     // Menu title fonts
@@ -2279,7 +2217,6 @@ void gGraphView::populateMenu(gGraph * graph)
             #if defined(ENABLE_ALWAYS_ON_ZERO_RED_LINE_FLOW_RATE)
             // if red line is always on then there is no need for the button to turn it on /off
             // skip creating UI to change value.   or turn enabled off.
-            //if (lc->code() == CPAP_FlowRate && dot.type == Calc_Zero) continue;
             if (lc->code() == CPAP_FlowRate) continue;
             #endif
 
@@ -2524,7 +2461,6 @@ void gGraphView::onSnapshotGraphToggle()
         }
 
         gGraph * newgraph = new gGraph(newname, nullptr, newtitle, graph->units(), graph->height(), graph->group());
-       // newgraph->setBlockSelect(true);
         newgraph->setHeight(graph->height());
 
         short group = 0;
@@ -2543,7 +2479,6 @@ void gGraphView::onSnapshotGraphToggle()
             group = qMax(g->group(), group);
         }
         newgraph->setGroup(group+1);
-        //newgraph->setMinHeight(pm.height());
 
         newgraph->setDay(graph->m_day);
         if (graph->m_day) {
@@ -2564,7 +2499,6 @@ void gGraphView::onSnapshotGraphToggle()
 
         emit GraphsChanged();
 
-//        addGraph(newgraph);
         updateScale();
         timedRedraw(0);
     } else if (cmd == "remove") {
@@ -2574,7 +2508,6 @@ void gGraphView::onSnapshotGraphToggle()
             }
         }
         m_graphsbyname.remove(graph->name());
-//        m_graphs.removeAll(it.value());
         m_graphs.removeAll(graph);
         delete graph;
 
@@ -2617,8 +2550,6 @@ void gGraphView::onPlotsClicked(QAction *action)
     graph->min_y = graph->MinY();
     graph->max_y = graph->MaxY();
     graph->timedRedraw(0);
-//    lc->Miny();
-//    lc->Maxy();
 }
 
 void gGraphView::onOverlaysClicked(QAction *action)
@@ -2754,7 +2685,6 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                 m_sizer_point.setY(y);
                 done = true;
             } else if ((y >= py) && (y < py + h)) {
-                //qDebug() << "Clicked" << i;
                 if ((event->button() == Qt::LeftButton) && (x < titleWidth + 20)) {
                     // clicked on title to drag graph..
                     // Note: reorder has to be limited to pinned graphs.
@@ -2766,7 +2696,6 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                     m_sizer_point.setX(x);
                     m_sizer_point.setY(py); // point at top of graph..
                     this->setCursor(Qt::ClosedHandCursor);
-                    //done=true;
                 } else if ((event->button() == Qt::RightButton) && (x < (titleWidth + gYAxis::Margin))) {
                     this->setCursor(Qt::ArrowCursor);
                     pin_action->setText(QObject::tr("Unpin %1 Graph").arg(g->title()));
@@ -2780,7 +2709,6 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                     #else
                         context_menu->popup(event->globalPosition().toPoint());
                     #endif
-                    //done=true;
                 } else if (!g->blockSelect()) {
                     if (m_metaselect) {
                         if (m_selected_graph) {
@@ -2794,7 +2722,6 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                         m_point_clicked = event->position().toPoint();
                     #endif
 
-                    //QMouseEvent e(event->type(),m_point_clicked,event->button(),event->buttons(),event->modifiers());
 
 
                     m_button_down = true;
@@ -2838,10 +2765,7 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                     m_sizer_index = i;
                     m_sizer_point.setX(x);
                     m_sizer_point.setY(y);
-                    //qDebug() << "Sizer clicked" << i;
-                    //done=true;
                 } else if ((y >= py) && (y < py + h)) {
-                    //qDebug() << "Clicked" << i;
 
                     if ((event->button() == Qt::LeftButton) && (x < (titleWidth + 20))) { // clicked on title to drag graph..
                         m_graph_dragging = true;
@@ -2851,7 +2775,6 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                         m_sizer_point.setX(x);
                         m_sizer_point.setY(py); // point at top of graph..
                         this->setCursor(Qt::ClosedHandCursor);
-                        //done=true;
                     } else if ((event->button() == Qt::RightButton) && (x < (titleWidth + gYAxis::Margin))) {
                         this->setCursor(Qt::ArrowCursor);
                         popout_action->setText(QObject::tr("Popout %1 Graph").arg(g->title()));
@@ -2865,7 +2788,6 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                         #else
                             context_menu->popup(event->globalPosition().toPoint());
                         #endif
-                        //done=true;
                     } else if (!g->blockSelect()) {
                        if (m_metaselect) {
                             if (m_selected_graph) {
@@ -2878,7 +2800,6 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                         #else
                             m_point_clicked = event->position().toPoint();
                         #endif
-                        //QMouseEvent e(event->type(),m_point_clicked,event->button(),event->buttons(),event->modifiers());
                         m_button_down = true;
                         m_metaselect = event->modifiers() & Qt::AltModifier;
 
@@ -2896,11 +2817,6 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
         }
     }
     if (!done) {
-//        if (event->button() == Qt::RightButton) {
-//            this->setCursor(Qt::ArrowCursor);
-//            context_menu->popup(event->globalPos());
-//            done=true;
-//        }
     }
 }
 
@@ -2942,9 +2858,6 @@ void gGraphView::mouseReleaseEvent(QMouseEvent *event)
             done = true;
         } else if ((y >= py + 1) && (y <= py + h)) {
 
-            //            if (!m_sizer_dragging && !m_graph_dragging) {
-            //               g->mouseReleaseEvent(event);
-            //            }
 
             if (x >= titleWidth + 10) {
                 this->setCursor(Qt::ArrowCursor);
@@ -2979,9 +2892,6 @@ void gGraphView::mouseReleaseEvent(QMouseEvent *event)
                 this->setCursor(Qt::SplitVCursor);
             } else if ((y >= py + 1) && (y <= py + h)) {
 
-                //            if (!m_sizer_dragging && !m_graph_dragging) {
-                //                g->mouseReleaseEvent(event);
-                //            }
 
                 if (x >= titleWidth + 10) {
                     this->setCursor(Qt::ArrowCursor);
@@ -3013,7 +2923,6 @@ void gGraphView::mouseReleaseEvent(QMouseEvent *event)
 
     // The graph that got the button press gets the release event
     if (button_down) {
-//        m_button_down = false;
         m_metaselect = event->modifiers() & Qt::AltModifier;
         saveHistory();
 
@@ -3195,7 +3104,6 @@ void gGraphView::wheelEvent(QWheelEvent *event)
 
     gGraph *graph = nullptr;
     int group = 0;
-    //int x = event->x();
     int y = wheelEventY(event);
 
     float h, py = 0, pinned_height = 0;
@@ -3306,41 +3214,21 @@ void gGraphView::wheelEvent(QWheelEvent *event)
     } else if ((event->modifiers() & Qt::ControlModifier)) {
 
         if (graph) graph->wheelEvent(event);
-//        int x = event->x();
-//        int y = event->y();
 
-//        float py = -m_offsetY;
 //        float h;
 
 
 
-//        for (int i = 0; i < m_graphs.size(); i++) {
-//            gGraph *g = m_graphs[i];
-//            if (!g || g->isEmpty() || !g->visible()) { continue; }
 
-//            h = g->height() * m_scaleY;
 
-//            if (py > height()) {
-//                break;
-//            }
 
-//            if ((py + h + graphSpacer) >= 0) {
-//                if ((y >= py) && (y <= py + h)) {
-//                    if (x < titleWidth) {
 //                        // What to do when ctrl+wheel is used on the graph title ??
 //                    } else {
 //                        // send event to graph..
-//                        g->wheelEvent(event);
-//                    }
-//                } else if ((y >= py + h) && (y <= py + h + graphSpacer + 1)) {
 //                    // What to do when the wheel is used on the resize handle?
-//                }
 
-//            }
 
-//            py += h;
 //            py += graphSpacer; // do we want the extra spacer down the bottom?
-//        }
     }
 }
 
@@ -3379,7 +3267,6 @@ void gGraphView::keyPressEvent(QKeyEvent *event)
     }
 
     if ((m_metaselect) && (event->key() >= Qt::Key_0) && (event->key() <= Qt::Key_9)) {
-        //int bk = (int)event->key()-Qt::Key_0;
         m_metaselect = false;
 
         timedRedraw(0);
@@ -3417,7 +3304,6 @@ void gGraphView::keyPressEvent(QKeyEvent *event)
             redraw();
         }
         return;
-        //        redraw();
     }
 
     gGraph *g = nullptr;
@@ -3493,7 +3379,6 @@ void gGraphView::keyPressEvent(QKeyEvent *event)
         g->ZoomX(zoom, 0); // Zoom out
     }
 
-    //qDebug() << "Keypress??";
 }
 
 // Sends day object to be distributed to all Graphs Layers objects
@@ -3566,7 +3451,6 @@ void gGraphView::resetLayout()
 }
 // Reset order of current graphs to new order, remove pinning
 void gGraphView::resetGraphOrder(bool pinFirst, const QList<QString> graphOrder) {
-//    qDebug() << "gGraphView::resetGraphOrder new order" << graphOrder;
     QList<gGraph *> new_graphs;
     QList<gGraph *> old_graphs = m_graphs;
 
@@ -3575,18 +3459,15 @@ void gGraphView::resetGraphOrder(bool pinFirst, const QList<QString> graphOrder)
         QString nextGraph = graphOrder.at(i);
         auto it = m_graphsbyname.find(nextGraph);
         if (it == m_graphsbyname.end()) {
-            // qDebug() << "resetGraphOrder could not find" << nextGraph;
             continue;  // should not happen
         }
         gGraph * graph = it.value();
         new_graphs.append(graph);
         int idx = old_graphs.indexOf(graph);
         old_graphs.removeAt(idx);
-//        qDebug() << "resetGraphOrder added to new graphs" << nextGraph;
     }
     // If we didn't find everything, append anything extra we have
     for (int i = 0; i < old_graphs.size(); i++) {
-        // qDebug() << "resetGraphOrder added leftover" << old_graphs.at(i)->name();
         new_graphs.append(old_graphs.at(i));
     }
 

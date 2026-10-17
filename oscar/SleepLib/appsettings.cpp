@@ -13,7 +13,6 @@
 
 AppWideSetting::AppWideSetting(Preferences *pref) : PrefSettings(pref)
 {
-//    m_multithreading = initPref(STR_IS_Multithreading, idealThreads() > 1).toBool();
     m_multithreading = false;     // too dangerous to allow
     m_showPerformance = initPref(STR_US_ShowPerformance, false).toBool();
     m_showDebug = initPref(STR_US_ShowDebug, false).toBool();
@@ -24,11 +23,9 @@ AppWideSetting::AppWideSetting(Preferences *pref) : PrefSettings(pref)
     initPref(STR_AS_DailyPanelWidth, 250.0);
     initPref(STR_AS_RightPanelWidth, 230.0);
     m_antiAliasing=initPref(STR_AS_AntiAliasing, true).toBool();
-//    initPref(STR_AS_GraphSnapshots, true);
     initPref(STR_AS_IncludeSerial, false);
     initPref(STR_AS_CombineSimilarMachines, true);
     initPref(STR_AS_MonochromePrinting, false);
-    //initPref(STR_AS_EventFlagSessionBar, false);
     initPref(STR_AS_DisableDailyGraphTitles, false);
     #if defined(STEADY_BREATHING)
     initPref(STR_AS_SteadyBreathing, SB_OFF);

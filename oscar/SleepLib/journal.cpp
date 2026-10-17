@@ -96,7 +96,6 @@ bool Journal::BackupJournal(QString filename)
     stream.setAutoFormattingIndent(2);
 
     stream.writeStartDocument();
-//    stream.writeProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\"");
     stream.writeStartElement("OSCAR");
     stream.writeAttribute("created", QDateTime::currentDateTime().toString(Qt::ISODate));
 
@@ -154,7 +153,6 @@ bool Journal::BackupJournal(QString filename)
 
         if (journal->settingExists(Journal_Notes)) {
             notes = sess->settings[Journal_Notes].toString();
-            //notes = Daily::convertHtmlToPlainText(notes).trimmed();
             havedata |= JRNL_Notes ;
         }
 
@@ -177,7 +175,6 @@ bool Journal::BackupJournal(QString filename)
             // No data to archive.
             continue ;
         }
-        //QString dateStr = ((++count & 1)==0) ? date.toString(/*Qt::ISODate*/) : date.toString(Qt::ISODate) ;
         QString dateStr =date.toString(Qt::ISODate) ;
         stream.writeStartElement("day");
             stream.writeAttribute("date", dateStr);
@@ -227,7 +224,6 @@ bool Journal::BackupJournal(QString filename)
     #else
         // Qt6 version utf-8 is the default
         // or if not utf-8
-        // ts.setEncoding(QStringConverter::Utf8);
     #endif
     ts.setGenerateByteOrderMark(true);
     ts << outBuf;
@@ -346,7 +342,6 @@ bool Journal::RestoreDay (QDomElement& dayElement,QDate& date,QString& filename)
         bool bmChanged = false;
         for (int idx=0 ; idx < bookmarks.size() ; idx++) {
             // get archived bookmark
-            //DEBUGFC Q(idx) Q(bookmarks.size()) Q(start.size()) ;
             QDomElement bookmark = bookmarks.at(idx).toElement();
             qint64 archiveStart = bookmark.attribute("start").toLongLong();
             qint64 archiveEnd   = bookmark.attribute("end").toLongLong();
@@ -356,12 +351,10 @@ bool Journal::RestoreDay (QDomElement& dayElement,QDate& date,QString& filename)
             bool duplicate = false;
             bool bNoteChanged = false;
             for (int idy=0 ; idy < start.size() ; idy++) {
-                //DEBUGFC Q(idy);
                 qint64 bmStart = start.at(idy).toLongLong();
                 qint64 bmEnd   = end.at(idy).toLongLong();
                 if ( (bmStart == archiveStart) && (bmEnd == archiveEnd) ) {
                     duplicate = true;
-                    //DEBUGFC Q(idx) Q(idy);
                     // have same bookmark - new check if notes need merging
                     QString aNote = archiveNote.simplified();
                     QString bmNote = notes.at(idy);
@@ -369,17 +362,13 @@ bool Journal::RestoreDay (QDomElement& dayElement,QDate& date,QString& filename)
                     DEBUGFC  Q(aNote) Q(bNote) Q(bNote.contains(aNote)) Q(aNote.contains(bNote));
                     if (bNote.contains(aNote) ) {
                         // no action needed.
-                        //DEBUGFC Q(idx) Q(idy) Q(bNote);;
                         break;
                     } else {
                         // updated existing bookmark label
-                        //DEBUGFC Q(idx) Q(idy);
                         // if an append is needed.
                         if (aNote.contains(bNote)) {
                             // use archived note
-                            //DEBUGFC Q(idx) Q(idy);
                         } else {
-                            //DEBUGFC Q(idx) Q(idy);
                             // prepend  archive note to bmNote
                             archiveNote.append(" :: ").append(bmNote);
                         }
@@ -403,7 +392,6 @@ bool Journal::RestoreDay (QDomElement& dayElement,QDate& date,QString& filename)
             }
         }
        if (bmChanged) {
-            //DEBUGFC Q(bmChanged);
             getJournal(daily,date,journal);
         if (journal == nullptr) { qWarning() << "RestoreDay: no journal session for" << date; return changed; }
             journal->settings[Bookmark_Start]=start;
@@ -465,7 +453,6 @@ bool Journal::RestoreJournal(QString filename)
     QDate first = p_profile->FirstDay();
     QDate last = p_profile->LastDay();
     QDate current = QDate::currentDate();
-    //int used=0;
     for (int idx=0 ; idx < days.size() ; idx++) {
         QDomElement dayElement = days.at(idx).toElement();
 

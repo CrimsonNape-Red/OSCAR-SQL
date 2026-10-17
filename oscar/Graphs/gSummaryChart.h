@@ -118,7 +118,6 @@ struct SummaryChartSlice {
         calc = nullptr;
         height = 0;
         value = 0;
-        //name = ST_CNT;
         name = "";
         color = Qt::black;
     }
@@ -130,11 +129,6 @@ struct SummaryChartSlice {
 
     SummaryChartSlice(SummaryCalcItem * calc, EventDataType value, EventDataType height, QString name, QColor color)
         :calc(calc), value(value), height(height), name(name), color(color) {
-//        QLinearGradient gradient(0, 0, 1, 0);
-//        gradient.setCoordinateMode(QGradient::ObjectBoundingMode);
-//        gradient.setColorAt(0,color);
-//        gradient.setColorAt(1,brighten(color));
-//        brush = QBrush(gradient);
     }
     SummaryCalcItem * calc;
     EventDataType value;

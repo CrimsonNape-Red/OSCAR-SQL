@@ -123,10 +123,8 @@ bool InitGraphGlobals()
     bigfont->setStyleHint(QFont::AnyStyle);
 #endif
 
-    //images["mask"] = new QImage(":/icons/mask.png");
     images["oximeter"] = new QImage(":/icons/cubeoximeter.png");
     images["smiley"] = new QImage(":/icons/smileyface.png");
-    //images["sad"] = new QImage(":/icons/sadface.png");
 
     images["logo"] = new QImage(":/icons/logo-lm.png");
     images["brick"] = new QImage(":/icons/brick.png");
@@ -161,7 +159,6 @@ gGraph::gGraph(QString name, gGraphView *graphview, QString title, QString units
       m_units(units),
       m_visible(true)
 {
-    // DEBUGF Q(name) Q(title) QQ("UNITS",units) Q(height) Q(group);
     if (height == 0) {
         height = AppSetting->graphHeight();
         Q_UNUSED(height)
@@ -196,7 +193,6 @@ gGraph::gGraph(QString name, gGraphView *graphview, QString title, QString units
         timer = new QTimer();
         connect(timer, SIGNAL(timeout()), SLOT(Timeout()));
         // know what I'm doing now.. ;)
-     //   qWarning() << "gGraph created without a gGraphView container.. Naughty programmer!! Bad!!!";
     }
 
     m_margintop = 14;
@@ -283,17 +279,11 @@ float gGraph::printScaleX() { return m_graphview->printScaleX(); }
 float gGraph::printScaleY() { return m_graphview->printScaleY(); }
 
 //void gGraph::drawGLBuf()
-//{
 
-//    float linesize = 1;
 
 //    if (m_printing) { linesize = 4; } //ceil(m_graphview->printScaleY());
 
-//    for (int i = 0; i < m_layers.size(); i++) {
-//        m_layers[i]->drawGLBuf(linesize);
-//    }
 
-//}
 
 void gGraph::setDay(Day *day)
 {
@@ -309,7 +299,6 @@ void gGraph::setDay(Day *day)
     rmin_y = rmax_y = 0;
     // This resets weight and bmi overview graphs to full date range when they are changed.
     // is it required ever?
-    // ResetBounds();
 }
 
 void gGraph::setZoomY(ZoomyScaling zoomy) {
@@ -358,7 +347,6 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         m_margintop = font_height + (2*printScaleY());
     }
 
-    //m_marginbottom=5;
 
     left = marginLeft()*printScaleX(), right = marginRight()*printScaleX(), top = marginTop(), bottom = marginBottom() * printScaleY();
     //int x;
@@ -420,7 +408,6 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
 #endif
     int tmp;
 
-   // left = 0;
 
     for (const auto & layer : m_layers) {
         if (!layer->visible()) { continue; }
@@ -442,7 +429,6 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         if (layer->position() == LayerLeft) {
             QRect rect(originX + left, originY + top, tmp, height - top - bottom);
             layer->m_rect = rect;
-          //  layer->paint(painter, *this, QRegion(rect));
             left += tmp;
 #ifdef DEBUG_LAYOUT
             QColor col = Qt::red;
@@ -455,7 +441,6 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
             right += tmp;
             QRect rect(originX + width - right, originY + top, tmp, height - top - bottom);
             layer->m_rect = rect;
-            //layer->paint(painter, *this, QRegion(rect));
 #ifdef DEBUG_LAYOUT
             QColor col = Qt::red;
             painter.setPen(col);
@@ -514,9 +499,7 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         QColor col(128, 128, 255, 128);
         painter.fillRect(originX + m_selection.x(), originY + top, m_selection.width(), height - bottom - top,QBrush(col));
 //        quads()->add(originX + m_selection.x(), originY + top,
-//                     originX + m_selection.x() + m_selection.width(), originY + top, col.rgba());
 //        quads()->add(originX + m_selection.x() + m_selection.width(), originY + height - bottom,
-//                     originX + m_selection.x(), originY + height - bottom, col.rgba());
     }
 
     if (isPinned() && !printing()) {
@@ -588,8 +571,6 @@ void gGraph::SetXBounds(qint64 minx, qint64 maxx)
     min_x = minx;
     max_x = maxx;
 
-    //repaint();
-    //m_graphview->redraw();
 }
 
 int gGraph::flipY(int y)
@@ -651,7 +632,6 @@ void gGraph::dynamicScaling(EventDataType &miny, EventDataType &maxy) {
     maxy += diff*0.08;      // more space at top for event ticks.
     miny -= diff*0.04;
     if (m_saved_minY!=m_lineChart_layer->actualMinY() || m_saved_maxY!=m_lineChart_layer->actualMaxY()  ) {
-        // DEBUGF O(m_name) Q(m_saved_minY) QQ("==>",m_lineChart_layer->actualMinY() ) QQ("==>",miny) Q(m_saved_maxY) QQ("==>",m_lineChart_layer->actualMaxY()  )  QQ("==>",maxy);
         m_saved_minY=m_lineChart_layer->actualMinY();
         m_saved_maxY=m_lineChart_layer->actualMaxY();
     }
@@ -748,8 +728,6 @@ void gGraph::roundY(EventDataType &miny, EventDataType &maxy)
         if (maxy == miny && maxy == 0) {
             maxy = 0.5;
         } else {
-            //maxy*=4.0;
-            //miny*=4.0;
             if (!ymax_good) {
                 maxy = ceil(maxy);
             }
@@ -758,8 +736,6 @@ void gGraph::roundY(EventDataType &miny, EventDataType &maxy)
                 miny = floor(miny);
             }
 
-            //maxy/=4.0;
-            //miny/=4.0;
         }
     }
 
@@ -771,8 +747,6 @@ void gGraph::roundY(EventDataType &miny, EventDataType &maxy)
     }
 
 
-    //if (m_enforceMinY) { miny=f_miny; }
-    //if (m_enforceMaxY) { maxy=f_maxy; }
 }
 
 void gGraph::AddLayer(Layer *l, LayerPosition position, short width, short height, short order, bool movable, short x, short y)
@@ -823,7 +797,6 @@ double gGraph::screenToTime(int xpos)
 
 void gGraph::mouseMoveEvent(QMouseEvent *event)
 {
-//    qDebug() << m_title << "Move" << event->pos() << m_graphview->pointClicked();
     if (m_rect.width() == 0) return;
     #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         int y = event->y();
@@ -833,7 +806,6 @@ void gGraph::mouseMoveEvent(QMouseEvent *event)
         int x = event->position().x();
     #endif
 
-    //bool doredraw = false;
 
     timedRedraw(0);
 
@@ -874,7 +846,6 @@ void gGraph::mouseMoveEvent(QMouseEvent *event)
     if (m_graphview->m_selected_graph == this) {  // Left Mouse button dragging
         if (event->buttons() & Qt::LeftButton) {
 
-            //qDebug() << m_title << "Moved" << x << y << left << right << top << bottom << m_width << h;
             int a1 = MIN(x, x2);
             int a2 = MAX(x, x2);
 
@@ -910,7 +881,6 @@ void gGraph::mouseMoveEvent(QMouseEvent *event)
             int offset = (x >= x2) ? 20 : - 20;
             ToolTip(m_selDurString, m_rect.left() + x + offset, m_rect.top() + y + 20, align);
 
-            //doredraw = true;
         } else if (event->buttons() & Qt::RightButton) {    // Right Mouse button dragging
             m_graphview->setPointClicked(event->pos());
             x -= left;
@@ -936,7 +906,6 @@ void gGraph::mouseMoveEvent(QMouseEvent *event)
                 }
 
                 m_graphview->SetXBounds(min_x, max_x, m_group, false);
-              //  doredraw = true;
             } else {
                 qint64 qq = rmax_x - rmin_x;
                 xx = max_x - min_x;
@@ -959,22 +928,14 @@ void gGraph::mouseMoveEvent(QMouseEvent *event)
                 }
 
                 m_graphview->SetXBounds(min_x, max_x, m_group, false);
-                //doredraw = true;
             }
         }
     }
 
     //if (!nolayer) { // no mouse button
-//    if (doredraw) {
-//        m_graphview->timedRedraw(0);
-//    }
 
-    //}
     //if (x>left+m_marginleft && x<m_lastbounds.width()-(right+m_marginright) && y>top+m_margintop && y<m_lastbounds.height()-(bottom+m_marginbottom)) { // main area
-    //        x-=left+m_marginleft;
-    //        y-=top+m_margintop;
     //        //qDebug() << m_title << "Moved" << x << y << left << right << top << bottom << m_width << m_height;
-    //    }
 }
 
 bool gGraph::selectingArea() { return m_selecting_area || m_graphview->metaSelect(); }
@@ -989,7 +950,6 @@ void gGraph::mousePressEvent(QMouseEvent *event)
         int x = event->position().x();
     #endif
 
-//    qDebug() << m_title << "gGraph mousePressEvent, x=" << x << " y=" << y;
 
     for (const auto & layer : m_layers) {
         if (layer->m_rect.contains(x, y))
@@ -1008,7 +968,6 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
         int y = event->position().y();
         int x = event->position().x();
     #endif
-//    qDebug() << m_title << "gGraph mouseReleaseEvent at x,y"  << x << y;
 
     for (const auto & layer : m_layers) {
         if (layer->m_rect.contains(x, y))
@@ -1024,11 +983,9 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
     int h = m_rect.height() - bottom; //+m_marginbottom);
 
     int x2 = m_graphview->pointClicked().x() - m_rect.left();
-    //int y2 = m_graphview->pointClicked().y() - m_rect.top();
 
     m_selDurString = QString();
 
-//    qDebug() << m_title << "Released" << min_x << max_x << x << y << x2 << left << right << top << bottom << m_width << m_height;
 
     if (m_selecting_area) {
         m_selecting_area = false;
@@ -1064,16 +1021,13 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
                 qint64 a1 = MIN(j1, j2)
                             qint64 a2 = MAX(j1, j2)
 
-                                        //if (a1<rmin_x) a1=rmin_x;
                 if (a2 > rmax_x) { a2 = rmax_x; }
 
                 if (a1 == a2)  // Don't zoom into a block if range is zero
                     return;
 
                 if (a1 <= rmin_x && a2 <= rmin_x) {
-                    //qDebug() << "Foo??";
                 } else {
-//                    qDebug() << m_title << "!m_blockzoom (960), a1, a2" << a1 << a2;
                     if (a2 - a1 < zoom_hard_limit) { a2 = a1 + zoom_hard_limit; }
 
                     m_graphview->SetXBounds(a1, a2, m_group);
@@ -1086,13 +1040,11 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
                 qint64 a1 = MIN(j1, j2)
                 qint64 a2 = MAX(j1, j2)
 
-                //if (a1<rmin_x) a1=rmin_x;
                 if (a2 > rmax_x) { a2 = rmax_x; }
 
                 if (a1 <= rmin_x && a2 <= rmin_x) {
                     qDebug() << "Foo2??";
                 } else  {
-//                     qDebug() << m_title << "m_blockzoom (979), a1, a2" << a1 << a2;
                     if (a2 - a1 < zoom_hard_limit) { a2 = a1 + zoom_hard_limit; }
                     m_graphview->SetXBounds(a1, a2, m_group);
                 }
@@ -1134,13 +1086,10 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
             }
         } else {
             x -= left;
-            //y -= top;
-            //w-=m_marginleft+left;
             double qq = rmax_x - rmin_x;
             double xmult;
 
             double xx = max_x - min_x;
-            //if (xx==qq) xx=1800000;
 
             xmult = qq / double(w);
 
@@ -1181,14 +1130,11 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
         }
     }
 
-    //m_graphview->redraw();
 }
 
 
 void gGraph::wheelEvent(QWheelEvent *event)
 {
-    //qDebug() << m_title << "Wheel" << wheelEventX(event) << wheelEventY(event) << wheelEventDelta(event);
-    //int y=event->pos().y();
     if ( isWheelEventHorizontal(event) ) {
 
         return;
@@ -1214,8 +1160,6 @@ void gGraph::wheelEvent(QWheelEvent *event)
 }
 void gGraph::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    //mousePressEvent(event);
-    //mouseReleaseEvent(event);
     int y = event->pos().y();
     int x = event->pos().x();
 
@@ -1231,7 +1175,6 @@ void gGraph::keyPressEvent(QKeyEvent *event)
         layer->keyPressEvent(event, this);
     }
 
-    //qDebug() << m_title << "Key Pressed.. implement me" << event->key();
 }
 
 void gGraph::keyReleaseEvent(QKeyEvent *event)
@@ -1249,7 +1192,6 @@ void gGraph::keyReleaseEvent(QKeyEvent *event)
 void gGraph::ZoomX(double mult, int origin_px)
 {
 
-//    qDebug() << "gGraph::ZoomX width, left, right" << m_rect.width() << left << right;
     int width = m_rect.width() - left - right; //(m_marginleft+left+right+m_marginright);
 
     if (origin_px == 0) { origin_px = (width / 2); }
@@ -1273,8 +1215,6 @@ void gGraph::ZoomX(double mult, int origin_px)
     double span = max - min;
     double ww = double(origin_px) / double(width);
     double origin = ww * span;
-    //double center=0.5*span;
-    //double dist=(origin-center);
 
     double q = span * mult;
 
@@ -1298,7 +1238,6 @@ void gGraph::ZoomX(double mult, int origin_px)
     //extern const int max_history;
 
     m_graphview->SetXBounds(min, max, m_group);
-    //updateSelectionTime(max-min);
 }
 
 void gGraph::DrawTextQue(QPainter &painter)
@@ -1313,8 +1252,6 @@ void gGraph::resize(int width, int height)
 
     Q_UNUSED(width);
     Q_UNUSED(height);
-    //m_height=height;
-    //m_width=width;
 }
 
 qint64 gGraph::MinX()
@@ -1343,7 +1280,6 @@ qint64 gGraph::MinX()
 }
 qint64 gGraph::MaxX()
 {
-    //bool first=true;
     qint64 val = 0, tmp;
 
     for (const auto & layer : m_layers) {
@@ -1353,7 +1289,6 @@ qint64 gGraph::MaxX()
 
         tmp = layer->Maxx();
 
-        //if (!tmp) continue;
         if (!val || (tmp > val)) {
             val = tmp;
         }
@@ -1380,9 +1315,6 @@ EventDataType gGraph::MinY()
 
         tmp = layer->Miny();
 
-//        if (tmp == 0 && tmp == (*l)->Maxy()) {
-//            continue;
-//        }
 
         if (first) {
             val = tmp;
@@ -1395,7 +1327,6 @@ EventDataType gGraph::MinY()
     }
 
     return rmin_y = val;
-//    return rmin_y = val * 0.9;
 }
 EventDataType gGraph::MaxY()
 {
@@ -1412,9 +1343,6 @@ EventDataType gGraph::MaxY()
         }
 
         tmp = layer->Maxy();
-//        if (tmp == 0 && layer->Miny() == 0) {
-//            continue;
-//        }
 
         if (first) {
             val = tmp;
@@ -1434,7 +1362,6 @@ EventDataType gGraph::physMinY()
     bool first = true;
     EventDataType val = 0, tmp;
 
-    //if (m_enforceMinY) return rmin_y=f_miny;
 
     for (const auto & layer : m_layers) {
         if (layer->isEmpty()) {
@@ -1463,7 +1390,6 @@ EventDataType gGraph::physMaxY()
     bool first = true;
     EventDataType val = 0, tmp;
 
-    // if (m_enforceMaxY) return rmax_y=f_maxy;
 
     for (const auto & layer : m_layers) {
         if (layer->isEmpty()) {

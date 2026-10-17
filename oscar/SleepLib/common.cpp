@@ -342,7 +342,6 @@ QString appResourcePath()
 #ifdef Q_OS_MAC
     path = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../Resources");
 #else
-//    QStringList paths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
     // Check the Appiication Path first, so we can execute out of the build directory
     QStringList paths;
     // This one will be used if the Html and Translations folders
@@ -441,7 +440,6 @@ QString formatRelief (QString relief)
         if (t.isDigit())
             newRelief = relief.insert(icm, " ");
     }
-//  qDebug() << "Relief input" << relief << "returning" << newRelief;
     return newRelief;
 }
 
@@ -1068,7 +1066,6 @@ void initializeStrings()
 
     STR_TR_Bookmarks = QObject::tr("Bookmarks");
     STR_TR_OSCAR = QString("OSCAR");
-    //STR_TR_AppVersion = QObject::tr("v%1").arg(getVersion());
 
     STR_TR_Mode = QObject::tr("Mode");
     STR_TR_Model = QObject::tr("Model");

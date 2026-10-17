@@ -37,7 +37,6 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
 
 
     Session *journal = nullptr;
-    //QDate d=QDate::currentDate();
 
     int visgraphs = gv->visibleGraphs();
 
@@ -109,7 +108,6 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
 
     GLint gw;
     gw = 2048; // Rough guess.. No GL_MAX_RENDERBUFFER_SIZE in mingw.. :(
-    //QSizeF pxres=printer->paperSize(QPrinter::DevicePixel);
     QRect prect = printer->pageLayout().paintRectPixels( printer->resolution() ) ;
     float ratio = float(prect.height()) / float(prect.width());
     float virt_width = gw;
@@ -127,7 +125,6 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
     title_font.setPixelSize(90);
     painter.setFont(report_font);
 
-    //QFontMetrics fm2(*defaultfont);
 
     qDebug() << "Printer Resolution is" << virt_width << "x" << virt_height;
 
@@ -221,7 +218,6 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
             auto perHour = [hours](float v) -> float { return (hours > 0) ? v / hours : 0.0f; };
             ahi = perHour(ahi);
             float csr = (hours > 0) ? (100.0 / hours) * (day->sum(CPAP_CSR) / 3600.0) : 0;
-            //float pb = (100.0 / hours) * (day->sum(CPAP_PB) / 3600.0);
             float uai = perHour(day->count(CPAP_Apnea));
             float oai = perHour(day->count(CPAP_Obstructive));
             float ai = perHour(day->count(CPAP_AllApnea));
@@ -237,15 +233,12 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
                 vsi = perHour(day->sum(CPAP_VSnore2));
             }
             float fli = perHour(day->count(CPAP_FlowLimit));
-//            float sai = day->count(CPAP_SensAwake) / hours;
             float nri = perHour(day->count(CPAP_NRI));
             float lki = perHour(day->count(CPAP_LeakFlag));
             float exp = perHour(day->count(CPAP_ExP));
 
             int piesize = (2048.0 / 8.0) * 1.3; // 1.5" in size
-            //float fscale=font_scale;
             //if (!highres)
-            //                fscale=1;
 
             QString stats;
             painter.setFont(medium_font);
@@ -279,7 +272,6 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
             cpapinfo += "\n\n";
 
             painter.setFont(report_font);
-            //bounds=painter.boundingRect(QRectF((virt_width/2)-(virt_width/6),top,virt_width/2,0),cpapinfo,QTextOption(Qt::AlignLeft));
             bounds = painter.boundingRect(QRectF(0, top, virt_width, 0), cpapinfo,
                                           QTextOption(Qt::AlignHCenter));
             painter.drawText(bounds, cpapinfo, QTextOption(Qt::AlignHCenter));
@@ -605,11 +597,9 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
         QString label = labels[i];
 
         if (!label.isEmpty()) {
-            //label+=":";
             top += normal_height / 3;
             QRectF bounds = painter.boundingRect(QRectF(0, top, virt_width, 0), label,
                                                  QTextOption(Qt::AlignHCenter));
-            //QRectF pagebnds=QRectF(0,top,virt_width,normal_height);
             painter.drawText(bounds, label, QTextOption(Qt::AlignHCenter));
             top += bounds.height();
         } else { top += normal_height / 2; }
@@ -619,14 +609,10 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
         g->m_marginbottom = 0;
 
 
-        //painter.beginNativePainting();
-        //g->showTitle(false);
         int hhh = full_graph_height - normal_height;
         QPixmap pm2 = g->renderPixmap(virt_width, hhh, 1);
         QImage pm = pm2.toImage(); //fscale);
         pm2.detach();
-        //g->showTitle(true);
-        //painter.endNativePainting();
         g->m_marginbottom = tmb;
         AppSetting->setAntiAliasing(aa_setting);
 
@@ -634,7 +620,6 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
         if (!pm.isNull()) {
             painter.drawImage(QRect(0, top, pm.width(), pm.height()), pm);
 
-            //painter.drawImage(0,top,virt_width,full_graph_height-normal_height,pm);
         }
 
         top += full_graph_height;

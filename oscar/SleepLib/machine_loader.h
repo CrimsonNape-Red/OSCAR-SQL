@@ -156,7 +156,6 @@ public:
     CPAPLoader() : MachineLoader() {}
     virtual ~CPAPLoader() {}
 
-    //virtual QList<ChannelID> eventFlags(Day * day);
 
     virtual QString PresReliefLabel() { return QString(""); }
     virtual ChannelID PresReliefMode() { return NoChannel; }
@@ -175,10 +174,6 @@ public:
         path = QString();
         loader = nullptr;
     }
-//  ImportPath(const ImportPath & copy) {
-//      loader = copy.loader;
-//      path = copy.path;
-//  }
     ImportPath(QString path, MachineLoader * loader) :
         path(path), loader(loader) {}
 

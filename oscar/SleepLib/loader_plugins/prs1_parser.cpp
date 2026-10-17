@@ -59,9 +59,7 @@ const PRS1ParsedEventType PRS1Test2Event::TYPE;
 const PRS1ParsedEventType PRS1HypopneaCount::TYPE;
 const PRS1ParsedEventType PRS1ClearAirwayCount::TYPE;
 const PRS1ParsedEventType PRS1ObstructiveApneaCount::TYPE;
-//const PRS1ParsedEventType PRS1DisconnectAlarmEvent::TYPE;
 const PRS1ParsedEventType PRS1ApneaAlarmEvent::TYPE;
-//const PRS1ParsedEventType PRS1LowMinuteVentilationAlarmEvent::TYPE;
 
 
 //********************************************************************************************
@@ -674,7 +672,6 @@ void PRS1DataChunk::ParseHumidifierSetting60Series(unsigned char humid1, unsigne
     if (tubepresent) humidclassic = false;  // Classic mode bit is evidently ignored when tube is present
     if (no_data) humidclassic = false;  // Classic mode bit is evidently ignored when tube is present
 
-    //qWarning() << this->sessionid << (humidclassic ? "C" : ".") << (humid2 & 0x20 ? "?" : ".") << (tubepresent ? "T" : ".") << (no_data ? "X" : ".") << (humidsystemone ? "1" : ".");
     /*
     if (tubepresent) {
         if (tubetemp) {

@@ -107,7 +107,6 @@ class EventList
     //! \brief Set the sample rate
     void setRate(EventDataType v) { m_rate = v; }
 
-    //void setCode(ChannelID id) { m_code=id; }
 
     //! \brief Return the Minimum data value
     inline EventDataType Min() { return m_min; }

@@ -14,53 +14,24 @@
 
 Layer::~Layer()
 {
-//    for (int i = 0; i < mgl_buffers.size(); i++) {
-//        delete mgl_buffers[i];
-//    }
 
-//    for (int i = 0; i < mv_buffers.size(); i++) {
-//        delete mv_buffers[i];
-//    }
 }
 
 //void Layer::drawGLBuf(float linesize)
-//{
 //    int type;
 //    float size;
 
-//    if (!m_visible) { return; }
 
 //    GLBuffer *buf;
 //    gVertexBuffer *vb;
 
-//    for (int i = 0; i < mv_buffers.size(); i++) {
-//        vb = mv_buffers[i];
-//        size = vb->size();
-//        type = vb->type();
 
-//        if ((linesize > size) && ((type == GL_LINES) || (type == GL_LINE_LOOP))) {
-//            vb->setSize(linesize);
-//        }
 
-//        vb->draw();
-//        vb->setSize(size);
-//    }
 
-//    for (int i = 0; i < mgl_buffers.size(); i++) {
-//        buf = mgl_buffers[i];
-//        size = buf->size();
-//        type = buf->type();
 
-//        if ((linesize > size) && ((type == GL_LINES) || (type == GL_LINE_LOOP))) {
-//            buf->setSize(linesize);
-//        }
 
-//        buf->draw();
 //        //if ((linesize>size) && ((type==GL_LINES) || (type==GL_LINE_LOOP))) {
-//        buf->setSize(size);
 //        //}
-//    }
-//}
 
 void Layer::CloneInto(Layer * layer)
 {
@@ -140,13 +111,7 @@ bool LayerGroup::isEmpty()
     return empty;
 }
 //void LayerGroup::drawGLBuf(float linesize)
-//{
-//    Layer::drawGLBuf(linesize);
 
-//    for (int i = 0; i < layers.size(); i++) {
-//        layers[i]->drawGLBuf(linesize);
-//    }
-//}
 
 void LayerGroup::SetDay(Day *d)
 {

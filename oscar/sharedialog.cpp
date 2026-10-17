@@ -172,9 +172,7 @@ void ShareDialog::populateDestinations()
     ui->destinationCombo->addItem(tr("Google Drive"),
         static_cast<int>(ShareDestination::GoogleDrive));
     // ui->destinationCombo->addItem(tr("OneDrive (coming soon)"),
-    //     static_cast<int>(ShareDestination::OneDrive));
     // ui->destinationCombo->addItem(tr("0x0.st (temporary anonymous hosting)"),
-    //     static_cast<int>(ShareDestination::ZeroX0));
     //  ^ Commented out: 0x0.st is currently not accepting new uploads.
 
     ui->destinationCombo->blockSignals(false);

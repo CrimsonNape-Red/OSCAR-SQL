@@ -57,10 +57,8 @@ class Profile : public Preferences
     bool loadMachinesFromDatabase();
     
     //! \brief Load machines from XML file (original implementation)
-//    bool loadMachinesFromXML();
 
     //! \brief Store machines from XML file (original implementation)
-//    bool storeMachinesToXML();
 
   public:
     //! \brief Store machines to database
@@ -120,7 +118,6 @@ class Profile : public Preferences
     //! \brief Removes a given day from the date, destroying the daylist date record if empty
     bool unlinkDay(Day * day);
 
-//    bool trashMachine(Machine * mach);
 
     //! \brief Add Day record to Profile Day list
     Day *addDay(QDate date);

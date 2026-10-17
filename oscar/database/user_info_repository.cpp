@@ -208,7 +208,6 @@ bool UserInfoRepository::loadIntoUserInfo(qint64 profileId, UserInfo* userInfo)
     userInfo->setGender((Gender)data.gender);
     userInfo->setTimeZone(data.timezone);
 
-//    qDebug() << "UserInfoRepository: Loaded user_info for profile" << profileId;
     return true;
 }
 

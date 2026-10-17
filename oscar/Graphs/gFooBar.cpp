@@ -74,10 +74,7 @@ void gFooBar::paint(QPainter &painter, gGraph &w, const QRegion &region)
         return;
     }
 
-    //int start_px=left;
-    //int end_px=left+width;
 
-    //float h=top;
 
     /*  glLineWidth(1);
       glBegin(GL_LINES);
@@ -101,16 +98,13 @@ void gFooBar::paint(QPainter &painter, gGraph &w, const QRegion &region)
       w.qglColor(m_handle_color);
       glVertex2f(start_px+px-extra,top-hh);
       glVertex2f(start_px+py+extra,top-hh);
-      //glColor4ub(255,255,255,128);
       glColor4ub(255,255,255,128);
       glVertex2f(start_px+py+extra,top-hh/2.0);
       glVertex2f(start_px+px-extra,top-hh/2.0);
-    //    glColor4ub(255,255,255,128);
       glColor4ub(255,255,255,128);
       glVertex2f(start_px+px-extra,top-hh/2.0);
       glVertex2f(start_px+py+extra,top-hh/2.0);
       w.qglColor(m_handle_color);
-    //    glColor4ub(192,192,192,128);
       glVertex2f(start_px+py+extra,h);
       glVertex2f(start_px+px-extra,h);
       glEnd();

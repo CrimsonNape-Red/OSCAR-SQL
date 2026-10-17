@@ -1011,7 +1011,6 @@ bool ProfileRestore::executeSqlFile(const QString& sqlFile)
             }
 
             // 3. Substitute the resolved username in the profiles table.
-//            qDebug() << "ProfileRestore::executeSqlFile() step 3a";
             if (tableName == QLatin1String("profiles")
                 && col == QLatin1String("username")) {
                 QString safeName = m_newUsername;
@@ -1025,7 +1024,6 @@ bool ProfileRestore::executeSqlFile(const QString& sqlFile)
             // The profile data folder is normally "%PROFDIR%/<username>".  When
             // restoring under a different name we must update that path so the
             // restored profile does not share the original profile's directory.
-//            qDebug() << "ProfileRestore::executeSqlFile() step 3b";
             if (tableName == QLatin1String("profiles")
                 && col == QLatin1String("data_folder")) {
                 const QString origUsername =
@@ -1051,7 +1049,6 @@ bool ProfileRestore::executeSqlFile(const QString& sqlFile)
             }
 
             // 4. Remap FK columns.
-//            qDebug() << "ProfileRestore::executeSqlFile() step 4 Remap FK columns";
             QString remapped = val;
             if (val != QLatin1String("NULL")) {
                 bool ok = false;
@@ -1114,7 +1111,6 @@ bool ProfileRestore::executeSqlFile(const QString& sqlFile)
         // channel_options uses INSERT OR IGNORE because the data is global (keyed
         // on channel code, not profile) — rows already present from other profiles
         // are identical and should be silently skipped.
-//        qDebug() << "ProfileRestore::executeSqlFile() execute the INSERT";
         const QStringList placeholders(newVals.count(), QStringLiteral("?"));
         const bool useIgnore = (tableName == QLatin1String("channel_options"));
         const QString sql = QString(useIgnore ? "INSERT OR IGNORE INTO %1 (%2) VALUES (%3)"
@@ -1140,7 +1136,6 @@ bool ProfileRestore::executeSqlFile(const QString& sqlFile)
         }
 
         // For parent tables, capture the new auto-increment PK and record the mapping.
-//        qDebug() << "ProfileRestore::executeSqlFile() capture the new auto-increment PK and record the mapping";
         if (originalId >= 0 && mappingTables.contains(tableName)) {
             QSqlQuery rowIdQ(db);
             if (!rowIdQ.exec(QStringLiteral("SELECT last_insert_rowid()"))

@@ -177,11 +177,7 @@ QVariant HelpBrowser::loadResource(int type, const QUrl &name)
         return QVariant(helpEngine->fileData(name));
     } else
 
-//    QString path = name.path(QUrl::FullyEncoded).replace("/./","/");
-//    if (!path.startsWith("/doc")) path="/doc"+path;
 //    QString urlstr = "qthelp://"+helpNamespace+path;
-//    QByteArray bytes = helpEngine->fileData(urlstr);
-//    if (bytes.size()>0) return QVariant(bytes);
 
     if (type == QTextDocument::ImageResource && name.scheme().compare(QLatin1String(""), Qt::CaseInsensitive) == 0) {
        static QRegularExpression re("^image/[^;]+;base64,.+={0,2}$");
@@ -219,9 +215,7 @@ void Help::on_searchComplete(int count)
     QHelpSearchEngine * search = helpEngine->searchEngine();
     QVector<QHelpSearchResult> results = search->searchResults(0, count);
 
-//    ui->searchBar->blockSignals(true);
     ui->searchBar->setText(QString());
-//    ui->searchBar->blockSignals(false);
 
     QString html = "<html><head><style type=\"text/css\">"
                    "a:link, a:visited { color: inherit; text-decoration: none; font-weight: normal;}"

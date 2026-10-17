@@ -72,7 +72,6 @@ struct EDFHeaderQT {
     */
 struct EDFSignal {
   public:
-//  virtual ~EDFSignal();
 
     QString label;                      //! \brief Name of this Signal
     QString transducer_type;            //! \brief Tranducer Type (source of the data, usually blank)

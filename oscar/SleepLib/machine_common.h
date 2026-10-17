@@ -84,7 +84,6 @@ enum SleepStageValue {
     Stage_Light = 3,   //!< Apple Health calls this "Core"
     Stage_Deep  = 4,
 };
-//void InitMapsWithoutAwesomeInitializerLists();
 
 //! \brief One active row from device_time_corrections, held in memory by Machine
 struct TimeCorrectionRow {

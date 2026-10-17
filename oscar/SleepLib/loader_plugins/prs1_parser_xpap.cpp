@@ -163,9 +163,7 @@ bool PRS1DataChunk::ParseSummaryF0V23()
                 //CHECK_VALUES(data[0x0e], ramp_pressure, min_pressure);  // initial CPAP/EPAP, can be minimum pressure or ramp, or whatever auto decides to use
                 //if (cpapmode == PRS1_MODE_BILEVEL) {  // initial IPAP for bilevel modes
                 //    CHECK_VALUE(data[0x0f], max_pressure);
-                //} else if (cpapmode == PRS1_MODE_AUTOBILEVEL) {
                 //    CHECK_VALUE(data[0x0f], min_pressure + 20);
-                //}
                 break;
             case 2:  // Mask On
                 delta = data[pos] | (data[pos+1] << 8);
@@ -1054,8 +1052,6 @@ bool PRS1DataChunk::ParseSettingsF0V45(const unsigned char* data, int size)
         this->AddEvent(new PRS1PressureSettingEvent(PRS1_SETTING_PRESSURE, min_ps));
         // TODO: Once OSCAR can handle more modes, we can include these settings; right now including
         // these settings makes it think this is AutoCPAP.
-        //this->AddEvent(new PRS1PressureSettingEvent(PRS1_SETTING_PRESSURE_MIN, min_pressure));
-        //this->AddEvent(new PRS1PressureSettingEvent(PRS1_SETTING_PRESSURE_MAX, max_pressure));
     } else if (cpapmode == PRS1_MODE_BILEVEL) {
         this->AddEvent(new PRS1PressureSettingEvent(PRS1_SETTING_EPAP, min_pressure));
         this->AddEvent(new PRS1PressureSettingEvent(PRS1_SETTING_IPAP, max_pressure));
@@ -2096,7 +2092,6 @@ bool PRS1DataChunk::ParseSettingsF0V6(const unsigned char* data, int size)
                 if (data[pos] > 4) {
                     UNEXPECTED_VALUE(data[pos], "0-4");
                 }
-                //this->AddEvent(new PRS1UnknownDataEvent(QByteArray((const char*) data, size), pos, len));
                 break;
             case 0x4a:  // Patient controls access, specific to DreamStation 2.
                 CHECK_VALUE(len, 1);

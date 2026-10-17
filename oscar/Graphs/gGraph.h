@@ -150,7 +150,6 @@ class gGraph : public QObject
     void roundY(EventDataType &miny, EventDataType &maxy);
 
 //    //! \brief Process all Layers GLBuffer (Vertex) objects, drawing the actual OpenGL stuff.
-//    void drawGLBuf();
 
     //! \brief Returns the Graph's (vertical) title
     inline QString & title() { return m_title; }

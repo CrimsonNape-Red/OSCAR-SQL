@@ -84,7 +84,6 @@ extern ChannelID Prisma_ObstructLevel, Prisma_rMVFluctuation, Prisma_rRMV, Prism
 inline QString channelInfo(ChannelID code) {
     return schema::channel[code].fullname()+"\n"+schema::channel[code].description()+"\n("+schema::channel[code].units()+")";
 //    return schema::channel[code].fullname()+"\n"+schema::channel[code].description()
-//            + (schema::channel[code].units() != "0" ? "\n("+schema::channel[code].units()+")" : "");
 }
 
 // Charts displayed on the Daily page are defined in the Daily::Daily constructor.  They consist of some hard-coded charts and a table
@@ -183,7 +182,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     ui->JournalNotesUnderline->setShortcut(QKeySequence::Underline);
 
     // Remove Incomplete Extras Tab
-    //ui->tabWidget->removeTab(3);
 
     BookmarksChanged=false;
 
@@ -204,17 +202,10 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     QPalette palette = dateDisplay->palette();
     palette.setColor(QPalette::Base, Qt::blue);
     dateDisplay->setPalette(palette);
-    //dateDisplay->setTextFormat(Qt::RichText);
     ui->sessionBarLayout->addWidget(dateDisplay,1);
 
 //    const bool sessbar_under_graphs=false;
-//    if (sessbar_under_graphs) {
-//        ui->sessionBarLayout->addWidget(sessbar,1);
 //    } else {
-//        ui->splitter->insertWidget(2,sessbar);
-//        sessbar->setMaximumHeight(sessbar->height());
-//        sessbar->setMinimumHeight(sessbar->height());
-//    }
 
 
     ui->calNavWidget->setMaximumHeight(ui->calNavWidget->height());
@@ -237,7 +228,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     ui->tabWidget->insertTab(0, widget, QIcon(), tr("Details"));
 
     ui->graphFrame->setLayout(layout);
-    //ui->graphMainArea->setLayout(layout);
 
     ui->graphMainArea->setAutoFillBackground(false);
 
@@ -245,8 +235,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     PERF_TIMER_START("Daily::Daily::Phase 3D");
     GraphView=new gGraphView(ui->graphFrame,shared);
-//    qDebug() << "New GraphView object created in Daily";
-//    sleep(3);
     GraphView->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
     GraphView->setEmptyImage(QPixmap(":/icons/logo-md.png"));
@@ -263,9 +251,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     ui->bookmarkTable->setColumnCount(2);
     ui->bookmarkTable->setColumnWidth(0,70);
-    //ui->bookmarkTable->setEditTriggers(QAbstractItemView::SelectedClicked);
-    //ui->bookmarkTable->setColumnHidden(2,true);
-    //ui->bookmarkTable->setColumnHidden(3,true);
     GraphView->setScrollBar(scrollbar);
     layout->addWidget(GraphView,1);
     layout->addWidget(scrollbar,0);
@@ -282,9 +267,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 //    const QString STR_GRAPH_DailySummary = "DailySummary";
 
 //    gGraph * SG;
-//    graphlist[STR_GRAPH_DailySummary] = SG = new gGraph(STR_GRAPH_DailySummary, GraphView, tr("Summary"), tr("Summary of this daily information"), default_height);
-//    SG->AddLayer(new gLabelArea(nullptr),LayerLeft,gYAxis::Margin);
-//    SG->AddLayer(new gDailySummary());
 
     graphlist[STR_GRAPH_SleepFlags] = SF = new gGraph(STR_GRAPH_SleepFlags, GraphView, STR_TR_EventFlags, STR_TR_EventFlags, default_height);
     sleepFlags = SF;
@@ -334,7 +316,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
             continue;
         }
         graphlist[schema::channel[code].code()] = new gGraph(schema::channel[code].code(), GraphView, schema::channel[code].label(), channelInfo(code), default_height);
-//        qDebug() << "Creating graph for code" << code << schema::channel[code].code();
     }
 
     const ChannelID oximetercodes[] = {
@@ -424,7 +405,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     if (gGraph *FRW = graphlist.value(schema::channel[CPAP_FlowRate].code())) {
         FRW->AddLayer(l);
         l->setMinimumHeight(80);      // set the layer height to 80. or about 130 graph height.
-//      FRW->AddLayer(AddOXI(new gLineOverlayBar(OXI_SPO2Drop, COLOR_SPO2Drop, STR_TR_O2)));
     } else {
         delete l; l = nullptr;
     }
@@ -434,7 +414,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     if (gGraph *g = graphlist.value(schema::channel[CPAP_Pressure].code())) {
         pc = new gLineChart(CPAP_Pressure, square);
         g->AddLayer(pc);
-      //  g->AddLayer(AddCPAP(new gLineOverlayBar(CPAP_Ramp, COLOR_Ramp, schema::channel[CPAP_Ramp].label(), FT_Span)));
         pc->addPlot(CPAP_EPAP, square);
         pc->addPlot(CPAP_IPAPLo, square);
         pc->addPlot(CPAP_IPAP, square);
@@ -457,7 +436,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     // Fill in the AHI graph
     if (p_profile->general->calculateRDI()) {
         AHI->AddLayer(new gLineChart(CPAP_RDI, square));
-//        AHI->AddLayer(AddCPAP(new AHIChart(QColor("#37a24b"))));
     } else {
         AHI->AddLayer(new gLineChart(CPAP_AHI, square));
     }
@@ -466,15 +444,10 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     // Better way would be having a search for linechart layers in graphlist[...]
     if (gGraph *g = graphlist.value(schema::channel[CPAP_Leak].code())) {
         leakchart=new gLineChart(CPAP_Leak, square);
-  //    g->AddLayer(AddCPAP(new gLineOverlayBar(CPAP_LargeLeak, COLOR_LargeLeak, STR_TR_LL, FT_Span)));
         leakchart->addPlot(CPAP_LeakTotal, square);
         leakchart->addPlot(CPAP_MaxLeak, square);
-//      schema::channel[CPAP_Leak].setUpperThresholdColor(Qt::red);
-//      schema::channel[CPAP_Leak].setLowerThresholdColor(Qt::green);
         g->AddLayer(leakchart);
     }
-    //LEAK->AddLayer(AddCPAP(new gLineChart(CPAP_Leak, COLOR_Leak,square)));
-    //LEAK->AddLayer(AddCPAP(new gLineChart(CPAP_MaxLeak, COLOR_MaxLeak,square)));
     if (auto *g = graphlist.value(schema::channel[CPAP_Snore].code())) g->AddLayer(new gLineChart(CPAP_Snore, true));
     if (auto *g = graphlist.value(schema::channel[BMC_FlowAbnormality].code())) g->AddLayer(new gLineChart(BMC_FlowAbnormality, square));
     if (auto *g = graphlist.value(schema::channel[BMC_PressureWave].code())) g->AddLayer(new gLineChart(BMC_PressureWave, square));
@@ -493,7 +466,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     }
     #endif
     if (auto *g = graphlist.value(schema::channel[CPAP_Test1].code())) g->AddLayer(new gLineChart(CPAP_Test1, square));
-    //graphlist[schema::channel[CPAP_Test2].code()]->AddLayer(new gLineChart(CPAP_Test2, square));
 
 
     gLineChart *lc = nullptr;
@@ -514,16 +486,12 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     if (auto *g = graphlist.value(schema::channel[CPAP_TidalVolume].code())) {
         g->AddLayer(lc=new gLineChart(CPAP_TidalVolume, square));
-        //lc->addPlot(CPAP_Test2,COLOR_DarkYellow,square);
     }
 
-    //graphlist[schema::channel[CPAP_TidalVolume].code()]->AddLayer(AddCPAP(new gLineChart("TidalVolume2", square)));
     if (auto *g = graphlist.value(schema::channel[CPAP_FLG].code())) g->AddLayer(new gLineChart(CPAP_FLG, true));
-    //graphlist[schema::channel[CPAP_RespiratoryEvent].code()]->AddLayer(AddCPAP(new gLineChart(CPAP_RespiratoryEvent, true)));
     if (auto *g = graphlist.value(schema::channel[CPAP_IE].code())) g->AddLayer(lc=new gLineChart(CPAP_IE, false));      // this should be inverse of supplied value
     if (auto *g = graphlist.value(schema::channel[CPAP_Te].code())) g->AddLayer(lc=new gLineChart(CPAP_Te, false));
     if (auto *g = graphlist.value(schema::channel[CPAP_Ti].code())) g->AddLayer(lc=new gLineChart(CPAP_Ti, false));
-    //lc->addPlot(CPAP_Test2,COLOR:DarkYellow,square);
 
     // ResMed bilevel/iVAPS ventilation waveforms
     if (auto *g = graphlist.value(schema::channel[RMVENT_AlvMinVent].code())) g->AddLayer(new gLineChart(RMVENT_AlvMinVent, square));
@@ -537,12 +505,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         g->AddLayer(new gXAxis(), LayerBottom, 0, gXAxis::Margin);
     }
 
-//    gLineOverlaySummary *los1=new gLineOverlaySummary(STR_UNIT_EventsPerHour,5,-4);
-//    gLineOverlaySummary *los2=new gLineOverlaySummary(STR_UNIT_EventsPerHour,5,-4);
-//    graphlist[schema::channel[OXI_Pulse].code()]->AddLayer(AddOXI(los1->add(new gLineOverlayBar(OXI_PulseChange, COLOR_PulseChange, STR_TR_PC,FT_Span))));
-//    graphlist[schema::channel[OXI_Pulse].code()]->AddLayer(AddOXI(los1));
-//    graphlist[schema::channel[OXI_SPO2].code()]->AddLayer(AddOXI(los2->add(new gLineOverlayBar(OXI_SPO2Drop, COLOR_SPO2Drop, STR_TR_O2,FT_Span))));
-//    graphlist[schema::channel[OXI_SPO2].code()]->AddLayer(AddOXI(los2));
 
     if (auto *g = graphlist.value(schema::channel[OXI_Pulse].code())) {
         g->AddLayer(new gLineChart(OXI_Pulse, square));
@@ -559,14 +521,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
 
     // Fix me
-//    gLineOverlaySummary *los3=new gLineOverlaySummary(STR_UNIT_EventsPerHour,5,-4);
-//    graphlist["INTPULSE"]->AddLayer(AddCPAP(los3->add(new gLineOverlayBar(OXI_PulseChange, COLOR_PulseChange, STR_TR_PC,FT_Span))));
-//    graphlist["INTPULSE"]->AddLayer(AddCPAP(los3));
-//    graphlist["INTPULSE"]->AddLayer(AddCPAP(new gLineChart(OXI_Pulse, square)));
-//    gLineOverlaySummary *los4=new gLineOverlaySummary(STR_UNIT_EventsPerHour,5,-4);
-//    graphlist["INTSPO2"]->AddLayer(AddCPAP(los4->add(new gLineOverlayBar(OXI_SPO2Drop, COLOR_SPO2Drop, STR_TR_O2,FT_Span))));
-//    graphlist["INTSPO2"]->AddLayer(AddCPAP(los4));
-//    graphlist["INTSPO2"]->AddLayer(AddCPAP(new gLineChart(OXI_SPO2, true)));
 
     if (auto *g = graphlist.value(schema::channel[CPAP_PTB].code())) g->setForceMaxY(100);
     if (auto *g = graphlist.value(schema::channel[OXI_SPO2].code())) g->setForceMaxY(100);
@@ -640,8 +594,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     // Watch for focusOut events on the JournalNotes widget
     ui->JournalNotes->installEventFilter(this);
-//    qDebug() << "Finished making new Daily object";
-//    sleep(3);
     saveGraphLayoutSettings=nullptr;
     dailySearchTab = new DailySearchTab(this,ui->searchTab,ui->tabWidget);
     htmlLsbSectionHeaderInit(false);
@@ -678,11 +630,7 @@ Daily::~Daily()
 
 void Daily::showEvent(QShowEvent *)
 {
-//    qDebug() << "Start showEvent in Daily object";
-//    sleep(3);
     RedrawGraphs();
-//    qDebug() << "Finished showEvent  Daily object";
-//    sleep(3);
 }
 
 bool Daily::rejectToggleSessionEnable( Session*sess) {
@@ -715,24 +663,20 @@ void Daily::Link_clicked(const QUrl &url)
         day=p_profile->GetDay(previous_date,MT_CPAP);
         if (!day) return;
         Session *sess=day->find(sid, MT_CPAP);
-//        int i=webView->page()->mainFrame()->scrollBarMaximum(Qt::Vertical)-webView->page()->mainFrame()->scrollBarValue(Qt::Vertical);
         if (rejectToggleSessionEnable( sess) ) return;
 
         // Reload day
         LoadDate(previous_date);
         mainwin->getOverview()->graphView()->dataChanged();
-  //      webView->page()->mainFrame()->setScrollBarValue(Qt::Vertical, webView->page()->mainFrame()->scrollBarMaximum(Qt::Vertical)-i);
     } else  if (code=="toggleoxisession") { // Enable/Disable Oximetry session
         day=p_profile->GetDay(previous_date,MT_OXIMETER);
         if (!day) return;
         Session *sess=day->find(sid, MT_OXIMETER);
-//        int i=webView->page()->mainFrame()->scrollBarMaximum(Qt::Vertical)-webView->page()->mainFrame()->scrollBarValue(Qt::Vertical);
         if (rejectToggleSessionEnable( sess) ) return;
 
         // Reload day
         LoadDate(previous_date);
         mainwin->getOverview()->graphView()->dataChanged();
-  //      webView->page()->mainFrame()->setScrollBarValue(Qt::Vertical, webView->page()->mainFrame()->scrollBarMaximum(Qt::Vertical)-i);
     } else  if (code=="togglestagesession") { // Enable/Disable Sleep Stage session
         day=p_profile->GetDay(previous_date,MT_SLEEPSTAGE);
         if (!day) return;
@@ -793,8 +737,6 @@ void Daily::ReloadGraphs()
 {
     PERF_TIMER_SCOPE("ReloadGraphs");
 
-//    qDebug() << "Start ReloadGraphs  Daily object";
-//    sleep(3);
     GraphView->setDay(nullptr);
 
     ui->splitter->setVisible(true);
@@ -802,7 +744,6 @@ void Daily::ReloadGraphs()
 
     if (previous_date.isValid()) {
         d=previous_date;
-        //Unload(d);
     }
     QDate lastcpap = p_profile->LastDay(MT_CPAP);
     QDate lastoxi = p_profile->LastDay(MT_OXIMETER);
@@ -820,8 +761,6 @@ void Daily::ReloadGraphs()
     Load(d);
     ui->calButton->setText(QLocale().toString(ui->calendar->selectedDate(), MedDateFormat));
     graphView()->redraw();
-//    qDebug() << "Finished ReloadGraphs in Daily object";
-//    sleep(3);
 }
 
 void Daily::updateLeftSidebar() {
@@ -909,11 +848,8 @@ void Daily::UpdateEventsTree(QTreeWidget *tree,Day *day)
             if (mcroot.find(code)==mcroot.end()) {
                 EventDataType fCnt = day->count(code);
                 int cnt=fCnt;
-//                if (cnt != fCnt) {
 //                    qDebug() << "Daily::UpdateEventsTree() counting for" << code << "got" << cnt << "(int) events, EventDataType value for fCnt"
-//                             << qSetRealNumberPrecision(9) << fCnt;
 //                    qDebug() << "UpdateEventsTree session" << ++sessnum << sess->session() << "type" << sess->machine()->type() << "starts"//                           << QDateTime::fromSecsSinceEpoch(sess->first()/1000).toString("yyyy-MM-dd HH:mm:ss");
-//                }
                 if (!cnt) continue; // If no events than don't bother showing..
                 QString st=schema::channel[code].fullname();
                 if (st.isEmpty())  {
@@ -1149,9 +1085,6 @@ void Daily::UpdateCalendarDay(QDate date)
     } else {
         ui->calendar->setDateTextFormat(date, nodata);
     }
-//    if (hasjournal) {
-//        ui->calendar->setDateTextFormat(date, cpapjour);
-//    }
 ***/
     ui->calendar->setHorizontalHeaderFormat(QCalendarWidget::ShortDayNames);
 }
@@ -1203,16 +1136,13 @@ void Daily::on_ReloadDay()
 
     this->setCursor(Qt::BusyCursor);
     if (previous_date.isValid()) {
-       // GraphView->fadeOut();
         Unload(previous_date);
     }
 
     unload_time=time.restart();
-    //bool fadedir=previous_date < ui->calendar->selectedDate();
     Load(ui->calendar->selectedDate());
     load_time=time.restart();
 
-    //GraphView->fadeIn(fadedir);
     GraphView->redraw();
     ui->calButton->setText(QLocale().toString(ui->calendar->selectedDate(), MedDateFormat));
     ui->calendar->setFocus(Qt::ActiveWindowFocusReason);
@@ -1236,7 +1166,6 @@ void Daily::ResetGraphOrder(int type)
         Day * day = p_profile->GetDay(previous_date,MT_CPAP);
 
         int cpapMode = day->getCPAPMode();
-        //    qDebug() << "Daily::ResetGraphOrder(): cpapMode" << cpapMode;
 
         if (useAdvancedGraphs.contains(cpapMode))
             GraphView->resetGraphOrder(true, advancedGraphOrder);
@@ -1282,7 +1211,6 @@ QString Daily::getSessionInformation(Day * day)
     QFontMetrics FM(*defaultfont);
 
     QDateTime fd,ld;
-    //bool corrupted_waveform=false;
 
     QString type;
 
@@ -1538,13 +1466,11 @@ QString Daily::getOximeterInformation(Day * day)
             return html;
         }
         html+="<table cellpadding=0 cellspacing=0 border=0 width=100%>";
-//        html+="<tr><td colspan=5 align=center>&nbsp;</td></tr>";
         if (cpapOximetry) {
             html+="<tr><td colspan=5 align=center>"+tr("Recorded by %1 %2").arg(oxi->brand(), oxi->model())+"</td></tr>\n";
         } else {
             html+="<tr><td colspan=5 align=center>"+oxi->brand()+" "+oxi->model()+"</td></tr>\n";
         }
-//        html+="<tr><td colspan=5 align=center>&nbsp;</td></tr>";
         if (oxi->loaderName() == applehealth_class_name) {
             // Per-machine, since day->count() would fold in a CPAP's SpO2/pulse from the same day
             EventDataType spo2Count = 0, pulseCount = 0;
@@ -1636,7 +1562,6 @@ QString Daily::getStatisticsInfo(Day * day)
 
     Machine *cpap = day->machine(MT_CPAP);
 //            *oxi = day->machine(MT_OXIMETER),
-//            *pos = day->machine(MT_POSITION);
 
     int mididx=p_profile->general->prefCalcMiddle();
     SummaryType ST_mid = ST_AVG;
@@ -1696,7 +1621,6 @@ QString Daily::getStatisticsInfo(Day * day)
 
         if (!schema::channel[code].units().isEmpty()) tooltip+=" ("+schema::channel[code].units()+")";
 //        if (!schema::channel[code].units().isEmpty() && schema::channel[code].units() != "0")
-//            tooltip+=" ("+schema::channel[code].units()+")";
 
         if (ST_max == ST_MAX) {
             mx=day->Max(code);
@@ -1727,9 +1651,7 @@ QString Daily::getStatisticsInfo(Day * day)
             }
         }
 
-//        QString oldtip = tooltip;
         tooltip.replace("'", "&apos;");
-//        qDebug() << schema::channel[code].label() << "old tooltip" << oldtip << "; new tooltip" << tooltip ;
 
         html+=QString("<tr><td align=left title='%6'>%1</td><td align=right>%2</td><td align=right>%3</td><td align=right>%4</td><td align=right>%5</td></tr>")
             .arg(schema::channel[code].label())
@@ -1778,15 +1700,10 @@ QString Daily::getStatisticsInfo(Day * day)
             html+="<tr><td colspan=3 align='left' bgcolor='white'>"+tr("Time outside of ramp")+
                     QString("</td><td colspan=2 bgcolor='white'>%1:%2:%3</td></tr>").arg(q / 3600, 2, 10, QChar('0')).arg((q / 60) % 60, 2, 10, QChar('0')).arg(q % 60, 2, 10, QChar('0'));
 
-//            EventDataType hc = day->count(CPAP_Hypopnea) - day->countInsideSpan(CPAP_Ramp, CPAP_Hypopnea);
-//            EventDataType oc = day->count(CPAP_Obstructive) - day->countInsideSpan(CPAP_Ramp, CPAP_Obstructive);
 
-            //EventDataType tc = day->count(CPAP_Hypopnea) + day->count(CPAP_Obstructive);
-//            EventDataType ahi = (hc+oc) / v;
             // Not sure if i was trying to be funny, and left on my replication of Devilbiss's bug here...  :P
 
 //            html+="<tr><td colspan=3 align='left' bgcolor='white'>"+tr("AHI excluding ramp")+
-//                    QString("</td><td colspan=2 bgcolor='white'>%1</td></tr>").arg(ahi, 0, 'f', 2);
         }
 
     }
@@ -1856,8 +1773,6 @@ QString Daily::getAHI(Day * day, bool isBrick) {
     html ="<table cellspacing=0 cellpadding=0 border=0 width='100%'>\n";
 
     // Show application font, for debugging font issues
-    // QString appFont = QApplication::font().toString();
-    // html +=QString("<tr><td colspan=5 align=center>%1</td></tr>").arg(appFont);
 
     html +="<tr>";
     if (!isBrick) {
@@ -1916,7 +1831,6 @@ QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values ) {
     for (int i=0; i < available.size(); ++i) {
         ChannelID code = available.at(i);
         schema::Channel & chan = schema::channel[code];
-//                if (!chan.enabled()) continue;
         QString data;
         if (
             ( code == CPAP_UserFlag1 || code == CPAP_UserFlag2) &&
@@ -2232,7 +2146,6 @@ void Daily::Load(QDate date)
 
     qDebug() << "Daily::Load(): Called for" << date.toString() << "using" << QApplication::font().toString();
 
-//    qDebug() << "Setting App font in Daily::Load";
     setApplicationFont();
 
     dateDisplay->setText("<i>"+date.toString(QLocale::system().dateFormat(QLocale::ShortFormat))+"</i>");
@@ -2247,7 +2160,6 @@ void Daily::Load(QDate date)
     if (day) {
         cpap = day->machine(MT_CPAP);
         oxi = day->machine(MT_OXIMETER);
-   //     stage = day->machine(MT_SLEEPSTAGE);
         posit = day->machine(MT_POSITION);
     }
     else {
@@ -2454,7 +2366,6 @@ void Daily::Load(QDate date)
             c++;
         }
     }
-    //sessbar->update();
 
 
     // Generate HTML shown in [Details] tab
@@ -2751,7 +2662,6 @@ void Daily::on_JournalNotesBold_clicked()
 }
 
 QVector<int> journalNotesFontSizeArray={10,15,20};
-//QVector<int> journalNotesFontSizeArray={10,15,25};
 
 void Daily::on_JournalNotesFontsize_activated(int index)
 {
@@ -3023,13 +2933,10 @@ void Daily::on_todayButton_clicked()
     if (previous_date.isValid()) {
          Unload(previous_date);
     }
-//    QDate d=QDate::currentDate();
-//    if (d > p_profile->LastDay()) {
         QDate lastcpap = p_profile->LastDay(MT_CPAP);
         QDate lastoxi = p_profile->LastDay(MT_OXIMETER);
 
         QDate d = qMax(lastcpap, lastoxi);
-//    }
     LoadDate(d);
 }
 
@@ -3638,7 +3545,6 @@ void Daily::on_splitter_2_splitterMoved(int, int)
 {
     int size = ui->splitter_2->sizes()[0];
     if (size == 0) return;
-//  qDebug() << "Left Panel width set to " << size;
     AppSetting->setDailyPanelWidth(size);
 }
 

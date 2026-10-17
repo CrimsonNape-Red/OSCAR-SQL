@@ -276,13 +276,11 @@ void rotateLogs(const QString & filePath, int maxPrevious)
     if (expired.exists()) {
         if (expired.isDir()) {
             QDir dir(expired.canonicalFilePath());
-            //qDebug() << "Removing expired log directory" << dir.canonicalPath();
             if (!dir.removeRecursively()) {
                 qWarning() << "Unable to delete expired log directory" << dir.canonicalPath();
             }
         } else {
             QFile file(expired.canonicalFilePath());
-            //qDebug() << "Removing expired log file" << file.fileName();
             if (!file.remove()) {
                 qWarning() << "Unable to delete expired log file" << file.fileName();
             }
@@ -298,7 +296,6 @@ void rotateLogs(const QString & filePath, int maxPrevious)
                 qWarning() << "Unable to rotate log:" << to.absoluteFilePath() << "exists";
                 continue;
             }
-            //qDebug() << "Renaming" << from.absoluteFilePath() << "to" << to.absoluteFilePath();
             if (!QFile::rename(from.absoluteFilePath(), to.absoluteFilePath())) {
                 qWarning() << "Unable to rename" << from.absoluteFilePath() << "to" << to.absoluteFilePath();
             }

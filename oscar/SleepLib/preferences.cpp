@@ -46,7 +46,6 @@ const QString &getUserName()
 #if defined (Q_OS_WIN)
 #if defined(UNICODE)
 
-//        if (QSysInfo::WindowsVersion >= QSysInfo::WV_NT) {
             TCHAR winUserName[UNLEN + 1]; // UNLEN is defined in LMCONS.H
             DWORD winUserNameSize = sizeof(winUserName);
             GetUserNameW(winUserName, &winUserNameSize);
@@ -214,10 +213,8 @@ bool Preferences::Open(QString filename)
 //    qDebug() << "Opening " << p_filename.toLocal8Bit().data();        // Not in OSCAR 2.0
 
     if (!file.open(QIODevice::ReadOnly)) {
-//        qWarning() << "Could not open" << p_filename.toLocal8Bit().data() << " Error: " << file.error();
         if (file.error() == 5) {
 //  Normal in OSCAR 2.0
-//            qDebug() << "Preferences file not found -- normal on first use of OSCAR";
         }
         else {
             qWarning() << "Preferences::Open(): Could not open preferences file for reading, error code" << file.error() << file.errorString();

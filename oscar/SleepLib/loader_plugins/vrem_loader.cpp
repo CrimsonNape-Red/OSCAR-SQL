@@ -455,9 +455,6 @@ int VREMLoader::OscarDataParser(QStringList OdataList,Machine* machine,QVector<v
                 index-=9;
                 qint32 value  = StartTime(reducedArray.mid(2, 4));
                 qint64 timeinmillies = value;
-                // if (context()->SessionExists(value)) {
-                //     continue;
-                // }
                 
                 time = timeinmillies*1000;
                 for (auto data : vREMdata)

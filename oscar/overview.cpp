@@ -283,12 +283,10 @@ void Overview::CreateAllGraphs() {
 
     ahi = new gAHIChart();
     AHI->AddLayer(ahi);
-    //chartsToBeMonitored.insert(ahi,AHI);
 
     UC = createGraph(STR_GRAPH_Usage, tr("Usage"), tr("Usage\n(hours)"));
     uc = new gUsageChart();
     UC->AddLayer(uc);
-    //chartsToBeMonitored.insert(uc,UC);
 
     STG = createGraph("New Session", tr("Session Times"), tr("Session Times"),  YT_Time);
     stg = new gSessionTimesChart();
@@ -297,12 +295,10 @@ void Overview::CreateAllGraphs() {
     PR = createGraph("Pressure Settings", STR_TR_Pressure, STR_TR_Pressure + "\n(" + STR_UNIT_CMH2O + ")");
     pres = new gPressureChart();
     PR->AddLayer(pres);
-    //chartsToBeMonitored.insert(pres,PR);
 
     TTIA = createGraph("TTIA", tr("Total Time in Apnea"), tr("Total Time in Apnea\n(Minutes)"));
     ttia = new gTTIAChart();
     TTIA->AddLayer(ttia);
-    //chartsToBeMonitored.insert(ttia,TTIA);
 
     // Add graphs for all channels that have been marked in Preferences Dialog as wanting a graph
     QHash<ChannelID, schema::Channel *>::iterator chit;
@@ -481,7 +477,6 @@ void Overview::setGraphText () {
             if (!g->visible()) {
                 numOff++;
             }
-            //DEBUGFW  Q(numTotal) Q(numOff)  Q(g->name());
         }
     }
     ui->graphCombo->setItemIcon(0, numOff ? *icon_warning : *icon_up_down);
@@ -773,7 +768,6 @@ void Overview::on_rangeCombo_activated(int index)
 
     // Ensure that all summary files are available and update version numbers if required
     int size = start.daysTo(end);
-    // qDebug() << "Overview range combo from" << start << "to" << end << "with" << size << "days";
     QDate dateback = end;
     CProgressBar progress(QObject::tr("Loading summaries"), mainwin, size);
     for (int i=1; i < size; ++i) {
@@ -853,7 +847,6 @@ void DateErrorDisplay::error(bool startDate,const QDate& dateEntered) {
 	int pixelsAboveBottom = 0;
 	int warningDurationMS =4000;
 	int resetUiDatesTimerDelayMS =1000;
-	//QFont* font=mediumfont;
 	QFont* font=defaultfont;
 
 	gv->m_parent_tooltip->display(gv,txt,pixelsAboveBottom,pixelsFromLeft, align, warningDurationMS , font);
@@ -895,7 +888,6 @@ void Overview::setRange(QDate& start, QDate& end, bool updateGraphs/*zoom*/)
     uiStartDate =start;
     uiEndDate = end;
 
-    //bool nextSamePage= start.daysTo(end)<=31;
     bool nextSamePage= (start.year() == end.year() && start.month() == end.month()) ;
     if (samePage>0 ||nextSamePage) {
         // The widgets do not signal pageChanged on opening - since the page hasn't changed.

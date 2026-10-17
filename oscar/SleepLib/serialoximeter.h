@@ -94,7 +94,6 @@ public:
 
     virtual void process() {}
 
-    //virtual Machine *CreateMachine()=0;
 
     // available sessions
     QMap<QDateTime, QVector<OxiRecord> *> oxisessions;

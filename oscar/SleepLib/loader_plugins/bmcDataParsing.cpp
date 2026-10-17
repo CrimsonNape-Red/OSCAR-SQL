@@ -85,7 +85,6 @@ void BmcUsrSession::ReadInProgressSession(QDataStream* strm)
         }
 
         //char msgBytes[datalen];
-        //strm->readRawData(msgBytes, datalen);
 
         std::vector<char> msgBytes(datalen);
         strm->readRawData(msgBytes.data(), datalen);
@@ -441,7 +440,6 @@ BmcWaveformPacket::BmcWaveformPacket(char* buffer)
     this->Raw.PulseRate = packetStruct->PulseRate;
     this->Raw.MinuteVentilation = packetStruct->MinuteVentilation;
     this->Raw.RespiratoryRate = packetStruct->RespiratoryRate;
-    //this->Raw.IERatioMapped = ((qint16)(packetStruct->IERatio <= 100 ? 100 - IERatioLookup[packetStruct->IERatio] : 0) * 10);
     this->Raw.IERatioMapped = static_cast<qint16>(
                 (packetStruct->IERatio <= 100)
                               ? 100 - IERatioLookup[packetStruct->IERatio]
@@ -537,14 +535,12 @@ BmcMachineInfo BmcData::ReadMachineInfo()
    usrFile.seek(0x2d);
    usrFile.read(buf, 32);
    info.SerialNumber = QString(buf);
-   //info.SerialNumber.truncate(info.SerialNumber.indexOf(QChar::Null));
    info.SerialNumber = info.SerialNumber.trimmed();
 
    //Model Number
    usrFile.seek(0x2296);
    usrFile.read(buf, 32);
    info.Model = QString(buf);
-   //info.Model.truncate(info.Model.indexOf(QChar::Null));
    info.Model = info.Model.trimmed();
 
    usrFile.close();

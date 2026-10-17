@@ -26,7 +26,6 @@ void gStatsLine::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     if (!m_visible) { return; }
 
-    //if (m_empty) return;
     Q_UNUSED(height);
 
     int z = (width + gYAxis::Margin) / 5;
@@ -35,7 +34,6 @@ void gStatsLine::paint(QPainter &painter, gGraph &w, const QRegion &region)
     top += 4;
     w.renderText(m_label, p, top);
 
-    //w.renderText(m_text,p,top,0,m_textcolor);
 
     p += z;
     w.renderText(st_min, p, top);

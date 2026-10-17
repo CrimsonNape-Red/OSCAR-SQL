@@ -69,7 +69,6 @@ class IntellipapLoader : public CPAPLoader
     virtual const QString &loaderName() { return intellipap_class_name; }
 
     //! \brief Creates a device object, indexed by serial number
- //   Machine *CreateMachine(QString serial);
 
     //! \brief Registers this MachineLoader with the master list, so Intellipap data can load
     static void Register();

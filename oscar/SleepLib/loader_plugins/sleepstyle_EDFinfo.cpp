@@ -33,7 +33,6 @@ bool SleepStyleEDFInfo::Parse( )	// overrides and calls the super's Parse
 {
 	if ( ! EDFInfo::Parse(  ) ) {
       qWarning() << "sleepStyle EDFInfo::Parse failed!";
-//      sleep(1);
         return false;
     }
 	
@@ -44,15 +43,12 @@ bool SleepStyleEDFInfo::Parse( )	// overrides and calls the super's Parse
 
     if (!edfHdr.startdate_orig.isValid()) {
         qDebug() << "sleepStyle EDFInfo::Parse Invalid date time retreieved parsing EDF File" << filename;
-//      sleep(1);
         return false;
     }
 
     startdate = qint64(edfHdr.startdate_orig.toSecsSinceEpoch()) * 1000L;
-    //startdate-=timezoneOffset();
     if (startdate == 0) {
         qDebug() << "sleepStyle EDFInfo::Parse Invalid startdate = 0 in EDF File" << filename;
-//      sleep(1);
         return false;
     }
 
@@ -91,13 +87,9 @@ EDFSignal *SleepStyleEDFInfo::lookupSignal(ChannelID ch)
 
 QDateTime SleepStyleEDFInfo::getStartDT( QString dateTimeStr )
 {
-//  edfHdr.startdate_orig = QDateTime::fromString(QString::fromLatin1(hdrPtr->datetime, 16), "dd.MM.yyHH.mm.ss");
 //  QString dateTimeStr;    // , dateStr, timeStr;
     QDate qDate;
     QTime qTime;
-//  dateTimeStr = QString::fromLatin1(hdrPtr->datetime, 16);
-//    dateStr = dateTimeStr.left(8);
-//    timeStr = dateTimeStr.right(8);
     qDate = QDate::fromString(dateTimeStr.left(8), "dd.MM.yy");
     if (qDate.year() < 2000) {
         qDate = qDate.addYears(100);

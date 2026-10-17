@@ -443,7 +443,6 @@ void PRS1DataChunk::ParseHumidifierSettingF3V3(unsigned char humid1, unsigned ch
 
     if (tubepresent) humidclassic = false;  // Classic mode bit is evidently ignored when tube is present
 
-    //qWarning() << this->sessionid << (humidclassic ? "C" : ".") << (humid2 & 0x20 ? "?" : ".") << (tubepresent ? "T" : ".") << (no_data ? "X" : ".") << (humidsystemone ? "1" : ".");
     /*
     if (tubepresent) {
         if (tubetemp) {

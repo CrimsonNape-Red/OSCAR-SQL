@@ -87,7 +87,6 @@ void gOverviewGraph::SetDay(Day * nullday)
             addSlice(CPAP_IPAPLo, QColor("light blue"), ST_SETMIN);
             addSlice(CPAP_IPAP, QColor("cyan"), mid, 0.5);
             addSlice(CPAP_IPAP, QColor("dark cyan"), ST_PERC, perc);
-            //addSlice(CPAP_IPAP,QColor("light blue"),ST_PERC,0.95);
             addSlice(CPAP_IPAPHi, QColor("blue"), ST_SETMAX);
         } else if (cpapmode >= MODE_BILEVEL_AUTO_FIXED_PS) {
             addSlice(CPAP_EPAP, QColor("green"), ST_SETMIN);
@@ -170,11 +169,8 @@ void gOverviewGraph::SetDay(Day * nullday)
             // skip any empty or irrelevant day records
             if (!day || (day->machine(m_machinetype) == nullptr)) { continue; }
 
-            //int ft = qint64(day->first()) / 1000L;
             //ft += tz_offset; // convert to local time
 
-            //int dz2 = ft / 86400;
-            //dz2 *= 86400;
             // ft = first sessions time, rounded back to midnight..
 
             // For each session in this day record
@@ -262,8 +258,6 @@ void gOverviewGraph::SetDay(Day * nullday)
                 }
 
                 //if (code==CPAP_Hypopnea) { // Make sure at least one of the CPAP data gets through with 0
-                //    hascode=true;
-                //}
                 if (hascode) {
                     m_days[dn] = day;
 
@@ -388,7 +382,6 @@ void gOverviewGraph::SetDay(Day * nullday)
         m_miny = 0;
     }
 
-    // m_minx=qint64(QDateTime(p_profile->FirstDay(),QTime(0,0,0),Qt::UTC).toSecsSinceEpoch())*1000L;
     m_maxx = qint64(QDateTime(p_profile->LastDay(), QTime(23, 59, 0), QTimeZone("UTC")).toSecsSinceEpoch()) * 1000L;
     m_physmaxy = m_maxy;
     m_physminy = m_miny;
@@ -461,7 +454,6 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     barw = (float(width) / float(days));
 
-   // graph = &w;
     float px;// = left;
     l_left = w.marginLeft() + gYAxis::Margin;
     l_top = w.marginTop();
@@ -514,13 +506,9 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
 
 
-//        QDateTime dt=QDateTime::fromMSecsSinceEpoch(time,Qt::UTC);
 
-//        QString text = dt.date().toString(Qt::SystemLocaleLongDate);
 
 //        int wid, h;
-       // GetTextExtent(text, wid, h);
-       // w.renderText(text, left + width/2 - wid/2, top-h+5);
 
     }
 
@@ -595,10 +583,8 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
             hours = m_hours[zd];
 
             int x1 = px;
-            //x1-=(barw/2.0);
             int x2 = px + barw;
 
-            //if (x1 < left) { x1 = left; }
 
             if (x2 > left + width) { x2 = left + width; }
 
@@ -612,11 +598,9 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
                 if (graphtype != GT_POINTS) {
                     painter.fillRect(x1-1, top, barw, height, QBrush(col));
-//                    quads->add(x1 - 1, top, x1 - 1, top + height, x2, top + height, x2, top, col.rgba());
                 } else {
                     painter.fillRect((x1+barw/2)-5, top, barw, height, QBrush(col));
 //                    quads->add((x1 + barw / 2) - 5, top, (x1 + barw / 2) - 5, top + height, (x2 - barw / 2) + 5,
-//                               top + height, (x2 - barw / 2) + 5, top, col.rgba());
                 }
             }
 
@@ -624,7 +608,6 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
                 int j;
                 auto times = m_times.find(zd);
                 QColor col = m_colors[0];
-                //if (hours<compliance_hours) col=QColor("#f03030");
 
                 if (summary_only) {
                     col = summaryColor;
@@ -635,7 +618,6 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
                 QColor col1 = col;
                 QColor col2 = brighten(col,2.37f);
-                //outlines->setColor(Qt::black);
 
                 int np = d.value().size();
 
@@ -651,14 +633,12 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
                     tmp = d.value()[j]; // length
 
-                    //tmp-=miny;
                     h = tmp * ymult;
 
                     QLinearGradient gradient(x1, py-h, x1+barw, py-h);
                     gradient.setColorAt(0,col1);
                     gradient.setColorAt(1,col2);
                     painter.fillRect(x1, py-h, barw, h, QBrush(gradient));
-//                    quads->add(x1, py, x1, py - h, x2, py - h, x2, py, col1, col2);
 
                     if ((h > 0) && (barw > 2)) {
                         painter.setPen(QColor(Qt::black));
@@ -685,7 +665,6 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
                 total = d.value()[0];
 
-                //if (total>0) {
                 if (day) {
                     EventDataType hours = m_hours[zd];
                     total_val += total * hours;
@@ -695,7 +674,6 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
                 py = top + height;
 
-                //}
                 bool good;
                 SummaryType type;
 
@@ -731,7 +709,6 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
                         col = COLOR_Gold;
                     }
 
-                    //if (!tmp) continue;
                     if ((type == ST_MAX) || (type == ST_SETMAX)) {
                         if (totalvalues[j] < tmp) {
                             totalvalues[j] = tmp;
@@ -744,9 +721,7 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
                         totalvalues[j] += tmp * hours;
                     }
 
-                    //if (tmp) {
                     totalcounts[j] += hours;
-                    //}
                     tmp -= miny;
                     h = tmp * ymult; // height in pixels
 
@@ -759,8 +734,6 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
                         gradient.setColorAt(1,col2);
                         painter.fillRect(x1, py-h, barw, h, QBrush(gradient));
 
-//                        quads->add(x1, py, x1, py - h, col1);
-//                        quads->add(x2, py - h, x2, py, col2);
 
                         if (h > 0 && barw > 2) {
                             painter.setPen(QColor(Qt::black));
@@ -828,7 +801,6 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
             }
 
             lastdaygood = true;
-            //    if (Q>maxx+extra) break;
         } else {
             lastdaygood = false;
         }
@@ -854,11 +826,7 @@ jumpnext:
     QSize size = QFontMetrics(*defaultfont).size(Qt::TextSingleLine ,"X");
     int bw = size.width();
     int bh = size.height() / 1.8;
-    //QFontMetrics fm(*defaultfont);
-    //int bw = fm.width('X');
-    //int bh = fm.height() / 1.8;
 
-    // bool ishours = false;
     int good = 0;
 
     for (int j = 0; j < m_codes.size(); j++) {
@@ -889,7 +857,6 @@ jumpnext:
 
             break;
 
-        //b=QString("%1%").arg(tval*100.0,0,'f',0); break;
         case ST_MIN:
             b = STR_TR_Min;
             break;
@@ -947,7 +914,6 @@ jumpnext:
             int h = f;
             int m = int(f * 60) % 60;
             val = QString::asprintf("%02i:%02i", h, m);
-            // ishours = true;
         } else if (code == Journal_Weight) {
             val = weightString(f, p_profile->general->unitSystem());
         } else {
@@ -955,27 +921,18 @@ jumpnext:
         }
 
         a += ": " + val;
-        //GetTextExtent(a,x,y);
-        //float wt=20*w.printScaleX();
-        //px-=wt+x;
-        //w.renderText(a,px+wt,py+1);
-        //quads->add(px+wt-y/4-y,py-y,px+wt-y/4,py-y,px+wt-y/4,py+1,px+wt-y/4-y,py+1,m_colors[j].rgba());
 
 
-        //QString text=schema::channel[code].label();
 
         int wid, hi;
         GetTextExtent(a, wid, hi);
         legendx -= wid;
         w.renderText(a, legendx, top - 4);
-        //  legendx-=bw/2;
 
         painter.fillRect(legendx - bw-4, top-w.marginTop()-1, bh, w.marginTop(), QBrush(m_colors[j]));
         legendx -= bw * 2;
 
 
-        //lines->add(px,py,px+20,py,m_colors[j]);
-        //lines->add(px,py+1,px+20,py+1,m_colors[j]);
     }
 
     if ((m_graphtype == GT_BAR) && (good > 0)) {
@@ -999,9 +956,6 @@ jumpnext:
     }*/
     a += QString(QObject::tr("Days: %1")).arg(total_days, 0);
 
-    //GetTextExtent(a,x,y);
-    //legendx-=30+x;
-    //w.renderText(a,px+24,py+5);
     w.renderText(a, left, py + 1);
 }
 
@@ -1049,9 +1003,7 @@ bool gOverviewGraph::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
     int event_y = yPosTop;
 
     if (!m_rect.contains(xposLeft, yPosTop)) {
-        //    if ((x<0 || y<0 || x>l_width || y>l_height)) {
         hl_day = -1;
-        //graph->timedRedraw(2000);
         return false;
     }
 
@@ -1080,12 +1032,8 @@ bool gOverviewGraph::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
 
         xposLeft += m_rect.left(); //gYAxis::Margin+gGraphView::titleWidth; //graph->m_marginleft+
         int y = event_y - m_rect.top() + rtop - 15;
-        //QDateTime dt1=QDateTime::fromSecsSinceEpoch(hl_day*86400).toLocalTime();
         QDateTime dt2 = QDateTime::fromSecsSinceEpoch(hl_day * 86400).toUTC();
-//        QDateTime dt2 = QDateTime::fromSecsSinceEpoch(hl_day * 86400).toLocalTime();
 
-        //QTime t1=dt1.time();
-        //QTime t2=dt2.time();
 
         QDate dt = dt2.date();
         day = m_days[zd];
@@ -1096,7 +1044,6 @@ bool gOverviewGraph::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
 
             QString strTooltip = dt.toString(QLocale::system().dateFormat(QLocale::ShortFormat));
 
-            // Day * day=m_days[hl_day];
             //EventDataType val;
             QString val;
 
@@ -1106,7 +1053,6 @@ bool gOverviewGraph::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
                     int t = m_hours[zd] * 3600.0;
                     int h = t / 3600;
                     int m = (t / 60) % 60;
-                    //int s=t % 60;
                     val = QString::asprintf("%02i:%02i", h, m);
                 } else {
                     val = QString::number(d.value()[0], 'f', 2);
@@ -1133,14 +1079,12 @@ bool gOverviewGraph::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
                     int t = d.value()[0] * 3600.0;
                     int h = t / 3600;
                     int m = (t / 60) % 60;
-                    //int s=t % 60;
                     val = QString::asprintf("%02i:%02i", h, m);
                 } else {
                     val = QString::number(d.value()[0], 'f', 2);
                 }
 
                 strTooltip += "\r\n" + m_label + ": " + val;
-                //z+="\r\nMode="+QString::number(day->settings_min("FlexSet"),'f',0);
 
             } else {
                 QString strDataType;
@@ -1217,7 +1161,6 @@ bool gOverviewGraph::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
                         val = QString::number(d.value()[i + 1], 'f', 0);
                         strTooltip += "\r\n" + strDataType + ": " + val;
                     } else {
-                        //if (day && (day->channelExists(m_codes[i]) || day->settingExists(m_codes[i]))) {
                         schema::Channel &chan = schema::channel[m_codes[i]];
                         EventDataType v;
 
@@ -1231,7 +1174,6 @@ bool gOverviewGraph::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
                             val = QString::number(v, 'f', 2);
                         }
                         strTooltip += "\r\n" + chan.label() + " " + strDataType + ": " + val;
-                        //}
                     }
                 }
 
@@ -1256,7 +1198,6 @@ bool gOverviewGraph::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
 bool gOverviewGraph::mousePressEvent(QMouseEvent *event, gGraph *graph)
 {
     if (event->modifiers() & Qt::ShiftModifier) {
-        //qDebug() << "Jump to daily view?";
         return true;
     }
 
@@ -1268,7 +1209,6 @@ bool gOverviewGraph::keyPressEvent(QKeyEvent *event, gGraph *graph)
 {
     Q_UNUSED(event)
     Q_UNUSED(graph)
-    //qDebug() << "Summarychart Keypress";
     return false;
 }
 
@@ -1283,10 +1223,8 @@ bool gOverviewGraph::mouseReleaseEvent(QMouseEvent *event, gGraph *graph)
 
         if (hl_day > 0) {
             QDateTime d = QDateTime::fromSecsSinceEpoch(hl_day * 86400).toUTC();
-//            QDateTime d = QDateTime::fromSecsSinceEpoch(hl_day * 86400).toLocalTime();
             mainwin->getDaily()->LoadDate(d.date());
             mainwin->JumpDaily();
-            //qDebug() << "Jump to daily view?" << d;
             return true;
         }
     }

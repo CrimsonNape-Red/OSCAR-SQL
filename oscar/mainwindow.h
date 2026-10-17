@@ -77,7 +77,6 @@ class MainWindow;
 
 extern QStatusBar *qstatusbar;
 
-//QString getCPAPPixmap(QString mach_class);
 
 
 class Daily;
@@ -143,7 +142,6 @@ class MainWindow : public QMainWindow
 
 //    /*! \fn gGraphView *snapshotGraph()
 //        \brief Returns the current snapshotGraph object used by the report printing system */
-//    gGraphView *snapshotGraph() { return SnapshotGraph; }
 
     //! \brief Returns the Daily Tab object
     Daily *getDaily() { return daily; }
@@ -282,7 +280,6 @@ class MainWindow : public QMainWindow
     void on_action_Reset_Graph_Layout_triggered();
 
     //! \brief passes the ResetGraphOrder menu click to the Daily & Overview views
-    //void on_action_Reset_Graph_Order_triggered();
 
     //! \brief passes the ResetGraphOrder menu click to the Daily & Overview views
     void on_action_Standard_Graph_Order_triggered();
@@ -351,9 +348,7 @@ class MainWindow : public QMainWindow
 
     void on_actionView_Statistics_triggered();
 
-    //void on_favouritesList_itemSelectionChanged();
 
-    //void on_favouritesList_itemClicked(QListWidgetItem *item);
 
     void on_tabWidget_currentChanged(int index);
 
@@ -371,7 +366,6 @@ class MainWindow : public QMainWindow
 
     void on_actionSleep_Disorder_Terms_Glossary_triggered();
 
-    //void on_actionHelp_Support_OSCAR_Development_triggered();
 
     void aboutBoxLinkClicked(const QUrl &url);
 
@@ -503,7 +497,6 @@ private:
     //! \brief Ensure database has no uncommitted transactions (profile switching safety)
     void ensureCleanDatabaseState();
 
-//    QString getWelcomeHTML();
     void FreeSessions();
 
     Ui::MainWindow *ui;

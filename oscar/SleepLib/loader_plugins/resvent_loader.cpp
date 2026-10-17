@@ -291,7 +291,6 @@ void ResventLoader::readAllConfigFiles(const QString & path ,QMap<QString,QStrin
 }
 
 void ResventLoader::readConfigFile(const QString & configFile, QMap<QString,QString>& hash) {
-    //DEBUGFC O(QFileInfo(configFile).fileName());
     if (!QFile::exists(configFile)) {
         qDebug() << "Resvent Data card has no file" << configFile;
     } else {
@@ -820,7 +819,6 @@ int ResventLoader::LoadSession(const QString& dirpath, const QDate& session_date
     {
         if (machine->SessionExists(sessionId)) {
             // session alreadt exists
-            //return base;
             continue;
         }
         Session* session = new Session(machine, sessionId++);

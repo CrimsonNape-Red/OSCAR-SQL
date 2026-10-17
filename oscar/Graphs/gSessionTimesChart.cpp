@@ -98,7 +98,6 @@ void gSessionTimesChart::afterDraw(QPainter & /*painter */, gGraph &graph, QRect
     }
 
 
-//    float avgsess = float(num_slices) / float(num_days);
 
     QString txt = QObject::tr("Sessions: %1 / %2 / %3 Length: %4 / %5 / %6 Longest: %7 / %8 / %9")
             .arg(calc1.min, 0, 'f', 2).arg(mid1, 0, 'f', 2).arg(calc1.max, 0, 'f', 2)
@@ -152,7 +151,6 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
     if (numDaysAfter > days)        // Nothing to do if this data is off the left edge of the chart
         return;
 
-    //    float lasty1 = rect.bottom();
     float lastx1 = rect.left();
     lastx1 += numDaysOffset * barw;
 
@@ -291,7 +289,6 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
 
         if (!day)
         {
-           // lasty1 = rect.bottom();
             lastx1 += barw;
             nousedays++;
          //   it++;
@@ -302,13 +299,11 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
 
         float x1 = lastx1 + barw;
 
-        //bool hl = false;
 
         QRectF rec2(lastx1, rect.top(), barw, rect.height());
         if (rec2.contains(mouse)) {
             QColor col2(255,0,0,64);
             painter.fillRect(rec2, QBrush(col2));
-            //hl = true;
         }
 
         if (cit != cache.end()) {
@@ -340,7 +335,6 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
                     gradient.setColorAt(0,col);
                     gradient.setColorAt(1,brighten(col, 2.0));
                     painter.fillRect(rec, QBrush(gradient));
-//                    painter.fillRect(rec, brush);
                     outlines.append(rec);
                 } else if (barw > 3) {
                     painter.fillRect(rec, QBrush(brighten(col,1.25)));

@@ -145,11 +145,6 @@ int WeinmannLoader::Open(const QString & dirpath)
 
     int WeekComplianceOffset = index["WeekComplianceOffset"];
     int WCD_Pin_Offset = index["WCD_Pin_Offset"];
-//    int WCD_Pex_Offset = index["WCD_Pex_Offset"];
-//    int WCD_Snore_Offset = index["WCD_Snore_Offset"];
-//    int WCD_Lf_Offset = index["WCD_Lf_Offset"];
-//    int WCD_Events_Offset = index["WCD_Events_Offset"];
-//    int WCD_IO_Offset = index["WCD_IO_Offset"];
     int comp_start = index[CompOffset];
 
     int wccount = index["WeekComplianceCount"];
@@ -172,7 +167,6 @@ int WeinmannLoader::Open(const QString & dirpath)
         QDateTime date = QDateTime(QDate(year,month,day), QTime(hour,minute,second));
         quint32 ts = date.toSecsSinceEpoch();
         if (!mach->SessionExists(ts)) {
-            // qDebug() << date;
         }
 
         // stores used length of data at 0x46, in 16bit integers, for IPAP, EPAP, snore, leak,
@@ -207,15 +201,11 @@ int WeinmannLoader::Open(const QString & dirpath)
     p = comp;
 
     QDateTime dt_epoch(QDate(2000,1,1), QTime(0,0,0));
-    //int epoch = dt_epoch.toSecsSinceEpoch();
-    //epoch = 0;
 
 
     float flow_sample_duration = 1000.0 / 5;
     float pressure_sample_duration = 1000.0 / 2;
-    //float amv_sample_duration = 200 * 10;
 
-    //int c = index[DayComplianceCount];
     for (int i=0; i < 5; i++) {
         int year = QString::asprintf("%02i%02i", p[0], p[1]).toInt();
         int month = p[2];
@@ -261,7 +251,6 @@ int WeinmannLoader::Open(const QString & dirpath)
         sess->really_set_last(qint64(ts+dur) * 1000L);
         sessions[ts] = sess;
 
-//        qDebug() << date << ts << dur << QString::asprintf("%02i:%02i:%02i", dur / 3600, dur/60 % 60, dur % 60);
 
         p += 0xd6;
     }
@@ -361,16 +350,11 @@ int WeinmannLoader::Open(const QString & dirpath)
         PR->AddWaveform(ti, (unsigned char *)&pres[ci.pres_start], ci.pres_size, (ci.pres_size/(1000.0/pressure_sample_duration)) * 1000.0);
 
         // Weinmann's MV graph is pretty dodgy... commenting this out and using my flow calced ones instead (the code below is mapped to snore for comparison purposes)
-        //EventList * MV = sess->AddEventList(CPAP_Snore, EVL_Waveform, 1.0f, 0.0, 0.0, 0.0, amv_sample_duration);
-        //MV->AddWaveform(ti, (unsigned char *)&mv[ci.amv_start], ci.amv_size, (ci.amv_size/(1000/amv_sample_duration)) * 1000L);
 
-//        EventList * L = sess->AddEventList(CPAP_Leak, EVL_Event);
-//        EventList * S = sess->AddEventList(CPAP_Snore, EVL_Event);
         EventList * OA = sess->AddEventList(CPAP_Obstructive, EVL_Event);
         EventList * A = sess->AddEventList(CPAP_Apnea, EVL_Event);
         EventList * H = sess->AddEventList(CPAP_Hypopnea, EVL_Event);
         EventList * FL = sess->AddEventList(CPAP_FlowLimit, EVL_Event);
-//        EventList * VS = sess->AddEventList(CPAP_VSnore, EVL_Event);
         quint64 tt = ti;
         Q_UNUSED (tt);
         quint64 step = sess->length() / ci.event_recs;
@@ -422,7 +406,6 @@ int WeinmannLoader::Open(const QString & dirpath)
                 S->AddEvent(ts, data);
                 break;
             case 0x22:
-              //  VS->AddEvent(ts, data/10.0);
 
                 break;
             case 0x28:
@@ -436,13 +419,11 @@ int WeinmannLoader::Open(const QString & dirpath)
                 OA->AddEvent(ts, data/10.0);
                 break;
             case '\'':
-                //A->AddEvent(ts, data/10.0);
                 break;
             case 'a':
                 A->AddEvent(ts, data/10.0);
                 break;
             case 'A':
-               // A->AddEvent(ts, data/10.0);
                 break;
             case '*':
                 H->AddEvent(ts, data/10.0);
@@ -459,14 +440,12 @@ int WeinmannLoader::Open(const QString & dirpath)
                 qDebug() << (int)evcode << endl;
             }*/
 
-          //  S->AddEvent(ts, p[5]);
 
 
 
             // p[5] == 0 corresponds to peak events
             // p[5] == 1 corresponds to hypopnea/bstructive events
 
-            //if (p[5] == 2) OA->AddEvent(ts, p[4]);
 
 
             // This is ugggggly...
@@ -531,45 +510,25 @@ int WeinmannLoader::Open(const QString & dirpath)
     ti = tt;
     for (int i=0; i < st_size; ++i) {
         EventStoreType c = ((unsigned char *)st)[i];
- //       if (c & 0x80) {
             ST->AddEvent(ti, c & 0x10);
-   //     }
         ti += sample_duration*4;  // *9
     }
 
 
-//    EventList * LEAK = sess->AddEventList(CPAP_Leak, EVL_Event);
-//    EventList * SNORE = sess->AddEventList(CPAP_Snore, EVL_Event);
 
-//    int ev_start = index[EventsOffset];
-//    int ev_end = wmdata.size();
-//    int ev_size = ev_end - ev_start;
-//    int recs = ev_size / 0x12;
 
 //    unsigned char ev[ev_size];
-//    memset((char *) ev, 0, ev_size);
 
-//    wmdata.seek(ev_start);
-//    wmdata.read((char *) ev, ev_size);
 
     sess->really_set_last(flow->last());
 
-//    int pos = 0;
-//    ti = tt;
 
 //    // 6 byte repeating structure.. No Leaks :(
 //    do {
 //        //EventStoreType c = ((unsigned char*)ev)[pos+0]; // TV?
 //        //c = ((unsigned char*)ev)[pos+6]; // MV?
 
-//        EventStoreType c = ((EventStoreType*)ev)[pos+0];
-//        LEAK->AddEvent(ti, c);
-//        SNORE->AddEvent(ti, ((unsigned char*)ev)[pos+2]);
-//        pos += 0x6;
-//        ti += 30000;
 //        if (ti > sess->last())
-//            break;
-//    } while (pos < (ev_size - 0x12));
 
 
 
@@ -582,15 +541,12 @@ int WeinmannLoader::Open(const QString & dirpath)
 void WeinmannLoader::initChannels()
 {
     //using namespace schema;
-    //Channel * chan = nullptr;
 //    channel.add(GRP_CPAP, chan = new Channel(INTP_SmartFlex = 0x1165, SETTING,   SESSION,
 //        "INTPSmartFlex", QObject::tr("SmartFlex"),
 //        QObject::tr("Weinmann pressure relief setting."),
 //        QObject::tr("SmartFlex"),
-//        "", DEFAULT, Qt::green));
 
 
-//    chan->addOption(1, STR_TR_None);
 }
 
 bool weinmann_initialized = false;
@@ -600,6 +556,5 @@ void WeinmannLoader::Register()
 
     qDebug() << "Registering WeinmannLoader";
     RegisterLoader(new WeinmannLoader());
-    //InitModelMap();
     weinmann_initialized = true;
 }

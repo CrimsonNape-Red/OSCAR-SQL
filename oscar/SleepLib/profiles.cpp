@@ -133,7 +133,6 @@ Profile::Profile(QString path, bool open)
             ProfileData profileData = profileRepo.findByUsername(user->userName());
             if (profileData.id > 0) {
                 // Profile is in database, load extended data from it
-//                qDebug() << "Profile::Profile() - Loading extended data from database for profile ID" << profileData.id;
                 loadExtendedDataFromDatabase();
             } else {
                 qDebug() << "Profile::Profile() - Profile not in database, using defaults";
@@ -280,7 +279,6 @@ bool Profile::OpenMachines()
         ProfileData profileData = profileRepo.findByUsername(username);
         if (profileData.id > 0) {
             m_database_id = profileData.id;
-//            qDebug() << "Profile::OpenMachines(): Set profile database ID to" << m_database_id;
         } else {
             qDebug() << "Profile::OpenMachines(): Profile" << username << "not in database yet";
         }
@@ -288,7 +286,6 @@ bool Profile::OpenMachines()
 
     // Try database first
     if (loadMachinesFromDatabase()) {
-//        qDebug() << "Profile::OpenMachines(): Loaded machines from database";
         return true;
     }
 
@@ -323,7 +320,6 @@ bool Profile::loadMachinesFromDatabase()
         return false;  // No machines in database
     }
 
-//    qDebug() << "Profile::loadMachinesFromDatabase(): Loading" << machines.size() << "machines from database";
 
     // Create Machine objects from database
     for (const MachineData& data : machines) {
@@ -340,7 +336,6 @@ bool Profile::loadMachinesFromDatabase()
         info.version = data.dataVersion;
         
 //        qDebug() << "Profile::loadMachinesFromDatabase(): Loading machine" << data.brand << data.model << "serial" << data.serialNumber
-//                 << "with dataVersion" << data.dataVersion;
 
         // Parse properties from JSON
         if (!data.properties.isEmpty()) {
@@ -405,7 +400,6 @@ bool Profile::loadMachinesFromXML()
         qWarning() << "Could not open" << filename.toLocal8Bit().data() << "for reading, error code" << file.error() << file.errorString();
         return false;
     }
-//    qDebug() << "OpenMachines opened" << filename.toLocal8Bit().data();
 
     QDomDocument doc("machines.xml");
 
@@ -843,7 +837,6 @@ void showInGraphicalShell(const QString & pathIn)
     success = success && error.isEmpty();
     if (!success) {
         QMessageBox::warning(NULL,STR_MessageBox_Error, tr("Could not find the file browser for your system, you will have to find your profile directory yourself.")+"\n\n"+error, QMessageBox::Ok);
-//        showGraphicalShellError(parent, app, error);
     }*/
 #endif
 }
@@ -1266,7 +1259,6 @@ Machine * Profile::CreateMachine(MachineInfo info, MachineID id)
 
     m->setInfo(info);
 
-  //  qDebug() << "Reading" << info.loadername << "Machine Record" << (info.serial.isEmpty() ? m->hexid() : info.serial);
 
     MachineList[info.loadername][info.serial] = m;
     AddMachine(m);
@@ -1452,36 +1444,12 @@ Machine *Profile::GetMachine(MachineType t)
 }
 
 //bool Profile::trashMachine(Machine * mach)
-//{
-//    QMap<QDate, QList<Day *> >::iterator it_end = daylist.end();
-//    QMap<QDate, QList<Day *> >::iterator it;
 //
 //    QList<QDate> datelist;
 //    QList<Day *> days;
 //
-//    for (it = daylist.begin(); it != it_end; ++it) {
-//        for (int i = 0; i< it.value().size(); ++i) {
-//            Day * day = it.value().at(i);
-//            if (day->machine() == mach) {
-//                days.push_back(day);
-//                datelist.push_back(it.key());
-//            }
-//        }
-//    }
 //
-//    for (int i=0; i < datelist.size(); ++i) {
-//        Day * day = days.at(i);
-//        it = daylist.find(datelist.at(i));
-//        if (it != daylist.end()) {
-//            it.value().removeAll(day);
-//            if (it.value().size() == 0) {
-//                daylist.erase(it);
-//            }
-//        }
-//        mach->unlinkDay(days.at(i));
-//    }
 //
-//}
 
 bool Profile::unlinkDay(Day * day)
 {
@@ -1496,7 +1464,6 @@ bool Profile::unlinkDay(Day * day)
 }
 
 
-//Profile *profile=nullptr;
 QString SHA1(QString pass)
 {
     return pass;
@@ -1575,12 +1542,9 @@ Profile *Create(QString name, const QString* in_path)
     }
     schema::resetChannels();
 
-    //path+="/"+name;
     p_profile = new Profile(path);
     profiles[name] = p_profile;
     p_profile->user->setUserName(name);
-    //p_profile->Set("Realname",realname);
-    //if (!password.isEmpty()) p_profile.user->setPassword(password);
     p_profile->Set(STR_GEN_DataFolder, QString("{home}/Profiles/{") + QString(STR_UI_UserName) + QString("}"));
 
     Machine *m = new Machine(p_profile, 0);
@@ -2016,7 +1980,6 @@ EventDataType Profile::calcAboveThreshold(ChannelID code, EventDataType threshol
  *   The in-memory optimization achieves the same goal with superior performance.
  ***/
 
-//    PERF_TIMER_START("Profile::calcAboveThreshold::iterative");
     EventDataType val = 0;
 
     do {
@@ -2028,8 +1991,6 @@ EventDataType Profile::calcAboveThreshold(ChannelID code, EventDataType threshol
 
         date = date.addDays(1);
     } while (date <= end);
-//    PERF_TIMER_STOP("Profile::calcAboveThreshold::iterative");
-//    qDebug() << "calcAboveThreshold() returning" << val;
 
     return val;
 }
@@ -2354,7 +2315,6 @@ EventDataType Profile::calcPercentile(ChannelID code, EventDataType percent, Mac
     QHash<ChannelID, QHash<EventStoreType, EventStoreType> >::iterator vsi;
     QHash<ChannelID, QHash<EventStoreType, quint32> >::iterator tsi;
     EventDataType gain;
-    //bool setgain=false;
     EventDataType value;
     int weight;
 
@@ -2373,7 +2333,6 @@ EventDataType Profile::calcPercentile(ChannelID code, EventDataType percent, Mac
             summaryOnly = false;
 
             // why was this nested like this???
-            //for (int i = 0; i < day->size(); i++) {
             for (auto & sess : day->sessions) {
                 if (!sess->enabled()) {
                     continue;
@@ -2423,7 +2382,6 @@ EventDataType Profile::calcPercentile(ChannelID code, EventDataType percent, Mac
                     }
                 }
             }
-            // }
         }
 
         date = date.addDays(1);
@@ -3161,17 +3119,12 @@ bool Profile::saveExtendedDataToDatabase()
     qint64 profileId = profileData.id;
     
     // Debug: Check what data we're trying to save
-//    qDebug() << "Profile::saveExtendedDataToDatabase() - Saving for profile ID" << profileId;
-//    qDebug() << "Profile::saveExtendedDataToDatabase() - User firstName:" << user->firstName();
-//    qDebug() << "Profile::saveExtendedDataToDatabase() - User lastName:" << user->lastName();
-//    qDebug() << "Profile::saveExtendedDataToDatabase() - Doctor name:" << doctor->name();
     
     // Save user info
     UserInfoRepository userRepo;
     if (!userRepo.saveFromUserInfo(profileId, user)) {
         qWarning() << "Profile::saveExtendedDataToDatabase() - Failed to save user info";
     } else {
-//        qDebug() << "Profile::saveExtendedDataToDatabase() - Successfully saved user info for profile" << profileId;
     }
     
     // Save doctor info
@@ -3179,7 +3132,6 @@ bool Profile::saveExtendedDataToDatabase()
     if (!doctorRepo.saveFromDoctorInfo(profileId, doctor)) {
         qWarning() << "Profile::saveExtendedDataToDatabase() - Failed to save doctor info";
     } else {
-//        qDebug() << "Profile::saveExtendedDataToDatabase() - Successfully saved doctor info";
     }
     
     // Save all preferences
@@ -3212,19 +3164,16 @@ bool Profile::loadExtendedDataFromDatabase()
     // Load user info
     UserInfoRepository userRepo;
     if (!userRepo.loadIntoUserInfo(profileId, user)) {
-//        qDebug() << "Profile::loadExtendedDataFromDatabase() - No user info in database";
     }
     
     // Load doctor info
     DoctorInfoRepository doctorRepo;
     if (!doctorRepo.loadIntoDoctorInfo(profileId, doctor)) {
-//        qDebug() << "Profile::loadExtendedDataFromDatabase() - No doctor info in database";
     }
     
     // Load all preferences
     PreferencesRepository prefRepo;
     if (!prefRepo.loadAllPreferences(profileId, cpap, oxi, session, appearance, general)) {
-//        qDebug() << "Profile::loadExtendedDataFromDatabase() - No preferences in database";
     }
 
     // Load Profile-level preferences
@@ -3233,7 +3182,6 @@ bool Profile::loadExtendedDataFromDatabase()
     // So the authoritative values for session/cpap/etc. keys are in category "profile",
     // not "session"/"cpap"/etc.  This call populates p_preferences with the correct values.
     if (!loadProfilePreferencesFromDatabase()) {
-//      qDebug() << "Profile::loadExtendedDataFromDatabase() - No profile-level preferences in database";
     }
 
     // Refresh cached member variables in settings classes AFTER all DB loading is done.
@@ -3301,7 +3249,6 @@ bool Profile::loadProfilePreferencesFromDatabase()
     QList<PreferenceData> prefs = prefRepo.findByCategory(profileId, "profile");
     
     if (prefs.isEmpty()) {
-//        qDebug() << "Profile::loadProfilePreferencesFromDatabase() - No profile-level preferences in database";
         return false;
     }
     
@@ -3330,6 +3277,5 @@ bool Profile::loadProfilePreferencesFromDatabase()
         p_preferences[pref.key] = value;
     }
     
-//    qDebug() << "Profile::loadProfilePreferencesFromDatabase() - Loaded" << prefs.size() << "profile-level preferences";
     return true;
 }

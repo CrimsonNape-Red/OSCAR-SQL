@@ -380,7 +380,6 @@ void PRS1DataChunk::ParseFlexSettingF5V012(quint8 flex, int cpapmode)
     if (flexmode == FLEX_BiFlex) {
         this->AddEvent(new PRS1ParsedSettingEvent(PRS1_SETTING_FLEX_LEVEL, flexlevel));
         CHECK_VALUE(lock, 0);  // Flag any sample data that will let us confirm flex lock
-        //this->AddEvent(new PRS1ParsedSettingEvent(PRS1_SETTING_FLEX_LOCK, lock != 0));
     } else {
         this->AddEvent(new PRS1ParsedSettingEvent(PRS1_SETTING_RISE_TIME, flexlevel));
         this->AddEvent(new PRS1ParsedSettingEvent(PRS1_SETTING_RISE_TIME_LOCK, lock != 0));
@@ -1216,7 +1215,6 @@ bool PRS1DataChunk::ParseSettingsF5V3(const unsigned char* data, int size)
             case 0x2f:  // Flex lock? (was on F0V6, 0x80 for locked)
                 CHECK_VALUE(len, 1);
                 CHECK_VALUE(data[pos], 0);
-                //this->AddEvent(new PRS1ParsedSettingEvent(PRS1_SETTING_FLEX_LOCK, data[pos] != 0));
                 break;
             //case 0x30: ASV puts the flex level in the 0x2e setting for some reason
             case 0x35:  // Humidifier setting

@@ -35,7 +35,6 @@ Q_OBJECT
     virtual int Version() { return md300w1_data_version; }
     virtual const QString &loaderName() { return md300w1_class_name; }
 
-    // Machine *CreateMachine();
 
     virtual MachineInfo newInfo() {
         return MachineInfo(MT_OXIMETER, 0, md300w1_class_name, QObject::tr("ChoiceMMed"), QObject::tr("MD300W1 Oximeter"), QString(), QString(), QObject::tr("MD300"), QDateTime::currentDateTime(), md300w1_data_version);

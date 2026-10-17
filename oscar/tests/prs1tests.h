@@ -20,7 +20,6 @@ private slots:
     void testMachineSupport();
     void testChunksToYaml();
     void testSessionsToYaml();
-    // void test2();
     void cleanupTestCase();
 };
 

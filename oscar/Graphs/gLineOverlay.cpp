@@ -41,7 +41,6 @@ void gLineOverlayBar::paint(QPainter &painter, gGraph &w, const QRegion &region)
     int start_py = topp;
 
     double xx = w.max_x - w.min_x;
-    //double yy = w.max_y - w.min_y;
 
     if (xx <= 0) { return; }
 
@@ -82,7 +81,6 @@ void gLineOverlayBar::paint(QPainter &painter, gGraph &w, const QRegion &region)
     int count;
 
     qint64 drift = 0;
-    //bool hover = false;
 
     int tooltipTimeout = AppSetting->tooltipTimeout();
 
@@ -145,7 +143,6 @@ void gLineOverlayBar::paint(QPainter &painter, gGraph &w, const QRegion &region)
                     // x2 represents the begining of a span in pixels
                     // x1 represent the end of the span in pixels
                     // BUG HERE
-                    //x2 += (int(x1)==int(x2)) ? 1 : 0;
                     // Fixed BY 
                     int duration = x1-x2;
                     if (duration<2) duration=2;     // display minial span with 2 pixels.
@@ -172,7 +169,6 @@ void gLineOverlayBar::paint(QPainter &painter, gGraph &w, const QRegion &region)
                     m_count++;
                     m_sum += raw;
 
-//                    if ((odt == ODT_Bars) || (xx < 3600000)) {
                         // show the fat dots in the middle
                         painter.setPen(QPen(m_flag_color,4));
 
@@ -181,8 +177,6 @@ void gLineOverlayBar::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
 //                    } else {
 //                        // thin lines down the bottom
-//                        painter.drawLine(x1, start_py + 1, x1, start_py + 1 + 12);
-//                    }
                 }
             } */else if ((m_flt == FT_Bar) || (m_flt == FT_Dot)) {
                 ////////////////////////////////////////////////////////////////////////////
@@ -196,7 +190,6 @@ void gLineOverlayBar::paint(QPainter &painter, gGraph &w, const QRegion &region)
                 //int lx,ly;
 
                 for (; dptr < eptr; dptr++) {
-                   // hover = false;
                     X = stime + *tptr++;
                     raw = *dptr;
 
@@ -252,7 +245,6 @@ void gLineOverlayBar::paint(QPainter &painter, gGraph &w, const QRegion &region)
                         //////////////////////////////////////////////////////////////////////////////////////
                         // Top and bottom markers
                         //////////////////////////////////////////////////////////////////////////////////////
-                        //bool b = false;
                         if (!w.selectingArea() && !m_blockhover && QRect(x1-2, topp, 6, height).contains(mouse) && !m_hover) {
                             // only want to draw the highlight/label once per frame
                             m_hover = true;
@@ -366,7 +358,6 @@ void gLineOverlaySummary::paint(QPainter &painter, gGraph &w, const QRegion &reg
 
     time /= 3600;
 
-    //if (time<1) time=1;
 
     if (time > 0) { val = cnt / time; }
 

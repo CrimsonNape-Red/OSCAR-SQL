@@ -62,7 +62,6 @@ class gOverviewGraph: public Layer
         m_codes.push_back(code);
         m_colors.push_back(color);
         m_type.push_back(type);
-        //m_zeros.push_back(ignore_zeros);
         m_typeval.push_back(tval);
     }
 

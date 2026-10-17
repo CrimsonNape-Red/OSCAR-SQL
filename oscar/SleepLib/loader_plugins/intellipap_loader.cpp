@@ -133,27 +133,17 @@ int IntellipapLoader::OpenDV5(const QString & path)
         lookup["Sn"] = INT_PROP_Serial;
         lookup["Mn"] = INT_PROP_Model;
         lookup["Mo"] = INT_PROP_Mode;     // 0 cpap, 1 auto
-        //lookup["Pn"]="??";
         lookup["Pu"] = INT_PROP_MaxPressure;
         lookup["Pl"] = INT_PROP_MinPressure;
         lookup["Pi"] = INT_PROP_IPAP;
         lookup["Pe"] = INT_PROP_EPAP;  // == WF on Auto models
         lookup["Ps"] = INT_PROP_PS;             // == WF on Auto models, Pressure support
-        //lookup["Ds"]="??";
-        //lookup["Pc"]="??";
         lookup["Pd"] = INT_PROP_RampPressure;
         lookup["Dt"] = INT_PROP_RampTime;
-        //lookup["Ld"]="??";
-        //lookup["Lh"]="??";
-        //lookup["FC"]="??";
-        //lookup["FE"]="??";
-        //lookup["FL"]="??";
         lookup["A%"]="ApneaThreshold";
         lookup["Ad"]="ApneaDuration";
         lookup["H%"]="HypopneaThreshold";
         lookup["Hd"]="HypopneaDuration";
-        //lookup["Pi"]="??";
-        //lookup["Pe"]="??";
         lookup["Ri"]="SmartFlexIRnd";  // Inhale Rounding (0-5)
         lookup["Re"]="SmartFlexERnd"; // Inhale Rounding (0-5)
         //lookup["Bu"]="??"; // WF
@@ -209,15 +199,11 @@ int IntellipapLoader::OpenDV5(const QString & path)
         } else if (key == INT_PROP_Model) {
             info.model = value;
         } else if (key == INT_PROP_MinPressure) {
-            //min_pressure = value.toFloat() / 10.0;
         } else if (key == INT_PROP_MaxPressure) {
-            //max_pressure = value.toFloat() / 10.0;
         } else if (key == INT_PROP_IPAP) {
-            //set_ipap = value.toFloat() / 10.0;
         } else if (key == INT_PROP_EPAP) {
             set_epap = value.toFloat() / 10.0;
         } else if (key == INT_PROP_PS) {
-            //set_ps = value.toFloat() / 10.0;
         } else if (key == INT_PROP_RampPressure) {
             ramp_pressure = value.toFloat() / 10.0;
         } else if (key == INT_PROP_RampTime) {
@@ -338,7 +324,6 @@ int IntellipapLoader::OpenDV5(const QString & path)
             sess = Sessions[sid] = new Session(mach, sid);
 
             sess->really_set_first(qint64(sid) * 1000L);
-         //   sess->really_set_last(qint64(SessionEnd[i]) * 1000L);
 
             rampstart[sid] = 0;
             rampend[sid] = 0;
@@ -393,9 +378,7 @@ int IntellipapLoader::OpenDV5(const QString & path)
     long pos = 0;
     int rampval = 0;
     sid = 0;
-    //SessionID lastsid = 0;
 
-    //int last_minp=0, last_maxp=0, last_ps=0, last_pres = 0;
 
     for (int i = 0; i < recs; i++) {
         // convert timestamp to real epoch
@@ -431,7 +414,6 @@ int IntellipapLoader::OpenDV5(const QString & path)
                         // ramp started
 
 
-//                        int rv = pres-rampval;
 //                        double ramp =
 
                         rampstart[sid] = time;
@@ -462,11 +444,9 @@ int IntellipapLoader::OpenDV5(const QString & path)
 
                     sess->eventlist[CPAP_IPAP][0]->AddEvent(time, float(pres) / 10.0);
                     sess->eventlist[CPAP_EPAP][0]->AddEvent(time, float(pres-ps) / 10.0);
-//                   rampval = maxp;
 
                 } else {
                     sess->eventlist[CPAP_Pressure][0]->AddEvent(time, float(pres) / 10.0); // current pressure
-//                    rampval = minp;
 
                     if (mode == MODE_APAP) {
                         sess->settings[CPAP_PressureMin] = float(minp) / 10.0;
@@ -524,7 +504,6 @@ int IntellipapLoader::OpenDV5(const QString & path)
                 break;
             } else {
             }
-            //lastsid = sid;
         }
 
         pos += 26;
@@ -560,11 +539,8 @@ int IntellipapLoader::OpenDV5(const QString & path)
 
             if (!sess) continue;
 
-//            quint64 first = qint64(sid) * 1000L;
-            //quint64 last = qint64(SessionEnd[i]) * 1000L;
 
             if (sess->last() > 0) {
-             //   sess->really_set_last(last);
 
 
                 sess->settings[INTP_SmartFlexLevel] = smartflex;
@@ -1029,7 +1005,6 @@ bool RollingBackup::open (const QString filetype, DV6_HEADER * inputhdr, QByteAr
             return false;
         }
     } else {
-//        qDebug() << "DV6 rb(open) history file size" << histfilesize;
         histfile.seek(histfilesize);
     }
 
@@ -1085,7 +1060,6 @@ bool RollingBackup::save(const QByteArray &dataBA) {
         }
         memcpy(&hdr.lasttime, data, 4);
 //        if (!histfile.seek(histfile.pos() + dataBA.length()))
-//            qWarning() << "DV6 rb(save) failed respositioning" << histfile.fileName() << "for readwrite, error code" << histfile.error() << histfile.errorString();
         numWritten++;
     }
 /***
@@ -1270,7 +1244,6 @@ unsigned char * RollingFile::get() {
     }
 
     QByteArray dataBA;
-//    readpos = file.pos();
     dataBA=file.read(record_length); // read next record
     if (dataBA.size() != record_length) {
         qWarning() << "DV6 rf(get) #" << record_number << "wrong length";
@@ -1284,7 +1257,6 @@ unsigned char * RollingFile::get() {
 
     number_read++;
 
-//    qDebug() << "DV6 rf(get)" << filename << "at start pos" << readpos << "end pos" << file.pos() << "record number" << record_number << "of length" << record_length << "number read so far" << number_read;
     memcpy (data, (unsigned char *) dataBA.data(), record_length);
     return data;
 }
@@ -1354,7 +1326,6 @@ bool load6Sessions () {
         sinfo.begin = ts1;
         sinfo.end = ts2;
         sinfo.written = 0;
-//        sinfo.haveHighResData = false;
         sinfo.firstHighRes = 0;
         sinfo.lastHighRes = 0;
 
@@ -1516,7 +1487,6 @@ bool load6VersionInfo(const QString & path) {
                     info.serial = str;
                     break;
                 case 2: // modelnumber
-//                    info.model = str;
                     info.modelnumber = str;
                     info.modelnumber = info.modelnumber.trimmed();
                     for (int i = 0; i < (int)sizeof(testedModels); i++) {
@@ -1585,15 +1555,12 @@ int create6Sessions() {
             sinfo->sess = sess;
             sinfo->dailyData = nullptr;
             sinfo->written = 0;
-//            sinfo->haveHighResData = false;
             sinfo->firstHighRes = 0;
             sinfo->lastHighRes = 0;
 
             sess->really_set_first(quint64(sinfo->begin) * 1000L);
             sess->really_set_last(quint64(sinfo->end) * 1000L);
 
-//            rampstart[sid] = 0;
-//            rampend[sid] = 0;
             sess->SetChanged(true);
             
             sess->AddEventList(INTELLIPAP_Unknown1, EVL_Event);
@@ -1610,7 +1577,6 @@ int create6Sessions() {
             sess->AddEventList(CPAP_Obstructive, EVL_Event);
             sess->AddEventList(CPAP_Hypopnea, EVL_Event);
             sess->AddEventList(CPAP_NRI, EVL_Event);
-//            sess->AddEventList(CPAP_LeakFlag, EVL_Event);
             sess->AddEventList(CPAP_ExP, EVL_Event);
             sess->AddEventList(CPAP_FlowLimit, EVL_Event);
 
@@ -1618,11 +1584,6 @@ int create6Sessions() {
         } else {
             // If there is a duplicate session, null out the earlier session
             // otherwise there will be a crash on shutdown.
-//??            for (int z = 0; z < SessionStart.size(); z++) {
-//??                if (SessionStart[z] == sid) {
-//??                    SessionStart[z] = 0;
-//??                    SessionEnd[z] = 0;
-//??                    break;
 //??                }
             qDebug() << sid << "has double ups" << QDateTime::fromSecsSinceEpoch(sid).toString("MM/dd/yyyy hh:mm:ss");
             
@@ -1661,7 +1622,6 @@ bool load6HighResData () {
     EventList * pressure = NULL;
     EventList * FLG = NULL;
     EventList * snore = NULL;
-//        EventList * leak = NULL;
 /***
     EventList * OA  = NULL;
     EventList * HY  = NULL;
@@ -1682,7 +1642,6 @@ bool load6HighResData () {
     qint64 PBstart = 0, PBend = 0;
     qint64 REstart =0, REend = 0;
     qint64 LLstart =0, LLend = 0;
-//    lastts1 = 0;
 ***/
 
     // sinfo is for walking through sessions when matching up with flow data records
@@ -1720,7 +1679,6 @@ bool load6HighResData () {
                 sess->setMax(CPAP_FlowRate, max);
                 sess->setPhysMax(CPAP_FlowRate, min); // not sure :/
                 sess->setPhysMin(CPAP_FlowRate, max);
-//                sess->really_set_last(flow->last());
             }
             sess = nullptr;
             flow = nullptr;
@@ -1778,8 +1736,6 @@ bool load6HighResData () {
                 pressure = sess->AddEventList(CPAP_Pressure, EVL_Event, 0.1f);
                 FLG = sess->AddEventList(CPAP_FLG, EVL_Waveform, 1.0f, 0.0f, 0.0f, 0.0f, double(2000) / double(2));
                 snore = sess->AddEventList(CPAP_Snore, EVL_Waveform, 1.0f, 0.0f, 0.0f, 0.0f, double(2000) / double(2));
-                //                    sinfo->hasMaskPressure = true;
-                //                    leak = R->sess->AddEventList(CPAP_Leak, EVL_Waveform, 1.0, 0.0, 0.0, 0.0, double(2000) / double(1));
                 /***
                     OA = R->sess->AddEventList(CPAP_Obstructive, EVL_Event);
                     NOA = R->sess->AddEventList(CPAP_NRI, EVL_Event);
@@ -1801,7 +1757,6 @@ bool load6HighResData () {
             pressure->AddEvent(ti + 1000, R->pressure2);
             if (sinfo->firstHighRes == 0 || sinfo->firstHighRes > rec_ts1) sinfo->firstHighRes = rec_ts1;
             if (sinfo->lastHighRes == 0 || sinfo->lastHighRes < rec_ts1+2) sinfo->lastHighRes = rec_ts1+2;
-//            sinfo->haveHighResData = true;
             if (sess->first() == 0)
                 qWarning() << "first = 0 - 1442";
 
@@ -1828,7 +1783,6 @@ bool load6HighResData () {
                 d[0] = data[107];
                 d[1] = data[108];
 
-                //leak->AddWaveform(ti+40000, d, 2, 2000);
 
                 // Needs to track state to pull events out cleanly..
 
@@ -2261,7 +2215,6 @@ bool load6PerMinute () {
                 if (sess->last()/1000 > sinfo->end)
                     sinfo->end = sess->last()/1000;
 
-//                if (!sinfo->haveHighResData) {
                     // Don't use this pressure if we already have higher resolution data
 
                 if (sinfo->mode == MODE_UNKNOWN) {
@@ -2294,14 +2247,10 @@ bool load6PerMinute () {
                 if (!Pressure)
                     Pressure = sess->AddEventList(CPAP_Pressure, EVL_Event, 0.1f);
 
-//                if (sinfo->firstHighRes ==  0) {
                 Pressure->AddEvent(ti, rec->avgPressure);  // average pressure for next minute
                 Pressure->AddEvent(ti + 59998, rec->avgPressure);  // end of pressure block
 //                } else {
-//                    for (int i = 0; i < 60; i++) {
 //                        Pressure->AddEvent(ti+i, rec->avgPressure);  // average pressure for next minute
-//                    }
-//                }
             }
 
 /***
@@ -2352,7 +2301,6 @@ bool load6EventData () {
     EventList * EP = nullptr;
     EventList * SN = nullptr;
     EventList * FL = nullptr;
-//    EventList * FLG = nullptr;
 
     if (!rf.open("E.BIN")) {
         qWarning() << "DV6 Unable to open E.BIN";
@@ -2445,8 +2393,6 @@ bool load6EventData () {
                 SN = sess->AddEventList(INTP_SnoreFlag, EVL_Event);
                 FL = sess->AddEventList(CPAP_FlowLimit, EVL_Event);
 
-//                FLG = sess->AddEventList(CPAP_FLG, EVL_Waveform, 1.0f, 0.0f, 0.0f, 0.0f, double(2000) / double(2));
-//                SN = sess->AddEventList(CPAP_Snore, EVL_Waveform, 1.0f, 0.0f, 0.0f, 0.0f, double(2000) / double(2));
 
                 inSession = true;
             }
@@ -2455,7 +2401,6 @@ bool load6EventData () {
             qint64 duration = rec_ts2 - rec_ts1;
             // We make an ad hoc adjustment to the start time so that the event lines up better with the flow graph
             // TODO: We don't know what is really going on here. Is it sloppiness on the part of the DV6 in recording time stamps?
-//            qint64 ti = qint64(rec_ts1 - (duration/2)) * 1000L;
             qint64 ti = qint64(rec_ts1 - duration) * 1000L;
             if (duration < 0) {
                 qDebug() << "E.BIN at" << QDateTime::fromSecsSinceEpoch(rec_ts1).toString("MM/dd/yyyy hh:mm:ss")
@@ -2579,7 +2524,6 @@ int addSessions() {
             // Unload them from memory
             sess->TrashEvents();
         } // else
-          //  qWarning() << "addSessions: session pointer is null";
     }
 
     return SessionData.size();
@@ -2828,7 +2772,6 @@ void IntellipapLoader::Register()
     if (!intellipap_initialized) {
         qDebug() << "Registering IntellipapLoader";
         RegisterLoader(new IntellipapLoader());
-        //InitModelMap();
         intellipap_initialized = true;
     }
     return;

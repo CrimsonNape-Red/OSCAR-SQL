@@ -268,7 +268,6 @@ void PrismaImport::run()
                 session->settings[Prisma_TubeType] = parameters[PRISMA_LINE_TUBE_TYPE] / 10.0;
             }
             // Indicate partial support
-            //session->settings[Prisma_Warning] = 2;
         }
 
         switch(parameters[PRISMA_LINE_MODE]) {
@@ -407,7 +406,6 @@ void PrismaImport::run()
     AddWaveform(Prisma_FlowFull, QString("FlowFull"));
 
     // The CPAPPressure exitst but is not used
-    // AddWaveform(CPAP_Pressure, QString("CPAPPressure"));
 
     // prisma line
     AddWaveform(CPAP_EPAP, QString("EPAPsoll"));
@@ -416,12 +414,6 @@ void PrismaImport::run()
 
     // Channels that exist on varous Prisma Line devices, but are not handled yet
 
-    // AddWaveform(CPAP_RespRate, "BreathFrequency");
-    // AddWaveform(CPAP_TidalVolume, "BreathVolume");
-    // AddWaveform(CPAP_IE, "InspExpirRel");
-    // AddWaveform(OXI_Pulse, "HeartFrequency");
-    // AddWaveform(OXI_SPO2, "SpO2");
-    // AddWaveform(CPAP_LeakTotal, QString("TotalLeakage"));
     // 20A, 25ST
     //  MV.txt
     //  rAMV.txt
@@ -1190,7 +1182,6 @@ void PrismaLoader::initChannels()
     //    QObject::tr("SPRStatus"),
     //    QObject::tr("SPRStatus"),
     //    QObject::tr("SPRStatus"),
-    //    STR_UNIT_Unknown, DEFAULT, QColor("black")));
 
 
     channel.add(GRP_CPAP, new Channel(Prisma_Artifact=0xe446, SPAN,  MT_CPAP,   SESSION,

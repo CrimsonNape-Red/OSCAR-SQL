@@ -48,32 +48,15 @@
 extern MainWindow * mainwin;
 
 //void SaveThread::run()
-//{
-//    bool running = true;
-//    while (running) {
 //        Session //sess = machine->popSaveList();
-//        if (sess) {
-//            if (machine->m_donetasks % 20 == 0) {
-//                int i = (float(machine->m_donetasks) / float(machine->m_totaltasks) * 100.0);
-//                emit UpdateProgress(i);
-//            }
-//            sess->UpdateSummaries();
 //            //machine->saveMutex.lock();
-//            sess->Store(path);
 //            //machine->saveMutex.unlock();
 //
-//            sess->TrashEvents();
 //        } else {
-//            if (!machine->m_save_threads_running) {
 //                break; // done
 //            } else {
 //                yieldCurrentThread(); // go do something else for a while
-//            }
-//        }
-//    }
 //
-//    machine->savelistSem->release(1);
-//}
 
 void SaveTask::run()
 {
@@ -124,7 +107,6 @@ Machine::Machine(Profile *_profile, MachineID id) : profile(_profile)
 }
 Machine::~Machine()
 {
-    //qDebug() << "Destroy device" << info.loadername << hex << m_id;
 }
 Session *Machine::SessionExists(SessionID session)
 {
@@ -317,7 +299,6 @@ bool Machine::addSessionImpl(Session *s, bool allowOldSessions, bool splitPiece)
 
     sessionlist[s->session()] = s; // To make sure it get's saved later even if it's not wanted.
 
-    //int drift=profile->cpap->clockDrift();
 
     qint64 rawFirst = s->first();
     qint64 corrMs   = correctionMs(QDateTime::fromMSecsSinceEpoch(rawFirst).date());
@@ -369,7 +350,6 @@ bool Machine::addSessionImpl(Session *s, bool allowOldSessions, bool splitPiece)
 
     if (session_length < ignore_sessions) {
         // keep the session to save importing it again, but don't add it to the day record this time
-        // qDebug() << s->session() << "Ignoring short session <" << ignore_sessions << "["+QDateTime::fromMSecsSinceEpoch(s->first()).toString("MMM dd, yyyy hh:mm:ss")+"]";
         return true;
     }
 
@@ -404,19 +384,8 @@ bool Machine::addSessionImpl(Session *s, bool allowOldSessions, bool splitPiece)
             dd->addSession(*i);
         }
 
-//        QMap<QDate, QList<Day *> >::iterator nd = profile->daylist.find(date.addDays(1));
-//        if (nd != profile->daylist.end()) {
-//            profile->unlinkDay(nd.key(), nd.value());
-//        }
 
-//        QList<Day *>::iterator iend = nd.value().end();
-//        for (QList<Day *>::iterator i = nd.value()->begin(); i != iend; ++i) {
-//            if (*i == nextday.value()) {
-//                nd.value().erase(i);
-//            }
-//        }
 
-//        day.erase(nextday);
     }
 
     return true;
@@ -521,14 +490,11 @@ bool Machine::Purge(int secret)
     QList<Day *> days = day.values();
 
     // Clean up any loaded sessions from memory first..
-    //bool success = true;
     for (int i=0; i < sessions.size(); ++i) {
         Session * sess = sessions[i];
         if (!sess->Destroy()) {
             qDebug() << "Could not destroy "+ info.loadername +" ("+info.serial+") session" << sess->session();
-      //      success = false;
         } else {
-//            sessionlist.remove(sess->session());
         }
 
         delete sess;
@@ -566,7 +532,6 @@ bool Machine::Purge(int secret)
             qDebug() << "Deleting " << fullpath;
             if (!dir.remove(fullpath)) {
                 qDebug() << "Could not purge file" << fullpath;
-                //success=false;
                 could_not_kill++;
             }
         } else {
@@ -831,19 +796,9 @@ bool Machine::SaveSession(Session *sess)
 }
 
 //Session *Machine::popSaveList()
-//{
-//    Session *sess = nullptr;
-//    listMutex.lock();
 //
-//    if (!m_savelist.isEmpty()) {
-//        sess = m_savelist.at(0);
-//        m_savelist.pop_front();
 //        m_donetasks++;
-//    }
 //
-//    listMutex.unlock();
-//    return sess;
-//}
 
 void Machine::queTask(ImportTask * task)
 {
@@ -870,20 +825,13 @@ void Machine::runTasks()
 
     QThreadPool * threadpool = QThreadPool::globalInstance();
 /***********************************************************
-//  int m_totaltasks=m_tasklist.size();
-//  int m_currenttask=0;
 //  if (loader())
-//      emit loader()->setProgressMax(m_totaltasks);
 ***********************************************************/
     while ( ! m_tasklist.isEmpty()) {
         if (threadpool->tryStart(m_tasklist.at(0))) {
             m_tasklist.pop_front();
             qDebug() << "Machine:runTasks running task" << ++taskNum;
 /************************************************************
-//          if (loader()) {
-//              emit loader()->setProgressValue(++m_currenttask);
-//              QApplication::processEvents();
-//          }
 ***************************************************************/
         }
     }
@@ -907,7 +855,6 @@ bool Machine::hasModifiedSessions()
 bool Machine::Save()
 {
     //int size;
-    // int cnt = 0;
 
     qDebug() << "Machine::Save entered";
 
@@ -968,7 +915,6 @@ bool Machine::Save()
         }
     }
 
-//  m_savelist.clear();
 
     // Store any event summaries to files (existing behavior)
     for (s = sessionlist.begin(); s != sessionlist.end(); s++) {
@@ -1004,7 +950,6 @@ bool Machine::Save()
                 qDebug() << "Machine::Save(): Started transaction for batch session save";
             }
         } else {
-//            qDebug() << "Machine::Save(): Already in transaction - skipping nested transaction";
         }
         
         int savedCount = 0;

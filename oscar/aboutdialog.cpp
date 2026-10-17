@@ -90,7 +90,6 @@ QString AboutDialog::getAbout()
         text = transLink(text);
     } else
         qWarning() << "Could not open" << aboutFile << "for reading, error code" << clfile.error() << clfile.errorString();
-//        qDebug() << "Failed to open About file";
 
     return text;
 }
@@ -117,7 +116,6 @@ QString AboutDialog::getRelnotes()
     QString changeLog = tr("Sorry, could not locate Release Notes.");
     if (clfile.open(QIODevice::ReadOnly)) {
         //Todo, write XML parser and only show the latest..
-        //QTextStream ts(&clfile);
         changeLog = clfile.readAll();
     }
     else

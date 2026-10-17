@@ -32,7 +32,6 @@ bool SearchEvent(Session * session, ChannelID code, qint64 time, int dur, bool u
     int cnt;
 
     //qint64 rate;
-//    bool fixdurations = (session->machine()->loaderName() != STR_MACH_ResMed);
 
     if (!p_profile->cpap->resyncFromUserFlagging()) {
         update=false;
@@ -41,7 +40,6 @@ bool SearchEvent(Session * session, ChannelID code, qint64 time, int dur, bool u
     auto evend = session->eventlist.end();
     if (it != evend) {
         for (const auto & el : it.value()) {
-            //rate=el->rate();
             cnt = el->count();
 
             // why would this be necessary???
@@ -93,19 +91,14 @@ bool SearchApnea(Session *session, qint64 time, double dur)
             return true;
 
 //    if (SearchEvent(session, CPAP_AllApnea, time, dur))
-//        return true;
 //
 //    if (SearchEvent(session, CPAP_Obstructive, time, dur))
-//        return true;
 //
 //    if (SearchEvent(session, CPAP_Apnea, time, dur))
-//        return true;
 //
 //    if (SearchEvent(session, CPAP_ClearAirway, time, dur))
-//        return true;
 //
 //    if (SearchEvent(session, CPAP_Hypopnea, time, dur))
-//        return true;
 
     if (SearchEvent(session, CPAP_UserFlag1, time, dur, false))
         return true;
@@ -195,7 +188,6 @@ void xpassFilter(EventDataType *input, EventDataType *output, int samples, Event
         output[i] = weight * input[i] + (1.0 - weight) * output[i - 1];
     }
 
-    //output[samples-1]=input[samples-1];
 }
 
 FlowParser::FlowParser()
@@ -213,9 +205,6 @@ FlowParser::FlowParser()
 FlowParser::~FlowParser()
 {
     free(m_filtered);
-    //    for (int i=0;i<num_filter_buffers;i++) {
-    //        free(m_buffers[i]);
-    //    }
 }
 void FlowParser::clearFilters()
 {
@@ -227,7 +216,6 @@ EventDataType *FlowParser::applyFilters(EventDataType *data, int samples)
     EventDataType *in = nullptr, *out = nullptr;
 
     if (m_filters.size() == 0) {
-        //qDebug() << "Trying to apply empty filter list in FlowParser..";
         return nullptr;
     }
 
@@ -243,7 +231,6 @@ EventDataType *FlowParser::applyFilters(EventDataType *data, int samples)
             out = m_buffers[0];
 
             if (in == out) {
-                //qDebug() << "Error: If you need to use internal m_buffers as initial input, use the second one. No filters were applied";
                 return nullptr;
             }
         } else {
@@ -328,16 +315,12 @@ void FlowParser::calcPeaks(EventDataType *input, int samples)
 
     EventDataType zeroline = 0;
 
-    // double rate = m_flow->rate();
 
-    // double flowstart = m_flow->first();
     //double time; //, lasttime;
 
     //double peakmax = flowstart,
-    //double peakmin = flowstart;
 
     // lasttime =
-    // time = flowstart;
     breaths.clear();
 
     // Estimate storage space needed using typical average breaths per minute.
@@ -360,9 +343,7 @@ void FlowParser::calcPeaks(EventDataType *input, int samples)
 
     int sps = 1000 / m_rate;
     int len = 0;
-    //int lastk = 0;
 
-    //qint64 sttime = time;
 
     // For each samples, find the peak upper and lower breath components
     for (int k = 0; k < samples; k++) {
@@ -382,16 +363,13 @@ void FlowParser::calcPeaks(EventDataType *input, int samples)
 
                     // Set max for start of the upper breath cycle
                     max = c;
-                    //peakmax = time;
 
                     // Starting point of next breath cycle
                     start = k;
-                    //sttime = time;
                 }
             } else if (c > max) {
                 // Update upper breath peak
                 max = c;
-                //peakmax = time;
             }
         }
 
@@ -401,21 +379,16 @@ void FlowParser::calcPeaks(EventDataType *input, int samples)
             if (lastc >= zeroline) {
                 // Set min for start of the lower breath cycle
                 min = c;
-                //peakmin = time;
                 middle = k;
 
             } else if (c < min) {
                 // Update lower breath peak
                 min = c;
-                //peakmin = time;
             }
 
         }
 
-        //lasttime = time;
-        // time += rate;
         lastc = c;
-        //lastk = k;
     }
 }
 
@@ -609,10 +582,6 @@ void FlowParser::calc(bool calcResp, bool calcTv, bool calcTi, bool calcTe, bool
             // Perhaps needs a bit of history averaging..
 
             // calculate root mean square
-            //double n=bm-bs;
-            //double q=(1/n)*val2;
-            //double x=sqrt(q)*2;
-            //val2=x;
 
             // Average TV over last three data points
             if (tv_count == 0) {
@@ -621,9 +590,6 @@ void FlowParser::calc(bool calcResp, bool calcTv, bool calcTi, bool calcTe, bool
                 tvlast = tvlast2 = tvlast3 = tv;
             }
 
-//          if (tv_count < 4) {
-//              qDebug() << "tv" << tv << tvlast << tvlast2 << tvlast3 << "avg" << (tvlast + tvlast2 + tvlast3 + tv*2)/5;
-//          }
 
             tv = (tvlast + tvlast2 + tvlast3 + tv*2)/5;
             tvlast3 = tvlast2;
@@ -649,7 +615,6 @@ void FlowParser::calc(bool calcResp, bool calcTv, bool calcTi, bool calcTe, bool
                 stmin = start;
             }
 
-            //len = et - stmin;
             rr = 0;
             len2 = 0;
 
@@ -789,8 +754,6 @@ void FlowParser::flagUserEvents(ChannelID code, EventDataType restriction, Event
         bm = p->middle;  // breath middle
         be = p->end;     // breath end
 
-//        mx = p->max;
-//        mn = p->min;
 
         //val = mx - mn;   // the total height from top to bottom of this breath
 
@@ -843,8 +806,6 @@ void FlowParser::flagUserEvents(ChannelID code, EventDataType restriction, Event
         } // else crossed over again.. breathe damn you!
 
         // okay, this looks like cruft..
-//        st = start + bs1 * m_rate;
-//        et = start + be1 * m_rate;
     }
 
     int bsize = bstart.size();   // Number of breath components over cutoff threshold
@@ -896,10 +857,8 @@ void calcRespRate(Session *session, FlowParser *flowparser)
 {
     if (session->type() != MT_CPAP) { return; }
 
-    //    if (session->machine()->loaderName() != STR_MACH_PRS1) return;
 
     if (!session->eventlist.contains(CPAP_FlowRate)) {
-        //qDebug() << "calcRespRate called without FlowRate waveform available";
         return; //need flow waveform
     }
 
@@ -908,8 +867,6 @@ void calcRespRate(Session *session, FlowParser *flowparser)
     if (!flowparser) {
         flowparser = new FlowParser();
         trashfp = true;
-        //qDebug() << "calcRespRate called without valid FlowParser object.. using a slow throw-away!";
-        //return;
     } else {
         trashfp = false;
     }
@@ -922,7 +879,6 @@ void calcRespRate(Session *session, FlowParser *flowparser)
 
     int z = (calcResp ? 1 : 0) + (calcTv ? 1 : 0) + (calcMv ? 1 : 0);
 // Force calculation for testing calculation vs CPAP data
-//    z = 1;
 
     // If any of these three missing, remove all, and switch all on
     if (z > 0 && z < 3) {
@@ -954,9 +910,6 @@ void calcRespRate(Session *session, FlowParser *flowparser)
     // No filters works rather well with the new peak detection algorithm..
     // Although the output could use filtering.
 
-    //flowparser->addFilter(FilterPercentile,7,0.5);
-    //flowparser->addFilter(FilterPercentile,5,0.5);
-    //flowparser->addFilter(FilterXPass,0.5);
 
     auto & EVL = session->eventlist[CPAP_FlowRate];
     for (auto & flow : EVL) {
@@ -992,7 +945,6 @@ EventDataType calcAHI(Session *session, qint64 start, qint64 end)
 //              + session->count(CPAP_AllApnea)
 //              + session->count(CPAP_Hypopnea)
 //              + session->count(CPAP_ClearAirway)
-//              + session->count(CPAP_Apnea);
 
         if (rdi) {
             cnt += session->count(CPAP_RERA);
@@ -1009,7 +961,6 @@ EventDataType calcAHI(Session *session, qint64 start, qint64 end)
 //              + session->rangeCount(CPAP_AllApnea, start, end)
 //              + session->rangeCount(CPAP_Hypopnea, start, end)
 //              + session->rangeCount(CPAP_ClearAirway, start, end)
-//              + session->rangeCount(CPAP_Apnea, start, end);
 
         if (rdi) {
             cnt += session->rangeCount(CPAP_RERA, start, end);
@@ -1112,7 +1063,6 @@ int calcAHIGraph(Session *session)
 //                         + session->rangeCount(CPAP_Hypopnea, ti, t)
 //                         + session->rangeCount(CPAP_Hypopnea, ti, t)
 //                         + session->rangeCount(CPAP_ClearAirway, ti, t)
-//                         + session->rangeCount(CPAP_Apnea, ti, t);
 
                 ahi = events / hours;
 
@@ -1129,7 +1079,6 @@ int calcAHIGraph(Session *session)
                 cnt++;
             }
 
-            //lastti = ti;
             ti += window_size_ms;
         } while (ti < last);
 
@@ -1142,7 +1091,6 @@ int calcAHIGraph(Session *session)
 //                     + session->rangeCount(CPAP_AllApnea, f, ti)
 //                     + session->rangeCount(CPAP_Hypopnea, f, ti)
 //                     + session->rangeCount(CPAP_ClearAirway, f, ti)
-//                     + session->rangeCount(CPAP_Apnea, f, ti);
 
             events = session->rangeCount(AllAhiChannels, f, ti);
 
@@ -1158,7 +1106,6 @@ int calcAHIGraph(Session *session)
             }
 
             cnt++;
-            //lastti = ti;
             ti += window_step;
         }
     }
@@ -1386,7 +1333,6 @@ void flagLargeLeaks(Session *session)
         if (!count) continue;
 
         leaktime = 0;
-        //EventDataType leakvalue = 0;
         lastvalue = -1;
 
         for (int i=0; i < count; ++i) {
@@ -1395,7 +1341,6 @@ void flagLargeLeaks(Session *session)
             if (value >= threshold) {
                 if (lastvalue < threshold) {
                     leaktime = time;
-                    //leakvalue = value;
                 }
             } else if (lastvalue > threshold) {
                 if (!LL) {
@@ -1468,7 +1413,6 @@ int calcPulseChange(Session *session)
 
                     if (tmp > max) { max = tmp; }
 
-                    //lv=tmp;
                     li = j;
                 }
             }
@@ -1515,17 +1459,11 @@ int calcSPO2Drop(Session *session)
 
     EventList *pc = new EventList(EVL_Event, 1, 0, 0, 0, 0, true);
     qint64 lastt;
-    //EventDataType lv = 0;
     int li = 0;
 
     // Fix me.. Time scale varies.
     //const unsigned ringsize=30;
-    //EventDataType ring[ringsize]={0};
-    //qint64 rtime[ringsize]={0};
-    //int rp=0;
     int min;
-    // int cnt = 0;
-    // tmp = 0;
 
     qint64 start = 0;
 
@@ -1545,7 +1483,6 @@ int calcSPO2Drop(Session *session)
 
             if (time > start + 3600000) { break; } // just look at the first hour
 
-            // tmp += val;
             // cnt++;
         }
     }
@@ -1565,7 +1502,6 @@ int calcSPO2Drop(Session *session)
     }
 
     session->settings[OXI_SPO2Drop] = baseline;
-    //EventDataType baseline=round(tmp/EventDataType(cnt));
     EventDataType current;
     qDebug() << "Calculated baseline" << baseline;
     
@@ -1621,14 +1557,12 @@ int calcSPO2Drop(Session *session)
 
             val = baseline;
             lastt = 0;
-            //lv = val;
 
 
             min = val;
 
             for (int j = i; j < elcount; ++j) { // scan ahead in the window
                 time2 = el->time(j);
-                //if (time2 > time+window) break;
                 val2 = el->data(j);
 
                 if (val2 > baseline - change) { break; }

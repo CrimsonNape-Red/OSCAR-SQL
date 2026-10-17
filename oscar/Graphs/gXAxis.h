@@ -189,7 +189,6 @@ public:
         layer->m_line_color = m_line_color;
         layer->m_text_color = m_text_color;
 
-        //layer->m_image = m_image;
     }
 
 protected:

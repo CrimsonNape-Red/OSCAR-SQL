@@ -148,8 +148,6 @@ void EventList::AddWaveform(qint64 start, qint16 *data, int recs, qint64 duratio
     }
 
     if (m_last > start) {
-        //qWarning() << "Attempted to add waveform with previous timestamp";
-        // return;
 
         // technically start should equal m_last+1 sample.. check this too.
     }
@@ -159,20 +157,17 @@ void EventList::AddWaveform(qint64 start, qint16 *data, int recs, qint64 duratio
     }
 
     // TODO: Check waveform chunk really is contiguous
-    //double rate=duration/recs;
 
     //realloc buffers.
     int r = m_count;
     m_count += recs;
     m_data.resize(m_count);
 
-  //  EventStoreType *edata = m_data.data();
 
     //EventStoreType raw;
     const qint16 *sp = data;
     const qint16 *ep = data + recs;
     EventStoreType *dp = (EventStoreType *)m_data.data()+r;
-//    EventStoreType *dp = &edata[r];
 
     if (m_update_minmax) {
         EventDataType min = m_min, max = m_max, val, gain = m_gain;
@@ -180,7 +175,6 @@ void EventList::AddWaveform(qint64 start, qint16 *data, int recs, qint64 duratio
         memcpy(dp, sp, recs*2);
 
         for (sp = data; sp < ep; ++sp) {
-//            *dp++ = raw = *sp;
             val = EventDataType(*sp) * gain + m_offset;
 
             if (min > val) { min = val; }
@@ -195,10 +189,7 @@ void EventList::AddWaveform(qint64 start, qint16 *data, int recs, qint64 duratio
         for (int i=0; i < recs; ++i) {
             m_data[i] = *sp++;
         }
-//        for (sp = data; sp < ep; ++sp) {
-//            *dp++ = *sp;
 //            //val=EventDataType(raw)*gain;
-//        }
     }
 
 }
@@ -214,7 +205,6 @@ void EventList::AddWaveform(qint64 start, unsigned char *data, int recs, qint64 
         return;
     }
 
-    // duration=recs*rate;
     qint64 last = start + duration;
 
     if (!m_first) {
@@ -223,8 +213,6 @@ void EventList::AddWaveform(qint64 start, unsigned char *data, int recs, qint64 
     }
 
     if (m_last > start) {
-        //qWarning() << "Attempted to add waveform with previous timestamp";
-        // return;
 
         // technically start should equal m_last+1 sample.. check this too.
     }
@@ -263,7 +251,6 @@ void EventList::AddWaveform(qint64 start, unsigned char *data, int recs, qint64 
     } else {
         for (sp = data; sp < ep; ++sp) {
             raw = *sp;
-            //val = EventDataType(raw) * m_gain;
             *dp++ = raw;
         }
     }
@@ -281,7 +268,6 @@ void EventList::AddWaveform(qint64 start, char *data, int recs, qint64 duration)
         return;
     }
 
-    // duration=recs*rate;
     qint64 last = start + duration;
 
     if (!m_first) {
@@ -289,8 +275,6 @@ void EventList::AddWaveform(qint64 start, char *data, int recs, qint64 duration)
         m_last = last;
     } else {
         if (m_last > start) {
-            //qWarning() << "Attempted to add waveform with previous timestamp";
-            //return;
 
             // technically start should equal m_last+1 sample.. check this too.
         }
@@ -329,7 +313,6 @@ void EventList::AddWaveform(qint64 start, char *data, int recs, qint64 duration)
     } else {
         for (sp = data; sp < ep; ++sp) {
             raw = *sp;
-     //       val = EventDataType(raw) * m_gain + m_offset;
             *dp++ = raw;
         }
     }

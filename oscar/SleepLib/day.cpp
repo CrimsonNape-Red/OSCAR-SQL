@@ -146,7 +146,6 @@ void Day::addSession(Session *s)
             qCritical() << "Day object" << this->date().toString() << "adding duplicate session" << s->session()
                      << "["+QDateTime::fromSecsSinceEpoch(s->session()).toString("MMM dd, yyyy hh:mm:ss")+"]";
             // Don't skip this one, since it might have replaced the original elsewhere already.
-            //return;
         }
     }
     sessions.push_back(s);
@@ -349,19 +348,10 @@ EventDataType Day::settings_wavg(ChannelID code)
 EventDataType Day::percentile(ChannelID code, EventDataType percentile)
 {
     // Cache this calculation?
-    //    QHash<ChannelID, QHash<EventDataType, EventDataType> >::iterator pi;
-    //    pi=perc_cache.find(code);
-    //    if (pi!=perc_cache.end()) {
-    //        QHash<EventDataType, EventDataType> & hsh=pi.value();
     //        QHash<EventDataType, EventDataType>::iterator hi=hsh.find(
-    //        if (hi!=pi.value().end()) {
-    //            return hi.value();
-    //        }
-    //    }
 
     QHash<EventStoreType, qint64> wmap; // weight map
 
-    // not used: QHash<EventStoreType, qint64>::iterator wmapit;
     qint64 SN = 0;
 
     EventDataType lastgain = 0, gain = 0;
@@ -424,7 +414,6 @@ EventDataType Day::percentile(ChannelID code, EventDataType percentile)
     }
 
     // sort by weight, then value
-    //qSort(valcnt);
     std::sort(valcnt.begin(), valcnt.end());
 
     //double SN=100.0/double(N); // 100% / overall sum
@@ -596,7 +585,6 @@ EventDataType Day::rangePercentile(ChannelID code, float p, qint64 st, qint64 et
     }
 
     // TODO: use nth_element instead..
-    //qSort(list);
     std::sort(list.begin(), list.end());
 
     float b = float(idx) * p;
@@ -686,7 +674,6 @@ qint64 Day::total_time()
 {
     qint64 d_totaltime = 0;
     QMultiMap<qint64, bool> range;
-    //range.reserve(size()*2);
 
     // Remember sessions may overlap..
 
@@ -752,7 +739,6 @@ qint64 Day::total_time()
 
     if (total != d_totaltime) {
         // They can overlap.. tough.
-//        qDebug() << "Sessions Times overlaps!" << total << d_totaltime;
     }
 
     return total; //d_totaltime;
@@ -763,7 +749,6 @@ qint64 Day::total_time(MachineType type)
 {
     qint64 d_totaltime = 0;
     QMultiMap<qint64, bool> range;
-    //range.reserve(size()*2);
 
     // Remember sessions may overlap..
 
@@ -828,7 +813,6 @@ qint64 Day::total_time(MachineType type)
 
     if (total != d_totaltime) {
         // They can overlap.. tough.
-//        qDebug() << "Sessions Times overlaps!" << total << d_totaltime;
     }
 
     return total; //d_totaltime;
@@ -853,7 +837,6 @@ ChannelID Day::getPressureChannelID() {
         // If preferred channel has data, return it
         if (channelHasData(preferredID)) {
 //          if ( cpapmode == MODE_AVAPS )
-//              qDebug() << QString("Found pressure channel 0x%1").arg(preferredID, 4, 16, QChar('0'));
             return preferredID;
         }
     }
@@ -998,8 +981,6 @@ bool Day::hasData(ChannelID code, SummaryType type)
         if (sess->enabled()) {
             switch (type) {
             //        case ST_90P:
-            //            has=sess->m_90p.contains(code);
-            //            break;
             case ST_PERC:
                 has = sess->m_valuesummary.contains(code);
                 break;
@@ -1130,7 +1111,6 @@ EventDataType Day::sph(ChannelID code)
 
 EventDataType Day::count(ChannelID code)
 {
-//    qDebug() << "Day::count() for code" << code;
     EventDataType total = 0;
 
     if (const QVector<ChannelID> * group = ahiChannelGroup(code)) {
@@ -1139,19 +1119,13 @@ EventDataType Day::count(ChannelID code)
         return total;
     }
 
-//    int numsess = 1;
     for (auto & sess : sessions) {
-//        qDebug() << "Day::count session" << numsess++;
 
         if (sess->enabled() && sess->m_cnt.contains(code)) {
             total += sess->count(code);
-//            EventDataType f = sess->count(code);
 //            if (f != static_cast<int>(f) && code!=4097) // 4097 = 0x1001 or Clear Airway flag
-//                qWarning() << "Day::count() sess->count() says it has code" << code << "with count of" << qSetRealNumberPrecision(9) << f << "total is currently" << qSetRealNumberPrecision(9) << total;
-//            total += f;
 //            if (total != static_cast<int>(total) && code!=4097)
 //                qWarning() << "Day::count() total+= for" << code << "is now" << qSetRealNumberPrecision(9) << total
-//                         << "at session" << sess->session();
         }
     }
     if (total != static_cast<int>(total)) {
@@ -1179,7 +1153,6 @@ bool Day::summaryOnly(Machine * mach)
     for (auto & sess : sessions) {
         if ((mach == nullptr) && sess->summaryOnly()) {
             // If this day generally has just summary data.
-//            qDebug() << "Day::summaryOnly() reports summary only day for machine == null";
             return true;
         } else if ((mach == sess->machine())  && sess->summaryOnly()) {
             // Focus only on device match
@@ -1295,7 +1268,6 @@ QList<ChannelID> Day::getSortedMachineChannels(MachineType type, quint32 chantyp
         #if defined(STEADY_BREATHING)
             if (AppSetting->steadyBreathing()!=SB_ACTIVE) {
                 if (code == CPAP_SteadyBreathing || code == CPAP_SteadyBreathingFlag)  {
-                    //DEBUGCI O("removing") NAME(code);
                     continue;
                 }
             }
@@ -1327,7 +1299,6 @@ QList<ChannelID> Day::getSortedMachineChannels(quint32 chantype)
         #if defined(STEADY_BREATHING)
             if (AppSetting->steadyBreathing()!=SB_ACTIVE) {
                 if (code == CPAP_SteadyBreathing || code == CPAP_SteadyBreathingFlag)  {
-                    //DEBUGCI O("removing") NAME(code);
                     continue;
                 }
             }
@@ -1496,7 +1467,6 @@ int Day::getCPAPMode()
     */
     ChannelID modechan = CPAP_Mode;
 
-//    schema::Channel & chan = schema::channel[modechan];
 
     // TODO: This is an awful hack that depends on the enum ordering of the device-specific CPAP mode.
     // See the comment in getCPAPModeStr().
@@ -1527,24 +1497,6 @@ QString Day::getCPAPModeStr()
 
     return chan.option(mode);
 
-//    if (mode == MODE_CPAP) {
-//        return QObject::tr("Fixed");
-//    } else if (mode == MODE_APAP) {
-//        return QObject::tr("Auto");
-//    } else if (mode == MODE_BILEVEL_FIXED ) {
-//        return QObject::tr("Fixed Bi-Level");
-//    } else if (mode == MODE_BILEVEL_AUTO_FIXED_PS) {
-//        return QObject::tr("Auto Bi-Level (Fixed PS)");
-//    } else if (mode == MODE_BILEVEL_AUTO_VARIABLE_PS) {
-//        return QObject::tr("Auto Bi-Level (Variable PS)");
-//    } else if (mode == MODE_TRILEVEL_AUTO_VARIABLE_PDIFF) {
-//        return QObject::tr("Auto TriLevel (Variable PDIFF)");
-//    }   else if (mode == MODE_ASV) {
-//        return QObject::tr("ASV Fixed EPAP");
-//    } else if (mode == MODE_ASV_VARIABLE_EPAP) {
-//        return QObject::tr("ASV Variable EPAP");
-//    }
-//    return STR_TR_Unknown;
 }
 
 QString Day::getPressureRelief()

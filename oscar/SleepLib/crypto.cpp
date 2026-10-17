@@ -52,7 +52,6 @@ CryptoResult decrypt_aes256_gcm(const QByteArray & key,
         dec->start(botan_iv);
         try {
             dec->finish(botan_message);
-            //qDebug() << QString::fromStdString(Botan::hex_encode(message.data(), message.size()));
             QByteArray message((char*) botan_message.data(), botan_message.size());
             plaintext = message;
         }
@@ -84,7 +83,6 @@ CryptoResult encrypt_aes256_gcm(const QByteArray & key,
         enc->set_key(botan_key);
         enc->start(botan_iv);
         enc->finish(botan_message);
-        //qDebug() << QString::fromStdString(Botan::hex_encode(botan_message.data(), botan_message.size()));
 
         size_t tag_size = enc->tag_size();
         QByteArray message((char*) botan_message.data(), botan_message.size());

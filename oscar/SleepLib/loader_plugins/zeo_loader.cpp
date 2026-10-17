@@ -123,12 +123,6 @@ void ZEOLoader::closeCSV()
     }
 }
 
-//    int idxTotalZ = header.indexOf("Total Z");
-//    int idxAlarmReason = header.indexOf("Alarm Reason");
-//    int idxSnoozeTime = header.indexOf("Snooze Time");
-//    int idxWakeTone = header.indexOf("Wake Tone");
-//    int idxWakeWindow = header.indexOf("Wake Window");
-//    int idxAlarmType = header.indexOf("Alarm Type");
 
 static const EventDataType GAIN = 0.25;  // allow for fractional sleep stages (such as Deep (2))
 
@@ -170,22 +164,12 @@ Session* ZEOLoader::readNextSession()
         TimeInLight = readInt(row["Time in Light"]);
         TimeInDeep = readInt(row["Time in Deep"]);
         Awakenings = readInt(row["Awakenings"]);
-        //end_of_night = readDateTime(row["End of Night"]);
-        //rise_time = readDateTime(row["Rise Time"]);
-        //FirstAlarmRing = readDateTime(row["First Alarm Ring"], false);
-        //LastAlarmRing = readDateTime(row["Last Alarm Ring"], false);
-        //FirstSnoozeTime = readDateTime(row["First Snooze Time"], false);
-        //LastSnoozeTime = readDateTime(row["Last Snooze Time"], false);
-        //SetAlarmTime = readDateTime(row["Set Alarm Time"], false);
         MorningFeel = readInt(row["Morning Feel"], false);
-        //FirmwareVersion = row["Firmware Version"];
-        //MyZeoVersion = row["My ZEO Version"];
 
         if (invalid_fields) {
             continue;
         }
 
-        //SG = row["Sleep Graph"].trimmed().split(" ");
         DSG = row["Detailed Sleep Graph"].trimmed().split(" ");
 
         if (DSG.size() == 0) {
@@ -245,8 +229,6 @@ Session* ZEOLoader::readNextSession()
 
         EndEventList(SLEEP_Stage, tt);
         sess->really_set_last(tt);
-        //int size = DSG.size();
-        //qDebug() << linecomp[0] << start_of_night << end_of_night << rise_time << size << "30 second chunks";
     }
 
     return sess;
@@ -312,6 +294,5 @@ void ZEOLoader::Register()
 
     qDebug("Registering ZEOLoader");
     RegisterLoader(new ZEOLoader());
-    //InitModelMap();
     zeo_initialized = true;
 }

@@ -64,7 +64,6 @@ class SleepStyleLoader : public CPAPLoader
 
     bool OpenSummary(Machine *mach, const QString & path);
     bool OpenDetail(Machine *mach, const QString & path);
-//    bool OpenFLW(Machine *mach, const QString & filename);
     bool OpenRealTime(Machine *mach, const QString & fname, const QString & filename);
 
     //! \brief Returns SleepLib database version of this F&P SleepStyle loader
@@ -74,7 +73,6 @@ class SleepStyleLoader : public CPAPLoader
     virtual const QString & loaderName() { return sleepstyle_class_name; }
 
     // ! \brief Creates a device object, indexed by serial number
-    //Machine *CreateMachine(QString serial);
 
     QString getSerialPath () {return serialPath;}
     void setSerialPath (QString sp) {serialPath = sp;}
@@ -101,7 +99,6 @@ class SleepStyleLoader : public CPAPLoader
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   protected:
-//    QDateTime readFPDateTime(quint8 *data);
 
     QString last;
     QHash<QString, Machine *> MachList;

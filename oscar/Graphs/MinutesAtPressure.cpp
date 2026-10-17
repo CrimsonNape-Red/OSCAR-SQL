@@ -170,7 +170,6 @@ EventDataType msecToMinutes(EventDataType value) {
 
 EventDataType getSetting(Session * sess,ChannelID code) {
     if (!sess->settings.contains(code)) {
-        // qWarning() << "MinutesAtPressure could not find channel" << code;
         DEBUGCI QQ(MinutesAtPressure could not find channel,code) NAME(code);
         return -1;
     }
@@ -458,7 +457,6 @@ void RecalcMAP::updateTimesValues(qint64 d1,qint64 d2, int key,PressureInfo & in
 void RecalcMAP::updateTimes(PressureInfo & info) {
     qint64 d1,d2;
     qint64 minx=0,maxx=0;
-    //qint64 prevSessDuration=info.totalDuration;
     EventDataType gain;
     EventStoreType data, lastdata;
     qint64 time, lasttime;
@@ -1008,7 +1006,6 @@ void MapPainter::calculatePeakY(int peaktime ){
     yPixelsPerMsec = pixelsPerMinute/60000;
     yMinutesPerStep=step;
     peakMinutes = totalMinutes;
-    //DEBUG << O(drawingRect.height() ) << O(textHeight) << O(peaktime) << O(peakmult) << O(yPixelsPerMsec) << O(yMinutesPerStep) << O(peakMinutes) ;
 
 }
 
@@ -1035,7 +1032,6 @@ int MapPainter::drawYaxis(int peaktime) {
         GetTextExtent(label, labelWidth, labelHeight);
         widest_YAxis = qMax(widest_YAxis, labelWidth +8);
         graph.renderText(label, left-(labelWidth+8),  bot+labelHeight/2-2 );
-        //DEBUG << O(label) << O(bot) <<O(yPixelsPerStep) <<OO(bot,drawingRect.bottom()) ;
     }
     return widest_YAxis;
 }
@@ -1130,9 +1126,7 @@ void MapPainter::drawMetaData(QPoint& last_mouse , QString& topBarLabel,Pressure
         // calculated.  both the first and last times can be different for resmed machines. This can be confusing so don't display questionable data.
 
         topBarLabel = displayMetaData(ipap.chan.label(),minpressure, minpressure, maxpressure, timeString(ipap.totalDuration),"","");
-        //topBarLabel = displayMetaData(ipap.chan.label(),minpressure, minpressure, maxpressure, "" ,"","");
         //So just display original Label instead of total Duration.
-        // topBarLabel = QObject::tr("Peak %1").arg(msecToMinutes(qMax(ipap.peaktime, epap.peaktime)),1,'f',1);
         Q_UNUSED(maxpressure);
     } else {
         // Mouse is in the horizantile ploting area of all graphs.
@@ -1191,7 +1185,6 @@ void MapPainter::setPenColorAlpha(ChannelID channelId ,int opacity) {
         QColor color=schema::channel[channelId].defaultColor();
         if (opacity>0 &&  opacity<=255) {
             color.setAlpha(opacity);
-            //DEBUG << FULLNAME(channelId) << O(color.name()) << O(opacity);
         }
         linePen=QPen(color, AppSetting->lineThickness());
         pointEnhancePen =QPen(QColor(Qt::black), 2.5*AppSetting->lineThickness());
@@ -1279,7 +1272,6 @@ EventDataType MapPainter::drawSegment( int bucket ,EventDataType lastxp,EventDat
 void MapPainter::drawPoint(bool accent,int xp, int yp) {
         if (!graphSelected) return;
         if (yp>=drawingRect.bottom() && chanType!=schema::WAVEFORM) return;
-        //DEBUG << FULLNAME(info.code) << OO(id,channel.id());
         if (accent) {
             painter.setPen(pointEnhancePen);
         } else {
@@ -1300,7 +1292,6 @@ void MapPainter::drawPlot() {
 
         painter.setPen(linePen);
         for (int i=startGraphBucket; i<=endBucket; ++i,xp+=pixelsPerBucket) {
-            //DEBUG << O(i) << OO(data,dataArray[i]);
             bool accent = (i==mouseOverKey);
             if (!started ) {
                 if (dataArray[i]<=0) continue;
@@ -1308,11 +1299,7 @@ void MapPainter::drawPlot() {
                     //draw vertical line to first point.
                     started=true;
                     // following used to test Y axis labels position.
-                    //int tmp=dataArray[i];
-                    //if (tmp>61000 && tmp<63000) tmp=60000;
-                    //yp = dataToYaxis(tmp);
                     yp = dataToYaxis(dataArray[i]);
-                    //DEBUG << OO(bucket,i) <<O(xp) << O(yp) <<OO(msec,dataArray[i]);
                     painter.drawLine(xp ,drawingRect.bottom(), xp, yp);
                     drawPoint( accent ,xp, drawingRect.bottom());
                 } else {

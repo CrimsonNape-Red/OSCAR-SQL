@@ -72,7 +72,6 @@ class FPIconLoader : public CPAPLoader
     virtual const QString & loaderName() { return fpicon_class_name; }
 
     // ! \brief Creates a device object, indexed by serial number
-    //Machine *CreateMachine(QString serial);
 
     virtual MachineInfo newInfo() {
         return MachineInfo(MT_CPAP, 0, fpicon_class_name, QObject::tr("Fisher & Paykel"), QString(), QString(), QString(), QObject::tr("ICON"), QDateTime::currentDateTime(), fpicon_data_version);

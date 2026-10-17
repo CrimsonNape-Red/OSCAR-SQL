@@ -1455,7 +1455,6 @@ bool YuwellFormatD::OpenSession(Machine *mach, const QString & filename)
                 sess->settings[CPAP_PressureMax] = -1;
             }
 
-            // sess->settings[Yuwell_Humidity] = humidity;
             sess->settings[Yuwell_Ramp] = ramp;
         }
         bysFile.close();

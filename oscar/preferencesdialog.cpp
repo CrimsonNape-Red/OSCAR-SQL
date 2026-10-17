@@ -77,7 +77,6 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     channeltype[schema::UNKNOWN] = tr("Always Minor");
     bool haveResMed = false;
     QList<Machine *> machines = profile->GetMachines(MT_CPAP);
-    //  qDebug() << "Machine list size is" << machines.size();
     if ( machines.size() > 0 ) {
         for (QList<Machine *>::iterator it = machines.begin(); it != machines.end(); ++it) {
             const QString & mclass=(*it)->loaderName();
@@ -137,10 +136,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
         shortformat.replace("yy", "yyyy");
     }
 
-    //    Qt::DayOfWeek dow = firstDayOfWeekFromLocale();
 
-    //    QTextCharFormat format = ui->startedUsingMask->calendarWidget()->weekdayTextFormat(Qt::Saturday);
-    //    format.setForeground(QBrush(Qt::black, Qt::SolidPattern));
 
     if (profile == nullptr) {
         qCritical() << "Preferences dialog created without legit profile object";
@@ -148,8 +144,6 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     }
     ui->tabWidget->setCurrentIndex(0);
 
-    //i=ui->timeZoneCombo->findText((*profile)["TimeZone"].toString());
-    //ui->timeZoneCombo->setCurrentIndex(i);
 
     ui->showLeakRedline->setChecked(profile->cpap->showLeakRedline());
     ui->leakRedlineSpinbox->setValue(profile->cpap->leakRedline());
@@ -206,32 +200,24 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     // If the current font is the system font, setCurrentFont() won't work as intended,
     // so select the font by searching for its name, which will always work.
     ui->applicationFont->setCurrentIndex(ui->applicationFont->findText(QApplication::font().family()));
-    //ui->applicationFont->setFont(QApplication::font());
     ui->applicationFontSize->setValue(QApplication::font().pointSize());
     ui->applicationFontBold->setChecked(QApplication::font().weight() == QFont::Bold);
     ui->applicationFontItalic->setChecked(QApplication::font().italic());
-    //    ui->applicationFont->setEditable(false);
 
     ui->graphFont->setCurrentFont(*defaultfont);
-    //ui->graphFont->setFont(*defaultfont);
     ui->graphFontSize->setValue(defaultfont->pointSize());
     ui->graphFontBold->setChecked(defaultfont->weight() == QFont::Bold);
     ui->graphFontItalic->setChecked(defaultfont->italic());
-    //    ui->graphFont->setEditable(false);
 
     ui->titleFont->setCurrentFont(*mediumfont);
-    //ui->titleFont->setFont(*mediumfont);
     ui->titleFontSize->setValue(mediumfont->pointSize());
     ui->titleFontBold->setChecked(mediumfont->weight() == QFont::Bold);
     ui->titleFontItalic->setChecked(mediumfont->italic());
-    //    ui->titleFont->setEditable(false);
 
     ui->bigFont->setCurrentFont(*bigfont);
-    //ui->bigFont->setFont(*bigfont);
     ui->bigFontSize->setValue(bigfont->pointSize());
     ui->bigFontBold->setChecked(bigfont->weight() == QFont::Bold);
     ui->bigFontItalic->setChecked(bigfont->italic());
-    //    ui->bigFont->setEditable(false);
 
     ui->lineThicknessSlider->setValue(AppSetting->lineThickness()*2.0);
     ui->gridLineOpacitySlider->setValue(AppSetting->gridLineOpacity());
@@ -242,7 +228,6 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->useAntiAliasing->setChecked(AppSetting->antiAliasing());
     ui->usePixmapCaching->setChecked(AppSetting->usePixmapCaching());
     ui->useSquareWavePlots->setChecked(AppSetting->squareWavePlots());
-    //    ui->enableGraphSnapshots->setChecked(AppSetting->graphSnapshots());
     ui->graphTooltips->setChecked(AppSetting->graphTooltips());
     ui->allowYAxisScaling->setChecked(AppSetting->allowYAxisScaling());
     ui->combineSimilarMachines->setChecked(AppSetting->combineSimilarMachines());
@@ -308,7 +293,6 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
 
     ui->skipEmptyDays->setChecked(profile->general->skipEmptyDays());
     ui->showUnknownFlags->setChecked(profile->general->showUnknownFlags());
-    //  ui->enableMultithreading->setChecked(AppSetting->multithreading());
     ui->enableMultithreading->setVisible(false);
     ui->removeCardNotificationCheckbox->setChecked(AppSetting->removeCardReminder());
     ui->notifyMessageBoxCheckbox->setChecked(AppSetting->notifyMessagBoxOption());
@@ -325,7 +309,6 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
 
     ui->tooltipTimeoutSlider->setValue(AppSetting->tooltipTimeout());
     on_tooltipTimeoutSlider_valueChanged(ui->tooltipTimeoutSlider->value());
-    //ui->tooltipMS->display(profile->general->tooltipTimeout());
 
     ui->scrollDampeningSlider->setValue(AppSetting->scrollDampening() / 10);
     on_scrollDampeningSlider_valueChanged(ui->scrollDampeningSlider->value());
@@ -462,8 +445,6 @@ public:
 QWidget *SpinBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const
 {
     QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
-    //editor->setMinimum(0);
-    //editor->setMaximum(100.0);
 
     return editor;
 }
@@ -516,8 +497,6 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
         if (it.key() == schema::UNKNOWN) continue;
         combo->addItem(it.value());
     }
-    //editor->setMinimum(0);
-    //editor->setMaximum(100.0);
 
     return combo;
 }
@@ -845,7 +824,6 @@ bool PreferencesDialog::Save()
 
     int rdi_set = profile->general->calculateRDI() ? 1 : 0;
     if (rdi_set != ui->eventIndexCombo->currentIndex()) {
-        //recalc_events=true;
         needs_reload  = true;
     }
 
@@ -871,7 +849,6 @@ bool PreferencesDialog::Save()
 
     // Restart if turning user event flagging on/off
     if (profile->cpap->userEventFlagging() != ui->customEventGroupbox->isChecked()) {
-        // if (profile->cpap->userEventFlagging()) {
         // Don't bother recalculating, just switch off
         needs_reload = true;
         //} else
@@ -964,7 +941,6 @@ bool PreferencesDialog::Save()
     AppSetting->setAntiAliasing(ui->useAntiAliasing->isChecked());
     AppSetting->setUsePixmapCaching(ui->usePixmapCaching->isChecked());
     AppSetting->setSquareWavePlots(ui->useSquareWavePlots->isChecked());
-    //    AppSetting->setGraphSnapshots(ui->enableGraphSnapshots->isChecked());
     AppSetting->setLineThickness(float(ui->lineThicknessSlider->value()) / 2.0);
     AppSetting->setGridLineOpacity(ui->gridLineOpacitySlider->value());
 
@@ -1114,7 +1090,6 @@ bool PreferencesDialog::Save()
 
     saveChanInfo();
     saveWaveInfo();
-    //qDebug() << "TODO: Save channels.xml to update channel data";
 
     p_pref->Save();
     profile->Save();
@@ -1130,7 +1105,6 @@ bool PreferencesDialog::Save()
     if (clicicalModeChanged) {
 
         // this fails - causing duplicate reload.
-        //QTimer::singleShot(0, mainwin, SLOT(reloadProfile()));
         // while this one works.
         mainwin->reloadProfile();
     } else
@@ -1267,45 +1241,18 @@ bool MySortFilterProxyModel::filterAcceptsRow(int source_row,
 
 // Might still be useful..
 //void PreferencesDialog::on_resetGraphButton_clicked()
-//{
-//    QString title = tr("Confirmation");
-//    QString text  = tr("Are you sure you want to reset your graph preferences to the defaults?");
-//    StandardButtons buttons = QMessageBox::Yes | QMessageBox::No;
-//    StandardButton  defaultButton = QMessageBox::No;
 
 //    // Display confirmation dialog.
-//    StandardButton choice = QMessageBox::question(this, title, text, buttons, defaultButton);
 
-//    if (choice == QMessageBox::No) {
-//        return;
-//    }
 
-//    gGraphView *views[3] = {0};
-//    views[0] = mainwin->getDaily()->graphView();
-//    views[1] = mainwin->getOverview()->graphView();
 
 //    // Iterate over all graph containers.
-//    for (unsigned j = 0; j < 3; j++) {
-//        gGraphView *view = views[j];
 
-//        if (!view) {
-//            continue;
-//        }
 
 //        // Iterate over all contained graphs.
-//        for (int i = 0; i < view->size(); i++) {
-//            gGraph *g = (*view)[i];
 //            g->setRecMaxY(0); // FIXME: should be g->reset(), but need other patches to land.
-//            g->setRecMinY(0);
-//            g->setVisible(true);
-//        }
 
-//        view->updateScale();
-//    }
 
-//    resetGraphModel();
-//    ui->graphView->update();
-//}
 
 void PreferencesDialog::on_createSDBackups_toggled(bool checked)
 {

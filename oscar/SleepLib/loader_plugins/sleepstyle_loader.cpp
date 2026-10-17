@@ -326,43 +326,13 @@ int SleepStyleLoader::OpenMachine(Machine *mach, const QString & path, const QSt
 
     }
 
-        //    qDebug() << "Unmatched Sessions";
         //    QList<FPWaveChunk> chunks;
-        //    for (QMap<int,QDate>::iterator dit=FLWDate.begin();dit!=FLWDate.end();dit++) {
-        //        int k=dit.key();
         //        //QDate date=dit.value();
         ////        QList<Session *> values = SessDate.values(date);
-        //        for (int j=0;j<FLWTS[k].size();j++) {
 
-        //            FPWaveChunk chunk(FLWTS[k].at(j),FLWDuration[k].at(j),k);
-        //            chunk.flow=FLWMapFlow[k].at(j);
-        //            chunk.leak=FLWMapLeak[k].at(j);
-        //            chunk.pressure=FLWMapPres[k].at(j);
 
-        //            chunks.push_back(chunk);
 
-        //            zz=FLWTS[k].at(j)/1000;
-        //            dur=double(FLWDuration[k].at(j))/60000.0;
-        //            bool b,c=false;
-        //            if (Sessions.contains(zz)) b=true; else b=false;
-        //            if (b) {
-        //                if (Sessions[zz]->channelDataExists(CPAP_FlowRate)) c=true;
-        //            }
-        //            qDebug() << k << "-" <<j << ":" << zz << qRound(dur) << "minutes" << (b ? "*" : "") << (c ? QDateTime::fromSecsSinceEpoch(zz).toString() : "");
-        //        }
-        //    }
-        //    std::sort(chunks.begin(), chunks.end());
         //    bool b,c;
-        //    for (int i=0;i<chunks.size();i++) {
-        //        const FPWaveChunk & chunk=chunks.at(i);
-        //        zz=chunk.st/1000;
-        //        dur=double(chunk.duration)/60000.0;
-        //        if (Sessions.contains(zz)) b=true; else b=false;
-        //        if (b) {
-        //            if (Sessions[zz]->channelDataExists(CPAP_FlowRate)) c=true;
-        //        }
-        //        qDebug() << chunk.file << ":" << i << zz << dur << "minutes" << (b ? "*" : "") << (c ? QDateTime::fromSecsSinceEpoch(zz).toString() : "");
-        //    }
 
     int c = Sessions.size();
     qDebug() << "SS Loader found" << c << "sessions";
@@ -396,14 +366,9 @@ quint32 ssconvertDate(quint32 timestamp)
     QDateTime dt = QDateTime(QDate(year, month, day), QTime(hour, minute, second), QTimeZone("UTC"));
 
 #ifdef DEBUGSS
-//    qDebug().noquote() << "SS timestamp" << timestamp << year << month << day << dt << hour << minute << second;
 #endif
 
-//    Q NO!!! _ASSERT(dt.isValid());
-//    if ((year == 2013) && (month == 9) && (day == 18)) {
 //        // this is for testing.. set a breakpoint on here and
-//        int i=5;
-//    }
 
 
     // From Rudd's data set compared to times reported from his F&P software's report (just the time bits left over)
@@ -462,7 +427,6 @@ bool SleepStyleLoader::OpenRealTime(Machine *mach, const QString & fname, const 
         return true;
     }
 
-//    sess->updateFirst(edf.startdate);
     sess->really_set_first(edf.startdate);
 
     qint64 duration = edf.GetNumDataRecords() * edf.GetDurationMillis();
@@ -926,18 +890,13 @@ bool SleepStyleLoader::OpenDetail(Machine *mach, const QString & filename)
         sess->really_set_first(ti);
         long PRSessCount = 0;
 
-//fastleak        EventList *LK = sess->AddEventList(CPAP_LeakTotal, EVL_Event, 1);
         EventList *PR = sess->AddEventList(CPAP_Pressure, EVL_Event, 0.1F);
         EventList *OA = sess->AddEventList(CPAP_Obstructive, EVL_Event);
         EventList *CA = sess->AddEventList(CPAP_ClearAirway, EVL_Event);
         EventList *H =  sess->AddEventList(CPAP_Hypopnea, EVL_Event);
         EventList *FL = sess->AddEventList(CPAP_FlowLimit, EVL_Event);
         EventList *SA = sess->AddEventList(CPAP_SensAwake, EVL_Event);
-//        EventList *CA = sess->AddEventList(CPAP_ClearAirway, EVL_Event);
-//        EventList *UA = sess->AddEventList(CPAP_Apnea, EVL_Event);
 // For testing to determine which bit is for which event type:
-//        EventList *UF1 = sess->AddEventList(CPAP_UserFlag1, EVL_Event);
-//        EventList *UF2 = sess->AddEventList(CPAP_UserFlag2, EVL_Event);
 
         unsigned stidx = start[r];
         int rec = records[r];
@@ -1007,9 +966,6 @@ bool SleepStyleLoader::OpenDetail(Machine *mach, const QString & filename)
         sess->setSummaryOnly(false);
         sess->UpdateSummaries();
 
-        //  sess->really_set_last(ti-360000L);
-        //        sess->SetChanged(true);
-        //       addSession(sess,profile);
     }
 
     return 1;
@@ -1065,6 +1021,5 @@ void SleepStyleLoader::Register()
 
     qDebug() << "Registering F&P Sleepstyle Loader";
     RegisterLoader(new SleepStyleLoader());
-    //InitModelMap();
     sleepstyle_initialized = true;
 }

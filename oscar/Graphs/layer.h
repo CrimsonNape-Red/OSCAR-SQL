@@ -154,8 +154,6 @@ class Layer
 
     //! \brief Return this Layers Layout Position.
     LayerPosition position() { return m_position; }
-    //void X() { return m_X; }
-    //void Y() { return m_Y; }
 
 //    //! \brief Draw all this layers custom GLBuffers (ie. the actual OpenGL Vertices)
 //    virtual void drawGLBuf(float linesize);
@@ -170,8 +168,6 @@ class Layer
 
   protected:
 //    //! \brief Add a GLBuffer (vertex) object customized to this layer
-//    void addGLBuf(GLBuffer *buf) { mgl_buffers.push_back(buf); }
-//    void addVertexBuffer(gVertexBuffer *buf) { mv_buffers.push_back(buf); }
 
     //QRect bounds; // bounds, relative to top of individual graph.
     Day *m_day;

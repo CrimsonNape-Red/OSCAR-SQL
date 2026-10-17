@@ -110,7 +110,6 @@ void gFlagsGroup::SetDay(Day *d)
     delete_flag_lines();
     lvisible.clear();
     for (const auto code : availableChans) {
-//        const schema::Channel & chan = schema::channel[code];
         gFlagsLine * fl = new gFlagsLine(code);
         fl->SetDay(d);
         lvisible.push_back(fl);
@@ -280,9 +279,7 @@ void gFlagsGroup::paint(QPainter &painter, gGraph &g, const QRegion &region)
 bool gFlagsGroup::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
 {
 
-    //if (p_profile->appearance->lineCursorMode()) {
         graph->timedRedraw(0);
-   // }
 
     if (!AppSetting->graphTooltips()) {
         return false;
@@ -487,7 +484,6 @@ void gFlagsLine::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
                         painter.drawRect(x1-2, bartop-2, 4, bottom-bartop+4);
                         int x,y;
-//                        QString lab = QString("%1 (%2)").arg(schema::channel[m_code].fullname()).arg(*dptr);
                         QString lab = QString("%1").arg(schema::channel[m_code].fullname());
                         if (*dptr != 0)
                             lab += QString(" (%2)").arg(*dptr);
@@ -514,7 +510,6 @@ bool gFlagsLine::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
 {
     Q_UNUSED(event)
     Q_UNUSED(graph)
-    //  qDebug() << code() << event->x() << event->y() << graph->rect();
 
     return false;
 }

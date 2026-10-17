@@ -13,8 +13,6 @@
 
 
 int defaultTimeoutSeconds = 4 ;
-//QString defaultTimeoutMessage = QObject::tr("Notifcation expires in %1 seconds.\nTo Dismiss: Press Escape or Enter.");
-//QString timeoutStoppedMessage = QObject::tr("Timer Stopped.\nTo Dismiss: Press Escape or Enter.");
 QString defaultTimeoutMessage = QObject::tr("Notifcation expires in %1 seconds.");
 QString timeoutStoppedMessage = QObject::tr("");
 
@@ -35,8 +33,6 @@ QString timeoutStoppedMessage = QObject::tr("");
     {
         m_msgBox = new QMessageBox(QMessageBox::Information,m_title,m_message);
         //QFont boldFont;
-        //boldFont.setBold(true);
-        //m_msgBox->setFont(boldFont);
         m_msgBox->setWindowTitle(m_title);
         m_msgBox->setText(m_message);
 

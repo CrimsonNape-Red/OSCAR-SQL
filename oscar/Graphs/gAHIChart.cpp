@@ -88,7 +88,6 @@ void gAHIChart::afterDraw(QPainter & /*painter */, gGraph &graph, QRectF rect)
 {
     if (totaldays == nousedays) return;
 
-    //int size = idx_end - idx_start;
 
     bool skip = true;
     float med = 0;

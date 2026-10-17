@@ -18,7 +18,6 @@ class ResmedTests : public QObject
  
 private slots:
     void initTestCase();
-    //void testChunksToYaml();
     void testSessionsToYaml();
     void cleanupTestCase();
 };

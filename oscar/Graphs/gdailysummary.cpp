@@ -25,11 +25,6 @@ void gDailySummary::SetDay(Day *day)
     for (int i = 0; i < ahiChannels.size(); i++)
         piechans.append(ahiChannels.at(i));
 
-//    piechans.append(CPAP_ClearAirway);
-//    piechans.append(CPAP_AllApnea);
-//    piechans.append(CPAP_Obstructive);
-//    piechans.append(CPAP_Apnea);
-//    piechans.append(CPAP_Hypopnea);
     piechans.append(CPAP_RERA);
     piechans.append(CPAP_FlowLimit);
 
@@ -196,34 +191,18 @@ void gDailySummary::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     int top = rect.top()-10;
     int left = rect.left();
-    //int width = rect.width();
     int height = rect.height()+10;
 
     // Draw bounding box
     painter.setPen(QColor(Qt::black));
- //   painter.drawRect(QRect(left,top,width,height),5,5);
 
 
     QRectF rect1, rect2;
     int size;
 
 
-//    QFontMetrics fm(*mediumfont);
-//    top += fm.height();
-//    painter.setFont(*mediumfont);
-//    size = info_values.size();
 //
-//    for (int i=0; i < size; ++i) {
-//        rect1 = QRect(0,0,200,100), rect2 = QRect(0,0,200,100);
-//        rect1 = painter.boundingRect(rect1, info_labels.at(i));
-//        w.renderText(info_labels.at(i), column, row, 0, Qt::black, mediumfont);
 
-//        rect2 = painter.boundingRect(rect2, info_values.at(i));
-//        w.renderText(info_values.at(i), column, row + rect1.height(), 0, Qt::black, mediumfont);
-//        column += qMax(rect1.width(), rect2.width()) + 15;
-//    }
-//    row += rect1.height()+rect2.height()-5;
-//    column = left + 10;
 
     float row = top + 10;
     float column = left+10;
@@ -303,10 +282,8 @@ void gDailySummary::paint(QPainter &painter, gGraph &w, const QRegion &region)
         rect1 = painter.boundingRect(rect1, Qt::AlignTop | Qt::AlignLeft, txt);
         rect1.setWidth(maxwidth);
         rect1.setHeight(rect1.height() * 1.25);
-//        painter.fillRect(rect1, QColor("orange"));
         painter.setPen(Qt::black);
         painter.drawText(rect1, Qt::AlignCenter, txt);
-//        painter.drawRoundedRect(rect1, 5, 5);
         ypos += rect1.height();
     }
 

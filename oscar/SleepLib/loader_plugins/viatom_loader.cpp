@@ -170,7 +170,6 @@ Session* ViatomLoader::ParseFilePOD2(const QString & filename, bool *existing)
     Machine *mach = p_profile->CreateMachine(info);
     if (mach->SessionExists(v->sessionid())) {
         // Skip already imported session
-        //qDebug() << filename << "session already exists, skipping" << v.sessionid();
         if (existing) {
             // Inform the caller (if they are interested) that this session was already imported
             *existing = true;
@@ -189,7 +188,6 @@ Session* ViatomLoader::ParseFilePOD2(const QString & filename, bool *existing)
     // Import data
     for (auto & rec : records)
     {
-        //qDebug() << "Timestamp: " << time_ms << "  POD2 Pulse: " << rec.hr << "  SPO2: " << rec.spo2;
         //I do not know if the POD 2 has the same limits as the other Viatom devices.
         //Lacking better information, I've kept the limit checks from the other Viatom devices.
         //In testing, there were some streaks of 0 values for SPO2 and HR
@@ -211,7 +209,6 @@ Session* ViatomLoader::ParseFilePOD2(const QString & filename, bool *existing)
             // The official software discards these readings.
             // TODO: Consider whether to import these as 60% since they reflect hypoxia.
             EndEventList(OXI_SPO2, time_ms);
-            //qDebug() << "<61% at" << QDateTime::fromMSecsSinceEpoch(time_ms);
         } else {
             // Viatom advertises (and graphs) a range of 70% - 99%, but apparently records down to 61%.
             // The official software graphs 61%-70% as 70%.
@@ -338,7 +335,6 @@ Session* ViatomLoader::ParseFileViatom(const QString & filename, bool *existing)
 
     if (mach->SessionExists(v->sessionid())) {
         // Skip already imported session
-        //qDebug() << filename << "session already exists, skipping" << v.sessionid();
         if (existing) {
             // Inform the caller (if they are interested) that this session was already imported
             *existing = true;
@@ -370,7 +366,6 @@ Session* ViatomLoader::ParseFileViatom(const QString & filename, bool *existing)
                 // The official software discards these readings.
                 // TODO: Consider whether to import these as 60% since they reflect hypoxia.
                 EndEventList(OXI_SPO2, time_ms);
-                //qDebug() << "<61% at" << QDateTime::fromMSecsSinceEpoch(time_ms);
             } else {
                 // Viatom advertises (and graphs) a range of 70% - 99%, but apparently records down to 61%.
                 // The official software graphs 61%-70% as 70%.
@@ -430,7 +425,6 @@ void ViatomLoader::EndEventList(ChannelID channel, qint64 /*t*/)
     if (C != nullptr) {
         // The below would be needed for square charts if the first sample represents
         // the 4 seconds following the starting timestamp:
-        //C->AddEvent(t, m_importLastValue[channel]);
 
         // Mark this channel's event list as ended.
         m_importChannels[channel] = nullptr;
@@ -460,7 +454,6 @@ ViatomLoader::Register()
     if (!viatom_initialized) {
         qDebug("Registering ViatomLoader");
         RegisterLoader(new ViatomLoader());
-        //InitModelMap();
         viatom_initialized = true;
     }
 }
@@ -603,14 +596,11 @@ bool ViatomFile::ParseHeader()
     CHECK_VALUE(header[15], 0);
     CHECK_VALUE(header[16], 0);
 
-    //int spo2_avg = header[17];
-    //int spo2_min = header[18];
     //int spo2_3pct = header[19];  // number of events
     //int spo2_4pct = header[20];  // number of events
     //CHECK_VALUE(header[21], 0);  // ??? sometimes nonzero; maybe pulse spike, not a threshold of SpO2 or pulse, not always smaller than spo2_4pct
     //int time_under_90pct = header[22] | (header[23] << 8);  // in seconds
     //int events_under_90pct = header[24];  // number of distinct events
-    //float o2_score = header[25] * 0.1;
     //CHECK_VALUES(header[26], 0, 4);  // number of steps taken (when nonzero, only reported by some models)
     CHECK_VALUE(header[27], 0);
     CHECK_VALUE(header[28], 0);
@@ -651,7 +641,6 @@ bool ViatomFile::ParseHeader()
         CHECK_VALUE(m_duration % m_record_count, 0);
     }
 
-    //qDebug().noquote() << m_file.fileName() << ts(m_timestamp) << dur(m_duration * 1000L) << ":" << m_record_count << "records @" << m_resolution << "ms";
 
     return true;
 }

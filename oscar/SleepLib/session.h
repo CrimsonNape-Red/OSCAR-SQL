@@ -83,7 +83,6 @@ class Session
     bool StoreSummaryToDatabase();
 
 //    //! \brief Save the Sessions Summary Indexes to the stream
-//    void StoreSummaryData(QDataStream & out) const;
 
     //! \brief Writes the Sessions EventLists to filename, in SleepLibs custom data format.
     bool StoreEvents();
@@ -94,10 +93,8 @@ class Session
     //! \brief Loads the Sessions EventLists from database (NEW - database storage)
     bool LoadEventsFromDatabase();
 
-    //bool Load(QString path);
 
 //    //! \brief Loads the Sessions Summary Indexes from stream
-//    void LoadSummaryData(QDataStream & in);
 
     //! \brief Loads the Sessions Summary Indexes from filename, from SleepLibs custom data format.
     // debug option is set to false because file errors are normal when there is summary but no details data
@@ -160,20 +157,8 @@ class Session
         qint64 duration=s_last - s_first;
         return duration<0?0:duration;
 //        qint64 t;
-//        int size = m_slices.size();
-//        if (size == 0) {
-//            t = (s_last - s_first);
 //        } else {
-//            t = 0;
-//            for (int i=0; i<size; ++i) {
-//                const SessionSlice & slice = m_slices.at(i);
-//                if (slice.status == MaskOn) {
-//                    t += slice.end - slice.start;
-//                }
-//            }
-//        }
 
-//        return t;
     }
 
     //! \brief Set this Sessions ID (Not does not update indexes)
@@ -355,9 +340,6 @@ class Session
             m_availableChannels.push_back(id);
         }
     }
-    //    void setMedian(ChannelID id,EventDataType val) { m_med[id]=val; }
-    //    void set90p(ChannelID id,EventDataType val) { m_90p[id]=val; }
-    //    void set95p(ChannelID id,EventDataType val) { m_95p[id]=val; }
     void setCph(ChannelID id, EventDataType val) { 
         m_cph[id] = val; 
         if (!m_availableChannels.contains(id)) {

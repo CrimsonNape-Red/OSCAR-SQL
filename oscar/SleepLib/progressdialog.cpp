@@ -71,7 +71,6 @@ void ProgressDialog::setProgressValue(int val)
 void ProgressDialog::setMessage(QString msg)
 {
     statusMsg->setText(msg);
-//    progress->raise();
     qDebug() << "progress msg" << msg;
 }
 

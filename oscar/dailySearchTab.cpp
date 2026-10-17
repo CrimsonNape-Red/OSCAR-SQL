@@ -262,7 +262,6 @@ void    DailySearchTab::createUi() {
         helpText->setSizePolicy( sizePolicyEE );
 
         helpButton->setStyleSheet( styleButton );
-        // helpButton->setText(tr("Help"));
         helpMode = true;
         on_helpButton_clicked();
 
@@ -321,7 +320,6 @@ void    DailySearchTab::createUi() {
         resultTable->setColumnWidth(DS_COL_LEFT, width);
 
         width = 30/*iconWidthPlus*/+QFontMetrics(this->font()).size(Qt::TextSingleLine ,clearButton->text()).width();
-        //width = clearButton->width();
         resultTable->setShowGrid(false);
 
 
@@ -395,7 +393,6 @@ QListWidgetItem* DailySearchTab::addCommandItem(QString str,int topic) {
     commandListItemMaxWidth = max (commandListItemMaxWidth, (width*percentX));
     commandListItemHeight = QFontMetricsF(this->font()).size(Qt::TextSingleLine , str).height();
     QAbstractButton* topicButton ;
-    //topicButton = new QCheckBox(str,commandList);
     topicButton = new QRadioButton(str,commandList);
     buttonGroup->addButton(topicButton,topic);
 
@@ -544,7 +541,6 @@ void    DailySearchTab::setState(STATE newState) {
             STATE prev=state;
             state = newState;
 
-            //DEBUGCI O(stateStr(prev)) O("==>") O(stateStr(state)) Q(matches.size());
             //enum STATE { reset , waitForSearchTopic   ,  matching , multpileMatches , waitForStart ,  autoStart , searching ,  endOfSeaching ,  waitForContinue , allApneaSelect , noDataFound};
             switch (state) {
                 case multpileMatches :
@@ -585,7 +581,6 @@ void    DailySearchTab::setState(STATE newState) {
                 case autoStart :
                     break;
                 case searching :
-                    //if (prev == searching) break;
                     matchButton->hide();
                     addMatchButton->hide();
                     hideResults(true);
@@ -636,7 +631,6 @@ QRegularExpression Match::searchPatterToRegex (QString searchPattern) {
 
 
         searchPattern = searchPattern.simplified();
-        //QString wilDebug = searchPattern;
         //
         // wildcard searches uses  '*' , '?' and '\'
         // '*' will match zero or more characters. '?' will match one character. the escape character '\' always matches the next character.
@@ -709,8 +703,6 @@ QRegularExpression Match::searchPatterToRegex (QString searchPattern) {
 
 
         // from AI
-        // QRegex convertedRegex =QRegex(searchPattern,Qt::CaseInsensitive, QRegex::RegExp);
-        // QRegularExpression convertedRegex(QRegularExpression::escape(searchPattern), QRegularExpression::CaseInsensitiveOption);
 
         // searchPattern = QString("^.*%1.*$").arg(searchPattern);       // add asterisk to end end points.
         QRegularExpression convertedRegex =QRegularExpression(searchPattern,QRegularExpression::CaseInsensitiveOption);
@@ -809,7 +801,6 @@ void DailySearchTab::setResult(int row,int column,QDate date,QString text) {
     GPushButton* item;
     if (header == nullptr) {
         item = new GPushButton(row,column,date,this);
-        //item->setStyleSheet("QPushButton {text-align: left;vertical-align:top;}");
         item->setStyleSheet(
             "QPushButton { text-align: left;color: black; border: 1px solid black; padding: 5px ;background-color:white; }" );
         resultTable->setCellWidget(row,column,item);
@@ -1020,7 +1011,6 @@ bool DailySearchTab::matchFind(Match* myMatch ,Day* day, QDate& date, Qt::Alignm
                                 EventList & ev=*(evlist.value()[z]);
                                 for (quint32 o=0;o<ev.count();o++) {
                                     int sec = evlist.value()[z]->raw(o);
-                                    //qint64 time = evlist.value()[z]->time(o);
                                     if (apneaLikeChannels.size()==1) {
                                         myMatch->updateMinMaxValues(sec);
                                     }
@@ -1182,8 +1172,6 @@ void    DailySearchTab::endOfPass() {
 }
 
 void    DailySearchTab::hideCommand(bool showButton) {
-        //operationCombo->hide();
-        //operationCombo->clear();
         operationButton->hide();
         selectDouble->hide();
         selectInteger->hide();
@@ -1346,8 +1334,6 @@ void    DailySearchTab::process_match_info(QString text, int topic) {
         if (match->operationOpCode == OP_NO_PARMS ) {
             // auto start searching
             setState (autoStart);
-            //match->units = "";
-            //match->compareString="";
             on_startButton_clicked();
             return;
         }
@@ -1485,7 +1471,6 @@ void    DailySearchTab::hideResults(bool hide) {
             }
         }
         progressBar->setMinimumHeight(matchButton->height());
-        //summaryWidget->setVisible(!hide);
 }
 
 QSize   DailySearchTab::textsize(QFont font ,QString text) {
@@ -1852,8 +1837,6 @@ GPushButton::GPushButton (int row,int column,QDate date,DailySearchTab* parent ,
 GPushButton::~GPushButton()
 {
         //the following disconnects trigger a crash during exit  or profile change. - anytime daily is destroyed.
-        //disconnect(this, SIGNAL(clicked()), this, SLOT(on_clicked()));
-        //disconnect(this, SIGNAL(activated(GPushButton*)), _parent, SLOT(on_activated(GPushButton*)));
 };
 
 void GPushButton::on_clicked() {
