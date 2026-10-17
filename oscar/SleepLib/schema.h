@@ -231,9 +231,6 @@ class ChannelList
     //! \brief Loads Channel list from XML file specified by filename
     bool Load(QString filename);
 
-    //! \brief Stores Channel list to XML file specified by filename
-    bool Save(QString filename = QString());
-
     void add(QString group, Channel *chan);
 
     //! \brief Looks up Channel in this List with the index idx, returns EmptyChannel if not found

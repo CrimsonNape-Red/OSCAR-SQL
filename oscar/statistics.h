@@ -118,16 +118,6 @@ struct StatisticsRow {
             return SC_AHI_RDI;
         } else if (calc.compare("hours", Qt::CaseInsensitive)==0) {
             return SC_HOURS;
-        #if 0
-        } else if (calc.compare("compliance", Qt::CaseInsensitive)==0) {
-            return SC_TOTAL_DAYS_PERCENT;
-        } else if (calc.compare("days", Qt::CaseInsensitive)==0) {
-            return SC_DAYS;
-        } else if (calc.compare("heading", Qt::CaseInsensitive)==0) {
-            return SC_HEADING;
-        } else if (calc.compare("subheading", Qt::CaseInsensitive)==0) {
-            return SC_SUBHEADING;
-        #endif
         }
         return SC_UNDEFINED;
     }

@@ -72,22 +72,6 @@ NotifyMessageBox* createNotifyMessageBox (
         int timeoutSeconds = 0 ,
         const QString& timeoutMessage = "" ) ;
 
-#if 0
-NotifyMessageBox* createNotifyMessageBox (
-        const QString& title, 
-        const QString& message, 
-        int timeoutSeconds = 0 , 
-        const QString& timeoutMessage = "" , 
-        QWidget* parent = nullptr);
-
-NotifyMessageBox* createNotifyMessageBox (
-        const QString& title, 
-        const QString& message, 
-        int timeoutSeconds = 0 , 
-        enum QMessageBox::Icon msgIcon = 
-        const QString& timeoutMessage = "" , 
-        QWidget* parent = nullptr);
-#endif
 
 #endif // NOTIFYMESSAGEBOX_H
 

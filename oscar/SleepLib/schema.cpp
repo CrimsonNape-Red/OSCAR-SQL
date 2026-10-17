@@ -113,13 +113,6 @@ void init()
     schema_initialized = true;
 
     EmptyChannel = Channel(0, DATA, MT_UNKNOWN, DAY, "Empty", "Empty", "Empty Channel", "", "");
-    #if 0 // SessionEnabledChannel is not used
-    SessionEnabledChannel = new Channel(1, DATA, MT_UNKNOWN, DAY, "Enabled", "Enabled", "Session Enabled", "", "");
-
-    channel.channels[1] = SessionEnabledChannel;
-    channel.names["Enabled"] = SessionEnabledChannel;
-    SESSION_ENABLED = 1;
-#endif  // SessionEnabledChannel is not used
     ChanTypes["data"] = DATA;
     //Types["waveform"]=WAVEFORM;
     ChanTypes["setting"] = SETTING;
@@ -790,70 +783,6 @@ void ChannelList::add(QString group, Channel *chan)
     }
 }
 
-#if 0 // Profile/User/chanels.xml is not read so it does not need to be saved
-bool ChannelList::Save(QString filename)
-{
-    if (filename.isEmpty())
-        return false;
-
-    qDebug() << "Schema::ChannelList::Save() saving " << filename;;
-
-    QDomDocument doc("channels");
-
-    QDomElement droot = doc.createElement(STR_AppName);
-    doc.appendChild(droot);
-
-    QDomElement root = doc.createElement("channels");
-    droot.appendChild(root);
-
-
-    for (auto git=groups.begin(), end=groups.end(); git != end; ++git) {
-        auto & chanlist = git.value();
-
-        QDomElement grp = doc.createElement("group");
-        grp.setAttribute("name", git.key());
-        root.appendChild(grp);
-        for (auto it = chanlist.begin(), cend=chanlist.end(); it!=cend; ++it) {
-            Channel * chan = it.value();
-            QDomElement cn = doc.createElement("channel");
-            cn.setAttribute("id", chan->id());
-            cn.setAttribute("code", it.key());
-            cn.setAttribute("label", chan->label());
-            cn.setAttribute("name", chan->fullname());
-            cn.setAttribute("description", chan->description());
-            cn.setAttribute("color", chan->defaultColor().name());
-            cn.setAttribute("upper", chan->upperThreshold());
-            cn.setAttribute("lower", chan->lowerThreshold());
-            cn.setAttribute("order", chan->order());
-            cn.setAttribute("type", chan->type());
-            cn.setAttribute("datatype", chan->datatype());
-            cn.setAttribute("overview", chan->showInOverview());
-            for (auto op=chan->m_options.begin(), opend=chan->m_options.end(); op!=opend; ++op) {
-                QDomElement c2 = doc.createElement("option");
-                c2.setAttribute("key", op.key());
-                c2.setAttribute("value", op.value());
-                cn.appendChild(c2);
-            }
-
-            //cn.appendChild(doc.createTextNode(i.value().toDateTime().toString("yyyy-MM-dd HH:mm:ss")));
-            grp.appendChild(cn);
-        }
-    }
-
-    QFile file(filename);
-
-    if (!file.open(QIODevice::WriteOnly)) {
-        qWarning() << "Could not open" << filename << "for writing, error code" << file.error() << file.errorString();
-        return false;
-    }
-
-    QTextStream ts(&file);
-    ts << doc.toString();
-    file.close();
-
-    return true;
-}
-#endif  // Profile/User/chanels.xml is not read so it does not need to be saved
 
 } // namespace
 

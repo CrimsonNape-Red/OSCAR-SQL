@@ -657,12 +657,6 @@ QRegularExpression Match::searchPatterToRegex (QString searchPattern) {
 
         static const QString metaClass = QString( "[ / \\\\ \\[ \\]  ( ) { } | + ^ . $ ? * - ]").replace(" ",""); // slash,bSlash,[,],(,),{,},+,^,.,$,?,*,-,|
         static const QRegularExpression metaCharRegex(metaClass);
-        #if 0
-        // Verify search pattern
-        if (!metaCharRegex.isValid()) {
-            return QRegularExpression();
-        }
-        #endif
 
         // regex meta characetrs. all regex meta character must be acounts to us regular expression to make wildcard work.
         // they will be escaped. except for * and ? which will be treated separately

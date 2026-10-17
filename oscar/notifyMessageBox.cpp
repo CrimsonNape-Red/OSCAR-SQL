@@ -142,18 +142,6 @@ NotifyMessageBox* createNotifyMessageBox (
         ) {
             return createNotifyMessageBox(title, message, timeoutSeconds, timeoutMessage,  parent);
         };
-#if 0
-NotifyMessageBox* createNotifyMessageBox (
-        QWidget* parent ,
-        const QString& title, 
-        const QString& message, 
-        enum QMessageBox::Icon msgIcon,
-        int timeoutSeconds ,
-        const QString& timeoutMessage 
-        ) {
-            return createNotifyMessageBox(title, message, timeoutSeconds, timeoutMessage,  parent);
-        };
-#endif
 
 
 

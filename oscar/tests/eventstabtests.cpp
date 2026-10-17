@@ -95,19 +95,6 @@ void EventsTabTests::initTestCase()
     // Make sure main window unset
     mainwin = nullptr;
 
-# if 0
-    // Alternative code using hidden main window
-    // NOTE: Not quite functional but would allow for better code coverage.
-
-    // Scan for user profiles (for automatic loading via mainwin)
-    Profiles::Scan();
-
-    // Startup hidden application
-    // note: The Daily view assumes various UI control setup
-    mainwin = new MainWindow();
-    mainwin->SetupGUI();                // needed for profile initialization
-    mainwin->hide();
-# endif
 
     // Explicitly load machine data
     qDebug() << "loading mocked up machine data";

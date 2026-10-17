@@ -1642,37 +1642,6 @@ Profile *Get()
 }
 
 //profiles.xml is never read so it does not need to be saved.
-#if 0
-void saveProfileList()
-{
-    QString filename = p_pref->Get("{home}/profiles.xml");
-
-    QDomDocument doc("profiles");
-
-    QDomElement root = doc.createElement("profiles");
-    doc.appendChild(root);
-
-    root.appendChild(doc.createComment("This file is created during Profile Scan for cloud access convenience, it's not used by Desktop version of OSCAR."));
-
-    for (auto it = profiles.begin(); it != profiles.end(); ++it) {
-        QDomElement elem = doc.createElement("profile");
-        elem.setAttribute("name", it.key());
-        // Not technically nessesary..
-        elem.setAttribute("path", QString("{home}/Profiles/%1/Profile.xml").arg(it.key()));
-        root.appendChild(elem);
-    }
-
-    QFile file(filename);
-    if (!file.open(QFile::WriteOnly)) {
-        qWarning() << "Could not open" << filename << "for writing, error code" << file.error() << file.errorString();
-        return;
-    }
-
-    file.write(doc.toByteArray());
-
-    file.close();
-}
-#endif
 
 int CleanupProfile(Profile *prof)
 {

@@ -26,28 +26,6 @@
 
 #define EXTRA_ASSERTS 1
 
-#if 0
-QDataStream & operator<<(QDataStream & stream, const DottedLine & dot)
-{
-    stream << dot.code;
-    stream << dot.type;
-    stream << dot.value;
-    stream << dot.visible;
-    stream << dot.available;
-    return stream;
-}
-QDataStream & operator>>(QDataStream & stream, DottedLine & dot)
-{
-    quint32 tmp;
-    stream >> dot.code;
-    stream >> tmp;
-    stream >> dot.value;
-    stream >> dot.visible;
-    stream >> dot.available;
-    dot.type = (ChannelCalcType)tmp;
-    return stream;
-}
-#endif
 
 QColor darken(QColor color, float p)
 {
