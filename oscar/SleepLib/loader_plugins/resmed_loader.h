@@ -10,6 +10,7 @@
 #ifndef RESMED_LOADER_H
 #define RESMED_LOADER_H
 
+#include <QFileInfoList>
 #include <QVector>
 #include <chrono>
 #include "SleepLib/machine.h" // Base class: MachineLoader
@@ -150,11 +151,20 @@ class ResmedLoader : public CPAPLoader
     void LogUnexpectedMessage(const QString & message);
 
 protected:
-//! \brief The STR.edf file is a unique edf file with many signals
+    //! \brief The STR.edf file is a unique edf file with many signals
     bool ProcessSTRfiles(Machine *, QMap<QDate, STRFile> &, QDate);
 
-    //! \brief Scan for new files to import, group into sessions and add to task que
-    int ScanFiles(Machine * mach, const QString & datalog_path, QDate firstImport);
+    //! \brief Scan for new files to import in the given datalog directory
+    //! \returns A QFileInfoList of files that are relevant to this import, including non-EDF files to be backed up
+    QFileInfoList scanDatalogFiles(const QString & datalogPath, const QDate & firstImport);
+
+    //! \brief Write a backup copy of the DATALOG files to the backup path provided, if backing up is enabled
+    //! \returns A QFileInfoList of the files at their now proper location, which shall be the backupPath if backup is enabled
+    QFileInfoList backupDatalogFiles(const QFileInfoList & datalogFiles, const QString & datalogPath, const QString & backupPath);
+
+    //! \brief Group EDF files into resdayList by ResMed (noon-split) day, keyed by filename without .gz.
+    //! Files without a .edf or .edf.gz extension are skipped
+    void populateResmedDayList(const QFileInfoList & files);
 
 //! \brief Write a backup copy to the backup path
     QString Backup(const QString & file, const QString & backup_path);
@@ -188,5 +198,20 @@ protected:
     QSet<QString> m_unexpectedMessages;
 
 };
+
+namespace resmed {
+
+//! Extract a date from a filename, taking into account Resmed's noon split
+QDate sleepDateFromFilename(const QString & filename);
+
+/*!
+ * \brief isImportableDatalogFile check if a file is importable. A file is importable
+ * if it is readable, non-empty and its name parses to at or after firstImport.
+ * The extension is not checked, so that non-EDF files are still backed up
+ * \return True if fi passes all checks, false otherwise
+ */
+bool isImportableDatalogFile(const QFileInfo & fi, const QDate & firstImport);
+
+}
 
 #endif // RESMED_LOADER_H

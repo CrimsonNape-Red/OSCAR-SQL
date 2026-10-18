@@ -37,6 +37,53 @@
     #define QTCOMBINE unite
 #endif
 
+// namespace for free functions to facilitate unittests
+namespace resmed {
+
+QDate sleepDateFromFilename(const QString & filename)
+{
+    auto datestr = filename.section("_", 0, 1);
+    auto datetime = QDateTime().fromString(datestr,"yyyyMMdd_HHmmss");
+    auto date = datetime.date();
+
+    // ResMed splits days at noon and now so do we, so all times before noon
+    // go to the previous day
+    if (datetime.time().hour() < 12) {
+        date = date.addDays(-1);
+    }
+    return date;
+}
+
+bool isImportableDatalogFile(const QFileInfo & fi, const QDate & firstImport)
+{
+    // A file is importable if it is at or later than firstImport, is readable
+    // and is not empty
+    QDate date = sleepDateFromFilename(fi.fileName());
+    if (!date.isValid()) {
+#ifdef SESSION_DEBUG
+        qDebug() << "Skipping file - filename doesn't have date" << fi.fileName();
+#endif
+        return false;
+    }
+    if (date < firstImport) {
+#ifdef SESSION_DEBUG
+        qDebug() << "Skipping file - ignore before" << fi.fileName();
+#endif
+        return false;
+    }
+    if (!fi.isReadable()) {
+        qWarning() << fi.fileName() << "is unreadable and has been ignored";
+        return false;
+    }
+    if (fi.size() == 0) {
+        qWarning() << fi.fileName() << "is empty and has been ignored";
+        return false;
+    }
+
+    return true;
+}
+
+} // namespace resmed
 
 ChannelID RMS9_EPR, RMS9_EPRLevel, RMS9_Mode, RMS9_SmartStart, RMS9_HumidStatus, RMS9_HumidLevel,
          RMS9_PtAccess, RMS9_Mask, RMS9_ABFilter, RMS9_ClimateControl, RMS9_TubeType, RMAS11_SmartStop,
@@ -841,15 +888,17 @@ void edfDebugInit();
     if (impfile.exists())
         impfile.remove();
 
-    emit updateMessage(QObject::tr("Cataloguing EDF Files..."));
-    QApplication::processEvents();
-
     if (isAborted())
         return 0;
 
     qDebug() << "ResmedLoader::Open: Starting scan of DATALOG";
-    dir.setPath(datalogPath);
-    ScanFiles(mach, datalogPath, firstImportDay);
+    auto datalogFiles = scanDatalogFiles(datalogPath, firstImportDay);
+
+    datalogFiles = backupDatalogFiles(datalogFiles, datalogPath, mach->getBackupPath());
+
+    // This should be extremely fast (dozens of ms) so no need for a separate update message
+    populateResmedDayList(datalogFiles);
+
     if (isAborted())
         return 0;
 
@@ -1069,180 +1118,195 @@ void ResmedLoader::checkSummaryDay( ResMedDay & resday, QDate date, Machine * ma
     queTask(rdt);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-// Sorted EDF files that need processing into date records according to ResMed noon split
-///////////////////////////////////////////////////////////////////////////////////////////
-int ResmedLoader::ScanFiles(Machine * mach, const QString & datalog_path, QDate firstImport)
+QFileInfoList ResmedLoader::scanDatalogFiles(const QString & datalogPath, const QDate & firstImport)
 {
     QElapsedTimer time;
-
-    bool create_backups = p_profile->session->backupCardData();
-    QString backup_path = mach->getBackupPath();
-
-    if (datalog_path == (backup_path + RMS9_STR_datalog + "/")) {
-        // Don't create backups if importing from backup folder
-        create_backups = false;
-    }
-
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // Generate list of files for later processing
     ///////////////////////////////////////////////////////////////////////////////////////
-    qDebug() << "Generating list of EDF files";
-    qDebug() << "First Import date is " << firstImport;
+    qDebug() << "Generating list of DATALOG files, first import date is" << firstImport;
 
     time.start();
 
-    QDir dir(datalog_path);
+    QDir dir(datalogPath);
 
     // First list any EDF files in DATALOG folder - Series 9 devices
-    QStringList filter;
-    filter << "*.edf";
+    QStringList filter({"*.edf", "*.edf.gz"});
     dir.setNameFilters(filter);
-    QFileInfoList EDFfiles = dir.entryInfoList();
+    dir.setFilter(QDir::Files);
+    const QFileInfoList s9FileList = dir.entryInfoList();
 
-    // Scan through all folders looking for EDF files, skip any already imported and peek inside to get durations
-
+    // Now list all subdirectories of DATALOG
     dir.setNameFilters(QStringList());
     dir.setFilter(QDir::Dirs | QDir::Hidden | QDir::NoDotAndDotDot);
-    QString filename;
-    bool ok;
+    const QFileInfoList dirList = dir.entryInfoList();
+    // totalEntries allows us to update the progress bar sensibly
+    const qint32 totalEntries = s9FileList.size() + dirList.size();
 
-    QFileInfoList dirlist = dir.entryInfoList();
-    int dirlistSize = dirlist.size();
+    QFileInfoList datalogFiles;
+    if (totalEntries == 0)
+        return datalogFiles;
 
+    int pbarFreq = totalEntries / 8;
+    if (pbarFreq < 1)
+        pbarFreq = 1;
+    emit updateMessage(QObject::tr("Cataloguing EDF Files..."));
+    emit setProgressValue(0);
+    emit setProgressMax(totalEntries);
+    QApplication::processEvents();
+
+    qint32 entriesProcessed = 0;
+    for (const auto & fi : s9FileList) {
+        if (isAborted())
+            return QFileInfoList();
+
+        if ((++entriesProcessed) % pbarFreq == 0) {
+            emit setProgressValue(entriesProcessed);
+            QApplication::processEvents();
+        }
+
+        if (resmed::isImportableDatalogFile(fi, firstImport))
+            datalogFiles.append(fi);
+    }
 
     // Scan for any sub folders and create files lists
-    for (int i = 0; i < dirlistSize ; i++) {
-        const QFileInfo & fi = dirlist.at(i);
-        filename = fi.fileName();
+    for (const auto & di : dirList) {
+        if (isAborted())
+            return QFileInfoList();
 
-        int len = filename.length();
+        QString dirname = di.fileName();
+
+        if ((++entriesProcessed) % pbarFreq == 0) {
+            emit setProgressValue(entriesProcessed);
+            QApplication::processEvents();
+        }
+
+        int len = dirname.length();
         if (len == 4) {                    // This is a year folder in BackupDATALOG
-            filename.toInt(&ok);
+            bool ok;
+            dirname.toInt(&ok);
             if ( ! ok ) {
-                qDebug() << "Skipping directory - bad 4-letter name" << filename;
+                qDebug() << "Skipping directory - bad 4-letter name" << dirname;
                 continue;
             }
         } else if (len == 8) {        // test directory date
-            QDate dirDate = QDate().fromString(filename, "yyyyMMdd");
+            QDate dirDate = QDate().fromString(dirname, "yyyyMMdd");
             if (dirDate < firstImport) {
 #ifdef SESSION_DEBUG
-                qDebug() << "Skipping directory - ignore before " << filename;
+                qDebug() << "Skipping directory - ignore before " << dirname;
 #endif
                 continue;
             }
         } else {
-            qDebug() << "Skipping directory - bad name size" << filename;
+            qDebug() << "Skipping directory - bad name size" << dirname;
             continue;
         }
-        // Get file lists under this directory
-        dir.setPath(fi.canonicalFilePath());
+
+        // List all files in this directory
+        dir.setPath(di.canonicalFilePath());
         dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
         dir.setSorting(QDir::Name);
 
-        // Append all files to one big QFileInfoList
-        EDFfiles.append(dir.entryInfoList());
+        for (const auto & fi : dir.entryInfoList()) {
+            if (resmed::isImportableDatalogFile(fi, firstImport))
+                datalogFiles.append(fi);
+        }
     }
-    qDebug().noquote() << "Generating" << EDFfiles.size() << "EDF files list took" << durationString(elapsedDuration(time));
+    qDebug().noquote() << "Scanning" << datalogFiles.size() << "DATALOG files took" << durationString(elapsedDuration(time));
 
-    ////////////////////////////////////////////////////////////////////////////////////////
-    // Scan through EDF files, Extracting EDF Durations, and skipping already imported files
-    // Check for duplicates along the way from compressed/uncompressed files
-    ////////////////////////////////////////////////////////////////////////////////////////
+    return datalogFiles;
+}
 
+QFileInfoList ResmedLoader::backupDatalogFiles(const QFileInfoList & datalogFiles, const QString & datalogPath, const QString & backupPath)
+{
+    // Nothing to do if the profile settings say don't backup, if there are no files
+    // or if the backup path is the one we are reading from
+    if ( ! p_profile->session->backupCardData() || datalogFiles.empty() || datalogPath == (backupPath + RMS9_STR_datalog + "/") ) {
+        // Backup is disabled or not needed, the incoming file list is valid as the final list to return to caller
+        return datalogFiles;
+    }
+
+    QElapsedTimer time;
     time.start();
-    QString datestr;
-    QDateTime datetime;
-    QDate date;
-    int totalfiles = EDFfiles.size();
+    int totalfiles = datalogFiles.size();
 
     // Calculate number of files for progress bar for this stage
     int pbarFreq = totalfiles / 50;
     if (pbarFreq < 1) // stop a divide by zero
         pbarFreq = 1;
 
+    emit updateMessage(QObject::tr("Backing up EDF Files..."));
     emit setProgressValue(0);
     emit setProgressMax(totalfiles);
-    QCoreApplication::processEvents();
+    QApplication::processEvents();
+
+    // If we are here then we are backing up all the files that aren't in the backup location
+    QFileInfoList backupFiles;
+    backupFiles.reserve(totalfiles);
 
     for (int i=0; i < totalfiles; ++i) {
         if (isAborted())
-            return 0;
+            return QFileInfoList();
 
-        const QFileInfo & fi = EDFfiles.at(i);
+        const QFileInfo & fi = datalogFiles[i];
 
         // Update progress bar
         if ((i % pbarFreq) == 0) {
             emit setProgressValue(i);
-            QCoreApplication::processEvents();
+            QApplication::processEvents();
         }
 
-        // Forget about it if it can't be read.
-        if (!fi.isReadable()) {
-            qWarning() << fi.fileName() << "is unreadable and has been ignored";
+        QString fullpath = fi.filePath();
+        QString newpath = Backup(fullpath, backupPath);
+        if (newpath.isEmpty())
             continue;
-        }
+        backupFiles.append(QFileInfo(newpath));
+    }
+    qDebug().noquote() << "Backing up" << backupFiles.size() << "DATALOG files took" << durationString(elapsedDuration(time));
 
-        // Skip empty files
-        if (fi.size() == 0) {
-            qWarning() << fi.fileName() << "is empty and has been ignored";
-            continue;
-        }
+    return backupFiles;
+}
 
-        filename = fi.fileName();
+void ResmedLoader::populateResmedDayList(const QFileInfoList & files)
+{
+    QElapsedTimer time;
+    time.start();
+    for (const auto & file : files) {
+        QString filename = file.fileName();
 
-        datestr = filename.section("_", 0, 1);
-        datetime = QDateTime().fromString(datestr,"yyyyMMdd_HHmmss");
-        date = datetime.date();
-        // ResMed splits days at noon and now so do we, so all times before noon
-        // go to the previous day
-        if (datetime.time().hour() < 12) {
-            date = date.addDays(-1);
-        }
-
-        if (date < firstImport) {
+        // Only .edf and .edf.gz files are imported. Other files (e.g. .crc) were only
+        // listed so they'd be backed up, and must not become keys in ResMedDay::files
+        // because checkSummaryDay counts those keys to estimate the session count
+        QString lcFilename = filename.toLower();
+        if (!(lcFilename.endsWith(STR_ext_EDF) || lcFilename.endsWith(STR_ext_EDF_gz))) {
 #ifdef SESSION_DEBUG
-            qDebug() << "Skipping file - ignore before " << filename;
+            qDebug() << "Skipping file - invalid extension" << filename;
 #endif
             continue;
         }
 
-        // Chop off the .gz component if it exists, it's not needed at this stage
-        if (filename.endsWith(STR_ext_gz)) {
-            filename.chop(3);
-        }
-        QString fullpath = fi.filePath();
+        QDate date = resmed::sleepDateFromFilename(filename);
 
-        QString newpath = create_backups ? Backup(fullpath, backup_path) : fullpath;
-
-        // Accept only .edf and .edf.gz files
-        if (filename.right(4).toLower() != ("."+STR_ext_EDF))
-            continue;
-
-
-        // Find or create ResMedDay object for this date
+        // Find the ResMedDay for that day in resdayList (map QDate |-> ResMedDay)
         auto rd = resdayList.find(date);
         if (rd == resdayList.end()) {
-            rd = resdayList.insert(date, ResMedDay(date));
-            rd.value().date = date;
-
             // We have data files without STR.edf record... the user MAY be planning on importing from another backup
             // later which could cause problems if we don't deal with it.
             // Best solution I can think of is import and tag the day No Settings and skip the day from overview.
+            rd = resdayList.insert(date, ResMedDay(date));
         }
-        ResMedDay & resday = rd.value();
 
-        if ( ! resday.files.contains(filename)) {
-            resday.files[filename] = newpath;
-        }
+        // Add the file to that day's ResMedDay::files, a map of
+        // filename (with any .gz removed) |-> full path. The first of a .edf/.edf.gz pair wins.
+        if (filename.endsWith(STR_ext_gz, Qt::CaseInsensitive))
+            filename.chop(STR_ext_gz.size());
+        if (!rd.value().files.contains(filename))
+            rd.value().files[filename] = file.absoluteFilePath();
     }
-    qDebug().noquote() << "Scanning EDF files took" << durationString(elapsedDuration(time));
 
-    qDebug() << "resdayList size is" << resdayList.size();
-
-    return resdayList.size();
-}           // end of scanFiles
+    qDebug().noquote() << "Grouping into" << resdayList.size() << "days took" << durationString(elapsedDuration(time));
+}
 
 QString ResmedLoader::Backup(const QString & fullname, const QString & backup_path)
 {
@@ -2249,7 +2313,7 @@ void backupSTRfiles( const QString strpath, const QString importPath, const QStr
             }
         }
         // now create the new backup name
-        QString newname = "STR-"+date.toString("yyyyMMdd")+"."+STR_ext_EDF;
+        QString newname = "STR-"+date.toString("yyyyMMdd")+STR_ext_EDF;
         QString backupfile = backupPath+"/STR_Backup/"+newname;
 
         QString gzfile = backupfile + STR_ext_gz;

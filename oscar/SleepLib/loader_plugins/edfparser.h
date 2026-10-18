@@ -19,8 +19,9 @@
 
 #include "SleepLib/common.h"
 
-const QString STR_ext_EDF = "edf";
+const QString STR_ext_EDF = ".edf";
 const QString STR_ext_gz = ".gz";
+const QString STR_ext_EDF_gz = ".edf.gz";
 
 const char AnnoSep = 20;
 const char AnnoDurMark = 21;
