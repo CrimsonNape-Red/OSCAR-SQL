@@ -4,6 +4,32 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-17 - Unit tests stopped under a debugger; test exit code was always 0 (#330)
+
+**Files:** `oscar/tests/importhandovertests.cpp`, `oscar/main.cpp`
+
+**Symptom:** Under gdb, `test.exe` stopped with SIGSEGV during `ImportHandoverTests`, in
+Qt's thread cleanup (`qthread_win.cpp`, `tls_callback` in Qt6Core). Run normally, the suite
+finished and exited 0 even when tests failed.
+
+**Root cause:** Two separate problems.
+- The `Requester` test helper ran `send()` on a `std::thread`. With MinGW, when a
+  winpthread thread that used Qt exits, Qt's `thread_local` cleanup reads its per-thread
+  data pointer as null and faults. Windows ignores a fault raised during thread exit, so the
+  tests carried on, but a debugger stops on it. A minimal program without OSCAR code
+  reproduces it; the same work on a `QThread` does not. The application itself uses no
+  `std::thread`.
+- The `UNITTEST_MODE` `main()` discarded the result of `AutoTest::run()`.
+
+**Fix:** `Requester` uses `QThread::create()`, and the test `main()` returns the summed
+failure count.
+
+**Not a bug:** No QTest output on stdout when stderr has no console (e.g. run from a tool
+or IDE shell): on Windows the plain logger then writes to `OutputDebugString`. Set
+`QT_ASSUME_STDERR_HAS_CONSOLE=1` or use `-o <file>,txt`.
+
+---
+
 ## 2026-10-15 - BMC G3X Insp/Exp Time graphs showed "Plots Disabled" after import (#324)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmc_loader.cpp`

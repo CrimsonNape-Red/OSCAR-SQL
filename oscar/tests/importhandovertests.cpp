@@ -11,7 +11,6 @@
 
 #include <atomic>
 #include <memory>
-#include <thread>
 
 #include <QCoreApplication>
 #include <QDir>
@@ -21,6 +20,7 @@
 #include <QLocalSocket>
 #include <QEventLoop>
 #include <QTemporaryDir>
+#include <QThread>
 #include <QTimer>
 
 #ifndef Q_OS_WIN
@@ -39,21 +39,24 @@ QString endpoint(const QString &dataDir)
 }
 
 // send() blocks, as it does in a second OSCAR process; run it beside the test's event loop.
+// A QThread, not std::thread: with MinGW, Qt's per-thread cleanup faults when a std::thread
+// that used Qt exits. Windows ignores the fault, but a debugger stops on it (#330).
 struct Requester
 {
-    std::thread thread;
+    std::unique_ptr<QThread> thread;
     std::atomic<bool> finished { false };
     SendResult result = SendResult::NoInstanceListening;
     Reply reply;
 
     Requester(const QString &dataDir, const Request &request, int acceptTimeoutMs = 10000)
     {
-        thread = std::thread([this, dataDir, request, acceptTimeoutMs]() {
+        thread.reset(QThread::create([this, dataDir, request, acceptTimeoutMs]() {
             result = send(dataDir, request, reply, 2000, acceptTimeoutMs);
             finished = true;
-        });
+        }));
+        thread->start();
     }
-    ~Requester() { if (thread.joinable()) thread.join(); }
+    ~Requester() { thread->wait(); }
 
     // Runs the test's event loop until the answer is there. A real event loop, as in the
     // application: the server serves requests when that loop is idle.
@@ -66,7 +69,7 @@ struct Requester
         QTimer::singleShot(ms, &loop, &QEventLoop::quit);
         loop.exec();
         if (finished) {
-            thread.join();
+            thread->wait();
         }
         return finished;
     }

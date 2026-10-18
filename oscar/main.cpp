@@ -509,7 +509,7 @@ int main(int argc, char* argv[])
     initializeStrings();
     qDebug() << STR_TR_OSCAR + " " + getVersion();
 
-    AutoTest::run(argc, argv);
+    return AutoTest::run(argc, argv);   // failed tests summed over all classes; 0 = all passed
 }
 
 #else
