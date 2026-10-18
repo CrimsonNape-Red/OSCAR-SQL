@@ -20,12 +20,17 @@ namespace PortableMode
 
 const QString MarkerFileName    = QStringLiteral("portable.ini");
 const QString CommandLineOption = QStringLiteral("--portable");
+const QString DefaultDataFolder = QStringLiteral("../OSCAR Portable Data");
 
 static const QString SettingsFolderName = QStringLiteral("Settings");
+static const QString DataFolderKey      = QStringLiteral("DataFolder");
 
 static bool    s_enabled = false;
 static bool    s_byOption = false;
+static bool    s_firstUse = false;
+static bool    s_defaultDataRoot = true;   // the data folder is where DefaultDataFolder puts it
 static QString s_root;
+static QString s_dataRoot;
 static QString s_setupError;
 
 /*!
@@ -63,12 +68,22 @@ void initialize(int argc, char *argv[])
     }
 
     s_root = executableFolder(argc > 0 ? argv[0] : "");
-    const bool haveMarker = QFileInfo::exists(s_root + QLatin1Char('/') + MarkerFileName);
+    const QString markerPath = s_root + QLatin1Char('/') + MarkerFileName;
+    const bool haveMarker = QFileInfo::exists(markerPath);
     s_enabled = haveMarker || s_byOption;
     if (!s_enabled)
         return;
     if (haveMarker)
         s_byOption = false;     // the marker alone keeps a restarted OSCAR portable
+
+    QString setting;
+    QFile marker(markerPath);
+    if (haveMarker && marker.open(QIODevice::ReadOnly))
+        setting = dataFolderSetting(marker.readAll());
+    s_dataRoot = resolveDataRoot(setting, s_root);
+    // The shipped marker spells the default out, so compare where it leads.
+    s_defaultDataRoot = (s_dataRoot == resolveDataRoot(QString(), s_root));
+    s_firstUse = !QFileInfo::exists(s_dataRoot);
 
     // Redirect even if the folder turns out to be read-only: main() then reports the
     // problem and exits, and nothing is written to this computer's settings meanwhile.
@@ -102,9 +117,33 @@ QString rootPath()
     return s_root;
 }
 
+QString dataRootPath()
+{
+    return s_dataRoot;
+}
+
 QString settingsPath()
 {
-    return s_root + QLatin1Char('/') + SettingsFolderName;
+    return s_dataRoot + QLatin1Char('/') + SettingsFolderName;
+}
+
+bool firstUse()
+{
+    return s_enabled && s_firstUse;
+}
+
+QString zipNamedParentFolder()
+{
+    return (firstUse() && s_defaultDataRoot) ? zipNamedParent(s_root) : QString();
+}
+
+void removeUnusedFolders()
+{
+    // rmdir() removes only an empty folder, so nothing OSCAR has saved can go.
+    if (firstUse()) {
+        QDir().rmdir(settingsPath());
+        QDir().rmdir(s_dataRoot);
+    }
 }
 
 QString setupError()
@@ -117,14 +156,17 @@ QStringList restartArguments()
     return enabledByOption() ? QStringList(CommandLineOption) : QStringList();
 }
 
+// Relative to the portable data folder rather than the program folder: everything kept
+// there moves with it, which on platforms without drive letters is the only case that
+// can be stored relative (see encodePath()).
 QString toStoredPath(const QString &path)
 {
-    return s_enabled ? encodePath(path, s_root) : path;
+    return s_enabled ? encodePath(path, s_dataRoot) : path;
 }
 
 QString fromStoredPath(const QString &stored)
 {
-    return s_enabled ? decodePath(stored, s_root) : stored;
+    return s_enabled ? decodePath(stored, s_dataRoot) : stored;
 }
 
 QString encodePath(const QString &path, const QString &root)
@@ -152,6 +194,65 @@ QString decodePath(const QString &stored, const QString &root)
     if (stored.isEmpty() || root.isEmpty() || !QDir::isRelativePath(stored))
         return stored;
     return QDir::cleanPath(root + QLatin1Char('/') + stored);
+}
+
+QString dataFolderSetting(const QByteArray &markerContents)
+{
+    const QStringList lines = QString::fromUtf8(markerContents).split(QLatin1Char('\n'));
+    for (const QString &rawLine : lines) {
+        const QString line = rawLine.trimmed();
+        if (line.startsWith(QLatin1Char(';')) || line.startsWith(QLatin1Char('#')))
+            continue;
+        const qsizetype eq = line.indexOf(QLatin1Char('='));
+        if (eq < 0 || line.left(eq).trimmed().compare(DataFolderKey, Qt::CaseInsensitive) != 0)
+            continue;
+        QString value = line.mid(eq + 1).trimmed();
+        if (value.size() >= 2 && value.startsWith(QLatin1Char('"')) && value.endsWith(QLatin1Char('"')))
+            value = value.mid(1, value.size() - 2).trimmed();
+        return QDir::fromNativeSeparators(value);
+    }
+    return QString();
+}
+
+QString resolveDataRoot(const QString &setting, const QString &programRoot)
+{
+    const QString folder = setting.isEmpty() ? DefaultDataFolder : QDir::fromNativeSeparators(setting);
+    if (!QDir::isRelativePath(folder))
+        return QDir::cleanPath(folder);
+
+    // QDir::cleanPath() keeps a ".." it cannot resolve ("E:/../x"), so walk the
+    // components here and stop climbing at the root. (Done on the path text: QDir::cdUp()
+    // only moves to a folder that exists.)
+    QString base = QDir::cleanPath(programRoot);
+    QStringList rest;
+    for (const QString &part : folder.split(QLatin1Char('/'), Qt::SkipEmptyParts)) {
+        if (part == QStringLiteral("."))
+            continue;
+        if (part == QStringLiteral("..")) {
+            if (!rest.isEmpty())
+                rest.removeLast();
+            else if (!QDir(base).isRoot())
+                base = QFileInfo(base).path();
+            continue;
+        }
+        rest << part;
+    }
+    return QDir::cleanPath(base + QLatin1Char('/') + rest.join(QLatin1Char('/')));
+}
+
+QString zipNamedParent(const QString &programRoot)
+{
+    const QString program = QDir::cleanPath(programRoot);
+    if (program.isEmpty() || QDir(program).isRoot())
+        return QString();
+    const QString parent = QFileInfo(program).path();
+    if (QDir(parent).isRoot())
+        return QString();
+    const QString name = QFileInfo(parent).fileName();
+    if (name.startsWith(QStringLiteral("OSCAR-"), Qt::CaseInsensitive)
+        && name.contains(QStringLiteral("-Portable"), Qt::CaseInsensitive))
+        return parent;
+    return QString();
 }
 
 } // namespace PortableMode

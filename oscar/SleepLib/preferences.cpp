@@ -76,9 +76,9 @@ QString GetAppData()
     QSettings settings;
     QString path = PortableMode::fromStoredPath(settings.value("Settings/AppData").toString());
     if (path.isEmpty()) {
-        // Portable mode keeps the data beside the executable rather than in Documents.
+        // Portable mode keeps the data in its portable data folder rather than in Documents.
         const QString parent = PortableMode::isEnabled()
-                                   ? PortableMode::rootPath()
+                                   ? PortableMode::dataRootPath()
                                    : QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
         path = parent + "/" + getModifiedAppData();
     }

@@ -18,5 +18,8 @@ private slots:
     void testDecode();
     void testRoundTrip();
     void testEmptyAndRelativeInputs();
+    void testDataFolderSetting();
+    void testResolveDataRoot();
+    void testZipNamedParent();
 };
 DECLARE_TEST(PortableModeTests)

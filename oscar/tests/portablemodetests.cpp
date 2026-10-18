@@ -11,6 +11,9 @@
 
 using PortableMode::encodePath;
 using PortableMode::decodePath;
+using PortableMode::dataFolderSetting;
+using PortableMode::resolveDataRoot;
+using PortableMode::zipNamedParent;
 
 #ifdef Q_OS_WIN
 static const QString Root = QStringLiteral("E:/OSCAR Portable");
@@ -71,4 +74,55 @@ void PortableModeTests::testEmptyAndRelativeInputs()
     QCOMPARE(decodePath(QString(), Root), QString());
     QCOMPARE(encodePath("already/relative", Root), QString("already/relative"));
     QCOMPARE(encodePath(Root + "/OSCAR20_Data", QString()), Root + "/OSCAR20_Data");
+}
+
+// The marker is read as text: Windows backslashes must survive, comments must not count.
+void PortableModeTests::testDataFolderSetting()
+{
+    QCOMPARE(dataFolderSetting("; marker\r\n\r\n[Portable]\r\nDataFolder=..\\OSCAR Portable Data\r\n"),
+             QString("../OSCAR Portable Data"));
+    QCOMPARE(dataFolderSetting("datafolder = \"E:\\My Data\" \n"), QString("E:/My Data"));
+    QCOMPARE(dataFolderSetting(";DataFolder=..\\Commented\n# DataFolder=x\n"), QString());
+    QCOMPARE(dataFolderSetting("; nothing here\n"), QString());
+    QCOMPARE(dataFolderSetting(QByteArray()), QString());
+    QCOMPARE(dataFolderSetting("DataFolder=\n"), QString());
+}
+
+// The default puts the data beside the program folder; ".." cannot climb above a root.
+void PortableModeTests::testResolveDataRoot()
+{
+#ifdef Q_OS_WIN
+    QCOMPARE(resolveDataRoot(QString(), "E:/OSCAR Portable"), QString("E:/OSCAR Portable Data"));
+    QCOMPARE(resolveDataRoot("../OSCAR Portable Data", "E:/Apps/OSCAR Portable"),
+             QString("E:/Apps/OSCAR Portable Data"));
+    QCOMPARE(resolveDataRoot("Data", "E:/OSCAR Portable"), QString("E:/OSCAR Portable/Data"));
+    QCOMPARE(resolveDataRoot("./x/../Data", "E:/OSCAR Portable"), QString("E:/OSCAR Portable/Data"));
+    QCOMPARE(resolveDataRoot("F:\\Elsewhere", "E:/OSCAR Portable"), QString("F:/Elsewhere"));
+    QCOMPARE(resolveDataRoot(QString(), "E:/"), QString("E:/OSCAR Portable Data"));
+    QCOMPARE(resolveDataRoot("../../x", "E:/OSCAR Portable"), QString("E:/x"));
+#else
+    QCOMPARE(resolveDataRoot(QString(), "/media/stick/OSCAR Portable"),
+             QString("/media/stick/OSCAR Portable Data"));
+    QCOMPARE(resolveDataRoot("/home/x/Data", "/media/stick/OSCAR Portable"), QString("/home/x/Data"));
+    QCOMPARE(resolveDataRoot(QString(), "/"), QString("/OSCAR Portable Data"));
+#endif
+}
+
+// "Extract All" names the destination after the ZIP, e.g. OSCAR-2.1.0-Win64-Portable.
+void PortableModeTests::testZipNamedParent()
+{
+#ifdef Q_OS_WIN
+    QCOMPARE(zipNamedParent("E:/OSCAR-2.1.0-Win64-Portable/OSCAR Portable"),
+             QString("E:/OSCAR-2.1.0-Win64-Portable"));
+    QCOMPARE(zipNamedParent("E:/OSCAR-2.1.1-Win64-1a2b3c4d-Portable-test (1)/OSCAR Portable"),
+             QString("E:/OSCAR-2.1.1-Win64-1a2b3c4d-Portable-test (1)"));
+    QCOMPARE(zipNamedParent("E:/OSCAR Portable"), QString());           // parent is the drive
+    QCOMPARE(zipNamedParent("E:/"), QString());
+    QCOMPARE(zipNamedParent("E:/Apps/OSCAR Portable"), QString());
+    QCOMPARE(zipNamedParent("E:/OSCAR-Data/OSCAR Portable"), QString()); // not a ZIP name
+#else
+    QCOMPARE(zipNamedParent("/media/stick/OSCAR-2.1.0-Win64-Portable/OSCAR Portable"),
+             QString("/media/stick/OSCAR-2.1.0-Win64-Portable"));
+    QCOMPARE(zipNamedParent("/media/stick/OSCAR Portable"), QString());
+#endif
 }

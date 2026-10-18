@@ -865,12 +865,12 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setOrganizationName(getDeveloperName());
     QCoreApplication::setOrganizationDomain(getDeveloperDomain());
 
-    // Portable mode redirects QSettings to an INI file beside the executable, so it must
-    // be decided before the first QSettings object below. Its data folder lives there too,
-    // so that folder takes the place of Documents for suggestions and relative --datadir.
+    // Portable mode redirects QSettings to an INI file in its portable data folder, so it
+    // must be decided before the first QSettings object below. The data folder lives there
+    // too, so that folder takes the place of Documents for suggestions and relative --datadir.
     PortableMode::initialize(argc, argv);
     if (PortableMode::isEnabled())
-        homeDocs = PortableMode::rootPath() + "/";
+        homeDocs = PortableMode::dataRootPath() + "/";
 //    QGuiApplication::styleHints()->colorScheme();  // Copies OS light or dark style to OSCAR,
                                                      // but supporting dark mode would require an exhaustive change to OSCAR
 //    QApplication::setStyle("Fusion");
@@ -1077,14 +1077,16 @@ int main(int argc, char *argv[]) {
     qDebug() << "APP-RESOURCES:" << appResourcePath();
     if (PortableMode::isEnabled()) {
         qDebug().noquote() << "Portable mode:" << PortableMode::rootPath()
-                           << (PortableMode::enabledByOption() ? "(--portable)" : "(" + PortableMode::MarkerFileName + " found)");
+                           << (PortableMode::enabledByOption() ? "(--portable)" : "(" + PortableMode::MarkerFileName + " found)")
+                           << "data in" << PortableMode::dataRootPath()
+                           << (PortableMode::firstUse() ? "(first use)" : "");
         // The portable folder was worked out from argv[0] before QApplication existed.
         if (QDir(PortableMode::rootPath()).canonicalPath() != QDir(QCoreApplication::applicationDirPath()).canonicalPath())
             qWarning().noquote() << "Portable mode: folder" << PortableMode::rootPath()
                                  << "differs from the application folder" << QCoreApplication::applicationDirPath();
     }
 
-    // Portable mode keeps every setting in the OSCAR folder. If that cannot be written,
+    // Portable mode keeps every setting in its Settings folder. If that cannot be written,
     // settings would be lost silently on every launch, so stop and say why.
     if (!PortableMode::setupError().isEmpty()) {
         QString errMsg = QObject::tr("OSCAR is set up to run as a portable application, but cannot write to its settings folder:") +
@@ -1095,6 +1097,36 @@ int main(int argc, char *argv[]) {
         if (!batchMode)
             QMessageBox::critical(nullptr, STR_MessageBox_Error, errMsg);
         return 1;
+    }
+
+    // Extracted with Windows' "Extract All", the program folder sits in a folder named
+    // after the ZIP, and the data would go in there with it, where the next version,
+    // extracted the same way, would not find it. Say so before anything is kept there.
+    const QString zipFolder = PortableMode::zipNamedParentFolder();
+    if (!zipFolder.isEmpty()) {
+        const QString programFolder = QFileInfo(PortableMode::rootPath()).fileName();
+        const QString dataFolder = QFileInfo(PortableMode::dataRootPath()).fileName();
+        const QString moveTo = QFileInfo(zipFolder).path();
+        qWarning().noquote() << "Portable mode: program folder is inside" << zipFolder
+                             << "(named after the download); data will be kept in" << PortableMode::dataRootPath();
+        if (!batchMode) {
+            QMessageBox box(QMessageBox::Warning, QObject::tr("OSCAR Portable"),
+                            QObject::tr("The \"%1\" folder is inside a folder named after the download:").arg(programFolder) +
+                                "\n\n" + QDir::toNativeSeparators(zipFolder) + "\n\n" +
+                                QObject::tr("OSCAR keeps your data and settings in a \"%1\" folder next to \"%2\", so they would be kept "
+                                            "in that folder too, and a newer version of OSCAR Portable extracted the same way would not find them.")
+                                    .arg(dataFolder, programFolder) + "\n\n" +
+                                QObject::tr("We recommend that you quit, move the \"%1\" folder to %2, and start OSCAR from there.")
+                                    .arg(programFolder, QDir::toNativeSeparators(moveTo)));
+            QPushButton *quitButton = box.addButton(QObject::tr("Quit"), QMessageBox::RejectRole);
+            box.addButton(QObject::tr("Continue Here"), QMessageBox::AcceptRole);
+            box.setDefaultButton(quitButton);
+            box.exec();
+            if (box.clickedButton() == quitButton) {
+                PortableMode::removeUnusedFolders();
+                return 0;
+            }
+        }
     }
 
 
@@ -1194,7 +1226,7 @@ int main(int argc, char *argv[]) {
     bool firstRun = dataDirArg.isEmpty() && !settings.contains("Settings/AppData");
     if (firstRun && PortableMode::isEnabled() && classifyDataFolder(GetAppData()) == DataFolderStatus::Oscar2) {
         // Portable settings are new (the Settings folder was removed, or a data folder was
-        // copied in beside OSCAR) but the default data folder already holds a database:
+        // copied into the portable data folder) but the default data folder already holds a database:
         // carry on with it rather than asking where the data is.
         qDebug().noquote() << "Portable mode: using existing data folder" << GetAppData();
         SetAppData(GetAppData());
@@ -1295,7 +1327,8 @@ int main(int argc, char *argv[]) {
     QString path = GetAppData();
     addBuildInfo(QObject::tr("Data directory:") + " <a href=\"file:///" + path + "\">" + path + "</a>");
     if (PortableMode::isEnabled())
-        addBuildInfo(QObject::tr("Portable mode:") + " " + QDir::toNativeSeparators(PortableMode::rootPath()));
+        addBuildInfo(QObject::tr("Portable mode:") + " " + QDir::toNativeSeparators(PortableMode::rootPath()) +
+                     " (" + QObject::tr("settings in %1").arg(QDir::toNativeSeparators(PortableMode::settingsPath())) + ")");
     addBuildInfo(QObject::tr("Database schema:") + " v" + QString::number(DatabaseSchema::CURRENT_SCHEMA_VERSION));
 
     QDir newDir(GetAppData());
