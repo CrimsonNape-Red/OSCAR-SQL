@@ -4,6 +4,24 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-18 - Renamed mode labels never reached an existing profile (#333)
+
+**Files:** `oscar/SleepLib/profiles.cpp`
+
+**Symptom:** After the prisma VENT loader renamed TherapyMode 2 from "ST (unconfirmed)" to
+"S/T", the Daily view still showed "ST (unconfirmed)" for a profile that had run the older
+build.
+
+**Root cause:** `saveChannelsToDatabase()` mirrors each channel's option labels into
+`channel_options`, and `loadChannelsFromDatabase()` then replaced the labels defined in code
+with that copy. The labels are not user-editable, so a renamed, corrected or retranslated
+label stayed frozen at whatever the first build saved.
+
+**Fix:** The stored labels are only loaded into channels that define none in code. The next
+save overwrites the stale rows, since `saveBatch()` uses INSERT OR REPLACE.
+
+---
+
 ## 2026-10-17 - Unit tests stopped under a debugger; test exit code was always 0 (#330)
 
 **Files:** `oscar/tests/importhandovertests.cpp`, `oscar/main.cpp`

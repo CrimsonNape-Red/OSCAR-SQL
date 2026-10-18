@@ -2751,8 +2751,10 @@ bool Profile::loadChannelsFromDatabase()
         chan->setUpperThresholdColor(data.upperThresholdColor);
         chan->setShowInOverview(data.showInOverview);
         
-        // Load channel options
-        if (optionsRepo.hasOptions(data.channelId)) {
+        // Option labels (e.g. mode names) are defined by the loaders and only
+        // mirrored here, so the code's labels win: a renamed or retranslated
+        // label would otherwise never replace the copy saved by an older build.
+        if (chan->m_options.isEmpty() && optionsRepo.hasOptions(data.channelId)) {
             chan->m_options = optionsRepo.getOptionsHash(data.channelId);
         }
     }
