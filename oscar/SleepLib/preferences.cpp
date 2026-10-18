@@ -31,6 +31,7 @@
 #endif
 
 #include "common.h"
+#include "portablemode.h"
 #include "preferences.h"
 #include "../database/app_preferences_repository.h"
 #include "../database/database_manager.h"
@@ -73,9 +74,14 @@ QString GetAppData()
     if (!g_appDataPath.isEmpty())
         return g_appDataPath;
     QSettings settings;
-    QString path = settings.value("Settings/AppData").toString();
-    if (path.isEmpty())
-        path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/" + getModifiedAppData();
+    QString path = PortableMode::fromStoredPath(settings.value("Settings/AppData").toString());
+    if (path.isEmpty()) {
+        // Portable mode keeps the data beside the executable rather than in Documents.
+        const QString parent = PortableMode::isEnabled()
+                                   ? PortableMode::rootPath()
+                                   : QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+        path = parent + "/" + getModifiedAppData();
+    }
     return path;
 }
 
@@ -85,7 +91,7 @@ void SetAppData(const QString& path, bool persist)
     if (!persist)
         return;
     QSettings settings;
-    settings.setValue("Settings/AppData", path);
+    settings.setValue("Settings/AppData", PortableMode::toStoredPath(path));
 }
 
 

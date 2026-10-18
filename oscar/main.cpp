@@ -49,6 +49,7 @@
 #include "translation.h"
 #include "speedcheck.h"
 #include "SleepLib/common.h"
+#include "SleepLib/portablemode.h"
 #include "SleepLib/deviceconnection.h"
 #include "Graphs/gGraph.h"
 
@@ -863,6 +864,13 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setApplicationName(getAppName() + " 2.0"); // add major version so that QSettings separates this from prior version.
     QCoreApplication::setOrganizationName(getDeveloperName());
     QCoreApplication::setOrganizationDomain(getDeveloperDomain());
+
+    // Portable mode redirects QSettings to an INI file beside the executable, so it must
+    // be decided before the first QSettings object below. Its data folder lives there too,
+    // so that folder takes the place of Documents for suggestions and relative --datadir.
+    PortableMode::initialize(argc, argv);
+    if (PortableMode::isEnabled())
+        homeDocs = PortableMode::rootPath() + "/";
 //    QGuiApplication::styleHints()->colorScheme();  // Copies OS light or dark style to OSCAR,
                                                      // but supporting dark mode would require an exhaustive change to OSCAR
 //    QApplication::setStyle("Fusion");
@@ -986,12 +994,14 @@ int main(int argc, char *argv[]) {
     bool autoUpgrade = false;
     QList<QPair<QString, QString>> importTasks;
     // Data folder recorded before this launch, so a cancelled first-time setup can put it back.
-    const QString appDataAtLaunch = settings.value("Settings/AppData").toString();
+    const QString appDataAtLaunch = PortableMode::fromStoredPath(settings.value("Settings/AppData").toString());
     for (int i = 1; i < args.size(); i++) {
         if ((args[i] == "--language") || (args[i] == "--l") ) {
             settings.setValue(LangSetting,"");
-        } else if ( (args[i] == "-nop") || (args[i] == "") || (args[i].compare("--legacy", Qt::CaseInsensitive) == 0) || (args[i].compare("--OpenGL", Qt::CaseInsensitive) == 0) ){
+        } else if ( (args[i] == "-nop") || (args[i] == "") || (args[i].compare("--legacy", Qt::CaseInsensitive) == 0) || (args[i].compare("--OpenGL", Qt::CaseInsensitive) == 0)
+                    || (args[i].compare(PortableMode::CommandLineOption, Qt::CaseInsensitive) == 0) ){
             // do nothing. internal calls that current don't have any further functions in main.
+            // --legacy, --OpenGL and --portable were acted on before QApplication was created.
         } else if (args[i] == "-p") {
             QThread::msleep(1000);
         } else if (args[i] == "--profile") {
@@ -1065,6 +1075,27 @@ int main(int argc, char *argv[]) {
     qDebug() << "APP-NAME:" << QCoreApplication::applicationName();
     qDebug() << "APP-PATH:" << QCoreApplication::applicationDirPath();
     qDebug() << "APP-RESOURCES:" << appResourcePath();
+    if (PortableMode::isEnabled()) {
+        qDebug().noquote() << "Portable mode:" << PortableMode::rootPath()
+                           << (PortableMode::enabledByOption() ? "(--portable)" : "(" + PortableMode::MarkerFileName + " found)");
+        // The portable folder was worked out from argv[0] before QApplication existed.
+        if (QDir(PortableMode::rootPath()).canonicalPath() != QDir(QCoreApplication::applicationDirPath()).canonicalPath())
+            qWarning().noquote() << "Portable mode: folder" << PortableMode::rootPath()
+                                 << "differs from the application folder" << QCoreApplication::applicationDirPath();
+    }
+
+    // Portable mode keeps every setting in the OSCAR folder. If that cannot be written,
+    // settings would be lost silently on every launch, so stop and say why.
+    if (!PortableMode::setupError().isEmpty()) {
+        QString errMsg = QObject::tr("OSCAR is set up to run as a portable application, but cannot write to its settings folder:") +
+                         "\n\n" + PortableMode::setupError() + "\n\n" +
+                         QObject::tr("Copy the OSCAR folder to a location you can write to, such as a USB drive, or remove %1 from it to run OSCAR normally.")
+                             .arg(PortableMode::MarkerFileName);
+        qCritical().noquote() << errMsg;
+        if (!batchMode)
+            QMessageBox::critical(nullptr, STR_MessageBox_Error, errMsg);
+        return 1;
+    }
 
 
 #ifdef QT_DEBUG
@@ -1160,9 +1191,17 @@ int main(int argc, char *argv[]) {
     // written to settings yet: that happens only once a folder is confirmed below, so
     // cancelling here leaves the previously recorded folder — or a genuine first-run
     // state — untouched.
-    const bool firstRun = dataDirArg.isEmpty() && !settings.contains("Settings/AppData");
-    if (firstRun)
+    bool firstRun = dataDirArg.isEmpty() && !settings.contains("Settings/AppData");
+    if (firstRun && PortableMode::isEnabled() && classifyDataFolder(GetAppData()) == DataFolderStatus::Oscar2) {
+        // Portable settings are new (the Settings folder was removed, or a data folder was
+        // copied in beside OSCAR) but the default data folder already holds a database:
+        // carry on with it rather than asking where the data is.
+        qDebug().noquote() << "Portable mode: using existing data folder" << GetAppData();
+        SetAppData(GetAppData());
+        firstRun = false;
+    } else if (firstRun) {
         qDebug() << "First time: no data folder recorded";
+    }
 
     // A recorded folder that still exists and holds files, but no oscar.db and no OSCAR 1.x
     // data, has lost its database (moved, deleted, or removed by a cloud sync or clean-up
@@ -1255,6 +1294,8 @@ int main(int argc, char *argv[]) {
 
     QString path = GetAppData();
     addBuildInfo(QObject::tr("Data directory:") + " <a href=\"file:///" + path + "\">" + path + "</a>");
+    if (PortableMode::isEnabled())
+        addBuildInfo(QObject::tr("Portable mode:") + " " + QDir::toNativeSeparators(PortableMode::rootPath()));
     addBuildInfo(QObject::tr("Database schema:") + " v" + QString::number(DatabaseSchema::CURRENT_SCHEMA_VERSION));
 
     QDir newDir(GetAppData());
@@ -1338,9 +1379,9 @@ int main(int argc, char *argv[]) {
     const QString DBCleanShutdownKey = "db/CleanShutdown";
     const QString DBLastPathKey      = "db/LastShutdownPath";
     bool    prevShutdownClean = settings.value(DBCleanShutdownKey, true).toBool();
-    QString prevShutdownPath  = settings.value(DBLastPathKey).toString();
+    QString prevShutdownPath  = PortableMode::fromStoredPath(settings.value(DBLastPathKey).toString());
     settings.setValue(DBCleanShutdownKey, false);
-    settings.setValue(DBLastPathKey, dbPath);
+    settings.setValue(DBLastPathKey, PortableMode::toStoredPath(dbPath));
     settings.sync();
 
     // qApp as context: the schema upgrade runs on a worker thread and may emit
@@ -1537,10 +1578,10 @@ int main(int argc, char *argv[]) {
             if (restore.isEmpty())
                 settings.remove("Settings/AppData");
             else
-                settings.setValue("Settings/AppData", restore);
+                settings.setValue("Settings/AppData", PortableMode::toStoredPath(restore));
             // Put the dirty-shutdown flags back as they were for the previous database.
             settings.setValue(DBCleanShutdownKey, prevShutdownClean);
-            settings.setValue(DBLastPathKey, prevShutdownPath);
+            settings.setValue(DBLastPathKey, PortableMode::toStoredPath(prevShutdownPath));
             settings.sync();
             return 0;
         }

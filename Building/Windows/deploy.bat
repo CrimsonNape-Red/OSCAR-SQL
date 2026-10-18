@@ -1,7 +1,8 @@
 :::
 ::: Build Release and Installer subdirectories of the current shadow build directory.
 ::: The Release directory contains everything needed to run OSCAR.
-::: The Installer directory contains a single executable -- the OSCAR installer.
+::: The Installer directory contains the OSCAR installer and the portable ZIP, which holds
+::: the Release directory in an "OSCAR Portable" folder with the portable.ini marker.
 :::
 ::: DEPLOY.BAT should be run as the last step of a QT Build Release kit.
 ::: QT Shadow build should be specified (this is the QT default).
@@ -16,6 +17,8 @@
 :::     buildinstall.iss -- script for Inno Setup to create installer
 :::     getBuildInfo.awk -- gawk script for extracting version fields from various files
 :::     setup.ico -- Icon to be used for the installer.
+:::     portable.ini -- marker that makes OSCAR run in portable mode (portable ZIP only)
+:::     README-Portable.txt -- instructions included in the portable ZIP
 :::
 ::: When building a release version in QT, QT will start this batch file which will prepare
 ::: additional files, run WinDeployQt, and create an installer.
@@ -145,9 +148,12 @@ IF %doSkipInstall%==1 goto :endProgram
 echo Creating OSCAR Installer
 "%ProgramFiles(x86)%\Inno Setup 6\iscc" /Q BuildInstall.iss 		|| (call :err 88	& goto :endProgram)
 if NOT exist %shadowBuildDir%\Installer\OSCAR*.exe  (call :err 89	& goto :endProgram)
+echo Creating OSCAR portable ZIP
+call :makePortable || goto :endProgram
 echo Installers in %shadowBuildDir%\Installer are:
 dir %shadowBuildDir%\Installer\ >%TEMP%\dirout.txt
 FINDSTR /C:".exe" %TEMP%\dirout.txt
+FINDSTR /C:".zip" %TEMP%\dirout.txt
 :endProgram
 echo Finished %~nx0 %errDescription%
 exit /b %errvalue%
@@ -187,6 +193,40 @@ echo %path%
 goto :eof
 
 ::: =====================================================================================
+:makePortable
+::: Portable ZIP: the Release folder plus the portable.ini marker and a README, inside a
+::: single "OSCAR Portable" folder so that extracting it does not scatter files. Named
+::: like the installer, with -Portable added before any command line suffix.
+set portableDir=%shadowBuildDir%\Portable
+set portableApp=%portableDir%\OSCAR Portable
+mkdir "%portableApp%"
+xcopy /E /I /Q /Y "%releaseDir%" "%portableApp%" 1>nul || (call :err 90	failure to copy %releaseDir% & exit /b 90)
+copy "%toolDir%\portable.ini" "%portableApp%" 1>nul || (call :err 91	failure to copy portable.ini & exit /b 91)
+copy "%toolDir%\README-Portable.txt" "%portableApp%" 1>nul || (call :err 92	failure to copy README-Portable.txt & exit /b 92)
+
+::: Version fields come from buildinfo.iss, written above: #define <name> "<value>"
+set pVersion=
+set pStatus=
+set pRevision=
+set pPlatform=
+for /f "usebackq tokens=2,3" %%a in ("%shadowBuildDir%\buildinfo.iss") do (
+	if "%%a"=="MyAppVersion"    set pVersion=%%~b
+	if "%%a"=="MyReleaseStatus" set pStatus=%%~b
+	if "%%a"=="MyGitRevision"   set pRevision=%%~b
+	if "%%a"=="MyPlatform"      set pPlatform=%%~b
+)
+set zipName=OSCAR-%pVersion%-%pPlatform%
+if NOT "%pStatus%"=="r" set zipName=%zipName%-%pRevision%
+set zipName=%zipName%-Portable%suffixParam%.zip
+
+::: Windows' own tar (bsdtar) writes ZIP files; Git's GNU tar, which may be earlier on
+::: the PATH after :getGawk, does not.
+if exist "%shadowBuildDir%\Installer\%zipName%" del /q "%shadowBuildDir%\Installer\%zipName%"
+"%SystemRoot%\System32\tar.exe" -a -c -f "%shadowBuildDir%\Installer\%zipName%" -C "%portableDir%" "OSCAR Portable" || (call :err 93	failure to create %zipName% & exit /b 93)
+if NOT exist "%shadowBuildDir%\Installer\%zipName%" (call :err 94	%zipName% was not created & exit /b 94)
+exit /b 0
+
+::: =====================================================================================
 :cleanFolder
 for /d %%i in (%shadowBuildDir%\*) do (
 	call :handClean %%i
@@ -204,6 +244,7 @@ goto :eof
 	if /I "%fname%"=="Translations" goto :endhandClean
 	if /I "%fname%"=="Release" goto :cleanDir
 	if /I "%fname%"=="Installer" goto :cleanDir
+	if /I "%fname%"=="Portable" goto :cleanDir
 	echo Folder %fname% was not cleaned
 	goto :endhandClean
 :cleanDir

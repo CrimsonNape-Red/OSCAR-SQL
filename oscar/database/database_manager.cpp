@@ -11,6 +11,7 @@
 
 #include "database_manager.h"
 #include "database_schema.h"
+#include "../SleepLib/portablemode.h"
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDir>
@@ -595,7 +596,7 @@ void DatabaseManager::markCleanShutdown(const QString& dbPath)
 {
     QSettings settings;
     settings.setValue("db/CleanShutdown", true);
-    settings.setValue("db/LastShutdownPath", dbPath);
+    settings.setValue("db/LastShutdownPath", PortableMode::toStoredPath(dbPath));
     settings.sync();
     qDebug() << "DatabaseManager::markCleanShutdown: clean shutdown marked for" << dbPath;
 }

@@ -60,6 +60,7 @@
 #include "SleepLib/appsettings.h"       // defines for REMSTAR_M_SUPPORT
 #include "SleepLib/journal.h"
 #include "SleepLib/common.h"
+#include "SleepLib/portablemode.h"
 #include "notifyMessageBox.h"
 #include "staticQMessageBox.h"
 #include "translation.h"
@@ -2391,6 +2392,7 @@ void MainWindow::RestartApplication(QString cmdline)
 
     args << "--args"; // OSCAR binary options after this
     args << "-p"; // -p starts with 1 second delay, to give this process time to save..
+    args << PortableMode::restartArguments();
 
 
 
@@ -2412,6 +2414,7 @@ void MainWindow::RestartApplication(QString cmdline)
     //} else
     QStringList args;
     args << "-p";
+    args << PortableMode::restartArguments();
 
 
     if (!cmdline.isEmpty()) { args << cmdline; }
@@ -3284,11 +3287,11 @@ void MainWindow::switchToDatabase(const QString& path)
     QString apppath = QApplication::instance()->applicationFilePath();
     qDebug() << "switchToDatabase: spawning" << apppath;
     QStringList args;
-    args << "-p" << "--datadir" << path;
+    args << "-p" << "--datadir" << path << PortableMode::restartArguments();
 #ifdef Q_OS_MAC
     apppath = QApplication::instance()->applicationDirPath().section("/", 0, -3);
     QStringList macArgs;
-    macArgs << "-n" << apppath << "--args" << "-p" << "--datadir" << path;
+    macArgs << "-n" << apppath << "--args" << "-p" << "--datadir" << path << PortableMode::restartArguments();
     if (!QProcess::startDetached("/usr/bin/open", macArgs))
 #else
     if (!QProcess::startDetached(apppath, args))
@@ -4723,11 +4726,11 @@ void MainWindow::on_actionCompress_Database_triggered()
 
     QString apppath = QApplication::instance()->applicationFilePath();
     QStringList args;
-    args << "-p";
+    args << "-p" << PortableMode::restartArguments();
 #ifdef Q_OS_MAC
     apppath = QApplication::instance()->applicationDirPath().section("/", 0, -3);
     QStringList macArgs;
-    macArgs << "-n" << apppath << "--args" << "-p";
+    macArgs << "-n" << apppath << "--args" << "-p" << PortableMode::restartArguments();
     QProcess::startDetached("/usr/bin/open", macArgs);
 #else
     QProcess::startDetached(apppath, args);

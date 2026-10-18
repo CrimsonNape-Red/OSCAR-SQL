@@ -38,6 +38,7 @@
 #include <QDirIterator>
 
 #include "SleepLib/common.h"
+#include "SleepLib/portablemode.h"
 #include "cprogressbar.h"
 
 #ifdef _MSC_VER
@@ -110,6 +111,11 @@ const QString getModifiedAppData()
 
 QString findLegacyOscarDataFolder()
 {
+    // A portable OSCAR reads no settings from the computer it is plugged into, and
+    // the redirected QSettings would only find the portable INI file anyway.
+    if (PortableMode::isEnabled())
+        return QString();
+
     // OSCAR 1.x and OSCAR 2.0 share the same organization name and domain, but
     // OSCAR 2.0 uses a distinct application name ("OSCAR 2.0" vs. STR_AppName)
     // so the two versions' settings don't collide. Borrow 1.x's application name

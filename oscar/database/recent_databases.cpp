@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "recent_databases.h"
+#include "../SleepLib/portablemode.h"
 #include <QSettings>
 #include <QFileInfo>
 #include <QDir>
@@ -16,7 +17,9 @@ static const QString RECENT_KEY = "RecentDatabases";
 
 QString RecentDatabases::canonicalize(const QString& path)
 {
-    QString clean = QDir::cleanPath(path);
+    // Entries are stored through PortableMode::toStoredPath(), so in portable mode one
+    // may be relative to the OSCAR folder; resolve it before anything else.
+    QString clean = QDir::cleanPath(PortableMode::fromStoredPath(path));
     QString canonical = QFileInfo(clean).canonicalFilePath();
     // canonicalFilePath() returns "" when the path doesn't exist yet (new DB).
     return canonical.isEmpty() ? clean : canonical;
@@ -47,7 +50,7 @@ void RecentDatabases::add(const QString& path)
     list.removeIf([&key](const QString& p) {
         return dedupKey(canonicalize(p)) == key;
     });
-    list.prepend(canon);
+    list.prepend(PortableMode::toStoredPath(canon));
     while (list.size() > MaxEntries)
         list.removeLast();
     settings.setValue(RECENT_KEY, list);
@@ -58,6 +61,7 @@ QStringList RecentDatabases::entries()
     QSettings settings;
     QStringList list = settings.value(RECENT_KEY).toStringList();
     QStringList valid;
+    QStringList stored;     // the same entries, in the form kept in settings
     QSet<QString> seen;
 
     for (const QString& path : list) {
@@ -66,11 +70,12 @@ QStringList RecentDatabases::entries()
         if (QFileInfo::exists(canon + "/oscar.db") && !seen.contains(key)) {
             seen.insert(key);
             valid << canon;
+            stored << PortableMode::toStoredPath(canon);
         }
     }
 
-    if (valid != list)
-        settings.setValue(RECENT_KEY, valid);
+    if (stored != list)
+        settings.setValue(RECENT_KEY, stored);
     return valid;
 }
 
@@ -88,6 +93,6 @@ void RecentDatabases::remove(const QString& path)
 void RecentDatabases::setActive(const QString& path)
 {
     QSettings settings;
-    settings.setValue("Settings/AppData", path);
+    settings.setValue("Settings/AppData", PortableMode::toStoredPath(path));
     add(path);
 }

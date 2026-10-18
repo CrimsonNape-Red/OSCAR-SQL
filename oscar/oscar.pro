@@ -424,6 +424,7 @@ SOURCES += \
     SleepLib/machine.cpp \
     SleepLib/machine_loader.cpp \
     SleepLib/preferences.cpp \
+    SleepLib/portablemode.cpp \
     SleepLib/profiles.cpp \
     SleepLib/progressdialog.cpp \
     SleepLib/schema.cpp \
@@ -562,6 +563,7 @@ HEADERS  += \
     SleepLib/machine_loader.h \
     SleepLib/importcontext.h \
     SleepLib/preferences.h \
+    SleepLib/portablemode.h \
     SleepLib/profiles.h \
     SleepLib/schema.h \
     SleepLib/session.h \
@@ -844,6 +846,7 @@ test {
         tests/zeotests.cpp \
         tests/applehealthtests.cpp \
         tests/machinetests.cpp \
+        tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp
 
     HEADERS += \
@@ -863,6 +866,7 @@ test {
         tests/zeotests.h \
         tests/applehealthtests.h \
         tests/machinetests.h \
+        tests/portablemodetests.h \
         tests/sessionsplittests.h
 }
 

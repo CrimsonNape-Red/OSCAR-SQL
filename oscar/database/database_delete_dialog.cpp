@@ -20,7 +20,6 @@
 #include <QInputDialog>
 #include <QLineEdit>
 #include <QMessageBox>
-#include <QSettings>
 #include <QDebug>
 #include <QEventLoop>
 #include <QFutureWatcher>
@@ -200,10 +199,7 @@ void DatabaseDeleteDialog::onDeleteClicked()
     }
 
     // Remove from recent list — database is gone (or sufficiently gone).
-    QSettings settings;
-    QStringList recent = settings.value("RecentDatabases").toStringList();
-    recent.removeAll(path);
-    settings.setValue("RecentDatabases", recent);
+    RecentDatabases::remove(path);
 
     // Disconnect during cleanup: takeItem() fires itemSelectionChanged while
     // the list count hasn't decremented yet, but m_candidates was already
