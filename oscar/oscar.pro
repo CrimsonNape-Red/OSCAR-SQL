@@ -402,6 +402,7 @@ SOURCES += \
     SleepLib/loader_plugins/md300w1_loader.cpp \
     SleepLib/loader_plugins/mseries_loader.cpp \
     SleepLib/loader_plugins/prisma_loader.cpp \
+    SleepLib/loader_plugins/prismavent_loader.cpp \
     SleepLib/loader_plugins/vrem_loader.cpp \
     SleepLib/loader_plugins/prs1_loader.cpp \
     SleepLib/loader_plugins/prs1_parser_asv.cpp \
@@ -584,6 +585,7 @@ HEADERS  += \
     SleepLib/loader_plugins/intellipap_loader.h \
     SleepLib/loader_plugins/mseries_loader.h \
     SleepLib/loader_plugins/prisma_loader.h \
+    SleepLib/loader_plugins/prismavent_loader.h \
     SleepLib/loader_plugins/vrem_loader.h \
     SleepLib/loader_plugins/prs1_loader.h \
     SleepLib/loader_plugins/prs1_parser.h \
@@ -847,7 +849,8 @@ test {
         tests/applehealthtests.cpp \
         tests/machinetests.cpp \
         tests/portablemodetests.cpp \
-        tests/sessionsplittests.cpp
+        tests/sessionsplittests.cpp \
+        tests/prismaventtests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -867,7 +870,8 @@ test {
         tests/applehealthtests.h \
         tests/machinetests.h \
         tests/portablemodetests.h \
-        tests/sessionsplittests.h
+        tests/sessionsplittests.h \
+        tests/prismaventtests.h
 }
 
 macx {

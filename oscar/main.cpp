@@ -73,6 +73,7 @@
 #include "SleepLib/loader_plugins/weinmann_loader.h"
 #include "SleepLib/loader_plugins/viatom_loader.h"
 #include "SleepLib/loader_plugins/prisma_loader.h"
+#include "SleepLib/loader_plugins/prismavent_loader.h"
 #include "SleepLib/loader_plugins/resvent_loader.h"
 #include "SleepLib/loader_plugins/vrem_loader.h"
 #include "SleepLib/loader_plugins/bmc_loader.h"
@@ -1570,6 +1571,7 @@ int main(int argc, char *argv[]) {
     MD300W1Loader::Register();
     ViatomLoader::Register();
     PrismaLoader::Register();
+    PrismaVentLoader::Register();
     ResventLoader::Register();
     BmcLoader::Register();
     BmcG3xLoader::Register();

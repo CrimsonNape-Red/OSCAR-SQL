@@ -3937,6 +3937,66 @@ logger is reorganised.
   device SN is the user-facing serial. Both should be retained in OSCAR's
   machine record.
 
+### Session file contents and loader-effort assessment (2026-10-17)
+
+Findings from inspecting the per-day ZIPs (81 sessions across the sample).
+
+**`.wmedf` signal files — existing reader works unchanged.** Same container as
+the LINE: standard EDF header (7,680 header bytes for 29 signals), 1 s records,
+and the per-signal reserved field set to `#1` / `#2` for 8-/16-bit samples.
+`WMEDFInfo::ParseSignalData()` in `prisma_loader.cpp` already handles that mix;
+the computed record width (206 bytes) divides the data region exactly.
+
+Signal labels differ from the LINE's, so `PrismaImport::AddWaveform()` label
+mappings don't carry over:
+
+| Rate | Signals |
+|---|---|
+| 10 Hz | Airway Pressure (hPa), Patient Flow (l/min), Online Volume (ml), Breath Phase, Phase Trigger, plus five `* Dbg` diagnostic signals (Patient Flow, ARP Volume, P main 2, P valve ctrl, P valve air) |
+| 1 Hz | Leakage Flow, TotalLeakage, Part Inspiration, Frequency (1/min), Tidal Volume (ml), Minute Volume (l/min), Part Spont Insp./Exp., SpO2 Value, Pulse Rate, SpO2 Sig. Qual., AirtrapControl, Target Volume, LIAM, Trigger Level, Trigger Delay (ms), RSBI, IPAPsoll, EPAPsoll |
+
+Only `IPAPsoll` / `EPAPsoll` share names with the LINE mapping.
+
+**`event_NNNN.xml` — different schema from the LINE.** Root `<desc>` with
+`<start time="+00HH:MM:SS.mmm"/>`, `<stop .../>`, and paired
+`<RespEvent time="<s>" id="<n>" event="begin|end" Strength="<n>"/>` records.
+No `DeviceEvent` / `ParameterID` records at all, so `PrismaEventFile` (which
+reads `RespEventID`, `EndTime`, `Duration`, `DeviceEvent`) cannot be reused.
+
+Event IDs seen (count of `begin` records): 111 ×655, 330 ×170, 6 ×131,
+171 ×53, 141 ×46, 241 ×46, 112 ×22, 101 ×6, 106 ×4, 113 ×2. **Meanings
+unknown.** `Strings_en.xaml` in `dcm.zip` holds only parameter names (93 keys:
+`Parameters/P3_2/…`, `WTS/Therapy/…`), and `MCC.P3_2ParameterSet.dll` contains
+no Apnea/Hypopnea/RespEvent strings (its `Apnoe` hits are the alarm parameter).
+Mapping needs vendor-software output for the same days.
+
+**Correction (#331):** every day ZIP also holds `parameter.xml` +
+`parametersmap.xml`, a timestamped per-program parameter log including
+`ActiveProgram`, so per-session settings *are* recoverable, and every event id
+above has since been named from prismaTS's own name table. See
+`PRISMA_VENT_CARD_ANALYSIS.md`. The paragraphs above and below predate those
+findings.
+
+**Settings history is not on the card in a known form.** With no per-session
+parameter records, `configuration.json` (a current snapshot of the 3 profiles)
+is the only decoded source. Per-session settings and the active profile are
+unknown unless `trendcurve/*.tc` (~5 KB/day, undecoded) carries them.
+
+**Usage pattern.** Sessions start throughout the day (e.g. mid-afternoon), up
+to 19 per day — round-the-clock ventilator use. Sleep-oriented summaries (AHI,
+usage hours) may be misleading for this device class; whether OSCAR should
+present it is an open scope question.
+
+**Effort estimate.** Code is moderate (~700–1,000 lines: detector, per-day ZIP
+iterator, `device.xml` / JSON parsing, label table, new event parser, channel
+definitions). The semantics are the cost:
+
+| Phase | Scope | Dependency |
+|---|---|---|
+| 1 | Detection, machine info, sessions, waveforms (no events, no settings) | None — ~1–2 days |
+| 2 | Event-ID mapping | Vendor-software screenshots for matching days |
+| 3 | Settings / active profile | `.tc` decoding or more samples |
+
 ---
 
 ## Löwenstein Prisma 25S — third Prisma LINE sample (older Eyra firmware)
