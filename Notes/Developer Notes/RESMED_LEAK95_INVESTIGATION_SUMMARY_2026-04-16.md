@@ -94,3 +94,5 @@ Disabled diagnostics include:
 - Day-level STR vs PLD p95 mismatch logging
 - Period-level OSCAR vs STR aggregate comparison logging
 
+Note: this diagnostic code was removed in Seeker4/OSCAR-code!52. It can be recovered with `git show d9d79f93`, which touched only `oscar/SleepLib/loader_plugins/resmed_loader.cpp`.
+

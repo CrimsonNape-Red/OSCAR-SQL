@@ -3,6 +3,8 @@
 Date: 2026-04-16  
 Scope: Review OSCAR percentile calculation paths relevant to ResMed leak mismatches and identify likely issues.
 
+Note: the Leak95 diagnostic code mentioned in this review was removed in Seeker4/OSCAR-code!52. It can be recovered with `git show d9d79f93`, which touched only `oscar/SleepLib/loader_plugins/resmed_loader.cpp`.
+
 ## Reproduced Facts
 
 1. `Blue Dragon 2025` (`C:\Users\Guy\Documents\oscar20_data`), day `2026-04-02`:
