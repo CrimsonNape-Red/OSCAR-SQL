@@ -70,6 +70,10 @@ void EventsTabTests::initTestCase()
 {
     DEBUGXD O("EventsTabTests::initTestCase");
 
+    // The sample profile is in the OSCAR 1.7 file format, which 2.0 no longer reads: devices
+    // and sessions now come only from the database, and this test opens none.
+    QSKIP("Needs porting to the OSCAR 2.0 database (#332)");
+
     // note: need dummy app for Qt even though hidden
     int argc = 0;
     char** argv = nullptr;
@@ -145,7 +149,12 @@ void EventsTabTests::freeObjects()
 void EventsTabTests::cleanupTestCase()
 {
     DEBUGXD O("EventsTabTests::cleanupTestCase");
-    
+
+    // QTest calls this even when initTestCase() skipped; then there is nothing to undo.
+    if (!m_app) {
+        return;
+    }
+
     // Cleanup objects
     freeObjects();
 
