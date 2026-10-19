@@ -1141,9 +1141,35 @@ void gGraph::wheelEvent(QWheelEvent *event)
 
     int x = wheelEventPos( event).x() - m_graphview->titleWidth; //(left+m_marginleft);
 
-    if (wheelEventDelta(event) > 0) {
-        ZoomX(0.75, x);
+    // A standard mouse notch is 120 units and zooms one step, exactly as before.
+    // Trackpads and high-resolution wheels send many smaller deltas; accumulate
+    // those so a full notch's worth of movement gives one step, not one per event.
+    const int notch = 120;
+    int delta = wheelEventDelta(event);
+    int step = 0;   // +1 zoom in, -1 zoom out
+
+    if (std::abs(delta) >= notch) {
+        m_wheelAccum = 0;
+        step = (delta > 0) ? 1 : -1;
     } else {
+        // New gesture or direction reversal discards the leftover partial notch
+        if ((event->phase() == Qt::ScrollBegin) || (m_wheelAccum > 0 && delta < 0) || (m_wheelAccum < 0 && delta > 0)) {
+            m_wheelAccum = 0;
+        }
+        m_wheelAccum += delta;
+
+        if (m_wheelAccum >= notch) {
+            m_wheelAccum -= notch;
+            step = 1;
+        } else if (m_wheelAccum <= -notch) {
+            m_wheelAccum += notch;
+            step = -1;
+        }
+    }
+
+    if (step > 0) {
+        ZoomX(0.75, x);
+    } else if (step < 0) {
         ZoomX(1.5, x);
     }
 

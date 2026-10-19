@@ -393,6 +393,8 @@ class gGraph : public QObject
     QPoint m_current;
     short m_group;
     short m_lastx23;
+    //! \brief Running total of sub-notch wheel deltas (trackpads, high-resolution wheels)
+    int m_wheelAccum = 0;
     Day *m_day;
     bool m_enforceMinY, m_enforceMaxY;
     bool m_showTitle;

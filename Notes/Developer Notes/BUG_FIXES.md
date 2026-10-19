@@ -4,6 +4,25 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-19 - Ctrl/Cmd+wheel zoom far too fast on trackpads (#306)
+
+**Files:** `oscar/Graphs/gGraph.cpp`, `gGraph.h`
+
+**Symptom:** On a macOS trackpad, a Cmd+two-finger swipe over a graph zoomed many steps per
+gesture. High-resolution mouse wheels behave the same way on any platform.
+
+**Root cause:** `gGraph::wheelEvent()` zoomed one full step (0.75 in / 1.5 out) per wheel
+event, using only the sign of `angleDelta().y()`. Trackpads send many small-delta events
+where a mouse sends one 120-unit notch.
+
+**Fix:** Events of 120 units or more zoom one step exactly as before, so standard mice are
+unchanged (deliberately, to avoid any perceptible change in mouse feel; the unbalanced
+0.75/1.5 pair is also left alone). Smaller deltas are accumulated in `m_wheelAccum` and
+fire one step per 120 units. The total resets at `Qt::ScrollBegin` and on a direction
+reversal.
+
+---
+
 ## 2026-10-19 - Cloud sign-in tokens were saved in plain text (#329)
 
 **Files:** `oscar/network/oauth2_handler.cpp`, `oauth2_handler.h`, `oscar/tests/cryptotests.cpp`
