@@ -4,6 +4,39 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-18 - Re-saving a session duplicated its respiratory_events rows (#335)
+
+**Files:** `oscar/SleepLib/session.cpp`, `oscar/preferencesdialog.cpp`
+
+**Symptom:** After toggling "Compress Session Data" (either way), every row in
+`respiratory_events` appeared twice; each further toggle added another copy. Daily, Overview
+and Statistics were unaffected because they read `event_lists`/`session_summaries`; the
+respiratory events report, profile backup and SQL analysis saw the copies.
+
+**Root cause:** `Session::StoreEventsToDatabase()` replaced the session's `event_lists`
+(`deleteBySession()` first) but appended to `respiratory_events` without clearing it, and
+the table has no UNIQUE constraint. Every path that re-saves an existing session with its
+events loaded was affected: recompress (`doRecompressEvents`), reindex
+(`doReprocessEvents`), and the day split (`SessionSplit`, which also left the tail's events
+under the head session).
+
+**Fix:** The new `Session::StoreRespiratoryEvents()` calls
+`RespiratoryEventsRepository::deleteBySession()` (which existed but had no caller) before
+re-extracting the rows, unconditionally, so a session whose flags were all removed doesn't
+keep stale rows. Also fixed "proceedure" in both confirmation prompts.
+
+**Repair:** `Profile::repairRespiratoryEvents()` runs once per profile at load, until it
+succeeds; `RespiratoryEventsRepaired` in the profile preferences then records it as done
+(restoring a pre-fix backup restores preferences without the flag, so it runs again). It finds
+sessions with more rows than `SUM(event_lists.count)` for their `event_type = 1` lists (or
+rows for a channel with no event list left) via
+`RespiratoryEventsRepository::findSessionsWithExcessRows()`, and rebuilds each one's rows
+from its events in one transaction, rolled back if any session fails. Rebuilding rather than
+deleting copies in SQL is also right for split sessions, whose extra rows are not exact
+multiples, and keeps events the device logged twice. Test: `tests/respiratoryeventstests.cpp`.
+
+---
+
 ## 2026-10-18 - Renamed mode labels never reached an existing profile (#333)
 
 **Files:** `oscar/SleepLib/profiles.cpp`

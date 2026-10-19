@@ -3560,20 +3560,42 @@ bool Session::StoreEventsToDatabase()
     }
 #endif
 
-    // NEW: Extract and store respiratory events to respiratory_events table
     PERF_TIMER_START("Session::StoreDB::RespiratoryEvents");
+    StoreRespiratoryEvents();
+    PERF_TIMER_STOP("Session::StoreDB::RespiratoryEvents");
+
+    return (totalSaved == totalEventLists);
+}
+
+/**
+ * @brief Replace this session's respiratory_events rows with ones extracted from its EventLists.
+ *
+ * Like event_lists in StoreEventsToDatabase(), the rows are replaced, not appended to:
+ * re-saves (recompress, reindex, day split) used to add another copy of every event (#335).
+ * The delete is unconditional so a session whose flags were all removed doesn't keep stale
+ * rows. The table has no UNIQUE constraint, since devices can log identical events.
+ *
+ * Also called by Profile::repairRespiratoryEvents() to rebuild rows written before the fix.
+ *
+ * @return false if the old rows could not be deleted or the new ones inserted
+ */
+bool Session::StoreRespiratoryEvents()
+{
+    RespiratoryEventsRepository respRepo;
+    if (!respRepo.deleteBySession(m_sessionrow_id)) {
+        qWarning() << "Session::StoreRespiratoryEvents() - Failed to clear existing respiratory_events for session"
+                   << s_session;
+        return false;
+    }
     QList<RespiratoryEventData> respiratoryEvents = extractRespiratoryEvents();
     if (!respiratoryEvents.isEmpty()) {
-        RespiratoryEventsRepository respRepo;
         if (!respRepo.createBatch(respiratoryEvents)) {
-            qWarning() << "Session::StoreEventsToDatabase() - Failed to store respiratory events";
-        } else {
-            qDebug() << "Session" << s_session << "stored" << respiratoryEvents.size() << "respiratory events";
+            qWarning() << "Session::StoreRespiratoryEvents() - Failed to store respiratory events";
+            return false;
         }
+        qDebug() << "Session" << s_session << "stored" << respiratoryEvents.size() << "respiratory events";
     }
-    PERF_TIMER_STOP("Session::StoreDB::RespiratoryEvents");
-    
-    return (totalSaved == totalEventLists);
+    return true;
 }
 
 bool Session::LoadEventsFromDatabase()

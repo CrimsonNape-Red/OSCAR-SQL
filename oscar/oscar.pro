@@ -850,7 +850,8 @@ test {
         tests/machinetests.cpp \
         tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp \
-        tests/prismaventtests.cpp
+        tests/prismaventtests.cpp \
+        tests/respiratoryeventstests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -871,7 +872,8 @@ test {
         tests/machinetests.h \
         tests/portablemodetests.h \
         tests/sessionsplittests.h \
-        tests/prismaventtests.h
+        tests/prismaventtests.h \
+        tests/respiratoryeventstests.h
 }
 
 macx {

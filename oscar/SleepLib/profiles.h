@@ -110,6 +110,10 @@ class Profile : public Preferences
     //! \brief Calculate and store daily summaries for all loaded days
     void calculateDailySummaries();
 
+    //! \brief Rebuild respiratory_events rows for sessions holding copies or stale rows (#335)
+    //! \return true if no affected sessions remain
+    bool repairRespiratoryEvents(qint64 profileId, ProgressDialog *progress);
+
     //! \brief Barf because data format has changed. This does a purge of CPAP data for machine *m
     void DataFormatError(Machine *m);
 
@@ -412,6 +416,9 @@ const QString STR_IS_LockSummarySessions = "LockSummarySessions";
 const QString STR_IS_WarnOnUntestedMachine = "WarnOnUntestedMachine";
 const QString STR_IS_WarnOnUnexpectedData = "WarnOnUnexpectedData";
 const QString STR_IS_SplitNonCPAPSessions = "SplitNonCPAPSessions";
+
+// One-time data repairs (set once the repair has completed for the profile)
+const QString STR_PREF_RespiratoryEventsRepaired = "RespiratoryEventsRepaired";  ///< #335
 
 //Apperance Settings
 const QString STR_AS_EventFlagSessionBar = "EventFlagSessionBar";

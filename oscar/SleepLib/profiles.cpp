@@ -50,6 +50,7 @@
 #include "../database/channel_options_repository.h"
 #include "../database/daily_summary_repository.h"
 #include "../database/device_time_correction_repository.h"
+#include "../database/respiratory_events_repository.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSqlQuery>
@@ -1125,6 +1126,13 @@ void Profile::LoadMachineData(ProgressDialog *progress)
             } else {
                 qDebug() << "Profile::LoadMachineData() - Found" << existingCount << "existing daily summaries";
             }
+        }
+
+        // One-time repair of rows duplicated before #335 was fixed. The flag is only set once
+        // no affected sessions remain, so a failed or partial repair is retried next load.
+        if (!(*this)[STR_PREF_RespiratoryEventsRepaired].toBool()
+                && repairRespiratoryEvents(profileData.id, progress)) {
+            Set(STR_PREF_RespiratoryEventsRepaired, true);
         }
     } else {
         qWarning() << "Profile::LoadMachineData() - Cannot check daily summaries, profile not in database";
@@ -3093,6 +3101,93 @@ void Profile::calculateDailySummaries()
     qDebug() << "Profile::calculateDailySummaries() - Summary: calculated" << calculatedCount
              << "days, totalDays" << totalDays << ", skipped (noDay" << skippedNoDay
              << ", noSessions" << skippedNoSessions << ", notCPAP" << skippedNotCPAP << ")";
+}
+
+/**
+ * @brief Rebuild respiratory_events rows for sessions that hold copies or stale rows.
+ *
+ * Until #335 was fixed, every re-save of a session (recompress, reindex, day split)
+ * appended its respiratory events again instead of replacing them. Affected sessions are
+ * found by comparing their rows with event_lists, which was always replaced correctly, and
+ * each one's rows are rebuilt from its events. Rebuilding (rather than deleting copies in
+ * SQL) is also correct for split sessions, whose extra rows are not exact multiples, and
+ * keeps events the device genuinely logged twice.
+ *
+ * LoadMachineData() runs it until it succeeds once, then records STR_PREF_RespiratoryEventsRepaired
+ * in the profile preferences. Restoring a backup made before the fix also restores its
+ * preferences without that flag, so the restored rows are repaired on the next load.
+ *
+ * @param profileId Database ID of the profile
+ * @param progress  Load progress dialog (may be null)
+ * @return true if no affected sessions remain; false if any could not be rebuilt
+ *         (failure, or the session isn't loaded), so the caller retries on the next load
+ */
+bool Profile::repairRespiratoryEvents(qint64 profileId, ProgressDialog *progress)
+{
+    RespiratoryEventsRepository respRepo;
+    const QList<qint64> affected = respRepo.findSessionsWithExcessRows(profileId);
+    if (affected.isEmpty()) return true;
+
+    qDebug() << "Profile::repairRespiratoryEvents() -" << affected.size()
+             << "sessions have duplicate or stale respiratory_events rows - rebuilding";
+
+    // The query returns database row ids; the loaded sessions are keyed by device SessionID.
+    QHash<qint64, Session *> byRowId;
+    for (Machine *mach : m_machlist) {
+        if (!mach) continue;
+        for (Session *sess : mach->sessionlist) {
+            if (sess && sess->sessionRowId() > 0) byRowId.insert(sess->sessionRowId(), sess);
+        }
+    }
+
+    if (progress) {
+        progress->setMessage(QObject::tr("Repairing Respiratory Event Records"));
+        progress->setProgressMax(affected.size());
+        progress->setProgressValue(0);
+    }
+
+    // One transaction for the whole repair: far faster than committing per row.
+    DatabaseManager &dbm = DatabaseManager::instance();
+    bool ownTransaction = !dbm.inTransaction() && dbm.transaction();
+
+    int repaired = 0, failed = 0, notLoaded = 0, done = 0;
+    for (qint64 rowId : affected) {
+        Session *sess = byRowId.value(rowId, nullptr);
+        if (!sess) {
+            notLoaded++;
+        } else {
+            bool wasOpen = sess->eventsLoaded();
+            if (sess->OpenEvents() && sess->StoreRespiratoryEvents()) {
+                repaired++;
+            } else {
+                failed++;
+            }
+            if (!wasOpen) sess->TrashEvents();
+        }
+        if (progress && (++done % 10 == 0)) {
+            progress->setProgressValue(done);
+            QApplication::processEvents();
+        }
+    }
+
+    if (ownTransaction) {
+        // A failed rebuild may have deleted a session's rows without re-inserting them; that
+        // session would then look healthy and never be retried. Roll back and try next load.
+        if (failed > 0) {
+            dbm.rollback();
+            qWarning() << "Profile::repairRespiratoryEvents() -" << failed
+                       << "sessions failed to rebuild; rolled back, will retry on next load";
+            return false;
+        }
+        if (!dbm.commit()) {
+            qWarning() << "Profile::repairRespiratoryEvents() - commit failed; no rows were repaired";
+            return false;
+        }
+    }
+
+    qDebug() << "Profile::repairRespiratoryEvents() - rebuilt" << repaired << "sessions,"
+             << failed << "failed," << notLoaded << "not loaded";
+    return failed == 0 && notLoaded == 0;
 }
 
 // Database integration: Save extended profile data

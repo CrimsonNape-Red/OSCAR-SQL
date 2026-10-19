@@ -862,7 +862,7 @@ bool PreferencesDialog::Save()
     if (recompress_events) {
         if (profile->countDays(MT_CPAP, profile->FirstDay(), profile->LastDay()) > 0) {
             if (QMessageBox::question(this, tr("Data Processing Required"),
-                                      tr("A data re/decompression proceedure is required to apply these changes. This operation may take a couple of minutes to complete.\n\nAre you sure you want to make these changes?"),
+                                      tr("A data re/decompression procedure is required to apply these changes. This operation may take a couple of minutes to complete.\n\nAre you sure you want to make these changes?"),
                                       QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
                 return false;
             }
@@ -871,7 +871,7 @@ bool PreferencesDialog::Save()
     if (recalc_events) {
         if (profile->countDays(MT_CPAP, profile->FirstDay(), profile->LastDay()) > 0) {
             if (QMessageBox::question(this, tr("Data Reindex Required"),
-                                      tr("A data reindexing proceedure is required to apply these changes. This operation may take a couple of minutes to complete.\n\nAre you sure you want to make these changes?"),
+                                      tr("A data reindexing procedure is required to apply these changes. This operation may take a couple of minutes to complete.\n\nAre you sure you want to make these changes?"),
                                       QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
                 return false;
             }

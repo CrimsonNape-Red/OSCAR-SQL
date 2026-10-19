@@ -229,8 +229,47 @@ bool RespiratoryEventsRepository::deleteBySession(qint64 sessionId)
         DatabaseManager::instance().checkQueryError("RespiratoryEventsRepository::deleteBySession", query);
         return false;
     }
-    
+
     return true;
+}
+
+QList<qint64> RespiratoryEventsRepository::findSessionsWithExcessRows(qint64 profileId)
+{
+    QList<qint64> sessionIds;
+    QSqlDatabase db = DatabaseManager::instance().database();
+    if (!db.isOpen()) {
+        qWarning() << "RespiratoryEventsRepository::findSessionsWithExcessRows() - Database not open";
+        return sessionIds;
+    }
+
+    // event_type 1 = EVL_Event; waveform lists never produce respiratory_events rows.
+    // LEFT JOIN: rows for a channel with no event lists left at all (e.g. user flags
+    // destroyed by a reindex) are stale too.
+    QSqlQuery query(db);
+    query.prepare(
+        "SELECT DISTINCT r.session_id FROM "
+        "  (SELECT session_id, channel_id, COUNT(*) AS n FROM respiratory_events "
+        "   WHERE profile_id = ? GROUP BY session_id, channel_id) r "
+        "LEFT JOIN "
+        "  (SELECT session_id, channel_id, SUM(count) AS n FROM event_lists "
+        "   WHERE profile_id = ? AND event_type = 1 GROUP BY session_id, channel_id) e "
+        "ON r.session_id = e.session_id AND r.channel_id = e.channel_id "
+        "WHERE r.n > COALESCE(e.n, 0)"
+    );
+    query.addBindValue(profileId);
+    query.addBindValue(profileId);
+
+    if (!query.exec()) {
+        qWarning() << "RespiratoryEventsRepository::findSessionsWithExcessRows() - Failed:"
+                   << query.lastError().text();
+        DatabaseManager::instance().checkQueryError("RespiratoryEventsRepository::findSessionsWithExcessRows", query);
+        return sessionIds;
+    }
+
+    while (query.next()) {
+        sessionIds.append(query.value(0).toLongLong());
+    }
+    return sessionIds;
 }
 
 QMap<int, int> RespiratoryEventsRepository::countByType(qint64 sessionId)

@@ -117,6 +117,9 @@ class Session
     //! \brief Extracts respiratory events from EventLists for storage in respiratory_events table
     QList<struct RespiratoryEventData> extractRespiratoryEvents();
 
+    //! \brief Replaces this session's respiratory_events rows with ones extracted from the loaded EventLists
+    bool StoreRespiratoryEvents();
+
     //! \brief Put the events away until needed again, freeing memory
     void TrashEvents();
 

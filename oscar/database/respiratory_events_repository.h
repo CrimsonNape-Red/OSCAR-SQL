@@ -94,7 +94,19 @@ public:
      * @return true if deletion successful
      */
     bool deleteBySession(qint64 sessionId);
-    
+
+    /**
+     * @brief Find sessions holding more respiratory_events rows than their event lists account for
+     * @param profileId Database ID of the profile to check
+     * @return Database IDs of the affected sessions (empty if none, or on error)
+     *
+     * Each row is extracted from one event of an EVL_Event list, and event_lists is replaced
+     * on every save, so a session/channel with more rows than SUM(event_lists.count) holds
+     * copies or stale rows. Before #335 was fixed, every re-save of a session appended
+     * another copy, and the day split left the tail's events under the head session.
+     */
+    QList<qint64> findSessionsWithExcessRows(qint64 profileId);
+
     /**
      * @brief Count events by type for a session
      * @param sessionId Database ID of session
