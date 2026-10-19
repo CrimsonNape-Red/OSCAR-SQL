@@ -111,6 +111,12 @@ public:
 ///        once per minute of the reported span, freezing the UI and exhausting memory.
 constexpr int kBmcMaxSessionDurationMinutes = 48 * 60;
 
+/// @brief The largest backward step between consecutive waveform packets, in seconds,
+///        that is still treated as the same recording (a DST "fall back" moves the clock
+///        back one hour).  A larger step means the newest data has run into the oldest
+///        data of the circular .nnn buffer.
+constexpr qint64 kBmcMaxBackwardJumpSecs = 7200;
+
 class BmcUsrSession
 {
 public:
@@ -498,6 +504,9 @@ protected:
     void ReadIdxFile();
     void ReadAllSessions();
     void BuildWaveformCrumbs();
+    // Adds a crumb where the circular .nnn buffer wraps from newest to oldest data, so
+    // the oldest surviving night is not read from the next fixed-grid crumb (GitLab #337).
+    void AddWrapPointCrumb();
     QList<BmcWaveformPacket> ReadWaveforms(BmcDataLink & link);
     void FindValidSessions();
 };

@@ -878,11 +878,84 @@ void BmcData::BuildWaveformCrumbs()
         filepath = ChangeFileExtension(this->usrFilePath, extension);
     };
 
+    // Needs the crumbs still in file order, so it must run before the sort.
+    AddWrapPointCrumb();
 
     std::sort(this->WaveformCrumbs.begin(), this->WaveformCrumbs.end(), [](BmcWaveformCrumb a, BmcWaveformCrumb b)->bool{
         return a.Timestamp < b.Timestamp;
     });
 
+}
+
+
+/**
+ * @brief Add a crumb wherever the newest waveform data runs into older data (GitLab #337).
+ *
+ * The .nnn files form one circular buffer, and BuildWaveformCrumbs() samples it only
+ * every 0x1000 packets (about 68 minutes).  The oldest surviving night therefore usually
+ * starts between two crumbs, and the crumb before it holds the newest data.
+ * FindValidSessions() then finds no crumb before that night and starts reading at the
+ * next one, so everything between the wrap point and that crumb is lost, as is any
+ * fragment of an earlier night left just after the wrap point.
+ *
+ * For each pair of consecutive crumbs (in file order, including last file to first) where
+ * time steps back by more than kBmcMaxBackwardJumpSecs, this binary-searches the packets
+ * between them for the first one that is older, and adds a crumb there.  The search
+ * relies on everything before the wrap point being newer than everything after it.
+ *
+ * Must be called while WaveformCrumbs is still in file order.
+ */
+void BmcData::AddWrapPointCrumb()
+{
+    const int count = this->WaveformCrumbs.size();
+    for (int c = 0; c < count; c++) {
+        // Copies: appending below may reallocate the list.
+        const BmcWaveformCrumb prev = this->WaveformCrumbs.at(c);
+        const BmcWaveformCrumb next = this->WaveformCrumbs.at((c + 1) % count);
+        const QDateTime threshold = prev.Timestamp.addSecs(-kBmcMaxBackwardJumpSecs);
+        if (next.Timestamp >= threshold)
+            continue;
+
+        // Search packets [1, end) after prev, where end is next itself when both are in the
+        // same file.  When next is in another file the wrap point may still be inside
+        // prev's file, so search to the end of it; if it is not there, the older data
+        // starts at next, which already has a crumb.
+        quint64 end;
+        if (next.FileIndex == prev.FileIndex && next.ByteOffset > prev.ByteOffset) {
+            end = (next.ByteOffset - prev.ByteOffset) / 0x100;
+        } else {
+            const quint64 fileSize = static_cast<quint64>(QFileInfo(prev.Filepath).size());
+            end = (fileSize > prev.ByteOffset) ? (fileSize - prev.ByteOffset) / 0x100 : 0;
+        }
+
+        // Stale or never-written regions can decode to dates like year 1031; those must
+        // not become a crumb that ReadWaveforms() would start from.
+        const auto isOlder = [&](quint64 k) {
+            const QDateTime t = ReadWaveformPacketTimestamp(prev.Filepath, prev.ByteOffset + k * 0x100);
+            return t.isValid() && t.date().year() >= 2000 && t < threshold;
+        };
+
+        quint64 lo = 1;
+        quint64 hi = end;
+        while (lo < hi) {
+            const quint64 mid = lo + (hi - lo) / 2;
+            if (isOlder(mid))
+                hi = mid;
+            else
+                lo = mid + 1;
+        }
+        if (lo >= end)
+            continue;
+
+        BmcWaveformCrumb crumb;
+        crumb.Filepath = prev.Filepath;
+        crumb.FileIndex = prev.FileIndex;
+        crumb.ByteOffset = prev.ByteOffset + lo * 0x100;
+        crumb.PacketOffset = static_cast<quint16>(crumb.ByteOffset >> 8);
+        crumb.Timestamp = ReadWaveformPacketTimestamp(crumb.Filepath, crumb.ByteOffset);
+        this->WaveformCrumbs.append(crumb);
+        qDebug() << "Wrap-point crumb" << crumb.Timestamp.toString(Qt::ISODate) << crumb.FileIndex << crumb.ByteOffset;
+    }
 }
 
 
@@ -923,9 +996,8 @@ QList<BmcWaveformPacket> BmcData::ReadWaveforms(BmcDataLink& link)
             // Allow backward timestamp jumps of up to 2 hours to handle DST "fall back"
             // (clocks go back 1 hour). Larger backward jumps indicate stale circular
             // buffer data from a previous recording cycle.
-            const qint64 kMaxAllowedBackwardSecs = 7200LL;
             if (packet.Timestamp > link.UsrSession.EndTimestamp ||
-                packet.Timestamp < lastPacketTimestamp.addSecs(-kMaxAllowedBackwardSecs)){
+                packet.Timestamp < lastPacketTimestamp.addSecs(-kBmcMaxBackwardJumpSecs)){
                 complete = true;
                 break;
             }

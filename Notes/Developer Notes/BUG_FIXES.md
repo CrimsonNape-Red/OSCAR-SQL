@@ -4,6 +4,31 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-19 - Legacy BMC: oldest night lost waveforms at the .nnn wrap point (#337)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcDataParsing.cpp`, `bmcDataParsing.h`
+
+**Symptom:** On a card whose circular `.nnn` waveform buffer had wrapped, the oldest surviving
+night was missing up to ~68 minutes of waveform from its start, and any fragment of the night
+before it (left just after the wrap point) had no waveform at all.
+
+**Root cause:** `BuildWaveformCrumbs()` samples each `.nnn` file only every 0x1000 packets.
+The point where the newest data runs into the oldest falls between two crumbs, and the crumb
+before it holds the newest data. `FindValidSessions()` then found no crumb before the oldest
+night and fell back to the first crumb inside its OSCAR day, so `ReadWaveforms()` skipped
+everything before it. The IDX entry that has the night's exact start didn't help: the
+`nextDay` match carries the search on to the following night's IDX entry, which the window
+guard then rejects.
+
+**Fix:** `AddWrapPointCrumb()` runs before the crumbs are sorted. For each pair of
+consecutive crumbs (in file order, last file wrapping to the first) where time steps back by
+more than `kBmcMaxBackwardJumpSecs` (now shared with `ReadWaveforms()`), it binary-searches
+for the first older packet and adds a crumb there. Dates before 2000 (stale or never-written
+regions) are rejected. Checked by emulating the parser on five legacy BMC sample cards:
+three recover the lost minutes, the others are unchanged.
+
+---
+
 ## 2026-10-18 - Re-saving a session duplicated its respiratory_events rows (#335)
 
 **Files:** `oscar/SleepLib/session.cpp`, `oscar/preferencesdialog.cpp`
