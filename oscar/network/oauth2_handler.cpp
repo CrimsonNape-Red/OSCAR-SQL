@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "oauth2_handler.h"
+#include "SleepLib/crypto.h"
 
 #include <QCryptographicHash>
 #include <QDesktopServices>
@@ -310,12 +311,87 @@ QString OAuth2Handler::accessToken() const
 //  Token persistence
 // ---------------------------------------------------------------------------
 
+namespace {
+
+/// AES-256 key for stored tokens (#329). Random bytes generated for this use only.
+/// Changing it makes every saved sign-in unreadable, so users would sign in again.
+const unsigned char kTokenSecret[32] = {
+    0x3f, 0x9b, 0x23, 0xae, 0x0f, 0x0c, 0xc8, 0xbe, 0x0e, 0xca, 0x6f, 0x03, 0x76, 0x20, 0xd0, 0x67,
+    0x38, 0x17, 0xbe, 0xfb, 0xd2, 0x62, 0xe0, 0x76, 0x0c, 0xa0, 0xd4, 0xd9, 0x8b, 0x61, 0xd5, 0x85
+};
+
+/// GCM IV and tag sizes, in bytes.
+const int kTokenIvSize = 12;
+const int kTokenTagSize = 16;
+
+QByteArray tokenKey()
+{
+    return QByteArray(reinterpret_cast<const char*>(kTokenSecret), sizeof(kTokenSecret));
+}
+
+} // namespace
+
+const QLatin1String OAuth2Handler::kEncryptedPrefix("#ENC1#");
+
+bool OAuth2Handler::isEncryptedToken(const QString& stored)
+{
+    return stored.startsWith(kEncryptedPrefix);
+}
+
+QString OAuth2Handler::encryptToken(const QString& token)
+{
+    if (token.isEmpty()) {
+        return QString();
+    }
+
+    // A fresh random IV for every value: GCM must never reuse an IV with the same key.
+    QByteArray iv(kTokenIvSize, '\0');
+    QRandomGenerator* gen = QRandomGenerator::system();
+    for (int i = 0; i < iv.size(); ++i) {
+        iv[i] = static_cast<char>(gen->bounded(256));
+    }
+
+    QByteArray ciphertext, tag;
+    if (encrypt_aes256_gcm(tokenKey(), iv, token.toUtf8(), ciphertext, tag) != OK
+            || tag.size() != kTokenTagSize) {
+        qWarning() << "OAuth2: could not encrypt token; it will not be saved";
+        return QString();
+    }
+    return kEncryptedPrefix + QString::fromLatin1((iv + ciphertext + tag).toBase64());
+}
+
+QString OAuth2Handler::decryptToken(const QString& stored, bool* ok)
+{
+    if (ok) {
+        *ok = true;
+    }
+    if (!isEncryptedToken(stored)) {
+        return stored;  // Plain text from an earlier version (or empty).
+    }
+
+    QByteArray blob = QByteArray::fromBase64(stored.mid(kEncryptedPrefix.size()).toLatin1());
+    QByteArray plaintext;
+    if (blob.size() > kTokenIvSize + kTokenTagSize) {
+        QByteArray iv = blob.left(kTokenIvSize);
+        QByteArray tag = blob.right(kTokenTagSize);
+        QByteArray ciphertext = blob.mid(kTokenIvSize, blob.size() - kTokenIvSize - kTokenTagSize);
+        if (decrypt_aes256_gcm(tokenKey(), iv, ciphertext, tag, plaintext) == OK) {
+            return QString::fromUtf8(plaintext);
+        }
+    }
+    qWarning() << "OAuth2: could not decrypt a saved token; the user must sign in again";
+    if (ok) {
+        *ok = false;
+    }
+    return QString();
+}
+
 void OAuth2Handler::saveTokens(const QString& providerKey)
 {
     QSettings s;
     s.beginGroup(QStringLiteral("CloudAuth/%1").arg(providerKey));
-    s.setValue(QStringLiteral("refreshToken"), m_refreshToken);
-    s.setValue(QStringLiteral("accessToken"), m_accessToken);
+    s.setValue(QStringLiteral("refreshToken"), encryptToken(m_refreshToken));
+    s.setValue(QStringLiteral("accessToken"), encryptToken(m_accessToken));
     if (m_tokenExpiry.isValid()) {
         s.setValue(QStringLiteral("tokenExpiry"), m_tokenExpiry.toMSecsSinceEpoch());
     }
@@ -326,8 +402,14 @@ void OAuth2Handler::loadTokens(const QString& providerKey)
 {
     QSettings s;
     s.beginGroup(QStringLiteral("CloudAuth/%1").arg(providerKey));
-    m_refreshToken = s.value(QStringLiteral("refreshToken")).toString();
-    m_accessToken = s.value(QStringLiteral("accessToken")).toString();
+    const QString storedRefresh = s.value(QStringLiteral("refreshToken")).toString();
+    const QString storedAccess = s.value(QStringLiteral("accessToken")).toString();
+    m_refreshToken = decryptToken(storedRefresh);
+    m_accessToken = decryptToken(storedAccess);
+
+    // Tokens saved in plain text by an earlier version are re-saved encrypted below.
+    const bool plainTextFound = (!storedRefresh.isEmpty() && !isEncryptedToken(storedRefresh))
+                             || (!storedAccess.isEmpty() && !isEncryptedToken(storedAccess));
     QVariant expiryVar = s.value(QStringLiteral("tokenExpiry"));
     if (expiryVar.isValid()) {
         bool ok = false;
@@ -340,6 +422,11 @@ void OAuth2Handler::loadTokens(const QString& providerKey)
         }
     }
     s.endGroup();
+
+    if (plainTextFound) {
+        qDebug() << "OAuth2: encrypting saved" << providerKey << "tokens";
+        saveTokens(providerKey);
+    }
 }
 
 void OAuth2Handler::clearTokens(const QString& providerKey)

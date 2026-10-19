@@ -67,14 +67,32 @@ public:
     /// The current access token (may be expired).
     QString accessToken() const;
 
-    /// Save tokens to QSettings under \a providerKey.
+    /// Save tokens to QSettings under \a providerKey, encrypted with encryptToken().
     void saveTokens(const QString& providerKey);
 
-    /// Load tokens from QSettings under \a providerKey.
+    /// Load tokens from QSettings under \a providerKey. Plain-text tokens saved by
+    /// earlier versions are accepted and re-saved encrypted.
     void loadTokens(const QString& providerKey);
 
     /// Clear saved tokens.
     void clearTokens(const QString& providerKey);
+
+    /// Prefix that marks a stored token as encrypted (format version 1).
+    static const QLatin1String kEncryptedPrefix;
+
+    /// Encrypt \a token for storage: kEncryptedPrefix followed by base64 of
+    /// IV + ciphertext + tag (AES-256-GCM). The key is built into OSCAR, so this
+    /// keeps tokens from being read as plain text; it does not stop someone who
+    /// has the OSCAR source. Returns an empty string for an empty token or on failure.
+    static QString encryptToken(const QString& token);
+
+    /// Reverse encryptToken(). A value without kEncryptedPrefix is a plain-text
+    /// token from an earlier version and is returned unchanged. Returns an empty
+    /// string, and sets \a ok to false, if an encrypted value can't be decrypted.
+    static QString decryptToken(const QString& stored, bool* ok = nullptr);
+
+    /// Whether \a stored carries kEncryptedPrefix.
+    static bool isEncryptedToken(const QString& stored);
 
 signals:
     /// Emitted when authorization completes (initial or refresh).

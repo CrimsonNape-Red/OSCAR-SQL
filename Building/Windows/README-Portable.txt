@@ -43,7 +43,9 @@ while it runs, and removing the drive then can damage it.
 Back up "OSCAR Portable Data" regularly; a USB stick is easy to lose.
 
 If you sign in to Dropbox, Google Drive or OneDrive from OSCAR, that sign-in is
-saved in the Settings folder, and anyone who has the drive could use it. Close
+saved in the Settings folder. It is encrypted, but OSCAR has to be able to read
+it back without asking you, so someone determined who has the drive could still
+use it. Close
 OSCAR and delete "OSCAR Portable Data\Settings" before lending or discarding
 the drive; your data is kept, and OSCAR finds it again on its next start.
 

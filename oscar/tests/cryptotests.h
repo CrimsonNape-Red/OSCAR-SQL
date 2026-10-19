@@ -16,6 +16,7 @@ private slots:
     void testAES256GCM();
     void testAES256GCMencrypt();
     void testPBKDF2_SHA256();
+    void testCloudTokenEncryption();
     void testPRS1Benchmarks();
 };
 DECLARE_TEST(CryptoTests)

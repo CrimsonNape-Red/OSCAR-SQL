@@ -8,6 +8,7 @@
 
 #include "cryptotests.h"
 #include "SleepLib/crypto.h"
+#include "network/oauth2_handler.h"
 
 //#define BENCHMARK_CRYPTO 1
 
@@ -123,6 +124,41 @@ void CryptoTests::testPBKDF2_SHA256()
     Q_ASSERT(derived_key == expected_key);
 }
 
+// Stored cloud tokens (#329): round trip, legacy plain text, and tampering.
+void CryptoTests::testCloudTokenEncryption()
+{
+    const QString token = QStringLiteral("sl.u.AbCdEf-0123456789_xyz~");
+
+    QString stored = OAuth2Handler::encryptToken(token);
+    QVERIFY(OAuth2Handler::isEncryptedToken(stored));
+    QVERIFY(!stored.contains(token));
+
+    bool ok = false;
+    QCOMPARE(OAuth2Handler::decryptToken(stored, &ok), token);
+    QVERIFY(ok);
+
+    // A fresh IV each time, so the same token never encrypts to the same text.
+    QVERIFY(OAuth2Handler::encryptToken(token) != stored);
+
+    // Plain text from an earlier version passes through unchanged.
+    QVERIFY(!OAuth2Handler::isEncryptedToken(token));
+    QCOMPARE(OAuth2Handler::decryptToken(token, &ok), token);
+    QVERIFY(ok);
+
+    // Empty stays empty.
+    QVERIFY(OAuth2Handler::encryptToken(QString()).isEmpty());
+    QVERIFY(OAuth2Handler::decryptToken(QString(), &ok).isEmpty());
+    QVERIFY(ok);
+
+    // A damaged value fails the GCM tag check and yields no token.
+    QString damaged = stored;
+    int pos = OAuth2Handler::kEncryptedPrefix.size() + 20;  // Inside the ciphertext.
+    damaged[pos] = (damaged[pos] == QChar('A')) ? QChar('B') : QChar('A');
+    QVERIFY(OAuth2Handler::decryptToken(damaged, &ok).isEmpty());
+    QVERIFY(!ok);
+    QVERIFY(OAuth2Handler::decryptToken(QString(OAuth2Handler::kEncryptedPrefix) + "xyz", &ok).isEmpty());
+    QVERIFY(!ok);
+}
 
 void CryptoTests::testPRS1Benchmarks()
 {

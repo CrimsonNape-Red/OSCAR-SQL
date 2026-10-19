@@ -136,8 +136,9 @@ back to Documents.
 
 - Help index (`help.cpp`, `AppDataLocation`): not compiled while `helpless` is defined.
 - Cloud downloads use the system temp folder; nothing persistent.
-- Cloud OAuth tokens are stored in plain text in the INI file, as they are in the registry
-  now; a lost stick exposes them. The README warns about this; encryption is tracked in #329.
+- Cloud OAuth tokens are encrypted (#329) with a key built into OSCAR, so they are not
+  readable as plain text, but the key travels with the program; the README still warns
+  that a lost stick exposes the sign-in.
 
 ## Packaging (`Building/Windows/deploy.bat`)
 

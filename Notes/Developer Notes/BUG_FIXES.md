@@ -4,6 +4,24 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-19 - Cloud sign-in tokens were saved in plain text (#329)
+
+**Files:** `oscar/network/oauth2_handler.cpp`, `oauth2_handler.h`, `oscar/tests/cryptotests.cpp`
+
+**Symptom:** The Dropbox, Google Drive and OneDrive refresh and access tokens were stored
+unencrypted under `CloudAuth/<provider>` in QSettings: the registry, or the portable
+`Settings` INI file on a USB stick.
+
+**Fix:** `saveTokens()` stores each token as `#ENC1#` + base64(IV + ciphertext + tag),
+AES-256-GCM with a random 12-byte IV per value and a 32-byte key built into OSCAR (option 2
+in the issue; the OS credential store was rejected to avoid OS ties). `loadTokens()` accepts
+values without the prefix as plain text from earlier versions and re-saves them encrypted.
+A value that fails the GCM tag check loads as empty, so the user signs in again. This is
+obfuscation, not protection against someone with the OSCAR source. Older OSCAR builds read
+an encrypted token as an invalid one and ask the user to sign in again.
+
+---
+
 ## 2026-10-19 - Legacy BMC: oldest night lost waveforms at the .nnn wrap point (#337)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmcDataParsing.cpp`, `bmcDataParsing.h`
