@@ -22,6 +22,24 @@ item is skipped, so it now uses the combo's current count.
 
 ---
 
+## 2026-10-19 - Portable mode left a QtProject key in the Windows registry
+
+**Files:** `oscar/SleepLib/portablemode.cpp`, `portablemode.h`, `oscar/main.cpp`,
+`oscar/mainwindow.cpp`
+
+**Symptom:** OSCAR Portable created `HKEY_CURRENT_USER\Software\QtProject` on the host PC,
+although portable settings are meant to stay in the INI file.
+
+**Root cause:** `QFileDialog` saves its state with `QSettings(QSettings::UserScope,
+"QtProject")`, which Qt hardcodes to `NativeFormat`, so `setDefaultFormat(IniFormat)`
+does not apply. No Qt version or option changes this.
+
+**Fix:** In portable mode on Windows, `PortableMode::initialize()` records whether the key
+exists, and `removeQtRegistryKey()` deletes it if OSCAR created it. It runs when `main()`
+exits (scope guard) and before each self-restart, so the new process finds the key gone.
+
+---
+
 ## 2026-10-19 - Ctrl/Cmd+wheel zoom far too fast on trackpads (#306)
 
 **Files:** `oscar/Graphs/gGraph.cpp`, `gGraph.h`

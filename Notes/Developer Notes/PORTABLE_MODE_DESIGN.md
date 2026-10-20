@@ -75,6 +75,22 @@ file `<path>/<organization>/<application>.ini`.
 The one explicit `NativeFormat` use, the read-only `MachineGuid` lookup in
 `getFingerprint()`, is deliberately left alone: a new PC still gets its OpenGL test.
 
+### Qt's own registry key
+
+`QFileDialog` saves its last folder, history and view mode with
+`QSettings(QSettings::UserScope, "QtProject")`, under `FileDialog` in
+`HKEY_CURRENT_USER\Software\QtProject\OrganizationDefaults`. That constructor is hardcoded
+to `NativeFormat` (Qt 6.10.2 and Qt's dev branch alike), so `setDefaultFormat()` cannot
+redirect it. Instead, `initialize()` notes whether `HKCU\Software\QtProject` exists, and
+`removeQtRegistryKey()` deletes the whole key if it did not. A key that already existed
+may belong to another Qt program, so it is left alone, including any FileDialog values OSCAR
+changed in it. `main()` calls it through a scope guard on every way out, and the three
+in-app restarts (`RestartApplication()`, `switchToDatabase()`, Compress Database) call it
+before spawning. The new process checks for the key before its `-p` delay, so if the old
+process still held the key the new process would leave its own copy behind. The removal is
+silent if the registry cannot be written. If OSCAR crashes, the key stays, and later runs
+then treat it as pre-existing. Not done on macOS or Linux (portable is Windows-only).
+
 ### Ordering constraint
 
 `main()` reads the graphics engine from `QSettings` before constructing `QApplication`

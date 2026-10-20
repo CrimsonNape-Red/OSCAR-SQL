@@ -24,7 +24,8 @@
  *    replacing the program folder; the marker's DataFolder line can move it;
  *  - every default-constructed QSettings reads and writes an INI file in the Settings
  *    folder inside the portable data folder instead of the registry (or the platform's
- *    native settings store);
+ *    native settings store); the registry key Qt's file dialogs write regardless is
+ *    removed again on Windows if OSCAR created it (removeQtRegistryKey());
  *  - the default data folder (OSCAR20_Data) is in the portable data folder instead of
  *    in Documents;
  *  - folder paths kept in settings are stored relative to the portable data folder when
@@ -93,6 +94,19 @@ namespace PortableMode
      *        still empty; for when OSCAR exits before using them.
      */
     void removeUnusedFolders();
+
+    /*!
+     * \brief On Windows, remove HKEY_CURRENT_USER\Software\QtProject if it did not exist
+     *        when portable OSCAR started; does nothing otherwise, or after the first call.
+     *
+     * Qt's file dialogs save their last folder, history and view mode there with
+     * QSettings(QSettings::UserScope, "QtProject"), which always uses the registry, so
+     * the INI redirection cannot catch it. A key that was already there may belong to
+     * another Qt program and is left alone. Call when OSCAR exits, and before it starts
+     * a new copy of itself so that the new copy finds the key gone and removes the one
+     * it creates in turn.
+     */
+    void removeQtRegistryKey();
 
     //! \brief Reason portable mode cannot work (folder not writable), or empty if it can.
     QString setupError();

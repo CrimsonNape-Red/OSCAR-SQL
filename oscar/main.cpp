@@ -38,6 +38,7 @@
 #include <QProcess>
 #include <QPushButton>
 #include <QDateTime>
+#include <QScopeGuard>
 #include <functional>
 
 #include "version.h"
@@ -870,6 +871,8 @@ int main(int argc, char *argv[]) {
     // must be decided before the first QSettings object below. The data folder lives there
     // too, so that folder takes the place of Documents for suggestions and relative --datadir.
     PortableMode::initialize(argc, argv);
+    // Runs on every way out of main(), after the last file dialog has saved its state.
+    const auto qtRegistryCleanup = qScopeGuard([] { PortableMode::removeQtRegistryKey(); });
     if (PortableMode::isEnabled())
         homeDocs = PortableMode::dataRootPath() + "/";
 //    QGuiApplication::styleHints()->colorScheme();  // Copies OS light or dark style to OSCAR,

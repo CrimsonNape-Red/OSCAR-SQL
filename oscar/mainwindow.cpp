@@ -2377,6 +2377,7 @@ void MainWindow::RestartApplication(QString cmdline)
     // Mark clean shutdown before spawning — the new process can race ahead and read
     // the flag before main()'s cleanup path writes it (same race as switchToDatabase).
     DatabaseManager::markCleanShutdown(DatabaseManager::instance().databasePath());
+    PortableMode::removeQtRegistryKey();    // likewise, so the new process sees it gone
 
     QString apppath;
 #ifdef Q_OS_MAC
@@ -3278,6 +3279,7 @@ void MainWindow::switchToDatabase(const QString& path)
     // this flag at startup; if we let main()'s cleanup write it after startDetached()
     // returns, the new process can race ahead and see the dirty flag.
     DatabaseManager::markCleanShutdown(DatabaseManager::instance().databasePath());
+    PortableMode::removeQtRegistryKey();    // likewise, so the new process sees it gone
 
     qDebug() << "=== This log is ending: switching to database" << path << "===";
 
@@ -4724,6 +4726,7 @@ void MainWindow::on_actionCompress_Database_triggered()
     }
     staticQMessageBox::information(this, tr("Compress Database"), msg, QMessageBox::Ok);
 
+    PortableMode::removeQtRegistryKey();    // before the new process looks for it
     QString apppath = QApplication::instance()->applicationFilePath();
     QStringList args;
     args << "-p" << PortableMode::restartArguments();

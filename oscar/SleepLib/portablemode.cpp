@@ -32,6 +32,21 @@ static bool    s_defaultDataRoot = true;   // the data folder is where DefaultDa
 static QString s_root;
 static QString s_dataRoot;
 static QString s_setupError;
+static bool    s_removeQtKey = false;      // QtProject registry key was absent at startup
+
+#ifdef Q_OS_WIN
+// Qt's file dialogs keep their state under HKEY_CURRENT_USER\Software\QtProject whatever
+// the default QSettings format is (see removeQtRegistryKey()).
+static const QString RegistrySoftwareKey = QStringLiteral("HKEY_CURRENT_USER\\Software");
+static const QString QtProjectKey        = QStringLiteral("QtProject");
+
+//! \brief True when HKEY_CURRENT_USER\Software\QtProject exists.
+static bool qtProjectKeyExists()
+{
+    QSettings software(RegistrySoftwareKey, QSettings::NativeFormat);
+    return software.childGroups().contains(QtProjectKey, Qt::CaseInsensitive);
+}
+#endif
 
 /*!
  * \brief Folder of the running executable, worked out from argv[0].
@@ -93,6 +108,9 @@ void initialize(int argc, char *argv[])
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settingsDir);
     QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, settingsDir);
+#ifdef Q_OS_WIN
+    s_removeQtKey = !qtProjectKeyExists();
+#endif
 
     // QFileInfo::isWritable() does not see Windows access rules, so try writing a file.
     QFile probe(settingsDir + QStringLiteral("/write-test.tmp"));
@@ -144,6 +162,19 @@ void removeUnusedFolders()
         QDir().rmdir(settingsPath());
         QDir().rmdir(s_dataRoot);
     }
+}
+
+void removeQtRegistryKey()
+{
+#ifdef Q_OS_WIN
+    if (!s_removeQtKey)
+        return;
+    s_removeQtKey = false;      // once only: a restarted OSCAR looks after its own key
+    if (qtProjectKeyExists()) {
+        QSettings software(RegistrySoftwareKey, QSettings::NativeFormat);
+        software.remove(QtProjectKey);      // the key and everything under it
+    }
+#endif
 }
 
 QString setupError()
