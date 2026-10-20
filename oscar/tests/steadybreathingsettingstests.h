@@ -26,6 +26,7 @@ private slots:
     void initTestCase();
     void testAppWideValueCopiedOnce();
     void testProfilesAreIndependent();
+    void testClinicalModeIsInactive();
     void cleanupTestCase();
 
 private:
@@ -34,6 +35,7 @@ private:
     QString m_previousAppData;
     Profile *m_profileA = nullptr;
     Profile *m_profileB = nullptr;
+    Profile *m_profileC = nullptr;
 };
 
 DECLARE_TEST(SteadyBreathingSettingsTests)

@@ -104,6 +104,30 @@ void SteadyBreathingSettingsTests::testProfilesAreIndependent()
 #endif
 }
 
+void SteadyBreathingSettingsTests::testClinicalModeIsInactive()
+{
+#if defined(STEADY_BREATHING)
+    // A profile with no CPAP data is opened in Clinical Mode, then gets the old app-wide
+    // SB_ACTIVE copied in. It must not report SB_ACTIVE, or import would run detection (#340).
+    const QString dirC = m_tempDir->path() + QStringLiteral("/Profiles/SteadyBreathingC");
+    m_profileC = Profiles::Create(QStringLiteral("SteadyBreathingC"), &dirC);
+    QVERIFY(m_profileC != nullptr);
+    m_profileC->cpap->setClinicalMode(true);
+    QVERIFY(m_profileC->saveProfilePreferencesToDatabase());
+    QVERIFY(m_profileC->loadExtendedDataFromDatabase());
+    QVERIFY((*m_profileC)[STR_PREF_SteadyBreathingPerProfile].toBool());
+    QCOMPARE(m_profileC->cpap->steadyBreathing(), SB_INACTIVE);
+
+    // The user's choice is kept, and takes effect once the profile is in Permissive Mode.
+    m_profileC->cpap->setClinicalMode(false);
+    QCOMPARE(m_profileC->cpap->steadyBreathing(), SB_ACTIVE);
+
+    // A stored SB_INACTIVE (written by older builds) still means "turned on".
+    m_profileC->cpap->setSteadyBreathing(SB_INACTIVE);
+    QCOMPARE(m_profileC->cpap->steadyBreathing(), SB_ACTIVE);
+#endif
+}
+
 void SteadyBreathingSettingsTests::cleanupTestCase()
 {
     Profiles::profiles.clear();
@@ -112,6 +136,8 @@ void SteadyBreathingSettingsTests::cleanupTestCase()
     m_profileA = nullptr;
     delete m_profileB;
     m_profileB = nullptr;
+    delete m_profileC;
+    m_profileC = nullptr;
     p_profile = nullptr;
     delete AppSetting;
     AppSetting = nullptr;

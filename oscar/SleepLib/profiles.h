@@ -688,7 +688,16 @@ class CPAPSettings : public PrefSettings
     double complianceHours() const { return m_complianceHours; }
     bool clinicalMode() const { return m_clinicalMode; }
 #if defined(STEADY_BREATHING)
-    SteadyBreathingState steadyBreathing() const { return (SteadyBreathingState)getPref(STR_CS_SteadyBreathing).toInt(); }
+    /*! \brief Effective Steady Breathing state for this profile.
+     *
+     * The stored value only records whether the user turned it on. Steady Breathing runs only
+     * in Permissive Mode, so any "on" value reports SB_INACTIVE while the profile is in Clinical
+     * Mode, and SB_ACTIVE otherwise. Detection and display require SB_ACTIVE (#340).
+     */
+    SteadyBreathingState steadyBreathing() const {
+        if ((SteadyBreathingState)getPref(STR_CS_SteadyBreathing).toInt() == SB_OFF) return SB_OFF;
+        return m_clinicalMode ? SB_INACTIVE : SB_ACTIVE;
+    }
 #if defined(STEADY_BREATHING_ENHANCED_TESTING)
     double steadyBreathingDefaultThreshold() const { return (double)1.51; /* hardCoded value */ }
     int steadyBreathingDefaultDuration() const { return 20; /* hardCoded value */ }

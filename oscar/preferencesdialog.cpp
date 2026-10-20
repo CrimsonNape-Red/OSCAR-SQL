@@ -239,12 +239,9 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->useFusionTheme->setChecked(AppSetting->useFusionTheme());
 
 #if defined(STEADY_BREATHING)
-    SteadyBreathingState sbState = profile->cpap->steadyBreathing();
-    ui->steadyBreathing->setChecked(sbState!=SB_OFF);
+    // In Clinical Mode steadyBreathing() already reports SB_INACTIVE, so nothing is written here
+    ui->steadyBreathing->setChecked(profile->cpap->steadyBreathing()!=SB_OFF);
     if (profile->cpap->clinicalMode()) {
-        if (sbState==SB_ACTIVE) {
-            profile->cpap->setSteadyBreathing(SB_INACTIVE);
-        }
         ui->steadyBreathing->setCheckable(false);
         ui->steadyBreathing->setTitle(tr("Must enable Permissive Mode (see Clinical Tab)"));
         ui->steadyBreathing->setDisabled(true);
@@ -914,14 +911,19 @@ bool PreferencesDialog::Save()
     }
 
     bool clicicalModeChanged = profile->cpap->clinicalMode() != ui->clinicalMode->isChecked() ;
+#if defined(STEADY_BREATHING)
+    // The effective state depends on clinical mode too, so capture it before either changes
+    bool steadyBreathingWasActive = profile->cpap->steadyBreathing()==SB_ACTIVE;
+#endif
     p_profile->cpap->setClinicalMode(ui->clinicalMode->isChecked());
 
 #if defined(STEADY_BREATHING)
-    // SetSteadyBreathing must be after setting clinical mode
-    SteadyBreathingState sbState= ui->steadyBreathing->isChecked() ? SB_ACTIVE : SB_OFF;
-    if (profile->cpap->clinicalMode() && sbState==SB_ACTIVE) sbState=SB_INACTIVE;
-    bool steadyBreathingGraphDIsplayChanged = (profile->cpap->steadyBreathing()==SB_ACTIVE) != (sbState==SB_ACTIVE);
-    profile->cpap->setSteadyBreathing(sbState);
+    // The group box is not checkable in Clinical Mode, and isChecked() is then always false,
+    // so keep the stored choice rather than turning it off.
+    if (ui->steadyBreathing->isCheckable()) {
+        profile->cpap->setSteadyBreathing(ui->steadyBreathing->isChecked() ? SB_ACTIVE : SB_OFF);
+    }
+    bool steadyBreathingGraphDIsplayChanged = steadyBreathingWasActive != (profile->cpap->steadyBreathing()==SB_ACTIVE);
 
 #if defined(STEADY_BREATHING_ENHANCED_TESTING)
     profile->cpap->setSteadyBreathingDuration(ui->steadyBreathingDuration->value());
@@ -1097,7 +1099,8 @@ bool PreferencesDialog::Save()
 
 #if defined(STEADY_BREATHING)
     ui->steadyBreathing->setDisabled(profile->cpap->clinicalMode());
-    if (steadyBreathingGraphDIsplayChanged) {
+    // A clinical mode change reloads the profile below; don't reload it twice
+    if (steadyBreathingGraphDIsplayChanged && !clicicalModeChanged) {
         mainwin->reloadProfile();
     }
 #endif

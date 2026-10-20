@@ -4,6 +4,29 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-20 - Steady Breathing still ran on import in Clinical Mode profiles (#340)
+
+**Files:** `oscar/SleepLib/profiles.h`, `oscar/preferencesdialog.cpp`,
+`oscar/tests/steadybreathingsettingstests.cpp`, `steadybreathingsettingstests.h`
+
+**Symptom:** After the settings became per profile (#339), a Clinical Mode profile could
+still get Steady Breathing flags on import. Typical case: Steady Breathing was on, and the user
+created a new profile, which opens in Clinical Mode until it has CPAP data.
+
+**Root cause:** Import (`calcRespRate()`) and display test `steadyBreathing()==SB_ACTIVE`,
+which returned the stored value. Only the Preferences dialog demoted it to `SB_INACTIVE`, when
+opened, and the one-time copy of the old app-wide value could store `SB_ACTIVE` in a Clinical
+Mode profile. Two smaller dialog faults: in Clinical Mode the group box is non-checkable, so
+`isChecked()` was false and saving stored `SB_OFF`, losing the user's choice; and the demotion
+was written when the dialog opened, so it stuck even after Cancel.
+
+**Fix:** `CPAPSettings::steadyBreathing()` now returns the effective state: any stored "on"
+value reports `SB_INACTIVE` in Clinical Mode and `SB_ACTIVE` otherwise. The dialog no longer
+writes on open, and keeps the stored choice while the box is non-checkable. It also no longer
+reloads the profile twice when Clinical Mode and the effective state change together.
+
+---
+
 ## 2026-10-20 - Steady Breathing channels never hidden from the Daily events list
 
 **Files:** `oscar/daily.cpp`
