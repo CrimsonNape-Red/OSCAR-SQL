@@ -239,11 +239,11 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->useFusionTheme->setChecked(AppSetting->useFusionTheme());
 
 #if defined(STEADY_BREATHING)
-    SteadyBreathingState sbState = AppSetting->steadyBreathing();
+    SteadyBreathingState sbState = profile->cpap->steadyBreathing();
     ui->steadyBreathing->setChecked(sbState!=SB_OFF);
     if (profile->cpap->clinicalMode()) {
         if (sbState==SB_ACTIVE) {
-            AppSetting->setSteadyBreathing(SB_INACTIVE);
+            profile->cpap->setSteadyBreathing(SB_INACTIVE);
         }
         ui->steadyBreathing->setCheckable(false);
         ui->steadyBreathing->setTitle(tr("Must enable Permissive Mode (see Clinical Tab)"));
@@ -251,8 +251,8 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     }
 #if defined(STEADY_BREATHING_ENHANCED_TESTING)
     // Ui MUST BE MANUALLY ENABLED. was commented out
-    ui->steadyBreathingDuration->setValue( AppSetting->steadyBreathingDuration());
-    ui->steadyBreathingThreshold->setValue(AppSetting->steadyBreathingThreshold());
+    ui->steadyBreathingDuration->setValue( profile->cpap->steadyBreathingDuration());
+    ui->steadyBreathingThreshold->setValue(profile->cpap->steadyBreathingThreshold());
     ui->steadyBreathingDuration->show();
     ui->steadyBreathingThreshold->show();
     ui->resetSteadyBreathingDefaults->show();
@@ -920,12 +920,12 @@ bool PreferencesDialog::Save()
     // SetSteadyBreathing must be after setting clinical mode
     SteadyBreathingState sbState= ui->steadyBreathing->isChecked() ? SB_ACTIVE : SB_OFF;
     if (profile->cpap->clinicalMode() && sbState==SB_ACTIVE) sbState=SB_INACTIVE;
-    bool steadyBreathingGraphDIsplayChanged = (AppSetting->steadyBreathing()==SB_ACTIVE) != (sbState==SB_ACTIVE);
-    AppSetting->setSteadyBreathing(sbState);
+    bool steadyBreathingGraphDIsplayChanged = (profile->cpap->steadyBreathing()==SB_ACTIVE) != (sbState==SB_ACTIVE);
+    profile->cpap->setSteadyBreathing(sbState);
 
 #if defined(STEADY_BREATHING_ENHANCED_TESTING)
-    AppSetting->setSteadyBreathingDuration(ui->steadyBreathingDuration->value());
-    AppSetting->setSteadyBreathingThreshold(ui->steadyBreathingThreshold->value());
+    profile->cpap->setSteadyBreathingDuration(ui->steadyBreathingDuration->value());
+    profile->cpap->setSteadyBreathingThreshold(ui->steadyBreathingThreshold->value());
 #endif
 #endif
 
@@ -1321,10 +1321,10 @@ void PreferencesDialog::on_resetChannelDefaults_clicked()
 void PreferencesDialog::on_resetSteadyBreathingDefaults_clicked()
 {
     // Ui MUST BE MANUALLY ENABLED. was commented out
-    AppSetting->setSteadyBreathingDuration(AppSetting->steadyBreathingDefaultDuration());
-    AppSetting->setSteadyBreathingThreshold(AppSetting->steadyBreathingDefaultThreshold());
-    ui->steadyBreathingDuration->setValue( AppSetting->steadyBreathingDuration());
-    ui->steadyBreathingThreshold->setValue(AppSetting->steadyBreathingThreshold());
+    profile->cpap->setSteadyBreathingDuration(profile->cpap->steadyBreathingDefaultDuration());
+    profile->cpap->setSteadyBreathingThreshold(profile->cpap->steadyBreathingDefaultThreshold());
+    ui->steadyBreathingDuration->setValue( profile->cpap->steadyBreathingDuration());
+    ui->steadyBreathingThreshold->setValue(profile->cpap->steadyBreathingThreshold());
 }
 #endif
 

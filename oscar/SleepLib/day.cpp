@@ -1266,7 +1266,7 @@ QList<ChannelID> Day::getSortedMachineChannels(MachineType type, quint32 chantyp
     QMultiMap<int, ChannelID> order;
     for (const auto code : available) {
         #if defined(STEADY_BREATHING)
-            if (AppSetting->steadyBreathing()!=SB_ACTIVE) {
+            if (p_profile->cpap->steadyBreathing()!=SB_ACTIVE) {
                 if (code == CPAP_SteadyBreathing || code == CPAP_SteadyBreathingFlag)  {
                     continue;
                 }
@@ -1297,7 +1297,7 @@ QList<ChannelID> Day::getSortedMachineChannels(quint32 chantype)
 
     for (auto code : available) {
         #if defined(STEADY_BREATHING)
-            if (AppSetting->steadyBreathing()!=SB_ACTIVE) {
+            if (p_profile->cpap->steadyBreathing()!=SB_ACTIVE) {
                 if (code == CPAP_SteadyBreathing || code == CPAP_SteadyBreathingFlag)  {
                     continue;
                 }

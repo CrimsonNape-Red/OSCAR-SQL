@@ -311,7 +311,7 @@ void Overview::CreateAllGraphs() {
             QString name = chan->fullname();
 
             #if defined(STEADY_BREATHING)
-            if (AppSetting->steadyBreathing()!=SB_ACTIVE ) {
+            if (p_profile->cpap->steadyBreathing()!=SB_ACTIVE ) {
                 if (code == CPAP_SteadyBreathingFlag)  continue;
                 if (code == CPAP_SteadyBreathing)  continue;
             }

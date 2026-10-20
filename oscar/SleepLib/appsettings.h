@@ -55,6 +55,8 @@ const QString STR_AS_MonochromePrinting = "PrintBW";
 //const QString STR_AS_EventFlagSessionBar = "EventFlagSessionBar";
 const QString STR_AS_DisableDailyGraphTitles = "DisableDailyGraphTitles";
 #if defined(STEADY_BREATHING)
+// Steady Breathing settings are now per profile (CPAPSettings). These app-wide keys are
+// only read once, to copy their old values into each profile.
 const QString STR_AS_SteadyBreathing = "SteadyBreathing";
 #if defined(STEADY_BREATHING_ENHANCED_TESTING)
 const QString STR_AS_SteadyBreathingThreshold = "SteadyBreathingThreshold";
@@ -163,15 +165,6 @@ public:
   //! \brief Whether to print reports in black and white, which can be more legible on non-color printers
   bool monochromePrinting() const { return getPref(STR_AS_MonochromePrinting).toBool(); }
   bool disableDailyGraphTitles() const { return getPref(STR_AS_DisableDailyGraphTitles).toBool(); }
-#if defined(STEADY_BREATHING)
-  SteadyBreathingState steadyBreathing() const { return (SteadyBreathingState)getPref(STR_AS_SteadyBreathing).toInt(); }
-#if defined(STEADY_BREATHING_ENHANCED_TESTING)
-  double steadyBreathingDefaultThreshold() const { return (double)1.51; /* hardCoded value */ }
-  int steadyBreathingDefaultDuration() const { return 20; /* hardCoded value */ }
-  double steadyBreathingThreshold() const { return getPref(STR_AS_SteadyBreathingThreshold).toDouble(); }
-  int steadyBreathingDuration() const { return getPref(STR_AS_SteadyBreathingDuration).toInt(); }
-#endif
-#endif
   //! \Allow disabling of sessions
   //! \brief Whether to show graph tooltips
   inline bool graphTooltips() const { return m_graphTooltips; }
@@ -251,13 +244,6 @@ public:
   //! \brief Sets whether to print reports in black and white, which can be more legible on non-color printers
   void setMonochromePrinting(bool b) { setPref(STR_AS_MonochromePrinting, b); }
   void setDisableDailyGraphTitles(bool b) { setPref(STR_AS_DisableDailyGraphTitles, b); }
-  #if defined(STEADY_BREATHING)
-  void setSteadyBreathing(SteadyBreathingState b) { setPref(STR_AS_SteadyBreathing, (int)b); }
-  #if defined(STEADY_BREATHING_ENHANCED_TESTING)
-  void setSteadyBreathingThreshold(double b) { setPref(STR_AS_SteadyBreathingThreshold, b); }
-  void setSteadyBreathingDuration(int b) { setPref(STR_AS_SteadyBreathingDuration, b); }
-  #endif
-  #endif
   //! \brief Sets whether to allow double clicking on Y-Axis labels to change vertical scaling mode
   void setGraphTooltips(bool b) { setPref(STR_AS_GraphTooltips, m_graphTooltips=b); }
   //! \brief Sets whether to use the Fusion theme instead of the platform-native theme

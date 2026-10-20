@@ -809,7 +809,7 @@ Statistics::Statistics(QObject *parent) :
                 hasOtherStats = true;
         }
 #if defined(STEADY_BREATHING)
-        if (AppSetting->steadyBreathing() != SB_OFF) {
+        if (p_profile->cpap->steadyBreathing() != SB_OFF) {
             ChannelID sbid = schema::channel["SteadyBreathing"].id();
             if (sbid != NoChannel && p_profile->channelAvailable(sbid))
                 hasOtherStats = true;
@@ -822,7 +822,7 @@ Statistics::Statistics(QObject *parent) :
                 rows.push_back(StatisticsRow("UserFlag2",   SC_CPH,     MT_CPAP));
             }
 #if defined(STEADY_BREATHING)
-            if (AppSetting->steadyBreathing() != SB_OFF)
+            if (p_profile->cpap->steadyBreathing() != SB_OFF)
                 rows.push_back(StatisticsRow("SteadyBreathing", SC_WAVG, MT_CPAP));
 #endif
         }

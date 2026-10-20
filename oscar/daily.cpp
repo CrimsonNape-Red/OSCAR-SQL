@@ -461,7 +461,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     if (auto *g = graphlist.value(schema::channel[Prisma_rMVFluctuation].code())) g->AddLayer(new gLineChart(Prisma_rMVFluctuation, square));
     if (auto *g = graphlist.value(schema::channel[Prisma_FlowFull].code())) g->AddLayer(new gLineChart(Prisma_FlowFull, square));
     #if defined(STEADY_BREATHING)
-    if (AppSetting->steadyBreathing()==SB_ACTIVE) {
+    if (p_profile->cpap->steadyBreathing()==SB_ACTIVE) {
         if (auto *g = graphlist.value(schema::channel[CPAP_SteadyBreathing].code())) g->AddLayer(new gLineChart(CPAP_SteadyBreathing, false));
     }
     #endif
@@ -3332,7 +3332,7 @@ void Daily::setFlagText () {
         numTotal++;
         ChannelID code = ui->eventsCombo->itemData(i, Qt::UserRole).toUInt();
         #if defined(STEADY_BREATHING)
-        if (AppSetting->steadyBreathing()!=SB_ACTIVE) {
+        if (p_profile->cpap->steadyBreathing()!=SB_ACTIVE) {
             if (code == CPAP_SteadyBreathing || code == CPAP_SteadyBreathingFlag)  {
                 continue;
             }
@@ -3467,14 +3467,14 @@ void Daily::updateEventsCombo(Day* day) {
     ui->eventsCombo->addItem(*icon_up_down, "", 0);   // text updated in setflagText
     for (int i=0; i < available.size(); ++i) {
         ChannelID code = available.at(i);
-        #if false && defined(STEADY_BREATHING)
-        if (!AppSetting->steadyBreathing()==SB_ACTIVE) {
+        #if defined(STEADY_BREATHING)
+        if (p_profile->cpap->steadyBreathing()!=SB_ACTIVE) {
             if (code == CPAP_SteadyBreathing || code == CPAP_SteadyBreathingFlag)  {
                 continue;
             }
         }
         #endif
-        int comboxBoxIndex = i+1;
+        int comboxBoxIndex = ui->eventsCombo->count();   // not i+1: channels may be skipped above
         schema::Channel & chan = schema::channel[code];
         bool on = chan.enabled();
         ui->eventsCombo->addItem(on ? *icon_on : *icon_off, chan.label(), code);
@@ -3495,8 +3495,8 @@ void Daily::showAllEvents(bool show) {
     for (int i=1;i<lastIndex;i++) {
         // If disabled, emulate a click to enable the event
         ChannelID code = ui->eventsCombo->itemData(i, Qt::UserRole).toUInt();
-        #if false && defined(STEADY_BREATHING)
-        if (!AppSetting->steadyBreathing()==SB_ACTIVE) {
+        #if defined(STEADY_BREATHING)
+        if (p_profile->cpap->steadyBreathing()!=SB_ACTIVE) {
             if (code == CPAP_SteadyBreathing || code == CPAP_SteadyBreathingFlag)  {
                 continue;
             }

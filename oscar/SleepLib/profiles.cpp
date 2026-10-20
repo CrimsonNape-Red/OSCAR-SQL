@@ -3271,6 +3271,25 @@ bool Profile::loadExtendedDataFromDatabase()
     // not "session"/"cpap"/etc.  This call populates p_preferences with the correct values.
     loadProfilePreferencesFromDatabase();
 
+#if defined(STEADY_BREATHING)
+    // Steady Breathing settings used to be app-wide. Copy the old values into this profile
+    // once, so it keeps them; after that each profile's settings are its own.
+    if (!(*this)[STR_PREF_SteadyBreathingPerProfile].toBool()) {
+        if (p_pref && p_pref->contains(STR_AS_SteadyBreathing)) {
+            cpap->setSteadyBreathing((SteadyBreathingState)(*p_pref)[STR_AS_SteadyBreathing].toInt());
+        }
+#if defined(STEADY_BREATHING_ENHANCED_TESTING)
+        if (p_pref && p_pref->contains(STR_AS_SteadyBreathingThreshold)) {
+            cpap->setSteadyBreathingThreshold((*p_pref)[STR_AS_SteadyBreathingThreshold].toDouble());
+        }
+        if (p_pref && p_pref->contains(STR_AS_SteadyBreathingDuration)) {
+            cpap->setSteadyBreathingDuration((*p_pref)[STR_AS_SteadyBreathingDuration].toInt());
+        }
+#endif
+        Set(STR_PREF_SteadyBreathingPerProfile, true);
+    }
+#endif
+
     // Refresh cached member variables in settings classes AFTER all DB loading is done.
     // The settings classes cache values in member variables (e.g. m_preloadSummaries) set
     // during construction.  loadAllPreferences/loadProfilePreferences update the underlying

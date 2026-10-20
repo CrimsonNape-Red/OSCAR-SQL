@@ -4,6 +4,24 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-20 - Steady Breathing channels never hidden from the Daily events list
+
+**Files:** `oscar/daily.cpp`
+
+**Symptom:** With Steady Breathing off, its two channels could still appear in the Daily
+events list and be turned on by "show all events".
+
+**Root cause:** The checks in `Daily::updateEventsCombo()` and `Daily::showAllEvents()` were
+inside `#if false && defined(STEADY_BREATHING)`, so they were never compiled. Their condition,
+`!steadyBreathing()==SB_ACTIVE`, was also wrong: `!` applies first, giving 0 or 1, which never
+equals `SB_ACTIVE` (2).
+
+**Fix:** Both blocks are enabled and test `steadyBreathing() != SB_ACTIVE`, matching
+`setFlagText()`. `updateEventsCombo()` placed each item at index `i+1`, which is wrong once an
+item is skipped, so it now uses the combo's current count.
+
+---
+
 ## 2026-10-19 - Ctrl/Cmd+wheel zoom far too fast on trackpads (#306)
 
 **Files:** `oscar/Graphs/gGraph.cpp`, `gGraph.h`

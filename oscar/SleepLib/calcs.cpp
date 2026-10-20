@@ -917,11 +917,11 @@ void calcRespRate(Session *session, FlowParser *flowparser)
             flowparser->openFlow(session, flow);
             flowparser->calc(calcResp, calcTv, calcTi , calcTe, calcMv);
             #if defined(STEADY_BREATHING)
-                if (AppSetting->steadyBreathing()==SB_ACTIVE) flowparser->calcSteadyBreathingWaveform();
+                if (p_profile->cpap->steadyBreathing()==SB_ACTIVE) flowparser->calcSteadyBreathingWaveform();
             #endif
             flowparser->flagEvents();
             #if defined(STEADY_BREATHING)
-                if (AppSetting->steadyBreathing()==SB_ACTIVE) flowparser->flagSteadyBreathing(session);
+                if (p_profile->cpap->steadyBreathing()==SB_ACTIVE) flowparser->flagSteadyBreathing(session);
             #endif
         }
     }
@@ -1652,7 +1652,7 @@ void FlowParser::calcSteadyBreathingWaveform(){
     EventDataType samplingRate = m_flow->rate(); // milliseconds per sample
     EventDataType spsFlow =  1000.0/samplingRate; // Samples Per Second
     #if defined(STEADY_BREATHING_ENHANCED_TESTING)
-        EventDataType flowPeriod_Seconds = AppSetting->steadyBreathingDuration();
+        EventDataType flowPeriod_Seconds = p_profile->cpap->steadyBreathingDuration();
     #else
         EventDataType flowPeriod_Seconds = 20.0;
     #endif
@@ -1744,7 +1744,7 @@ void FlowParser::flagSteadyBreathing(Session *session)
     //Skip regions shorter than 60 seconds.
 
     #if defined(STEADY_BREATHING_ENHANCED_TESTING)
-        EventDataType threshold = AppSetting->steadyBreathingThreshold();
+        EventDataType threshold = p_profile->cpap->steadyBreathingThreshold();
     #else
         EventDataType threshold = 10;
     #endif

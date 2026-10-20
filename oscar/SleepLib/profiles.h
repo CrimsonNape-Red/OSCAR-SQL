@@ -364,6 +364,13 @@ const QString STR_OS_OxiDiscardThreshold = "OxiDiscardThreshold";
 // CPAPSettings Strings
 const QString STR_CS_ComplianceHours = "ComplianceHours";
 const QString STR_CS_ClinicalMode = "ClinicalMode";
+#if defined(STEADY_BREATHING)
+const QString STR_CS_SteadyBreathing = "SteadyBreathing";
+#if defined(STEADY_BREATHING_ENHANCED_TESTING)
+const QString STR_CS_SteadyBreathingThreshold = "SteadyBreathingThreshold";
+const QString STR_CS_SteadyBreathingDuration = "SteadyBreathingDuration";
+#endif
+#endif
 const QString STR_CS_ZombieMode = "ZombieMode";
 const QString STR_CS_ShowLeaksMode = "ShowLeaksMode";
 const QString STR_CS_MaskStartDate = "MaskStartDate";
@@ -419,6 +426,9 @@ const QString STR_IS_SplitNonCPAPSessions = "SplitNonCPAPSessions";
 
 // One-time data repairs (set once the repair has completed for the profile)
 const QString STR_PREF_RespiratoryEventsRepaired = "RespiratoryEventsRepaired";  ///< #335
+#if defined(STEADY_BREATHING)
+const QString STR_PREF_SteadyBreathingPerProfile = "SteadyBreathingPerProfile";  ///< moved from app-wide settings
+#endif
 
 //Apperance Settings
 const QString STR_AS_EventFlagSessionBar = "EventFlagSessionBar";
@@ -628,6 +638,13 @@ class CPAPSettings : public PrefSettings
     {
         m_complianceHours = initPref(STR_CS_ComplianceHours, 4.0f).toFloat();
         m_clinicalMode = initPref(STR_CS_ClinicalMode, false).toBool();
+#if defined(STEADY_BREATHING)
+        initPref(STR_CS_SteadyBreathing, SB_OFF);
+#if defined(STEADY_BREATHING_ENHANCED_TESTING)
+        initPref(STR_CS_SteadyBreathingThreshold, steadyBreathingDefaultThreshold());
+        initPref(STR_CS_SteadyBreathingDuration, steadyBreathingDefaultDuration());
+#endif
+#endif
         initPref(STR_CS_ShowLeaksMode, 0);
         // TODO: Check if this date is initiliazed yet
         initPref(STR_CS_MaskStartDate, QDate());
@@ -670,6 +687,15 @@ class CPAPSettings : public PrefSettings
     //Getters
     double complianceHours() const { return m_complianceHours; }
     bool clinicalMode() const { return m_clinicalMode; }
+#if defined(STEADY_BREATHING)
+    SteadyBreathingState steadyBreathing() const { return (SteadyBreathingState)getPref(STR_CS_SteadyBreathing).toInt(); }
+#if defined(STEADY_BREATHING_ENHANCED_TESTING)
+    double steadyBreathingDefaultThreshold() const { return (double)1.51; /* hardCoded value */ }
+    int steadyBreathingDefaultDuration() const { return 20; /* hardCoded value */ }
+    double steadyBreathingThreshold() const { return getPref(STR_CS_SteadyBreathingThreshold).toDouble(); }
+    int steadyBreathingDuration() const { return getPref(STR_CS_SteadyBreathingDuration).toInt(); }
+#endif
+#endif
     int leakMode() const { return getPref(STR_CS_ShowLeaksMode).toInt(); }
     QDate maskStartDate() const { return getPref(STR_CS_MaskStartDate).toDate(); }
     QString maskDescription() const { return getPref(STR_CS_MaskDescription).toString(); }
@@ -714,6 +740,13 @@ class CPAPSettings : public PrefSettings
     void setDateDiagnosed(QDate date) { setPref(STR_CS_DateDiagnosed, date); }
     void setComplianceHours(EventDataType hours) { setPref(STR_CS_ComplianceHours, m_complianceHours=hours); }
     void setClinicalMode(bool mode) { setPref(STR_CS_ClinicalMode, m_clinicalMode=mode); }
+#if defined(STEADY_BREATHING)
+    void setSteadyBreathing(SteadyBreathingState b) { setPref(STR_CS_SteadyBreathing, (int)b); }
+#if defined(STEADY_BREATHING_ENHANCED_TESTING)
+    void setSteadyBreathingThreshold(double b) { setPref(STR_CS_SteadyBreathingThreshold, b); }
+    void setSteadyBreathingDuration(int b) { setPref(STR_CS_SteadyBreathingDuration, b); }
+#endif
+#endif
     void setLeakMode(int leakmode) { setPref(STR_CS_ShowLeaksMode, (int)leakmode); }
     void setMaskStartDate(QDate date) { setPref(STR_CS_MaskStartDate, date); }
     void setMaskType(MaskType masktype) { setPref(STR_CS_MaskType, (int)masktype); }
