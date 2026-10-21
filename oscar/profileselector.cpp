@@ -38,6 +38,7 @@
 static const QString kSortPrefCategory = QStringLiteral("ProfileSelector");
 static const QString kSortPrefColumnKey = QStringLiteral("sortColumn");
 static const QString kSortPrefOrderKey  = QStringLiteral("sortOrder");
+static const QString kSortPrefHistoryKey = QStringLiteral("sortHistory");
 
 extern MainWindow * mainwin;
 
@@ -118,12 +119,76 @@ ProfileSelector::ProfileSelector(QWidget *parent) :
     ui->buttonOpenProfile->setEnabled(false);
 
     connect(ui->profileView->horizontalHeader(), &QHeaderView::sortIndicatorChanged,
-            this, [](int column, Qt::SortOrder order) {
-                if (!DatabaseManager::instance().isOpen()) return;
-                AppPreferencesRepository repo;
-                repo.save(kSortPrefCategory, kSortPrefColumnKey, column);
-                repo.save(kSortPrefCategory, kSortPrefOrderKey,  static_cast<int>(order));
-            });
+            this, &ProfileSelector::onSortIndicatorChanged);
+}
+
+void ProfileSelector::onSortIndicatorChanged(int column, Qt::SortOrder order)
+{
+    if (restoringSort) return;
+
+    // A new sort on a column supersedes any earlier sort on that same column.
+    for (int i = sortHistory.size() - 1; i >= 0; --i) {
+        if (sortHistory[i].first == column) sortHistory.removeAt(i);
+    }
+    if (column >= 0) sortHistory.append(qMakePair(column, order));
+
+    if (!DatabaseManager::instance().isOpen()) return;
+    QStringList parts;
+    for (const auto &key : sortHistory) {
+        parts << QString("%1:%2").arg(key.first).arg(static_cast<int>(key.second));
+    }
+    AppPreferencesRepository repo;
+    repo.save(kSortPrefCategory, kSortPrefHistoryKey, parts.join(';'));
+}
+
+void ProfileSelector::loadSortHistory()
+{
+    if (!DatabaseManager::instance().isOpen()) return;
+
+    QString history;
+    int col = -1;
+    Qt::SortOrder order = Qt::AscendingOrder;
+    AppPreferencesRepository repo;
+    const QList<AppPrefData> rows = repo.loadByCategory(kSortPrefCategory);
+    for (const AppPrefData& row : rows) {
+        if (row.key == kSortPrefHistoryKey)     history = row.value;
+        else if (row.key == kSortPrefColumnKey) col     = row.value.toInt();
+        else if (row.key == kSortPrefOrderKey)  order   = static_cast<Qt::SortOrder>(row.value.toInt());
+    }
+
+    sortHistory.clear();
+    if (!history.isEmpty()) {
+        const QStringList parts = history.split(';', Qt::SkipEmptyParts);
+        for (const QString &part : parts) {
+            const QStringList kv = part.split(':');
+            if (kv.size() != 2) continue;
+            bool okCol = false, okOrder = false;
+            const int c = kv[0].toInt(&okCol);
+            const int o = kv[1].toInt(&okOrder);
+            if (!okCol || !okOrder || c < 0 || (o != Qt::AscendingOrder && o != Qt::DescendingOrder)) continue;
+            sortHistory.append(qMakePair(c, static_cast<Qt::SortOrder>(o)));
+        }
+    } else if (col >= 0) {
+        // Preferences written before the full history was kept.
+        sortHistory.append(qMakePair(col, order));
+    }
+}
+
+void ProfileSelector::applySortHistory()
+{
+    restoringSort = true;
+    ui->profileView->setSortingEnabled(true);
+    // Column -1 returns the proxy to source-model order, so the replay does not inherit
+    // whatever order the header's default indicator (Profile, descending) produced.
+    ui->profileView->sortByColumn(-1, Qt::AscendingOrder);
+    bool sorted = false;
+    for (const auto &key : sortHistory) {
+        if (key.first >= model->columnCount()) continue;
+        ui->profileView->sortByColumn(key.first, key.second);
+        sorted = true;
+    }
+    if (!sorted) ui->profileView->sortByColumn(0, Qt::AscendingOrder);
+    restoringSort = false;
 }
 
 ProfileSelector::~ProfileSelector()
@@ -305,21 +370,10 @@ void ProfileSelector::updateProfileList()
     proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
 
     ui->profileView->setModel(proxy);
-    ui->profileView->setSortingEnabled(true);
 
-    {
-        int col = 0;
-        Qt::SortOrder order = Qt::AscendingOrder;
-        if (DatabaseManager::instance().isOpen()) {
-            AppPreferencesRepository repo;
-            const QList<AppPrefData> rows = repo.loadByCategory(kSortPrefCategory);
-            for (const AppPrefData& row : rows) {
-                if (row.key == kSortPrefColumnKey)     col   = row.value.toInt();
-                else if (row.key == kSortPrefOrderKey) order = static_cast<Qt::SortOrder>(row.value.toInt());
-            }
-        }
-        ui->profileView->sortByColumn(col, order);
-    }
+    // Only load from preferences once; afterwards sortHistory tracks the user's clicks.
+    if (sortHistory.isEmpty()) loadSortHistory();
+    applySortHistory();
 
     QHeaderView *headerView = ui->profileView->horizontalHeader();
     headerView->setStretchLastSection(true);

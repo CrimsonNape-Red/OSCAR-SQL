@@ -4,6 +4,27 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-21 - Profile selector forgets secondary sort order on restart (#345)
+
+**Files:** `oscar/profileselector.cpp`, `oscar/profileselector.h`
+
+**Symptom:** Sorting by Profile and then by Ventilator Brand lists profiles by brand,
+alphabetical within each brand. After restarting OSCAR the brand order was kept, but within
+each brand the profiles were in reverse alphabetical order.
+
+**Root cause:** Only the last-clicked column and order were saved. The secondary order
+existed only because `QSortFilterProxyModel` sorts stably over its current order. On restart
+`setSortingEnabled(true)` first sorted by the header's default indicator (column 0,
+descending), and the saved brand sort then ran over that order. The same thing happened when
+the list was rebuilt during a session (the base was then the database order).
+
+**Fix:** The selector keeps a sort history, one entry per column with the most recent last,
+and saves it as `ProfileSelector/sortHistory` (`col:order;col:order`). When the list is
+rebuilt it resets the proxy to source order with `sortByColumn(-1)` and then replays the
+history oldest first. Older preferences fall back to the single saved column.
+
+---
+
 ## 2026-10-21 - BMC legacy: sessions lost after a broken USR record; Abort stuck on (#343)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmcDataParsing.cpp`, `bmcDataParsing.h`,

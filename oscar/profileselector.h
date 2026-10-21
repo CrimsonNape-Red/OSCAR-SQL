@@ -121,9 +121,23 @@ private:
     //! @brief Returns a locale-independent "lastname, firstname" sort key for the name column.
     static QString nameSortKey(const QString &lastName, const QString &firstName);
 
+    //! @brief Records a user column sort in sortHistory and saves the history to app preferences.
+    void onSortIndicatorChanged(int column, Qt::SortOrder order);
+    //! @brief Loads sortHistory from app preferences (falls back to the older single-column keys).
+    void loadSortHistory();
+    //! @brief Re-applies sortHistory to the view, oldest first, starting from source order.
+    void applySortHistory();
+
     Ui::ProfileSelector *ui;
     QStandardItemModel *model;
     MySortFilterProxyModel2 *proxy;
+
+    //! Column sorts the user has applied, oldest first, at most one entry per column.
+    //! The proxy's sort is stable, so replaying these in order reproduces the multi-level
+    //! order the user built up by clicking headers (last entry = primary key).
+    QList<QPair<int, Qt::SortOrder>> sortHistory;
+    //! True while applySortHistory() drives the header, so those changes are not recorded.
+    bool restoringSort = false;
 
     bool showDiskUsage;
 };
