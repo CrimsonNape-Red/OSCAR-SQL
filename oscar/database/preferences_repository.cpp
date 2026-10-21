@@ -433,7 +433,8 @@ bool PreferencesRepository::saveOxiSettings(qint64 profileId, OxiSettings* oxi)
         "SkipOxiIntroScreen", "SPO2DropDuration", "SPO2DropPercentage",
         "PulseChangeDuration", "PulseChangeBPM", "OxiDiscardThreshold",
         "oxiDesaturationThreshold", "flagPulseAbove", "flagPulseBelow",
-        "baseSpO2Option", "SpO2BaselineMethod", "SpO2BaselineWindow", "SpO2ManualBaseline"
+        "baseSpO2Option", "SpO2BaselineMethod", "SpO2BaselineWindow", "SpO2ManualBaseline",
+        "SpO2BaselinePercentile"
     };
     
     for (const QString& key : oxiKeys) {

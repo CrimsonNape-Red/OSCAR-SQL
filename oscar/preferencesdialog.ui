@@ -1802,7 +1802,7 @@ Disabled Sessions are used for graphing and Statistics.</string>
                           <property name="toolTip">
                             <string>The SpO2 level that drops are measured from.
 Rolling: the average of the readings just before, so the baseline follows slow changes through the night (recommended).
-Whole night / First hour: one value for the session, from its higher readings.
+Whole night / First hour: one value for the session, from the percentile set below.
 Manual: the fixed value set below.</string>
                           </property>
                         </widget>
@@ -1837,6 +1837,37 @@ Manual: the fixed value set below.</string>
                         </widget>
                       </item>
                       <item row="2" column="0">
+                        <widget class="QLabel" name="label_spo2BaselinePercentile">
+                          <property name="text">
+                            <string>Baseline percentile</string>
+                          </property>
+                          <property name="alignment">
+                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                          </property>
+                        </widget>
+                      </item>
+                      <item row="2" column="1">
+                        <widget class="QSpinBox" name="spo2BaselinePercentile">
+                          <property name="toolTip">
+                            <string>For the Whole night and First hour methods: the baseline is the SpO2 level the readings are at or below for this share of the time.
+The 50th percentile (the median) suits most nights.
+Higher percentiles cope better with nights spent mostly desaturated, but on steady nights they count normal variation as drops.</string>
+                          </property>
+                          <property name="suffix">
+                            <string>th</string>
+                          </property>
+                          <property name="minimum">
+                            <number>50</number>
+                          </property>
+                          <property name="maximum">
+                            <number>95</number>
+                          </property>
+                          <property name="singleStep">
+                            <number>5</number>
+                          </property>
+                        </widget>
+                      </item>
+                      <item row="3" column="0">
                         <widget class="QLabel" name="label_baseSpO2Option">
                           <property name="text">
                             <string>Manual baseline</string>
@@ -1846,7 +1877,7 @@ Manual: the fixed value set below.</string>
                           </property>
                         </widget>
                       </item>
-                      <item row="2" column="1">
+                      <item row="3" column="1">
                         <widget class="QComboBox" name="baseSpO2Option">
                           <property name="toolTip">
                             <string>The fixed baseline used by the Manual method. This may be useful when the automatic baselines are not typical of your data, or to compare days more easily.</string>

@@ -181,8 +181,8 @@ void OximetryEventsTests::testStaticBaselineMethods()
     p_profile->oxi->setSpO2DropPercentage(3);
     p_profile->oxi->setSpO2DropDuration(8);
 
-    // An hour at 93, then 97 for the rest: the first hour's baseline is 93, the whole
-    // night's is 97, so only the whole-night baseline makes the first hour one long drop.
+    // An hour at 93, then 97 for the rest: the first hour's median is 93, the whole night's
+    // is 97, so only the whole-night baseline makes the first hour one long drop.
     const QVector<EventDataType> readings = run(93, 3600) + run(97, 3 * 3600);
 
     p_profile->oxi->setSpO2BaselineMethod(SBM_FirstHour);
@@ -202,6 +202,36 @@ void OximetryEventsTests::testStaticBaselineMethods()
         QCOMPARE(calcSPO2Drop(&sess), 1);
         QCOMPARE(sess.settings.value(OXI_SPO2Drop).toInt(), 97);
     }
+}
+
+void OximetryEventsTests::testStaticBaselinePercentile()
+{
+    p_profile->oxi->setSpO2DropPercentage(3);
+    p_profile->oxi->setSpO2DropDuration(8);
+    p_profile->oxi->setSpO2BaselineMethod(SBM_WholeNight);
+
+    // 60% of the time at 93, 40% at 96: the median is 93, the 90th percentile 96.
+    const QVector<EventDataType> readings = run(93, 600) + run(96, 400) + run(93, 1);
+
+    p_profile->oxi->setSpO2BaselinePercentile(50);
+    {
+        Machine mach(nullptr, 3);
+        Session sess(&mach, 1);
+        addReadings(sess, OXI_SPO2, readings);
+        QCOMPARE(calcSPO2Drop(&sess), 0);
+        QCOMPARE(sess.settings.value(OXI_SPO2Drop).toInt(), 93);
+    }
+
+    // From 96, the stretch at 93 is a drop.
+    p_profile->oxi->setSpO2BaselinePercentile(90);
+    {
+        Machine mach(nullptr, 3);
+        Session sess(&mach, 1);
+        addReadings(sess, OXI_SPO2, readings);
+        QCOMPARE(calcSPO2Drop(&sess), 1);
+        QCOMPARE(sess.settings.value(OXI_SPO2Drop).toInt(), 96);
+    }
+    p_profile->oxi->setSpO2BaselinePercentile(50);
 }
 
 void OximetryEventsTests::testChangeOnlyReadings()
@@ -239,7 +269,7 @@ void OximetryEventsTests::testChangeOnlyPercentileIsTimeWeighted()
     Machine mach(nullptr, 3);
     Session sess(&mach, 1);
     // 97 for 50 minutes, stored once, then 10 minutes flickering between 94 and 95 every
-    // second. By readings the 90th percentile would be 95; by time it is 97.
+    // second. By readings the median would be 94 or 95; by time it is 97.
     EventList *el = sess.AddEventList(OXI_SPO2, EVL_Event);
     el->AddEvent(kStart, 97);
     for (int i = 0; i < 600; ++i) {

@@ -413,7 +413,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     connect(ui->spo2BaselineMethod, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &PreferencesDialog::updateSpO2BaselineControls);
     showSpO2Baseline(profile->oxi->spO2BaselineMethod(), profile->oxi->spO2BaselineWindow(),
-                     profile->oxi->spO2ManualBaseline());
+                     profile->oxi->spO2BaselinePercentile(), profile->oxi->spO2ManualBaseline());
 
 
 
@@ -856,6 +856,8 @@ bool PreferencesDialog::Save()
     // The window and manual value only matter to the method that uses them.
     auto new_base_method = (SpO2BaselineMethod)ui->spo2BaselineMethod->currentData().toInt();
     int new_base_window = ui->spo2BaselineWindow->value();
+    int new_base_percentile = ui->spo2BaselinePercentile->value();
+    bool new_base_static = (new_base_method == SBM_WholeNight) || (new_base_method == SBM_FirstHour);
     int new_base_manual = ui->baseSpO2Option->currentData().toInt();
     bool recalc_oximetry = (profile->oxi->spO2DropPercentage() != ui->spo2Drop->value())
             || (profile->oxi->spO2DropDuration() != ui->spo2DropDuration->value())
@@ -863,6 +865,7 @@ bool PreferencesDialog::Save()
             || (profile->oxi->pulseChangeDuration() != ui->pulseChangeDuration->value())
             || (profile->oxi->spO2BaselineMethod() != new_base_method)
             || ((new_base_method == SBM_Rolling) && (profile->oxi->spO2BaselineWindow() != new_base_window))
+            || (new_base_static && (profile->oxi->spO2BaselinePercentile() != new_base_percentile))
             || ((new_base_method == SBM_Manual) && (profile->oxi->spO2ManualBaseline() != new_base_manual));
     if (recalc_oximetry) {
         recalc_events = true;
@@ -1021,6 +1024,7 @@ bool PreferencesDialog::Save()
     //added by Sheila 1/5/2026
     profile->oxi->setSpO2BaselineMethod(new_base_method);
     profile->oxi->setSpO2BaselineWindow(new_base_window);
+    profile->oxi->setSpO2BaselinePercentile(new_base_percentile);
     profile->oxi->setSpO2ManualBaseline(new_base_manual);
 
     profile->cpap->setAHIWindow(ui->ahiGraphWindowSize->value());
@@ -1362,6 +1366,7 @@ void PreferencesDialog::on_resetOxiMetryDefaults_clicked()
         ui->flagPulseBelow->setValue(     profile->oxi->defaultValue_OS_flagPulseBelow );
         showSpO2Baseline((SpO2BaselineMethod)profile->oxi->defaultValue_OS_SpO2BaselineMethod,
                          profile->oxi->defaultValue_OS_SpO2BaselineWindow,
+                         profile->oxi->defaultValue_OS_SpO2BaselinePercentile,
                          profile->oxi->defaultValue_OS_SpO2ManualBaseline);
 
         if (Save() ) {
@@ -1381,16 +1386,17 @@ void PreferencesDialog::on_resetOxiMetryDefaults_clicked()
         ui->flagPulseAbove->setValue(profile->oxi->flagPulseAbove());
         ui->flagPulseBelow->setValue(profile->oxi->flagPulseBelow());
         showSpO2Baseline(profile->oxi->spO2BaselineMethod(), profile->oxi->spO2BaselineWindow(),
-                         profile->oxi->spO2ManualBaseline());
+                         profile->oxi->spO2BaselinePercentile(), profile->oxi->spO2ManualBaseline());
     }
 
 }
 
-void PreferencesDialog::showSpO2Baseline(SpO2BaselineMethod method, int window, int manual)
+void PreferencesDialog::showSpO2Baseline(SpO2BaselineMethod method, int window, int percentile, int manual)
 {
     int idx = ui->spo2BaselineMethod->findData(method);
     ui->spo2BaselineMethod->setCurrentIndex(idx >= 0 ? idx : 0);
     ui->spo2BaselineWindow->setValue(window);
+    ui->spo2BaselinePercentile->setValue(percentile);
     ui->baseSpO2Option->setCurrentIndex(ui->baseSpO2Option->findData(manual));
     updateSpO2BaselineControls();
 }
@@ -1400,6 +1406,9 @@ void PreferencesDialog::updateSpO2BaselineControls()
     auto method = (SpO2BaselineMethod)ui->spo2BaselineMethod->currentData().toInt();
     ui->spo2BaselineWindow->setEnabled(method == SBM_Rolling);
     ui->label_spo2BaselineWindow->setEnabled(method == SBM_Rolling);
+    const bool isStatic = (method == SBM_WholeNight) || (method == SBM_FirstHour);
+    ui->spo2BaselinePercentile->setEnabled(isStatic);
+    ui->label_spo2BaselinePercentile->setEnabled(isStatic);
     ui->baseSpO2Option->setEnabled(method == SBM_Manual);
     ui->label_baseSpO2Option->setEnabled(method == SBM_Manual);
 }

@@ -476,14 +476,15 @@ const QString STR_OS_baseSpO2Option = "baseSpO2Option";
 const QString STR_OS_SpO2BaselineMethod = "SpO2BaselineMethod";
 const QString STR_OS_SpO2BaselineWindow = "SpO2BaselineWindow";
 const QString STR_OS_SpO2ManualBaseline = "SpO2ManualBaseline";
+const QString STR_OS_SpO2BaselinePercentile = "SpO2BaselinePercentile";
 
 /*! \enum SpO2BaselineMethod
     \brief How calcSPO2Drop() finds the baseline that SpO2 drops are measured from
     */
 enum SpO2BaselineMethod {
     SBM_Rolling = 0,    //!< Mean of the readings before each sample, excluding earlier drops
-    SBM_WholeNight = 1, //!< 90th percentile of the whole recording
-    SBM_FirstHour = 2,  //!< 90th percentile of the first hour
+    SBM_WholeNight = 1, //!< SpO2BaselinePercentile of the whole recording
+    SBM_FirstHour = 2,  //!< SpO2BaselinePercentile of the first hour
     SBM_Manual = 3      //!< The fixed value in SpO2ManualBaseline
 };
 
@@ -604,6 +605,7 @@ class OxiSettings : public PrefSettings
         initPref(STR_OS_SpO2BaselineMethod, defaultValue_OS_SpO2BaselineMethod);
         initPref(STR_OS_SpO2BaselineWindow, defaultValue_OS_SpO2BaselineWindow);
         initPref(STR_OS_SpO2ManualBaseline, defaultValue_OS_SpO2ManualBaseline);
+        initPref(STR_OS_SpO2BaselinePercentile, defaultValue_OS_SpO2BaselinePercentile);
 
     }
 
@@ -620,6 +622,7 @@ class OxiSettings : public PrefSettings
     const int defaultValue_OS_SpO2BaselineMethod = SBM_Rolling;
     const int defaultValue_OS_SpO2BaselineWindow = 120;     // seconds
     const int defaultValue_OS_SpO2ManualBaseline = 95;      // %
+    const int defaultValue_OS_SpO2BaselinePercentile = 50;  // the median
 
 
     bool oximetryEnabled() const { return getPref(STR_OS_EnableOximetry).toBool(); }
@@ -671,6 +674,9 @@ class OxiSettings : public PrefSettings
     //! \brief The baseline used by the Manual method, in %
     int spO2ManualBaseline() const { return getPref(STR_OS_SpO2ManualBaseline).toInt(); }
     void setSpO2ManualBaseline(int percent) { setPref(STR_OS_SpO2ManualBaseline, percent); }
+    //! \brief The percentile of the readings used by the Whole night and First hour methods
+    int spO2BaselinePercentile() const { return getPref(STR_OS_SpO2BaselinePercentile).toInt(); }
+    void setSpO2BaselinePercentile(int percentile) { setPref(STR_OS_SpO2BaselinePercentile, percentile); }
 };
 
 /*! \class CPAPSettings

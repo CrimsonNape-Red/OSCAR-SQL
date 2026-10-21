@@ -1450,10 +1450,10 @@ QList<Session *> sortedRecording(QList<Session *> recording)
     return recording;
 }
 
-// The SpO2 level that readings are at or below for 90% of the time up to 'until' (0 for all
-// of them), ignoring dropouts. Weighting by time rather than counting readings matters for
-// devices that store SpO2 only when it changes.
-EventDataType spo2Percentile90(const QVector<OxiReading> & readings, qint64 until)
+// The SpO2 level that readings are at or below for 'percentile'% of the time up to 'until'
+// (0 for all of them), ignoring dropouts. Weighting by time rather than counting readings
+// matters for devices that store SpO2 only when it changes.
+EventDataType spo2Percentile(const QVector<OxiReading> & readings, qint64 until, int percentile)
 {
     QVector<QPair<EventDataType, qint64>> lasted;     // value, how long it lasted
     qint64 total = 0;
@@ -1472,7 +1472,7 @@ EventDataType spo2Percentile90(const QVector<OxiReading> & readings, qint64 unti
                                                const QPair<EventDataType, qint64> & b) {
         return a.first < b.first;
     });
-    const qint64 target = qint64(double(total) * 0.90);
+    const qint64 target = qint64(double(total) * percentile / 100.0);
     qint64 sofar = 0;
     for (const auto & reading : lasted) {
         sofar += reading.second;
@@ -1574,10 +1574,11 @@ int calcSPO2Drop(const QList<Session *> & pieces)
         baseline = p_profile->oxi->spO2ManualBaseline();
         break;
     case SBM_FirstHour:
-        baseline = spo2Percentile90(readings, readings.first().time + 3600000L);
+        baseline = spo2Percentile(readings, readings.first().time + 3600000L,
+                                  p_profile->oxi->spO2BaselinePercentile());
         break;
     case SBM_WholeNight:
-        baseline = spo2Percentile90(readings, 0);
+        baseline = spo2Percentile(readings, 0, p_profile->oxi->spO2BaselinePercentile());
         break;
     case SBM_Rolling:
         break;

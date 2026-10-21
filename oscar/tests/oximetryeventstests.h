@@ -26,6 +26,7 @@ private slots:
     void testRollingBaselineExcludesEarlierDrops();
     void testRollingBaselineNeedsHistory();
     void testStaticBaselineMethods();
+    void testStaticBaselinePercentile();
     void testChangeOnlyReadings();
     void testChangeOnlyPercentileIsTimeWeighted();
     void testSplitRecordingIsCalculatedWhole();
