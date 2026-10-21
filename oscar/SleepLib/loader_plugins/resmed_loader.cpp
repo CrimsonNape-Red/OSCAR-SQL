@@ -3788,6 +3788,10 @@ void ResmedLoader::ToTimeDelta(Session *sess, ResMedEDFInfo &edf, EDFSignal &es,
     // Treat a 0 on these channels as a null value, exactly like the -1 handling below.
     bool isPressure = (code == CPAP_Pressure) || (code == CPAP_IPAP) ||
                       (code == CPAP_EPAP) || (code == CPAP_MaskPressure);
+    // On the oximetry channels -1 means no reading (finger out of the sensor), often for
+    // minutes or hours. Holding the last value over it would show a reading that wasn't
+    // taken, so it ends the EventList like any out of range value, leaving a gap.
+    bool isOximetry = (code == OXI_SPO2) || (code == OXI_Pulse);
 
 //  There's no reason to skip the first 40 seconds of slow data
 //  Reduce that to 10 seconds, to allow presssures to stabilise
@@ -3850,7 +3854,7 @@ void ResmedLoader::ToTimeDelta(Session *sess, ResMedEDFInfo &edf, EDFSignal &es,
         for (; sptr < eptr; sptr++) {
             sampleCounter++;
             c = *sptr;
-            if ((c == -1 || (isPressure && c == 0)) && t_min>=0 ) {
+            if (((c == -1 && !isOximetry) || (isPressure && c == 0)) && t_min>=0 ) {
                 // -1 is the Null value sentinel for most signals; pressure signals use 0
                 // (digital_minimum 0). Either way it is end-of-data padding, not a reading.
                 Q_UNUSED(sampleCounter);
@@ -3943,8 +3947,11 @@ EventList * buildEventList( EventStoreType est, EventDataType t_min, EventDataTy
             qDebug() << "Code:" << QString::number(code, 16) <<"Value:" << tmp << "Out of range:\n\t t_min:" <<
                 t_min << "t_max:" << t_max << "EL count:" << el->count();
         // Out of bounds value, start a new eventlist
-        // But first drop a closing value that repeats the last one
-        el->AddEvent(tt, el->raw(el->count() - 1));
+        // But first drop a closing value that repeats the last one, if there is one: after
+        // an earlier out of range value the list is empty
+        if (el->count() > 0) {
+            el->AddEvent(tt, el->raw(el->count() - 1));
+        }
         if (el->count() > 1) {
             // that should be in session, not the eventlist.. handy for debugging though
             el->setDimension(es.physical_dimension);
