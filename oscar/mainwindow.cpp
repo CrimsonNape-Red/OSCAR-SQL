@@ -2255,7 +2255,8 @@ void MainWindow::on_action_Rebuild_Oximetry_Index_triggered()
 
     qint64 f = 0, l = 0;
 
-    int discard_threshold = p_profile->oxi->oxiDiscardThreshold();
+    // The preference is in seconds
+    qint64 discard_threshold = qint64(p_profile->oxi->oxiDiscardThreshold()) * 1000L;
     Machine *m;
 
     for (int z = 0; z < machines.size(); z++) {
@@ -2294,7 +2295,8 @@ void MainWindow::on_action_Rebuild_Oximetry_Index_triggered()
                     QVector<EventList *> newlist;
 
                     for (int i = 0; i < e.value().size(); i++)  {
-                        if (e.value()[i]->count() > (unsigned)discard_threshold) {
+                        EventList *el = e.value()[i];
+                        if ((el->count() > 0) && (el->last() - el->first() >= discard_threshold)) {
                             newlist.push_back(e.value()[i]);
                         } else {
                             delete e.value()[i];
@@ -2337,6 +2339,9 @@ void MainWindow::on_action_Rebuild_Oximetry_Index_triggered()
         }
 
     }
+
+    // Recalculate the SpO2 drop and pulse change flags deleted above from the cleaned data
+    p_profile->recalculateOximetryEvents(nullptr, MT_OXIMETER);
 
     for (int i = 0; i < machines.size(); i++) {
         Machine *m = machines[i];
@@ -3060,6 +3065,10 @@ void MainWindow::doReprocessEvents()
         progress.setProgressValue(++idx);
         QApplication::processEvents();
     }
+
+    // Oximetry flags, so they pick up the current drop/change preferences. Done separately
+    // so a recording cut at the day split time is recalculated whole.
+    p_profile->recalculateOximetryEvents(&progress);
     progress.close();
 
     welcome = new Welcome(ui->tabWidget);

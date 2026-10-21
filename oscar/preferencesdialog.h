@@ -109,6 +109,11 @@ private:
     void saveChanInfo();
     void saveWaveInfo();
 
+    //! \brief Show these SpO2 baseline settings in the Oximetry tab
+    void showSpO2Baseline(SpO2BaselineMethod method, int window, int manual);
+    //! \brief Enable the rolling window and manual value only for the method that uses them
+    void updateSpO2BaselineControls();
+
     QHash<MachineType, QStandardItem *> toplevel;
     QHash<MachineType, QStandardItem *> machlevel;
 

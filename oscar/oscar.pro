@@ -853,7 +853,9 @@ test {
         tests/prismaventtests.cpp \
         tests/respiratoryeventstests.cpp \
         tests/bmcsessionendstests.cpp \
-        tests/steadybreathingsettingstests.cpp
+        tests/steadybreathingsettingstests.cpp \
+        tests/oximetryeventstests.cpp \
+        tests/oximetryrecalctests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -877,7 +879,9 @@ test {
         tests/prismaventtests.h \
         tests/respiratoryeventstests.h \
         tests/bmcsessionendstests.h \
-        tests/steadybreathingsettingstests.h
+        tests/steadybreathingsettingstests.h \
+        tests/oximetryeventstests.h \
+        tests/oximetryrecalctests.h
 }
 
 macx {

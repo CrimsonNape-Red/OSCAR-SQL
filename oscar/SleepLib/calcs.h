@@ -176,8 +176,21 @@ int calcLeaks(Session *session);
 //! \brief Calculate Pulse change flagging, according to preferences
 int calcPulseChange(Session *session);
 
+//! \brief Calculate Pulse change flagging over a recording cut into pieces at the day split
+//!        time (see SessionSplit), storing each flag with its piece. The pieces must have none yet.
+int calcPulseChange(const QList<Session *> & recording);
+
 //! \brief Calculate SPO2 Drop flagging, according to preferences
 int calcSPO2Drop(Session *session);
+
+//! \brief Calculate SPO2 Drop flagging over a recording cut into pieces at the day split time
+//!        (see SessionSplit), storing each flag with its piece and the baseline with all of
+//!        them. The pieces must have no flags or baseline yet.
+int calcSPO2Drop(const QList<Session *> & recording);
+
+//! \brief Remove the SpO2 drop and pulse change flags and the SpO2 baseline they used, so the
+//!        next calcSPO2Drop() and calcPulseChange() recalculate them with the current preferences
+void clearOximetryEvents(Session *session);
 
 
 #endif // CALCS_H

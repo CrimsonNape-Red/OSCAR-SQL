@@ -1053,7 +1053,8 @@ void AppleHealthTests::testSPO2DropSparsity()
     const auto addSpo2Samples = [](Session &session, qint64 startMs, qint64 cadenceMs) {
         EventList *samples = session.AddEventList(OXI_SPO2, EVL_Event);
         int sample = 0;
-        for (int i = 0; i < 10; ++i) {
+        // Enough normal readings before the dip for the rolling baseline (half its window)
+        for (int i = 0; i < 40; ++i) {
             samples->AddEvent(startMs + sample++ * cadenceMs, 96);
         }
         for (int i = 0; i < 61; ++i) {

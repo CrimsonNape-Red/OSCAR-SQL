@@ -402,23 +402,18 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     }
 
     //added by Sheila 1/5/2026 for marks1
-
-    if(ui->baseSpO2Option->count()<1)
-    {
-        ui->baseSpO2Option->clear();
-        // First option
-        ui->baseSpO2Option->addItem("Default (Calculated from Hour 1)", -1);
-
-        // Add 99 down to 85
-        for (int i = 99; i >= 85; --i) {
-            ui->baseSpO2Option->addItem(QString::number(i), i);
-        }
+    ui->spo2BaselineMethod->addItem(tr("Rolling (recommended)"), SBM_Rolling);
+    ui->spo2BaselineMethod->addItem(tr("Whole night"), SBM_WholeNight);
+    ui->spo2BaselineMethod->addItem(tr("First hour"), SBM_FirstHour);
+    ui->spo2BaselineMethod->addItem(tr("Manual"), SBM_Manual);
+    // Add 99 down to 85
+    for (int i = 99; i >= 85; --i) {
+        ui->baseSpO2Option->addItem(QString("%1%").arg(i), i);
     }
-    int baseoption_data = profile->oxi->baseSpO2Option();
-    if(baseoption_data==-1 || baseoption_data==0)
-        ui->baseSpO2Option->setCurrentIndex(0);
-    else
-        ui->baseSpO2Option->setCurrentIndex(100-baseoption_data);
+    connect(ui->spo2BaselineMethod, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &PreferencesDialog::updateSpO2BaselineControls);
+    showSpO2Baseline(profile->oxi->spO2BaselineMethod(), profile->oxi->spO2BaselineWindow(),
+                     profile->oxi->spO2ManualBaseline());
 
 
 
@@ -856,6 +851,23 @@ bool PreferencesDialog::Save()
         recompress_events = true;
     }
 
+    // SpO2 drop and pulse change flags are calculated once and saved with each session,
+    // so changing how they're detected only takes effect once they're recalculated.
+    // The window and manual value only matter to the method that uses them.
+    auto new_base_method = (SpO2BaselineMethod)ui->spo2BaselineMethod->currentData().toInt();
+    int new_base_window = ui->spo2BaselineWindow->value();
+    int new_base_manual = ui->baseSpO2Option->currentData().toInt();
+    bool recalc_oximetry = (profile->oxi->spO2DropPercentage() != ui->spo2Drop->value())
+            || (profile->oxi->spO2DropDuration() != ui->spo2DropDuration->value())
+            || (profile->oxi->pulseChangeBPM() != ui->pulseChange->value())
+            || (profile->oxi->pulseChangeDuration() != ui->pulseChangeDuration->value())
+            || (profile->oxi->spO2BaselineMethod() != new_base_method)
+            || ((new_base_method == SBM_Rolling) && (profile->oxi->spO2BaselineWindow() != new_base_window))
+            || ((new_base_method == SBM_Manual) && (profile->oxi->spO2ManualBaseline() != new_base_manual));
+    if (recalc_oximetry) {
+        recalc_events = true;
+    }
+
     if (recompress_events) {
         if (profile->countDays(MT_CPAP, profile->FirstDay(), profile->LastDay()) > 0) {
             if (QMessageBox::question(this, tr("Data Processing Required"),
@@ -866,7 +878,11 @@ bool PreferencesDialog::Save()
         } else { recompress_events = false; }
     }
     if (recalc_events) {
-        if (profile->countDays(MT_CPAP, profile->FirstDay(), profile->LastDay()) > 0) {
+        int days = profile->countDays(MT_CPAP, profile->FirstDay(), profile->LastDay());
+        if (recalc_oximetry) {
+            days += profile->countDays(MT_OXIMETER, profile->FirstDay(), profile->LastDay());
+        }
+        if (days > 0) {
             if (QMessageBox::question(this, tr("Data Reindex Required"),
                                       tr("A data reindexing procedure is required to apply these changes. This operation may take a couple of minutes to complete.\n\nAre you sure you want to make these changes?"),
                                       QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
@@ -1003,11 +1019,9 @@ bool PreferencesDialog::Save()
     profile->oxi->setFlagPulseAbove(ui->flagPulseAbove->value());
     profile->oxi->setFlagPulseBelow(ui->flagPulseBelow->value());
     //added by Sheila 1/5/2026
-    QString combo_string = ui->baseSpO2Option->currentText();
-    if(combo_string==QString("Default (Calculated from Hour 1)"))
-        profile->oxi->setBaseSpO2Option(-1);
-    else
-        profile->oxi->setBaseSpO2Option(combo_string.toInt());
+    profile->oxi->setSpO2BaselineMethod(new_base_method);
+    profile->oxi->setSpO2BaselineWindow(new_base_window);
+    profile->oxi->setSpO2ManualBaseline(new_base_manual);
 
     profile->cpap->setAHIWindow(ui->ahiGraphWindowSize->value());
     profile->cpap->setAHIReset(ui->ahiGraphZeroReset->isChecked());
@@ -1346,6 +1360,9 @@ void PreferencesDialog::on_resetOxiMetryDefaults_clicked()
         ui->oxiDesaturationThreshold->setValue(  profile->oxi->defaultValue_OS_oxiDesaturationThreshold);
         ui->flagPulseAbove->setValue(     profile->oxi->defaultValue_OS_flagPulseAbove );
         ui->flagPulseBelow->setValue(     profile->oxi->defaultValue_OS_flagPulseBelow );
+        showSpO2Baseline((SpO2BaselineMethod)profile->oxi->defaultValue_OS_SpO2BaselineMethod,
+                         profile->oxi->defaultValue_OS_SpO2BaselineWindow,
+                         profile->oxi->defaultValue_OS_SpO2ManualBaseline);
 
         if (Save() ) {
             // comment accept out to return to the preference tab
@@ -1360,11 +1377,31 @@ void PreferencesDialog::on_resetOxiMetryDefaults_clicked()
         ui->pulseChangeDuration->setValue(profile->oxi->pulseChangeDuration());
 
         ui->oxiDiscardThreshold->setValue(profile->oxi->oxiDiscardThreshold());
-        ui->oxiDesaturationThreshold->setValue(profile->oxi->defaultValue_OS_oxiDesaturationThreshold);
-        ui->flagPulseAbove->setValue( profile->oxi->defaultValue_OS_flagPulseAbove );
-        ui->flagPulseBelow->setValue(  profile->oxi->defaultValue_OS_flagPulseBelow );
+        ui->oxiDesaturationThreshold->setValue(profile->oxi->oxiDesaturationThreshold());
+        ui->flagPulseAbove->setValue(profile->oxi->flagPulseAbove());
+        ui->flagPulseBelow->setValue(profile->oxi->flagPulseBelow());
+        showSpO2Baseline(profile->oxi->spO2BaselineMethod(), profile->oxi->spO2BaselineWindow(),
+                         profile->oxi->spO2ManualBaseline());
     }
 
+}
+
+void PreferencesDialog::showSpO2Baseline(SpO2BaselineMethod method, int window, int manual)
+{
+    int idx = ui->spo2BaselineMethod->findData(method);
+    ui->spo2BaselineMethod->setCurrentIndex(idx >= 0 ? idx : 0);
+    ui->spo2BaselineWindow->setValue(window);
+    ui->baseSpO2Option->setCurrentIndex(ui->baseSpO2Option->findData(manual));
+    updateSpO2BaselineControls();
+}
+
+void PreferencesDialog::updateSpO2BaselineControls()
+{
+    auto method = (SpO2BaselineMethod)ui->spo2BaselineMethod->currentData().toInt();
+    ui->spo2BaselineWindow->setEnabled(method == SBM_Rolling);
+    ui->label_spo2BaselineWindow->setEnabled(method == SBM_Rolling);
+    ui->baseSpO2Option->setEnabled(method == SBM_Manual);
+    ui->label_baseSpO2Option->setEnabled(method == SBM_Manual);
 }
 
 void PreferencesDialog::on_createSDBackups_clicked(bool checked)

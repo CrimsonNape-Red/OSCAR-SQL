@@ -1363,237 +1363,331 @@ void flagLargeLeaks(Session *session)
     }
 }
 
+namespace {
+
+// One reading of an oximetry channel. It lasts until the next reading of its EventList, or
+// until the list ends: some devices (ResMed) store SpO2 only when it changes.
+struct OxiReading {
+    qint64 time;
+    qint64 end;
+    EventDataType value;
+};
+
+// The readings of 'code' across all the pieces of a recording, in time order
+QVector<OxiReading> oximetryReadings(const QList<Session *> & recording, ChannelID code)
+{
+    QVector<OxiReading> readings;
+    for (Session *sess : recording) {
+        auto it = sess->eventlist.find(code);
+        if (it == sess->eventlist.end()) { continue; }
+
+        for (EventList *el : it.value()) {
+            const int count = el->count();
+            for (int i = 0; i < count; ++i) {
+                const qint64 time = el->time(i);
+                const qint64 end = (i + 1 < count) ? el->time(i + 1) : qMax(time, el->last());
+                readings.append({ time, end, el->data(i) });
+            }
+        }
+    }
+    std::stable_sort(readings.begin(), readings.end(), [](const OxiReading & a, const OxiReading & b) {
+        return a.time < b.time;
+    });
+    return readings;
+}
+
+// The piece of a recording, sorted by start time, that an event at 'time' belongs to. Like
+// SessionSplit::splitAt(), an event at a cut goes to the later piece.
+Session * pieceAt(const QList<Session *> & recording, qint64 time)
+{
+    Session *piece = recording.first();
+    for (Session *sess : recording) {
+        if (sess->realFirst() <= time) { piece = sess; }
+    }
+    return piece;
+}
+
+// Stores the flags found in a recording with the pieces they belong to
+void storeFlags(const QList<Session *> & recording, ChannelID code,
+                const QVector<QPair<qint64, QPair<EventDataType, EventDataType>>> & flags)
+{
+    QHash<Session *, EventList *> lists;
+    for (const auto & flag : flags) {
+        Session *sess = pieceAt(recording, flag.first);
+        EventList *el = lists.value(sess);
+        if (!el) {
+            el = new EventList(EVL_Event, 1, 0, 0, 0, 0, true);
+            lists.insert(sess, el);
+        }
+        el->AddEvent(flag.first, flag.second.first, flag.second.second);
+    }
+
+    for (auto it = lists.begin(); it != lists.end(); ++it) {
+        Session *sess = it.key();
+        EventList *el = it.value();
+        sess->eventlist[code].push_back(el);
+        sess->setMin(code, el->Min());
+        sess->setMax(code, el->Max());
+        sess->setCount(code, el->count());
+        sess->setFirst(code, el->first());
+        sess->setLast(code, el->last());
+    }
+}
+
+// Apple Health spot checks are far too sparse for meaningful oximetry flagging.
+bool isSpotCheckData(const QList<Session *> & recording)
+{
+    Session *sess = recording.first();
+    return sess->machine() && (sess->machine()->loaderName() == applehealth_class_name);
+}
+
+// The recording sorted by start time
+QList<Session *> sortedRecording(QList<Session *> recording)
+{
+    std::sort(recording.begin(), recording.end(), [](Session *a, Session *b) {
+        return a->realFirst() < b->realFirst();
+    });
+    return recording;
+}
+
+// The SpO2 level that readings are at or below for 90% of the time up to 'until' (0 for all
+// of them), ignoring dropouts. Weighting by time rather than counting readings matters for
+// devices that store SpO2 only when it changes.
+EventDataType spo2Percentile90(const QVector<OxiReading> & readings, qint64 until)
+{
+    QVector<QPair<EventDataType, qint64>> lasted;     // value, how long it lasted
+    qint64 total = 0;
+    for (const OxiReading & r : readings) {
+        if (until && (r.time >= until)) { break; }
+
+        const qint64 end = until ? qMin(r.end, until) : r.end;
+        if ((r.value > 0) && (end > r.time)) {
+            lasted.append(qMakePair(r.value, end - r.time));
+            total += end - r.time;
+        }
+    }
+    if (total == 0) { return 0; }
+
+    std::sort(lasted.begin(), lasted.end(), [](const QPair<EventDataType, qint64> & a,
+                                               const QPair<EventDataType, qint64> & b) {
+        return a.first < b.first;
+    });
+    const qint64 target = qint64(double(total) * 0.90);
+    qint64 sofar = 0;
+    for (const auto & reading : lasted) {
+        sofar += reading.second;
+        if (sofar > target) { return reading.first; }
+    }
+    return lasted.last().first;
+}
+
+} // namespace
+
 int calcPulseChange(Session *session)
 {
     if (session->eventlist.contains(OXI_PulseChange)) { return 0; }
+    return calcPulseChange(QList<Session *>{ session });
+}
 
-    // Apple Health spot checks are far too sparse for meaningful pulse-change detection.
-    if (session->machine() && session->machine()->loaderName() == applehealth_class_name) { return 0; }
+int calcPulseChange(const QList<Session *> & pieces)
+{
+    if (pieces.isEmpty() || isSpotCheckData(pieces)) { return 0; }
 
-    auto it = session->eventlist.find(OXI_Pulse);
+    const QList<Session *> recording = sortedRecording(pieces);
+    const QVector<OxiReading> readings = oximetryReadings(recording, OXI_Pulse);
+    const int count = readings.size();
+    if (count == 0) { return 0; }
 
-    if (it == session->eventlist.end()) { return 0; }
+    const qint64 window = qint64(p_profile->oxi->pulseChangeDuration()) * 1000L;
+    const EventDataType change = p_profile->oxi->pulseChangeBPM();
 
-    EventDataType val, val2, change, tmp;
-    qint64 time, time2;
-    qint64 window = p_profile->oxi->pulseChangeDuration();
-    window *= 1000;
+    // time, (duration in seconds, size of the change in bpm)
+    QVector<QPair<qint64, QPair<EventDataType, EventDataType>>> flags;
 
-    change = p_profile->oxi->pulseChangeBPM();
+    for (int i = 0; i < count; ++i) {
+        const EventDataType val = readings[i].value;
+        const qint64 time = readings[i].time;
 
-    EventList *pc = new EventList(EVL_Event, 1, 0, 0, 0, 0, true);
-    pc->setFirst(session->first(OXI_Pulse));
-    qint64 lastt;
-    EventDataType lv = 0;
-    int li = 0;
+        // A zero is a dropout (finger out, no signal), not a pulse rate.
+        if (!val) { continue; }
 
-    int max;
+        qint64 lastt = 0;
+        EventDataType max = 0;
+        int li = 0;
 
-    int elcount;
-    for (auto & el : it.value()) {
-        elcount = el->count();
-        for (int i = 0; i < elcount; ++i) {
-            val = el->data(i);
-            time = el->time(i);
+        for (int j = i + 1; j < count; ++j) { // scan ahead in the window
+            const qint64 time2 = readings[j].time;
 
-            lastt = 0;
-            lv = change;
-            max = 0;
+            if (time2 > time + window) { break; }
 
-            for (int j = i + 1; j < elcount; ++j) { // scan ahead in the window
-                time2 = el->time(j);
+            const EventDataType val2 = readings[j].value;
+            if (!val2) { continue; }
 
-                if (time2 > time + window) { break; }
+            const EventDataType tmp = qAbs(val2 - val);
 
-                val2 = el->data(j);
-                tmp = qAbs(val2 - val);
+            if (tmp >= change) {
+                lastt = time2;
 
-                if (tmp > lv) {
-                    lastt = time2;
+                if (tmp > max) { max = tmp; }
 
-                    if (tmp > max) { max = tmp; }
-
-                    li = j;
-                }
+                li = j;
             }
+        }
 
-            if (lastt > 0) {
-                qint64 len = (lastt - time) / 1000.0;
-                pc->AddEvent(lastt, len, tmp);
-                i = li;
-
-            }
+        if (lastt > 0) {
+            flags.append(qMakePair(lastt, qMakePair(EventDataType((lastt - time) / 1000), max)));
+            i = li;
         }
     }
 
-    if (pc->count() == 0) {
-        delete pc;
-        return 0;
-    }
-
-    session->eventlist[OXI_PulseChange].push_back(pc);
-    session->setMin(OXI_PulseChange, pc->Min());
-    session->setMax(OXI_PulseChange, pc->Max());
-    session->setCount(OXI_PulseChange, pc->count());
-    session->setFirst(OXI_PulseChange, pc->first());
-    session->setLast(OXI_PulseChange, pc->last());
-    return pc->count();
+    storeFlags(recording, OXI_PulseChange, flags);
+    return flags.size();
 }
-
 
 int calcSPO2Drop(Session *session)
 {
-    if (session->eventlist.contains(OXI_SPO2Drop)) { return 0; }
+    // A session already has its flags, or had none, if its baseline has been stored.
+    if (session->eventlist.contains(OXI_SPO2Drop) || session->settings.contains(OXI_SPO2Drop)) { return 0; }
+    return calcSPO2Drop(QList<Session *>{ session });
+}
 
-    // Apple Health spot checks are far too sparse for meaningful desaturation detection.
-    if (session->machine() && session->machine()->loaderName() == applehealth_class_name) { return 0; }
+int calcSPO2Drop(const QList<Session *> & pieces)
+{
+    if (pieces.isEmpty() || isSpotCheckData(pieces)) { return 0; }
 
-    auto it = session->eventlist.find(OXI_SPO2);
-    if (it == session->eventlist.end()) { return 0; }
+    const QList<Session *> recording = sortedRecording(pieces);
+    const QVector<OxiReading> readings = oximetryReadings(recording, OXI_SPO2);
+    const int count = readings.size();
+    if (count == 0) { return 0; }
 
-    EventDataType val, val2, change ; // , tmp;
-    qint64 time, time2;
-    qint64 window = p_profile->oxi->spO2DropDuration();
-    window *= 1000;
-    change = p_profile->oxi->spO2DropPercentage();
+    const qint64 window = qint64(p_profile->oxi->spO2DropDuration()) * 1000L;
+    const EventDataType change = p_profile->oxi->spO2DropPercentage();
 
-    EventList *pc = new EventList(EVL_Event, 1, 0, 0, 0, 0, true);
-    qint64 lastt;
-    int li = 0;
-
-    // Fix me.. Time scale varies.
-    //const unsigned ringsize=30;
-    int min;
-
-    qint64 start = 0;
-
-    // Calculate median baseline
-    QList<EventDataType> med;
-
-    int elcount;
-    for (auto & el : it.value()) {
-        elcount = el->count();
-        for (int i = 0; i < elcount; i++) {
-            val = el->data(i);
-            time = el->time(i);
-
-            if (val > 0) { med.push_back(val); }
-
-            if (!start) { start = time; }
-
-            if (time > start + 3600000) { break; } // just look at the first hour
-
-            // cnt++;
-        }
-    }
+    // A drop is SpO2 at least 'change' points below the baseline for at least 'window'.
+    // The rolling baseline is found per reading below; the others are one value for the recording.
+    const SpO2BaselineMethod method = p_profile->oxi->spO2BaselineMethod();
+    const bool rolling = (method == SBM_Rolling);
 
     EventDataType baseline = 0;
-
-    if (med.size() > 0) {
-        std::sort(med.begin(), med.end());
-
-        int midx = float(med.size()) * 0.90;
-
-        if (midx > med.size() - 1) { midx = med.size() - 1; }
-
-        if (midx < 0) { midx = 0; }
-
-        baseline = med[midx];
+    switch (method) {
+    case SBM_Manual:
+        baseline = p_profile->oxi->spO2ManualBaseline();
+        break;
+    case SBM_FirstHour:
+        baseline = spo2Percentile90(readings, readings.first().time + 3600000L);
+        break;
+    case SBM_WholeNight:
+        baseline = spo2Percentile90(readings, 0);
+        break;
+    case SBM_Rolling:
+        break;
     }
+    if (!rolling && (baseline <= 0)) { return 0; }
 
-    session->settings[OXI_SPO2Drop] = baseline;
-    EventDataType current;
-    qDebug() << "Calculated baseline" << baseline;
-    
-    //added by Sheila for marks1 1/5/2026 //////////////
-    int override_baseline_spo2_value = p_profile->oxi->baseSpO2Option();
-        
-    qDebug() << "Override Baseline SpO2 Value from Preference (zero if preference is not set): " << override_baseline_spo2_value;
-       
-    // marks1 1/6/26 Fix Sheila issue, change || to && 
-    // Add debug to confirm whether we are using the Default traditional (calculated) SpO2 baseline or overriding it.
-    if (override_baseline_spo2_value != -1 && override_baseline_spo2_value != 0)      
-    {
-		qDebug() << "Overriding the calculated baseline and instead using the Baseline SpO2 value from the preference: " << override_baseline_spo2_value;  
-        baseline = override_baseline_spo2_value; //case:85~99
-        session->settings[OXI_SPO2Drop] = baseline;
-        session->SetChanged(true);
-    }
-    ////////////////////////////////////////////////////
-    
-    
-    for (auto & el : it.value()) {
-        elcount = el->count();
-        for (int i = 0; i < elcount; ++i) {
-            current = el->data(i);
+    const qint64 baseWindow = qint64(p_profile->oxi->spO2BaselineWindow()) * 1000L;
+    double baselineSum = 0;     // for the average rolling baseline reported for the recording
+    qint64 baselineTime = 0;
 
-            if (!current) { continue; }
+    // Readings already in a drop, which the rolling baseline leaves out so that a long drop
+    // can't lower the baseline of the next one
+    QVector<bool> inDrop(rolling ? count : 0, false);
 
-            time = el->time(i);
-            /*
-            ring[rp]=val;
-            rtime[rp]=time;
-            rp++;
-            rp=rp % ringsize;
-            if (i<ringsize)  {
-                for (unsigned j=i;j<ringsize;j++) {
-                    ring[j]=val;
-                    rtime[j]=0;
-                }
+    // time, (duration in seconds, depth in SpO2 points)
+    QVector<QPair<qint64, QPair<EventDataType, EventDataType>>> flags;
+
+    for (int i = 0; i < count; ++i) {
+        const OxiReading & reading = readings[i];
+        EventDataType base = baseline;
+
+        if (rolling) {
+            // At least half the window must have passed, so the start of a recording isn't
+            // measured against a handful of readings.
+            if (reading.time - readings.first().time < baseWindow / 2) { continue; }
+
+            // Time-weighted mean of the window before this reading
+            const qint64 from = reading.time - baseWindow;
+            double sum = 0;
+            qint64 covered = 0;
+            for (int k = i - 1; k >= 0; --k) {
+                const OxiReading & r = readings[k];
+                if (r.end <= from) { break; }
+                if ((r.value <= 0) || inDrop[k]) { continue; }
+
+                const qint64 start = qMax(r.time, from);
+                const qint64 end = qMin(r.end, reading.time);
+                if (end <= start) { continue; }
+                sum += double(r.value) * double(end - start);
+                covered += end - start;
             }
-            tmp=0;
-            cnt=0;
-            for (unsigned j=0;j<ringsize;j++) {
-                if (rtime[j] > time-300000) {  // only look at recent entries..
-                    tmp+=ring[j];
-                    cnt++;
-                }
-            }
-            if (!cnt) {
-                unsigned j=abs((rp-1) % ringsize);
-                tmp=(ring[j]+val)/2;
-            } else tmp/=EventDataType(cnt);
-            */
+            if (covered == 0) { continue; }
+            base = sum / double(covered);
+        }
 
-            val = baseline;
-            lastt = 0;
+        const EventDataType current = reading.value;
+        if (!current) { continue; }
 
+        if (rolling && (reading.end > reading.time)) {
+            baselineSum += double(base) * double(reading.end - reading.time);
+            baselineTime += reading.end - reading.time;
+        }
 
-            min = val;
+        if (current > base - change) { continue; }
 
-            for (int j = i; j < elcount; ++j) { // scan ahead in the window
-                time2 = el->time(j);
-                val2 = el->data(j);
+        // Scan ahead while SpO2 stays down, tracking the lowest reading. The drop lasts until
+        // the reading that ends it, or until the data stops.
+        EventDataType nadir = current;
+        qint64 end = reading.end;
+        int li = i + 1;
+        for (int j = i + 1; j < count; ++j) {
+            const OxiReading & r = readings[j];
 
-                if (val2 > baseline - change) { break; }
+            // A gap in the data ends the drop where the data stopped.
+            if (r.time > readings[j - 1].end) { break; }
 
-                lastt = time2;
-                li = j + 1;
+            // A zero is a dropout (finger out, no signal), not a desaturation.
+            if (!r.value || (r.value > base - change)) {
+                end = r.time;
+                break;
             }
 
-            if (lastt > 0) {
-                qint64 len = (lastt - time);
+            if (r.value < nadir) { nadir = r.value; }
+            end = r.end;
+            li = j + 1;
+        }
 
-                if (len >= window) {
-                    pc->AddEvent(lastt, len / 1000, val - min);
-                    i = li;
-                }
+        const qint64 len = end - reading.time;
+        if (len >= window) {
+            // Depth of the desaturation, in SpO2 points from baseline to nadir
+            flags.append(qMakePair(end, qMakePair(EventDataType(len / 1000), EventDataType(base - nadir))));
+            if (rolling) {
+                for (int j = i; j < li; ++j) { inDrop[j] = true; }
             }
+            i = li - 1;
         }
     }
 
-    if (pc->count() == 0) {
-        delete pc;
-        return 0;
+    // Kept in the session settings and shown as "SpO2 Baseline Used" in Daily; for the
+    // rolling baseline it is the time-weighted average over the recording.
+    if (rolling) {
+        baseline = baselineTime ? EventDataType(baselineSum / double(baselineTime)) : 0;
     }
+    if (baseline > 0) {
+        for (Session *sess : recording) {
+            sess->settings[OXI_SPO2Drop] = baseline;
+        }
+    }
+    qDebug() << "calcSPO2Drop: baseline method" << method << "baseline" << baseline;
 
-    session->eventlist[OXI_SPO2Drop].push_back(pc);
-    session->setMin(OXI_SPO2Drop, pc->Min());
-    session->setMax(OXI_SPO2Drop, pc->Max());
-    session->setCount(OXI_SPO2Drop, pc->count());
-    session->setFirst(OXI_SPO2Drop, pc->first());
-    session->setLast(OXI_SPO2Drop, pc->last());
-    return pc->count();
+    storeFlags(recording, OXI_SPO2Drop, flags);
+    return flags.size();
+}
+
+void clearOximetryEvents(Session *session)
+{
+    session->destroyEvent(OXI_SPO2Drop);
+    session->destroyEvent(OXI_PulseChange);
+    // calcSPO2Drop() keeps the baseline it used in the session settings
+    session->settings.remove(OXI_SPO2Drop);
 }
 
 
