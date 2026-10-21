@@ -524,6 +524,14 @@ private:
 
     void PopulatePurgeMenu();
 
+    //! \brief Rebuild a CPAP device's data from OSCAR's backup, asking first
+    //! \return true if it was rebuilt
+    bool rebuildCPAPMachine(Machine *mach);
+
+    //! \brief Offer to rebuild the ResMed devices whose oximetry was imported before missing
+    //!        readings were kept as gaps (asked about until rebuilt or declined for good)
+    void checkResMedOximetryRebuild();
+
     //! \brief Destroy ALL the CPAP data for the selected device
     void purgeMachine(Machine *);
 

@@ -872,6 +872,10 @@ bool MainWindow::OpenProfile(QString profileName)
     PERF_TIMER_REPORT();
     PERF_TIMER_RESET();
 
+    if (!m_batchMode) {
+        QTimer::singleShot(0, this, &MainWindow::checkResMedOximetryRebuild);
+    }
+
     return true;
 }
 
@@ -2664,9 +2668,6 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
 
 void MainWindow::on_actionRebuildCPAP(QAction *action)
 {
-    ui->tabWidget->setCurrentWidget(welcome); // Daily view can't run during rebuild
-    QApplication::processEvents();
-
     QString data = action->data().toString();
     QString cls = data.section(":",0,0);
     QString serial = data.section(":", 1);
@@ -2680,6 +2681,16 @@ void MainWindow::on_actionRebuildCPAP(QAction *action)
         }
     }
     if (!mach) return;
+    rebuildCPAPMachine(mach);
+}
+
+bool MainWindow::rebuildCPAPMachine(Machine *mach)
+{
+    ui->tabWidget->setCurrentWidget(welcome); // Daily view can't run during rebuild
+    QApplication::processEvents();
+
+    const QString serial = mach->serial();
+    const bool isResMed = (mach->loaderName() == STR_MACH_ResMed);
     QString bpath = mach->getBackupPath();
     bool backups = (dirCount(bpath) > 0) ? true : false;
     MachineLoader *loader = lookupLoader(mach);
@@ -2709,7 +2720,7 @@ void MainWindow::on_actionRebuildCPAP(QAction *action)
                 "<p>"+tr("Rebuilding will delete all of this device's data, and OSCAR may not be able to restore it from the backup. You would then have to import it again from the SD card or your own backups.")+"</p>" +
                 "<p><b>"+tr("Are you really sure you want to do this?")+"</b></p>",
                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No) {
-            return;
+            return false;
         }
     } else if (backups) {
         if (staticQMessageBox::question(this, STR_MessageBox_Question,
@@ -2718,7 +2729,7 @@ void MainWindow::on_actionRebuildCPAP(QAction *action)
                 mach->modelnumber() + " (" + mach->serial() + ")\n\n" +
                 tr("Please note, that this could result in loss of data if OSCAR's backups have been disabled."),
                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No) {
-            return;
+            return false;
         }
     } else {
         if (staticQMessageBox::question(this,
@@ -2728,7 +2739,7 @@ void MainWindow::on_actionRebuildCPAP(QAction *action)
                 "<p>"+tr("Provided you have made <i>your <b>own</b> backups for ALL of your CPAP data</i>, you can still complete this operation, but you will have to restore from your backups manually.")+"</p>" +
                 "<p><b>"+tr("Are you really sure you want to do this?")+"</b></p>",
                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No) {
-            return;
+            return false;
         }
     }
 
@@ -2759,6 +2770,68 @@ void MainWindow::on_actionRebuildCPAP(QAction *action)
     PopulatePurgeMenu();
     GenerateStatistics();
     p_profile->StoreMachines();
+
+    // Rebuilt ResMed oximetry keeps its missing readings as gaps: no need to ask about it again.
+    if (isResMed && p_profile->contains(STR_PREF_ResMedOximetryRebuild)) {
+        QStringList pending = (*p_profile)[STR_PREF_ResMedOximetryRebuild].toString().split(',', Qt::SkipEmptyParts);
+        pending.removeAll(serial);
+        p_profile->Set(STR_PREF_ResMedOximetryRebuild, pending.join(','));
+    }
+    return true;
+}
+
+void MainWindow::checkResMedOximetryRebuild()
+{
+    if (!p_profile) return;
+
+    // The first time, note the ResMed devices with oximetry imported so far. Data imported
+    // from now on keeps its gaps, so a device added later is never asked about.
+    if (!p_profile->contains(STR_PREF_ResMedOximetryRebuild)) {
+        QStringList serials;
+        for (Machine *mach : p_profile->GetMachines(MT_CPAP)) {
+            if (mach->loaderName() != STR_MACH_ResMed) continue;
+            for (Session *sess : std::as_const(mach->sessionlist)) {
+                if (sess->m_availableChannels.contains(OXI_SPO2) || sess->m_availableChannels.contains(OXI_Pulse)) {
+                    serials.append(mach->serial());
+                    break;
+                }
+            }
+        }
+        p_profile->Set(STR_PREF_ResMedOximetryRebuild, serials.join(','));
+    }
+
+    const QStringList pending = (*p_profile)[STR_PREF_ResMedOximetryRebuild].toString().split(',', Qt::SkipEmptyParts);
+    QList<Machine *> machines;
+    QString list;
+    for (Machine *mach : p_profile->GetMachines(MT_CPAP)) {
+        if ((mach->loaderName() == STR_MACH_ResMed) && pending.contains(mach->serial())) {
+            machines.append(mach);
+            list += "<li>" + mach->brand() + " " + mach->model() + " (" + mach->serial() + ")</li>";
+        }
+    }
+    if (machines.isEmpty()) return;
+
+    QMessageBox box(QMessageBox::Information, tr("ResMed Oximetry Data"),
+        "<p>" + tr("OSCAR now shows the times your ResMed device recorded no SpO2 or pulse reading, "
+                   "such as with the finger out of the sensor, as gaps. Data imported by earlier versions "
+                   "filled those times with the last reading, which can show long SpO2 drops that did not happen.") + "</p>"
+        "<p>" + tr("To correct it, rebuild the data of these devices from OSCAR's backup, "
+                   "or purge it and import it again from the SD card:") + "</p><ul>" + list + "</ul>",
+        QMessageBox::NoButton, this);
+    QPushButton *rebuild = box.addButton(tr("Rebuild Now"), QMessageBox::AcceptRole);
+    box.addButton(tr("Remind Me Later"), QMessageBox::RejectRole);
+    QPushButton *never = box.addButton(tr("Don't Remind Me"), QMessageBox::DestructiveRole);
+    box.setDefaultButton(rebuild);
+    box.exec();
+
+    if (box.clickedButton() == never) {
+        p_profile->Set(STR_PREF_ResMedOximetryRebuild, QString());
+    } else if (box.clickedButton() == rebuild) {
+        // Each rebuild asks first and removes its device from the list once done.
+        for (Machine *mach : machines) {
+            if (!rebuildCPAPMachine(mach)) break;
+        }
+    }
 }
 
 void MainWindow::on_actionPurgeMachine(QAction *action)

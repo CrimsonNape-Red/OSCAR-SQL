@@ -439,6 +439,9 @@ const QString STR_IS_SplitNonCPAPSessions = "SplitNonCPAPSessions";
 const QString STR_PREF_RespiratoryEventsRepaired = "RespiratoryEventsRepaired";  ///< #335
 const QString STR_PREF_BmcSessionEndsRepaired = "BmcSessionEndsRepaired";  ///< #342
 const QString STR_PREF_SpO2BaselineMigrated = "SpO2BaselineMigrated";  ///< switched to the rolling baseline
+/// Serial numbers, comma separated, of ResMed devices whose oximetry was imported with missing
+/// readings filled in and still needs rebuilding; absent until the profile has been checked
+const QString STR_PREF_ResMedOximetryRebuild = "ResMedOximetryRebuildPending";
 #if defined(STEADY_BREATHING)
 const QString STR_PREF_SteadyBreathingPerProfile = "SteadyBreathingPerProfile";  ///< moved from app-wide settings
 #endif
