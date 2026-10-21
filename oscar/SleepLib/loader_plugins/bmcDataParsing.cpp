@@ -622,18 +622,28 @@ BmcDateSession BmcData::ReadDateSession(QDate aDate)
     if (lastPacketTimestamp.isValid() && !session->Waveforms.isEmpty()) {
         session->StartTimestamp = session->Waveforms.first().Timestamp;
         session->EndTimestamp = lastPacketTimestamp;
-        // When the waveform ring buffer was overwritten before the session ended (the
-        // device hit stale circular-buffer data and stopped), the USR-reported duration
-        // is longer than the available waveform span.  Extend the session window to the
-        // full USR duration so that respiratory events recorded throughout the night are
-        // distributed to this session and visible on the Daily page.
-        const QDateTime usrEnd = session->StartTimestamp.addSecs(
-            static_cast<qint64>(usrDurationMinutes) * 60);
-        if (usrEnd > session->EndTimestamp)
-            session->EndTimestamp = usrEnd;
         dateSession.Sessions.append(session);
     } else {
         delete session;
+    }
+
+    // When the waveform ring buffer was overwritten before the session ended (the device
+    // hit stale circular-buffer data and stopped), the USR-reported duration is longer
+    // than the available waveform.  Extend the final session by the missing time so that
+    // respiratory events recorded throughout the night are distributed to it and visible
+    // on the Daily page.  The USR duration is the therapy time of the whole day, summed
+    // over all of its sessions, so only the shortfall against every session's waveform
+    // span is missing; measuring it from the final session's start alone would stretch
+    // that session by the length of all the earlier ones (GitLab #342).
+    if (!dateSession.Sessions.isEmpty() && usrDurationMinutes > 0) {
+        qint64 waveformSecs = 0;
+        for (const BmcSession* daySession : dateSession.Sessions)
+            waveformSecs += daySession->StartTimestamp.secsTo(daySession->EndTimestamp);
+        const qint64 missingSecs = static_cast<qint64>(usrDurationMinutes) * 60 - waveformSecs;
+        if (missingSecs > 0) {
+            BmcSession* finalSession = dateSession.Sessions.last();
+            finalSession->EndTimestamp = finalSession->EndTimestamp.addSecs(missingSecs);
+        }
     }
 
     //Get all the respiratory events that fall in this session

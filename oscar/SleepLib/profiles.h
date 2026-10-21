@@ -114,6 +114,10 @@ class Profile : public Preferences
     //! \return true if no affected sessions remain
     bool repairRespiratoryEvents(qint64 profileId, ProgressDialog *progress);
 
+    //! \brief Trim BMC sessions stretched past their waveforms on multi-session nights (#342)
+    //! \return true once the repair is committed; false to retry on the next load
+    bool repairBmcSessionEnds(qint64 profileId, ProgressDialog *progress);
+
     //! \brief Barf because data format has changed. This does a purge of CPAP data for machine *m
     void DataFormatError(Machine *m);
 
@@ -426,6 +430,7 @@ const QString STR_IS_SplitNonCPAPSessions = "SplitNonCPAPSessions";
 
 // One-time data repairs (set once the repair has completed for the profile)
 const QString STR_PREF_RespiratoryEventsRepaired = "RespiratoryEventsRepaired";  ///< #335
+const QString STR_PREF_BmcSessionEndsRepaired = "BmcSessionEndsRepaired";  ///< #342
 #if defined(STEADY_BREATHING)
 const QString STR_PREF_SteadyBreathingPerProfile = "SteadyBreathingPerProfile";  ///< moved from app-wide settings
 #endif

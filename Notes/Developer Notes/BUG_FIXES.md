@@ -4,6 +4,43 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-20 - BMC legacy: last session of a multi-session night stretched by hours (#342)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcDataParsing.cpp`, `oscar/SleepLib/profiles.cpp`,
+`profiles.h`, `oscar/database/session_repository.cpp`, `session_repository.h`,
+`oscar/tests/bmcsessionendstests.cpp`, `bmcsessionendstests.h`
+
+**Symptom:** On BMC G2S/G3 (legacy loader) nights with more than one session, the previous
+night showed several hours of blank chart to the right of the last session after the next
+day's import, and its AHI and leak averages dropped. The night just imported looked correct.
+
+**Root cause:** `BmcData::ReadDateSession()` extended the final waveform session to
+`finalSession.Start + USR DurationMinutes` (added in `f1b48793` for waveforms truncated by
+the ring buffer, first shipped in 2.1.0). The USR duration is the therapy time of the whole
+day, summed over all its sessions, so the final session grew by the length of every earlier
+session that night. In one affected profile the implied USR duration matched the summed
+session lengths within 1.6 min on all ten affected nights. It appeared only on re-import
+because the in-progress USR record has no duration (0), and BMC always re-imports the last
+imported day.
+
+**Fix:** The final session is now extended only by the shortfall between the USR duration
+and the summed waveform spans of all the day's sessions. Single-session nights get the same
+end time as before.
+
+**Repair:** BMC only re-imports the last day and the card overwrites old waveforms, so
+stored nights would not heal. `Profile::repairBmcSessionEnds()` runs once at profile load
+(flag `BmcSessionEndsRepaired`). It finds BMC sessions ending over a minute past their
+waveforms and gives each the end the fixed loader would compute, using the earlier
+sessions of the same OSCAR day in place of the USR day. Those are counted newest first
+while the stretch can hold them, so an older session of the same OSCAR day from the
+previous USR day (an afternoon nap) is left out. A session with no earlier session that
+fits is a correct ring-buffer extension and is skipped; the same test keeps an accidental
+rerun from trimming a repaired session again. Trimmed sessions get clipped slices, fresh summaries (including the AHI
+graph) and a recalculated daily_summaries row. A night whose day split falls between its
+sessions is not repaired.
+
+---
+
 ## 2026-10-20 - Steady Breathing still ran on import in Clinical Mode profiles (#340)
 
 **Files:** `oscar/SleepLib/profiles.h`, `oscar/preferencesdialog.cpp`,

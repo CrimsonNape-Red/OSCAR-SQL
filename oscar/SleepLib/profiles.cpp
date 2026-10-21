@@ -51,6 +51,8 @@
 #include "../database/daily_summary_repository.h"
 #include "../database/device_time_correction_repository.h"
 #include "../database/respiratory_events_repository.h"
+#include "../database/session_repository.h"
+#include "loader_plugins/bmc_loader.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSqlQuery>
@@ -1133,6 +1135,12 @@ void Profile::LoadMachineData(ProgressDialog *progress)
         if (!(*this)[STR_PREF_RespiratoryEventsRepaired].toBool()
                 && repairRespiratoryEvents(profileData.id, progress)) {
             Set(STR_PREF_RespiratoryEventsRepaired, true);
+        }
+
+        // One-time repair of BMC sessions stretched before #342 was fixed; retried only if it failed.
+        if (!(*this)[STR_PREF_BmcSessionEndsRepaired].toBool()
+                && repairBmcSessionEnds(profileData.id, progress)) {
+            Set(STR_PREF_BmcSessionEndsRepaired, true);
         }
     } else {
         qWarning() << "Profile::LoadMachineData() - Cannot check daily summaries, profile not in database";
@@ -3188,6 +3196,193 @@ bool Profile::repairRespiratoryEvents(qint64 profileId, ProgressDialog *progress
     qDebug() << "Profile::repairRespiratoryEvents() - rebuilt" << repaired << "sessions,"
              << failed << "failed," << notLoaded << "not loaded";
     return failed == 0 && notLoaded == 0;
+}
+
+/**
+ * @brief Trim BMC legacy sessions that were stretched past their waveforms (#342).
+ *
+ * Until #342 was fixed, the BMC loader set the last session of a day to end at its own
+ * start plus the USR-reported duration. That duration is the therapy time of the whole
+ * day, so on a multi-session night the last session grew by the length of all the
+ * earlier ones, which added blank hours to the Daily charts and lowered AHI and leak
+ * averages. It happened on re-import, so every such night already imported is affected.
+ *
+ * Candidates are sessions that end more than a minute after their waveform data. Each is
+ * given the end the fixed loader computes: its waveform end, extended only by whatever of
+ * its stretch the waveform time of the day's earlier sessions does not account for. Those
+ * are taken newest first for as long as the stretch can hold them, which leaves out an
+ * older session of the same OSCAR day that belongs to the previous USR day. A session with
+ * no earlier session that fits was extended correctly (waveforms truncated by the ring
+ * buffer) and is left alone; that test also keeps an accidental rerun from trimming a
+ * repaired session again. Repaired sessions are re-saved with fresh summaries, and their
+ * days' daily_summaries rows recalculated.
+ *
+ * The OSCAR day stands in for the USR day: the USR day runs for 24 hours from the night's
+ * first session, so its sessions share an OSCAR day unless the day split falls between them.
+ *
+ * LoadMachineData() runs it until it succeeds once, then records STR_PREF_BmcSessionEndsRepaired
+ * in the profile preferences.
+ *
+ * @param profileId Database ID of the profile
+ * @param progress  Load progress dialog (may be null)
+ * @return true once the repair has been committed (or nothing needed it); false if the
+ *         search or a re-save failed, so the caller retries on the next load
+ */
+bool Profile::repairBmcSessionEnds(qint64 profileId, ProgressDialog *progress)
+{
+    // The USR duration is in whole minutes, so the fixed loader may still extend a session
+    // by under a minute; only a longer gap can be this bug.
+    constexpr qint64 kMinStretchMs = 60000;
+    // The USR duration came out up to 1.6 min below the summed session lengths in affected
+    // data, so a stretched session's stretch can fall that far short of the earlier sessions.
+    constexpr qint64 kUsrShortfallMs = 3 * 60000;
+
+    SessionRepository sessionRepo;
+    bool ok = false;
+    const QHash<qint64, qint64> waveformEnd =
+        sessionRepo.findSessionsEndingAfterWaveform(profileId, bmc_class_name, kMinStretchMs, &ok);
+    if (!ok) return false;
+    if (waveformEnd.isEmpty()) return true;
+
+    struct Fix {
+        Session *sess;
+        Day *day;
+        qint64 newLast;
+    };
+    QList<Fix> fixes;
+    int found = 0;
+
+    for (Machine *mach : m_machlist) {
+        if (!mach || mach->loaderName() != bmc_class_name) continue;
+        for (auto it = mach->day.cbegin(); it != mach->day.cend(); ++it) {
+            Day *day = it.value();
+            if (!day) continue;
+
+            QList<Session *> sessions;
+            for (Session *sess : day->sessions) {
+                if (sess && sess->machine() == mach) sessions.append(sess);
+            }
+
+            for (Session *sess : sessions) {
+                const auto wf = waveformEnd.constFind(sess->sessionRowId());
+                if (wf == waveformEnd.constEnd()) continue;
+                found++;
+
+                // Waveform time of the USR day's earlier sessions, which the stretch always
+                // contains. They are the ones immediately before this session, so take them
+                // newest first while the stretch can hold them; an older session in the same
+                // OSCAR day (a nap from the previous USR day) would overflow it. A session
+                // with none that fit was extended correctly.
+                QList<Session *> earlier;
+                for (Session *other : sessions) {
+                    if (other->realFirst() < sess->realFirst()) earlier.append(other);
+                }
+                std::sort(earlier.begin(), earlier.end(), [](Session *a, Session *b) {
+                    return a->realFirst() > b->realFirst();
+                });
+
+                const qint64 stretchMs = sess->realLast() - wf.value();
+                qint64 earlierMs = 0;
+                for (Session *other : earlier) {
+                    const qint64 otherEnd = waveformEnd.value(other->sessionRowId(), other->realLast());
+                    const qint64 otherMs = std::max<qint64>(0, otherEnd - other->realFirst());
+                    if (earlierMs + otherMs > stretchMs + kUsrShortfallMs) break;
+                    earlierMs += otherMs;
+                }
+                if (earlierMs == 0) continue;
+
+                const qint64 newLast = wf.value() + std::max<qint64>(0, stretchMs - earlierMs);
+                if (newLast < sess->realLast()) {
+                    fixes.append({ sess, day, newLast });
+                }
+            }
+        }
+    }
+
+    // Unlike the respiratory events repair, a session not loaded now is not retried: a
+    // rerun could trim a session whose remaining extension still looks like the bug.
+    const int notLoaded = waveformEnd.size() - found;
+    if (fixes.isEmpty()) return true;
+
+    qDebug() << "Profile::repairBmcSessionEnds() -" << fixes.size()
+             << "BMC sessions run past their waveforms - trimming";
+
+    if (progress) {
+        progress->setMessage(QObject::tr("Repairing BMC Session Times"));
+        progress->setProgressMax(fixes.size());
+        progress->setProgressValue(0);
+    }
+
+    DatabaseManager &dbm = DatabaseManager::instance();
+    bool ownTransaction = !dbm.inTransaction() && dbm.transaction();
+
+    QSet<Day *> changedDays;
+    int repaired = 0, failed = 0, done = 0;
+    for (const Fix &fix : fixes) {
+        Session *sess = fix.sess;
+        const bool wasOpen = sess->eventsLoaded();
+        if (!sess->OpenEvents()) {
+            failed++;
+        } else {
+            qDebug() << "Profile::repairBmcSessionEnds() - session" << sess->session() << "end"
+                     << QDateTime::fromMSecsSinceEpoch(sess->realLast()).toString(Qt::ISODate) << "->"
+                     << QDateTime::fromMSecsSinceEpoch(fix.newLast).toString(Qt::ISODate);
+            sess->really_set_last(fix.newLast);
+
+            // The loader's mask-on slice ends one second after the session (at EndTimestamp).
+            const qint64 sliceEnd = fix.newLast + 1000;
+            for (int i = sess->m_slices.size() - 1; i >= 0; --i) {
+                SessionSlice &slice = sess->m_slices[i];
+                if (slice.start >= sliceEnd) {
+                    sess->m_slices.removeAt(i);
+                } else if (slice.end > sliceEnd) {
+                    slice.end = sliceEnd;
+                }
+            }
+
+            // Rebuilds the AHI graph, which ran to the old end, and the per-hour statistics.
+            sess->UpdateSummaries();
+            sess->SetChanged(true);
+            if (sess->Store(sess->machine()->getDataPath())) {
+                repaired++;
+                changedDays.insert(fix.day);
+            } else {
+                failed++;
+            }
+        }
+        if (!wasOpen) sess->TrashEvents();
+
+        if (progress) {
+            progress->setProgressValue(++done);
+            QApplication::processEvents();
+        }
+    }
+
+    if (ownTransaction) {
+        if (failed > 0) {
+            dbm.rollback();
+            qWarning() << "Profile::repairBmcSessionEnds() -" << failed
+                       << "sessions failed to re-save; rolled back, will retry on next load";
+            return false;
+        }
+        if (!dbm.commit()) {
+            qWarning() << "Profile::repairBmcSessionEnds() - commit failed; no sessions were repaired";
+            return false;
+        }
+    }
+
+    DailySummaryRepository summaryRepo;
+    // Without a transaction of our own the trimmed sessions are already saved, so refresh
+    // their days before reporting the failure.
+    const bool allSaved = failed == 0;
+    for (Day *day : changedDays) {
+        day->invalidate();
+        summaryRepo.calculateAndStoreFromDay(day, profileId);
+    }
+
+    qDebug() << "Profile::repairBmcSessionEnds() - trimmed" << repaired << "sessions,"
+             << failed << "failed," << notLoaded << "candidates not loaded";
+    return allSaved;
 }
 
 // Database integration: Save extended profile data

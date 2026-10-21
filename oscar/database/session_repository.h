@@ -14,6 +14,7 @@
 
 #include <QString>
 #include <QList>
+#include <QHash>
 #include <QDateTime>
 
 /*!
@@ -144,7 +145,21 @@ public:
      * \return true if exists, false otherwise
      */
     bool exists(qint64 machineId, qint64 sessionId);
-    
+
+    /*!
+     * \brief Find sessions that end well after the last of their waveform data
+     * \param profileId Database ID of the profile to check
+     * \param loaderName Only sessions of machines imported by this loader
+     * \param minGapMs Minimum time between the waveforms' end and the session end
+     * \param ok Set to false if the query failed, so the caller can tell that from "none"
+     * \return Session database row id -> end of its waveform data (ms since epoch)
+     *
+     * Used by the one-time repair of BMC sessions stretched past their waveforms (#342).
+     * Sessions with no waveform lists are not returned.
+     */
+    QHash<qint64, qint64> findSessionsEndingAfterWaveform(qint64 profileId, const QString& loaderName,
+                                                         qint64 minGapMs, bool* ok = nullptr);
+
     /*!
      * \brief Begin a database transaction
      * \return true if successful, false otherwise

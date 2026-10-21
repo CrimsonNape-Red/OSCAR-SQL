@@ -425,6 +425,46 @@ int SessionRepository::countByMachine(qint64 machineId)
     return 0;
 }
 
+QHash<qint64, qint64> SessionRepository::findSessionsEndingAfterWaveform(qint64 profileId,
+                                                                        const QString& loaderName,
+                                                                        qint64 minGapMs, bool* ok)
+{
+    QHash<qint64, qint64> result;
+    if (ok) *ok = false;
+
+    QSqlDatabase db = DatabaseManager::instance().database();
+    if (!db.isOpen()) {
+        qWarning() << "SessionRepository::findSessionsEndingAfterWaveform() - Database not open";
+        return result;
+    }
+
+    // event_type 0 = EVL_Waveform.
+    QSqlQuery query(db);
+    query.prepare(
+        "SELECT s.id, MAX(el.last_time) AS waveform_end FROM sessions s "
+        "JOIN machines m ON m.id = s.machine_id "
+        "JOIN event_lists el ON el.session_id = s.id AND el.event_type = 0 "
+        "WHERE m.profile_id = ? AND m.loader_name = ? "
+        "GROUP BY s.id, s.end_time "
+        "HAVING s.end_time - MAX(el.last_time) > ?"
+    );
+    query.addBindValue(profileId);
+    query.addBindValue(loaderName);
+    query.addBindValue(minGapMs);
+
+    if (!query.exec()) {
+        qWarning() << "SessionRepository::findSessionsEndingAfterWaveform() failed:" << query.lastError().text();
+        DatabaseManager::instance().checkQueryError("SessionRepository::findSessionsEndingAfterWaveform", query);
+        return result;
+    }
+
+    while (query.next()) {
+        result.insert(query.value(0).toLongLong(), query.value(1).toLongLong());
+    }
+    if (ok) *ok = true;
+    return result;
+}
+
 bool SessionRepository::exists(qint64 machineId, qint64 sessionId)
 {
     QSqlDatabase db = DatabaseManager::instance().database();
