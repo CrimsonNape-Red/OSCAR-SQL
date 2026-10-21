@@ -994,6 +994,8 @@ int MainWindow::importCPAP(ImportPath import, const QString &message, bool silen
         qDebug() << "MainWindow::importCPAP no import loader found";
         return 0;
     }
+    // Before the Abort button is connected, so only a click during this import counts.
+    import.loader->resetAbort();
 
     ProgressDialog * progdlg = nullptr;
     if (!silent) {
@@ -3493,6 +3495,8 @@ bool MainWindow::importNonCPAPFiles(MachineLoader &loader, const QStringList &fi
     if (size == 0) {
         return false;
     }
+    // Before the Abort button is connected, so only a click during this import counts.
+    loader.resetAbort();
 
     // Display progress if we have more than 1 file to load...
     ProgressDialog *progress = nullptr;

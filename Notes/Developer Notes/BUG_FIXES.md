@@ -4,6 +4,40 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-21 - BMC legacy: sessions lost after a broken USR record; Abort stuck on (#343)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcDataParsing.cpp`, `bmcDataParsing.h`,
+`oscar/SleepLib/machine_loader.h`, `oscar/mainwindow.cpp`,
+`oscar/tests/bmcusrsessionstests.cpp`, `bmcusrsessionstests.h`
+
+**Symptom:** A legacy BMC card with ~10 months of data imported only 18 nights from
+November–December 2025 plus the in-progress night. A later import in the same OSCAR run
+imported nothing at all ("Already up to date").
+
+**Root cause 1:** Each historic session record in the `.USR` file points to the next one.
+On this card two fragments with no session header (289 and 583 bytes) sit in the chain after
+2025-12-17. `ReadAllSessions()` followed the pointer into the first fragment and read an
+invalid 'next' pointer there. It then fell back to end of file and treated the remaining
+~97 KB as one record, which failed the 0xE1 header check. The other 180 sessions were lost.
+
+**Fix 1:** `ReadAllSessions()` now reads the file into memory. When a position does not hold a
+session header (0xE1 with a decodable date), it skips forward to the next header that also
+has a valid 'next' pointer. A header with an unset pointer runs to the next header, or to the
+end of the file as before. The parser emulation recovers 2025-12-21 to 2026-10-02 (198
+historic records instead of 18) and leaves the five other legacy BMC sample cards unchanged.
+The fragments themselves have no date and are still skipped.
+
+**Root cause 2:** `MachineLoader::m_abort` was set by the progress dialog's Abort button but
+only cleared in the constructor. Loaders are singletons, so after one Abort click every later
+import through that loader in the same run skipped all its tasks (`runTasks` logged the task
+count and then nothing). This affected every loader, not just BMC. A dismissed Apple Health
+source chooser left the flag set in the same way.
+
+**Fix 2:** New `MachineLoader::resetAbort()`, called at the start of `importCPAP()` and
+`importNonCPAPFiles()` before the Abort button is connected.
+
+---
+
 ## 2026-10-21 - Daily calendar: sleep-stage day background too glaring (#341)
 
 **Files:** `oscar/daily.cpp`, `oscar/Graphs/glcommon.h`

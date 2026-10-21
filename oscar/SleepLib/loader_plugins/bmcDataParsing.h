@@ -131,7 +131,13 @@ public:
     BmcUsrSession();
     BmcUsrSession(QDataStream*, bool inProgressSession);
 
-    static quint32 GetNextHistoricSessionOffset(QDataStream*);
+    /// The record's 'next session' pointer if it lies after @p pos and within @p usr, else 0.
+    static quint32 NextHistoricSessionOffset(const QByteArray& usr, qint64 pos);
+    /// True if @p pos holds a historic session header: 0xE1 and a decodable start date.
+    static bool IsHistoricSessionStart(const QByteArray& usr, qint64 pos);
+    /// Offset of the first session header at or after @p from that also has a valid
+    /// 'next session' pointer, or usr.size() if there is none.
+    static qint64 FindHistoricSession(const QByteArray& usr, qint64 from);
 
 protected:
     QList<MessageItem32> MessagesOffset45;

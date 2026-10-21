@@ -853,6 +853,7 @@ test {
         tests/prismaventtests.cpp \
         tests/respiratoryeventstests.cpp \
         tests/bmcsessionendstests.cpp \
+        tests/bmcusrsessionstests.cpp \
         tests/steadybreathingsettingstests.cpp
 
     HEADERS += \
@@ -877,6 +878,7 @@ test {
         tests/prismaventtests.h \
         tests/respiratoryeventstests.h \
         tests/bmcsessionendstests.h \
+        tests/bmcusrsessionstests.h \
         tests/steadybreathingsettingstests.h
 }
 

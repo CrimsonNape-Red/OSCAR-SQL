@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QDir>
 #include <QBuffer>
+#include <QtEndian>
 
 #include <QDebug>
 #include <algorithm>
@@ -39,24 +40,37 @@ BmcUsrSession::BmcUsrSession(QDataStream* strm, bool InProgressSession) : BmcUsr
 }
 
 
-quint32 BmcUsrSession::GetNextHistoricSessionOffset(QDataStream* strm)
+quint32 BmcUsrSession::NextHistoricSessionOffset(const QByteArray& usr, qint64 pos)
 {
-    const quint64 current = strm->device()->pos();
+    if (pos + 5 > usr.size())
+        return 0;
 
-    strm->skipRawData(1);          // skip 0xE1/0xE2
-    quint32 next;  *strm >> next;
-
-    // If next is invalid (0, 0xFFFFFFFF, or before the current position),
-    // use end-of-file as a sentinel so the caller reads to EOF.
-    const quint64 end   = strm->device()->size();
-    if (next == 0            ||
-        next == 0xFFFFFFFF   ||
-        next <= current      ||
-        next >  end)
-        next = static_cast<quint32>(end);
-
-    strm->device()->seek(current);
+    // 0, 0xFFFFFFFF, or anything before this record or past the end of the file is unset.
+    const quint32 next = qFromLittleEndian<quint32>(usr.constData() + pos + 1);
+    if (next <= pos || next > usr.size())
+        return 0;
     return next;
+}
+
+
+bool BmcUsrSession::IsHistoricSessionStart(const QByteArray& usr, qint64 pos)
+{
+    if (pos + 0x09 > usr.size() || static_cast<quint8>(usr.at(pos)) != 0xE1)
+        return false;
+    const quint16 encodedDate = qFromLittleEndian<quint16>(usr.constData() + pos + 0x07);
+    return BmcEncodedDate::DecodeDate(encodedDate).isValid();
+}
+
+
+qint64 BmcUsrSession::FindHistoricSession(const QByteArray& usr, qint64 from)
+{
+    // A stray 0xE1 inside session data would also need a valid date and a 'next' pointer
+    // that lands inside the rest of the file to be taken for a header.
+    for (qint64 pos = from; pos < usr.size(); pos++) {
+        if (IsHistoricSessionStart(usr, pos) && NextHistoricSessionOffset(usr, pos) != 0)
+            return pos;
+    }
+    return usr.size();
 }
 
 
@@ -817,23 +831,33 @@ void BmcData::ReadAllSessions()
 
     BmcUsrSession inProgressSession(&strmUSR, true);
 
-    const quint64 sessionsStart = 0x102340;
-    fileUSR.seek(sessionsStart);
-    //For each session, we determine the length of the session data, copy
-    // the data to memory and then parse it from memory to save on file seeking.
+    // The historic sessions are parsed from memory to save on file seeking.
+    fileUSR.seek(0);
+    const QByteArray usr = fileUSR.readAll();
+    fileUSR.close();
 
-    while (fileUSR.pos() < fileUSR.size())
+    // Each historic session record points to the next one.  Some machines leave a
+    // fragment without a header between records (GitLab #343), so the chain can point
+    // at something that is not a session; skip ahead to the next header and carry on
+    // rather than treating the rest of the file as one corrupt record.
+    const qint64 sessionsStart = 0x102340;
+    qint64 here = sessionsStart;
+    while (here < usr.size())
     {
-        quint64 here      = fileUSR.pos();
-        quint32 next      = BmcUsrSession::GetNextHistoricSessionOffset(&strmUSR);
-        quint64 sliceEnd  = qMin<quint64>(next, fileUSR.size());
+        if (!BmcUsrSession::IsHistoricSessionStart(usr, here)) {
+            const qint64 resume = BmcUsrSession::FindHistoricSession(usr, here + 1);
+            qDebug() << "Skipping" << (resume - here) << "bytes without a session header at offset" << here;
+            here = resume;
+            continue;
+        }
 
-        if (sliceEnd <= here)         // extra safety: nothing to read
-            break;
+        // A record with no valid 'next' pointer runs to the next header, or to the end
+        // of the file if it is the last one.
+        qint64 next = BmcUsrSession::NextHistoricSessionOffset(usr, here);
+        if (next == 0)
+            next = BmcUsrSession::FindHistoricSession(usr, here + 1);
 
-        const quint32 len = static_cast<quint32>(sliceEnd - here);
-        QByteArray raw   = fileUSR.read(len);
-
+        QByteArray raw = usr.mid(here, next - here);
         QBuffer  buf(&raw);  buf.open(QIODevice::ReadOnly);
         QDataStream strm(&buf);  strm.setByteOrder(QDataStream::LittleEndian);
 
@@ -843,12 +867,10 @@ void BmcData::ReadAllSessions()
         } catch (...) {
             qDebug() << "Corrupt session record at offset" << here;
         }
+        here = next;
     }
 
     this->AllUsrSessions.append(inProgressSession);
-
-    fileUSR.close();
-
 }
 
 void BmcData::BuildWaveformCrumbs()

@@ -107,6 +107,9 @@ class MachineLoader: public QObject
 
     inline bool isAborted() { return m_abort; }
     inline void abort() { m_abort = true; }
+    //! \brief Clear an earlier abort.  Loaders are long-lived singletons, so this must be
+    //! called before each import or one Abort click would cancel every later one.
+    inline void resetAbort() { m_abort = false; }
 
     QMutex sessionMutex;
     QMutex saveMutex;
