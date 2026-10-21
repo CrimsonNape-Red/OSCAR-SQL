@@ -1760,7 +1760,7 @@ Disabled Sessions are used for graphing and Statistics.</string>
               <item>
                <widget class="QGroupBox" name="oximetryGroupBox">
                 <property name="title">
-                 <string>Oximetry Settings - Not Currently Functional</string>
+                 <string>Oximetry Settings</string>
                 </property>
                 <property name="checkable">
                  <bool>false</bool>
@@ -1783,67 +1783,77 @@ Disabled Sessions are used for graphing and Statistics.</string>
                  </property>
                  <item row="0" column="0" colspan="2">
                   <widget class="QGroupBox" name="experimental_group">
-                   <property name="title">
-                    <string>Experimental Options</string>
-                   </property>
-                   <layout class="QVBoxLayout" name="verticalLayout">
-                    <item>
-                     <layout class="QHBoxLayout" name="horizontalLayout_6">
-                      <item>
-                       <widget class="QLabel" name="label_47">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Baseline SpO&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                        </property>
-                       </widget>
+                    <property name="title">
+                      <string>SpO2 Drop Baseline</string>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_spo2Baseline">
+                      <item row="0" column="0">
+                        <widget class="QLabel" name="label_47">
+                          <property name="text">
+                            <string>Method</string>
+                          </property>
+                          <property name="alignment">
+                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                          </property>
+                        </widget>
                       </item>
-                      <item>
-                       <spacer name="horizontalSpacer_4">
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>40</width>
-                          <height>20</height>
-                         </size>
-                        </property>
-                       </spacer>
+                      <item row="0" column="1">
+                        <widget class="QComboBox" name="spo2BaselineMethod">
+                          <property name="toolTip">
+                            <string>The SpO2 level that drops are measured from.
+Rolling: the average of the readings just before, so the baseline follows slow changes through the night (recommended).
+Whole night / First hour: one value for the session, from its higher readings.
+Manual: the fixed value set below.</string>
+                          </property>
+                        </widget>
                       </item>
-                      <item>
-                       <widget class="QComboBox" name="baseSpO2Option">
-                        <property name="toolTip">
-                         <string>By default, OSCAR uses a calculation from the first hour of oximetry data as baseline.
-This setting allows you to override that with a static value.
-This may be useful when the first hour is not typical of the whole dataset.
-It may also be useful to provide easier comparison between days.</string>
-                        </property>
-                        <property name="currentText">
-                         <string/>
-                        </property>
-                       </widget>
+                      <item row="1" column="0">
+                        <widget class="QLabel" name="label_spo2BaselineWindow">
+                          <property name="text">
+                            <string>Rolling window</string>
+                          </property>
+                          <property name="alignment">
+                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                          </property>
+                        </widget>
                       </item>
-                      <item>
-                       <spacer name="horizontalSpacer_8">
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>40</width>
-                          <height>20</height>
-                         </size>
-                        </property>
-                       </spacer>
+                      <item row="1" column="1">
+                        <widget class="QSpinBox" name="spo2BaselineWindow">
+                          <property name="toolTip">
+                            <string>How far back the rolling baseline looks. Readings already part of a drop are left out.</string>
+                          </property>
+                          <property name="suffix">
+                            <string>s</string>
+                          </property>
+                          <property name="minimum">
+                            <number>30</number>
+                          </property>
+                          <property name="maximum">
+                            <number>600</number>
+                          </property>
+                          <property name="singleStep">
+                            <number>30</number>
+                          </property>
+                        </widget>
                       </item>
-                     </layout>
-                    </item>
-                   </layout>
+                      <item row="2" column="0">
+                        <widget class="QLabel" name="label_baseSpO2Option">
+                          <property name="text">
+                            <string>Manual baseline</string>
+                          </property>
+                          <property name="alignment">
+                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                          </property>
+                        </widget>
+                      </item>
+                      <item row="2" column="1">
+                        <widget class="QComboBox" name="baseSpO2Option">
+                          <property name="toolTip">
+                            <string>The fixed baseline used by the Manual method. This may be useful when the automatic baselines are not typical of your data, or to compare days more easily.</string>
+                          </property>
+                        </widget>
+                      </item>
+                    </layout>
                   </widget>
                  </item>
                  <item row="2" column="0" colspan="2">
@@ -1860,6 +1870,9 @@ It may also be useful to provide easier comparison between days.</string>
                    <layout class="QGridLayout" name="gridLayout_13">
                     <item row="0" column="1">
                      <widget class="QSpinBox" name="oxiDesaturationThreshold">
+                      <property name="toolTip">
+                       <string>Where the SpO2 Lower Threshold line is drawn on the SpO2 graph. Turn the line on from the graph's right-click menu, under Dotted Lines.</string>
+                      </property>
                       <property name="suffix">
                        <string notr="true">%</string>
                       </property>
@@ -1867,6 +1880,9 @@ It may also be useful to provide easier comparison between days.</string>
                     </item>
                     <item row="2" column="1">
                      <widget class="QSpinBox" name="flagPulseBelow">
+                      <property name="toolTip">
+                       <string>Where the Pulse Lower Threshold line is drawn on the Pulse graph. Turn the line on from the graph's right-click menu, under Dotted Lines.</string>
+                      </property>
                       <property name="suffix">
                        <string> bpm</string>
                       </property>
@@ -1875,7 +1891,7 @@ It may also be useful to provide easier comparison between days.</string>
                     <item row="3" column="1">
                      <widget class="QSpinBox" name="oxiDiscardThreshold">
                       <property name="toolTip">
-                       <string>Small chunks of oximetry data under this amount will be discarded.</string>
+                       <string>When running Data → Automatic Oximetry Cleanup, segments of oximetry data shorter than this are discarded.</string>
                       </property>
                       <property name="suffix">
                        <string>s</string>
@@ -1897,6 +1913,9 @@ It may also be useful to provide easier comparison between days.</string>
                     </item>
                     <item row="1" column="1">
                      <widget class="QSpinBox" name="flagPulseAbove">
+                      <property name="toolTip">
+                       <string>Where the Pulse Upper Threshold line is drawn on the Pulse graph. Turn the line on from the graph's right-click menu, under Dotted Lines.</string>
+                      </property>
                       <property name="suffix">
                        <string> bpm</string>
                       </property>
@@ -1908,7 +1927,7 @@ It may also be useful to provide easier comparison between days.</string>
                     <item row="0" column="0">
                      <widget class="QLabel" name="label_52">
                       <property name="text">
-                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Flag SpO&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt; Desaturations Below&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SpO&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt; Lower Threshold&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1918,7 +1937,7 @@ It may also be useful to provide easier comparison between days.</string>
                     <item row="2" column="0">
                      <widget class="QLabel" name="label_54">
                       <property name="text">
-                       <string>Flag Pulse Rate Below</string>
+                       <string>Pulse Lower Threshold</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1928,7 +1947,7 @@ It may also be useful to provide easier comparison between days.</string>
                     <item row="1" column="0">
                      <widget class="QLabel" name="label_53">
                       <property name="text">
-                       <string>Flag Pulse Rate Above</string>
+                       <string>Pulse Upper Threshold</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1992,7 +2011,7 @@ It may also be useful to provide easier comparison between days.</string>
                     <item row="3" column="2">
                      <widget class="QDoubleSpinBox" name="pulseChangeDuration">
                       <property name="toolTip">
-                       <string>Minimum duration of pulse change event.</string>
+                       <string>Time window within which the pulse rate must change by at least the amount set</string>
                       </property>
                       <property name="suffix">
                        <string>s</string>

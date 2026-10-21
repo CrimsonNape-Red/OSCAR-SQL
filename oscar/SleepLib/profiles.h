@@ -118,6 +118,13 @@ class Profile : public Preferences
     //! \return true once the repair is committed; false to retry on the next load
     bool repairBmcSessionEnds(qint64 profileId, ProgressDialog *progress);
 
+    //! \brief Recalculate the SpO2 drop and pulse change flags of every session with oximetry,
+    //!        using the current oximetry settings. A recording cut at the day split time is
+    //!        recalculated whole. Sessions whose events can't be loaded are left as they are.
+    //! \param mt  only sessions of this device type, or MT_UNKNOWN for all
+    //! \return false if the results couldn't be saved; nothing is changed then
+    bool recalculateOximetryEvents(ProgressDialog *progress, MachineType mt = MT_UNKNOWN);
+
     //! \brief Barf because data format has changed. This does a purge of CPAP data for machine *m
     void DataFormatError(Machine *m);
 
@@ -431,6 +438,7 @@ const QString STR_IS_SplitNonCPAPSessions = "SplitNonCPAPSessions";
 // One-time data repairs (set once the repair has completed for the profile)
 const QString STR_PREF_RespiratoryEventsRepaired = "RespiratoryEventsRepaired";  ///< #335
 const QString STR_PREF_BmcSessionEndsRepaired = "BmcSessionEndsRepaired";  ///< #342
+const QString STR_PREF_SpO2BaselineMigrated = "SpO2BaselineMigrated";  ///< switched to the rolling baseline
 #if defined(STEADY_BREATHING)
 const QString STR_PREF_SteadyBreathingPerProfile = "SteadyBreathingPerProfile";  ///< moved from app-wide settings
 #endif
@@ -465,6 +473,19 @@ const int STAT_MODE_RANGE = 2;
 
 //added by Sheila 1/5/2026
 const QString STR_OS_baseSpO2Option = "baseSpO2Option";
+const QString STR_OS_SpO2BaselineMethod = "SpO2BaselineMethod";
+const QString STR_OS_SpO2BaselineWindow = "SpO2BaselineWindow";
+const QString STR_OS_SpO2ManualBaseline = "SpO2ManualBaseline";
+
+/*! \enum SpO2BaselineMethod
+    \brief How calcSPO2Drop() finds the baseline that SpO2 drops are measured from
+    */
+enum SpO2BaselineMethod {
+    SBM_Rolling = 0,    //!< Mean of the readings before each sample, excluding earlier drops
+    SBM_WholeNight = 1, //!< 90th percentile of the whole recording
+    SBM_FirstHour = 2,  //!< 90th percentile of the first hour
+    SBM_Manual = 3      //!< The fixed value in SpO2ManualBaseline
+};
 
 class DoctorInfo : public PrefSettings
 {
@@ -580,6 +601,9 @@ class OxiSettings : public PrefSettings
 
         //added by Sheila 1/5/2026
         initPref(STR_OS_baseSpO2Option, 0);
+        initPref(STR_OS_SpO2BaselineMethod, defaultValue_OS_SpO2BaselineMethod);
+        initPref(STR_OS_SpO2BaselineWindow, defaultValue_OS_SpO2BaselineWindow);
+        initPref(STR_OS_SpO2ManualBaseline, defaultValue_OS_SpO2ManualBaseline);
 
     }
 
@@ -592,6 +616,10 @@ class OxiSettings : public PrefSettings
     const double defaultValue_OS_oxiDesaturationThreshold = 88.0;
     const double defaultValue_OS_flagPulseAbove = 99.0;
     const double defaultValue_OS_flagPulseBelow = 40.0;
+
+    const int defaultValue_OS_SpO2BaselineMethod = SBM_Rolling;
+    const int defaultValue_OS_SpO2BaselineWindow = 120;     // seconds
+    const int defaultValue_OS_SpO2ManualBaseline = 95;      // %
 
 
     bool oximetryEnabled() const { return getPref(STR_OS_EnableOximetry).toBool(); }
@@ -628,8 +656,21 @@ class OxiSettings : public PrefSettings
     void setFlagPulseAbove(double value) { setPref(STR_OS_flagPulseAbove, value); }
     void setFlagPulseBelow(double value) { setPref(STR_OS_flagPulseBelow, value); }
     //added by Sheila
+    //! \brief The fixed baseline from before the baseline methods: 85-99, or 0 or -1 when the
+    //!        first hour was used. Only read to carry it over to SpO2ManualBaseline.
     int baseSpO2Option() const { return getPref(STR_OS_baseSpO2Option).toInt(); }
     void setBaseSpO2Option(int val) { setPref(STR_OS_baseSpO2Option, val); }
+
+    SpO2BaselineMethod spO2BaselineMethod() const {
+        return (SpO2BaselineMethod)getPref(STR_OS_SpO2BaselineMethod).toInt();
+    }
+    void setSpO2BaselineMethod(SpO2BaselineMethod method) { setPref(STR_OS_SpO2BaselineMethod, (int)method); }
+    //! \brief Length in seconds of the rolling baseline window
+    int spO2BaselineWindow() const { return getPref(STR_OS_SpO2BaselineWindow).toInt(); }
+    void setSpO2BaselineWindow(int seconds) { setPref(STR_OS_SpO2BaselineWindow, seconds); }
+    //! \brief The baseline used by the Manual method, in %
+    int spO2ManualBaseline() const { return getPref(STR_OS_SpO2ManualBaseline).toInt(); }
+    void setSpO2ManualBaseline(int percent) { setPref(STR_OS_SpO2ManualBaseline, percent); }
 };
 
 /*! \class CPAPSettings

@@ -46,6 +46,7 @@
 #include "../database/user_info_repository.h"
 #include "../database/doctor_info_repository.h"
 #include "../database/preferences_repository.h"
+#include "calcs.h"
 #include "../database/channel_repository.h"
 #include "../database/channel_options_repository.h"
 #include "../database/daily_summary_repository.h"
@@ -1141,6 +1142,19 @@ void Profile::LoadMachineData(ProgressDialog *progress)
         if (!(*this)[STR_PREF_BmcSessionEndsRepaired].toBool()
                 && repairBmcSessionEnds(profileData.id, progress)) {
             Set(STR_PREF_BmcSessionEndsRepaired, true);
+        }
+
+        // One-time switch to the rolling SpO2 baseline. A profile with a fixed baseline set keeps
+        // it; the stored flags are recalculated either way, as earlier ones lack the drop depth.
+        if (!(*this)[STR_PREF_SpO2BaselineMigrated].toBool()) {
+            const int manual = oxi->baseSpO2Option();
+            if ((manual >= 85) && (manual <= 99)) {
+                oxi->setSpO2BaselineMethod(SBM_Manual);
+                oxi->setSpO2ManualBaseline(manual);
+            }
+            if (recalculateOximetryEvents(progress)) {
+                Set(STR_PREF_SpO2BaselineMigrated, true);
+            }
         }
     } else {
         qWarning() << "Profile::LoadMachineData() - Cannot check daily summaries, profile not in database";
@@ -3383,6 +3397,131 @@ bool Profile::repairBmcSessionEnds(qint64 profileId, ProgressDialog *progress)
     qDebug() << "Profile::repairBmcSessionEnds() - trimmed" << repaired << "sessions,"
              << failed << "failed," << notLoaded << "candidates not loaded";
     return allSaved;
+}
+
+bool Profile::recalculateOximetryEvents(ProgressDialog *progress, MachineType mt)
+{
+    // A session's summary lists its channels, so this needs no event data loaded.
+    QList<Session *> sessions;
+    QSet<Session *> seen;
+    QHash<Session *, Day *> dayOf;
+    for (Day *day : std::as_const(daylist)) {
+        if (!day) continue;
+        for (Session *sess : day->sessions) {
+            if (!sess || seen.contains(sess)) continue;
+            if ((mt != MT_UNKNOWN) && (sess->type() != mt)) continue;
+            if (sess->m_availableChannels.contains(OXI_SPO2) || sess->m_availableChannels.contains(OXI_Pulse)) {
+                seen.insert(sess);
+                sessions.append(sess);
+                dayOf.insert(sess, day);
+            }
+        }
+    }
+    if (sessions.isEmpty()) return true;
+
+    // Put the pieces of a recording cut at the day split time back together: SessionSplit
+    // starts each piece exactly where the one before it ends. Only non-CPAP sessions are cut.
+    std::sort(sessions.begin(), sessions.end(), [](Session *a, Session *b) {
+        if (a->machine() != b->machine()) return a->machine() < b->machine();
+        return a->realFirst() < b->realFirst();
+    });
+    QList<QList<Session *>> recordings;
+    for (Session *sess : sessions) {
+        if (!recordings.isEmpty()) {
+            Session *prev = recordings.last().last();
+            if ((prev->machine() == sess->machine()) && (sess->type() != MT_CPAP)
+                    && (sess->realFirst() == prev->realLast())) {
+                recordings.last().append(sess);
+                continue;
+            }
+        }
+        recordings.append(QList<Session *>{ sess });
+    }
+
+    qDebug() << "Profile::recalculateOximetryEvents() - recalculating" << sessions.size()
+             << "sessions in" << recordings.size() << "recordings";
+
+    if (progress) {
+        progress->setMessage(QObject::tr("Recalculating Oximetry Events"));
+        progress->setProgressMax(recordings.size());
+        progress->setProgressValue(0);
+    }
+
+    DatabaseManager &dbm = DatabaseManager::instance();
+    bool ownTransaction = !dbm.inTransaction() && dbm.transaction();
+
+    QList<Session *> changed;
+    QSet<Session *> wasOpen;
+    int notLoaded = 0, failed = 0, done = 0;
+    for (const QList<Session *> &recording : std::as_const(recordings)) {
+        // Like the BMC repair, a recording whose events can't be loaded is left alone and not
+        // retried, so one unreadable session can't make every load repeat this.
+        bool loaded = true;
+        for (Session *sess : recording) {
+            if (sess->eventsLoaded()) wasOpen.insert(sess);
+            if (!sess->OpenEvents()) loaded = false;
+        }
+
+        if (!loaded) {
+            notLoaded += recording.size();
+        } else {
+            for (Session *sess : recording) {
+                clearOximetryEvents(sess);
+            }
+            calcSPO2Drop(recording);
+            calcPulseChange(recording);
+            for (Session *sess : recording) {
+                sess->UpdateSummaries();
+                sess->SetChanged(true);
+                changed.append(sess);
+                if (!sess->Store(sess->machine()->getDataPath())) {
+                    failed++;
+                }
+            }
+        }
+        for (Session *sess : recording) {
+            if (!wasOpen.contains(sess)) sess->TrashEvents();
+        }
+
+        if (progress) {
+            progress->setProgressValue(++done);
+            QApplication::processEvents();
+        }
+    }
+
+    bool saved = (failed == 0);
+    if (ownTransaction) {
+        if (saved) {
+            saved = dbm.commit();
+            if (!saved) qWarning() << "Profile::recalculateOximetryEvents() - commit failed";
+        } else {
+            dbm.rollback();
+            qWarning() << "Profile::recalculateOximetryEvents() -" << failed
+                       << "sessions failed to save; rolled back";
+        }
+
+        // Nothing was saved, so put the changed sessions back as the database has them.
+        if (!saved) {
+            for (Session *sess : changed) {
+                sess->TrashEvents();
+                sess->LoadFromDatabase();
+                if (wasOpen.contains(sess)) sess->OpenEvents();
+            }
+        }
+    }
+
+    // Days cache their per-channel totals
+    QSet<Day *> days;
+    for (Session *sess : changed) {
+        days.insert(dayOf.value(sess));
+    }
+    for (Day *day : days) {
+        if (day) day->invalidate();
+    }
+
+    qDebug() << "Profile::recalculateOximetryEvents() -" << (saved ? "saved" : "not saved") << ","
+             << notLoaded << "sessions not loaded";
+    return saved;
 }
 
 // Database integration: Save extended profile data

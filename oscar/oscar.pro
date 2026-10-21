@@ -854,7 +854,9 @@ test {
         tests/respiratoryeventstests.cpp \
         tests/bmcsessionendstests.cpp \
         tests/bmcusrsessionstests.cpp \
-        tests/steadybreathingsettingstests.cpp
+        tests/steadybreathingsettingstests.cpp \
+        tests/oximetryeventstests.cpp \
+        tests/oximetryrecalctests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -879,7 +881,9 @@ test {
         tests/respiratoryeventstests.h \
         tests/bmcsessionendstests.h \
         tests/bmcusrsessionstests.h \
-        tests/steadybreathingsettingstests.h
+        tests/steadybreathingsettingstests.h \
+        tests/oximetryeventstests.h \
+        tests/oximetryrecalctests.h
 }
 
 macx {
