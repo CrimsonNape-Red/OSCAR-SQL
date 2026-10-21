@@ -41,6 +41,7 @@ const QColor COLOR_DarkYellow = Qt::darkYellow;
 const QColor COLOR_Orange = QColor("orange");
 const QColor COLOR_Green = Qt::green;
 const QColor COLOR_Brown = QColor("brown");
+const QColor COLOR_BlanchedAlmond = QColor("blanchedalmond");
 
 const QColor COLOR_Text = Qt::black;
 const QColor COLOR_Outline = Qt::black;

@@ -4,6 +4,24 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-21 - Daily calendar: sleep-stage day background too glaring (#341)
+
+**Files:** `oscar/daily.cpp`, `oscar/Graphs/glcommon.h`
+
+**Symptom:** Days with sleep stage data (e.g. SomnoTrace/ZEO imports) had a bright cyan
+background in the Daily calendar that users found hard on the eyes.
+
+**Root cause:** `Daily::UpdateCalendarDay()` used `COLOR_Cyan` (`Qt::cyan`, `#00FFFF`), a
+fully saturated colour. Red CPAP + oximetry dates on it are a complementary pair and shimmer.
+
+**Fix:** The background is now `COLOR_BlanchedAlmond` (`#FFEBCD`), a pale warm tint chosen
+from side-by-side mockups. It stands out from white days slightly less than cyan (contrast
+1.17 vs 1.25) and keeps better contrast with the blue, red and dark-green date text. The
+calendar stylesheet in `daily.ui` pins white cells and black text, so the tint stays
+readable under a dark OS theme.
+
+---
+
 ## 2026-10-20 - BMC legacy: last session of a multi-session night stretched by hours (#342)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmcDataParsing.cpp`, `oscar/SleepLib/profiles.cpp`,

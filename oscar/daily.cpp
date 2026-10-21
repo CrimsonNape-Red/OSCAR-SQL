@@ -1026,7 +1026,7 @@ void Daily::UpdateCalendarDay(QDate date)
     }
 
     if (hasstage) {
-        charAttr.setBackground(QBrush(COLOR_Cyan, Qt::SolidPattern)); // has staging
+        charAttr.setBackground(QBrush(COLOR_BlanchedAlmond, Qt::SolidPattern)); // has staging (pale, low-glare tint; #341)
     }
 
     if (haspos) {
