@@ -791,7 +791,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
     <message>
         <location filename="../oscar/daily.cpp" line="1470"/>
         <source>Recorded by %1 %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">기록 장치: %1 %2</translation>
     </message>
     <message>
         <location filename="../oscar/daily.cpp" line="1482"/>
@@ -4037,42 +4037,42 @@ Are you sure?</source>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2718"/>
         <source>OSCAR does not recognize the backup data for the following device:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR가 다음 장치의 백업 데이터를 인식하지 못합니다:</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2720"/>
         <source>Rebuilding will delete all of this device&apos;s data, and OSCAR may not be able to restore it from the backup. You would then have to import it again from the SD card or your own backups.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">재구성하면 이 장치의 모든 데이터가 삭제되며, OSCAR가 백업에서 복원하지 못할 수도 있습니다. 그런 경우 SD 카드나 직접 만든 백업에서 다시 불러와야 합니다.</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2814"/>
         <source>ResMed Oximetry Data</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ResMed 산소측정 데이터</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2815"/>
         <source>OSCAR now shows the times your ResMed device recorded no SpO2 or pulse reading, such as with the finger out of the sensor, as gaps. Data imported by earlier versions filled those times with the last reading, which can show long SpO2 drops that did not happen.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">이제 OSCAR는 손가락이 센서에서 빠져 있었을 때처럼 ResMed 장치가 SpO2나 맥박 값을 기록하지 않은 시간을 빈 구간으로 표시합니다. 이전 버전으로 불러온 데이터는 그 시간을 마지막 측정값으로 채웠기 때문에, 실제로 일어나지 않은 긴 SpO2 저하가 표시될 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2818"/>
         <source>To correct it, rebuild the data of these devices from OSCAR&apos;s backup, or purge it and import it again from the SD card:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">이를 바로잡으려면 이 장치들의 데이터를 OSCAR 백업에서 재구성하거나, 데이터를 지운 뒤 SD 카드에서 다시 불러오십시오:</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2821"/>
         <source>Rebuild Now</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">지금 재구성</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2822"/>
         <source>Remind Me Later</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">나중에 알림</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2823"/>
         <source>Don&apos;t Remind Me</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">다시 알리지 않음</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2985"/>
@@ -4238,22 +4238,22 @@ Open databases with File ▸ Database ▸ Open first to add them to the recent l
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3831"/>
         <source>Importing %1 data</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 데이터 불러오는 중</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3944"/>
         <source>Importing data</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">데이터 불러오는 중</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3945"/>
         <source>Importing data, as requested on the command line...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">명령줄 요청에 따라 데이터 불러오는 중...</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3958"/>
         <source>Importing %1 data, as requested on the command line...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">명령줄 요청에 따라 %1 데이터 불러오는 중...</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="4289"/>
@@ -4343,17 +4343,17 @@ The original database is unchanged.</source>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="4775"/>
         <source>The compressed database could not be put in place, and OSCAR could not put the original database back.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">압축된 데이터베이스를 제자리에 놓을 수 없었고, OSCAR가 원래 데이터베이스를 되돌리지 못했습니다.</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="4777"/>
         <source>Your data is safe in this file:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">데이터는 다음 파일에 안전하게 보관되어 있습니다:</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="4778"/>
         <source>OSCAR will now close. Before starting OSCAR again, rename that file to oscar.db.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">이제 OSCAR가 종료됩니다. OSCAR를 다시 시작하기 전에 해당 파일의 이름을 oscar.db로 바꾸십시오.</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="4786"/>
@@ -6169,22 +6169,22 @@ Index</source>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="412"/>
         <source>Oximetry, Sleep Stage and Position Data</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">산소측정, 수면 단계 및 자세 데이터</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="433"/>
         <source>&lt;p&gt;Cut oximetry, sleep stage and position recordings at the day split time, so that the part recorded after it appears on the next day.&lt;/p&gt;&lt;p&gt;Use this with CPAP devices that end their sessions at the day split time, such as ResMed devices, which split at noon. Then the oximetry and CPAP graphs for a day cover the same hours. With other CPAP devices, a session that runs past the split time stays whole, so leave this off.&lt;/p&gt;&lt;p&gt;Applies to data imported after the option is turned on. Data already imported is not changed; to split it, delete those sessions and import the files again.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&lt;p&gt;산소측정, 수면 단계 및 자세 기록을 일 분할 시간에서 잘라, 그 이후에 기록된 부분이 다음 날에 표시되도록 합니다.&lt;/p&gt;&lt;p&gt;정오에 분할하는 ResMed 장치처럼 일 분할 시간에 세션을 끝내는 CPAP 장치에서 사용하십시오. 그러면 하루의 산소측정 그래프와 CPAP 그래프가 같은 시간대를 다룹니다. 다른 CPAP 장치에서는 분할 시간을 넘기는 세션이 하나로 유지되므로 이 옵션을 꺼 두십시오.&lt;/p&gt;&lt;p&gt;옵션을 켠 뒤에 불러온 데이터에 적용됩니다. 이미 불러온 데이터는 바뀌지 않습니다. 나누려면 해당 세션을 삭제하고 파일을 다시 불러오십시오.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="436"/>
         <source>Split recordings at the day split time</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">일 분할 시간에서 기록 나누기</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="443"/>
         <source>For CPAP devices that end their sessions at the day split time (ResMed splits at noon), so both kinds of data appear on the same day. Applies only to data imported after it is turned on.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">일 분할 시간에 세션을 끝내는 CPAP 장치용이며(ResMed는 정오에 분할), 두 종류의 데이터가 같은 날에 표시되게 합니다. 켠 뒤에 불러온 데이터에만 적용됩니다.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="462"/>
@@ -6650,17 +6650,17 @@ Mainly affects the importer.</source>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1763"/>
         <source>Oximetry Settings</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">산소측정 설정</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1787"/>
         <source>SpO2 Drop Baseline</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">SpO2 저하 기준선</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1793"/>
         <source>Method</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">방법</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1803"/>
@@ -6668,84 +6668,89 @@ Mainly affects the importer.</source>
 Rolling: the average of the readings just before, so the baseline follows slow changes through the night (recommended).
 Whole night / First hour: one value for the session, from the percentile set below.
 Manual: the fixed value set below.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">저하를 측정하는 기준 SpO2 수준입니다.
+이동 평균: 바로 앞 측정값들의 평균으로, 기준선이 밤 동안의 느린 변화를 따라갑니다(권장).
+밤 전체 / 첫 1시간: 아래에서 설정한 백분위수로 구한 세션당 하나의 값.
+수동: 아래에서 설정한 고정 값.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1813"/>
         <source>Rolling window</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">이동 구간</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1823"/>
         <source>How far back the rolling baseline looks. Readings already part of a drop are left out.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">이동 기준선이 얼마나 과거까지 보는지입니다. 이미 저하에 포함된 측정값은 제외됩니다.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1842"/>
         <source>Baseline percentile</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">기준선 백분위수</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1852"/>
         <source>For the Whole night and First hour methods: the baseline is the SpO2 level the readings are at or below for this share of the time.
 The 50th percentile (the median) suits most nights.
 Higher percentiles cope better with nights spent mostly desaturated, but on steady nights they count normal variation as drops.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">밤 전체 및 첫 1시간 방법의 경우: 기준선은 이 비율의 시간 동안 측정값이 그 값 이하에 있는 SpO2 수준입니다.
+50번째 백분위수(중앙값)는 대부분의 밤에 적합합니다.
+더 높은 백분위수는 대부분을 산소포화도 저하 상태로 보낸 밤에 더 잘 맞지만, 안정적인 밤에는 정상적인 변동을 저하로 셉니다.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1857"/>
         <source>th</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">번째</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1873"/>
         <source>Manual baseline</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">수동 기준선</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1883"/>
         <source>The fixed baseline used by the Manual method. This may be useful when the automatic baselines are not typical of your data, or to compare days more easily.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">수동 방법에서 사용하는 고정 기준선입니다. 자동 기준선이 데이터에 맞지 않을 때나 날짜를 더 쉽게 비교하려 할 때 유용할 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1905"/>
         <source>Where the SpO2 Lower Threshold line is drawn on the SpO2 graph. Turn the line on from the graph&apos;s right-click menu, under Dotted Lines.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">SpO2 그래프에서 SpO2 하한 임계값 선이 그려지는 위치입니다. 그래프의 오른쪽 클릭 메뉴에서 점선 아래에 있는 항목으로 선을 켜십시오.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1915"/>
         <source>Where the Pulse Lower Threshold line is drawn on the Pulse graph. Turn the line on from the graph&apos;s right-click menu, under Dotted Lines.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">맥박 그래프에서 맥박 하한 임계값 선이 그려지는 위치입니다. 그래프의 오른쪽 클릭 메뉴에서 점선 아래에 있는 항목으로 선을 켜십시오.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1925"/>
         <source>When running Data → Automatic Oximetry Cleanup, segments of oximetry data shorter than this are discarded.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">데이터 → 자동 산소 측정 데이터 정리를 실행하면 이보다 짧은 산소측정 데이터 구간은 버려집니다.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1948"/>
         <source>Where the Pulse Upper Threshold line is drawn on the Pulse graph. Turn the line on from the graph&apos;s right-click menu, under Dotted Lines.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">맥박 그래프에서 맥박 상한 임계값 선이 그려지는 위치입니다. 그래프의 오른쪽 클릭 메뉴에서 점선 아래에 있는 항목으로 선을 켜십시오.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1961"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SpO&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt; Lower Threshold&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SpO&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt; 하한 임계값&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1971"/>
         <source>Pulse Lower Threshold</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">맥박 하한 임계값</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1981"/>
         <source>Pulse Upper Threshold</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">맥박 상한 임계값</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="2045"/>
         <source>Time window within which the pulse rate must change by at least the amount set</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">맥박수가 최소한 설정한 양만큼 변해야 하는 시간 범위</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="2151"/>
@@ -7663,17 +7668,17 @@ Try it and see if you like it.</source>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="405"/>
         <source>Rolling (recommended)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">이동 평균 (권장)</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="406"/>
         <source>Whole night</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">밤 전체</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="407"/>
         <source>First hour</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">첫 1시간</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="408"/>
@@ -7896,14 +7901,18 @@ Would you like do this now?</source>
         <source>A data re/decompression procedure is required to apply these changes. This operation may take a couple of minutes to complete.
 
 Are you sure you want to make these changes?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">이 변경 사항을 적용하려면 데이터 재압축/압축 해제가 필요합니다. 이 작업은 몇 분 정도 걸릴 수 있습니다.
+
+이 변경 사항을 적용하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="890"/>
         <source>A data reindexing procedure is required to apply these changes. This operation may take a couple of minutes to complete.
 
 Are you sure you want to make these changes?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">이 변경 사항을 적용하려면 데이터 재색인이 필요합니다. 이 작업은 몇 분 정도 걸릴 수 있습니다.
+
+이 변경 사항을 적용하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="1292"/>
@@ -11137,17 +11146,17 @@ TTIA: %1</source>
     <message>
         <location filename="../oscar/SleepLib/profiles.cpp" line="3166"/>
         <source>Repairing Respiratory Event Records</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">호흡 이벤트 기록 복구 중</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/profiles.cpp" line="3325"/>
         <source>Repairing BMC Session Times</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">BMC 세션 시간 복구 중</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/profiles.cpp" line="3445"/>
         <source>Recalculating Oximetry Events</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">산소측정 이벤트 다시 계산 중</translation>
     </message>
     <message>
         <source>OSCAR will now exit, then (attempt to) launch your computers file manager so you can manually back your profile up:</source>
@@ -12592,42 +12601,42 @@ Cleaning up, please wait...</source>
     <message>
         <location filename="../oscar/main.cpp" line="1096"/>
         <source>OSCAR is set up to run as a portable application, but cannot write to its settings folder:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR가 포터블 애플리케이션으로 실행되도록 설정되어 있지만 설정 폴더에 쓸 수 없습니다:</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1098"/>
         <source>Copy the OSCAR folder to a location you can write to, such as a USB drive, or remove %1 from it to run OSCAR normally.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR 폴더를 USB 드라이브처럼 쓰기 가능한 위치로 복사하거나, 폴더에서 %1을(를) 제거하여 OSCAR를 일반적으로 실행하십시오.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1117"/>
         <source>OSCAR Portable</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR Portable</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1118"/>
         <source>The &quot;%1&quot; folder is inside a folder named after the download:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&quot;%1&quot; 폴더가 다운로드 이름으로 된 폴더 안에 있습니다:</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1120"/>
         <source>OSCAR keeps your data and settings in a &quot;%1&quot; folder next to &quot;%2&quot;, so they would be kept in that folder too, and a newer version of OSCAR Portable extracted the same way would not find them.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR는 데이터와 설정을 &quot;%2&quot; 옆의 &quot;%1&quot; 폴더에 보관하므로 이들도 그 폴더 안에 보관되며, 같은 방식으로 압축을 푼 새 버전의 OSCAR Portable은 이를 찾지 못합니다.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1123"/>
         <source>We recommend that you quit, move the &quot;%1&quot; folder to %2, and start OSCAR from there.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">종료한 뒤 &quot;%1&quot; 폴더를 %2(으)로 옮기고 그곳에서 OSCAR를 시작하는 것을 권장합니다.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1125"/>
         <source>Quit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">종료</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1126"/>
         <source>Continue Here</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">여기서 계속</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1197"/>
@@ -12647,7 +12656,7 @@ Cleaning up, please wait...</source>
     <message>
         <location filename="../oscar/main.cpp" line="1276"/>
         <source>OSCAR will exit without changing your data folder.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR가 데이터 폴더를 변경하지 않고 종료됩니다.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1301"/>
@@ -12707,12 +12716,12 @@ Cleaning up, please wait...</source>
     <message>
         <location filename="../oscar/main.cpp" line="1334"/>
         <source>Portable mode:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">포터블 모드:</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1335"/>
         <source>settings in %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">설정 위치: %1</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1336"/>
@@ -13874,7 +13883,7 @@ popout window, delete it, then pop out this graph again.</source>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="1239"/>
         <source>Backing up EDF Files...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">EDF 파일 백업 중...</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="1427"/>
@@ -14677,37 +14686,37 @@ Dreem 데이터는 세미콜론으로 구분된 CSV 파일 형식이어야 합�
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="247"/>
         <source>OSCAR&apos;s data folder is still there, but the database file it contains (oscar.db) is missing:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR 데이터 폴더는 그대로 있지만 그 안의 데이터베이스 파일(oscar.db)이 없습니다:</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="249"/>
         <source>The file may have been moved, renamed or deleted, or removed by a cloud synchronization or disk clean-up tool.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">파일이 이동, 이름 변경 또는 삭제되었거나, 클라우드 동기화 도구나 디스크 정리 도구에 의해 제거되었을 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="251"/>
         <source>If you have a backup copy of oscar.db (for example in Time Machine, File History, or your cloud service&apos;s deleted files), choose Exit, put the copy back in this folder, and start OSCAR again.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">oscar.db의 백업 사본이 있다면(예: Time Machine, 파일 히스토리 또는 클라우드 서비스의 삭제된 파일), 나가기를 선택하고 사본을 이 폴더에 다시 넣은 뒤 OSCAR를 다시 시작하십시오.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="253"/>
         <source>If your data folder is somewhere else, choose Find.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">데이터 폴더가 다른 곳에 있다면 찾기를 선택하십시오.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="254"/>
         <source>Choose Create only if you want to start again with an empty database; your CPAP data will then need to be imported again.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">빈 데이터베이스로 다시 시작하려는 경우에만 만들기를 선택하십시오. 그러면 CPAP 데이터를 다시 불러와야 합니다.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="256"/>
         <source>OSCAR Database Not Found</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR 데이터베이스를 찾을 수 없음</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="258"/>
         <source>Create new empty database</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">새 빈 데이터베이스 만들기</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="271"/>
@@ -14752,194 +14761,194 @@ Dreem 데이터는 세미콜론으로 구분된 CSV 파일 형식이어야 합�
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="800"/>
         <source>Ventilation mode</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">환기 모드</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="804"/>
         <source>Mode %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">모드 %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="807"/>
         <source>MPVp</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">MPVp</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="810"/>
         <source>Therapy program</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">치료 프로그램</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="811"/>
         <source>Therapy program in use</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">사용 중인 치료 프로그램</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="812"/>
         <source>Program</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">프로그램</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="816"/>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="818"/>
         <source>Backup rate</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">백업 호흡수</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="817"/>
         <source>Breath rate below which the device delivers timed breaths</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">이 호흡수 아래로 내려가면 장치가 시간 조절 호흡을 제공하는 호흡수</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="822"/>
         <source>Inspiration time</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">흡기 시간</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="823"/>
         <source>Inspiration time of a timed breath</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">시간 조절 호흡의 흡기 시간</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="824"/>
         <source>Ti</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ti</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="828"/>
         <source>Minimum inspiration time</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">최소 흡기 시간</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="829"/>
         <source>Shortest inspiration the device allows</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">장치가 허용하는 가장 짧은 흡기</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="830"/>
         <source>Ti min</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ti 최소</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="834"/>
         <source>Maximum inspiration time</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">최대 흡기 시간</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="835"/>
         <source>Longest inspiration the device allows</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">장치가 허용하는 가장 긴 흡기</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="836"/>
         <source>Ti max</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ti 최대</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="840"/>
         <source>Inspiratory trigger</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">흡기 트리거</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="841"/>
         <source>Inspiratory trigger sensitivity level</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">흡기 트리거 감도 수준</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="842"/>
         <source>Insp. trigger</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">흡기 트리거</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="846"/>
         <source>Expiratory trigger</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">호기 트리거</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="847"/>
         <source>Expiratory trigger, as a percentage of peak inspiratory flow</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">최대 흡기 유량에 대한 백분율로 나타낸 호기 트리거</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="848"/>
         <source>Exp. trigger</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">호기 트리거</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="852"/>
         <source>Inspiratory rise</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">흡기 상승</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="853"/>
         <source>Speed of the pressure rise at the start of inspiration</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">흡기 시작 시 압력 상승 속도</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="854"/>
         <source>Insp. rise</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">흡기 상승</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="860"/>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="862"/>
         <source>ePC</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ePC</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="861"/>
         <source>Epoch (2 mins) with premature cycling</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">조기 사이클링이 있는 에포크(2분)</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="867"/>
         <source>Disconnection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">연결 해제</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="868"/>
         <source>The breathing circuit was disconnected</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">호흡 회로가 분리되었습니다</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="869"/>
         <source>DC</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">DC</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="873"/>
         <source>Sudden decline of leakage</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">누출의 급격한 감소</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="874"/>
         <source>Leakage dropped suddenly, as when a mouth leak closes</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">입 누출이 멈출 때처럼 누출이 갑자기 줄었습니다</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="875"/>
         <source>SEL</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">SEL</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="879"/>
         <source>Expiratory fall</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">호기 하강</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="880"/>
         <source>Speed of the pressure fall at the start of expiration</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">호기 시작 시 압력 하강 속도</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="881"/>
         <source>Exp. fall</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">호기 하강</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.h" line="175"/>
         <source>prisma VENT</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">prisma VENT</translation>
     </message>
 </context>
 <context>

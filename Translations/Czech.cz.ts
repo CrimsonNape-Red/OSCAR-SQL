@@ -909,7 +909,7 @@ Podporované služby: Dropbox, Google Drive, OneDrive, Box, 0x0.st nebo jakýkol
     <message>
         <location filename="../oscar/daily.cpp" line="1470"/>
         <source>Recorded by %1 %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Zaznamenáno přístrojem %1 %2</translation>
     </message>
     <message>
         <location filename="../oscar/daily.cpp" line="1482"/>
@@ -4006,42 +4006,42 @@ Jste si jisti?</translation>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2718"/>
         <source>OSCAR does not recognize the backup data for the following device:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR nerozpoznává zálohovaná data následujícího zařízení:</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2720"/>
         <source>Rebuilding will delete all of this device&apos;s data, and OSCAR may not be able to restore it from the backup. You would then have to import it again from the SD card or your own backups.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Opětovné sestavení odstraní všechna data tohoto zařízení a OSCAR je možná nedokáže obnovit ze zálohy. Pak byste je museli znovu importovat ze SD karty nebo z vlastních záloh.</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2814"/>
         <source>ResMed Oximetry Data</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Data oxymetrie ResMed</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2815"/>
         <source>OSCAR now shows the times your ResMed device recorded no SpO2 or pulse reading, such as with the finger out of the sensor, as gaps. Data imported by earlier versions filled those times with the last reading, which can show long SpO2 drops that did not happen.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR nyní zobrazuje jako mezery časy, kdy vaše zařízení ResMed nezaznamenalo žádnou hodnotu SpO2 ani pulzu, například když byl prst mimo senzor. Data importovaná dřívějšími verzemi tyto časy vyplňovala poslední naměřenou hodnotou, což může ukazovat dlouhé poklesy SpO2, ke kterým nedošlo.</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2818"/>
         <source>To correct it, rebuild the data of these devices from OSCAR&apos;s backup, or purge it and import it again from the SD card:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Chcete-li to opravit, sestavte data těchto zařízení znovu ze zálohy OSCARu, nebo je vymažte a znovu importujte ze SD karty:</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2821"/>
         <source>Rebuild Now</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Znovu sestavit nyní</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2822"/>
         <source>Remind Me Later</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Připomenout později</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2823"/>
         <source>Don&apos;t Remind Me</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Nepřipomínat</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="2985"/>
@@ -4207,22 +4207,22 @@ Nejprve otevřete databáze pomocí Soubor ▸ Databáze ▸ Otevřít, aby byly
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3831"/>
         <source>Importing %1 data</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Importují se data %1</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3944"/>
         <source>Importing data</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Importují se data</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3945"/>
         <source>Importing data, as requested on the command line...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Importují se data, jak bylo požadováno na příkazovém řádku...</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3958"/>
         <source>Importing %1 data, as requested on the command line...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Importují se data %1, jak bylo požadováno na příkazovém řádku...</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="4298"/>
@@ -4307,17 +4307,17 @@ Originální databáze zůstala nezměněna.</translation>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="4775"/>
         <source>The compressed database could not be put in place, and OSCAR could not put the original database back.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Komprimovanou databázi nebylo možné umístit na místo a OSCAR nedokázal vrátit původní databázi.</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="4777"/>
         <source>Your data is safe in this file:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Vaše data jsou v bezpečí v tomto souboru:</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="4778"/>
         <source>OSCAR will now close. Before starting OSCAR again, rename that file to oscar.db.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR se nyní zavře. Před dalším spuštěním OSCARu přejmenujte tento soubor na oscar.db.</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="4786"/>
@@ -6480,17 +6480,17 @@ Pokud máte nový počítač s malým diskem SSD, je to vhodná volba.</translat
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1763"/>
         <source>Oximetry Settings</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Nastavení oxymetrie</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1787"/>
         <source>SpO2 Drop Baseline</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Základní úroveň pro poklesy SpO2</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1793"/>
         <source>Method</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Metoda</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1803"/>
@@ -6498,84 +6498,89 @@ Pokud máte nový počítač s malým diskem SSD, je to vhodná volba.</translat
 Rolling: the average of the readings just before, so the baseline follows slow changes through the night (recommended).
 Whole night / First hour: one value for the session, from the percentile set below.
 Manual: the fixed value set below.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Úroveň SpO2, od které se poklesy měří.
+Klouzavá: průměr hodnot těsně předtím, takže základní úroveň sleduje pomalé změny během noci (doporučeno).
+Celá noc / První hodina: jedna hodnota pro relaci, z percentilu nastaveného níže.
+Ruční: pevná hodnota nastavená níže.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1813"/>
         <source>Rolling window</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Klouzavé okno</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1823"/>
         <source>How far back the rolling baseline looks. Readings already part of a drop are left out.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Jak daleko do minulosti klouzavá základní úroveň sahá. Hodnoty, které jsou již součástí poklesu, se vynechávají.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1842"/>
         <source>Baseline percentile</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Percentil základní úrovně</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1852"/>
         <source>For the Whole night and First hour methods: the baseline is the SpO2 level the readings are at or below for this share of the time.
 The 50th percentile (the median) suits most nights.
 Higher percentiles cope better with nights spent mostly desaturated, but on steady nights they count normal variation as drops.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pro metody Celá noc a První hodina: základní úroveň je úroveň SpO2, na které nebo pod kterou jsou hodnoty po tento podíl času.
+50. percentil (medián) vyhovuje většině nocí.
+Vyšší percentily lépe zvládají noci strávené převážně v desaturaci, ale za stabilních nocí počítají běžné kolísání jako poklesy.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1857"/>
         <source>th</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1873"/>
         <source>Manual baseline</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ruční základní úroveň</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1883"/>
         <source>The fixed baseline used by the Manual method. This may be useful when the automatic baselines are not typical of your data, or to compare days more easily.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pevná základní úroveň používaná metodou Ruční. To může být užitečné, když automatické základní úrovně nejsou pro vaše data typické, nebo pro snazší porovnání dnů.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1905"/>
         <source>Where the SpO2 Lower Threshold line is drawn on the SpO2 graph. Turn the line on from the graph&apos;s right-click menu, under Dotted Lines.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Kde se v grafu SpO2 kreslí čára dolního prahu SpO2. Čáru zapněte v nabídce grafu po kliknutí pravým tlačítkem, v části Tečkované čáry.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1915"/>
         <source>Where the Pulse Lower Threshold line is drawn on the Pulse graph. Turn the line on from the graph&apos;s right-click menu, under Dotted Lines.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Kde se v grafu pulzu kreslí čára dolního prahu pulzu. Čáru zapněte v nabídce grafu po kliknutí pravým tlačítkem, v části Tečkované čáry.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1925"/>
         <source>When running Data → Automatic Oximetry Cleanup, segments of oximetry data shorter than this are discarded.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Při spuštění Data → Automatické čištění oxymetrie se úseky dat oxymetrie kratší než tato hodnota zahodí.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1948"/>
         <source>Where the Pulse Upper Threshold line is drawn on the Pulse graph. Turn the line on from the graph&apos;s right-click menu, under Dotted Lines.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Kde se v grafu pulzu kreslí čára horního prahu pulzu. Čáru zapněte v nabídce grafu po kliknutí pravým tlačítkem, v části Tečkované čáry.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1961"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SpO&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt; Lower Threshold&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dolní práh SpO&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1971"/>
         <source>Pulse Lower Threshold</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Dolní práh pulzu</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1981"/>
         <source>Pulse Upper Threshold</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Horní práh pulzu</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="2045"/>
         <source>Time window within which the pulse rate must change by at least the amount set</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Časové okno, během kterého se tepová frekvence musí změnit alespoň o nastavenou hodnotu</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="2355"/>
@@ -6702,22 +6707,22 @@ Higher percentiles cope better with nights spent mostly desaturated, but on stea
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="412"/>
         <source>Oximetry, Sleep Stage and Position Data</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Data oxymetrie, fází spánku a polohy</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="433"/>
         <source>&lt;p&gt;Cut oximetry, sleep stage and position recordings at the day split time, so that the part recorded after it appears on the next day.&lt;/p&gt;&lt;p&gt;Use this with CPAP devices that end their sessions at the day split time, such as ResMed devices, which split at noon. Then the oximetry and CPAP graphs for a day cover the same hours. With other CPAP devices, a session that runs past the split time stays whole, so leave this off.&lt;/p&gt;&lt;p&gt;Applies to data imported after the option is turned on. Data already imported is not changed; to split it, delete those sessions and import the files again.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&lt;p&gt;Rozdělí záznamy oxymetrie, fází spánku a polohy v čase rozdělení dne, takže část zaznamenaná po něm se zobrazí v následujícím dni.&lt;/p&gt;&lt;p&gt;Použijte to u přístrojů CPAP, které ukončují relace v čase rozdělení dne, například u přístrojů ResMed, které dělí v poledne. Grafy oxymetrie a CPAP za den pak pokrývají stejné hodiny. U jiných přístrojů CPAP zůstane relace, která přesahuje čas rozdělení, celá, proto tuto možnost nechte vypnutou.&lt;/p&gt;&lt;p&gt;Platí pro data importovaná po zapnutí této možnosti. Již importovaná data se nemění; chcete-li je rozdělit, odstraňte tyto relace a importujte soubory znovu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="436"/>
         <source>Split recordings at the day split time</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Rozdělit záznamy v čase rozdělení dne</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="443"/>
         <source>For CPAP devices that end their sessions at the day split time (ResMed splits at noon), so both kinds of data appear on the same day. Applies only to data imported after it is turned on.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pro přístroje CPAP, které ukončují relace v čase rozdělení dne (ResMed dělí v poledne), aby se oba druhy dat zobrazily ve stejném dni. Platí jen pro data importovaná po zapnutí.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="646"/>
@@ -7470,22 +7475,22 @@ Tato možnost musí být povolena před importem, jinak je nutné provést vymaz
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="405"/>
         <source>Rolling (recommended)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Klouzavá (doporučeno)</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="406"/>
         <source>Whole night</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Celá noc</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="407"/>
         <source>First hour</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">První hodina</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="408"/>
         <source>Manual</source>
-        <translation type="unfinished">Manuální</translation>
+        <translation type="unfinished">Ruční</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="592"/>
@@ -7703,14 +7708,18 @@ Chcete to provést nyní?</translation>
         <source>A data re/decompression procedure is required to apply these changes. This operation may take a couple of minutes to complete.
 
 Are you sure you want to make these changes?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pro použití těchto změn je nutná opětovná komprese/dekomprese dat. Tato operace může trvat několik minut.
+
+Opravdu chcete tyto změny provést?</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="890"/>
         <source>A data reindexing procedure is required to apply these changes. This operation may take a couple of minutes to complete.
 
 Are you sure you want to make these changes?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pro použití těchto změn je nutná opětovná indexace dat. Tato operace může trvat několik minut.
+
+Opravdu chcete tyto změny provést?</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="1292"/>
@@ -10880,17 +10889,17 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/profiles.cpp" line="3166"/>
         <source>Repairing Respiratory Event Records</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Opravují se záznamy dechových událostí</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/profiles.cpp" line="3325"/>
         <source>Repairing BMC Session Times</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Opravují se časy relací BMC</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/profiles.cpp" line="3445"/>
         <source>Recalculating Oximetry Events</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Přepočítávají se události oxymetrie</translation>
     </message>
     <message>
         <source>OSCAR will now exit, then (attempt to) launch your computers file manager so you can manually back your profile up:</source>
@@ -12266,42 +12275,42 @@ Cleaning up, please wait...</source>
     <message>
         <location filename="../oscar/main.cpp" line="1096"/>
         <source>OSCAR is set up to run as a portable application, but cannot write to its settings folder:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR je nastaven pro běh jako přenosná aplikace, ale nemůže zapisovat do své složky nastavení:</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1098"/>
         <source>Copy the OSCAR folder to a location you can write to, such as a USB drive, or remove %1 from it to run OSCAR normally.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Zkopírujte složku OSCAR do umístění, kam můžete zapisovat, například na USB disk, nebo z ní odstraňte %1, aby OSCAR běžel normálně.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1117"/>
         <source>OSCAR Portable</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR Portable</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1118"/>
         <source>The &quot;%1&quot; folder is inside a folder named after the download:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Složka „%1“ je uvnitř složky pojmenované podle staženého souboru:</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1120"/>
         <source>OSCAR keeps your data and settings in a &quot;%1&quot; folder next to &quot;%2&quot;, so they would be kept in that folder too, and a newer version of OSCAR Portable extracted the same way would not find them.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR uchovává vaše data a nastavení ve složce „%1“ vedle „%2“, takže by byly uloženy také v této složce, a novější verze OSCAR Portable rozbalená stejným způsobem by je nenašla.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1123"/>
         <source>We recommend that you quit, move the &quot;%1&quot; folder to %2, and start OSCAR from there.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Doporučujeme ukončit program, přesunout složku „%1“ do %2 a spustit OSCAR odtud.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1125"/>
         <source>Quit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ukončit</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1126"/>
         <source>Continue Here</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pokračovat zde</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1197"/>
@@ -12321,7 +12330,7 @@ Cleaning up, please wait...</source>
     <message>
         <location filename="../oscar/main.cpp" line="1276"/>
         <source>OSCAR will exit without changing your data folder.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">OSCAR se ukončí bez změny vaší datové složky.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1301"/>
@@ -12385,12 +12394,12 @@ Cleaning up, please wait...</source>
     <message>
         <location filename="../oscar/main.cpp" line="1334"/>
         <source>Portable mode:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Přenosný režim:</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1335"/>
         <source>settings in %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">nastavení v %1</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1336"/>
@@ -13577,7 +13586,7 @@ vyskakovací okno, smazat ho a poté znovu otevřít tento graf.</translation>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="1239"/>
         <source>Backing up EDF Files...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Zálohují se soubory EDF...</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="1427"/>
@@ -14356,37 +14365,37 @@ Data Dreem musí být formátována jako soubor CSV oddělený středníkem. Uji
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="247"/>
         <source>OSCAR&apos;s data folder is still there, but the database file it contains (oscar.db) is missing:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Datová složka OSCARu stále existuje, ale databázový soubor, který obsahuje (oscar.db), chybí:</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="249"/>
         <source>The file may have been moved, renamed or deleted, or removed by a cloud synchronization or disk clean-up tool.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Soubor mohl být přesunut, přejmenován nebo smazán, případně odstraněn nástrojem pro synchronizaci s cloudem nebo pro čištění disku.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="251"/>
         <source>If you have a backup copy of oscar.db (for example in Time Machine, File History, or your cloud service&apos;s deleted files), choose Exit, put the copy back in this folder, and start OSCAR again.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pokud máte záložní kopii oscar.db (například v Time Machine, Historii souborů nebo ve smazaných souborech vaší cloudové služby), zvolte Ukončit, vraťte kopii do této složky a spusťte OSCAR znovu.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="253"/>
         <source>If your data folder is somewhere else, choose Find.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pokud je vaše datová složka jinde, zvolte Najít.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="254"/>
         <source>Choose Create only if you want to start again with an empty database; your CPAP data will then need to be imported again.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Zvolte Vytvořit jen tehdy, pokud chcete začít znovu s prázdnou databází; vaše data CPAP pak bude nutné znovu importovat.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="256"/>
         <source>OSCAR Database Not Found</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Databáze OSCARu nebyla nalezena</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="258"/>
         <source>Create new empty database</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Vytvořit novou prázdnou databázi</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="271"/>
@@ -14431,194 +14440,194 @@ Data Dreem musí být formátována jako soubor CSV oddělený středníkem. Uji
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="800"/>
         <source>Ventilation mode</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ventilační režim</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="804"/>
         <source>Mode %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Režim %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="807"/>
         <source>MPVp</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">MPVp</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="810"/>
         <source>Therapy program</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Terapeutický program</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="811"/>
         <source>Therapy program in use</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Používaný terapeutický program</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="812"/>
         <source>Program</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Program</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="816"/>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="818"/>
         <source>Backup rate</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Záložní frekvence</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="817"/>
         <source>Breath rate below which the device delivers timed breaths</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Dechová frekvence, pod kterou přístroj dodává řízené dechy</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="822"/>
         <source>Inspiration time</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Doba nádechu</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="823"/>
         <source>Inspiration time of a timed breath</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Doba nádechu řízeného dechu</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="824"/>
         <source>Ti</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ti</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="828"/>
         <source>Minimum inspiration time</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Minimální doba nádechu</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="829"/>
         <source>Shortest inspiration the device allows</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Nejkratší nádech, který přístroj povolí</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="830"/>
         <source>Ti min</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ti min</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="834"/>
         <source>Maximum inspiration time</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Maximální doba nádechu</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="835"/>
         <source>Longest inspiration the device allows</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Nejdelší nádech, který přístroj povolí</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="836"/>
         <source>Ti max</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ti max</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="840"/>
         <source>Inspiratory trigger</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Inspirační spouštěč</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="841"/>
         <source>Inspiratory trigger sensitivity level</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Úroveň citlivosti inspiračního spouštěče</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="842"/>
         <source>Insp. trigger</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Insp. spouštěč</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="846"/>
         <source>Expiratory trigger</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Exspirační spouštěč</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="847"/>
         <source>Expiratory trigger, as a percentage of peak inspiratory flow</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Exspirační spouštěč jako procento špičkového inspiračního průtoku</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="848"/>
         <source>Exp. trigger</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Exsp. spouštěč</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="852"/>
         <source>Inspiratory rise</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Inspirační náběh</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="853"/>
         <source>Speed of the pressure rise at the start of inspiration</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Rychlost nárůstu tlaku na začátku nádechu</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="854"/>
         <source>Insp. rise</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Insp. náběh</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="860"/>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="862"/>
         <source>ePC</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ePC</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="861"/>
         <source>Epoch (2 mins) with premature cycling</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Epocha (2 min) s předčasným přepnutím</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="867"/>
         <source>Disconnection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Odpojení</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="868"/>
         <source>The breathing circuit was disconnected</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Dýchací okruh byl odpojen</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="869"/>
         <source>DC</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">DC</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="873"/>
         <source>Sudden decline of leakage</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Náhlý pokles úniku</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="874"/>
         <source>Leakage dropped suddenly, as when a mouth leak closes</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Únik náhle poklesl, například když se uzavře únik ústy</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="875"/>
         <source>SEL</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">SEL</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="879"/>
         <source>Expiratory fall</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Exspirační pokles</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="880"/>
         <source>Speed of the pressure fall at the start of expiration</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Rychlost poklesu tlaku na začátku výdechu</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="881"/>
         <source>Exp. fall</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Exsp. pokles</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.h" line="175"/>
         <source>prisma VENT</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">prisma VENT</translation>
     </message>
 </context>
 <context>
