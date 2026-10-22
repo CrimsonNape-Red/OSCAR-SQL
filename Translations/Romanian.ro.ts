@@ -17112,7 +17112,7 @@ Asigurați-vă că aveți încredere în destinatar înainte de a partaja aceste
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation>Cea mai proasta limitare de flux aerian</translation>
     </message>
     <message>

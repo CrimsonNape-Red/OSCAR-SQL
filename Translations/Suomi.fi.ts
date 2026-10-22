@@ -17087,7 +17087,7 @@ Varmista, että luotat vastaanottajaan ennen tietojen jakamista.</translation>
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation>Huonoin virtauksen rajoite</translation>
     </message>
     <message>

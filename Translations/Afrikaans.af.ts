@@ -17096,7 +17096,7 @@ Maak seker dat u die ontvanger vertrou voordat u hierdie data deel.</translation
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation>Slegste Vloeibeperking</translation>
     </message>
     <message>

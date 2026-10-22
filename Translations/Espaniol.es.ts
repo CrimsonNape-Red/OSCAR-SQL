@@ -17104,7 +17104,7 @@ Asegúrate de que confías en el destinatario antes de compartir estos datos.</t
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation>Peor lLmitación de Flujo</translation>
     </message>
     <message>

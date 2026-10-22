@@ -17315,7 +17315,7 @@ Fichier → Profils → Restaurer le profil</translation>
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation>Pire limitation de flux</translation>
     </message>
     <message>

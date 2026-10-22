@@ -17358,7 +17358,7 @@ Stellen Sie sicher, dass Sie dem Empfänger vertrauen, bevor Sie diese Daten wei
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation>Schlechteste Flusslimitierung</translation>
     </message>
     <message>

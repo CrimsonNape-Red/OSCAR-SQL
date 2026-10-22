@@ -17089,7 +17089,7 @@ Se till att du litar på mottagaren innan du delar denna data.</translation>
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation>Sämsta flödes-begränsning</translation>
     </message>
     <message>

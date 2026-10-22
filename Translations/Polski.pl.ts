@@ -17168,7 +17168,7 @@ Upewnij się, że ufasz odbiorcy przed udostępnieniem tych danych.</translation
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation>Najgorsze ograniczenia przepływu</translation>
     </message>
     <message>

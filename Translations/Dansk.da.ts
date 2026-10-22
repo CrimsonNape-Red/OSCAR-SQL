@@ -17569,7 +17569,7 @@ Sørg for at du stoler på modtageren, før du deler disse data.</translation>
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation>Dårligste flowbegrænsning</translation>
     </message>
     <message>

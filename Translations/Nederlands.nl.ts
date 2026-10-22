@@ -17263,7 +17263,7 @@ Zorg ervoor dat u de ontvanger vertrouwt voordat u deze gegevens deelt.</transla
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation>Slechtste stroombeperking</translation>
     </message>
     <message>

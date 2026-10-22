@@ -17031,7 +17031,7 @@ Forsikre deg om at du stoler på mottakeren før du deler disse dataene.</transl
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation>Verste flytbegrensning</translation>
     </message>
     <message>

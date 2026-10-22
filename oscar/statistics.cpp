@@ -1951,7 +1951,7 @@ QString Statistics::UpdateRecordsBox()
 
                 html += "<br>";
 
-                html += "<b>"+tr("Worst Flow Limtation")+"</b><br>";
+                html += "<b>"+tr("Worst Flow Limitation")+"</b><br>";
 
                 it = ahilist.end(); --it;
                 it_end = ahilist.begin();

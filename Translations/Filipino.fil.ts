@@ -16905,7 +16905,7 @@ Tiyaking pinagkakatiwalaan mo ang tatanggap bago ibahagi ang datos na ito.</tran
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation type="unfinished">Pinakamasamang Flow Limitation</translation>
     </message>
     <message>

@@ -17086,7 +17086,7 @@ Győződjön meg arról, hogy megbízik a címzettben, mielőtt megosztja ezeket
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1974"/>
-        <source>Worst Flow Limtation</source>
+        <source>Worst Flow Limitation</source>
         <translation>Legrosszabb légáramlás korlátozás</translation>
     </message>
     <message>
