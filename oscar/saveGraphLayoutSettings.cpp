@@ -297,12 +297,12 @@ QStringList strList;
     <<QString("<br>")
 <<QString(tr("The description may be changed."))
     <<QString("<br>")
-<<QString(tr("The Add button will be greyed out when maximum number is reached."))
+<<QString(tr("The Add button will be grayed out when maximum number is reached."))
     <<QString("<br>")
     <<QString("</td></tr> <tr><td><i><u>")
 <<QString(tr("Other Buttons"))
     <<QString("</u> </i></td>  <td>")
-<<QString(tr("Greyed out when there are no selections"))
+<<QString(tr("Grayed out when there are no selections"))
     <<QString("</td></tr> <tr><td>")
 <<QString(tr("Restore"))
     <<QString("</td> <td>")
@@ -320,7 +320,7 @@ QStringList strList;
     <<QString("</td></tr> <tr><td valign=\"top\">")
 <<QString(tr("Delete"))
     <<QString("</td> <td>")
-<<QString(tr("Deletes the selecton."))
+<<QString(tr("Deletes the selection."))
     <<QString("<br>")
 <<QString(tr("Prompts for confirmation."))
     <<QString("</td></tr> <tr><td><i><u>")
@@ -370,7 +370,7 @@ QStringList strList;
     <<QString("<br>")
 <<QString(tr("They do not control if a graph is displayed or not."))
     <<QString("</li> <li>")
-<<QString(tr("Layout Settings for daily and overview are managed independantly."))
+<<QString(tr("Layout Settings for daily and overview are managed independently."))
     <<QString("</li> </ul>");
 return strList.join("\n");
 };

@@ -4,6 +4,38 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-22 - Spelling and grammar errors in user-facing strings (#346)
+
+**Files:** `oscar/daily.ui`, `oscar/daily.cpp`, `oscar/mainwindow.cpp`,
+`oscar/SleepLib/loader_plugins/cms50_loader.cpp`, `oscar/dailySearchTab.cpp`,
+`oscar/notifyMessageBox.cpp`, `oscar/SleepLib/common.cpp`, `oscar/mainwindow.ui`,
+`oscar/datafolderdialog.cpp`, `oscar/backupdialog.cpp`,
+`oscar/saveGraphLayoutSettings.cpp`, `oscar/statistics.cpp`, `oscar/preferencesdialog.ui`,
+`oscar/oximeterimport.ui`, `oscar/SleepLib/schema.cpp`,
+`oscar/SleepLib/loader_plugins/prisma_loader.cpp`, `Translations/*.ts`
+
+A spell check of all `tr()`/`QT_TR_NOOP`/`translate` strings and `.ui` strings found 17
+misspellings (e.g. calender, Notifcation, Limtation, Lenght, treshold, recomended,
+plethysomogram) and five grammar slips (e.g. "unless your short", "an graphics",
+"this option provide"). All were corrected in the source. Five more wording errors were
+found because the en_UK translation had already corrected them: "oximeter devices menu",
+"recorded this day", "save journal", "incompliant" and "Standard average of indice".
+
+lupdate matches messages by context and exact source text, so a changed source string
+would come back unfinished in every language. The same corrections were made to the
+`<source>` text in every `.ts` file, so existing translations keep their finished state.
+Translations that had copied "plethysomogram" were corrected as well. After lupdate, all
+646 affected translations kept their status. In five catalogues, "Deletes the selection."
+went from unfinished to finished, because they still held a translation of the correct
+spelling from before the typo was introduced.
+
+The source language is en_US, so nine strings with UK spellings were Americanized (Colour,
+Litres, Analyse, recognise, synchronisation, synchronised, unauthorised, greyed/Greyed).
+`English.en_UK.ts` now carries the original UK wording as finished translations for them.
+"Cancelled"/"cancelling" were kept with the double L by choice.
+
+---
+
 ## 2026-10-21 - Profile selector forgets secondary sort order on restart (#345)
 
 **Files:** `oscar/profileselector.cpp`, `oscar/profileselector.h`

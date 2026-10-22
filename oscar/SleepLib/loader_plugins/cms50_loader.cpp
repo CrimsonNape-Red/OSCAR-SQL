@@ -483,7 +483,7 @@ void CMS50Loader::startImportTimeout()
         if (m_itemCnt > START_TIMEOUT) { // Give up after START_TIMEOUT
             closeDevice();
             abort();
-            QMessageBox::warning(nullptr, STR_MessageBox_Error, "<h2>"+tr("Could not get data transmission from oximeter.")+"<br/><br/>"+tr("Please ensure you select 'upload' from the oximeter devices menu.")+"</h2>");
+            QMessageBox::warning(nullptr, STR_MessageBox_Error, "<h2>"+tr("Could not get data transmission from oximeter.")+"<br/><br/>"+tr("Please ensure you select 'upload' from the oximeter device menu.")+"</h2>");
             return;
         } else {
             // Note: Newer CMS50 devices transmit from user input, but there is no way of differentiating between models

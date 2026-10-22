@@ -2268,7 +2268,7 @@ p, li { white-space: pre-wrap; }
     <string>Drift Analysis...</string>
    </property>
    <property name="toolTip">
-    <string>Analyse and model clock drift over time</string>
+    <string>Analyze and model clock drift over time</string>
    </property>
   </action>
   <action name="action_Import_Data">

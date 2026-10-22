@@ -548,7 +548,7 @@ QToolButton:pressed {
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>Show or hide the calender</string>
+           <string>Show or hide the calendar</string>
           </property>
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>

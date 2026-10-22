@@ -2715,7 +2715,7 @@ bool MainWindow::rebuildCPAPMachine(Machine *mach)
 
     if (backups && !backupRecognised) {
         if (staticQMessageBox::warning(this, STR_MessageBox_Warning,
-                "<p><b>"+STR_MessageBox_Warning+": </b>"+tr("OSCAR does not recognise the backup data for the following device:")+"</p>" +
+                "<p><b>"+STR_MessageBox_Warning+": </b>"+tr("OSCAR does not recognize the backup data for the following device:")+"</p>" +
                 "<p>"+mach->brand() + " " + mach->model() + " " + mach->modelnumber() + " (" + mach->serial() + ")</p>"+
                 "<p>"+tr("Rebuilding will delete all of this device's data, and OSCAR may not be able to restore it from the backup. You would then have to import it again from the SD card or your own backups.")+"</p>" +
                 "<p><b>"+tr("Are you really sure you want to do this?")+"</b></p>",
@@ -4329,7 +4329,7 @@ void MainWindow::on_actionExport_Journal_triggered()
     }
     folder += QDir::separator() + tr("%1's Journal").arg(p_profile->user->userName()) + ".xml";
 
-    QString filename = QFileDialog::getSaveFileName(this, tr("Choose where to save journal"), folder, tr("XML Files (*.xml)"), nullptr, nativeDialogOption());
+    QString filename = QFileDialog::getSaveFileName(this, tr("Choose where to save the journal"), folder, tr("XML Files (*.xml)"), nullptr, nativeDialogOption());
     if (filename.isEmpty()) {
         return;     // user cancelled the save dialog
     }

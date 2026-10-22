@@ -246,7 +246,7 @@ StartupChoice showDatabaseMissingChoice(const QString& folder)
     const QString text =
         QObject::tr("OSCAR's data folder is still there, but the database file it contains (oscar.db) is missing:") +
         "\n\n" + QDir::toNativeSeparators(QDir(folder).filePath("oscar.db")) + "\n\n" +
-        QObject::tr("The file may have been moved, renamed or deleted, or removed by a cloud synchronisation or disk clean-up tool.") +
+        QObject::tr("The file may have been moved, renamed or deleted, or removed by a cloud synchronization or disk clean-up tool.") +
         "\n\n" +
         QObject::tr("If you have a backup copy of oscar.db (for example in Time Machine, File History, or your cloud service's deleted files), "
                     "choose Exit, put the copy back in this folder, and start OSCAR again.") + "\n\n" +
@@ -433,7 +433,7 @@ void DataFolderCreateDialog::onCreate()
         if (QMessageBox::warning(this, tr("Cloud-managed location"),
                                  tr("The location you chose appears to be managed by %1.").arg(cloud) + "\n\n" +
                                  tr("Cloud services can change or lock OSCAR's database while OSCAR is using it, which can corrupt your data.") + " " +
-                                 tr("We recommend a folder that is not synchronised with a cloud service.") + "\n\n" +
+                                 tr("We recommend a folder that is not synchronized with a cloud service.") + "\n\n" +
                                  tr("Use this location anyway?"),
                                  QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) {
             return;

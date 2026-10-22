@@ -13,7 +13,7 @@
 
 
 int defaultTimeoutSeconds = 4 ;
-QString defaultTimeoutMessage = QObject::tr("Notifcation expires in %1 seconds.");
+QString defaultTimeoutMessage = QObject::tr("Notification expires in %1 seconds.");
 QString timeoutStoppedMessage = QObject::tr("");
 
     NotifyMessageBox::NotifyMessageBox(const QString& title, const QString& message, int timeoutSeconds,  const QString& timeoutMessage, QWidget* parent)

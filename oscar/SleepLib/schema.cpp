@@ -233,7 +233,7 @@ void init()
             QString("SpO2 %"), QObject::tr("Blood-oxygen saturation percentage"), QString("SpO2"),       STR_UNIT_Percentage,          DEFAULT,    QColor("blue")));
 
     schema::channel.add(GRP_OXI, new Channel(OXI_Plethy          = 0x1802, WAVEFORM,    MT_OXIMETER, SESSION, STR_GRAPH_Oxi_Plethy,
-            QObject::tr("Plethysomogram"), QObject::tr("An optical Photo-plethysomogram showing heart rhythm"), QObject::tr("Plethy"),     STR_UNIT_Hz,           DEFAULT,    QColor(64, 64, 64)));
+            QObject::tr("Plethysmogram"), QObject::tr("An optical Photo-plethysmogram showing heart rhythm"), QObject::tr("Plethy"),     STR_UNIT_Hz,           DEFAULT,    QColor(64, 64, 64)));
 
     schema::channel.add(GRP_OXI, new Channel(OXI_Perf             = 0x1805, WAVEFORM,   MT_OXIMETER, SESSION, STR_GRAPH_Oxi_Perf,
             QObject::tr("Perfusion Index"), QObject::tr("A relative assessment of the pulse strength at the monitoring site"), QObject::tr("Perf. Index %"), STR_UNIT_Percentage,     DEFAULT,   QColor("magenta")));

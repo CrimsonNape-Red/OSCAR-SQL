@@ -717,7 +717,7 @@ void Daily::Link_clicked(const QUrl &url)
             ui->treeWidget->setCurrentItem(wi);
             ui->tabWidget->setCurrentIndex(1);
         } else {
-            mainwin->Notify(tr("No %1 events are recorded this day").arg(schema::channel[sid].fullname()),"",1500);
+            mainwin->Notify(tr("No %1 events are recorded on this day").arg(schema::channel[sid].fullname()),"",1500);
         }
     } else if (code=="graph") {
         qDebug() << "Select graph " << data;
@@ -2690,7 +2690,7 @@ void Daily::on_JournalNotesFontsize_activated(int index)
 
 void Daily::on_JournalNotesColour_clicked()
 {
-    QColor col=QColorDialog::getColor(COLOR_Black,this,tr("Pick a Colour")); //,QColorDialog::NoButtons);
+    QColor col=QColorDialog::getColor(COLOR_Black,this,tr("Pick a Color")); //,QColorDialog::NoButtons);
     if (!col.isValid()) return;
 
     QTextCursor cursor = ui->JournalNotes->textCursor();

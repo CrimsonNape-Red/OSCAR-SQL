@@ -281,7 +281,7 @@ bool BackupDialog::showSecurityWarning()
            "Storage recommendations:\n"
            "\u2022 Store backups on encrypted storage\n"
            "\u2022 Keep backups in a secure, access-controlled location\n"
-           "\u2022 Do not share backup files with unauthorised parties"),
+           "\u2022 Do not share backup files with unauthorized parties"),
         &warn);
     body->setWordWrap(true);
     layout->addWidget(body);

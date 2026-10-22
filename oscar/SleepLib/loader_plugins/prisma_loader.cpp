@@ -1072,14 +1072,14 @@ void PrismaLoader::initChannels()
     channel.add(GRP_CPAP, new Channel(Prisma_Softstart_Time=0xe405, SETTING,  MT_CPAP,  SESSION,
         "Prisma_Softstart_Time",
         QObject::tr("Softstart time"),
-        QObject::tr("Lenght of soft start period"),
+        QObject::tr("Length of soft start period"),
         QObject::tr("Softstart time"),
         STR_UNIT_Minutes, LOOKUP, Qt::green));
 
     channel.add(GRP_CPAP, new Channel(Prisma_Softstart_TimeMax=0xe406, SETTING,  MT_CPAP,  SESSION,
         "Prisma_Softstart_TimeMax",
         QObject::tr("Soft start maximum time"),
-        QObject::tr("Maximum lenght of soft start period"),
+        QObject::tr("Maximum length of soft start period"),
         QObject::tr("Soft start max. time"),
         STR_UNIT_Minutes, LOOKUP, Qt::green));
 
@@ -1194,7 +1194,7 @@ void PrismaLoader::initChannels()
     channel.add(GRP_CPAP, new Channel(Prisma_CriticalLeak = 0xe447, SPAN,  MT_CPAP,   SESSION,
         "Prisma_CriticalLeak",
         QObject::tr("CriticalLeak"),
-        QObject::tr("Mask leakage is above a critical treshold"),
+        QObject::tr("Mask leakage is above a critical threshold"),
         QObject::tr("CL"),
         STR_UNIT_EventsPerHour, DEFAULT, QColor("orchid")));
 

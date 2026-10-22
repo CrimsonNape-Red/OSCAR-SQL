@@ -931,7 +931,7 @@ void initializeStrings()
     STR_UNIT_Hz = QObject::tr("Hz");          // Hertz
     STR_UNIT_BPM = QObject::tr("bpm");        // Beats per Minute
     STR_UNIT_LPM = QObject::tr("l/min");      // Litres per Minute
-    STR_UNIT_Litres = QObject::tr("Litres");
+    STR_UNIT_Litres = QObject::tr("Liters");
     STR_UNIT_ml = QObject::tr("ml");        // millilitres
     STR_UNIT_BreathsPerMinute = QObject::tr("Breaths/min"); // Breaths per minute
     STR_UNIT_Unknown = QString("?");
