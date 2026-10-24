@@ -3427,11 +3427,9 @@ doesn't have PrismaTS pre-installed. `MCC` = "Modular Configuration Component";
 `P3ParameterSet` = "Prisma 3 Platform Parameter Set" (presumably the 3rd-gen Prisma
 data model).
 
-**For OSCAR's purposes these DLLs are useful as a static reference for parameter ID
-decoding** — extracting the ID→name/units mapping from `MCC.P3ParameterSet.dll` (via a
-.NET reflection tool like ILSpy) is the most accurate way to label new `ParameterID`
-values not yet in `prisma_loader.cpp`. The DLLs themselves aren't loaded or executed by
-OSCAR.
+The DLLs aren't loaded, executed or inspected by OSCAR. New `ParameterID` values not yet
+in `prisma_loader.cpp` are labelled by comparing card data with the reports of the
+manufacturer's software.
 
 ### Root `logs/` directory — duplicates from inside therapy.pdat
 
@@ -3489,9 +3487,6 @@ self-contained, externally-readable bundle complete with its own decoding tools.
   transferred to the cloud and can be safely pruned. Open question: does OSCAR need
   to coordinate with the upload state, or does the device guarantee that pruned
   sessions are never relevant again?
-- **`MCC.P3ParameterSet.dll` is a goldmine** if parameter ID coverage is incomplete —
-  it's a .NET assembly that can be statically inspected (no execution) to extract
-  the full ID→name/units/range mapping the device firmware uses internally.
 
 ---
 

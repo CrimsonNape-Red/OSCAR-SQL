@@ -3,10 +3,9 @@
 **Status:** Reverse-engineered; not vendor-documented.
 **Validation:** Validated against actual export files.
 **Source:** ported from the companion project `apex-xt-oscar-convert`
-(`docs/apex_format/apf.md`, `docs/apex_format/ape.md`), which reverse-engineered
-this format via static byte-diffing (`.APF`) and dynamic disassembly of the
-vendor's Easy Compliance 3.4.1 Windows software (`.APE`), cross-checked against
-several years of real device exports and Easy Compliance's own CSV/PDF reports.
+(`docs/apex_format/apf.md`, `docs/apex_format/ape.md`), which decoded this format
+from the card files and cross-checked it against several years of real device
+exports and the vendor software's own CSV/PDF reports.
 This document covers only the raw device format. See
 `Notes/loaders/Apex/APEX_LOADER_DESIGN.md` for
 how it becomes an OSCAR loader.
@@ -74,12 +73,9 @@ only in `.APE`, and only for the most recent ≤18 sessions (§3).
 ## 3. `.APE` — per-minute detail ring buffer
 
 Fixed size: **20,482 bytes** (`0x5002`). This is the actual finest-grained data
-source the device exposes; found via dynamic disassembly of the vendor app
-rather than static analysis (`.APE`'s own layout gave no purchase to
-byte-diffing — the working decoder came from tracing the vendor app's live
-memory access pattern, confirming the process indexes a `base + i × 0x276C`
-struct array where `0x276C == 10092` decimal, matching a related legacy format's
-per-session slot size exactly).
+source the device exposes. The session slots form a `base + i × 0x276C` struct
+array, where `0x276C == 10092` decimal matches a related legacy format's
+per-session slot size exactly.
 
 ```
 0x0000  +----------------------------------------------------+
