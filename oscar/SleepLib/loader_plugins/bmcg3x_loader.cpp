@@ -89,7 +89,7 @@ int BmcG3xLoader::Open(const QString& dirpath)
     }
 
     // Warn if the firmware version has not been tested with this loader.
-    // Tested user-facing versions: G3-2.11.x.x (SC.72), G3-2.12.x.x (SC.74/SC.75) and
+    // Tested user-facing versions: G3-2.11.x.x (SC.72), G3-2.12.x.x (SC.74/SC.75/SC.76) and
     // E5-1.02.x.x on the E5 B25A Plus.
     // The version string comes from the .log file (e.g. "G3-2.11.02.33", "E5-1.02.05.02")
     // and matches what PAP-Link and the device display report.  If the .log was
@@ -104,6 +104,7 @@ int BmcG3xLoader::Open(const QString& dirpath)
                                    fwVersion.contains("SC.72") ||        // IDX fallback
                                    fwVersion.contains("SC.74") ||        // IDX fallback
                                    fwVersion.contains("SC.75") ||        // IDX fallback
+                                   fwVersion.contains("SC.76") ||        // IDX fallback
                                    fwVersion.startsWith("E5-1.SC.00.");  // IDX fallback
         if (!knownFirmware) {
             // Also record this in the debug log: the dialog is transient, but a support

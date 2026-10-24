@@ -4,6 +4,35 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-24 - BMC G3X card with no waveform files not detected (#348)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp`,
+`oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp`
+
+A G3 A20 on internal firmware build SC.76 writes no `.000`–`.062` waveform files. Every IDX
+record has a zero waveform length, and the nights exist only in the `.evt` stream and the
+IT summary. `DirectoryHasBmcG3xData()` and `ResolveIdxFile()` both required a `.000` beside
+the `.idx`, so OSCAR reported no supported data. Both now accept a valid G3X `.idx` with
+either a `.000` or a `.evt` (`HasG3xDataFiles()`). Import then takes the existing EVT-only
+path, which builds sessions from the 0x40/0x41 markers. SC.76 was added to the
+known-firmware fallback list.
+
+A second fault in the EVT-only path showed up on this card. Pressure snapshots are stored
+in whole seconds, but a session's start marker keeps its milliseconds. The firmware writes
+the session's first pressure in the same millisecond as the marker, so after truncation it
+fell just before the session start and was dropped. Every EVT-only session lost its opening
+pressure point. Short sessions with no later pressure change were left with no data and were
+not imported, so usage came out 6–10 min under the IT duration on three of four nights.
+The snapshot window now opens at the start of the marker's second. Usage then matches
+the IT duration exactly. This also applies to nights on older cards whose waveform has been
+overwritten.
+
+The card's `.dat` file holds 10 Hz flow and mask pressure for the most recent ~11 h of
+therapy. It is decoded in `Notes/G3X/BMC_G3X_DAT_FORMAT.md` but not imported: the EVT-only
+import already shows the same data as PAP-Link.
+
+---
+
 ## 2026-10-22 - Spelling and grammar errors in user-facing strings (#346)
 
 **Files:** `oscar/daily.ui`, `oscar/daily.cpp`, `oscar/mainwindow.cpp`,

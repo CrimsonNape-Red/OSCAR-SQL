@@ -7,7 +7,8 @@
 ///   - `.evt`  — event stream; fixed-size 0x20-byte records containing respiratory
 ///               events (apneas, hypopneas) and therapy pressure snapshots.
 ///   - `.000`–`.062` — waveform stream; a circular series of 64 MiB files, each a
-///               stream of 0x800-byte packets at one-second cadence.
+///               stream of 0x800-byte packets at one-second cadence.  Absent on some
+///               firmware (G3 A20, SC.76), which is then imported from `.evt` alone.
 ///
 /// All multi-byte integers are little-endian unless otherwise stated.
 ///
@@ -731,6 +732,16 @@ void ApplyFlowWaveformFromG3xPacket(const QByteArray& waveformPacket,
     }
 }
 
+/// @brief Returns true when a G3X `.idx` at @p basePath has the data files needed to import.
+///
+/// Either the first waveform file (`.000`) or the event stream (`.evt`) qualifies.  Some
+/// firmware (G3 A20, internal build SC.76) writes no waveform files at all: every IDX record
+/// has a zero waveform length and the nights are imported from the EVT stream alone.
+bool HasG3xDataFiles(const QString& basePath)
+{
+    return QFile::exists(basePath + ".000") || QFile::exists(basePath + ".evt");
+}
+
 } // end anonymous namespace
 
 // ============================================================
@@ -769,7 +780,7 @@ bool BmcG3xData::DirectoryHasBmcG3xData(const QString& path)
             continue;
         }
         const QString basePath = idxInfo.absolutePath() + QDir::separator() + idxInfo.completeBaseName();
-        if (QFile::exists(basePath + ".000")) {
+        if (HasG3xDataFiles(basePath)) {
             return true;
         }
     }
@@ -1263,8 +1274,15 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
                                          ? evtSessionEnds.at(i)
                                          : dayEntry->EndTimestamp;
 
+                // Snapshots carry whole seconds (G3xTimedSampleUpdate::TimestampSec) while the
+                // 0x40 marker keeps its milliseconds, so the window opens at the start of the
+                // marker's second.  The firmware writes the first pressure in the same
+                // millisecond as the marker; compared exactly it fell before the session, which
+                // lost every session's opening pressure and left short sessions with none at
+                // all, so they were not imported.
+                const QDateTime windowStart = s->StartTimestamp.addMSecs(-s->StartTimestamp.time().msec());
                 for (const BmcPressureSnapshot& snap : evtPressureSnapshots) {
-                    if (snap.Timestamp >= s->StartTimestamp &&
+                    if (snap.Timestamp >= windowStart &&
                         snap.Timestamp <= s->EndTimestamp) {
                         s->PressureSnapshots.append(snap);
                     }
@@ -1837,7 +1855,7 @@ const QList<BmcDataLink>& BmcG3xData::GetSessionLinks() const
 /// @brief Finds and validates the `.idx` file for this recording directory.
 ///
 /// Sets idxFilePath and fileBasePath on success.  Returns false if no valid
-/// `.idx` with a matching `.000` companion file is found.
+/// `.idx` with a matching `.000` or `.evt` companion file is found.
 bool BmcG3xData::ResolveIdxFile()
 {
     if (!idxFilePath.isEmpty() && QFile::exists(idxFilePath)) {
@@ -1861,7 +1879,7 @@ bool BmcG3xData::ResolveIdxFile()
             continue;
         }
         const QString candidateBase = idxInfo.absolutePath() + QDir::separator() + idxInfo.completeBaseName();
-        if (!QFile::exists(candidateBase + ".000")) {
+        if (!HasG3xDataFiles(candidateBase)) {
             continue;
         }
         idxFilePath  = idxInfo.absoluteFilePath();
