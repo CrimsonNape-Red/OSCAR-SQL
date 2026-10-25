@@ -8,6 +8,9 @@
 
 #include "resmedtests.h"
 #include "sessiontests.h"
+#include "../SleepLib/machine_loader.h"
+#include <QTemporaryDir>
+#include <QRandomGenerator>
 #if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
     #define QTHEX     Qt::hex
     #define QTDEC     Qt::dec
@@ -73,6 +76,55 @@ static void parseAndEmitSessionYaml(const QString & path)
 void ResmedTests::testSessionsToYaml()
 {
     iterateTestCards(TESTDATA_PATH "resmed/input/", parseAndEmitSessionYaml);
+}
+
+// Defined in resmed_loader.cpp; not declared in a header.
+EDFduration getEDFDuration(const QString & filename);
+
+// GitLab #350: the backup's gzip helpers used gzopen(path.toLatin1()), which fails
+// when the data folder contains non-Latin-1 characters. Round-trip a file through
+// compressFile / uncompressFile / getEDFDuration inside such a folder.
+void ResmedTests::testGzipNonAsciiPath()
+{
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    QString dir = tmp.path() + QStringLiteral(u"/\u6587\u4ef6");   // "文件"
+    QVERIFY(QDir().mkpath(dir));
+
+    // Minimal EDF header: start date/time at 0xa8, 10 records of 60 s each,
+    // followed by binary data with high bytes and too random to compress.
+    QByteArray edf(256, ' ');
+    edf.replace(0xa8, 16, "19.09.2610.56.07");
+    edf.replace(0xec, 8, "10      ");
+    edf.replace(0xf4, 8, "60      ");
+    QRandomGenerator rng(350);
+    for (int i = 0; i < 65536; i++) {
+        edf.append(char(rng.bounded(256)));
+    }
+
+    QString plain = dir + "/20260919_105607_BRP.edf";
+    QFile f(plain);
+    QVERIFY(f.open(QFile::WriteOnly));
+    f.write(edf);
+    f.close();
+
+    QVERIFY(compressFile(plain));
+    QVERIFY(QFile::exists(plain + ".gz"));
+
+    QString restored = dir + "/restored/20260919_105607_BRP.edf";
+    QVERIFY(QDir().mkpath(dir + "/restored"));
+    QVERIFY(uncompressFile(plain + ".gz", restored));
+    QFile r(restored);
+    QVERIFY(r.open(QFile::ReadOnly));
+    QCOMPARE(r.readAll(), edf);
+    r.close();
+
+    EDFduration plainDur = getEDFDuration(plain);
+    EDFduration gzDur = getEDFDuration(plain + ".gz");
+    QVERIFY(gzDur.start != 0);
+    QCOMPARE(gzDur.start, plainDur.start);
+    QCOMPARE(gzDur.end, plainDur.end);
+    QCOMPARE(gzDur.end - gzDur.start, quint32(600));
 }
 
 

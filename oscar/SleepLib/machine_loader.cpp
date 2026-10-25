@@ -288,6 +288,41 @@ QList<ChannelID> CPAPLoader::eventFlags(Day * day)
 }
 */
 
+/**
+ * @brief Encode a buffer as a complete gzip stream (RFC 1952).
+ *
+ * Done in memory with zlib's deflate so that file I/O can go through QFile,
+ * which handles Unicode paths on every platform. gzopen() takes a narrow
+ * char* path and cannot (GitLab #350).
+ * @param data Uncompressed bytes.
+ * @param out Receives the gzip stream.
+ * @return true on success.
+ */
+static bool gzipEncode(const QByteArray & data, QByteArray & out)
+{
+    z_stream strm;
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+
+    // windowBits 15 + 16 selects a gzip header and trailer instead of zlib's
+    if (deflateInit2(&strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15 + 16, 8, Z_DEFAULT_STRATEGY) != Z_OK) {
+        return false;
+    }
+
+    out.resize(deflateBound(&strm, data.size()));
+    strm.next_in = (Bytef *)data.constData();
+    strm.avail_in = data.size();
+    strm.next_out = (Bytef *)out.data();
+    strm.avail_out = out.size();
+
+    // deflateBound() guarantees room for a single-pass Z_FINISH
+    int ret = deflate(&strm, Z_FINISH);
+    out.resize(strm.total_out);
+    deflateEnd(&strm);
+    return ret == Z_STREAM_END;
+}
+
 bool uncompressFile(QString infile, QString outfile)
 {
     if (!infile.endsWith(".gz",Qt::CaseInsensitive)) {
@@ -300,36 +335,25 @@ bool uncompressFile(QString infile, QString outfile)
         return false;
     }
 
-    // Get file length from inside gzip file
+    // Read through QFile rather than gzopen() so non-ASCII paths work (GitLab #350)
     QFile fi(infile);
-
-    if (!fi.open(QFile::ReadOnly) || !fi.seek(fi.size() - 4)) {
+    if (!fi.open(QFile::ReadOnly)) {
+        qDebug() << "uncompressFile() Couldn't open" << infile;
         return false;
     }
-
-    unsigned char ch[4];
-    fi.read((char *)ch, 4);
-    quint32 datasize = ch[0] | (ch [1] << 8) | (ch[2] << 16) | (ch[3] << 24);
-
-    // Open gzip file for reading
-    gzFile f = gzopen(infile.toLatin1(), "rb");
-    if (!f) {
+    QByteArray data = gUncompress(fi.readAll());
+    fi.close();
+    if (data.isEmpty()) {
+        qDebug() << "uncompressFile() Couldn't decompress" << infile;
         return false;
     }
-
-
-    // Decompressed header and data block
-    char * buffer = new char [datasize];
-    gzread(f, buffer, datasize);
-    gzclose(f);
 
     QFile out(outfile);
     if (out.open(QFile::WriteOnly)) {
-        out.write(buffer, datasize);
+        out.write(data);
         out.close();
     }
 
-    delete [] buffer;
     return true;
 
 }
@@ -360,27 +384,33 @@ bool compressFile(QString infile, QString outfile)
         return false;
     }
 
-    char *buf = new char [size];
+    QByteArray buf = f.read(size);
+    f.close();
 
-    if (!f.read(buf, size)) {
-        delete [] buf;
+    if (buf.size() != size) {
         qDebug() << "compressFile() Couldn't read all of" << infile;
         return false;
     }
 
-    f.close();
-
-    gzFile gz = gzopen(outfile.toLatin1(), "wb");
-
-    if (!gz) {
-        qDebug() << "compressFile() Couldn't open" << outfile << "for writing";
-        delete [] buf;
+    QByteArray gz;
+    if (!gzipEncode(buf, gz)) {
+        qDebug() << "compressFile() Couldn't compress" << infile;
         return false;
     }
 
-    gzwrite(gz, buf, size);
-    gzclose(gz);
-    delete [] buf;
+    // Write through QFile rather than gzopen() so non-ASCII paths work (GitLab #350)
+    QFile out(outfile);
+    if (!out.open(QFile::WriteOnly)) {
+        qDebug() << "compressFile() Couldn't open" << outfile << "for writing";
+        return false;
+    }
+    if (out.write(gz) != gz.size()) {
+        qDebug() << "compressFile() Couldn't write all of" << outfile;
+        out.close();
+        out.remove();
+        return false;
+    }
+    out.close();
     return true;
 }
 

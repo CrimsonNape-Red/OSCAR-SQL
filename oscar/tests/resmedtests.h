@@ -19,6 +19,7 @@ class ResmedTests : public QObject
 private slots:
     void initTestCase();
     void testSessionsToYaml();
+    void testGzipNonAsciiPath();
     void cleanupTestCase();
 };
 

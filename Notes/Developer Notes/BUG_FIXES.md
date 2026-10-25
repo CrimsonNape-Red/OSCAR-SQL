@@ -4,6 +4,23 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-24 - ResMed import fails when the data folder path has non-Latin-1 characters (#350)
+
+**Files:** `oscar/SleepLib/machine_loader.cpp`, `oscar/SleepLib/loader_plugins/resmed_loader.cpp`
+
+With **Compress SD Card Backups** enabled, `compressFile()`, `uncompressFile()` and the `.gz`
+branch of `getEDFDuration()` opened files with `gzopen(path.toLatin1())`. Characters outside
+Latin-1 became `?`, so with a data folder such as `~/文件/OSCAR20_Data` no `.edf.gz` backup
+was written. The import then read sessions from the missing backups and loaded nothing. On
+Windows the same applied to any character outside the ANSI code page. Uncompressed backups
+use `QFile::copy()` and were not affected. All three functions now do file I/O through
+`QFile` and gzip in memory: zlib `deflateInit2` (gzip wrapper) for writing, `gUncompress()`
+for reading. Only the ResMed loader uses these helpers. Unit test
+`ResmedTests::testGzipNonAsciiPath` fails on the old code and passes on the new. 1.7.1 has
+the same three calls.
+
+---
+
 ## 2026-10-24 - BMC G3X card with no waveform files not detected (#348)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp`,

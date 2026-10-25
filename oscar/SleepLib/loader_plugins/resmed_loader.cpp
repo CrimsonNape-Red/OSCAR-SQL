@@ -2473,35 +2473,26 @@ EDFduration getEDFDuration(const QString & filename)
 
         file.close();
     } else {
-        gzFile f = gzopen(filename.toLatin1(), "rb");
-        if (!f)
+        // Read through QFile rather than gzopen() so non-ASCII paths work (GitLab #350).
+        // The fixed header compresses well, so the first few KB decompress to
+        // well past the fields we need; fall back to the whole file otherwise.
+        static constexpr int HDR_END = 0xec + 16;   // end of num_records + rec_duration
+        QFile file(filename);
+        if (!file.open(QFile::ReadOnly))
             return EDFduration(0, 0, filename);
 
-        // Decompressed header and data block
-        if (!gzseek(f, 0xa8, SEEK_SET)) {
-            gzclose(f);
-            return EDFduration(0, 0, filename);
+        QByteArray hdr = gUncompress(file.read(4096));
+        if (hdr.size() < HDR_END) {
+            file.seek(0);
+            hdr = gUncompress(file.readAll());
         }
-        char datebytes[17] = {0};
-        gzread(f, (char *)&datebytes, 16);
-        QString str = QString(QString::fromLatin1(datebytes,16)).trimmed();
-        startDate = EDFInfo::getStartDT(str);
-
-        if (!gzseek(f, 0xec-0xa8-16, SEEK_CUR)) { // 0xec
-            gzclose(f);
+        file.close();
+        if (hdr.size() < HDR_END)
             return EDFduration(0, 0, filename);
-        }
 
-        char cbytes[9] = {0};
-        gzread(f, (char *)&cbytes, 8);
-        str = QString(cbytes).trimmed();
-        num_records = str.toInt(&ok1);
-
-        gzread(f, (char *)&cbytes, 8);
-        str = QString(cbytes).trimmed();
-        rec_duration = str.toDouble(&ok2);
-
-        gzclose(f);
+        startDate = EDFInfo::getStartDT(QString::fromLatin1(hdr.constData() + 0xa8, 16).trimmed());
+        num_records = hdr.mid(0xec, 8).trimmed().toInt(&ok1);
+        rec_duration = hdr.mid(0xf4, 8).trimmed().toDouble(&ok2);
     }
 
     // Derive the filename-based start time up front so we can use it as a
