@@ -986,6 +986,107 @@ void Daily::UpdateEventsTree(QTreeWidget *tree,Day *day)
     }
 }
 
+// "Löwenstein prisma20A, 6 h 12 min" - the device of that type on the day and its time. Plain text.
+static QString calendarDeviceText(Day *day, MachineType type)
+{
+    Machine *machine = day ? day->machine(type) : nullptr;
+    QString text;
+    if (machine) {
+        // Some loaders repeat the brand in the model name ("Viatom Oximeter").
+        const QString brand = machine->brand().trimmed();
+        const QString model = machine->model().trimmed();
+        text = model.startsWith(brand, Qt::CaseInsensitive) ? model : (brand + QLatin1Char(' ') + model).trimmed();
+    }
+    const int minutes = day ? qRound(day->hours(type) * 60.0) : 0;
+    if (minutes > 0) {
+        QString duration = minutes < 60 ? Daily::tr("%L1 min").arg(minutes)
+                                        : Daily::tr("%L1 h %L2 min").arg(minutes / 60).arg(minutes % 60);
+        duration.replace(QLatin1Char(' '), QChar(QChar::Nbsp));  // never wrapped inside
+        text = text.isEmpty() ? duration : text + QStringLiteral(", ") + duration;
+    }
+    return text;
+}
+
+// "CPAP: Löwenstein prisma20A, 6 h 12 min", or just "CPAP" when there is nothing to name.
+static QString calendarDeviceLine(const QString &label, Day *day, MachineType type)
+{
+    const QString text = calendarDeviceText(day, type);
+    //: A calendar tooltip line: what kind of data, then the device and its time
+    return text.isEmpty() ? label : Daily::tr("%1: %2").arg(label, text);
+}
+
+// The calendar's hint for one day: what data the day has, and what its styling stands for.
+// hasoxi is what colors the day (as UpdateCalendarDay decides it, movement data included);
+// hasOxiData says whether there is oximetry (SpO2 or pulse) at all.
+static QString calendarDayToolTip(const QDate &date, Day *cpapDay, Day *oxiDay, bool hasoxi, bool hasOxiData,
+                                  Day *stageDay, Day *posDay, Day *journalDay, int bookmarks)
+{
+    QStringList lines;   // plain text, escaped once below
+    QStringList styles;  // legend entries, joined by commas after "Legend:"
+    if (cpapDay) {
+        lines << calendarDeviceLine(STR_TR_CPAP, cpapDay, MT_CPAP);
+        styles << (!hasoxi ? Daily::tr("blue = CPAP")
+                           : hasOxiData ? Daily::tr("red = CPAP and oximetry")
+                                        : Daily::tr("red = CPAP and movement data"));
+    } else if (hasoxi) {
+        styles << Daily::tr("green = oximetry");  // without CPAP only an oximeter colors the day
+    }
+    if (hasOxiData) {
+        // Without an oximeter the readings come from another device's sessions of the day.
+        lines << (oxiDay ? calendarDeviceLine(STR_TR_Oximetry, oxiDay, MT_OXIMETER) : STR_TR_Oximetry);
+    }
+    if (stageDay) {
+        lines << calendarDeviceLine(Daily::tr("Sleep stages"), stageDay, MT_SLEEPSTAGE);
+        styles << Daily::tr("shaded background = sleep stages");
+    }
+    if (posDay) {
+        lines << calendarDeviceLine(Daily::tr("Sleep position"), posDay, MT_POSITION);
+        styles << Daily::tr("line above = sleep position");
+    }
+    if (journalDay) {
+        QStringList parts;
+        Session *journal = journalDay->firstSession(MT_JOURNAL);
+        if (journal) {
+            const double kg = journal->settings.value(Journal_Weight).toDouble();
+            if (kg > 0.0001) {
+                parts << Daily::tr("weight %1").arg(weightString(kg, p_profile->general->unitSystem()));
+            }
+            // Stored as 0-100 (0 = not set), shown on the scale the user chose (see setup_ZombieUIWidgets).
+            const int feeling = journal->settings.value(Journal_ZombieMeter).toInt();
+            if (feeling > 0) {
+                parts << (p_profile->appearance->zombieMode()
+                              ? Daily::tr("feeling %1/100").arg(feeling)
+                              : Daily::tr("feeling %1/10").arg(QLocale().toString(feeling / 10.0, 'f', 1)));
+            }
+            const QString notes = journal->settings.value(Journal_Notes).toString();
+            if (!notes.isEmpty() && !Daily::convertHtmlToPlainText(notes).isEmpty()) {
+                //: In a calendar tooltip: the day's journal has notes
+                parts << Daily::tr("notes");
+            }
+        }
+        if (bookmarks > 0) {
+            parts << Daily::tr("bookmarks: %1").arg(bookmarks);
+            styles << Daily::tr("italic = bookmarks");
+        }
+        //: In a calendar tooltip: the day's journal entry holds nothing
+        const QString empty = Daily::tr("empty");
+        lines << Daily::tr("Journal: %1").arg(parts.isEmpty() ? empty : parts.join(QStringLiteral(", ")));
+        styles << Daily::tr("underlined = journal entry");
+    }
+    QString html = QStringLiteral("<b>%1</b>").arg(QLocale().toString(date, QLocale::LongFormat).toHtmlEscaped());
+    if (lines.isEmpty()) {
+        return html + QStringLiteral("<br>") + Daily::tr("No data for this day").toHtmlEscaped();
+    }
+    for (const QString &line : lines) {
+        html += QStringLiteral("<br>") + line.toHtmlEscaped();
+    }
+    if (!styles.isEmpty()) {
+        html += QStringLiteral("<br><i>%1</i>")
+                    .arg(Daily::tr("Legend: %1").arg(styles.join(QStringLiteral(", "))).toHtmlEscaped());
+    }
+    return html;
+}
+
 // Sets font appearence in calendar to reflect what data is present for that day.
 void Daily::UpdateCalendarDay(QDate date)
 {
@@ -997,17 +1098,20 @@ void Daily::UpdateCalendarDay(QDate date)
 
     Day * cpapDay = p_profile->FindDay(date, MT_CPAP);
     bool hascpap = cpapDay != nullptr;
-    bool hasoxi = p_profile->FindDay(date, MT_OXIMETER) != nullptr
-                  || (cpapDay && (cpapDay->channelHasData(OXI_SPO2)
-                                  || cpapDay->channelHasData(OXI_Pulse)
-                                  || cpapDay->channelHasData(POS_Movement)));
+    Day * oxiDay = p_profile->FindDay(date, MT_OXIMETER);
+    const bool hasOxiData = oxiDay != nullptr
+                            || (cpapDay && (cpapDay->channelHasData(OXI_SPO2) || cpapDay->channelHasData(OXI_Pulse)));
+    bool hasoxi = hasOxiData || (cpapDay && cpapDay->channelHasData(POS_Movement));
     Day * journalDay = p_profile->FindDay(date, MT_JOURNAL);
     bool hasjournal = journalDay != nullptr;
-    bool hasstage = p_profile->FindDay(date, MT_SLEEPSTAGE)!=nullptr;
-    bool haspos = p_profile->FindDay(date, MT_POSITION)!=nullptr;
+    Day * stageDay = p_profile->FindDay(date, MT_SLEEPSTAGE);
+    bool hasstage = stageDay != nullptr;
+    Day * posDay = p_profile->FindDay(date, MT_POSITION);
+    bool haspos = posDay != nullptr;
 
-    bool hasbookmarks = hasjournal && journalDay->settingExists(Bookmark_Start)
-                        && !journalDay->firstSession(MT_JOURNAL)->settings[Bookmark_Start].toList().isEmpty();
+    const int bookmarks = hasjournal && journalDay->settingExists(Bookmark_Start)
+                          ? journalDay->firstSession(MT_JOURNAL)->settings[Bookmark_Start].toList().size() : 0;
+    bool hasbookmarks = bookmarks > 0;
 
     charAttr.setFontWeight(QFont::DemiBold);        // Make everything a little darker
 
@@ -1024,7 +1128,7 @@ void Daily::UpdateCalendarDay(QDate date)
     }
 
     if (hasjournal) {
-        charAttr.setFontUnderline(true);            // has sleep position info
+        charAttr.setFontUnderline(true);            // has a journal entry
     }
 
     if (hasbookmarks) {
@@ -1038,6 +1142,9 @@ void Daily::UpdateCalendarDay(QDate date)
     if (haspos) {
         charAttr.setFontOverline(true);            // has sleep position info
     }
+
+    // Explain the day's data and its calendar styling in a tooltip.
+    charAttr.setToolTip(calendarDayToolTip(date, cpapDay, oxiDay, hasoxi, hasOxiData, stageDay, posDay, journalDay, bookmarks));
 
     ui->calendar->setDateTextFormat(date, charAttr);
 /***
@@ -2505,6 +2612,8 @@ void Daily::UnitsChanged()
     // just as if weight changed. may make bmi visible.
     on_weightSpinBox_editingFinished();
 #endif
+    // The calendar's day hints show the weight in the chosen units.
+    on_calendar_currentPageChanged(ui->calendar->yearShown(), ui->calendar->monthShown());
 }
 
 double  Daily::calculateBMI(double weight_kg, double height_cm) {
@@ -3309,6 +3418,8 @@ void Daily::on_Units10_100_clicked(){
     p_profile->appearance->setZombieMode(!mode);
     int uiValue = ui->ZombieSlider->value();
     set_ZombieUI(uiValue, true);
+    // The calendar's day hints show feelings on the chosen scale.
+    on_calendar_currentPageChanged(ui->calendar->yearShown(), ui->calendar->monthShown());
 }
 
 void Daily::on_weightSpinBox_valueChanged(double )
