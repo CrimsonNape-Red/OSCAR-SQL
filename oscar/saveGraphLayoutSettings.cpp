@@ -457,7 +457,7 @@ QString SaveGraphLayoutSettings::calculateButtonStyle(bool on,bool exitBtn){
             "max-width:1em;"
             "border:none;"
             );
-        // No QToolTip rule: the buttons' tooltips use the platform style like the rest of OSCAR.
+        // No QToolTip rule: the buttons use the tooltip colors set for the whole application (MainWindow).
         return btnStyle;
 }
 
