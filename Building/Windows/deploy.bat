@@ -194,15 +194,16 @@ goto :eof
 
 ::: =====================================================================================
 :makePortable
-::: Portable ZIP: the Release folder plus the portable.ini marker and a README, inside a
-::: single "OSCAR Portable" folder so that extracting it does not scatter files. Named
-::: like the installer, with -Portable added before any command line suffix.
+::: Portable ZIP: the Release folder plus the portable.ini marker, inside a single
+::: "OSCAR Portable" folder so that extracting it does not scatter files, and the README
+::: beside that folder at the top of the ZIP, where someone opening the ZIP sees it first.
+::: Named like the installer, with -Portable added before any command line suffix.
 set portableDir=%shadowBuildDir%\Portable
 set portableApp=%portableDir%\OSCAR Portable
 mkdir "%portableApp%"
 xcopy /E /I /Q /Y "%releaseDir%" "%portableApp%" 1>nul || (call :err 90	failure to copy %releaseDir% & exit /b 90)
 copy "%toolDir%\portable.ini" "%portableApp%" 1>nul || (call :err 91	failure to copy portable.ini & exit /b 91)
-copy "%toolDir%\README-Portable.txt" "%portableApp%" 1>nul || (call :err 92	failure to copy README-Portable.txt & exit /b 92)
+copy "%toolDir%\README-Portable.txt" "%portableDir%" 1>nul || (call :err 92	failure to copy README-Portable.txt & exit /b 92)
 
 ::: Version fields come from buildinfo.iss, written above: #define <name> "<value>"
 set pVersion=
@@ -222,7 +223,7 @@ set zipName=%zipName%-Portable%suffixParam%.zip
 ::: Windows' own tar (bsdtar) writes ZIP files; Git's GNU tar, which may be earlier on
 ::: the PATH after :getGawk, does not.
 if exist "%shadowBuildDir%\Installer\%zipName%" del /q "%shadowBuildDir%\Installer\%zipName%"
-"%SystemRoot%\System32\tar.exe" -a -c -f "%shadowBuildDir%\Installer\%zipName%" -C "%portableDir%" "OSCAR Portable" || (call :err 93	failure to create %zipName% & exit /b 93)
+"%SystemRoot%\System32\tar.exe" -a -c -f "%shadowBuildDir%\Installer\%zipName%" -C "%portableDir%" "OSCAR Portable" "README-Portable.txt" || (call :err 93	failure to create %zipName% & exit /b 93)
 if NOT exist "%shadowBuildDir%\Installer\%zipName%" (call :err 94	%zipName% was not created & exit /b 94)
 exit /b 0
 

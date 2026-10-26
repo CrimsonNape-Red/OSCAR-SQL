@@ -23,8 +23,8 @@ Everything the user keeps is in a folder beside the program folder, so an upgrad
 E:\
 ├── OSCAR Portable\             program folder (any name, any drive); replaced on upgrade
 │   ├── OSCAR.exe, Qt DLLs, plugins, Help\, Html\, Translations\   (= deploy's Release\)
-│   ├── portable.ini            marker; DataFolder=..\OSCAR Portable Data
-│   └── README-Portable.txt
+│   └── portable.ini            marker; DataFolder=..\OSCAR Portable Data
+├── README-Portable.txt         at the top of the ZIP, so it is seen on opening the ZIP
 └── OSCAR Portable Data\        portable data folder; never in the ZIP; must be writable
     ├── Settings\OSCAR_Team\OSCAR 2.0.ini    (development builds: branch name added)
     └── OSCAR20_Data\                        default data folder
@@ -160,8 +160,9 @@ back to Documents.
 
 Built whenever the installer is built (skipped with `skipInstall`, like the installer):
 
-1. `:makePortable` copies `Release\` into `Portable\OSCAR Portable\`, adds `portable.ini` and
-   `README-Portable.txt` from `Building\Windows\`.
+1. `:makePortable` copies `Release\` into `Portable\OSCAR Portable\` and adds `portable.ini`
+   from `Building\Windows\`. `README-Portable.txt` goes into `Portable\` itself, so it sits
+   at the top of the ZIP beside the `OSCAR Portable` folder.
 2. Name follows the installer: `OSCAR-<ver>-Win64[-<rev>]-Portable<suffix>.zip`, with the
    revision added for non-release builds; fields come from the generated `buildinfo.iss`.
 3. Zipped with `%SystemRoot%\System32\tar.exe -a` (bsdtar). Git's GNU tar, which can be first

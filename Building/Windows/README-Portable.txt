@@ -13,8 +13,12 @@ or SD card and be used on any Windows PC. It uses two folders side by side:
 
 Test builds name the data folder with a suffix, such as OSCAR20_Data-test.
 
-Nothing is written to the Windows registry. The folders still work if the drive
-gets a different letter on another PC.
+OSCAR keeps its settings in the Settings folder, not in the Windows registry.
+Its file windows do note the last folder you opened in the registry, but OSCAR
+removes that note when it closes, unless other programs built with Qt (the
+toolkit OSCAR uses) already keep theirs there.
+
+The folders still work if the drive gets a different letter on another PC.
 
 To keep your data somewhere else, change the DataFolder line in portable.ini
 before starting OSCAR for the first time.
