@@ -76,6 +76,7 @@ QString htmlLeftSessionInfo;
 QString htmlLeftFooter;
 
 extern ChannelID PRS1_PeakFlow;
+extern ChannelID WM_rRMV;
 extern ChannelID Prisma_ObstructLevel, Prisma_rMVFluctuation, Prisma_rRMV, Prisma_PressureMeasured, Prisma_FlowFull;
 
 #define WEIGHT_SPIN_BOX_DECIMALS 1
@@ -107,6 +108,7 @@ const QList<QString> standardGraphOrder = {
     STR_GRAPH_Oxi_Pulse, STR_GRAPH_Oxi_SPO2, STR_GRAPH_Oxi_Perf, STR_GRAPH_Oxi_Plethy,
     "AWRespRate", "AWHRV",   // Apple Watch (match channel codes)
     STR_GRAPH_AHI, STR_GRAPH_TAP, STR_GRAPH_ObstructLevel, STR_GRAPH_PressureMeasured, STR_GRAPH_rRMV, STR_GRAPH_rMVFluctuation,
+    "WM_rRMV",   // Weinmann relative minute volume (matches the channel code)
     STR_GRAPH_FlowFull
     #if defined(STEADY_BREATHING)
     , STR_GRAPH_CPAP_SteadyBreathing
@@ -123,6 +125,7 @@ const QList<QString> advancedGraphOrder = {
     STR_GRAPH_Oxi_Pulse, STR_GRAPH_Oxi_SPO2, STR_GRAPH_Oxi_Perf, STR_GRAPH_Oxi_Plethy,
     "AWRespRate", "AWHRV",   // Apple Watch (match channel codes)
     STR_GRAPH_AHI, STR_GRAPH_TAP, STR_GRAPH_ObstructLevel, STR_GRAPH_PressureMeasured, STR_GRAPH_rRMV, STR_GRAPH_rMVFluctuation,
+    "WM_rRMV",   // Weinmann relative minute volume (matches the channel code)
     STR_GRAPH_FlowFull
     #if defined(STEADY_BREATHING)
     , STR_GRAPH_CPAP_SteadyBreathing
@@ -293,6 +296,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         CPAP_MaskPressure, CPAP_RespRate, CPAP_MinuteVent, CPAP_PTB, PRS1_PeakFlow, CPAP_RespEvent, CPAP_Ti, CPAP_Te,
         CPAP_IE, SLEEP_Stage, POS_Inclination, POS_Orientation, POS_Movement, CPAP_Test1,
         Prisma_ObstructLevel, Prisma_rRMV, Prisma_rMVFluctuation, Prisma_PressureMeasured, Prisma_FlowFull
+        ,  WM_rRMV
         ,  BMC_PressureWave, BMC_FlowAbnormality, BMC_IE_Ratio
         ,  RMVENT_AlvMinVent, RMVENT_SpontCyc, RMVENT_SpontTrig
         #if defined(STEADY_BREATHING)
@@ -460,6 +464,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     if (auto *g = graphlist.value(schema::channel[Prisma_rRMV].code())) g->AddLayer(new gLineChart(Prisma_rRMV, square));
     if (auto *g = graphlist.value(schema::channel[Prisma_rMVFluctuation].code())) g->AddLayer(new gLineChart(Prisma_rMVFluctuation, square));
     if (auto *g = graphlist.value(schema::channel[Prisma_FlowFull].code())) g->AddLayer(new gLineChart(Prisma_FlowFull, square));
+    if (auto *g = graphlist.value(schema::channel[WM_rRMV].code())) g->AddLayer(new gLineChart(WM_rRMV, square));
     #if defined(STEADY_BREATHING)
     if (p_profile->cpap->steadyBreathing()==SB_ACTIVE) {
         if (auto *g = graphlist.value(schema::channel[CPAP_SteadyBreathing].code())) g->AddLayer(new gLineChart(CPAP_SteadyBreathing, false));
@@ -1597,7 +1602,7 @@ QString Daily::getStatisticsInfo(Day * day)
     ChannelID chans[]={
         CPAP_Pressure,CPAP_PressureSet,CPAP_EPAP,CPAP_EPAPSet,CPAP_IPAP,CPAP_IPAPSet,CPAP_PS,CPAP_PTB,
         PRS1_PeakFlow,
-        Prisma_ObstructLevel, Prisma_PressureMeasured, Prisma_rRMV, Prisma_rMVFluctuation,
+        Prisma_ObstructLevel, Prisma_PressureMeasured, Prisma_rRMV, Prisma_rMVFluctuation, WM_rRMV,
         CPAP_MinuteVent, CPAP_RespRate, CPAP_RespEvent,CPAP_FLG,
         RMVENT_AlvMinVent, RMVENT_SpontCyc, RMVENT_SpontTrig,
         CPAP_Leak, CPAP_LeakTotal, CPAP_Snore,  CPAP_IE,  CPAP_Ti,CPAP_Te, CPAP_TgMV,

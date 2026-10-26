@@ -4,6 +4,47 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-21 - Weinmann SOMNObalance e: incomplete import, wrong events and statistics
+
+**Files:** `oscar/SleepLib/loader_plugins/weinmann_loader.cpp/.h`, `oscar/daily.cpp`,
+`Notes/Developer Notes/WEINMANN_LOADER.md`
+
+**Symptom:** A SOMNObalance e card imported only the first 5 detailed nights, all under one
+hard-coded serial number. The 60 usage days of week data were never imported. Events were
+limited to four types, matched by ASCII letters, and the device settings (mode, pressure
+limits, humidifier, soft start, firmware) were missing. Pressure was stored as mask pressure,
+so Overview had no median or 95 % for those nights. Event counts and indices differed from
+Weinmann's own software (WEINMANNsupport).
+
+**Root cause:** The loader was an unfinished stub. It read the week records but discarded them,
+looped over a fixed 5 day records, took the serial from a constant and decoded events by guessed
+characters (`'@'`, `'A'`, `'F'`, `'*'`). The real event codes (3, 4, 8, 9, 10, 16, 17, 34, 64, 65),
+their timing (end of the event + 1 s, duration in 1/10 s) and Weinmann's suppression rules were
+not known to it.
+
+**Fix:** Port of TBM's Weinmann loader (SleepyHead fork), checked against WEINMANNsupport
+event by event on several nights.
+- Reads the settings block (serial, model, firmware, mode, pressure limits, humidifier,
+  soft start, storage settings) and imports week data as low resolution sessions.
+- Imports every detailed day record with flow, pressure (as `CPAP_Pressure`) and the new
+  `WM_rRMV` waveform (relative minute volume, 100 = reference); `daily.cpp` gets a graph for it.
+- Decodes the real event codes (RERA, flow limitation, epochs, central/obstructive apneas and
+  hypopneas, artefacts), starts events at the right time, and applies Weinmann's rule that an
+  overlapping obstructive event suppresses central events and RERAs. RERAs of week data are
+  dropped, like Weinmann's software does.
+- Flow and leak are derived like WEINMANNsupport does: the compressed flow and week leak bytes are
+  decompressed, the respiratory flow and the leak of detailed nights are calculated from flow and
+  pressure (no dependency on the mask leak profile of the OSCAR profile).
+- A night stored from week data only is replaced by the detailed data of an older card, so cards
+  can be imported in any order.
+- Validates the index and every record against the block sizes, so a damaged card is rejected
+  or the damaged record skipped with a warning instead of reading out of bounds.
+- `weinmann_data_version` stays at 3: the loader writes to the device with the real serial number
+  instead of the old hard-coded `141819`, so old and new data never share a device. The format is
+  described in `WEINMANN_LOADER.md`.
+
+---
+
 ## 2026-10-24 - ResMed import fails when the data folder path has non-Latin-1 characters (#350)
 
 **Files:** `oscar/SleepLib/machine_loader.cpp`, `oscar/SleepLib/loader_plugins/resmed_loader.cpp`
@@ -47,6 +88,7 @@ overwritten.
 The card's `.dat` file holds 10 Hz flow and mask pressure for the most recent ~11 h of
 therapy. It is decoded in `Notes/G3X/BMC_G3X_DAT_FORMAT.md` but not imported: the EVT-only
 import already shows the same data as PAP-Link.
+>>>>>>> upstream/master
 
 ---
 

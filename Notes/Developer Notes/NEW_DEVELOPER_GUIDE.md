@@ -215,7 +215,7 @@ original card.
 | `mseries_loader` | Respironics M-Series (file import from *Data* menu) |
 | `icon_loader`, `sleepstyle_loader` | Fisher & Paykel ICON and SleepStyle |
 | `intellipap_loader` | DeVilbiss IntelliPAP and DV6 |
-| `prisma_loader`, `weinmann_loader` | Löwenstein / Weinmann prisma line; older Weinmann devices |
+| `prisma_loader`, `weinmann_loader` | Löwenstein / Weinmann prisma line; Weinmann SOMNO-series (`WM_DATA.TDF`, see `Notes/Developer Notes/WEINMANN_LOADER.md`) |
 | `resvent_loader` | Resvent iBreeze and Hoffrichter Point 3 |
 | `bmc_loader`, `bmcg3x_loader` (+ `*DataParsing`) | BMC legacy formats and BMC G3/G3X `.00x` format |
 | `apex_loader` | Apex Medical XT |
