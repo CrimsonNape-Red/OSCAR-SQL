@@ -4,6 +4,29 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-27 - BMC G3X/E5: session start moved hours late (GitLab #353)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcg3x_loader.h`
+
+**Symptom:** An E5 B25A Plus night that PAP-Link reported as 01:23:22–07:10:34 started at
+about 03:17 in OSCAR. The card's IDX record and waveform covered the whole night with no gaps.
+
+**Root cause:** `BmcG3xLoader::findStableStartMs()` (added 2026-03-16 to hide startup
+artifacts) moved the session start to the end of the first pressure rise, assuming it was a
+startup ramp. With no ramp, an auto machine can sit at minimum pressure for hours; the first rise
+is then an auto-titration response. On that night pressure stayed at 5.0 cmH2O until 03:17:07, so
+1 h 54 min of therapy was cut. A survey of the G3X test cards found the start moved on most
+sessions — usually by a few minutes of genuine ramp, but by 10–114 minutes on 10 nights across
+two cards. On every one of those nights, respiratory flow was present from the first packet.
+
+**Fix:** Dropped the pressure-based phases; the start is now the first packet that begins a
+sustained run of respiratory flow (the existing fallback), else the first packet. Ramp time now
+counts as therapy, as in PAP-Link and the other loaders. Session IDs come from the first packet
+and are unchanged, so re-importing replaces the old sessions. Verified by batch import: the night
+now runs 01:23:23–07:10:34.
+
+---
+
 ## 2026-10-21 - Weinmann SOMNObalance e: incomplete import, wrong events and statistics
 
 **Files:** `oscar/SleepLib/loader_plugins/weinmann_loader.cpp/.h`, `oscar/daily.cpp`,

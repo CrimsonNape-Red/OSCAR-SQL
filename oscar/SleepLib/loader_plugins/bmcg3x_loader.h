@@ -36,47 +36,22 @@ public:
     virtual bool ExportPressureWaveform() const override { return false; }
     virtual bool ExportFlowAbnormalityWaveform() const override { return false; }
 
-    /// Advances the session start past machine startup noise to the first
-    /// therapeutically meaningful moment.
+    /// Advances the session start past any idle period before the patient puts on
+    /// the mask: returns the first packet that begins a sustained run of
+    /// respiratory flow, or the session start if there is none.
     ///
-    /// Phase 1 — skip idle: the machine idles at minimum APAP pressure before
-    ///   the patient puts on the mask; scan forward until PressureTrend rises
-    ///   above the initial value.
-    /// Phase 2 — skip ramp: once rising, scan until PressureTrend stops
-    ///   increasing, i.e., the ramp peak has been reached.
-    /// Phase 3 — flow fallback: for fixed-pressure (CPAP) sessions where pressure
-    ///   never rises, scan forward for the first packet with sustained respiratory
-    ///   flow, indicating the patient has put on the mask.
+    /// Pressure is deliberately not used.  An earlier version skipped to the end of
+    /// the first pressure rise on the assumption that it was a startup ramp, but an
+    /// auto machine with no ramp can sit at minimum pressure for hours and its first
+    /// rise is then an auto-titration response — that cut up to two hours of therapy
+    /// from the start of the session (GitLab #353).  A ramp is therapy time anyway:
+    /// PAP-Link counts it, and no other loader trims it.
     virtual qint64 findStableStartMs(BmcSession* bmcSession) const override {
         const auto & waveforms = bmcSession->Waveforms;
         if (waveforms.size() < 2) {
             return bmcSession->StartTimestamp.toMSecsSinceEpoch();
         }
 
-        // Phase 1: skip packets where pressure is at or below the initial idle value.
-        const quint16 idlePt = waveforms[0].Raw.PressureTrend;
-        int rampStart = 0;
-        for (int i = 1; i < waveforms.size(); ++i) {
-            if (waveforms[i].Raw.PressureTrend > idlePt) {
-                rampStart = i;
-                break;
-            }
-        }
-
-        if (rampStart > 0) {
-            // Phase 2: from rampStart, find first packet where pressure stops rising.
-            for (int i = rampStart; i + 1 < waveforms.size(); ++i) {
-                quint16 pt0 = waveforms[i].Raw.PressureTrend;
-                quint16 pt1 = waveforms[i + 1].Raw.PressureTrend;
-                if (pt0 >= pt1) {
-                    return waveforms[i].Timestamp.toMSecsSinceEpoch();
-                }
-            }
-            // Ramp never completed within this session.
-            return bmcSession->StartTimestamp.toMSecsSinceEpoch();
-        }
-
-        // Phase 3: pressure never rose (fixed-pressure / CPAP mode, or very short session).
         // Scan forward for the first packet followed by a sustained run of respiratory flow.
         // Uses the same noise floor as findStableEndMs().
         static constexpr qint16 kMaskOnFlowNoise  = 25;
@@ -118,7 +93,7 @@ public:
             }
         }
 
-        // Flow-based detection also failed — use full session start.
+        // No sustained flow anywhere — use full session start.
         return bmcSession->StartTimestamp.toMSecsSinceEpoch();
     }
     // Leak is now sourced from waveform packet offset 0x52A (raw × 0.16 → L/min).
