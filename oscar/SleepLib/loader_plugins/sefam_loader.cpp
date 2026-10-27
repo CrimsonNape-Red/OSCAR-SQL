@@ -128,20 +128,46 @@ SefamLoader::SefamLoader()
 SefamLoader::~SefamLoader() = default;
 
 /*! \brief Sort DATA_nnn directory names into chronological order.
+    \param dir  The serial directory that holds them.
+    \param dirs Directory names, sorted in place.
 
-    Session directories are not consistently zero-padded across models: the Rêve
-    Auto writes DATA_000, the S.Box AUTO writes DATA_0. Plain name sorting puts
-    DATA_10 before DATA_2, which would carry therapy settings backwards in time.
-    Sort on the numeric suffix, falling back to name order if it is missing. */
-static void sortSessionDirs(QStringList &dirs)
+    The directory number is not a usable order. It is reused: an S.Box card held
+    DATA_0 to DATA_299 with the newest session in DATA_241 and the oldest in
+    DATA_242, the device having come round to DATA_0 again and overwritten its
+    way forward. Numeric order then puts five months of history in the wrong
+    place, which carries settings backwards in time and breaks the newest-first
+    match against the S.Box session archive. Nor is it consistently zero-padded
+    (DATA_000 on the Rêve, DATA_0 on the S.Box), so name order is worse still.
+
+    Sort on each session's start time from its .INI instead. The numeric suffix
+    breaks ties, and orders a directory whose .INI cannot be read — such a
+    directory is skipped on import anyway. */
+static void sortSessionDirs(const QDir &dir, QStringList &dirs)
 {
-    std::sort(dirs.begin(), dirs.end(), [](const QString &a, const QString &b) {
-        bool aok = false, bok = false;
-        const int an = a.section('_', -1).toInt(&aok);
-        const int bn = b.section('_', -1).toInt(&bok);
-        if (aok && bok && an != bn) { return an < bn; }
-        return a < b;
+    struct Key {
+        qint64  startMs;   // Session start, or 0 when the .INI cannot be read
+        int     number;    // DATA_nnn suffix, or -1 when it is not a number
+        QString name;
+    };
+    QVector<Key> keys;
+    keys.reserve(dirs.size());
+    for (const QString &d : dirs) {
+        QHash<QString, ChannelSpec> specs;
+        QDateTime start;
+        const bool ok = SefamParsing::parseIni(
+            dir.absoluteFilePath(d + "/" + d + ".INI"), specs, start);
+        bool numOk = false;
+        const int number = d.section('_', -1).toInt(&numOk);
+        keys.append({ ok && start.isValid() ? start.toMSecsSinceEpoch() : 0,
+                      numOk ? number : -1, d });
+    }
+    std::sort(keys.begin(), keys.end(), [](const Key &a, const Key &b) {
+        if (a.startMs != b.startMs) { return a.startMs < b.startMs; }
+        if (a.number != b.number)   { return a.number < b.number; }
+        return a.name < b.name;
     });
+    dirs.clear();
+    for (const Key &k : keys) { dirs.append(k.name); }
 }
 
 void SefamLoader::Register()
@@ -742,7 +768,7 @@ int SefamLoader::Open(const QString &path)
     QDir dir(serialDir);
     QStringList dirs =
         dir.entryList(QStringList("DATA_*"), QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
-    sortSessionDirs(dirs);   // chronological, not lexical — see above
+    sortSessionDirs(dir, dirs);   // by start time, not by name or number — see above
 
     // Brand, not "SEFAM": the user sees "Sanrai" everywhere else for a Rêve, so
     // the manufacturer's name here would look like a different device.
@@ -784,15 +810,18 @@ int SefamLoader::Open(const QString &path)
             // wrong block. Mismatched settings and events are worse than none.
             constexpr int kMaxSkip = 16;
 
-            // The derived minute count matched the archive exactly on 23 of the
-            // 24 sessions across both sample cards. The exception was a short
-            // session written seven weeks before the next one, where the card
-            // holds half a minute more than the device counted — a torn or
-            // abandoned write. So an exact match is tried first and a
-            // one-minute discrepancy is accepted only when nothing fits exactly.
-            const auto findBlock = [&](int from, int want, int tolerance) {
+            // The derived minute count usually matches the archive exactly, but
+            // now and then the card holds one minute more than the device
+            // counted — 5 of 325 sessions across three cards, always in that
+            // direction. So a one-minute discrepancy is accepted, and the
+            // NEAREST block within it wins. Searching the whole window for an
+            // exact match first is wrong: it once passed over the adjacent
+            // block, one minute short, for an unrelated session of the right
+            // length fifteen blocks back, and every older session then failed
+            // to match.
+            const auto findBlock = [&](int from, int want) {
                 for (int scan = from; scan >= 0 && from - scan < kMaxSkip; --scan) {
-                    if (qAbs(archive.at(scan).minutes - want) <= tolerance) {
+                    if (qAbs(archive.at(scan).minutes - want) <= 1) {
                         return scan;
                     }
                 }
@@ -804,8 +833,7 @@ int SefamLoader::Open(const QString &path)
                 const int want = archiveMinutesFor(dir.absoluteFilePath(dirs.at(i)));
                 if (want < 0) { continue; }        // stub directory: no block exists
 
-                int scan = findBlock(b, want, 0);
-                if (scan < 0) { scan = findBlock(b, want, 1); }
+                const int scan = findBlock(b, want);
                 if (scan < 0) {
                     qWarning() << "Sefam: session archive alignment lost at"
                                << dirs.at(i) << "— older sessions get no events";

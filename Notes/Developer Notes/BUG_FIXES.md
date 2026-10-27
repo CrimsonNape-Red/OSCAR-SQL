@@ -4,6 +4,34 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-10-27 - SEFAM S.Box: no events or settings on a well-used device (GitLab #354)
+
+**Files:** `oscar/SleepLib/loader_plugins/sefamDataParsing.cpp/.h`,
+`oscar/SleepLib/loader_plugins/sefam_loader.cpp`, `Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md`
+
+**Symptom:** An S.Box AUTO (firmware A020200) imported its waveforms, but every night had
+AHI 0.00, no event flags and PAP mode "Unknown". The device's own display showed AHI 1–2.
+
+**Root cause:** Three faults, each enough on its own to lose some or all events:
+1. The session archive in `.RAM` is a 0x160000-byte ring buffer. `readMemoryImage()` assumed it
+   always starts at file offset 0x1009B. On this card the ring had wrapped, so that offset held
+   the tail of a block, and no blocks were read at all.
+2. The card's `DATA_nnn` numbers also wrap: `DATA_0`…`DATA_299`, newest in `DATA_241`, oldest in
+   `DATA_242`. `sortSessionDirs()` sorted by number, so the newest-first archive match began at
+   the wrong session.
+3. The match searched its 16-block window for an exact minute count before trying ±1. It passed
+   over the adjacent block (135 vs 136 wanted) for an unrelated 136-minute block 15 back, which
+   misaligned every older session.
+
+**Fix:** The archive is read as a ring, starting at the oldest block, found as the start of the
+longest block chain. Directories are sorted by `.INI` start time. The matcher takes the nearest
+block within ±1 minute. Verified by batch import: this card matches 300 of 300 sessions, with
+per-session counts identical to the archive, and all sessions read CPAP 11.5. The two earlier
+S.Box cards are unchanged (21/22 and 3/3). Sessions already imported are not replaced (the
+session IDs are unchanged), so affected users must delete those sessions and re-import.
+
+---
+
 ## 2026-10-27 - BMC G3X/E5: session start moved hours late (GitLab #353)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmcg3x_loader.h`

@@ -205,6 +205,16 @@ struct Settings
 //! the start of the file (the 155-byte text header precedes the image itself).
 constexpr int kArchiveOffset = 0x1009B;
 
+/*! \brief Size of the ring buffer that holds the session archive, in bytes.
+
+    The archive occupies image offsets 0x10000-0x170000. Once that is full the
+    device carries on writing from kArchiveOffset again, overwriting the oldest
+    blocks, so on a well-used device the oldest surviving block can start
+    anywhere in the ring and one block straddles its end. Measured on a card
+    whose ring had wrapped: 1255 blocks chain contiguously across the end of the
+    ring only at exactly this length. */
+constexpr int kArchiveRingLength = 0x160000;
+
 //! Length of the fixed part of an archive block, in bytes: 44 big-endian uint16.
 constexpr int kArchiveHeaderLength = 88;
 
@@ -237,7 +247,8 @@ struct MinuteRecord
 
     The S.Box AUTO writes no .LOG. Its events and its therapy settings live only
     in the <serial>.RAM memory image, as a contiguous chain of these blocks —
-    one per session for the whole life of the device, oldest first. See
+    one per session, oldest first, for as far back as the archive's ring buffer
+    reaches (kArchiveRingLength). See
     Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md.
 
     The counts below are the device's own totals. They are reproduced exactly by
@@ -275,13 +286,24 @@ struct SessionSummary
     \return false if the file cannot be read or carries no archive.
 
     The archive is walked as a chain — each block's length is 88 + 6 * minutes,
-    and the next block begins immediately after — starting at kArchiveOffset.
-    Do NOT locate blocks by scanning for kArchiveMarker: that value also occurs
-    inside the per-minute data and a scan invents blocks that are not there.
+    and the next block begins immediately after — around a ring of
+    kArchiveRingLength bytes starting at kArchiveOffset. Do NOT collect blocks
+    by scanning for kArchiveMarker: that value also occurs inside the per-minute
+    data and a scan invents blocks that are not there.
+
+    Where the chain starts is not fixed. Until the ring first fills it starts at
+    kArchiveOffset; after that it starts at the oldest block not yet overwritten,
+    which is wherever the device's writes have reached. Nothing in the image is
+    known to record that position, so it is found from the chains themselves:
+    every marker is tried as a starting point and the longest chain wins. The
+    true oldest block reaches the newest one; a stray marker inside minute data
+    either dies within a block or two or joins the real chain part-way along.
 
     A block whose marker, minute count or extent is implausible ends the walk
     rather than failing it, so a truncated or partly overwritten image still
-    yields the blocks that precede the damage. */
+    yields the blocks that precede the damage. If the chain comes round to its
+    own start no oldest block can be told apart, and the image is rejected
+    rather than read in an arbitrary order. */
 bool readMemoryImage(const QString &path, QVector<SessionSummary> &out);
 
 /*! \struct SessionData

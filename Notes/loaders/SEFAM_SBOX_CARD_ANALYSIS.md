@@ -50,12 +50,17 @@ walking both lists newest-first. The count a directory should have is
 minutes = floor(recordCount * 10 / 60) + 1
 ```
 
-which holds on **23 of the 24 sessions** across both cards. The exception is a
-3.5-minute session written seven weeks before the next one, where the card holds
-half a minute more than the device counted — a torn or abandoned write. The
-loader therefore tries an exact match first and accepts a one-minute discrepancy
-only when nothing fits exactly; with that, both cards match completely (21 of 22
-directories on card A, the 22nd being the data-less stub, and 3 of 3 on card B).
+which holds on **23 of the 24 sessions** across cards A and B, and on 296 of
+card C's 300. Every exception is one minute, in the same direction — the card
+holding slightly more than the device counted; on card B it is a 3.5-minute
+session written seven weeks before the next one, plausibly a torn or abandoned
+write. The loader accepts a one-minute discrepancy and takes the **nearest**
+block within it. It used to search the whole skip window for an exact match
+first and fall back to ±1 only when none existed; on card C that passed over
+the adjacent block (135 against a wanted 136) for an unrelated 136-minute block
+fifteen back, and every older session then failed to match. With nearest-first,
+all three cards match completely: 21 of 22 directories on card A (the 22nd
+being the data-less stub), 3 of 3 on card B, 300 of 300 on card C.
 
 The scan skips backwards over unmatched blocks — necessary, since card A has
 three archived sessions with no directory — but is bounded, and gives up rather
@@ -134,8 +139,13 @@ Sessions are retained sparsely and consecutive directory numbers can be weeks
 apart, so **the numbering says nothing about elapsed time** — read every `.INI`.
 
 Directory names are **not zero-padded** (`DATA_0` … `DATA_2`, `DATA_90` …
-`DATA_111`), so they must be sorted numerically. This is the same trap the Rêve
-note records.
+`DATA_111`), so name order is wrong. **Numeric order is wrong too, once the
+numbers wrap.** Card C (firmware `VER :A020200`, five months of nightly use)
+holds exactly `DATA_0` … `DATA_299`: the newest session is in `DATA_241`, the
+oldest in `DATA_242`, the device having reached 299, gone back to `DATA_0` and
+overwritten its way forward. Whether 300 is a fixed limit or depends on card
+space is not known. The loader sorts directories by the start time in each
+`.INI`, with the number only as a tie-break.
 
 ### `upload.dat` is the settings write-back channel
 
@@ -656,8 +666,8 @@ rediscovered and believed a second time.
 
 **The events are on the card.** They are not an event log — there is no list of
 individual event times anywhere — but a **per-session summary archive**, one
-block per session for the whole life of the device, in the same memory image as
-the settings.
+block per session for as far back as its ring buffer reaches (see below), in
+the same memory image as the settings.
 
 ### Structure
 
@@ -670,6 +680,38 @@ number of sessions: 467" its vendor report prints — and 3 on card B.
 
 Walk the chain; do not scan for the marker. 0xFEA1 also occurs inside the
 per-minute data, and a scan produces false blocks.
+
+### The archive is a ring buffer
+
+"For the whole life of the device" is true only until the archive fills. It is
+a **ring of 0x160000 bytes** (image offsets 0x10000–0x170000, file offsets
+0x1009b–0x17009b); once full, the device carries on writing from the start of
+the ring, overwriting the oldest blocks. Card C's ring had wrapped:
+
+- File offset 0x1009b holds the *tail* of a block, not a marker — so a walk
+  that starts there finds nothing, and every session imported with no events and
+  no settings (AHI 0.00, mode "Unknown"). That was the reported symptom.
+- The oldest surviving block starts at 0x11e28b; the chain runs to the end of
+  the ring, the block there straddles it and continues at 0x1009b, and the chain
+  resumes at 0x104bd and runs to the newest block, which ends at 0x11dd51. The
+  1338 bytes between are a partly overwritten older block.
+- 1255 blocks chain contiguously across the end of the ring at exactly this ring
+  length, and the marker occurs exactly 1255 times — no strays on this card.
+
+No pointer to the write position was found (searched as file, image and ring
+offset, 32-bit, both byte orders). The loader therefore tries every marker as a
+starting point and keeps the longest chain: the true oldest block reaches the
+newest one, and a stray marker in minute data either dies within a block or two
+or joins the real chain part-way along. A chain that comes back round to its own
+start — the newest block ending exactly where the oldest begins — has no
+identifiable start, and the image is rejected rather than read in an arbitrary
+order.
+
+Card C's decoded values agree with what its owner reported from the device's
+own display: median AHI excluding central hypopnoeas 1.2 ("approximately 1–2"),
+all 300 sessions CPAP at 11.5 cmH₂O. Its mask-leak word reads 234 (low seven
+bits 106), outside the 18–60 lpm mask range, so it is not shown; whether that
+is a different encoding on this firmware is unknown without a vendor report.
 
 ### Block header — 44 uint16, big-endian
 

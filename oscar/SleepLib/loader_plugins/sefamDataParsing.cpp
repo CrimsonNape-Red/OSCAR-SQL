@@ -15,6 +15,7 @@
 #include <QDir>
 #include <QFile>
 #include <QRegularExpression>
+#include <QSet>
 #include <QSettings>
 
 #include <cctype>
@@ -432,24 +433,88 @@ bool readMemoryImage(const QString &path, QVector<SessionSummary> &out)
     const QByteArray raw = f.readAll();
     f.close();
 
+    // Everything below addresses the archive by position within its ring, so a
+    // block that straddles the end of the ring reads as if it were contiguous.
+    // An image too short to hold the whole ring cannot have wrapped; it is read
+    // as far as it goes, without wrapping.
+    const bool fullRing   = raw.size() >= kArchiveOffset + kArchiveRingLength;
+    const int  ringLength = fullRing ? kArchiveRingLength
+                                     : static_cast<int>(raw.size()) - kArchiveOffset;
+    if (ringLength < kArchiveHeaderLength) { return false; }
+    const quint8 *ring = reinterpret_cast<const quint8 *>(raw.constData()) + kArchiveOffset;
+
     // The image is stored in the clear: unlike the Reve's, it is neither
     // obfuscated nor encrypted, so nothing is descrambled here.
-    const auto be16 = [&raw](int offset) -> quint16 {
-        return static_cast<quint16>((static_cast<quint8>(raw.at(offset)) << 8)
-                                   | static_cast<quint8>(raw.at(offset + 1)));
+    const auto byteAt = [ring, ringLength](int pos) -> quint8 {
+        return ring[pos % ringLength];
+    };
+    const auto be16 = [&byteAt](int pos) -> quint16 {
+        return static_cast<quint16>((byteAt(pos) << 8) | byteAt(pos + 1));
     };
 
-    int off = kArchiveOffset;
-    while (off + kArchiveHeaderLength <= raw.size()) {
-        if (be16(off) != kArchiveMarker) { break; }
+    // Length of the block starting at ring position pos, or 0 if none does.
+    const auto blockLengthAt = [&](int pos) -> int {
+        if (!fullRing && pos + kArchiveHeaderLength > ringLength) { return 0; }
+        if (be16(pos) != kArchiveMarker) { return 0; }
 
-        const int minutes = be16(off + 24 * 2);
+        const int minutes = be16(pos + 24 * 2);
         // One block per session, so a minute count beyond a couple of days means
         // the chain has been lost rather than that a session ran that long.
-        if (minutes <= 0 || minutes > 4320) { break; }
+        if (minutes <= 0 || minutes > 4320) { return 0; }
 
-        const int blockLen = kArchiveHeaderLength + minutes * kArchiveMinuteLength;
-        if (off + blockLen > raw.size()) { break; }
+        const int len = kArchiveHeaderLength + minutes * kArchiveMinuteLength;
+        if (fullRing ? len > ringLength : pos + len > ringLength) { return 0; }
+        return len;
+    };
+
+    // Find the oldest surviving block as the start of the longest chain. A
+    // chain from one block is that block plus the chain from the next, so
+    // lengths are memoised and every block is walked once however many markers
+    // lead into it.
+    QHash<int, int> chainLength;   // ring position -> blocks from there to the newest
+    int start = -1, longest = 0;
+    const int lastMarkerPos = fullRing ? ringLength - 1 : ringLength - 2;
+    for (int pos = 0; pos <= lastMarkerPos; ++pos) {
+        if (byteAt(pos) != (kArchiveMarker >> 8) || chainLength.contains(pos)) { continue; }
+        if (be16(pos) != kArchiveMarker) { continue; }
+
+        QVector<int> chain;
+        QSet<int> onPath;
+        int p = pos, tail = 0;
+        for (;;) {
+            const auto known = chainLength.constFind(p);
+            if (known != chainLength.constEnd()) { tail = known.value(); break; }
+            if (onPath.contains(p)) {
+                // The newest block ends exactly where the oldest begins, so the
+                // chain has no start. Rare, and cleared by the next session the
+                // device writes; reading it in an arbitrary order would attach
+                // events to the wrong nights.
+                qWarning() << "Sefam: session archive in" << path
+                           << "forms a closed loop; its oldest session cannot be found";
+                out.clear();
+                return false;
+            }
+            const int len = blockLengthAt(p);
+            if (len == 0) { break; }
+            chain.append(p);
+            onPath.insert(p);
+            p += len;
+            if (fullRing) { p %= ringLength; }
+        }
+        for (int i = chain.size() - 1; i >= 0; --i) {
+            chainLength.insert(chain.at(i), ++tail);
+        }
+        if (!chain.isEmpty() && tail > longest) {
+            longest = tail;
+            start   = pos;
+        }
+    }
+    if (start < 0) { return false; }
+
+    int off = start;
+    for (int n = 0; n < longest; ++n) {
+        const int blockLen = blockLengthAt(off);
+        const int minutes  = (blockLen - kArchiveHeaderLength) / kArchiveMinuteLength;
 
         SessionSummary s;
         s.minutes              = minutes;
@@ -508,15 +573,15 @@ bool readMemoryImage(const QString &path, QVector<SessionSummary> &out)
         }
 
         s.minuteData.resize(minutes);
-        const char *rec = raw.constData() + off + kArchiveHeaderLength;
+        int rec = off + kArchiveHeaderLength;
         for (int m = 0; m < minutes; ++m, rec += kArchiveMinuteLength) {
             MinuteRecord &r = s.minuteData[m];
-            r.meanPressure = static_cast<quint8>(rec[0]);
+            r.meanPressure = byteAt(rec);
 
             // Byte 2 is four independent two-bit counters, one per event type,
             // so a minute holding two of the same kind is not lost. Reading the
             // bits as mere presence flags undercounts and looks almost right.
-            const quint8 events = static_cast<quint8>(rec[2]);
+            const quint8 events = byteAt(rec + 2);
             r.obstructiveApnea     =  events       & 0x03;
             r.centralApnea         = (events >> 2) & 0x03;
             r.obstructiveHypopnea  = (events >> 4) & 0x03;
@@ -525,12 +590,17 @@ bool readMemoryImage(const QString &path, QVector<SessionSummary> &out)
             // Bit 7 of both of these is a flag of some other kind, not part of
             // the count. Left in, the totals disagree with the block header on
             // roughly a fifth of sessions.
-            r.flowLimitation = static_cast<quint8>(rec[3]) & 0x0F;
-            r.snore          = static_cast<quint8>(rec[4]) & 0x7F;
+            r.flowLimitation = byteAt(rec + 3) & 0x0F;
+            r.snore          = byteAt(rec + 4) & 0x7F;
         }
 
         out.append(s);
         off += blockLen;
+        if (fullRing) { off %= ringLength; }
+    }
+    if (start != 0) {
+        qDebug() << "Sefam: session archive has wrapped; oldest surviving block at ring offset"
+                 << Qt::hex << start;
     }
     return !out.isEmpty();
 }
