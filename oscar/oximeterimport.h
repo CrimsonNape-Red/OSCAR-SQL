@@ -33,6 +33,10 @@ public:
     explicit OximeterImport(QWidget *parent = 0);
     ~OximeterImport();
 
+    //! True if the user chose to download from a Viatom oximeter over Bluetooth; the
+    //! caller then opens the Viatom BLE Import dialog.
+    bool viatomBleImportRequested() const { return m_viatomBleImportRequested; }
+
 
 private slots:
     void on_nextButton_clicked();
@@ -102,6 +106,7 @@ protected:
 
 private:
     Ui::OximeterImport *ui;
+    bool m_viatomBleImportRequested = false;
     SerialOximeter * oximodule;
     gGraphView * liveView;
     gGraph * plethyGraph;

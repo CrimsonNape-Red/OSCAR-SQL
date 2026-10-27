@@ -384,6 +384,8 @@ class MainWindow : public QMainWindow
     void on_actionImport_Somnopose_Data_triggered();
 
     void on_actionImport_Viatom_Data_triggered();
+    void on_actionViatom_BLE_Import_triggered();
+    void updateViatomBleAction();
 
     //! \brief Populates the statistics with information.
     void on_statisticsButton_clicked();

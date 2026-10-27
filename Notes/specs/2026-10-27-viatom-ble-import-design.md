@@ -12,6 +12,48 @@ branch `vihealth-dev`.
   (Lepu `blepro` SDK). The disassembly and tools are in
   `~/QtProjects/2.2-Dev/ViHealth-analysis/`.
 
+## As built: phase 1 (2026-10-27, not yet tested on hardware)
+
+- **Code:**
+  - `SleepLib/viatomble/`:
+    - `viatomble_protocol` (CRC, frames, splitter, info JSON)
+    - `viatomble_link` (interface)
+    - `viatomble_downloader`
+    - `viatomble_availability`
+    - `viatomble_device` and `viatomble_scanner` (Qt Bluetooth only)
+  - `viatombleimportdialog.{h,cpp}`: built in code, styled after the oximeter wizard.
+  - Tests in `tests/viatombletests.cpp`.
+- **Late replies.** Replies carry no command code, so after a retry the late reply to the
+  first attempt could be taken as the next reply. After accepting a reply to a retried
+  request, the downloader pauses for twice the reply timeout and drops anything that
+  arrives meanwhile. Replies do carry a packet number at bytes 3–4 (the SDK ignores it).
+  Once the device has shown that it echoes the request's number, late file chunks are
+  also dropped by number.
+- **File check before renaming:** size only. `ViatomFile::ParseHeader` is not called by
+  the downloader (it would tie it to the loader); a bad file is caught at import.
+- **Device file names are kept as they are.** O2Rings name their files `<timestamp>.vld`,
+  which is the loader's version-3 format. oxytool renamed them to `.dat`; OSCAR doesn't
+  need to, because the loader goes by the header and the 14-digit timestamp.
+- **Two entry points:**
+  - Data → Viatom BLE Import…;
+  - a button on the oximeter wizard's import-method page, which closes the wizard and
+    opens the dialog.
+
+  Both are greyed out with the reason in the tooltip when Bluetooth can't be used.
+- **The dialog stays connected after a download.** "Choose more recordings" returns to the
+  refreshed file list.
+- **The test runner creates no application object.** `ViatomBleTests` creates a
+  `QCoreApplication` for its own event loop.
+- **macOS:** `Building/MacOS/Info.plist.in` has `NSBluetoothAlwaysUsageDescription`.
+- **Clock set on every connection,** as ViHealth does: `0x16` with
+  `{"SetTIME":"yyyy-MM-dd,HH:mm:ss"}` in local time. It's an option on the device page,
+  on by default. The files page says how far the clock was off, since recordings already
+  on the device carry that error. (oxytool sends an extra `}` and a NUL; OSCAR follows the
+  SDK.)
+- **Not done yet:**
+  - Flatpak and AppImage permissions;
+  - testing on hardware.
+
 ## Goal
 
 Let OSCAR download recordings straight from a Viatom/Wellue oximeter over Bluetooth Low
@@ -154,8 +196,7 @@ the file size is reached → Read end.
   error, or stays silent where it should answer, OSCAR reports "this device requires an
   encrypted connection, which OSCAR does not support yet" and stops.
 
-**Not in scope for phase 1:** setting the device clock (`SetTIME`), settings, live readings,
-deleting files.
+**Not in scope for phase 1:** settings other than the clock, live readings, deleting files.
 
 ## Protocol: phase 2, the O2Ring S family
 

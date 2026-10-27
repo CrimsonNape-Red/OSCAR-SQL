@@ -24,6 +24,7 @@ class ViatomBleTests : public QObject
     void testSplitterHandlesFragmentsAndJunk();
     void testDeviceInfo();
     void testFileSizeFromReadStart();
+    void testSetTimePayload();
 
     void testDownloadAllFiles();
     void testSkipsExistingFiles();
@@ -36,6 +37,7 @@ class ViatomBleTests : public QObject
     void testCancelStopsAndCleansUp();
     void testInfo();
     void testInfoTimeout();
+    void testSetTime();
 
 #ifdef OSCAR_HAVE_BLUETOOTH
     void testDeviceFamilyFromName();

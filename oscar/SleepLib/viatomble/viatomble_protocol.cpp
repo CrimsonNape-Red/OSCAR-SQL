@@ -146,4 +146,18 @@ qint64 fileSizeFromReadStart(const Reply &reply)
     return qint64(p[0]) | (qint64(p[1]) << 8) | (qint64(p[2]) << 16) | (qint64(p[3]) << 24);
 }
 
+static const QString DEVICE_TIME_FORMAT = QStringLiteral("yyyy-MM-dd,HH:mm:ss");
+
+QByteArray setTimePayload(const QDateTime &localTime)
+{
+    QJsonObject obj;
+    obj.insert(QStringLiteral("SetTIME"), localTime.toString(DEVICE_TIME_FORMAT));
+    return QJsonDocument(obj).toJson(QJsonDocument::Compact);
+}
+
+QDateTime parseDeviceTime(const QString &text)
+{
+    return QDateTime::fromString(text.trimmed(), DEVICE_TIME_FORMAT);
+}
+
 } // namespace ViatomBle

@@ -124,6 +124,10 @@
 #include "statistics.h"
 #include "zip.h"
 #include "speedcheck.h"
+#include "SleepLib/viatomble/viatomble_availability.h"
+#ifdef OSCAR_HAVE_BLUETOOTH
+#include "viatombleimportdialog.h"
+#endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,4,0)
 #include <QOpenGLFunctions>
@@ -137,6 +141,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    // Viatom BLE Import is greyed out, with the reason in its tooltip, when Bluetooth
+    // can't be used; checked each time the Data menu opens.
+    ui->menu_Data->setToolTipsVisible(true);
+    connect(ui->menu_Data, &QMenu::aboutToShow, this, &MainWindow::updateViatomBleAction);
 
     {
         QAction *searchIcon = ui->filterBookmarks->addAction(
@@ -2031,6 +2040,9 @@ void MainWindow::on_oximetryButton_clicked()
         PopulatePurgeMenu();
         if (overview) overview->ReloadGraphs();
         if (welcome) welcome->refreshPage();
+        if (oxiimp.viatomBleImportRequested()) {
+            on_actionViatom_BLE_Import_triggered();
+        }
     }
 }
 
@@ -4024,6 +4036,40 @@ void MainWindow::on_actionImport_Viatom_Data_triggered()
 {
     ViatomLoader viatom;
     importNonCPAP(viatom);
+}
+
+void MainWindow::updateViatomBleAction()
+{
+    const ViatomBle::Availability availability = ViatomBle::availability();
+    const bool available = (availability == ViatomBle::Availability::Available);
+    ui->actionViatom_BLE_Import->setEnabled(available && p_profile != nullptr);
+    ui->actionViatom_BLE_Import->setToolTip(available
+        ? tr("Download recordings from a Viatom/Wellue oximeter over Bluetooth")
+        : ViatomBle::availabilityReason(availability));
+}
+
+void MainWindow::on_actionViatom_BLE_Import_triggered()
+{
+#ifdef OSCAR_HAVE_BLUETOOTH
+    if (p_profile == nullptr) {
+        QMessageBox::warning(this, tr("Import"), tr("Please open or create a profile before importing data."));
+        return;
+    }
+    ViatomBleImportDialog dialog([this](const QString &path) {
+        ViatomLoader viatom;
+        return importNonCPAPFiles(viatom, QStringList(path), true, false);
+    }, this);
+    dialog.exec();
+
+    if (dialog.importedAny()) {
+        // The imports ran silently, so refresh once here.
+        PopulatePurgeMenu();
+        if (overview) overview->ReloadGraphs();
+        if (welcome) welcome->refreshPage();
+        GenerateStatistics();
+        if (daily) daily->LoadDate(daily->getDate());
+    }
+#endif
 }
 
 void MainWindow::GenerateStatistics()

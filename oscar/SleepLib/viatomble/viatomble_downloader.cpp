@@ -40,6 +40,17 @@ void Downloader::requestInfo()
     request(WaitInfo, CMD_INFO, 0);
 }
 
+void Downloader::setTime(const QDateTime &localTime)
+{
+    if (isBusy()) {
+        qWarning() << "ViatomBle::Downloader: setTime while busy";
+        return;
+    }
+    m_cancelRequested = false;
+    m_splitter.clear();
+    request(WaitSetTime, CMD_PARA_SYNC, 0, setTimePayload(localTime));
+}
+
 void Downloader::download(const QStringList &files, const QString &folder, bool overwriteExisting)
 {
     if (isBusy()) {
@@ -141,6 +152,15 @@ void Downloader::handleReply(const Reply &reply)
             return;
         }
         emit infoReceived(info);
+        return;
+    }
+    case WaitSetTime: {
+        m_timer.stop();
+        const QString error = reply.ok() ? QString() : tr("The device refused the new time.");
+        continueWith([this, error]() {
+            m_state = Idle;
+            emit timeSet(error);
+        });
         return;
     }
     case WaitStart:
@@ -313,6 +333,10 @@ void Downloader::onTimeout()
         emit failed(tr("The device did not answer. It may need an encrypted connection, "
                        "which OSCAR does not support yet."));
         return;
+    case WaitSetTime:
+        m_state = Idle;
+        emit timeSet(tr("The device did not answer the request to set its clock."));
+        return;
     case WaitStart:
         emit fileFailed(m_current, tr("The device did not answer the request to open the file."));
         startNextFile();
@@ -337,7 +361,7 @@ void Downloader::onLinkLost(const QString &reason)
     if (m_state == Idle) {
         return;
     }
-    const bool transferring = (m_state != WaitInfo);
+    const bool transferring = (m_state != WaitInfo && m_state != WaitSetTime);
     m_state = Idle;
     if (transferring) {
         discardPartFile();

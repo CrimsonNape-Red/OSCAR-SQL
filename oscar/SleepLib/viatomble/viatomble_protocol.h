@@ -10,6 +10,7 @@
 #define VIATOMBLE_PROTOCOL_H
 
 #include <QByteArray>
+#include <QDateTime>
 #include <QList>
 #include <QMetaType>
 #include <QString>
@@ -30,6 +31,7 @@ enum Command : quint8 {
     CMD_READ_CONTENT = 0x04,
     CMD_READ_END     = 0x05,
     CMD_INFO         = 0x14,
+    CMD_PARA_SYNC    = 0x16,   // settings as JSON; used here to set the clock
 };
 
 // Largest reply payload accepted; file chunks are at most 512 bytes and the
@@ -86,6 +88,13 @@ struct DeviceInfo
 
 //! File size from a successful CMD_READ_START reply, or -1 if the payload is too short.
 qint64 fileSizeFromReadStart(const Reply &reply);
+
+//! CMD_PARA_SYNC payload that sets the device clock: {"SetTIME":"yyyy-MM-dd,HH:mm:ss"},
+//! local time, as the ViHealth app sends it on every connection.
+QByteArray setTimePayload(const QDateTime &localTime);
+
+//! Parses the device's clock (CurTIME, "yyyy-MM-dd,HH:mm:ss"); invalid if unreadable.
+QDateTime parseDeviceTime(const QString &text);
 
 } // namespace ViatomBle
 

@@ -7,6 +7,8 @@
  * for more details. */
 
 #include <QDir>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QSet>
 #include <QSignalSpy>
 #include <QTemporaryDir>
@@ -84,6 +86,8 @@ class FakeDevice : public Link
     QMap<QString, QByteArray> files;
     QByteArray infoJson;
     bool silent = false;
+    bool refuseSetTime = false;
+    QString lastSetTime;
     bool echoSeq = true;
     QSet<int> dropContentReplyOnce;     // chunk numbers whose first reply is lost
     QMap<int, int> delayContentReplyOnce;   // chunk number -> ms the first reply is late
@@ -138,6 +142,10 @@ class FakeDevice : public Link
         }
         case CMD_READ_END:
             reply(makeReply(0, 0, QByteArray()));
+            break;
+        case CMD_PARA_SYNC:
+            lastSetTime = QJsonDocument::fromJson(payload).object().value("SetTIME").toString();
+            reply(makeReply(refuseSetTime ? 1 : 0, 0, QByteArray()));
             break;
         default:
             QFAIL("unexpected command");
@@ -284,6 +292,14 @@ void ViatomBleTests::testFileSizeFromReadStart()
     QCOMPARE(fileSizeFromReadStart(r), qint64(0x12345));
     r.payload = QByteArray("\x01\x02", 2);
     QCOMPARE(fileSizeFromReadStart(r), qint64(-1));
+}
+
+void ViatomBleTests::testSetTimePayload()
+{
+    const QDateTime t(QDate(2026, 10, 27), QTime(9, 5, 3));
+    QCOMPARE(setTimePayload(t), QByteArray("{\"SetTIME\":\"2026-10-27,09:05:03\"}"));
+    QCOMPARE(parseDeviceTime("2026-10-27,09:05:03"), t);
+    QVERIFY(!parseDeviceTime("27/10/2026 09:05").isValid());
 }
 
 // ---------------------------------------------------------------------------------------
@@ -500,6 +516,26 @@ void ViatomBleTests::testInfoTimeout()
     QVERIFY(failed.wait(5000));
 
     QCOMPARE(dev.countSent(CMD_INFO), 3);
+    QVERIFY(!dl.isBusy());
+}
+
+void ViatomBleTests::testSetTime()
+{
+    FakeDevice dev;
+    Downloader dl(&dev);
+    QSignalSpy timeSet(&dl, &Downloader::timeSet);
+
+    dl.setTime(QDateTime(QDate(2026, 10, 27), QTime(22, 30, 0)));
+    QVERIFY(timeSet.wait(5000));
+    QCOMPARE(timeSet.first().first().toString(), QString());
+    QCOMPARE(dev.lastSetTime, QStringLiteral("2026-10-27,22:30:00"));
+    QVERIFY(!dl.isBusy());
+
+    // A refusal is reported, and the downloader can carry on.
+    dev.refuseSetTime = true;
+    dl.setTime(QDateTime::currentDateTime());
+    QVERIFY(timeSet.wait(5000));
+    QVERIFY(!timeSet.last().first().toString().isEmpty());
     QVERIFY(!dl.isBusy());
 }
 

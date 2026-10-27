@@ -10,6 +10,7 @@
 #define TEST_MACROS_ENABLEDoff
 #include <test_macros.h>
 
+#include <functional>
 #include <QThread>
 #include <QTimeZone>
 #include <QMessageBox>
@@ -25,6 +26,7 @@
 #include "translation.h"
 #include "ui_oximeterimport.h"
 #include "SleepLib/calcs.h"
+#include "SleepLib/viatomble/viatomble_availability.h"
 #include "mainwindow.h"
 
 extern MainWindow * mainwin;
@@ -161,7 +163,38 @@ OximeterImport::OximeterImport(QWidget *parent) :
     ui->cms50DeviceName->setEnabled(false);
     ui->cms50SyncTime->setChecked(p_profile->oxi->syncOximeterClock());
 
-
+    // Viatom/Wellue oximeters download over Bluetooth in their own dialog; this button
+    // closes the wizard and asks MainWindow to open it.
+    std::function<QBoxLayout *(QLayout *)> holder = [&holder, this](QLayout *layout) -> QBoxLayout * {
+        if (!layout) {
+            return nullptr;
+        }
+        if (layout->indexOf(ui->fileImportButton) >= 0) {
+            return qobject_cast<QBoxLayout *>(layout);
+        }
+        for (int i = 0; i < layout->count(); i++) {
+            if (QBoxLayout *found = holder(layout->itemAt(i)->layout())) {
+                return found;
+            }
+        }
+        return nullptr;
+    };
+    if (QBoxLayout *box = holder(ui->fileImportButton->parentWidget()->layout())) {
+        auto *bleButton = new QPushButton(QIcon(":/icons/oximeter.png"),
+            tr("Download from a Viatom/Wellue oximeter over Bluetooth (O2Ring, SleepU, Checkme O2)"), this);
+        bleButton->setIconSize(ui->fileImportButton->iconSize());
+        bleButton->setAutoDefault(false);
+        const ViatomBle::Availability availability = ViatomBle::availability();
+        bleButton->setEnabled(availability == ViatomBle::Availability::Available);
+        bleButton->setToolTip(availability == ViatomBle::Availability::Available
+            ? tr("Opens Viatom BLE Import, which saves the recordings and can import them as they arrive.")
+            : ViatomBle::availabilityReason(availability));
+        connect(bleButton, &QPushButton::clicked, this, [this]() {
+            m_viatomBleImportRequested = true;
+            accept();
+        });
+        box->insertWidget(box->indexOf(ui->fileImportButton) + 1, bleButton);
+    }
 }
 
 OximeterImport::~OximeterImport()

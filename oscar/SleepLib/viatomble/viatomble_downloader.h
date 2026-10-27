@@ -50,6 +50,9 @@ class Downloader : public QObject
     //! Asks the device for its info; answers with infoReceived() or failed().
     void requestInfo();
 
+    //! Sets the device clock; answers with timeSet(). A failure here isn't fatal.
+    void setTime(const QDateTime &localTime);
+
     /*! Downloads files into folder, one after another, then emits downloadFinished().
      *  A file already in folder with the size the device reports is skipped unless
      *  overwriteExisting is set. */
@@ -60,6 +63,8 @@ class Downloader : public QObject
 
   signals:
     void infoReceived(const ViatomBle::DeviceInfo &info);
+    //! error is empty on success.
+    void timeSet(const QString &error);
     void fileStarted(const QString &name, qint64 size);
     void fileProgress(const QString &name, qint64 received, qint64 size);
     void fileSaved(const QString &name, const QString &path);
@@ -75,7 +80,7 @@ class Downloader : public QObject
     void onLinkLost(const QString &reason);
 
   private:
-    enum State { Idle, WaitInfo, WaitStart, WaitContent, WaitEnd };
+    enum State { Idle, WaitInfo, WaitSetTime, WaitStart, WaitContent, WaitEnd };
 
     void request(State state, quint8 cmd, quint16 seq, const QByteArray &payload = QByteArray());
     void sendPending();

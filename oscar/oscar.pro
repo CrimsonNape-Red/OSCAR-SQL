@@ -824,10 +824,12 @@ qtHaveModule(bluetooth) {
     DEFINES += OSCAR_HAVE_BLUETOOTH
     SOURCES += \
         SleepLib/viatomble/viatomble_device.cpp \
-        SleepLib/viatomble/viatomble_scanner.cpp
+        SleepLib/viatomble/viatomble_scanner.cpp \
+        viatombleimportdialog.cpp
     HEADERS += \
         SleepLib/viatomble/viatomble_device.h \
-        SleepLib/viatomble/viatomble_scanner.h
+        SleepLib/viatomble/viatomble_scanner.h \
+        viatombleimportdialog.h
     # Qt's BlueZ backend drops write-without-response; the device writes through BlueZ over D-Bus.
     unix:!macx:!haiku:qtHaveModule(dbus) {
         QT += dbus
