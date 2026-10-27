@@ -347,7 +347,7 @@ Session* ViatomLoader::ParseFileViatom(const QString & filename, bool *existing)
     m_session->set_first(time_ms);
 
     const ViatomFile::Summary & summary = v->summary();
-    if (summary.valid) {
+    if (summary.valid()) {
         m_session->settings[Viatom_O2Score] = summary.o2score / 10.0;
         m_session->settings[Viatom_Drops3] = summary.drops3;
         m_session->settings[Viatom_Drops4] = summary.drops4;
@@ -659,12 +659,6 @@ bool ViatomFile::ParseHeader()
     //int events_under_90pct = header[24];  // number of distinct events
     m_summary.o2score       = header[25];  // tenths of a point
     m_summary.steps         = header[26] | (header[27] << 8) | (header[28] << 16) | ((quint32)header[29] << 24);
-    for (int i = 15; i <= 29; i++) {
-        if (header[i] != 0) {
-            m_summary.valid = true;
-            break;
-        }
-    }
     //CHECK_VALUE(header[30], 0);  // average pulse rate (when nonzero)
     CHECK_VALUE(header[31], 0);
     CHECK_VALUE(header[32], 0);
@@ -725,8 +719,9 @@ QList<ViatomFile::Record> ViatomFile::ReadData()
             // The pulse rate is really 16 bits, so oximetry_invalid is its high byte: 0xFFFF marks an invalid reading.
             in >> rec.spo2 >> rec.hr >> rec.oximetry_invalid >> rec.motion >> rec.vibration;
             CHECK_VALUES(rec.oximetry_invalid, 0, 0xFF);
-            // The last byte is a set of flags: 0x80 = SpO2 alarm, 0x40 = pulse alarm, 0x20 = motion alarm,
-            // 0x10 = invalid reading; the ViHealth SDK also reads bits 4-5 as a sleep state.
+            // The last byte is a set of flags: 0x80 = SpO2 alarm, 0x40 = pulse alarm. The ViHealth SDK
+            // reads bits 4-5 in two conflicting ways: as 0x20 = motion alarm and 0x10 = invalid reading,
+            // and as a 2-bit sleep state. Until real data settles which, OSCAR ignores bits 4-5.
             // Nothing has been seen in the low nibble.
             if (rec.vibration & 0x0F) {
                 UNEXPECTED_VALUE(rec.vibration, "flags in bits 4-7 only");
@@ -815,23 +810,19 @@ bool O2RingS::ParseHeader()
     auto u32 = [trailer, u16](int i) { return u16(i) | (u16(i+2) << 16); };
 
     m_sig = 0x0301;
-    m_sessionid = 0;  // for UNEXPECTED_VALUE until the timestamp is known
 
-    // max number of records in a O2Ring S file is 36000
-    m_record_count = u32(12);
-    CHECK_VALUE((qint64) m_record_count * 3, trailer_loc - HEADER_SIZE);
+    // The SDK reads the record count as 32 bits; the max number of records in a O2Ring S file is 36000.
+    // Older versions of this loader read only the low 16 bits, so fall back to those if the high ones
+    // hold anything, rather than rejecting a file that used to import.
+    quint32 record_count = u32(12);
+    if (record_count > 0xFFFF) {
+        record_count = u16(12);
+    }
+    m_record_count = record_count;
     if (m_record_count <= 0 || (qint64) m_record_count * 3 > trailer_loc - HEADER_SIZE) {
         qDebug() << m_file.fileName() << "invalid record count in Viatom data file" << m_record_count;
         return false;
     }
-
-    m_interval = trailer[16];
-    if (m_interval == 0) {
-        UNEXPECTED_VALUE(m_interval, "nonzero");
-        m_interval = 1;
-    }
-    m_duration = m_record_count * m_interval;
-    m_resolution = m_interval * 1000;
 
     // The start time is the local wall-clock time stored as seconds since the epoch.
     QDateTime data_timestamp;
@@ -856,13 +847,22 @@ bool O2RingS::ParseHeader()
     m_timestamp = data_timestamp.toMSecsSinceEpoch();
     m_sessionid = m_timestamp / 1000L;
 
+    // Checks that report unexpected values come after the session ID is known
+    CHECK_VALUE((qint64) m_record_count * 3, trailer_loc - HEADER_SIZE);
+    m_interval = trailer[16];
+    if (m_interval == 0) {
+        UNEXPECTED_VALUE(m_interval, "nonzero");
+        m_interval = 1;
+    }
+    m_duration = m_record_count * m_interval;
+    m_resolution = m_interval * 1000;
+
     m_summary.asleep_time   = u16(32);
     m_summary.drops3        = trailer[36];
     m_summary.drops4        = trailer[37];
     m_summary.time_below_90 = u16(39);
     m_summary.o2score       = trailer[42];
     m_summary.steps         = u32(43);
-    m_summary.valid = true;
 
     // advance past the header
     return m_file.seek(HEADER_SIZE);
@@ -883,7 +883,7 @@ QList<ViatomFile::Record> O2RingS::ReadData()
         in >> rec.spo2 >> rec.hr >> flags;
         rec.oximetry_invalid = (rec.spo2 == 0xFF || rec.hr == 0xFF) ? 0xFF : 0;
         rec.motion = (flags & 0x3F) * 2;
-        rec.vibration = ((flags & 0x80) ? 0x80 : 0) | ((flags & 0x40) ? 0x40 : 0);
+        rec.vibration = flags & 0xC0;
         records.append(rec);
     } while (records.size() < m_record_count);
 

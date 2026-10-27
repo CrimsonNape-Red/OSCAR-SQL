@@ -117,7 +117,8 @@ public:
     // Figures the device computes for the whole recording (as decoded by the ViHealth SDK)
     struct Summary
     {
-        bool valid = false;
+        // Devices that don't compute a summary leave these fields at 0
+        bool valid() const { return o2score || drops3 || drops4 || time_below_90 || asleep_time || steps; }
         int o2score = 0;           // tenths of a point
         int drops3 = 0;            // SpO2 drops of 3% or more
         int drops4 = 0;            // SpO2 drops of 4% or more

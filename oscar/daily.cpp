@@ -1535,8 +1535,8 @@ QString Daily::getOximeterInformation(Day * day)
 /*! \brief Builds the rows for the summary figures a Viatom oximeter computes itself.
  *
  *  Counts, times and steps are summed over the day's enabled sessions from this oximeter;
- *  the O2 score is averaged, weighted by session length. Returns nothing when no session
- *  carries the figures (older models don't record them).
+ *  the O2 score is averaged over the sessions that have one, weighted by session length.
+ *  Returns nothing when no session carries the figures (older models don't record them).
  */
 QString Daily::getViatomSummary(Day * day, Machine * oxi)
 {
@@ -1547,9 +1547,13 @@ QString Daily::getViatomSummary(Day * day, Machine * oxi)
         if (!sess->enabled() || sess->machine() != oxi) continue;
         if (!sess->settings.contains(Viatom_O2Score)) continue;
         found = true;
-        double h = sess->hours();
-        hours += h;
-        scoreWeighted += sess->settings[Viatom_O2Score].toDouble() * h;
+        // A session can carry other summary figures without a score; leave it out of the average
+        double score = sess->settings[Viatom_O2Score].toDouble();
+        if (score > 0) {
+            double h = sess->hours();
+            hours += h;
+            scoreWeighted += score * h;
+        }
         drops3 += sess->settings[Viatom_Drops3].toLongLong();
         drops4 += sess->settings[Viatom_Drops4].toLongLong();
         below90 += sess->settings[Viatom_TimeBelow90].toLongLong();
