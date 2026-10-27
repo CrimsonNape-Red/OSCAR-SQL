@@ -14,6 +14,12 @@
 
 const QString viatom_class_name = "Viatom";
 const int viatom_data_version = 2;
+// Not bumped for the O2Ring S motion fix ((b & 0x3F) * 2 without the reminder bits), so that existing
+// imports aren't invalidated; the fix applies to newly imported sessions only.
+
+// Session summary figures that the device computes itself and stores in each file
+extern ChannelID Viatom_O2Score, Viatom_Drops3, Viatom_Drops4, Viatom_TimeBelow90,
+                 Viatom_AsleepTime, Viatom_Steps;
 
 
 /*! \class ViatomLoader
@@ -41,6 +47,8 @@ class ViatomLoader : public MachineLoader
     }
 
     virtual QStringList getNameFilter();
+
+    virtual void initChannels();
 
 
   protected:
@@ -104,7 +112,18 @@ public:
         unsigned char hr;
         unsigned char oximetry_invalid;
         unsigned char motion;
-        unsigned char vibration;
+        unsigned char vibration;  // 0x80 = SpO2 alarm/reminder, 0x40 = pulse alarm/reminder
+    };
+    // Figures the device computes for the whole recording (as decoded by the ViHealth SDK)
+    struct Summary
+    {
+        bool valid = false;
+        int o2score = 0;           // tenths of a point
+        int drops3 = 0;            // SpO2 drops of 3% or more
+        int drops4 = 0;            // SpO2 drops of 4% or more
+        int time_below_90 = 0;     // seconds
+        int asleep_time = 0;       // seconds
+        quint32 steps = 0;
     };
     ViatomFile(QFile & file);
     virtual ~ViatomFile() = default;
@@ -114,6 +133,7 @@ public:
     SessionID sessionid() const { return m_sessionid; }
     quint64 timestamp() const { return m_timestamp; }
     int duration() const { return m_duration; }
+    const Summary & summary() const { return m_summary; }
     QDateTime getFilenameTimestamp();
 
 protected:
@@ -125,6 +145,7 @@ protected:
     int m_record_count;
     int m_resolution;
     SessionID m_sessionid;
+    Summary m_summary;
 };
 
 class O2RingS : public ViatomFile
@@ -134,6 +155,12 @@ public:
     ~O2RingS() = default;
     bool ParseHeader();
     QList<Record> ReadData();
+
+protected:
+    // The O2Ring S keeps its metadata in a fixed-size trailer after the samples
+    static const int TRAILER_SIZE = 48;
+    static const int HEADER_SIZE = 10;
+    int m_interval;  // seconds per sample
 };
 
 #endif // VIATOMLOADER_H

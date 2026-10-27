@@ -346,6 +346,16 @@ Session* ViatomLoader::ParseFileViatom(const QString & filename, bool *existing)
     m_session = new Session(mach, v->sessionid());
     m_session->set_first(time_ms);
 
+    const ViatomFile::Summary & summary = v->summary();
+    if (summary.valid) {
+        m_session->settings[Viatom_O2Score] = summary.o2score / 10.0;
+        m_session->settings[Viatom_Drops3] = summary.drops3;
+        m_session->settings[Viatom_Drops4] = summary.drops4;
+        m_session->settings[Viatom_TimeBelow90] = summary.time_below_90;
+        m_session->settings[Viatom_AsleepTime] = summary.asleep_time;
+        m_session->settings[Viatom_Steps] = summary.steps;
+    }
+
     QList<ViatomFile::Record> records = v->ReadData();
     m_step = v->duration() / records.size() * 1000L;
 
@@ -444,6 +454,50 @@ QStringList ViatomLoader::getNameFilter()
                         "*20[0-5][0-9]-[01][0-9]-[0-3][0-9] [012][0-9]:[0-5][0-9]:[0-5][0-9]*",
                         "[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].dat"
     });
+}
+
+ChannelID Viatom_O2Score = 0, Viatom_Drops3 = 0, Viatom_Drops4 = 0, Viatom_TimeBelow90 = 0,
+          Viatom_AsleepTime = 0, Viatom_Steps = 0;
+
+void ViatomLoader::initChannels()
+{
+    using namespace schema;
+
+    channel.add(GRP_OXI, new Channel(Viatom_O2Score = 0xe5a0, SETTING, MT_OXIMETER, SESSION,
+        "Viatom_O2Score", QObject::tr("O2 Score"),
+        QObject::tr("Oxygen score calculated by the oximeter (0-10)"),
+        QObject::tr("O2 Score"),
+        "", DEFAULT, Qt::green));
+
+    channel.add(GRP_OXI, new Channel(Viatom_Drops3 = 0xe5a1, SETTING, MT_OXIMETER, SESSION,
+        "Viatom_Drops3", QObject::tr("3% SpO2 drops"),
+        QObject::tr("Number of SpO2 drops of 3% or more counted by the oximeter"),
+        QObject::tr("3% drops"),
+        "", INTEGER, Qt::green));
+
+    channel.add(GRP_OXI, new Channel(Viatom_Drops4 = 0xe5a2, SETTING, MT_OXIMETER, SESSION,
+        "Viatom_Drops4", QObject::tr("4% SpO2 drops"),
+        QObject::tr("Number of SpO2 drops of 4% or more counted by the oximeter"),
+        QObject::tr("4% drops"),
+        "", INTEGER, Qt::green));
+
+    channel.add(GRP_OXI, new Channel(Viatom_TimeBelow90 = 0xe5a3, SETTING, MT_OXIMETER, SESSION,
+        "Viatom_TimeBelow90", QObject::tr("Time below 90% SpO2"),
+        QObject::tr("Time with SpO2 below 90% according to the oximeter"),
+        QObject::tr("Time < 90%"),
+        STR_UNIT_Seconds, INTEGER, Qt::green));
+
+    channel.add(GRP_OXI, new Channel(Viatom_AsleepTime = 0xe5a4, SETTING, MT_OXIMETER, SESSION,
+        "Viatom_AsleepTime", QObject::tr("Asleep time"),
+        QObject::tr("Time asleep according to the oximeter"),
+        QObject::tr("Asleep"),
+        STR_UNIT_Seconds, INTEGER, Qt::green));
+
+    channel.add(GRP_OXI, new Channel(Viatom_Steps = 0xe5a5, SETTING, MT_OXIMETER, SESSION,
+        "Viatom_Steps", QObject::tr("Steps"),
+        QObject::tr("Steps counted by the oximeter during the recording"),
+        QObject::tr("Steps"),
+        "", INTEGER, Qt::green));
 }
 
 static bool viatom_initialized = false;
@@ -592,19 +646,25 @@ bool ViatomFile::ParseHeader()
     int filesize = header[9] | (header[10] << 8) | (header[11] << 16);  // possibly 32-bit
     CHECK_VALUE(header[12], 0);
 
-    m_duration   = header[13] | (header[14] << 8);  // possibly 32-bit
-    CHECK_VALUE(header[15], 0);
-    CHECK_VALUE(header[16], 0);
+    m_duration   = header[13] | (header[14] << 8);
 
-    //int spo2_3pct = header[19];  // number of events
-    //int spo2_4pct = header[20];  // number of events
-    //CHECK_VALUE(header[21], 0);  // ??? sometimes nonzero; maybe pulse spike, not a threshold of SpO2 or pulse, not always smaller than spo2_4pct
-    //int time_under_90pct = header[22] | (header[23] << 8);  // in seconds
+    // Summary fields as decoded by the ViHealth SDK (OxyBleFile). Older models leave them all 0.
+    m_summary.asleep_time   = header[15] | (header[16] << 8);  // in seconds
+    //int avg_spo2 = header[17];
+    //int min_spo2 = header[18];
+    m_summary.drops3        = header[19];  // number of events
+    m_summary.drops4        = header[20];  // number of events
+    //int asleep_pct = header[21];  // percentage of the recording spent asleep
+    m_summary.time_below_90 = header[22] | (header[23] << 8);  // in seconds
     //int events_under_90pct = header[24];  // number of distinct events
-    //CHECK_VALUES(header[26], 0, 4);  // number of steps taken (when nonzero, only reported by some models)
-    CHECK_VALUE(header[27], 0);
-    CHECK_VALUE(header[28], 0);
-    CHECK_VALUE(header[29], 0);
+    m_summary.o2score       = header[25];  // tenths of a point
+    m_summary.steps         = header[26] | (header[27] << 8) | (header[28] << 16) | ((quint32)header[29] << 24);
+    for (int i = 15; i <= 29; i++) {
+        if (header[i] != 0) {
+            m_summary.valid = true;
+            break;
+        }
+    }
     //CHECK_VALUE(header[30], 0);  // average pulse rate (when nonzero)
     CHECK_VALUE(header[31], 0);
     CHECK_VALUE(header[32], 0);
@@ -662,10 +722,14 @@ QList<ViatomFile::Record> ViatomFile::ReadData()
             rec.oximetry_invalid = (rec.spo2 == 0xFF || rec.hr == 0xFF) ? 0xFF : 0;
             rec.vibration = 0;
         } else {
+            // The pulse rate is really 16 bits, so oximetry_invalid is its high byte: 0xFFFF marks an invalid reading.
             in >> rec.spo2 >> rec.hr >> rec.oximetry_invalid >> rec.motion >> rec.vibration;
             CHECK_VALUES(rec.oximetry_invalid, 0, 0xFF);
-            if (rec.vibration) {
-                CHECK_VALUES(rec.vibration, 0x40, 0x80);  // 0x40 or 0x80 when vibration is triggered
+            // The last byte is a set of flags: 0x80 = SpO2 alarm, 0x40 = pulse alarm, 0x20 = motion alarm,
+            // 0x10 = invalid reading; the ViHealth SDK also reads bits 4-5 as a sleep state.
+            // Nothing has been seen in the low nibble.
+            if (rec.vibration & 0x0F) {
+                UNEXPECTED_VALUE(rec.vibration, "flags in bits 4-7 only");
             }
             // Invalid readings indicate any interruption in the measurements, whether
             // transitory (e.g. due to movement) or when the device is removed at the end of a session.
@@ -730,30 +794,78 @@ O2RingS::O2RingS(QFile & file) : ViatomFile(file)
 
 bool O2RingS::ParseHeader()
 {
-    // For the O2Ring S, the header only contains the signature
-    // Additional metadata is stored at the end of the file
-    // The record count is stored 36 bytes prior to EOF
-    int record_count_loc = m_file.size() - 36;
-    if (record_count_loc < 0 || !m_file.seek(record_count_loc)) {
-        qDebug() << m_file.fileName() << "error locating Viatom record count";
+    // For the O2Ring S, the header (10 bytes) only contains the signature and device model.
+    // The other metadata is in a 48-byte trailer after the 3-byte samples (ViHealth SDK OxyIIBleFile):
+    //   +0 checksum (4), +4 magic (4), +8 start time (4), +12 record count (4), +16 seconds per sample,
+    //   +17 channel type, +18 channel bytes, +32 asleep time (2), +34 avg SpO2, +35 min SpO2,
+    //   +36 3% drops, +37 4% drops, +38 % below 90, +39 time below 90 (2), +41 drops below 90,
+    //   +42 O2 score, +43 steps (4), +47 avg pulse
+    qint64 trailer_loc = m_file.size() - TRAILER_SIZE;
+    if (trailer_loc < HEADER_SIZE || !m_file.seek(trailer_loc)) {
+        qDebug() << m_file.fileName() << "error locating Viatom trailer";
+        return false;
+    }
+    QByteArray data = m_file.read(TRAILER_SIZE);
+    if (data.size() < TRAILER_SIZE) {
+        qDebug() << m_file.fileName() << "too short for a Viatom data file";
+        return false;
+    }
+    const unsigned char* trailer = (const unsigned char*) data.constData();
+    auto u16 = [trailer](int i) { return (quint32) (trailer[i] | (trailer[i+1] << 8)); };
+    auto u32 = [trailer, u16](int i) { return u16(i) | (u16(i+2) << 16); };
+
+    m_sig = 0x0301;
+    m_sessionid = 0;  // for UNEXPECTED_VALUE until the timestamp is known
+
+    // max number of records in a O2Ring S file is 36000
+    m_record_count = u32(12);
+    CHECK_VALUE((qint64) m_record_count * 3, trailer_loc - HEADER_SIZE);
+    if (m_record_count <= 0 || (qint64) m_record_count * 3 > trailer_loc - HEADER_SIZE) {
+        qDebug() << m_file.fileName() << "invalid record count in Viatom data file" << m_record_count;
         return false;
     }
 
-    // read record count as a 2-byte little endian value
-    // max number of records in a O2Ring S file is 36000
-    QDataStream in(m_file.read(2));
-    in.setByteOrder(QDataStream::LittleEndian);
-    quint16 record_count;
-    in >> record_count;
+    m_interval = trailer[16];
+    if (m_interval == 0) {
+        UNEXPECTED_VALUE(m_interval, "nonzero");
+        m_interval = 1;
+    }
+    m_duration = m_record_count * m_interval;
+    m_resolution = m_interval * 1000;
 
-    m_sig = 0x0301;
-    m_record_count = m_duration = record_count;
-    m_timestamp = getFilenameTimestamp().toMSecsSinceEpoch();
+    // The start time is the local wall-clock time stored as seconds since the epoch.
+    QDateTime data_timestamp;
+    quint32 start = u32(8);
+    if (start != 0) {
+        QDateTime wallclock = QDateTime::fromSecsSinceEpoch(start, QTimeZone::utc());
+        data_timestamp = QDateTime(wallclock.date(), wallclock.time());
+    }
+    QDateTime filename_timestamp = getFilenameTimestamp();
+    if (filename_timestamp.isValid()) {
+        if (data_timestamp.isValid() && filename_timestamp != data_timestamp) {
+            qDebug() << m_file.fileName() << "Using filename timestamp" << filename_timestamp.toString("yyyy-MM-dd HH:mm:ss")
+                     << "instead of trailer timestamp" << data_timestamp.toString("yyyy-MM-dd HH:mm:ss");
+        }
+        data_timestamp = filename_timestamp;
+    } else if (data_timestamp.isValid()) {
+        qWarning() << m_file.fileName() << "invalid timestamp in Viatom filename, using trailer timestamp";
+    } else {
+        qWarning() << m_file.fileName() << "no valid timestamp in Viatom filename or trailer";
+        return false;
+    }
+    m_timestamp = data_timestamp.toMSecsSinceEpoch();
     m_sessionid = m_timestamp / 1000L;
-    m_resolution = 1000;
+
+    m_summary.asleep_time   = u16(32);
+    m_summary.drops3        = trailer[36];
+    m_summary.drops4        = trailer[37];
+    m_summary.time_below_90 = u16(39);
+    m_summary.o2score       = trailer[42];
+    m_summary.steps         = u32(43);
+    m_summary.valid = true;
 
     // advance past the header
-    return m_file.seek(10);
+    return m_file.seek(HEADER_SIZE);
 }
 
 QList<ViatomFile::Record> O2RingS::ReadData()
@@ -762,19 +874,20 @@ QList<ViatomFile::Record> O2RingS::ReadData()
 
     // Read all Pulse, SPO2 and Motion data
     // 0xFF for spo2 or hr indicates an interruption in measurement
-    // Vibration data is likely stored in a variable length block following the
-    // fixed-width pulse/SPO2/motion data. Zero out for now since OSCAR doesn't
-    // use this data.
-    QDataStream in(m_file.readAll());
+    // The third byte packs motion in bits 0-5 (in units of 2) with the pulse reminder (vibration)
+    // in bit 6 and the SpO2 reminder in bit 7.
+    QDataStream in(m_file.read((qint64) m_record_count * 3));
     do {
         ViatomFile::Record rec;
-        in >> rec.spo2 >> rec.hr >> rec.motion;
+        unsigned char flags;
+        in >> rec.spo2 >> rec.hr >> flags;
         rec.oximetry_invalid = (rec.spo2 == 0xFF || rec.hr == 0xFF) ? 0xFF : 0;
-        rec.vibration = 0;
+        rec.motion = (flags & 0x3F) * 2;
+        rec.vibration = ((flags & 0x80) ? 0x80 : 0) | ((flags & 0x40) ? 0x40 : 0);
         records.append(rec);
     } while (records.size() < m_record_count);
 
-    // Confirm that we have a 1s sample rate
-    CHECK_VALUE(duration() / records.size(), 1);
+    // Confirm that the sample rate matches the interval in the trailer
+    CHECK_VALUE(duration() / records.size(), m_interval);
     return records;
 }

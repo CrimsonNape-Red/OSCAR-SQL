@@ -46,6 +46,7 @@
 #include "SleepLib/session.h"
 #include "SleepLib/performance_timer.h"
 #include "SleepLib/loader_plugins/applehealth_loader.h"
+#include "SleepLib/loader_plugins/viatom_loader.h"
 #include "database/session_repository.h"
 
 #include "Graphs/gLineOverlay.h"
@@ -1520,9 +1521,60 @@ QString Daily::getOximeterInformation(Day * day)
             html+=QString("<tr><td colspan=5 align=center>%1: %2 (%3%) %4/h</td></tr>").arg(tr("SpO2 Desaturations")).arg(dropCount).arg(pctDrop,0,'f',2).arg(rateDrop,0,'f',2);
             html+=QString("<tr><td colspan=5 align=center>%1: %2 (%3%) %4/h</td></tr>").arg(tr("Pulse Change events")).arg(pcCount).arg(pctPC,0,'f',2).arg(ratePC,0,'f',2);
             html+=QString("<tr><td colspan=5 align=center>%1: %2%</td></tr>").arg(tr("SpO2 Baseline Used")).arg(baseline,0,'f',2); // CHECKME: Should this value be wavg OXI_SPO2 isntead?
+
+            if (oxi->loaderName() == viatom_class_name) {
+                html += getViatomSummary(day, oxi);
+            }
         }
         html+="</table>\n";
         html+="<hr/>\n";
+    }
+    return html;
+}
+
+/*! \brief Builds the rows for the summary figures a Viatom oximeter computes itself.
+ *
+ *  Counts, times and steps are summed over the day's enabled sessions from this oximeter;
+ *  the O2 score is averaged, weighted by session length. Returns nothing when no session
+ *  carries the figures (older models don't record them).
+ */
+QString Daily::getViatomSummary(Day * day, Machine * oxi)
+{
+    double hours = 0, scoreWeighted = 0;
+    qint64 drops3 = 0, drops4 = 0, below90 = 0, asleep = 0, steps = 0;
+    bool found = false;
+    for (auto & sess : day->sessions) {
+        if (!sess->enabled() || sess->machine() != oxi) continue;
+        if (!sess->settings.contains(Viatom_O2Score)) continue;
+        found = true;
+        double h = sess->hours();
+        hours += h;
+        scoreWeighted += sess->settings[Viatom_O2Score].toDouble() * h;
+        drops3 += sess->settings[Viatom_Drops3].toLongLong();
+        drops4 += sess->settings[Viatom_Drops4].toLongLong();
+        below90 += sess->settings[Viatom_TimeBelow90].toLongLong();
+        asleep += sess->settings[Viatom_AsleepTime].toLongLong();
+        steps += sess->settings[Viatom_Steps].toLongLong();
+    }
+    if (!found) {
+        return QString();
+    }
+
+    auto hm = [](qint64 secs) {
+        return QString("%1:%2").arg(secs / 3600).arg((secs % 3600) / 60, 2, 10, QChar('0'));
+    };
+    QString html;
+    html+=QString("<tr><td colspan=5 align=center><i>%1</i></td></tr>").arg(tr("Reported by the oximeter"));
+    if (hours > 0) {
+        html+=QString("<tr><td colspan=5 align=center>%1: %2</td></tr>").arg(tr("O2 Score")).arg(scoreWeighted / hours,0,'f',1);
+    }
+    html+=QString("<tr><td colspan=5 align=center>%1: %2 / %3</td></tr>").arg(tr("3% / 4% Drops")).arg(drops3).arg(drops4);
+    html+=QString("<tr><td colspan=5 align=center>%1: %2</td></tr>").arg(tr("Time below 90%")).arg(hm(below90));
+    if (asleep > 0) {
+        html+=QString("<tr><td colspan=5 align=center>%1: %2</td></tr>").arg(tr("Asleep")).arg(hm(asleep));
+    }
+    if (steps > 0) {
+        html+=QString("<tr><td colspan=5 align=center>%1: %2</td></tr>").arg(tr("Steps")).arg(steps);
     }
     return html;
 }
