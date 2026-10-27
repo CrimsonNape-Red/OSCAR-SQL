@@ -12,6 +12,31 @@ branch `vihealth-dev`.
   (Lepu `blepro` SDK). The disassembly and tools are in
   `~/QtProjects/2.2-Dev/ViHealth-analysis/`.
 
+## As built: phase 2, O2Ring S (2026-10-27, experimental, not yet tested on hardware)
+
+- **Decisions (2026-10-27):** the app key is embedded in the source; no test device is
+  available here, so a tester with an O2Ring S builds the branch.
+  `Notes/loaders/VIATOM_BLE_TESTING.md` is their guide.
+- **Code:**
+  - `viatomble_o2rings` holds the frames, handshake, payloads and parsers, all pure
+    functions.
+  - `viatomble_dialect` splits out what differs between the two families:
+    - `ClassicDialect`: the phase 1 frames;
+    - `O2RingSDialect`: handshake, AES session, generic Lepu commands.
+
+    The `Downloader` keeps the request sequence, retries, the pause for late replies and
+    the `.part` handling for both. For the O2Ring S, information takes three steps:
+    handshake, info, file list.
+  - AES-128-ECB with PKCS#7 padding is in `SleepLib/crypto`, using the Botan already
+    bundled with OSCAR.
+  - `Device` uses the `e8fb…` service for the O2Ring S, falling back to the classic one.
+- **Dialog:** O2Ring S devices can be selected, marked "experimental".
+- **Diagnostics:** the downloader writes every frame sent and every reply received
+  (command, status, number, first bytes) to the debug log.
+- **Tests:** a fake O2Ring S runs the full encrypted session in the unit tests, including
+  an unsolicited live-data frame in the middle of a transfer and a ring answering with the
+  wrong key. AES is checked against the FIPS-197 test vector.
+
 ## As built: phase 1 (2026-10-27, not yet tested on hardware)
 
 - **Code:**
@@ -224,12 +249,29 @@ setting), so the driver should accept whichever of the two the device offers.
 
 | Command | Code | Payload | Reply |
 |---|---|---|---|
+For ordinary overnight recordings the SDK uses Lepu's **generic** commands (`LpBleCmd`).
+The OxyII-specific `0x06`–`0x09` are only used for other file types (`oxi.list`,
+`ppg.list`, `acc.list`) and on a few models; OSCAR doesn't use them.
+
+| Command | Code | Payload | Reply |
+|---|---|---|---|
 | Encrypt (handshake) | `0xFF` | 16-byte token, scrambled — see below | session key, scrambled |
-| File list | `0x06` | none | 1-byte count, then one 16-byte name per file, zero-padded |
-| Read start | `0x07` | 20 bytes: name (up to 16, zero-padded) + 32-bit start offset (0, or a resume point) | 32-bit file size |
-| Read data | `0x08` | 32-bit offset | next chunk |
-| Read end | `0x09` | none | acknowledgement |
-| Info (common command) | `0xE1` | none | device info |
+| Info | `0xE1` | none | serial number: length at byte 37, text from byte 38 (at most 18 bytes); clock: year (16-bit) at 24, then month, day, hour, minute, second |
+| Set UTC time | `0xC0` | year (16-bit), month, day, hour, minute, second (local time), UTC offset in tenths of an hour | acknowledgement |
+| File list | `0xF1` | none | 1-byte count, then one 16-byte name per file, zero-padded |
+| Read start | `0xF2` | 20 bytes: name (up to 16, zero-padded) + 32-bit start offset | 32-bit file size |
+| Read data | `0xF3` | 32-bit byte offset of the next block | next block |
+| Read end | `0xF4` | none | acknowledgement |
+
+- **Reply type byte:** 1 means a normal reply; anything else is an error code (e.g. `0xE0`
+  file not found, `0xF3` decryption failed, `0xFB` busy, `0xFD` unsupported).
+- **Sequence number:** one byte, counting 0–254.
+- **Matching replies:** replies carry their command code, so OSCAR ignores any reply that
+  doesn't answer the pending command, such as live data.
+- **Order after connecting:** the SDK runs the handshake, then switches off the ring's
+  automatic live-data pushes, then sets the clock. OSCAR does the handshake, info, file
+  list and (optionally) the clock. It leaves the live-data setting alone, because replies
+  can be told apart by their command code anyway.
 
 **Encryption is required.**
 - `OxyIIBleInterface.needEncrypt()` returns true for:
@@ -362,18 +404,14 @@ New code goes in `oscar/SleepLib/viatomble/`, except for the dialog.
 
 ## Open decisions
 
-These were raised on 2026-10-27 and are not answered yet. The design assumes the default in
+Raised on 2026-10-27. Decided items are marked; for the rest, the design assumes the default in
 brackets.
 
-1. **Test hardware.** oxytool has been used with the SleepU and the classic O2Ring, so
-   those can be tested. Is an O2Ring S available? [Unknown. Phase 2 can't be verified
-   without one.]
-2. **Encryption.** The O2Ring S family requires the handshake, so supporting it means
-   embedding Lepu's 16-byte `EncryptUtil.SECRET_KEY` in OSCAR. It is needed only to talk to
-   the user's own device, but it is the vendor's secret in GPL source. [Undecided. Phase 2
-   is blocked on this.]
-3. **Scope.** [Phase 1, the classic protocol, only. Phase 2, O2Ring S, once decisions 1 and
-   2 are settled.]
+1. **Test hardware.** The SleepU and classic O2Ring have been used with oxytool. **No O2Ring
+   S is available here; a tester with one will build `vihealth-dev`** (decided
+   2026-10-27).
+2. **Encryption.** **Embed the app key in the source** (decided 2026-10-27).
+3. **Scope.** Phase 1 and phase 2 are both built; phase 2 is experimental until tested.
 4. **Menu label.** "Viatom BLE Import…", as requested. ["Import Viatom/Wellue Data via
    Bluetooth…" would match the item next to it. Kept as requested unless changed.]
 

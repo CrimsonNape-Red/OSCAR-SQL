@@ -98,6 +98,7 @@ class ViatomBleImportDialog : public QDialog
     QPushButton *m_connectButton = nullptr;
     QCheckBox *m_setClock = nullptr;
     QList<QBluetoothDeviceInfo> m_devices;
+    QList<ViatomBle::DeviceFamily> m_families;   // parallel to m_devices
 
     // Files page
     QLabel *m_deviceInfo = nullptr;

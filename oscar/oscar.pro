@@ -419,7 +419,9 @@ SOURCES += \
     SleepLib/loader_plugins/somnopose_loader.cpp \
     SleepLib/loader_plugins/viatom_loader.cpp \
     SleepLib/viatomble/viatomble_availability.cpp \
+    SleepLib/viatomble/viatomble_dialect.cpp \
     SleepLib/viatomble/viatomble_downloader.cpp \
+    SleepLib/viatomble/viatomble_o2rings.cpp \
     SleepLib/viatomble/viatomble_protocol.cpp \
     SleepLib/loader_plugins/weinmann_loader.cpp \
     SleepLib/loader_plugins/yuwell_loader.cpp \
@@ -597,8 +599,10 @@ HEADERS  += \
     SleepLib/loader_plugins/somnopose_loader.h \
     SleepLib/loader_plugins/viatom_loader.h \
     SleepLib/viatomble/viatomble_availability.h \
+    SleepLib/viatomble/viatomble_dialect.h \
     SleepLib/viatomble/viatomble_downloader.h \
     SleepLib/viatomble/viatomble_link.h \
+    SleepLib/viatomble/viatomble_o2rings.h \
     SleepLib/viatomble/viatomble_protocol.h \
     SleepLib/loader_plugins/yuwell_loader.h \
     SleepLib/loader_plugins/zeo_loader.h \

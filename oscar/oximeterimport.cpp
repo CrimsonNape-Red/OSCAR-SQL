@@ -181,7 +181,7 @@ OximeterImport::OximeterImport(QWidget *parent) :
     };
     if (QBoxLayout *box = holder(ui->fileImportButton->parentWidget()->layout())) {
         auto *bleButton = new QPushButton(QIcon(":/icons/oximeter.png"),
-            tr("Download from a Viatom/Wellue oximeter over Bluetooth (O2Ring, SleepU, Checkme O2)"), this);
+            tr("Download from a Viatom/Wellue oximeter over Bluetooth (O2Ring, O2Ring S, SleepU, Checkme O2)"), this);
         bleButton->setIconSize(ui->fileImportButton->iconSize());
         bleButton->setAutoDefault(false);
         const ViatomBle::Availability availability = ViatomBle::availability();

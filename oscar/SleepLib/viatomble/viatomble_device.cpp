@@ -26,6 +26,7 @@
 #endif
 
 #include "viatomble_device.h"
+#include "viatomble_o2rings.h"
 #include "viatomble_protocol.h"
 
 namespace ViatomBle {
@@ -44,10 +45,19 @@ Device::~Device()
     disconnectFromDevice();
 }
 
-void Device::connectToDevice(const QBluetoothDeviceInfo &info)
+void Device::connectToDevice(const QBluetoothDeviceInfo &info, DeviceFamily family)
 {
     disconnectFromDevice();
     m_info = info;
+
+    const ServiceSpec classic{QString::fromLatin1(SERVICE_UUID), QString::fromLatin1(WRITE_UUID),
+                              QString::fromLatin1(NOTIFY_UUID)};
+    const ServiceSpec o2ringS{QString::fromLatin1(O2RingS::SERVICE_UUID), QString::fromLatin1(O2RingS::WRITE_UUID),
+                              QString::fromLatin1(O2RingS::NOTIFY_UUID)};
+    // The SDK can also put an O2Ring S on the classic service (its UUIDProtocol V1);
+    // the frames are the O2Ring S ones either way.
+    m_candidates = (family == DeviceFamily::O2RingS) ? QList<ServiceSpec>{o2ringS, classic}
+                                                     : QList<ServiceSpec>{classic};
 
     m_controller = QLowEnergyController::createCentral(info, this);
     connect(m_controller, &QLowEnergyController::connected, this, &Device::onConnected);
@@ -125,12 +135,25 @@ void Device::onConnectTimeout()
 
 void Device::onDiscoveryFinished()
 {
-    const QBluetoothUuid serviceUuid(QString::fromLatin1(SERVICE_UUID));
-    if (!m_controller->services().contains(serviceUuid)) {
-        fail(tr("This device does not offer the Viatom data service. "
-                "It may be an O2Ring S or another model OSCAR cannot download from yet."));
+    QBluetoothUuid serviceUuid;
+    for (const ServiceSpec &spec : m_candidates) {
+        if (m_controller->services().contains(QBluetoothUuid(spec.service))) {
+            m_spec = spec;
+            serviceUuid = QBluetoothUuid(spec.service);
+            break;
+        }
+    }
+    if (serviceUuid.isNull()) {
+        QStringList offered;
+        for (const QBluetoothUuid &uuid : m_controller->services()) {
+            offered << uuid.toString();
+        }
+        qWarning() << "ViatomBle::Device: services offered:" << offered;
+        fail(tr("This device does not offer the Viatom data service OSCAR expected. "
+                "It may be a model OSCAR cannot download from yet."));
         return;
     }
+    qDebug() << "ViatomBle::Device: using service" << m_spec.service;
     m_service = m_controller->createServiceObject(serviceUuid, this);
     if (!m_service) {
         fail(tr("The Viatom data service could not be opened."));
@@ -155,8 +178,8 @@ void Device::onServiceStateChanged(QLowEnergyService::ServiceState state)
     if (state != QLowEnergyService::RemoteServiceDiscovered) {
         return;
     }
-    m_writeChar = m_service->characteristic(QBluetoothUuid(QString::fromLatin1(WRITE_UUID)));
-    m_notifyChar = m_service->characteristic(QBluetoothUuid(QString::fromLatin1(NOTIFY_UUID)));
+    m_writeChar = m_service->characteristic(QBluetoothUuid(m_spec.write));
+    m_notifyChar = m_service->characteristic(QBluetoothUuid(m_spec.notify));
     if (!m_writeChar.isValid() || !m_notifyChar.isValid()) {
         fail(tr("The Viatom data service is missing its characteristics."));
         return;
@@ -262,8 +285,8 @@ void Device::startBluezSetup()
             enableQtNotifications();
             return;
         }
-        m_writePath = bluezCharacteristicPath(reply, QString::fromLatin1(WRITE_UUID));
-        m_notifyPath = bluezCharacteristicPath(reply, QString::fromLatin1(NOTIFY_UUID));
+        m_writePath = bluezCharacteristicPath(reply, m_spec.write);
+        m_notifyPath = bluezCharacteristicPath(reply, m_spec.notify);
         if (m_writePath.isEmpty()) {
             qWarning() << "ViatomBle::Device: BlueZ write path not found, using Qt writes";
         }

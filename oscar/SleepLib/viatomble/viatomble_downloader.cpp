@@ -16,7 +16,12 @@
 namespace ViatomBle {
 
 Downloader::Downloader(Link *link, QObject *parent)
-    : QObject(parent), m_link(link)
+    : Downloader(link, std::make_unique<ClassicDialect>(), parent)
+{
+}
+
+Downloader::Downloader(Link *link, std::unique_ptr<Dialect> dialect, QObject *parent)
+    : QObject(parent), m_link(link), m_dialect(std::move(dialect))
 {
     m_timer.setSingleShot(true);
     connect(&m_timer, &QTimer::timeout, this, &Downloader::onTimeout);
@@ -36,8 +41,10 @@ void Downloader::requestInfo()
         return;
     }
     m_cancelRequested = false;
-    m_splitter.clear();
-    request(WaitInfo, CMD_INFO, 0);
+    m_dialect->clearBuffer();
+    m_infoStep = 0;
+    m_info = DeviceInfo();
+    request(WaitInfo, m_dialect->infoRequest(0));
 }
 
 void Downloader::setTime(const QDateTime &localTime)
@@ -47,8 +54,8 @@ void Downloader::setTime(const QDateTime &localTime)
         return;
     }
     m_cancelRequested = false;
-    m_splitter.clear();
-    request(WaitSetTime, CMD_PARA_SYNC, 0, setTimePayload(localTime));
+    m_dialect->clearBuffer();
+    request(WaitSetTime, m_dialect->setTimeRequest(localTime));
 }
 
 void Downloader::download(const QStringList &files, const QString &folder, bool overwriteExisting)
@@ -61,7 +68,7 @@ void Downloader::download(const QStringList &files, const QString &folder, bool 
     m_folder = folder;
     m_overwrite = overwriteExisting;
     m_cancelRequested = false;
-    m_splitter.clear();
+    m_dialect->clearBuffer();
     QDir().mkpath(folder);
     startNextFile();
 }
@@ -85,10 +92,10 @@ QString Downloader::targetPath(const QString &name) const
     return QDir(m_folder).filePath(QFileInfo(name).fileName());
 }
 
-void Downloader::request(State state, quint8 cmd, quint16 seq, const QByteArray &payload)
+void Downloader::request(State state, const Dialect::Request &request)
 {
     m_state = state;
-    m_pendingFrame = buildRequest(cmd, seq, payload);
+    m_pending = request;
     m_attempt = 0;
     m_timedOut = false;
     sendPending();
@@ -96,7 +103,10 @@ void Downloader::request(State state, quint8 cmd, quint16 seq, const QByteArray 
 
 void Downloader::sendPending()
 {
-    m_link->send(m_pendingFrame);
+    // Compact protocol trace for the debug log: enough to see where an exchange stops.
+    qDebug().noquote() << QStringLiteral("ViatomBle tx (attempt %1):").arg(m_attempt + 1)
+                       << m_pending.frame.left(48).toHex(' ');
+    m_link->send(m_pending.frame);
     m_timer.start(m_replyTimeoutMs);
 }
 
@@ -117,15 +127,18 @@ void Downloader::continueWith(std::function<void()> next)
         if (generation != m_generation) {
             return;
         }
-        m_splitter.clear();
+        m_dialect->clearBuffer();
         next();
     });
 }
 
 void Downloader::onDataReceived(const QByteArray &chunk)
 {
-    const QList<Reply> replies = m_splitter.feed(chunk);
+    const QList<Reply> replies = m_dialect->feed(chunk);
     for (const Reply &reply : replies) {
+        qDebug().noquote() << QStringLiteral("ViatomBle rx: cmd %1 status %2 seq %3 len %4:")
+                                  .arg(reply.cmd, 0, 16).arg(reply.status, 0, 16).arg(reply.seq).arg(reply.payload.size())
+                           << reply.payload.left(32).toHex(' ');
         if (m_settling) {
             qDebug() << "ViatomBle::Downloader: dropping late reply after a retry";
             continue;
@@ -134,6 +147,22 @@ void Downloader::onDataReceived(const QByteArray &chunk)
             qDebug() << "ViatomBle::Downloader: ignoring reply while idle";
             continue;
         }
+        if (m_pending.cmd >= 0 && reply.cmd != m_pending.cmd) {
+            // e.g. live data the device sends on its own
+            qDebug() << "ViatomBle::Downloader: ignoring reply to command" << Qt::hex << reply.cmd
+                     << "while waiting for" << m_pending.cmd;
+            continue;
+        }
+        if (m_pending.seq != 0) {
+            if (reply.seq == m_pending.seq) {
+                m_echoSeq = true;
+            } else if (m_echoSeq) {
+                // A late reply to an earlier, retried request.
+                qDebug() << "ViatomBle::Downloader: dropping reply numbered" << reply.seq
+                         << "while waiting for" << m_pending.seq;
+                continue;
+            }
+        }
         handleReply(reply);
     }
 }
@@ -141,22 +170,9 @@ void Downloader::onDataReceived(const QByteArray &chunk)
 void Downloader::handleReply(const Reply &reply)
 {
     switch (m_state) {
-    case WaitInfo: {
-        m_timer.stop();
-        const bool ok = reply.ok();
-        const DeviceInfo info = DeviceInfo::fromPayload(reply.payload);
-        continueWith([this, ok, info]() {
-            m_state = Idle;
-            if (!ok) {
-                emit failed(tr("The device refused the request for its information."));
-            } else if (!info.valid) {
-                emit failed(tr("The device's information could not be read."));
-            } else {
-                emit infoReceived(info);
-            }
-        });
+    case WaitInfo:
+        handleInfo(reply);
         return;
-    }
     case WaitSetTime: {
         m_timer.stop();
         const QString error = reply.ok() ? QString() : tr("The device refused the new time.");
@@ -181,6 +197,23 @@ void Downloader::handleReply(const Reply &reply)
     }
 }
 
+void Downloader::handleInfo(const Reply &reply)
+{
+    m_timer.stop();
+    const QString error = m_dialect->handleInfoReply(m_infoStep, reply, m_info);
+    continueWith([this, error]() {
+        if (!error.isEmpty()) {
+            m_state = Idle;
+            emit failed(error);
+        } else if (++m_infoStep < m_dialect->infoSteps()) {
+            request(WaitInfo, m_dialect->infoRequest(m_infoStep));
+        } else {
+            m_state = Idle;
+            emit infoReceived(m_info);
+        }
+    });
+}
+
 void Downloader::startNextFile()
 {
     if (m_cancelRequested || m_queue.isEmpty()) {
@@ -196,9 +229,7 @@ void Downloader::startNextFile()
     m_skipCurrent = false;
     m_fileError.clear();
 
-    QByteArray name = m_current.toLatin1();
-    name.append('\0');
-    request(WaitStart, CMD_READ_START, 0, name);
+    request(WaitStart, m_dialect->startRequest(m_current));
 }
 
 void Downloader::handleStart(const Reply &reply)
@@ -206,11 +237,12 @@ void Downloader::handleStart(const Reply &reply)
     m_timer.stop();
     if (!reply.ok()) {
         // The device did not open the file, so there is nothing to end.
-        emit fileFailed(m_current, tr("The device refused to open the file."));
+        emit fileFailed(m_current, tr("The device refused to open the file (code 0x%1).")
+                                       .arg(reply.status, 2, 16, QLatin1Char('0')));
         continueWith([this]() { startNextFile(); });
         return;
     }
-    m_size = fileSizeFromReadStart(reply);
+    m_size = m_dialect->fileSize(reply);
     if (m_size < 0) {
         continueWith([this]() { endFile(tr("The device's reply did not include the file size.")); });
         return;
@@ -234,22 +266,14 @@ void Downloader::handleStart(const Reply &reply)
         if (m_skipCurrent || !error.isEmpty() || m_size == 0) {
             endFile(error);
         } else {
-            request(WaitContent, CMD_READ_CONTENT, m_chunk);
+            request(WaitContent, m_dialect->dataRequest(m_chunk, m_received));
         }
     });
 }
 
 void Downloader::handleContent(const Reply &reply)
 {
-    if (m_echoSeq && reply.seq != m_chunk) {
-        // A late reply to an earlier, retried request.
-        qDebug() << "ViatomBle::Downloader: dropping reply for chunk" << reply.seq << "while waiting for" << m_chunk;
-        return;
-    }
     m_timer.stop();
-    if (m_chunk > 0 && reply.seq == m_chunk) {
-        m_echoSeq = true;
-    }
 
     QString error;
     if (!reply.ok()) {
@@ -271,7 +295,7 @@ void Downloader::handleContent(const Reply &reply)
             endFile(error);
         } else {
             m_chunk++;
-            request(WaitContent, CMD_READ_CONTENT, m_chunk);
+            request(WaitContent, m_dialect->dataRequest(m_chunk, m_received));
         }
     });
 }
@@ -279,7 +303,7 @@ void Downloader::handleContent(const Reply &reply)
 void Downloader::endFile(const QString &reason)
 {
     m_fileError = reason;
-    request(WaitEnd, CMD_READ_END, 0);
+    request(WaitEnd, m_dialect->endRequest());
 }
 
 void Downloader::finishFile()
@@ -335,8 +359,7 @@ void Downloader::onTimeout()
     case WaitInfo:
         continueWith([this]() {
             m_state = Idle;
-            emit failed(tr("The device did not answer. It may need an encrypted connection, "
-                           "which OSCAR does not support yet."));
+            emit failed(m_dialect->infoTimeoutMessage(m_infoStep));
         });
         return;
     case WaitSetTime:

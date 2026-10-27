@@ -15,7 +15,10 @@
 #include <QTimer>
 
 #include "viatombletests.h"
+#include "SleepLib/crypto.h"
+#include "SleepLib/viatomble/viatomble_dialect.h"
 #include "SleepLib/viatomble/viatomble_downloader.h"
+#include "SleepLib/viatomble/viatomble_o2rings.h"
 #include "SleepLib/viatomble/viatomble_link.h"
 #include "SleepLib/viatomble/viatomble_protocol.h"
 
@@ -616,6 +619,287 @@ void ViatomBleTests::testLateInfoReplyIsNotTakenForSetTime()
 
     QCOMPARE(info.size(), 1);
     QVERIFY(!timeSet.first().first().toString().isEmpty());   // the refusal is reported
+}
+
+// ---------------------------------------------------------------------------------------
+// O2Ring S family
+
+namespace {
+
+QByteArray makeA5Reply(quint8 cmd, quint8 type, quint8 seq, const QByteArray &payload)
+{
+    QByteArray frame;
+    frame.append(char(0xA5));
+    frame.append(char(cmd));
+    frame.append(char(~cmd));
+    frame.append(char(type));
+    frame.append(char(seq));
+    frame.append(char(payload.size() & 0xFF));
+    frame.append(char(payload.size() >> 8));
+    frame.append(payload);
+    frame.append(char(crc8(frame.constData(), frame.size())));
+    return frame;
+}
+
+//! Plays an O2Ring S: checks the handshake token, hands out a session key, then
+//! encrypts and decrypts every payload as the SDK describes.
+class FakeO2RingS : public Link
+{
+  public:
+    QMap<QString, QByteArray> files;
+    QByteArray sessionKey = QByteArray::fromHex("00112233445566778899aabbccddeeff");
+    bool wrongKeyOnReplies = false;      // encrypt replies with another key
+    bool liveDataDuringTransfer = false; // push an unsolicited frame while sending a file
+    QByteArray lastUtcTime;
+    QList<QByteArray> sent;
+    QString handshakeError;
+
+    void send(const QByteArray &frame) override
+    {
+        sent.append(frame);
+        const auto *b = reinterpret_cast<const quint8 *>(frame.constData());
+        QCOMPARE(b[0], quint8(0xA5));
+        QCOMPARE(quint8(b[2]), quint8(~b[1]));
+        QCOMPARE(b[3], quint8(0));
+        QCOMPARE(tableCrc8(frame.left(frame.size() - 1)), quint8(b[frame.size() - 1]));
+        const quint8 cmd = b[1];
+        const quint8 seq = b[4];
+        QByteArray payload = frame.mid(7, b[5] | (b[6] << 8));
+        if (m_session && !payload.isEmpty()) {
+            QByteArray plain;
+            QVERIFY(O2RingS::decryptPayload(sessionKey, payload, plain));
+            payload = plain;
+        }
+
+        switch (cmd) {
+        case O2RingS::CMD_ENCRYPT: {
+            const QByteArray token = O2RingS::scramble(payload);
+            const QByteArray expected = O2RingS::handshakeToken(0).left(8);
+            if (token.left(8) != expected || token.mid(8, 4) != QByteArray("0000")) {
+                handshakeError = QStringLiteral("bad token");
+                reply(cmd, 0xF3, seq, QByteArray());
+                return;
+            }
+            QByteArray info;
+            info.append(char(1));
+            info.append(char(16));
+            info.append(QByteArray(2, '\0'));
+            info.append(sessionKey);
+            reply(cmd, 1, seq, O2RingS::scramble(info));
+            m_session = true;
+            return;
+        }
+        case O2RingS::CMD_GET_INFO: {
+            QByteArray info(60, '\0');
+            info[24] = char(2026 & 0xFF);
+            info[25] = char(2026 >> 8);
+            info[26] = 10; info[27] = 27; info[28] = 21; info[29] = 55; info[30] = 7;
+            const QByteArray sn("2224300099");
+            info[37] = char(sn.size());
+            info.replace(38, sn.size(), sn);
+            reply(cmd, 1, seq, info);
+            return;
+        }
+        case O2RingS::CMD_GET_FILE_LIST: {
+            QByteArray list;
+            list.append(char(files.size()));
+            for (const QString &name : files.keys()) {
+                QByteArray n = name.toLatin1();
+                n.append(QByteArray(16 - n.size(), '\0'));
+                list.append(n);
+            }
+            reply(cmd, 1, seq, list);
+            return;
+        }
+        case O2RingS::CMD_SET_UTC_TIME:
+            lastUtcTime = payload;
+            reply(cmd, 1, seq, QByteArray());
+            return;
+        case O2RingS::CMD_READ_FILE_START: {
+            QByteArray name = payload.left(16);
+            name.truncate(name.indexOf('\0') < 0 ? 16 : name.indexOf('\0'));
+            QCOMPARE(payload.mid(16, 4), QByteArray(4, '\0'));
+            if (!files.contains(QString::fromLatin1(name))) {
+                reply(cmd, 0xE0, seq, QByteArray());   // "file not found"
+                return;
+            }
+            m_current = files.value(QString::fromLatin1(name));
+            reply(cmd, 1, seq, le32(m_current.size()));
+            return;
+        }
+        case O2RingS::CMD_READ_FILE_DATA: {
+            const auto *o = reinterpret_cast<const quint8 *>(payload.constData());
+            const int offset = o[0] | (o[1] << 8) | (o[2] << 16) | (o[3] << 24);
+            if (liveDataDuringTransfer && offset > 0 && !m_pushedLive) {
+                m_pushedLive = true;
+                reply(0x04, 1, 0, QByteArray(20, '\x55'));   // live data, not asked for
+            }
+            reply(cmd, 1, seq, m_current.mid(offset, 300));
+            return;
+        }
+        case O2RingS::CMD_READ_FILE_END:
+            reply(cmd, 1, seq, QByteArray());
+            return;
+        default:
+            QFAIL("unexpected command");
+        }
+    }
+
+  private:
+    void reply(quint8 cmd, quint8 type, quint8 seq, const QByteArray &plain)
+    {
+        QByteArray payload = plain;
+        if (m_session && !plain.isEmpty()) {
+            const QByteArray key = wrongKeyOnReplies ? QByteArray(16, '\x42') : sessionKey;
+            QVERIFY(O2RingS::encryptPayload(key, plain, payload));
+        }
+        const QByteArray frame = makeA5Reply(cmd, type, seq, payload);
+        for (int i = 0; i < frame.size(); i += 20) {
+            const QByteArray chunk = frame.mid(i, 20);
+            QTimer::singleShot(0, this, [this, chunk]() { emit dataReceived(chunk); });
+        }
+    }
+
+    bool m_session = false;
+    bool m_pushedLive = false;
+    QByteArray m_current;
+};
+
+} // namespace
+
+void ViatomBleTests::testAes128EcbPkcs7()
+{
+    // FIPS-197 appendix C.1
+    const QByteArray key = QByteArray::fromHex("000102030405060708090a0b0c0d0e0f");
+    const QByteArray plain = QByteArray::fromHex("00112233445566778899aabbccddeeff");
+    QByteArray cipher;
+    QCOMPARE(encrypt_aes128_ecb_pkcs7(key, plain, cipher), OK);
+    QCOMPARE(cipher.size(), 32);   // a full block of padding follows
+    QCOMPARE(cipher.left(16), QByteArray::fromHex("69c4e0d86a7b0430d8cdb78070b4c55a"));
+
+    QByteArray back;
+    QCOMPARE(decrypt_aes128_ecb_pkcs7(key, cipher, back), OK);
+    QCOMPARE(back, plain);
+    for (int n : {0, 1, 15, 17, 512}) {
+        const QByteArray data = pattern(n, n);
+        QCOMPARE(encrypt_aes128_ecb_pkcs7(key, data, cipher), OK);
+        QCOMPARE(cipher.size() % 16, 0);
+        QCOMPARE(decrypt_aes128_ecb_pkcs7(key, cipher, back), OK);
+        QCOMPARE(back, data);
+    }
+    QVERIFY(decrypt_aes128_ecb_pkcs7(key, cipher.left(cipher.size() - 1), back) != OK);   // length
+    QVERIFY(decrypt_aes128_ecb_pkcs7(QByteArray(16, '\x01'), cipher, back) != OK);        // padding
+}
+
+void ViatomBleTests::testO2RingSFrames()
+{
+    const QByteArray req = O2RingS::buildRequest(O2RingS::CMD_GET_FILE_LIST, 7);
+    QCOMPARE(req.left(7), QByteArray::fromHex("a5f10e00070000"));
+    QCOMPARE(quint8(req.at(7)), tableCrc8(req.left(7)));
+
+    O2RingS::FrameSplitter splitter;
+    QByteArray stream = QByteArray::fromHex("00ff") + makeA5Reply(0xF2, 1, 9, le32(1234))
+                      + makeA5Reply(0xF2, 0xE0, 10, QByteArray());
+    QList<Reply> replies;
+    for (int i = 0; i < stream.size(); i += 3) {
+        replies += splitter.feed(stream.mid(i, 3));
+    }
+    QCOMPARE(replies.size(), 2);
+    QCOMPARE(replies[0].cmd, 0xF2);
+    QVERIFY(replies[0].ok());
+    QCOMPARE(replies[0].seq, quint16(9));
+    QCOMPARE(fileSizeFromReadStart(replies[0]), qint64(1234));
+    QVERIFY(!replies[1].ok());
+    QCOMPARE(replies[1].status, quint8(0xE0));
+    QCOMPARE(O2RingS::statusFromType(0), quint8(0xFF));
+}
+
+void ViatomBleTests::testO2RingSHandshake()
+{
+    // Every other byte of the app key, "0000", then the time shifted by 0..3 bits.
+    const QByteArray token = O2RingS::handshakeToken(0x12345678);
+    QCOMPARE(token.size(), 16);
+    QCOMPARE(token.left(8), QByteArray::fromHex("c2cfdad8a8f7c435"));
+    QCOMPARE(token.mid(8, 4), QByteArray("0000"));
+    QCOMPARE(token.mid(12, 4), QByteArray::fromHex("783c9ecf"));
+
+    QCOMPARE(O2RingS::scramble(O2RingS::scramble(pattern(40, 3))), pattern(40, 3));
+
+    const QByteArray key = QByteArray::fromHex("0f0e0d0c0b0a09080706050403020100");
+    QByteArray reply;
+    reply.append(char(1)).append(char(16)).append(QByteArray(2, '\0')).append(key);
+    QCOMPARE(O2RingS::sessionKeyFromHandshake(O2RingS::scramble(reply)), key);
+    QVERIFY(O2RingS::sessionKeyFromHandshake(O2RingS::scramble(reply.left(10))).isEmpty());
+}
+
+void ViatomBleTests::testO2RingSPayloads()
+{
+    const QByteArray start = O2RingS::readStartPayload("20261027220000", 0x01020304);
+    QCOMPARE(start.size(), 20);
+    QCOMPARE(start.left(16), QByteArray("20261027220000\0\0", 16));
+    QCOMPARE(start.mid(16), QByteArray::fromHex("04030201"));
+
+    const QByteArray utc = O2RingS::utcTimePayload(QDateTime(QDate(2026, 10, 27), QTime(21, 5, 9)), -5 * 3600);
+    QCOMPARE(utc, QByteArray::fromHex("ea070a1b150509ce"));   // 2026, 10, 27, 21:05:09, -50 tenths
+
+    QByteArray list;
+    list.append(char(2)).append(QByteArray("20261025220000\0\0", 16)).append(QByteArray("20261026230000\0\0", 16));
+    QCOMPARE(O2RingS::parseFileList(list), QStringList({"20261025220000", "20261026230000"}));
+    QVERIFY(O2RingS::parseFileList(QByteArray(1, '\x05')).isEmpty());   // count larger than the data
+
+    QVERIFY(!O2RingS::parseInfo(QByteArray(10, '\0')).valid);
+}
+
+void ViatomBleTests::testO2RingSSession()
+{
+    QTemporaryDir dir;
+    FakeO2RingS dev;
+    dev.files["20261025220000"] = pattern(1000, 20);   // several 300-byte blocks
+    dev.files["20261026230000"] = pattern(300, 21);
+    dev.liveDataDuringTransfer = true;
+    Downloader dl(&dev, std::make_unique<O2RingSDialect>());
+    QSignalSpy info(&dl, &Downloader::infoReceived);
+    QSignalSpy timeSet(&dl, &Downloader::timeSet);
+    QSignalSpy saved(&dl, &Downloader::fileSaved);
+    QSignalSpy finished(&dl, &Downloader::downloadFinished);
+
+    dl.requestInfo();
+    QVERIFY(info.wait(5000));
+    QVERIFY(dev.handshakeError.isEmpty());
+    const DeviceInfo got = info.first().first().value<DeviceInfo>();
+    QCOMPARE(got.serialNumber, QStringLiteral("2224300099"));
+    QCOMPARE(got.deviceTime, QStringLiteral("2026-10-27,21:55:07"));
+    QCOMPARE(got.files, QStringList(dev.files.keys()));
+
+    dl.setTime(QDateTime(QDate(2026, 10, 27), QTime(22, 0, 0)));
+    QVERIFY(timeSet.wait(5000));
+    QCOMPARE(timeSet.first().first().toString(), QString());
+    QCOMPARE(dev.lastUtcTime.left(7), QByteArray::fromHex("ea070a1b160000"));
+
+    dl.download(got.files, dir.path(), false);
+    QVERIFY(finished.wait(5000));
+    QCOMPARE(saved.size(), 2);
+    for (auto it = dev.files.cbegin(); it != dev.files.cend(); ++it) {
+        QCOMPARE(readFile(dir.filePath(it.key())), it.value());
+    }
+
+    // Every request after the handshake carried an encrypted (block-sized) payload or none.
+    for (const QByteArray &frame : dev.sent.mid(1)) {
+        const int len = quint8(frame.at(5)) | (quint8(frame.at(6)) << 8);
+        QCOMPARE(len % 16, 0);
+    }
+}
+
+void ViatomBleTests::testO2RingSWrongKey()
+{
+    FakeO2RingS dev;
+    dev.wrongKeyOnReplies = true;
+    Downloader dl(&dev, std::make_unique<O2RingSDialect>());
+    QSignalSpy failed(&dl, &Downloader::failed);
+
+    dl.requestInfo();
+    QVERIFY(failed.wait(5000));
+    QVERIFY(failed.first().first().toString().contains(QStringLiteral("0xf3")));
 }
 
 #ifdef OSCAR_HAVE_BLUETOOTH

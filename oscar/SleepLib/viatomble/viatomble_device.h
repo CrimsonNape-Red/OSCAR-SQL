@@ -17,6 +17,7 @@
 #include <QTimer>
 
 #include "viatomble_link.h"
+#include "viatomble_scanner.h"
 
 class QDBusMessage;
 class QSocketNotifier;
@@ -39,8 +40,8 @@ class Device : public Link
     explicit Device(QObject *parent = nullptr);
     ~Device() override;
 
-    //! Connects and sets up the service; answers with ready() or connectFailed().
-    void connectToDevice(const QBluetoothDeviceInfo &info);
+    //! Connects and sets up the family's service; answers with ready() or connectFailed().
+    void connectToDevice(const QBluetoothDeviceInfo &info, DeviceFamily family = DeviceFamily::Classic);
     void disconnectFromDevice();
     bool isReady() const { return m_ready; }
 
@@ -85,7 +86,17 @@ class Device : public Link
     QString m_dbusWriteType = QStringLiteral("command");   // "request" if "command" fails
 #endif
 
+    //! A GATT service with its write and notify characteristics.
+    struct ServiceSpec
+    {
+        QString service;
+        QString write;
+        QString notify;
+    };
+
     QBluetoothDeviceInfo m_info;
+    QList<ServiceSpec> m_candidates;   //!< in order of preference
+    ServiceSpec m_spec;                //!< the one in use
     QLowEnergyController *m_controller = nullptr;
     QLowEnergyService *m_service = nullptr;
     QLowEnergyCharacteristic m_writeChar;

@@ -41,6 +41,14 @@ class ViatomBleTests : public QObject
     void testSetTime();
     void testLateInfoReplyIsNotTakenForSetTime();
 
+    // O2Ring S family
+    void testAes128EcbPkcs7();
+    void testO2RingSFrames();
+    void testO2RingSHandshake();
+    void testO2RingSPayloads();
+    void testO2RingSSession();
+    void testO2RingSWrongKey();
+
 #ifdef OSCAR_HAVE_BLUETOOTH
     void testDeviceFamilyFromName();
 #endif

@@ -47,8 +47,9 @@ QByteArray buildRequest(quint8 cmd, quint16 seq, const QByteArray &payload = QBy
 //! One reply frame: 55 status ~status seq(LE16) len(LE16) payload crc8.
 struct Reply
 {
-    quint8 status = 0;   // 0 = success, 1 = error
+    quint8 status = 0;   // 0 = success, anything else an error
     quint16 seq = 0;     // packet number as sent by the device
+    int cmd = -1;        // command answered, where the protocol says (not the classic one)
     QByteArray payload;
 
     bool ok() const { return status == 0; }

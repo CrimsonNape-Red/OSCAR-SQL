@@ -27,6 +27,7 @@
 #include "SleepLib/common.h"
 #include "SleepLib/preferences.h"
 #include "SleepLib/profiles.h"
+#include "SleepLib/viatomble/viatomble_dialect.h"
 #include "SleepLib/viatomble/viatomble_device.h"
 #include "SleepLib/viatomble/viatomble_downloader.h"
 
@@ -143,7 +144,8 @@ QWidget *ViatomBleImportDialog::buildWelcomePage()
     text->setText(tr(
         "<h3>Download recordings from your oximeter over Bluetooth</h3>"
         "<p>This works with Viatom/Wellue oximeters such as the O2Ring, SleepU, Checkme O2 and "
-        "Wearable O2. The O2Ring S family is not supported yet.</p>"
+        "Wearable O2. Support for the O2Ring S family (O2Ring S, SC, SF, SP) is new and "
+        "experimental: if it fails, OSCAR's debug log shows what happened.</p>"
         "<p><b>Before you start:</b></p>"
         "<ul>"
         "<li>Close the ViHealth app on your phone, or turn the phone's Bluetooth off. "
@@ -325,6 +327,7 @@ void ViatomBleImportDialog::startScan()
 {
     closeConnection();
     m_devices.clear();
+    m_families.clear();
     m_deviceList->clear();
     showPage(DevicesPage);
     m_rescanButton->setEnabled(false);
@@ -345,31 +348,20 @@ void ViatomBleImportDialog::onDeviceFound(const QBluetoothDeviceInfo &info, Devi
     }
     QString text = deviceLabel(info);
     if (family == DeviceFamily::O2RingS) {
-        text += tr("   (O2Ring S family: not supported yet)");
+        text += tr("   (O2Ring S family: experimental)");
     }
     if (row < 0) {
         m_devices.append(info);
-        auto *item = new QListWidgetItem(text, m_deviceList);
-        if (family != DeviceFamily::Classic) {
-            item->setFlags(item->flags() & ~(Qt::ItemIsEnabled | Qt::ItemIsSelectable));
-        }
-        if (m_deviceList->currentRow() < 0 && family == DeviceFamily::Classic) {
+        m_families.append(family);
+        new QListWidgetItem(text, m_deviceList);
+        if (m_deviceList->currentRow() < 0) {
             m_deviceList->setCurrentRow(m_deviceList->count() - 1);
         }
     } else {
         // The family can change as more of the advertisement arrives, e.g. a late name.
         m_devices[row] = info;
-        QListWidgetItem *item = m_deviceList->item(row);
-        item->setText(text);
-        const Qt::ItemFlags usable = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-        if (family == DeviceFamily::Classic) {
-            item->setFlags(item->flags() | usable);
-        } else {
-            item->setFlags(item->flags() & ~usable);
-            if (m_deviceList->currentRow() == row) {
-                m_deviceList->setCurrentRow(-1);
-            }
-        }
+        m_families[row] = family;
+        m_deviceList->item(row)->setText(text);
     }
     updateConnectButton();
 }
@@ -407,9 +399,14 @@ void ViatomBleImportDialog::connectToSelected()
     }
     m_scanner->stop();
     const QBluetoothDeviceInfo info = m_devices.at(row);
+    const DeviceFamily family = m_families.at(row);
 
     m_device = new Device(this);
-    m_downloader = new Downloader(m_device, this);
+    if (family == DeviceFamily::O2RingS) {
+        m_downloader = new Downloader(m_device, std::make_unique<O2RingSDialect>(), this);
+    } else {
+        m_downloader = new Downloader(m_device, this);
+    }
     connect(m_device, &Device::ready, this, &ViatomBleImportDialog::onDeviceReady);
     connect(m_device, &Device::connectFailed, this, &ViatomBleImportDialog::onConnectFailed);
     connect(m_device, &Link::linkLost, this, [this](const QString &reason) {
@@ -439,7 +436,9 @@ void ViatomBleImportDialog::connectToSelected()
     m_connectButton->setEnabled(false);
     m_rescanButton->setEnabled(false);
     m_status->setText(tr("Connecting to %1...").arg(info.name()));
-    m_device->connectToDevice(info);
+    qDebug().noquote() << "ViatomBleImport: connecting to" << info.name() << deviceLabel(info)
+                       << (family == DeviceFamily::O2RingS ? "as O2Ring S family" : "as classic");
+    m_device->connectToDevice(info, family);
 }
 
 void ViatomBleImportDialog::onDeviceReady()

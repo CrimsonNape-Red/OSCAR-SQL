@@ -10,12 +10,14 @@
 #define VIATOMBLE_DOWNLOADER_H
 
 #include <functional>
+#include <memory>
 
 #include <QObject>
 #include <QFile>
 #include <QStringList>
 #include <QTimer>
 
+#include "viatomble_dialect.h"
 #include "viatomble_protocol.h"
 
 namespace ViatomBle {
@@ -24,9 +26,12 @@ class Link;
 
 /*! \brief Reads device info and downloads files over a Link, without blocking.
  *
+ *  The family-specific frames come from a Dialect (classic, or O2Ring S).
+ *
  *  One request is outstanding at a time. Each request is retried after a timeout;
- *  when the retries run out the request fails. Replies carry no command code, so a
- *  late reply to a retried request could be mistaken for the next reply. After
+ *  when the retries run out the request fails. Where replies name their command,
+ *  others are ignored. Classic replies don't, so a late reply to a retried request
+ *  could be mistaken for the next reply. After
  *  accepting a reply to a retried request, the downloader therefore pauses and drops
  *  whatever arrives meanwhile. If the device has shown that it echoes sequence
  *  numbers, late file chunks are also recognised by number. A file is written to "<name>.part"
@@ -38,7 +43,9 @@ class Downloader : public QObject
     Q_OBJECT
 
   public:
+    //! Uses the classic dialect.
     explicit Downloader(Link *link, QObject *parent = nullptr);
+    Downloader(Link *link, std::unique_ptr<Dialect> dialect, QObject *parent = nullptr);
     ~Downloader() override;
 
     //! Also sets the pause after a retried request to twice the timeout.
@@ -82,11 +89,12 @@ class Downloader : public QObject
   private:
     enum State { Idle, WaitInfo, WaitSetTime, WaitStart, WaitContent, WaitEnd };
 
-    void request(State state, quint8 cmd, quint16 seq, const QByteArray &payload = QByteArray());
+    void request(State state, const Dialect::Request &request);
     void sendPending();
     //! Runs next now, or after a pause if the current request was retried or abandoned.
     void continueWith(std::function<void()> next);
     void handleReply(const Reply &reply);
+    void handleInfo(const Reply &reply);
     void handleStart(const Reply &reply);
     void handleContent(const Reply &reply);
     void startNextFile();
@@ -97,13 +105,15 @@ class Downloader : public QObject
     QString targetPath(const QString &name) const;
 
     Link *m_link;
-    FrameSplitter m_splitter;
+    std::unique_ptr<Dialect> m_dialect;
     QTimer m_timer;
     int m_replyTimeoutMs = 2000;
     int m_maxRetries = 3;
 
     State m_state = Idle;
-    QByteArray m_pendingFrame;
+    Dialect::Request m_pending;
+    int m_infoStep = 0;
+    DeviceInfo m_info;
     int m_attempt = 0;
     bool m_timedOut = false;   // the current request ran out of retries
     bool m_settling = false;
@@ -122,8 +132,8 @@ class Downloader : public QObject
     QFile m_part;
     bool m_skipCurrent = false;
     QString m_fileError;
-    //! Set once a reply to a content request has carried that request's (non-zero)
-    //! sequence number. Never cleared: a mismatch might just be a late reply.
+    //! Set once a reply has carried its request's (non-zero) sequence number. Never
+    //! cleared: a mismatch might just be a late reply.
     bool m_echoSeq = false;
 };
 
