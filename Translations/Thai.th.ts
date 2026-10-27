@@ -692,352 +692,352 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="unfinished">แสดง/ซ่อนกราฟที่มีอยู่</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="355"/>
+        <location filename="../oscar/daily.cpp" line="359"/>
         <source>Breakdown</source>
         <translation type="unfinished">รายละเอียด</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="355"/>
+        <location filename="../oscar/daily.cpp" line="359"/>
         <source>events</source>
         <translation type="unfinished">เหตุการณ์</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="369"/>
+        <location filename="../oscar/daily.cpp" line="373"/>
         <source>UF1</source>
         <translation type="unfinished">UF1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="370"/>
+        <location filename="../oscar/daily.cpp" line="374"/>
         <source>UF2</source>
         <translation type="unfinished">UF2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="429"/>
+        <location filename="../oscar/daily.cpp" line="433"/>
         <source>Time at Pressure</source>
         <translation type="unfinished">เวลาที่ความดัน</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="639"/>
+        <location filename="../oscar/daily.cpp" line="644"/>
         <source>Clinical Mode</source>
         <translation type="unfinished">โหมดคลินิก</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="720"/>
+        <location filename="../oscar/daily.cpp" line="725"/>
         <source>No %1 events are recorded on this day</source>
         <translation type="unfinished">ไม่มีการบันทึกเหตุการณ์ %1 ในวันนี้</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="859"/>
+        <location filename="../oscar/daily.cpp" line="864"/>
         <source>%1 event</source>
         <translation type="unfinished">เหตุการณ์ %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="860"/>
+        <location filename="../oscar/daily.cpp" line="865"/>
         <source>%1 events</source>
         <translation type="unfinished">เหตุการณ์ %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="926"/>
+        <location filename="../oscar/daily.cpp" line="931"/>
         <source>Session Start Times</source>
         <translation type="unfinished">เวลาเริ่มต้นเซสชัน</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="927"/>
+        <location filename="../oscar/daily.cpp" line="932"/>
         <source>Session End Times</source>
         <translation type="unfinished">เวลาสิ้นสุดเซสชัน</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1204"/>
+        <location filename="../oscar/daily.cpp" line="1209"/>
         <source>Session Information</source>
         <translation type="unfinished">ข้อมูลเซสชัน</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1228"/>
+        <location filename="../oscar/daily.cpp" line="1233"/>
         <source>Oximetry Sessions</source>
         <translation type="unfinished">เซสชันวัดออกซิเจน</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1248"/>
+        <location filename="../oscar/daily.cpp" line="1253"/>
         <source>Duration</source>
         <translation type="unfinished">ระยะเวลา</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1321"/>
+        <location filename="../oscar/daily.cpp" line="1326"/>
         <source>Device Settings</source>
         <translation type="unfinished">การตั้งค่าอุปกรณ์</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1550"/>
+        <location filename="../oscar/daily.cpp" line="1555"/>
         <source>(Mode and Pressure settings missing; yesterday&apos;s shown.)</source>
         <translation type="unfinished">(ไม่พบการตั้งค่าโหมดและความดัน; แสดงข้อมูลของเมื่อวาน)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1789"/>
+        <location filename="../oscar/daily.cpp" line="1794"/>
         <source>This CPAP device does NOT record detailed data</source>
         <translation type="unfinished">อุปกรณ์ CPAP นี้ไม่ได้บันทึกข้อมูลโดยละเอียด</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2296"/>
+        <location filename="../oscar/daily.cpp" line="2301"/>
         <source>no data :(</source>
         <translation type="unfinished">ไม่มีข้อมูล :(</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2297"/>
+        <location filename="../oscar/daily.cpp" line="2302"/>
         <source>Sorry, this device only provides compliance data.</source>
         <translation type="unfinished">ขออภัย อุปกรณ์นี้ให้ข้อมูลเฉพาะการปฏิบัติตามเท่านั้น</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3035"/>
+        <location filename="../oscar/daily.cpp" line="3040"/>
         <source>This bookmark is in a currently disabled area..</source>
         <translation type="unfinished">บุ๊กมาร์กนี้อยู่ในพื้นที่ที่ถูกปิดใช้งานอยู่</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1225"/>
+        <location filename="../oscar/daily.cpp" line="1230"/>
         <source>CPAP Sessions</source>
         <translation type="unfinished">เซสชัน CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="228"/>
+        <location filename="../oscar/daily.cpp" line="231"/>
         <source>Details</source>
         <translation type="unfinished">รายละเอียด</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1231"/>
+        <location filename="../oscar/daily.cpp" line="1236"/>
         <source>Sleep Stage Sessions</source>
         <translation type="unfinished">เซสชันระยะการนอนหลับ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1234"/>
+        <location filename="../oscar/daily.cpp" line="1239"/>
         <source>Position Sensor Sessions</source>
         <translation type="unfinished">เซสชันเซ็นเซอร์ตำแหน่ง</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1239"/>
+        <location filename="../oscar/daily.cpp" line="1244"/>
         <source>Unknown Session</source>
         <translation type="unfinished">เซสชันที่ไม่รู้จัก</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1541"/>
+        <location filename="../oscar/daily.cpp" line="1546"/>
         <source>Model %1 - %2</source>
         <translation type="unfinished">รุ่น %1 - %2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1546"/>
+        <location filename="../oscar/daily.cpp" line="1551"/>
         <source>PAP Mode: %1</source>
         <translation type="unfinished">โหมด PAP: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1670"/>
+        <location filename="../oscar/daily.cpp" line="1675"/>
         <source>This day just contains summary data, only limited information is available.</source>
         <translation type="unfinished">วันนี้มีเพียงข้อมูลสรุป จึงมีข้อมูลที่สามารถแสดงได้อย่างจำกัด</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1696"/>
+        <location filename="../oscar/daily.cpp" line="1701"/>
         <source>Total ramp time</source>
         <translation type="unfinished">เวลารวมของการปรับค่าเริ่มต้น (ramp)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1700"/>
+        <location filename="../oscar/daily.cpp" line="1705"/>
         <source>Time outside of ramp</source>
         <translation type="unfinished">เวลาที่อยู่นอกช่วงการปรับค่าเริ่มต้น (ramp)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1745"/>
+        <location filename="../oscar/daily.cpp" line="1750"/>
         <source>Start</source>
         <translation type="unfinished">เริ่มต้น</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1745"/>
+        <location filename="../oscar/daily.cpp" line="1750"/>
         <source>End</source>
         <translation type="unfinished">สิ้นสุด</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2073"/>
+        <location filename="../oscar/daily.cpp" line="2078"/>
         <source>Unable to display Pie Chart on this system</source>
         <translation type="unfinished">ไม่สามารถแสดงแผนภูมิวงกลมบนระบบนี้ได้</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2335"/>
+        <location filename="../oscar/daily.cpp" line="2340"/>
         <source>&quot;Nothing&apos;s here!&quot;</source>
         <translation type="unfinished">&quot;ไม่มีอะไรที่นี่!&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2338"/>
+        <location filename="../oscar/daily.cpp" line="2343"/>
         <source>No data is available for this day.</source>
         <translation type="unfinished">ไม่มีข้อมูลสำหรับวันนี้</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1464"/>
+        <location filename="../oscar/daily.cpp" line="1469"/>
         <source>Oximeter Information</source>
         <translation type="unfinished">ข้อมูลเครื่องวัดออกซิเจน</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="639"/>
+        <location filename="../oscar/daily.cpp" line="644"/>
         <source> Disabling Sessions requires Permissive Mode be set in OSCAR Preferences in the Clinical tab.</source>
         <translation type="unfinished"> การปิดใช้งานเซสชันต้องเปิดใช้งาน Permissive Mode ในการตั้งค่า OSCAR ในแท็บ Clinical</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="958"/>
+        <location filename="../oscar/daily.cpp" line="963"/>
         <source>All</source>
         <translation type="unfinished">ทั้งหมด</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1268"/>
+        <location filename="../oscar/daily.cpp" line="1273"/>
         <source>Click to %1 this session.</source>
         <translation type="unfinished">คลิกเพื่อ%1เซสชันนี้</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1268"/>
+        <location filename="../oscar/daily.cpp" line="1273"/>
         <source>disable</source>
         <translation type="unfinished">ปิดใช้งาน</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1268"/>
+        <location filename="../oscar/daily.cpp" line="1273"/>
         <source>enable</source>
         <translation type="unfinished">เปิดใช้งาน</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1284"/>
+        <location filename="../oscar/daily.cpp" line="1289"/>
         <source>%1 Session #%2</source>
         <translation type="unfinished">%1 เซสชัน #%2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1285"/>
+        <location filename="../oscar/daily.cpp" line="1290"/>
         <source>%1h %2m %3s</source>
         <translation type="unfinished">%1 ชม. %2 นาที %3 วินาที</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1318"/>
+        <location filename="../oscar/daily.cpp" line="1323"/>
         <source>DEVICE SETTINGS ERROR</source>
         <translation type="unfinished">ข้อผิดพลาดการตั้งค่าอุปกรณ์</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1327"/>
+        <location filename="../oscar/daily.cpp" line="1332"/>
         <source>&lt;b&gt;Please Note:&lt;/b&gt; All settings shown below are based on assumptions that nothing has changed since previous days.</source>
         <translation type="unfinished">&lt;b&gt;โปรดทราบ:&lt;/b&gt; การตั้งค่าทั้งหมดที่แสดงด้านล่างนี้อิงจากการสมมติว่าไม่มีสิ่งใดเปลี่ยนแปลงนับตั้งแต่วันก่อนหน้า</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1470"/>
+        <location filename="../oscar/daily.cpp" line="1475"/>
         <source>Recorded by %1 %2</source>
         <translation type="unfinished">บันทึกโดย %1 %2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1482"/>
+        <location filename="../oscar/daily.cpp" line="1487"/>
         <source>SpO2 spot checks</source>
         <translation type="unfinished">การตรวจวัด SpO2 แบบจุด</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1483"/>
+        <location filename="../oscar/daily.cpp" line="1488"/>
         <source>Pulse readings</source>
         <translation type="unfinished">ค่าอัตราการเต้นของหัวใจ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1484"/>
+        <location filename="../oscar/daily.cpp" line="1489"/>
         <source>Spot-check data; desaturation detection is not applicable</source>
         <translation type="unfinished">ข้อมูลการตรวจวัดแบบจุด; ไม่สามารถใช้การตรวจจับภาวะออกซิเจนลดต่ำได้</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1515"/>
+        <location filename="../oscar/daily.cpp" line="1520"/>
         <source>SpO2 Desaturations</source>
         <translation type="unfinished">การลดความอิ่มตัวของออกซิเจน SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1516"/>
+        <location filename="../oscar/daily.cpp" line="1521"/>
         <source>Pulse Change events</source>
         <translation type="unfinished">เหตุการณ์การเปลี่ยนแปลงชีพจร</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1517"/>
+        <location filename="../oscar/daily.cpp" line="1522"/>
         <source>SpO2 Baseline Used</source>
         <translation type="unfinished">ค่าพื้นฐาน SpO2 ที่ใช้</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1585"/>
+        <location filename="../oscar/daily.cpp" line="1590"/>
         <source>Statistics</source>
         <translation type="unfinished">สถิติ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1680"/>
+        <location filename="../oscar/daily.cpp" line="1685"/>
         <source>Total time in apnea</source>
         <translation type="unfinished">เวลารวมที่หยุดหายใจ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1690"/>
+        <location filename="../oscar/daily.cpp" line="1695"/>
         <source>Time over leak redline</source>
         <translation type="unfinished">เวลาที่เกินเส้นแดงการรั่วไหล</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1736"/>
+        <location filename="../oscar/daily.cpp" line="1741"/>
         <source>General</source>
         <translation type="unfinished">ทั่วไป</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1805"/>
+        <location filename="../oscar/daily.cpp" line="1810"/>
         <source>Obstructive and Central shares of the %1</source>
         <translation type="unfinished">สัดส่วนของภาวะอุดกั้นและภาวะกลางของ %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1883"/>
+        <location filename="../oscar/daily.cpp" line="1888"/>
         <source>Breathing Disturbances (Apple)</source>
         <translation type="unfinished">ความผิดปกติของการหายใจ (Apple)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1895"/>
+        <location filename="../oscar/daily.cpp" line="1900"/>
         <source>Wrist Temperature</source>
         <translation type="unfinished">อุณหภูมิข้อมือ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1976"/>
+        <location filename="../oscar/daily.cpp" line="1981"/>
         <source>Time within the watch&apos;s sleep session spent without the CPAP mask on, and its share of that session</source>
         <translation type="unfinished">ระยะเวลาภายในช่วงการนอนหลับของนาฬิกาที่ไม่ได้สวมหน้ากาก CPAP และสัดส่วนเทียบกับช่วงเวลานั้น</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1981"/>
+        <location filename="../oscar/daily.cpp" line="1986"/>
         <source>Unmasked Sleep</source>
         <translation type="unfinished">การนอนหลับโดยไม่สวมหน้ากาก</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2043"/>
+        <location filename="../oscar/daily.cpp" line="2048"/>
         <source>Event Breakdown</source>
         <translation type="unfinished">รายละเอียดเหตุการณ์</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2287"/>
+        <location filename="../oscar/daily.cpp" line="2292"/>
         <source>Sessions all off!</source>
         <translation type="unfinished">ปิดเซสชันทั้งหมดแล้ว!</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2289"/>
+        <location filename="../oscar/daily.cpp" line="2294"/>
         <source>Sessions exist for this day but are switched off.</source>
         <translation type="unfinished">มีเซสชันสำหรับวันนี้แต่ถูกปิดอยู่</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2292"/>
+        <location filename="../oscar/daily.cpp" line="2297"/>
         <source>Impossibly short session</source>
         <translation type="unfinished">เซสชันสั้นเกินไปจนเป็นไปไม่ได้</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2293"/>
+        <location filename="../oscar/daily.cpp" line="2298"/>
         <source>Zero hours??</source>
         <translation type="unfinished">ศูนย์ชั่วโมง??</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2298"/>
+        <location filename="../oscar/daily.cpp" line="2303"/>
         <source>Complain to your Equipment Provider!</source>
         <translation type="unfinished">กรุณาแจ้งผู้ให้บริการอุปกรณ์ของคุณ!</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2319"/>
+        <location filename="../oscar/daily.cpp" line="2324"/>
         <source>No CPAP data is available for this day</source>
         <translation type="unfinished">ไม่มีข้อมูล CPAP สำหรับวันนี้</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2693"/>
+        <location filename="../oscar/daily.cpp" line="2698"/>
         <source>Pick a Color</source>
         <translation type="unfinished">เลือกสี</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2986"/>
+        <location filename="../oscar/daily.cpp" line="2991"/>
         <source>Bookmark at %1</source>
         <translation type="unfinished">บุ๊กมาร์กที่ %1</translation>
     </message>
@@ -9330,7 +9330,6 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="823"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="202"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="273"/>
-        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.h" line="125"/>
         <source>Unknown</source>
         <translation type="unfinished">ไม่ทราบ</translation>
     </message>
@@ -9704,6 +9703,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1189"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1442"/>
         <source>Artefact</source>
         <translation type="unfinished">Artefact</translation>
     </message>
@@ -9797,6 +9797,8 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1160"/>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1162"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1476"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1478"/>
         <source>rRMV</source>
         <translation type="unfinished">rRMV</translation>
     </message>
@@ -9856,7 +9858,9 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1227"/>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1229"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1452"/>
         <source>eFL</source>
+        <extracomment>Displayname for &quot;epoch with flowlimitation&quot; on the events-graph - keep this short!</extracomment>
         <translation type="unfinished">eFL</translation>
     </message>
     <message>
@@ -10360,7 +10364,7 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/apex_loader.cpp" line="195"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="1026"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="166"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="167"/>
         <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="1223"/>
         <source>Creating data backup...</source>
         <translation type="unfinished">กำลังสร้างการสำรองข้อมูล...</translation>
@@ -10372,7 +10376,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="1054"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="185"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="186"/>
         <source>Starting import...</source>
         <translation type="unfinished">กำลังเริ่มการนำเข้า...</translation>
     </message>
@@ -10642,6 +10646,7 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2906"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="226"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1484"/>
         <source>Humidifier Status</source>
         <translation type="unfinished">สถานะเครื่องทำความชื้น</translation>
     </message>
@@ -12873,7 +12878,6 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <location filename="../oscar/SleepLib/loader_plugins/icon_loader.h" line="87"/>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.h" line="251"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="67"/>
-        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.h" line="117"/>
         <location filename="../oscar/notifyMessageBox.cpp" line="17"/>
         <source></source>
         <translation type="unfinished"></translation>
@@ -13312,16 +13316,19 @@ popout window, delete it, then pop out this graph again.</source>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="226"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1482"/>
         <source>Humid. Status</source>
         <translation type="unfinished">สถานะความชื้น</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="226"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1483"/>
         <source>Humidifier Enabled Status</source>
         <translation type="unfinished">สถานะการเปิดใช้งานเครื่องเพิ่มความชื้น</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="234"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1491"/>
         <source>Humid. Level</source>
         <translation type="unfinished">ระดับความชื้น</translation>
     </message>
@@ -13332,6 +13339,8 @@ popout window, delete it, then pop out this graph again.</source>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="234"/>
         <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="183"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="1012"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1492"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1493"/>
         <source>Humidity Level</source>
         <translation type="unfinished">ระดับความชื้น</translation>
     </message>
@@ -13634,14 +13643,18 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="unfinished">เปิดใช้งานการไต่ระดับ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.h" line="117"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.h" line="112"/>
         <source>Weinmann</source>
         <translation type="unfinished">Weinmann</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.h" line="117"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.h" line="112"/>
+        <source>SOMNObalance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>SOMNOsoft2</source>
-        <translation type="unfinished">SOMNOsoft2</translation>
+        <translation type="obsolete">SOMNOsoft2</translation>
     </message>
     <message>
         <location filename="../oscar/Graphs/gGraph.cpp" line="393"/>
@@ -13876,24 +13889,24 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="unfinished">หน้านี้ในภาษาอื่น:</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3310"/>
+        <location filename="../oscar/daily.cpp" line="3315"/>
         <location filename="../oscar/overview.cpp" line="488"/>
         <source>%1 Graphs</source>
         <translation type="unfinished">กราฟ %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3314"/>
+        <location filename="../oscar/daily.cpp" line="3319"/>
         <location filename="../oscar/overview.cpp" line="492"/>
         <source>%1 of %2 Graphs</source>
         <translation type="unfinished">%1 จาก %2 กราฟ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3351"/>
+        <location filename="../oscar/daily.cpp" line="3356"/>
         <source>%1 Event Types</source>
         <translation type="unfinished">ประเภทเหตุการณ์ %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3355"/>
+        <location filename="../oscar/daily.cpp" line="3360"/>
         <source>%1 of %2 Event Types</source>
         <translation type="unfinished">%1 จาก %2 ประเภทเหตุการณ์</translation>
     </message>
@@ -14067,32 +14080,32 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="unfinished">ลบโปรไฟล์สำเร็จแล้ว</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="116"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="117"/>
         <source>BMC G3X — Untested Firmware</source>
         <translation type="unfinished">BMC G3X — เฟิร์มแวร์ที่ยังไม่ได้ทดสอบ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="117"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="118"/>
         <source>Your BMC G3X device is running firmware &quot;%1&quot;, which has not been tested with this version of OSCAR.</source>
         <translation type="unfinished">อุปกรณ์ BMC G3X ของคุณกำลังใช้งานเฟิร์มแวร์ &quot;%1&quot; ซึ่งยังไม่ได้รับการทดสอบกับ OSCAR เวอร์ชันนี้</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="118"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="119"/>
         <source>It may be similar enough to known firmware versions that import works correctly, but the OSCAR developers would like a .zip copy of this device&apos;s SD card to verify support. Import will continue.</source>
         <translation type="unfinished">อาจมีความคล้ายคลึงกับเฟิร์มแวร์เวอร์ชันที่รู้จักมากพอที่การนำเข้าจะทำงานได้อย่างถูกต้อง แต่นักพัฒนา OSCAR ต้องการไฟล์ .zip ของการ์ด SD ของอุปกรณ์นี้เพื่อยืนยันการรองรับ การนำเข้าจะดำเนินต่อไป</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="138"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="139"/>
         <source>BMC G3X — Untested Model</source>
         <translation type="unfinished">BMC G3X — รุ่นที่ยังไม่ได้ทดสอบ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="139"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="140"/>
         <source>Your BMC G3X device model &quot;%1&quot; has not been tested with this version of OSCAR.</source>
         <translation type="unfinished">รุ่นอุปกรณ์ BMC G3X ของคุณ &quot;%1&quot; ยังไม่ได้รับการทดสอบกับ OSCAR เวอร์ชันนี้</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="140"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="141"/>
         <source>It may be similar enough to known models that import works correctly, but the OSCAR developers would like a .zip copy of this device&apos;s SD card to verify support. Import will continue.</source>
         <translation type="unfinished">อาจมีความคล้ายคลึงกับรุ่นที่รู้จักมากพอที่การนำเข้าจะทำงานได้อย่างถูกต้อง แต่นักพัฒนา OSCAR ต้องการไฟล์ .zip ของการ์ด SD ของอุปกรณ์นี้เพื่อยืนยันการรองรับ การนำเข้าจะดำเนินต่อไป</translation>
     </message>
@@ -14628,6 +14641,305 @@ Dreem data must be formatted as a semicolon-delimited CSV file. Please ensure yo
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.h" line="175"/>
         <source>prisma VENT</source>
         <translation type="unfinished">prisma VENT</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="161"/>
+        <source>SoftPAP: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="595"/>
+        <source>unknown device</source>
+        <translation type="unfinished">อุปกรณ์ที่ไม่รู้จัก</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1443"/>
+        <source>Falsification of a signal which stops event detection. e.g. change in position, coughing, speaking, swallowing etc.</source>
+        <translation type="unfinished">สัญญาณที่ผิดเพี้ยนซึ่งทำให้การตรวจจับเหตุการณ์หยุดลง เช่น การเปลี่ยนท่า การไอ การพูด การกลืน ฯลฯ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1445"/>
+        <source>Art</source>
+        <extracomment>Displayname on the events-graph - keep this short!</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1449"/>
+        <source>Epoch flow limitation</source>
+        <translation type="unfinished">ช่วงเวลาที่มีการจำกัดการไหล</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1450"/>
+        <source>An epoch with flowlimitation.</source>
+        <translation type="unfinished">ช่วงเวลาที่มีการจำกัดการไหลของอากาศ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1456"/>
+        <source>Epoch Snore</source>
+        <translation type="unfinished">ช่วงเวลาที่มีการกรน</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1457"/>
+        <source>An epoch with snoring.</source>
+        <translation type="unfinished">ช่วงเวลาที่มีการกรน</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1459"/>
+        <source>eSN</source>
+        <extracomment>Displayname for &quot;epoch with snoring&quot; on the events-graph - keep this short!</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1462"/>
+        <source>Epoch mild Obstruction</source>
+        <translation type="unfinished">ช่วงเวลาที่มีการอุดกั้นเล็กน้อย</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1463"/>
+        <source>An epoch with mild obstruction.</source>
+        <translation type="unfinished">ช่วงเวลาที่มีการอุดกั้นเล็กน้อย</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1465"/>
+        <source>emO</source>
+        <extracomment>Displayname for &quot;epoch with mild obstruction&quot; on the graph-legend - keep this short!</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1468"/>
+        <source>Epoch severe Obstruction</source>
+        <translation type="unfinished">ช่วงเวลาที่มีการอุดกั้นรุนแรง</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1469"/>
+        <source>An epoch with severe obstruction.</source>
+        <translation type="unfinished">ช่วงเวลาที่มีการอุดกั้นรุนแรง</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1471"/>
+        <source>esO</source>
+        <extracomment>Displayname for &quot;epoch with severe Obstruction&quot; on the events-graph - keep this short!</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1477"/>
+        <source>Relative respiratory minute volume (100 = reference value of the device)</source>
+        <translation type="unfinished">ปริมาตรการหายใจต่อนาทีสัมพัทธ์ (100 = ค่าอ้างอิงของอุปกรณ์)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1507"/>
+        <source>Humid. Usage</source>
+        <translation type="unfinished">การใช้ความชื้น</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1508"/>
+        <source>Percentage of time the humidifier was used (for the entire day)</source>
+        <translation type="unfinished">เปอร์เซ็นต์ของเวลาที่ใช้เครื่องทำความชื้น (ตลอดทั้งวัน)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1509"/>
+        <source>Humidifier Usage</source>
+        <translation type="unfinished">การใช้เครื่องทำความชื้น</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1513"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1515"/>
+        <source>SoftPAP Lock</source>
+        <translation type="unfinished">ล็อก SoftPAP</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1514"/>
+        <source>Shows if the SoftPAP setting can be changed</source>
+        <translation type="unfinished">แสดงว่าสามารถเปลี่ยนการตั้งค่า SoftPAP ได้หรือไม่</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1518"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1571"/>
+        <source>Available</source>
+        <translation type="unfinished">ใช้ได้</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1519"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1572"/>
+        <source>Locked</source>
+        <translation type="unfinished">ล็อกอยู่</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1522"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1524"/>
+        <source>SoftPAP Level</source>
+        <translation type="unfinished">ระดับ SoftPAP</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1523"/>
+        <source>Breathing Relief Level</source>
+        <translation type="unfinished">ระดับการบรรเทาการหายใจ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1528"/>
+        <source>Gentle</source>
+        <translation type="unfinished">นุ่มนวล</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1529"/>
+        <source>Normal</source>
+        <translation type="unfinished">ปกติ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1530"/>
+        <source>Breathing relief with inhalation assistance</source>
+        <translation type="unfinished">การบรรเทาการหายใจพร้อมการช่วยหายใจเข้า</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1533"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1535"/>
+        <source>Soft Start</source>
+        <translation type="unfinished">การเริ่มแบบนุ่มนวล</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1534"/>
+        <source>Soft Start (Ramp) Status</source>
+        <translation type="unfinished">สถานะการเริ่มแบบนุ่มนวล (Ramp)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1545"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1547"/>
+        <source>Pressure Rise</source>
+        <translation type="unfinished">การเพิ่มความดัน</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1546"/>
+        <source>Speed of pressure increase</source>
+        <translation type="unfinished">ความเร็วในการเพิ่มความดัน</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1548"/>
+        <source>cmH2O/s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1551"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1553"/>
+        <source>Masktest Pressure</source>
+        <translation type="unfinished">ความดันทดสอบหน้ากาก</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1552"/>
+        <source>Pressure for the Masktest at startup</source>
+        <translation type="unfinished">ความดันสำหรับการทดสอบหน้ากากเมื่อเริ่มต้น</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1557"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1558"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1559"/>
+        <source>Automatic Start</source>
+        <translation type="unfinished">เริ่มอัตโนมัติ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1566"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1568"/>
+        <source>Patient Information Menu</source>
+        <translation type="unfinished">เมนูข้อมูลผู้ป่วย</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1567"/>
+        <source>Shows if the patient menu is available</source>
+        <translation type="unfinished">แสดงว่าเมนูผู้ป่วยใช้งานได้หรือไม่</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1575"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1577"/>
+        <source>Therapy Diary</source>
+        <translation type="unfinished">บันทึกการรักษา</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1576"/>
+        <source>Shows if the therapy diary is saved on the SD card</source>
+        <translation type="unfinished">แสดงว่าบันทึกการรักษาถูกบันทึกลงการ์ด SD หรือไม่</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1584"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1586"/>
+        <source>Automatic Storage</source>
+        <translation type="unfinished">การบันทึกอัตโนมัติ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1585"/>
+        <source>Shows which information is automatically saved to the SD card after each session</source>
+        <translation type="unfinished">แสดงข้อมูลที่ถูกบันทึกลงการ์ด SD โดยอัตโนมัติหลังแต่ละเซสชัน</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1589"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1599"/>
+        <source>Compliance</source>
+        <translation type="unfinished">การปฏิบัติตาม</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1590"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1600"/>
+        <source>Compliance + efficacy</source>
+        <translation type="unfinished">การปฏิบัติตาม + ประสิทธิผล</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1591"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1601"/>
+        <source>Detailed signal data</source>
+        <translation type="unfinished">ข้อมูลสัญญาณโดยละเอียด</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1594"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1596"/>
+        <source>Manual Storage</source>
+        <translation type="unfinished">การบันทึกด้วยตนเอง</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1595"/>
+        <source>Shows which information is saved to the SD card by holding down the Info key</source>
+        <translation type="unfinished">แสดงข้อมูลที่ถูกบันทึกลงการ์ด SD เมื่อกดปุ่ม Info ค้างไว้</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1604"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1606"/>
+        <source>Total usage time</source>
+        <translation type="unfinished">เวลาใช้งานทั้งหมด</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1605"/>
+        <source>Total usage time of this device by you (at import)</source>
+        <translation type="unfinished">เวลาที่คุณใช้อุปกรณ์นี้ทั้งหมด (ขณะนำเข้า)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1610"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1612"/>
+        <source>Total therapy time</source>
+        <translation type="unfinished">เวลาการรักษาทั้งหมด</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1611"/>
+        <source>Total therapy time of this device by you (at import)</source>
+        <translation type="unfinished">เวลาการรักษาทั้งหมดของคุณด้วยอุปกรณ์นี้ (ขณะนำเข้า)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1618"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1622"/>
+        <source>Total humidifier time</source>
+        <extracomment>Name
+----------
+Displayname</extracomment>
+        <translation type="unfinished">เวลาเครื่องทำความชื้นทั้งหมด</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1620"/>
+        <source>Total usage time of the humidifier by you (at import)</source>
+        <extracomment>Explanation</extracomment>
+        <translation type="unfinished">เวลาที่คุณใช้เครื่องทำความชื้นทั้งหมด (ขณะนำเข้า)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1628"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1629"/>
+        <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1630"/>
+        <source>Firmware Version</source>
+        <translation type="unfinished">เวอร์ชันเฟิร์มแวร์</translation>
     </message>
 </context>
 <context>
