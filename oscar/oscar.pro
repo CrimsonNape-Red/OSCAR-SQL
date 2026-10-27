@@ -823,7 +823,11 @@ memdebug {
 }
 
 # Viatom BLE Import (Data menu). Without Qt Bluetooth the menu item stays disabled.
-qtHaveModule(bluetooth) {
+# Qt 6 has no working Bluetooth backend on Windows with MinGW (only a dummy), so
+# Windows needs an MSVC build.
+win32-g++:greaterThan(QT_MAJOR_VERSION, 5) {
+    message("Qt Bluetooth does not work with MinGW: building without Viatom BLE Import (use an MSVC kit)")
+} else:qtHaveModule(bluetooth) {
     QT += bluetooth
     DEFINES += OSCAR_HAVE_BLUETOOTH
     SOURCES += \

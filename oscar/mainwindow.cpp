@@ -4042,6 +4042,14 @@ void MainWindow::updateViatomBleAction()
 {
     const ViatomBle::Availability availability = ViatomBle::availability();
     const bool available = (availability == ViatomBle::Availability::Available);
+    static bool logged = false;
+    static ViatomBle::Availability lastLogged;
+    if (!logged || availability != lastLogged) {
+        qDebug() << "ViatomBle availability:"
+                 << (available ? QStringLiteral("available") : ViatomBle::availabilityReason(availability));
+        logged = true;
+        lastLogged = availability;
+    }
     ui->actionViatom_BLE_Import->setEnabled(available && p_profile != nullptr);
     ui->actionViatom_BLE_Import->setToolTip(available
         ? tr("Download recordings from a Viatom/Wellue oximeter over Bluetooth")

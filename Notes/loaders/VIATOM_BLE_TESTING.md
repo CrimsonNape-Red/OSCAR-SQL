@@ -28,6 +28,9 @@ You need Qt 6 with the **Bluetooth** module.
 - **macOS:** use Qt 6.6 or later, so OSCAR can ask for Bluetooth permission.
 - **Linux:** also needs the **D-Bus** module and a running BlueZ (`systemctl status
   bluetooth`).
+- **Windows:** build with an **MSVC** kit (e.g. *Desktop Qt 6.10 MSVC2022 64-bit*, plus
+  the free Visual Studio Build Tools). Qt 6 has no working Bluetooth with **MinGW**, so a
+  MinGW build leaves the menu item greyed out.
 
 ```bash
 git clone -b vihealth-dev https://gitlab.com/Seeker4/OSCAR-code.git
@@ -37,8 +40,9 @@ make -j$(nproc)
 ```
 
 On Debian/Ubuntu the Qt packages are `qt6-base-dev qt6-connectivity-dev` (plus the usual
-OSCAR build packages). If the qmake output says "Qt Bluetooth not found", the menu item
-will stay greyed out.
+OSCAR build packages). If the qmake output says "Qt Bluetooth not found" or "does not work
+with MinGW", the menu item will stay greyed out. Hovering over a greyed-out item shows the
+reason, and the log has a `ViatomBle availability:` line.
 
 ## The test
 
