@@ -418,6 +418,9 @@ SOURCES += \
     SleepLib/loader_plugins/sleepstyle_loader.cpp \
     SleepLib/loader_plugins/somnopose_loader.cpp \
     SleepLib/loader_plugins/viatom_loader.cpp \
+    SleepLib/viatomble/viatomble_availability.cpp \
+    SleepLib/viatomble/viatomble_downloader.cpp \
+    SleepLib/viatomble/viatomble_protocol.cpp \
     SleepLib/loader_plugins/weinmann_loader.cpp \
     SleepLib/loader_plugins/yuwell_loader.cpp \
     SleepLib/loader_plugins/zeo_loader.cpp \
@@ -593,6 +596,10 @@ HEADERS  += \
     SleepLib/loader_plugins/resmed_EDFinfo.h \
     SleepLib/loader_plugins/somnopose_loader.h \
     SleepLib/loader_plugins/viatom_loader.h \
+    SleepLib/viatomble/viatomble_availability.h \
+    SleepLib/viatomble/viatomble_downloader.h \
+    SleepLib/viatomble/viatomble_link.h \
+    SleepLib/viatomble/viatomble_protocol.h \
     SleepLib/loader_plugins/yuwell_loader.h \
     SleepLib/loader_plugins/zeo_loader.h \
     SleepLib/loader_plugins/resvent_loader.h \
@@ -811,6 +818,25 @@ memdebug {
     }
 }
 
+# Viatom BLE Import (Data menu). Without Qt Bluetooth the menu item stays disabled.
+qtHaveModule(bluetooth) {
+    QT += bluetooth
+    DEFINES += OSCAR_HAVE_BLUETOOTH
+    SOURCES += \
+        SleepLib/viatomble/viatomble_device.cpp \
+        SleepLib/viatomble/viatomble_scanner.cpp
+    HEADERS += \
+        SleepLib/viatomble/viatomble_device.h \
+        SleepLib/viatomble/viatomble_scanner.h
+    # Qt's BlueZ backend drops write-without-response; the device writes through BlueZ over D-Bus.
+    unix:!macx:!haiku:qtHaveModule(dbus) {
+        QT += dbus
+        DEFINES += OSCAR_BLE_BLUEZ_DBUS
+    }
+} else {
+    message("Qt Bluetooth not found: building without Viatom BLE Import")
+}
+
 # Turn on unit testing by adding "CONFIG+=test" to your qmake command
 test {
     TARGET = test
@@ -841,6 +867,7 @@ test {
         tests/importhandovertests.cpp \
         tests/versiontests.cpp \
         tests/viatomtests.cpp \
+        tests/viatombletests.cpp \
         tests/deviceconnectiontests.cpp \
         tests/cryptotests.cpp \
         tests/dreemtests.cpp \
@@ -868,6 +895,7 @@ test {
         tests/importhandovertests.h \
         tests/versiontests.h \
         tests/viatomtests.h \
+        tests/viatombletests.h \
         tests/deviceconnectiontests.h \
         tests/cryptotests.h \
         tests/dreemtests.h \
