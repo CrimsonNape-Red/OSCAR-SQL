@@ -58,6 +58,7 @@ From <http://gnuwin32.sourceforge.net/packages/gawk.htm>, download setup for “
         - Under Qt 6.9.3 (or 6.10.0) Additional Libraries, check:
           - Qt 5 Compatibility Module
           - Qt Serial Port.
+          - Qt Connectivity (Qt Bluetooth, for Data → Viatom BLE Import. Without it OSCAR still builds, with that menu item disabled. windeployqt then copies Qt6Bluetooth.dll on its own.)
         - For development use, check:
           - Sources
           - QT Debug Information Files

@@ -111,6 +111,21 @@ if [ -z "$libSQL" ]; then
     libSQL="libqt6sql6"
 fi
 
+# Viatom BLE Import (Data menu): Qt Bluetooth, and Qt D-Bus for writes through BlueZ.
+libBluetooth=""
+getPkg libqt6bluetooth6
+libBluetooth=$PKGNAME
+if [ -z "$libBluetooth" ]; then
+    libBluetooth="libqt6bluetooth6"
+fi
+
+libDBus=""
+getPkg libqt6dbus6
+libDBus=$PKGNAME
+if [ -z "$libDBus" ]; then
+    libDBus="libqt6dbus6"
+fi
+
 # clean folders need to create the package
 if [ -d "${temp_folder}" ]; then
     rm -r ${temp_folder}
@@ -207,6 +222,9 @@ fpm --input-type dir --output-type deb  \
     --depends ${libxml} \
     --depends libqt6serialport6 \
     --depends $libSQL \
+    --depends $libBluetooth \
+    --depends $libDBus \
+    --deb-recommends bluez \
     -C ${temp_folder} \
     -p ${deb_file} \
     .

@@ -75,9 +75,13 @@ branch `vihealth-dev`.
   on by default. The files page says how far the clock was off, since recordings already
   on the device carry that error. (oxytool sends an extra `}` and a NUL; OSCAR follows the
   SDK.)
-- **Not done yet:**
-  - Flatpak and AppImage permissions;
-  - testing on hardware.
+- **Packaging (2026-10-27):**
+  - The .deb depends on `libqt6bluetooth6` and `libqt6dbus6`, and recommends `bluez`.
+  - The Linux, Windows and macOS build notes name the Qt Connectivity module.
+  - The Flatpak manifest (kept outside the repo) has `--system-talk-name=org.bluez` and
+    `--allow=bluetooth`; the KDE 6.10 runtime already ships Qt Bluetooth.
+  - The AppImage needs no change: linuxdeploy bundles the linked Qt libraries.
+- **Not done yet:** testing on hardware.
 
 ## Goal
 
