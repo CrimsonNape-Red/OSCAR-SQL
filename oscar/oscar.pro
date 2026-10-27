@@ -57,7 +57,7 @@ greaterThan(QT_MAJOR_VERSION, 5) {
     CONFIG += c++17
 ## Added for Qt6-Clang compiler - Crimson Nape 25-11-17
     CONFIG += warn_off
-    QMAKE_CXXFLAGS += -Wno-nonportable-include-path
+    !msvc: QMAKE_CXXFLAGS += -Wno-nonportable-include-path
 
 }
 
@@ -196,6 +196,7 @@ macx  {
     }
 
     if (*-msvc*) {
+        DEFINES += NOMINMAX   # keep windows.h from defining min() and max() macros
         CONFIG += precompile_header
         PRECOMPILED_HEADER = pch.h
         HEADERS += pch.h
@@ -498,7 +499,11 @@ optimize.input = SOURCES_OPTIMIZE
 optimize.dependency_type = TYPE_C
 optimize.variable_out = OBJECTS
 optimize.output = ${QMAKE_FILE_IN_BASE}$${first(QMAKE_EXT_OBJ)}
-optimize.commands = $${QMAKE_CXX} -c $(CXXFLAGS) -O3 $(INCPATH) -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_IN}
+msvc {
+    optimize.commands = $${QMAKE_CXX} -c $(CXXFLAGS) -O2 $(INCPATH) -Fo${QMAKE_FILE_OUT} ${QMAKE_FILE_IN}
+} else {
+    optimize.commands = $${QMAKE_CXX} -c $(CXXFLAGS) -O3 $(INCPATH) -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_IN}
+}
 QMAKE_EXTRA_COMPILERS += optimize
 
 HEADERS  += \
@@ -773,8 +778,13 @@ DISTFILES += help/default.css \
 message("CXXFLAGS pre-mods $$QMAKE_CXXFLAGS ")
 
 # Always treat warnings as errors, even (especially!) in release
-QMAKE_CFLAGS += -Werror
-QMAKE_CXXFLAGS += -Werror
+msvc {
+    QMAKE_CFLAGS += -WX
+    QMAKE_CXXFLAGS += -WX
+} else {
+    QMAKE_CFLAGS += -Werror
+    QMAKE_CXXFLAGS += -Werror
+}
 
 gcc | clang {
     COMPILER_VERSION = $$system($$QMAKE_CXX " -dumpversion")
