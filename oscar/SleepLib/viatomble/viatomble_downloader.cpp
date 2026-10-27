@@ -72,6 +72,7 @@ void Downloader::cancel()
     if (m_state == WaitInfo) {
         m_timer.stop();
         m_state = Idle;
+        m_settling = false;
         m_generation++;
         emit failed(tr("Cancelled"));
     }
@@ -89,6 +90,7 @@ void Downloader::request(State state, quint8 cmd, quint16 seq, const QByteArray 
     m_state = state;
     m_pendingFrame = buildRequest(cmd, seq, payload);
     m_attempt = 0;
+    m_timedOut = false;
     sendPending();
 }
 
@@ -102,11 +104,11 @@ void Downloader::continueWith(std::function<void()> next)
 {
     // Even when the device echoes sequence numbers, a late file chunk could arrive
     // after the last chunk and be taken for another command's reply, so always pause.
-    if (m_attempt == 0) {
+    if (m_attempt == 0 && !m_timedOut) {
         next();
         return;
     }
-    // The reply just accepted answered a retried request, so the reply to an earlier
+    // The request was sent more than once, or given up on, so a reply to an earlier
     // attempt may still be on its way. Let it arrive and drop it before going on.
     m_settling = true;
     const int generation = m_generation;
@@ -141,17 +143,18 @@ void Downloader::handleReply(const Reply &reply)
     switch (m_state) {
     case WaitInfo: {
         m_timer.stop();
-        m_state = Idle;
-        if (!reply.ok()) {
-            emit failed(tr("The device refused the request for its information."));
-            return;
-        }
-        DeviceInfo info = DeviceInfo::fromPayload(reply.payload);
-        if (!info.valid) {
-            emit failed(tr("The device's information could not be read."));
-            return;
-        }
-        emit infoReceived(info);
+        const bool ok = reply.ok();
+        const DeviceInfo info = DeviceInfo::fromPayload(reply.payload);
+        continueWith([this, ok, info]() {
+            m_state = Idle;
+            if (!ok) {
+                emit failed(tr("The device refused the request for its information."));
+            } else if (!info.valid) {
+                emit failed(tr("The device's information could not be read."));
+            } else {
+                emit infoReceived(info);
+            }
+        });
         return;
     }
     case WaitSetTime: {
@@ -325,28 +328,33 @@ void Downloader::onTimeout()
         return;
     }
 
-    // Out of retries. Whatever follows is a fresh request, so no pause is needed.
-    m_attempt = 0;
+    // Out of retries. A reply to the abandoned request may still turn up, so whatever
+    // comes next waits until it would have arrived (continueWith pauses).
+    m_timedOut = true;
     switch (m_state) {
     case WaitInfo:
-        m_state = Idle;
-        emit failed(tr("The device did not answer. It may need an encrypted connection, "
-                       "which OSCAR does not support yet."));
+        continueWith([this]() {
+            m_state = Idle;
+            emit failed(tr("The device did not answer. It may need an encrypted connection, "
+                           "which OSCAR does not support yet."));
+        });
         return;
     case WaitSetTime:
-        m_state = Idle;
-        emit timeSet(tr("The device did not answer the request to set its clock."));
+        continueWith([this]() {
+            m_state = Idle;
+            emit timeSet(tr("The device did not answer the request to set its clock."));
+        });
         return;
     case WaitStart:
         emit fileFailed(m_current, tr("The device did not answer the request to open the file."));
-        startNextFile();
+        continueWith([this]() { startNextFile(); });
         return;
     case WaitContent:
-        endFile(tr("The device stopped sending the file."));
+        continueWith([this]() { endFile(tr("The device stopped sending the file.")); });
         return;
     case WaitEnd:
         // The data is complete or already abandoned; a missing acknowledgement doesn't matter.
-        finishFile();
+        continueWith([this]() { finishFile(); });
         return;
     case Idle:
         return;

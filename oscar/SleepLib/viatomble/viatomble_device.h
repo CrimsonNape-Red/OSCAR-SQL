@@ -18,6 +18,7 @@
 
 #include "viatomble_link.h"
 
+class QDBusMessage;
 class QSocketNotifier;
 
 namespace ViatomBle {
@@ -61,13 +62,16 @@ class Device : public Link
   private:
     void fail(const QString &reason);
     void setReady();
+    void enableQtNotifications();
     int writeChunkSize() const;
     void sendQt(const QByteArray &frame);
 
 #ifdef OSCAR_BLE_BLUEZ_DBUS
-    //! BlueZ object path of the characteristic with this UUID on our device, or empty.
-    QString findBluezCharacteristic(const QString &uuid) const;
-    bool acquireNotify();
+    void startBluezSetup();
+    //! BlueZ object path of the characteristic with this UUID on our device, or empty;
+    //! reply is the answer to GetManagedObjects.
+    QString bluezCharacteristicPath(const QDBusMessage &reply, const QString &uuid) const;
+    void acquireNotify();
     void onNotifyFdReadable();
     void writeNextDbusChunk();
     void closeNotifyFd();
@@ -89,6 +93,8 @@ class Device : public Link
     QTimer m_connectTimer;
     int m_mtu = 23;
     bool m_ready = false;
+    //! Bumped on every disconnect; asynchronous answers for an older connection are ignored.
+    int m_connection = 0;
 };
 
 } // namespace ViatomBle

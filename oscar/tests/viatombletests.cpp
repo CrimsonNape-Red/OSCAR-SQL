@@ -87,10 +87,16 @@ class FakeDevice : public Link
     QByteArray infoJson;
     bool silent = false;
     bool refuseSetTime = false;
+    int setTimeReplyDelay = 0;
     QString lastSetTime;
     bool echoSeq = true;
     QSet<int> dropContentReplyOnce;     // chunk numbers whose first reply is lost
     QMap<int, int> delayContentReplyOnce;   // chunk number -> ms the first reply is late
+    int lateOnlyChunk = -1;                 // this chunk's only reply is the first, and it's late
+    int lateOnlyDelay = 0;
+    int delayInfoReplyOnce = 0;             // ms the first info reply is late
+    int endReplyDelay = 0;                  // ms before READ_END is acknowledged
+    int startReplyDelay = 0;                // ms before READ_START is answered
     int loseLinkAtChunk = -1;
     QList<QByteArray> sent;
 
@@ -110,16 +116,25 @@ class FakeDevice : public Link
         const QByteArray payload = frame.mid(7, b[5] | (b[6] << 8));
 
         switch (cmd) {
-        case CMD_INFO:
-            reply(makeReply(0, 0, infoJson + QByteArray(1, '\0')));
+        case CMD_INFO: {
+            const QByteArray r = makeReply(0, 0, infoJson + QByteArray(1, '\0'));
+            if (delayInfoReplyOnce > 0) {
+                const int delay = delayInfoReplyOnce;
+                delayInfoReplyOnce = 0;
+                QTimer::singleShot(delay, this, [this, r]() { reply(r); });
+            } else {
+                reply(r);
+            }
             break;
+        }
         case CMD_READ_START: {
             const QString name = QString::fromLatin1(payload.left(payload.indexOf('\0')));
             if (!files.contains(name)) {
                 reply(makeReply(1, 0, QByteArray()));
             } else {
                 m_current = files.value(name);
-                reply(makeReply(0, 0, le32(m_current.size())));
+                const QByteArray r = makeReply(0, 0, le32(m_current.size()));
+                QTimer::singleShot(startReplyDelay, this, [this, r]() { reply(r); });
             }
             break;
         }
@@ -131,6 +146,14 @@ class FakeDevice : public Link
             if (dropContentReplyOnce.remove(seq)) {
                 return;
             }
+            if (seq == lateOnlyChunk) {
+                if (!m_lateSent) {
+                    m_lateSent = true;
+                    const QByteArray late = makeReply(0, echoSeq ? seq : 0, m_current.mid(seq * 512, 512));
+                    QTimer::singleShot(lateOnlyDelay, this, [this, late]() { reply(late); });
+                }
+                return;
+            }
             const QByteArray r = makeReply(0, echoSeq ? seq : 0, m_current.mid(seq * 512, 512));
             if (delayContentReplyOnce.contains(seq)) {
                 const int delay = delayContentReplyOnce.take(seq);
@@ -140,13 +163,18 @@ class FakeDevice : public Link
             }
             break;
         }
-        case CMD_READ_END:
-            reply(makeReply(0, 0, QByteArray()));
+        case CMD_READ_END: {
+            const QByteArray r = makeReply(0, 0, QByteArray());
+            QTimer::singleShot(endReplyDelay, this, [this, r]() { reply(r); });
             break;
+        }
         case CMD_PARA_SYNC:
+        {
             lastSetTime = QJsonDocument::fromJson(payload).object().value("SetTIME").toString();
-            reply(makeReply(refuseSetTime ? 1 : 0, 0, QByteArray()));
+            const QByteArray r = makeReply(refuseSetTime ? 1 : 0, 0, QByteArray());
+            QTimer::singleShot(setTimeReplyDelay, this, [this, r]() { reply(r); });
             break;
+        }
         default:
             QFAIL("unexpected command");
         }
@@ -173,6 +201,7 @@ class FakeDevice : public Link
     }
 
     QByteArray m_current;
+    bool m_lateSent = false;
 };
 
 QStringList folderEntries(const QString &path)
@@ -427,6 +456,34 @@ void ViatomBleTests::testDropsLateReplyAfterRetry()
     QCOMPARE(readFile(dir.filePath("20261025220000")), pattern(3000, 4));
 }
 
+void ViatomBleTests::testDropsLateReplyAfterGivingUp()
+{
+    // Chunk 1 is never answered in time: the downloader gives up on the first file and
+    // moves on. The one late reply must not be taken for the next command's reply.
+    QTemporaryDir dir;
+    FakeDevice dev;
+    dev.files["20261025220000"] = pattern(2000, 10);
+    dev.files["20261026230000"] = pattern(400, 11);   // one chunk, so lateOnlyChunk does not apply
+    dev.lateOnlyChunk = 1;
+    dev.lateOnlyDelay = 150;          // after the last retry (4 x 30 ms), within the pause
+    dev.endReplyDelay = 20;           // slow acknowledgements, as on a real link: without the
+    dev.startReplyDelay = 20;         // pause, the late chunk lands while the next file opens
+    Downloader dl(&dev);
+    dl.setReplyTimeout(30);
+    QSignalSpy failed(&dl, &Downloader::fileFailed);
+    QSignalSpy saved(&dl, &Downloader::fileSaved);
+    QSignalSpy finished(&dl, &Downloader::downloadFinished);
+
+    dl.download(dev.files.keys(), dir.path(), false);
+    QVERIFY(finished.wait(5000));
+
+    QCOMPARE(failed.size(), 1);
+    QCOMPARE(failed.first().first().toString(), QStringLiteral("20261025220000"));
+    QCOMPARE(saved.size(), 1);
+    QCOMPARE(readFile(dir.filePath("20261026230000")), pattern(400, 11));
+    QCOMPARE(folderEntries(dir.path()), QStringList({"20261026230000"}));
+}
+
 void ViatomBleTests::testDeviceRefusesFile()
 {
     QTemporaryDir dir;
@@ -537,6 +594,28 @@ void ViatomBleTests::testSetTime()
     QVERIFY(timeSet.wait(5000));
     QVERIFY(!timeSet.last().first().toString().isEmpty());
     QVERIFY(!dl.isBusy());
+}
+
+void ViatomBleTests::testLateInfoReplyIsNotTakenForSetTime()
+{
+    // The info reply is slow, so the request is retried and two replies arrive. The
+    // second must not be taken as the reply to the clock request that follows.
+    FakeDevice dev;
+    dev.infoJson = "{\"SN\":\"2051300123\",\"FileList\":\"\"}";
+    dev.delayInfoReplyOnce = 80;      // the retry goes out at 50 ms and is answered at once
+    dev.refuseSetTime = true;
+    dev.setTimeReplyDelay = 40;       // so without the pause, the stray info reply (80 ms) comes first
+    Downloader dl(&dev);
+    dl.setReplyTimeout(50);
+    QSignalSpy info(&dl, &Downloader::infoReceived);
+    QSignalSpy timeSet(&dl, &Downloader::timeSet);
+    QObject::connect(&dl, &Downloader::infoReceived, &dl, [&dl]() { dl.setTime(QDateTime::currentDateTime()); });
+
+    dl.requestInfo();
+    QVERIFY(timeSet.wait(5000));
+
+    QCOMPARE(info.size(), 1);
+    QVERIFY(!timeSet.first().first().toString().isEmpty());   // the refusal is reported
 }
 
 #ifdef OSCAR_HAVE_BLUETOOTH

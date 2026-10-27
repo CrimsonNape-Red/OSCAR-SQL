@@ -84,7 +84,7 @@ class Downloader : public QObject
 
     void request(State state, quint8 cmd, quint16 seq, const QByteArray &payload = QByteArray());
     void sendPending();
-    //! Runs next now, or after a pause if the reply just accepted answered a retried request.
+    //! Runs next now, or after a pause if the current request was retried or abandoned.
     void continueWith(std::function<void()> next);
     void handleReply(const Reply &reply);
     void handleStart(const Reply &reply);
@@ -105,6 +105,7 @@ class Downloader : public QObject
     State m_state = Idle;
     QByteArray m_pendingFrame;
     int m_attempt = 0;
+    bool m_timedOut = false;   // the current request ran out of retries
     bool m_settling = false;
     //! Bumped when an operation ends abnormally, so a pending pause doesn't resume it.
     int m_generation = 0;

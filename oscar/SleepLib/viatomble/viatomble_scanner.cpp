@@ -7,6 +7,10 @@
  * for more details. */
 
 #include <QBluetoothUuid>
+#include <QCoreApplication>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+#include <QPermissions>
+#endif
 
 #include "viatomble_protocol.h"
 #include "viatomble_scanner.h"
@@ -82,6 +86,30 @@ Scanner::Scanner(QObject *parent)
 
 void Scanner::start(int timeoutMs)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+    // macOS (and iOS/Android) need the user's permission at run time as well as the
+    // Info.plist entry; elsewhere this reports Granted.
+    QBluetoothPermission permission;
+    permission.setCommunicationModes(QBluetoothPermission::Access);
+    switch (qApp->checkPermission(permission)) {
+    case Qt::PermissionStatus::Undetermined:
+        qApp->requestPermission(permission, this, [this, timeoutMs](const QPermission &result) {
+            if (result.status() == Qt::PermissionStatus::Granted) {
+                start(timeoutMs);
+            } else {
+                emit error(tr("OSCAR is not allowed to use Bluetooth. You can allow it in the system's "
+                              "privacy settings."));
+            }
+        });
+        return;
+    case Qt::PermissionStatus::Denied:
+        emit error(tr("OSCAR is not allowed to use Bluetooth. You can allow it in the system's "
+                      "privacy settings."));
+        return;
+    case Qt::PermissionStatus::Granted:
+        break;
+    }
+#endif
     m_agent.stop();
     m_agent.setLowEnergyDiscoveryTimeout(timeoutMs);
     m_agent.start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);

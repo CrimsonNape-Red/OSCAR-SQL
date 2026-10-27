@@ -114,6 +114,7 @@ class ViatomBleImportDialog : public QDialog
     QPlainTextEdit *m_log = nullptr;
     QPushButton *m_cancelButton = nullptr;
     QPushButton *m_moreButton = nullptr;
+    QPushButton *m_searchAgainButton = nullptr;
 
     ViatomBle::Scanner *m_scanner = nullptr;
     ViatomBle::Device *m_device = nullptr;
@@ -127,7 +128,8 @@ class ViatomBleImportDialog : public QDialog
     int m_savedCount = 0;
     int m_skippedCount = 0;
     int m_failedCount = 0;
-    int m_importedCount = 0;
+    int m_importedCount = 0;          // since the dialog opened, for importedAny()
+    int m_batchImportedCount = 0;     // in the current download
     int m_importFailedCount = 0;
 };
 

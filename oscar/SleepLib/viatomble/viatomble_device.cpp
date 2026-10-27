@@ -20,6 +20,8 @@
 #include <QDBusUnixFileDescriptor>
 #include <QDBusVariant>
 #include <QSocketNotifier>
+#include <cerrno>
+#include <cstring>
 #include <unistd.h>
 #endif
 
@@ -62,6 +64,7 @@ void Device::disconnectFromDevice()
 {
     m_connectTimer.stop();
     m_ready = false;
+    m_connection++;   // answers still on their way for this connection are ignored
 #ifdef OSCAR_BLE_BLUEZ_DBUS
     closeNotifyFd();
     m_dbusWrites.clear();
@@ -135,6 +138,15 @@ void Device::onDiscoveryFinished()
     }
     connect(m_service, &QLowEnergyService::stateChanged, this, &Device::onServiceStateChanged);
     connect(m_service, &QLowEnergyService::characteristicChanged, this, &Device::onCharacteristicChanged);
+    connect(m_service, &QLowEnergyService::errorOccurred, this, [this](QLowEnergyService::ServiceError error) {
+        if (!m_ready) {
+            // e.g. notifications could not be enabled: say so now rather than at the timeout
+            fail(tr("The Viatom data service reported an error (%1).").arg(int(error)));
+        } else {
+            // A lost write shows up as a missing reply, which the downloader retries.
+            qWarning() << "ViatomBle::Device: service error" << int(error);
+        }
+    });
     m_service->discoverDetails();
 }
 
@@ -151,18 +163,14 @@ void Device::onServiceStateChanged(QLowEnergyService::ServiceState state)
     }
 
 #ifdef OSCAR_BLE_BLUEZ_DBUS
-    m_writePath = findBluezCharacteristic(QString::fromLatin1(WRITE_UUID));
-    m_notifyPath = findBluezCharacteristic(QString::fromLatin1(NOTIFY_UUID));
-    if (m_writePath.isEmpty()) {
-        qWarning() << "ViatomBle::Device: BlueZ write path not found, using Qt writes";
-    }
-    if (!m_notifyPath.isEmpty() && acquireNotify()) {
-        setReady();
-        return;
-    }
-    qWarning() << "ViatomBle::Device: AcquireNotify unavailable, enabling notifications through Qt";
+    startBluezSetup();
+#else
+    enableQtNotifications();
 #endif
+}
 
+void Device::enableQtNotifications()
+{
     const QLowEnergyDescriptor cccd =
         m_notifyChar.descriptor(QBluetoothUuid::DescriptorType::ClientCharacteristicConfiguration);
     if (!cccd.isValid()) {
@@ -234,16 +242,41 @@ void Device::sendQt(const QByteArray &frame)
 static const QString BLUEZ = QStringLiteral("org.bluez");
 static const QString GATT_CHARACTERISTIC = QStringLiteral("org.bluez.GattCharacteristic1");
 
-QString Device::findBluezCharacteristic(const QString &uuid) const
+void Device::startBluezSetup()
 {
+    // Asks BlueZ for its objects, finds our two characteristics, then asks for the
+    // notification descriptor. Every step is asynchronous; if one fails, Qt's own
+    // calls are used instead.
+    const int connection = m_connection;
     QDBusMessage call = QDBusMessage::createMethodCall(BLUEZ, QStringLiteral("/"),
         QStringLiteral("org.freedesktop.DBus.ObjectManager"), QStringLiteral("GetManagedObjects"));
-    const QDBusMessage reply = QDBusConnection::systemBus().call(call, QDBus::Block, 5000);
-    if (reply.type() != QDBusMessage::ReplyMessage || reply.arguments().isEmpty()) {
-        qWarning() << "ViatomBle::Device: GetManagedObjects failed:" << reply.errorMessage();
-        return QString();
-    }
+    auto *watcher = new QDBusPendingCallWatcher(QDBusConnection::systemBus().asyncCall(call, 5000), this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, connection](QDBusPendingCallWatcher *w) {
+        w->deleteLater();
+        if (connection != m_connection) {
+            return;
+        }
+        const QDBusMessage reply = w->reply();
+        if (reply.type() != QDBusMessage::ReplyMessage || reply.arguments().isEmpty()) {
+            qWarning() << "ViatomBle::Device: GetManagedObjects failed:" << reply.errorMessage();
+            enableQtNotifications();
+            return;
+        }
+        m_writePath = bluezCharacteristicPath(reply, QString::fromLatin1(WRITE_UUID));
+        m_notifyPath = bluezCharacteristicPath(reply, QString::fromLatin1(NOTIFY_UUID));
+        if (m_writePath.isEmpty()) {
+            qWarning() << "ViatomBle::Device: BlueZ write path not found, using Qt writes";
+        }
+        if (m_notifyPath.isEmpty()) {
+            enableQtNotifications();
+            return;
+        }
+        acquireNotify();
+    });
+}
 
+QString Device::bluezCharacteristicPath(const QDBusMessage &reply, const QString &uuid) const
+{
     // BlueZ puts the address in the object path: /org/bluez/hci0/dev_AA_BB_CC_DD_EE_FF/...
     QString device = QStringLiteral("dev_") + m_info.address().toString();
     device.replace(QLatin1Char(':'), QLatin1Char('_'));
@@ -291,31 +324,38 @@ QString Device::findBluezCharacteristic(const QString &uuid) const
     return found;
 }
 
-bool Device::acquireNotify()
+void Device::acquireNotify()
 {
+    const int connection = m_connection;
     QDBusMessage call = QDBusMessage::createMethodCall(BLUEZ, m_notifyPath, GATT_CHARACTERISTIC,
                                                        QStringLiteral("AcquireNotify"));
     call << QVariantMap();
-    const QDBusMessage reply = QDBusConnection::systemBus().call(call, QDBus::Block, 5000);
-    if (reply.type() != QDBusMessage::ReplyMessage || reply.arguments().size() < 2) {
-        qWarning() << "ViatomBle::Device: AcquireNotify failed:" << reply.errorMessage();
-        return false;
-    }
-    const QDBusUnixFileDescriptor fd = reply.arguments().at(0).value<QDBusUnixFileDescriptor>();
-    if (!fd.isValid()) {
-        return false;
-    }
-    m_notifyFd = ::dup(fd.fileDescriptor());
-    if (m_notifyFd < 0) {
-        return false;
-    }
-    const int mtu = int(reply.arguments().at(1).toUInt());
-    if (mtu > 0) {
-        m_mtu = mtu;
-    }
-    m_notifyWatcher = new QSocketNotifier(m_notifyFd, QSocketNotifier::Read, this);
-    connect(m_notifyWatcher, &QSocketNotifier::activated, this, [this]() { onNotifyFdReadable(); });
-    return true;
+    auto *watcher = new QDBusPendingCallWatcher(QDBusConnection::systemBus().asyncCall(call, 5000), this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, connection](QDBusPendingCallWatcher *w) {
+        w->deleteLater();
+        if (connection != m_connection) {
+            return;
+        }
+        const QDBusMessage reply = w->reply();
+        QDBusUnixFileDescriptor fd;
+        if (reply.type() == QDBusMessage::ReplyMessage && reply.arguments().size() >= 2) {
+            fd = reply.arguments().at(0).value<QDBusUnixFileDescriptor>();
+        }
+        m_notifyFd = fd.isValid() ? ::dup(fd.fileDescriptor()) : -1;
+        if (m_notifyFd < 0) {
+            qWarning() << "ViatomBle::Device: AcquireNotify unavailable, enabling notifications through Qt:"
+                       << reply.errorMessage();
+            enableQtNotifications();
+            return;
+        }
+        const int mtu = int(reply.arguments().at(1).toUInt());
+        if (mtu > 0) {
+            m_mtu = mtu;
+        }
+        m_notifyWatcher = new QSocketNotifier(m_notifyFd, QSocketNotifier::Read, this);
+        connect(m_notifyWatcher, &QSocketNotifier::activated, this, [this]() { onNotifyFdReadable(); });
+        setReady();
+    });
 }
 
 void Device::onNotifyFdReadable()
@@ -328,6 +368,9 @@ void Device::onNotifyFdReadable()
     } else if (n == 0) {
         // BlueZ closed the descriptor: the link is gone.
         fail(tr("The device disconnected."));
+    } else if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR) {
+        // A broken descriptor stays readable, so stop here rather than spin.
+        fail(tr("The Bluetooth connection failed: %1").arg(QString::fromLocal8Bit(std::strerror(errno))));
     }
 }
 
@@ -359,12 +402,13 @@ void Device::writeNextDbusChunk()
     options[QStringLiteral("type")] = m_dbusWriteType;
     call << QVariant::fromValue(chunk) << QVariant::fromValue(options);
 
+    const int connection = m_connection;
     auto *watcher = new QDBusPendingCallWatcher(QDBusConnection::systemBus().asyncCall(call, 5000), this);
-    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher *w) {
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, connection](QDBusPendingCallWatcher *w) {
         w->deleteLater();
         const bool error = w->isError();
         const QString message = w->error().message();
-        if (!m_ready) {
+        if (!m_ready || connection != m_connection) {
             return;
         }
         if (error && m_dbusWriteType == QLatin1String("command")) {

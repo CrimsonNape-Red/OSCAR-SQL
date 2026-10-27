@@ -32,12 +32,14 @@ class ViatomBleTests : public QObject
     void testRetriesAfterLostReply();
     void testDropsLateReplyAfterRetry_data();
     void testDropsLateReplyAfterRetry();
+    void testDropsLateReplyAfterGivingUp();
     void testDeviceRefusesFile();
     void testLinkLostRemovesPartialFile();
     void testCancelStopsAndCleansUp();
     void testInfo();
     void testInfoTimeout();
     void testSetTime();
+    void testLateInfoReplyIsNotTakenForSetTime();
 
 #ifdef OSCAR_HAVE_BLUETOOTH
     void testDeviceFamilyFromName();

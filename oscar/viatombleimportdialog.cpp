@@ -274,8 +274,14 @@ QWidget *ViatomBleImportDialog::buildTransferPage()
     m_moreButton = new QPushButton(tr("Choose more recordings"), page);
     connect(m_moreButton, &QPushButton::clicked, this, &ViatomBleImportDialog::showFiles);
 
+    // After the connection is lost, start again from the device search.
+    m_searchAgainButton = new QPushButton(tr("Search again"), page);
+    m_searchAgainButton->setVisible(false);
+    connect(m_searchAgainButton, &QPushButton::clicked, this, &ViatomBleImportDialog::startScan);
+
     auto *buttons = new QHBoxLayout;
     buttons->addStretch();
+    buttons->addWidget(m_searchAgainButton);
     buttons->addWidget(m_moreButton);
     buttons->addWidget(m_cancelButton);
 
@@ -351,14 +357,30 @@ void ViatomBleImportDialog::onDeviceFound(const QBluetoothDeviceInfo &info, Devi
             m_deviceList->setCurrentRow(m_deviceList->count() - 1);
         }
     } else {
+        // The family can change as more of the advertisement arrives, e.g. a late name.
         m_devices[row] = info;
-        m_deviceList->item(row)->setText(text);
+        QListWidgetItem *item = m_deviceList->item(row);
+        item->setText(text);
+        const Qt::ItemFlags usable = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+        if (family == DeviceFamily::Classic) {
+            item->setFlags(item->flags() | usable);
+        } else {
+            item->setFlags(item->flags() & ~usable);
+            if (m_deviceList->currentRow() == row) {
+                m_deviceList->setCurrentRow(-1);
+            }
+        }
     }
     updateConnectButton();
 }
 
 void ViatomBleImportDialog::onScanFinished()
 {
+    if (m_device) {
+        // Stopping the scan to connect reports "finished" too, possibly after the connect
+        // has started; the connection now owns the buttons and status.
+        return;
+    }
     m_rescanButton->setEnabled(true);
     if (m_pages->currentIndex() != DevicesPage) {
         return;
@@ -397,6 +419,7 @@ void ViatomBleImportDialog::connectToSelected()
         if (m_pages->currentIndex() == TransferPage) {
             log(tr("The device disconnected: %1").arg(reason));
             m_moreButton->setVisible(false);
+            m_searchAgainButton->setVisible(true);
             closeConnection();
             return;
         }
@@ -557,8 +580,9 @@ void ViatomBleImportDialog::onFailed(const QString &reason)
     if (m_pages->currentIndex() == TransferPage) {
         // The link was lost during a download; the per-file failure is already logged.
         log(tr("Stopped: %1").arg(reason));
-        onDownloadFinished(false);
         closeConnection();
+        onDownloadFinished(false);
+        m_searchAgainButton->setVisible(true);
         return;
     }
     closeConnection();
@@ -587,6 +611,7 @@ void ViatomBleImportDialog::startDownload()
     m_filesTotal = files.size();
     m_filesDone = 0;
     m_savedCount = m_skippedCount = m_failedCount = 0;
+    m_batchImportedCount = 0;
     m_importFailedCount = 0;
     m_log->clear();
     m_totalProgress->setRange(0, m_filesTotal);
@@ -596,6 +621,7 @@ void ViatomBleImportDialog::startDownload()
     m_cancelButton->setVisible(true);
     m_cancelButton->setEnabled(true);
     m_moreButton->setVisible(false);
+    m_searchAgainButton->setVisible(false);
     showPage(TransferPage);
     m_status->setText(tr("Downloading. Keep the oximeter close to the computer."));
 
@@ -625,6 +651,7 @@ void ViatomBleImportDialog::onFileSaved(const QString &name, const QString &path
         // Runs between transfers: the downloader asks for the next file after this returns.
         if (m_importFile(path)) {
             m_importedCount++;
+            m_batchImportedCount++;
             log(tr("    imported into OSCAR"));
         } else {
             m_importFailedCount++;
@@ -662,7 +689,7 @@ void ViatomBleImportDialog::onDownloadFinished(bool cancelled)
         summary << tr("%n failed", "", m_failedCount);
     }
     if (m_importAsArrive->isChecked()) {
-        summary << tr("%n imported", "", m_importedCount);
+        summary << tr("%n imported", "", m_batchImportedCount);
         if (m_importFailedCount) {
             summary << tr("%n could not be imported", "", m_importFailedCount);
         }
