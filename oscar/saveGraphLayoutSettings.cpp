@@ -84,7 +84,7 @@ QPushButton*  SaveGraphLayoutSettings::newBtnRtn(QHBoxLayout* layout,QString nam
     button->setSizePolicy(hPolicy,QSizePolicy::Fixed);
     button->setToolTip(tooltip);
     button->setToolTipDuration(AppSetting->tooltipTimeout());
-    button->setFont(*mediumfont);
+    // Button text uses the dialog's (application) font, not the graph title font.
     layout->addWidget(button);
     return button;
 }
@@ -457,14 +457,7 @@ QString SaveGraphLayoutSettings::calculateButtonStyle(bool on,bool exitBtn){
             "max-width:1em;"
             "border:none;"
             );
-
-        QString toolTipStyle="  QToolTip { "
-            "border: 1px solid black;"
-            "border-width: 1px;"
-            "padding: 4px;"
-            "font: 14px ; color:black; background-color:yellow;"
-            "}";
-        btnStyle.append(toolTipStyle);
+        // No QToolTip rule: the buttons' tooltips use the platform style like the rest of OSCAR.
         return btnStyle;
 }
 

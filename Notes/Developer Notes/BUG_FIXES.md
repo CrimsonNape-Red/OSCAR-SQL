@@ -7515,3 +7515,19 @@ row and the per-session AHI in the CSV export now show 0.
 With the guards in place the SEFAM loader no longer skips a session in which the blower
 never ran (2026-09-13 entry): `addMaskSlices()` gives it only MaskOff slices, so it is
 kept with zero usage, as the vendor software shows it.
+
+---
+
+## 2026-10-28 - Layout dialog buttons used their own tooltip style and the graph title font (#355)
+
+**Files:** `oscar/saveGraphLayoutSettings.cpp`
+
+The graph Layout dialog's buttons carried a `QToolTip` rule in their style sheet (bright
+yellow, black border, 14px font), so their tooltips looked unlike every other standard
+tooltip, and `newBtnRtn()` set the button text to the graph title font (`mediumfont`). Both
+are removed: the tooltips now come from the platform style and the button text uses the
+dialog's application font. The button colors (enabled/disabled) are unchanged.
+
+Standard tooltips keep the platform background (light gray under the Windows 11 style, pale
+yellow under Fusion); the info blocks OSCAR paints on the graphs (`gToolTip::paint`) keep
+their own yellow on all platforms. Raised in MR !60.
