@@ -46,6 +46,7 @@ class Device : public Link
     bool isReady() const { return m_ready; }
 
     void send(const QByteArray &frame) override;
+    bool useAcknowledgedWrites() override;
 
   signals:
     void ready();
@@ -104,6 +105,7 @@ class Device : public Link
     QTimer m_connectTimer;
     int m_mtu = 23;
     bool m_ready = false;
+    bool m_acknowledgedWrites = false;   //!< write with response even if the device allows without
     //! Bumped on every disconnect; asynchronous answers for an older connection are ignored.
     int m_connection = 0;
 };

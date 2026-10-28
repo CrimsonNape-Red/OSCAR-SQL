@@ -39,6 +39,7 @@ class ViatomBleTests : public QObject
     void testCancelStopsAndCleansUp();
     void testInfo();
     void testInfoTimeout();
+    void testSwitchesToAcknowledgedWrites();
     void testSetTime();
     void testLateInfoReplyIsNotTakenForSetTime();
 
@@ -47,8 +48,10 @@ class ViatomBleTests : public QObject
     void testO2RingSFrames();
     void testO2RingSHandshake();
     void testO2RingSPayloads();
+    void testO2RingSSession_data();
     void testO2RingSSession();
     void testO2RingSWrongKey();
+    void testO2RingSSilent();
 
 #ifdef OSCAR_HAVE_BLUETOOTH
     void testDeviceFamilyFromName();

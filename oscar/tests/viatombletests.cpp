@@ -101,12 +101,25 @@ class FakeDevice : public Link
     int endReplyDelay = 0;                  // ms before READ_END is acknowledged
     int startReplyDelay = 0;                // ms before READ_START is answered
     int loseLinkAtChunk = -1;
+    bool onlyAcknowledged = false;          // ignores writes until useAcknowledgedWrites()
+    bool acknowledged = false;
+    int acknowledgedSwitches = 0;
     QList<QByteArray> sent;
+
+    bool useAcknowledgedWrites() override
+    {
+        if (!onlyAcknowledged || acknowledged) {
+            return false;
+        }
+        acknowledged = true;
+        acknowledgedSwitches++;
+        return true;
+    }
 
     void send(const QByteArray &frame) override
     {
         sent.append(frame);
-        if (silent) {
+        if (silent || (onlyAcknowledged && !acknowledged)) {
             return;
         }
         const auto *b = reinterpret_cast<const quint8 *>(frame.constData());
@@ -601,6 +614,37 @@ void ViatomBleTests::testInfoTimeout()
     QVERIFY(!dl.isBusy());
 }
 
+void ViatomBleTests::testSwitchesToAcknowledgedWrites()
+{
+    FakeDevice dev;
+    dev.infoJson = "{\"SN\":\"1234\"}";
+    dev.onlyAcknowledged = true;
+    Downloader dl(&dev);
+    dl.setReplyTimeout(20);
+    dl.setMaxRetries(2);
+    QSignalSpy info(&dl, &Downloader::infoReceived);
+    QSignalSpy failed(&dl, &Downloader::failed);
+
+    dl.requestInfo();
+    QVERIFY(info.wait(5000));
+    QCOMPARE(failed.count(), 0);
+    QCOMPARE(dev.acknowledgedSwitches, 1);
+    QCOMPARE(dev.countSent(CMD_INFO), 4);   // three ignored, then one acknowledged
+
+    // A silent device that can't switch still fails after the usual retries.
+    FakeDevice quiet;
+    quiet.silent = true;
+    quiet.onlyAcknowledged = true;
+    Downloader dl2(&quiet);
+    dl2.setReplyTimeout(20);
+    dl2.setMaxRetries(2);
+    QSignalSpy failed2(&dl2, &Downloader::failed);
+    dl2.requestInfo();
+    QVERIFY(failed2.wait(5000));
+    QCOMPARE(quiet.acknowledgedSwitches, 1);
+    QCOMPARE(quiet.countSent(CMD_INFO), 6);
+}
+
 void ViatomBleTests::testSetTime()
 {
     FakeDevice dev;
@@ -672,6 +716,8 @@ class FakeO2RingS : public Link
     QByteArray sessionKey = QByteArray::fromHex("00112233445566778899aabbccddeeff");
     bool wrongKeyOnReplies = false;      // encrypt replies with another key
     bool liveDataDuringTransfer = false; // push an unsolicited frame while sending a file
+    bool requiresEncryption = false;     // ignore plain requests until the handshake
+    bool ignoresHandshake = false;       // never answer the handshake (like the S8-AW)
     QByteArray lastUtcTime;
     QList<QByteArray> sent;
     QString handshakeError;
@@ -691,6 +737,9 @@ class FakeO2RingS : public Link
             QByteArray plain;
             QVERIFY(O2RingS::decryptPayload(sessionKey, payload, plain));
             payload = plain;
+        }
+        if (cmd == O2RingS::CMD_ENCRYPT ? ignoresHandshake : (requiresEncryption && !m_session)) {
+            return;
         }
 
         switch (cmd) {
@@ -872,14 +921,27 @@ void ViatomBleTests::testO2RingSPayloads()
     QVERIFY(!O2RingS::parseInfo(QByteArray(10, '\0')).valid);
 }
 
+void ViatomBleTests::testO2RingSSession_data()
+{
+    QTest::addColumn<bool>("encrypted");
+    QTest::newRow("plain, handshake ignored") << false;
+    QTest::newRow("encrypted, plain ignored") << true;
+}
+
 void ViatomBleTests::testO2RingSSession()
 {
+    QFETCH(bool, encrypted);
     QTemporaryDir dir;
     FakeO2RingS dev;
     dev.files["20261025220000"] = pattern(1000, 20);   // several 300-byte blocks
     dev.files["20261026230000"] = pattern(300, 21);
     dev.liveDataDuringTransfer = true;
+    dev.requiresEncryption = encrypted;
+    dev.ignoresHandshake = !encrypted;
     Downloader dl(&dev, std::make_unique<O2RingSDialect>());
+    dl.setReplyTimeout(30);
+    dl.setOpenTimeout(30);
+    dl.setMaxRetries(1);
     QSignalSpy info(&dl, &Downloader::infoReceived);
     QSignalSpy timeSet(&dl, &Downloader::timeSet);
     QSignalSpy saved(&dl, &Downloader::fileSaved);
@@ -905,10 +967,22 @@ void ViatomBleTests::testO2RingSSession()
         QCOMPARE(readFile(dir.filePath(it.key())), it.value());
     }
 
-    // Every request after the handshake carried an encrypted (block-sized) payload or none.
-    for (const QByteArray &frame : dev.sent.mid(1)) {
+    int handshake = -1;
+    for (int i = 0; i < dev.sent.size(); i++) {
+        if (quint8(dev.sent[i].at(1)) == O2RingS::CMD_ENCRYPT) {
+            handshake = i;
+            break;
+        }
+    }
+    QCOMPARE(handshake >= 0, encrypted);
+    for (int i = 0; i < dev.sent.size(); i++) {
+        const QByteArray &frame = dev.sent[i];
         const int len = quint8(frame.at(5)) | (quint8(frame.at(6)) << 8);
-        QCOMPARE(len % 16, 0);
+        if (encrypted && i > handshake) {
+            QCOMPARE(len % 16, 0);   // an encrypted (block-sized) payload, or none
+        } else if (quint8(frame.at(1)) == O2RingS::CMD_READ_FILE_START) {
+            QCOMPARE(len, 20);       // the plain name and offset
+        }
     }
 }
 
@@ -916,12 +990,38 @@ void ViatomBleTests::testO2RingSWrongKey()
 {
     FakeO2RingS dev;
     dev.wrongKeyOnReplies = true;
+    dev.requiresEncryption = true;
     Downloader dl(&dev, std::make_unique<O2RingSDialect>());
+    dl.setReplyTimeout(30);
+    dl.setMaxRetries(1);
     QSignalSpy failed(&dl, &Downloader::failed);
 
     dl.requestInfo();
     QVERIFY(failed.wait(5000));
     QVERIFY(failed.first().first().toString().contains(QStringLiteral("0xf3")));
+}
+
+void ViatomBleTests::testO2RingSSilent()
+{
+    // Answers neither plain requests nor the handshake: one failure, after both tries.
+    FakeO2RingS dev;
+    dev.requiresEncryption = true;
+    dev.ignoresHandshake = true;
+    Downloader dl(&dev, std::make_unique<O2RingSDialect>());
+    dl.setReplyTimeout(20);
+    dl.setMaxRetries(1);
+    QSignalSpy failed(&dl, &Downloader::failed);
+    QSignalSpy info(&dl, &Downloader::infoReceived);
+
+    dl.requestInfo();
+    QVERIFY(failed.wait(5000));
+    QCOMPARE(failed.size(), 1);
+    QCOMPARE(info.size(), 0);
+    QVERIFY(failed.first().first().toString().contains(QStringLiteral("encrypted")));
+    QCOMPARE(dev.sent.size(), 4);   // plain info twice, then the handshake twice
+    QCOMPARE(quint8(dev.sent[0].at(1)), quint8(O2RingS::CMD_GET_INFO));
+    QCOMPARE(quint8(dev.sent[3].at(1)), quint8(O2RingS::CMD_ENCRYPT));
+    QVERIFY(!dl.isBusy());
 }
 
 #ifdef OSCAR_HAVE_BLUETOOTH

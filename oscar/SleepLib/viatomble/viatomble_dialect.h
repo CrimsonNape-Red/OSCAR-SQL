@@ -46,8 +46,11 @@ class Dialect
     //! Drops partly received data (not the session).
     virtual void clearBuffer() = 0;
 
-    //! Reading the device info takes one or more request/reply steps.
-    virtual int infoSteps() const = 0;
+    //! Reading the device info takes one or more request/reply steps, starting at 0.
+    //! The step after this one succeeded, or -1 if the info is complete.
+    virtual int nextInfoStep(int step) const = 0;
+    //! The step to try when this one is refused or not answered, or -1 to give up.
+    virtual int infoFallbackStep(int step) const { Q_UNUSED(step); return -1; }
     virtual Request infoRequest(int step) = 0;
     //! Interprets one info step's reply into info; returns an error message, or empty.
     virtual QString handleInfoReply(int step, const Reply &reply, DeviceInfo &info) = 0;
@@ -70,7 +73,7 @@ class ClassicDialect : public Dialect
     QList<Reply> feed(const QByteArray &chunk) override { return m_splitter.feed(chunk); }
     void clearBuffer() override { m_splitter.clear(); }
 
-    int infoSteps() const override { return 1; }
+    int nextInfoStep(int) const override { return -1; }
     Request infoRequest(int step) override;
     QString handleInfoReply(int step, const Reply &reply, DeviceInfo &info) override;
     QString infoTimeoutMessage(int step) const override;
@@ -85,10 +88,18 @@ class ClassicDialect : public Dialect
     FrameSplitter m_splitter;
 };
 
-//! O2Ring S, SC, SF, SP, ...: an encrypted session, replies name their command.
-//! Info takes three steps: handshake, device info, file list.
+/*! O2Ring S, SC, SF, SP, ...: replies name their command.
+ *
+ *  ViHealth sets up an encrypted session only for a few models (not the O2Ring S,
+ *  whose payloads it sends in plain text), so info starts with plain device info and
+ *  file list. If the device doesn't answer, it falls back to the handshake and asks
+ *  again with encrypted payloads.
+ */
 class O2RingSDialect : public Dialect
 {
+  public:
+    enum InfoStep { PlainInfo, PlainFileList, Handshake, EncryptedInfo, EncryptedFileList };
+
   public:
     //! now gives the current time (replaceable for tests).
     explicit O2RingSDialect(std::function<QDateTime()> now = [] { return QDateTime::currentDateTime(); });
@@ -96,7 +107,8 @@ class O2RingSDialect : public Dialect
     QList<Reply> feed(const QByteArray &chunk) override;
     void clearBuffer() override { m_splitter.clear(); }
 
-    int infoSteps() const override { return 3; }
+    int nextInfoStep(int step) const override;
+    int infoFallbackStep(int step) const override;
     Request infoRequest(int step) override;
     QString handleInfoReply(int step, const Reply &reply, DeviceInfo &info) override;
     QString infoTimeoutMessage(int step) const override;

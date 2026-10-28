@@ -49,6 +49,7 @@ void Device::connectToDevice(const QBluetoothDeviceInfo &info, DeviceFamily fami
 {
     disconnectFromDevice();
     m_info = info;
+    m_acknowledgedWrites = false;
 
     const ServiceSpec classic{QString::fromLatin1(SERVICE_UUID), QString::fromLatin1(WRITE_UUID),
                               QString::fromLatin1(NOTIFY_UUID)};
@@ -64,7 +65,10 @@ void Device::connectToDevice(const QBluetoothDeviceInfo &info, DeviceFamily fami
     connect(m_controller, &QLowEnergyController::disconnected, this, &Device::onDisconnected);
     connect(m_controller, &QLowEnergyController::errorOccurred, this, &Device::onControllerError);
     connect(m_controller, &QLowEnergyController::discoveryFinished, this, &Device::onDiscoveryFinished);
-    connect(m_controller, &QLowEnergyController::mtuChanged, this, [this](int mtu) { m_mtu = mtu; });
+    connect(m_controller, &QLowEnergyController::mtuChanged, this, [this](int mtu) {
+        qDebug() << "ViatomBle::Device: MTU now" << mtu;
+        m_mtu = mtu;
+    });
 
     m_connectTimer.start(CONNECT_TIMEOUT_MS);
     m_controller->connectToDevice();
@@ -170,7 +174,13 @@ void Device::onDiscoveryFinished()
             qWarning() << "ViatomBle::Device: service error" << int(error);
         }
     });
+#if QT_VERSION >= QT_VERSION_CHECK(6, 2, 0)
+    // The characteristic values aren't needed, and on Windows reading them sometimes
+    // fails ("Could not read characteristic value"), which aborts the connection.
+    m_service->discoverDetails(QLowEnergyService::SkipValueDiscovery);
+#else
     m_service->discoverDetails();
+#endif
 }
 
 void Device::onServiceStateChanged(QLowEnergyService::ServiceState state)
@@ -184,6 +194,10 @@ void Device::onServiceStateChanged(QLowEnergyService::ServiceState state)
         fail(tr("The Viatom data service is missing its characteristics."));
         return;
     }
+    // Property bits: 0x04 write without response, 0x08 write, 0x10 notify, 0x20 indicate.
+    qDebug().noquote() << QStringLiteral("ViatomBle::Device: write characteristic properties 0x%1, notify 0x%2")
+                              .arg(int(m_writeChar.properties()), 2, 16, QLatin1Char('0'))
+                              .arg(int(m_notifyChar.properties()), 2, 16, QLatin1Char('0'));
 
 #ifdef OSCAR_BLE_BLUEZ_DBUS
     startBluezSetup();
@@ -201,10 +215,16 @@ void Device::enableQtNotifications()
         return;
     }
     connect(m_service, &QLowEnergyService::descriptorWritten, this,
-            [this](const QLowEnergyDescriptor &, const QByteArray &) {
+            [this](const QLowEnergyDescriptor &, const QByteArray &value) {
                 if (!m_ready) {
+                    qDebug() << "ViatomBle::Device: notifications enabled" << value.toHex();
                     setReady();
                 }
+            });
+    // Only acknowledged writes report back; a device that ignores a write shows nothing here.
+    connect(m_service, &QLowEnergyService::characteristicWritten, this,
+            [](const QLowEnergyCharacteristic &, const QByteArray &value) {
+                qDebug() << "ViatomBle::Device: write acknowledged," << value.size() << "bytes";
             });
     m_service->writeDescriptor(cccd, QByteArray::fromHex("0100"));
 }
@@ -213,7 +233,28 @@ void Device::setReady()
 {
     m_connectTimer.stop();
     m_ready = true;
+    if (m_controller && m_controller->mtu() > 0) {
+        m_mtu = m_controller->mtu();
+    }
+    qDebug() << "ViatomBle::Device: ready, MTU" << m_mtu << "so writes of up to" << writeChunkSize() << "bytes";
     emit ready();
+}
+
+bool Device::useAcknowledgedWrites()
+{
+    if (m_acknowledgedWrites || !m_ready) {
+        return false;
+    }
+    if (!(m_writeChar.properties() & QLowEnergyCharacteristic::Write)) {
+        qDebug() << "ViatomBle::Device: the device does not take acknowledged writes";
+        return false;
+    }
+    m_acknowledgedWrites = true;
+#ifdef OSCAR_BLE_BLUEZ_DBUS
+    m_dbusWriteType = QStringLiteral("request");
+#endif
+    qDebug() << "ViatomBle::Device: switching to acknowledged writes";
+    return true;
 }
 
 void Device::onCharacteristicChanged(const QLowEnergyCharacteristic &ch, const QByteArray &value)
@@ -251,7 +292,8 @@ void Device::send(const QByteArray &frame)
 
 void Device::sendQt(const QByteArray &frame)
 {
-    const auto mode = (m_writeChar.properties() & QLowEnergyCharacteristic::WriteNoResponse)
+    const auto mode = (!m_acknowledgedWrites
+                       && (m_writeChar.properties() & QLowEnergyCharacteristic::WriteNoResponse))
                           ? QLowEnergyService::WriteWithoutResponse
                           : QLowEnergyService::WriteWithResponse;
     const int size = writeChunkSize();

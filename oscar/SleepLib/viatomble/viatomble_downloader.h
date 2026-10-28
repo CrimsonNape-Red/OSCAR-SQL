@@ -98,6 +98,8 @@ class Downloader : public QObject
     void continueWith(std::function<void()> next);
     void handleReply(const Reply &reply);
     void handleInfo(const Reply &reply);
+    //! Moves to the dialect's fallback for the current info step, if it has one.
+    bool tryInfoFallback(const QString &why);
     void handleStart(const Reply &reply);
     void handleContent(const Reply &reply);
     void startNextFile();
@@ -123,6 +125,9 @@ class Downloader : public QObject
     int m_attempt = 0;
     bool m_timedOut = false;   // the current request ran out of retries
     bool m_settling = false;
+    bool m_heardFromDevice = false;      //!< any bytes at all have arrived
+    bool m_triedAcknowledged = false;    //!< asked the link for acknowledged writes
+    int m_rawChunksLogged = 0;
     //! Bumped when an operation ends abnormally, so a pending pause doesn't resume it.
     int m_generation = 0;
 

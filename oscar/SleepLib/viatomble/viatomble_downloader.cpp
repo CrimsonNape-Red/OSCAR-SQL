@@ -139,6 +139,15 @@ void Downloader::continueWith(std::function<void()> next)
 
 void Downloader::onDataReceived(const QByteArray &chunk)
 {
+    m_heardFromDevice = true;
+    // The first notifications as they arrived, so the log shows a reply in a form the
+    // frame splitter doesn't recognise. After that only parsed replies are logged.
+    static const int RAW_CHUNKS_TO_LOG = 40;
+    if (m_rawChunksLogged < RAW_CHUNKS_TO_LOG) {
+        m_rawChunksLogged++;
+        qDebug().noquote() << QStringLiteral("ViatomBle raw rx (%1 bytes):").arg(chunk.size())
+                           << chunk.left(64).toHex(' ');
+    }
     const QList<Reply> replies = m_dialect->feed(chunk);
     for (const Reply &reply : replies) {
         qDebug().noquote() << QStringLiteral("ViatomBle rx: cmd %1 status %2 seq %3 len %4:")
@@ -208,15 +217,34 @@ void Downloader::handleInfo(const Reply &reply)
     const QString error = m_dialect->handleInfoReply(m_infoStep, reply, m_info);
     continueWith([this, error]() {
         if (!error.isEmpty()) {
-            m_state = Idle;
-            emit failed(error);
-        } else if (++m_infoStep < m_dialect->infoSteps()) {
+            if (!tryInfoFallback(error)) {
+                m_state = Idle;
+                emit failed(error);
+            }
+            return;
+        }
+        const int next = m_dialect->nextInfoStep(m_infoStep);
+        if (next >= 0) {
+            m_infoStep = next;
             request(WaitInfo, m_dialect->infoRequest(m_infoStep));
         } else {
             m_state = Idle;
             emit infoReceived(m_info);
         }
     });
+}
+
+bool Downloader::tryInfoFallback(const QString &why)
+{
+    const int fallback = m_dialect->infoFallbackStep(m_infoStep);
+    if (fallback < 0) {
+        return false;
+    }
+    qDebug().noquote() << QStringLiteral("ViatomBle::Downloader: info step %1 failed (%2), trying step %3")
+                              .arg(m_infoStep).arg(why).arg(fallback);
+    m_infoStep = fallback;
+    request(WaitInfo, m_dialect->infoRequest(m_infoStep));
+    return true;
 }
 
 void Downloader::startNextFile()
@@ -357,14 +385,27 @@ void Downloader::onTimeout()
         return;
     }
 
+    // Not a byte from the device yet: it may be dropping unacknowledged writes (e.g. a
+    // characteristic that needs pairing), so try once more with acknowledged ones.
+    if (!m_heardFromDevice && !m_triedAcknowledged) {
+        m_triedAcknowledged = true;
+        if (m_link->useAcknowledgedWrites()) {
+            m_attempt = 0;
+            sendPending();
+            return;
+        }
+    }
+
     // Out of retries. A reply to the abandoned request may still turn up, so whatever
     // comes next waits until it would have arrived (continueWith pauses).
     m_timedOut = true;
     switch (m_state) {
     case WaitInfo:
         continueWith([this]() {
-            m_state = Idle;
-            emit failed(m_dialect->infoTimeoutMessage(m_infoStep));
+            if (!tryInfoFallback(m_dialect->infoTimeoutMessage(m_infoStep))) {
+                m_state = Idle;
+                emit failed(m_dialect->infoTimeoutMessage(m_infoStep));
+            }
         });
         return;
     case WaitSetTime:

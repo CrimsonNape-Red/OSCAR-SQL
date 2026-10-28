@@ -102,15 +102,34 @@ QList<Reply> O2RingSDialect::feed(const QByteArray &chunk)
     return replies;
 }
 
+int O2RingSDialect::nextInfoStep(int step) const
+{
+    switch (step) {
+    case PlainInfo:     return PlainFileList;
+    case Handshake:     return EncryptedInfo;
+    case EncryptedInfo: return EncryptedFileList;
+    default:            return -1;
+    }
+}
+
+int O2RingSDialect::infoFallbackStep(int step) const
+{
+    // A device that wants an encrypted session ignores or refuses plain requests.
+    return step == PlainInfo ? int(Handshake) : -1;
+}
+
 Dialect::Request O2RingSDialect::infoRequest(int step)
 {
     switch (step) {
-    case 0: {
+    case PlainInfo:
+        m_sessionKey.clear();
+        return make(O2RingS::CMD_GET_INFO, QByteArray());
+    case Handshake: {
         m_sessionKey.clear();
         const qint64 now = m_now().toSecsSinceEpoch();
         return make(O2RingS::CMD_ENCRYPT, O2RingS::scramble(O2RingS::handshakeToken(now)));
     }
-    case 1:
+    case EncryptedInfo:
         return make(O2RingS::CMD_GET_INFO, QByteArray());
     default:
         return make(O2RingS::CMD_GET_FILE_LIST, QByteArray());
@@ -122,20 +141,25 @@ QString O2RingSDialect::handleInfoReply(int step, const Reply &reply, DeviceInfo
     if (!reply.ok()) {
         const QString code = QStringLiteral("0x%1").arg(reply.status, 2, 16, QLatin1Char('0'));
         switch (step) {
-        case 0:  return tr("The device refused the encrypted connection (code %1).").arg(code);
-        case 1:  return tr("The device refused the request for its information (code %1).").arg(code);
-        default: return tr("The device refused the request for its list of recordings (code %1).").arg(code);
+        case Handshake:
+            return tr("The device refused the encrypted connection (code %1).").arg(code);
+        case PlainInfo:
+        case EncryptedInfo:
+            return tr("The device refused the request for its information (code %1).").arg(code);
+        default:
+            return tr("The device refused the request for its list of recordings (code %1).").arg(code);
         }
     }
     switch (step) {
-    case 0:
+    case Handshake:
         m_sessionKey = O2RingS::sessionKeyFromHandshake(reply.payload);
         if (m_sessionKey.isEmpty()) {
             qWarning().noquote() << "ViatomBle::O2RingSDialect: unexpected handshake reply" << reply.payload.toHex(' ');
             return tr("The device's answer to the encrypted connection could not be understood.");
         }
         return QString();
-    case 1:
+    case PlainInfo:
+    case EncryptedInfo:
         info = O2RingS::parseInfo(reply.payload);
         if (!info.valid) {
             qWarning().noquote() << "ViatomBle::O2RingSDialect: unexpected info reply" << reply.payload.toHex(' ');
@@ -151,9 +175,14 @@ QString O2RingSDialect::handleInfoReply(int step, const Reply &reply, DeviceInfo
 QString O2RingSDialect::infoTimeoutMessage(int step) const
 {
     switch (step) {
-    case 0:  return tr("The device did not answer the request for an encrypted connection.");
-    case 1:  return tr("The device did not answer the request for its information.");
-    default: return tr("The device did not answer the request for its list of recordings.");
+    case Handshake:
+        return tr("The device did not answer, neither to plain requests nor to the request "
+                  "for an encrypted connection.");
+    case PlainInfo:
+    case EncryptedInfo:
+        return tr("The device did not answer the request for its information.");
+    default:
+        return tr("The device did not answer the request for its list of recordings.");
     }
 }
 

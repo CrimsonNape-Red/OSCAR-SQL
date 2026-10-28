@@ -27,6 +27,11 @@ class Link : public QObject
 
     virtual void send(const QByteArray &frame) = 0;
 
+    /*! Sends from now on with writes the device must acknowledge, for a device that
+     *  ignores the faster unacknowledged ones. False if the link is already doing
+     *  that or can't. */
+    virtual bool useAcknowledgedWrites() { return false; }
+
   signals:
     void dataReceived(const QByteArray &chunk);
     void linkLost(const QString &reason);
