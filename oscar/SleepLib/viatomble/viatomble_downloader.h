@@ -50,6 +50,8 @@ class Downloader : public QObject
 
     //! Also sets the pause after a retried request to twice the timeout.
     void setReplyTimeout(int ms) { m_replyTimeoutMs = ms; }
+    //! The timeout for opening a file, which can take the device a few seconds.
+    void setOpenTimeout(int ms) { m_openTimeoutMs = ms; }
     void setMaxRetries(int retries) { m_maxRetries = retries; }
 
     bool isBusy() const { return m_state != Idle; }
@@ -84,6 +86,7 @@ class Downloader : public QObject
   private slots:
     void onDataReceived(const QByteArray &chunk);
     void onTimeout();
+    int currentTimeout() const;
     void onLinkLost(const QString &reason);
 
   private:
@@ -108,6 +111,9 @@ class Downloader : public QObject
     std::unique_ptr<Dialect> m_dialect;
     QTimer m_timer;
     int m_replyTimeoutMs = 2000;
+    // The ViHealth SDK waits 6 s for every reply. A SleepU took just over 2 s to open
+    // one recording, so a shorter wait resends the open while the device is working on it.
+    int m_openTimeoutMs = 6000;
     int m_maxRetries = 3;
 
     State m_state = Idle;

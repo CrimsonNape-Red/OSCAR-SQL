@@ -107,7 +107,12 @@ void Downloader::sendPending()
     qDebug().noquote() << QStringLiteral("ViatomBle tx (attempt %1):").arg(m_attempt + 1)
                        << m_pending.frame.left(48).toHex(' ');
     m_link->send(m_pending.frame);
-    m_timer.start(m_replyTimeoutMs);
+    m_timer.start(currentTimeout());
+}
+
+int Downloader::currentTimeout() const
+{
+    return m_state == WaitStart ? qMax(m_openTimeoutMs, m_replyTimeoutMs) : m_replyTimeoutMs;
 }
 
 void Downloader::continueWith(std::function<void()> next)
@@ -122,7 +127,7 @@ void Downloader::continueWith(std::function<void()> next)
     // attempt may still be on its way. Let it arrive and drop it before going on.
     m_settling = true;
     const int generation = m_generation;
-    QTimer::singleShot(2 * m_replyTimeoutMs, this, [this, generation, next]() {
+    QTimer::singleShot(2 * currentTimeout(), this, [this, generation, next]() {
         m_settling = false;
         if (generation != m_generation) {
             return;

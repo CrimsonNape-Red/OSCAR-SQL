@@ -30,6 +30,7 @@ class ViatomBleTests : public QObject
     void testSkipsExistingFiles();
     void testOverwritesExistingFiles();
     void testRetriesAfterLostReply();
+    void testWaitsLongerForFileOpen();
     void testDropsLateReplyAfterRetry_data();
     void testDropsLateReplyAfterRetry();
     void testDropsLateReplyAfterGivingUp();

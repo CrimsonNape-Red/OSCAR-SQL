@@ -425,6 +425,28 @@ void ViatomBleTests::testRetriesAfterLostReply()
     QCOMPARE(dev.countSent(CMD_READ_CONTENT), 4 + 2);
 }
 
+void ViatomBleTests::testWaitsLongerForFileOpen()
+{
+    // Opening a file can take the device longer than other replies (a SleepU took
+    // just over 2 s). The open must not be resent while the device is still on it.
+    QTemporaryDir dir;
+    FakeDevice dev;
+    dev.files["20261025220000"] = pattern(800, 5);
+    dev.startReplyDelay = 150;
+    Downloader dl(&dev);
+    dl.setReplyTimeout(50);
+    dl.setOpenTimeout(400);
+    QSignalSpy saved(&dl, &Downloader::fileSaved);
+    QSignalSpy finished(&dl, &Downloader::downloadFinished);
+
+    dl.download(dev.files.keys(), dir.path(), false);
+    QVERIFY(finished.wait(5000));
+
+    QCOMPARE(saved.size(), 1);
+    QCOMPARE(dev.countSent(CMD_READ_START), 1);
+    QCOMPARE(readFile(dir.filePath("20261025220000")), pattern(800, 5));
+}
+
 void ViatomBleTests::testDropsLateReplyAfterRetry_data()
 {
     QTest::addColumn<bool>("echo");
