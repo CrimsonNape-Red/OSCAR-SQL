@@ -10,9 +10,9 @@ recordings from a Viatom/Wellue oximeter over Bluetooth and imports them into OS
 
 ## Before you start
 
-- **Use a separate data folder**, not your everyday one. Either:
-  - make a new database with **File → Database → New**; or
-  - run OSCAR in portable mode.
+- **Use a separate data folder**, not your everyday one. The first time the test build
+  starts, choose to **create a new data folder**, not "find existing". Later you can
+  also make one with **File → Database → New**, or use the portable ZIP.
 
   The import only adds data, but this is test code.
 - **Close the ViHealth app on your phone**, or turn the phone's Bluetooth off. The ring
@@ -22,6 +22,14 @@ recordings from a Viatom/Wellue oximeter over Bluetooth and imports them into OS
     this in the dialog.
   - It never deletes anything from the ring.
 
+## Windows installer
+
+If you were sent `OSCAR-…-BLE.exe`, run it instead of building. It installs to
+`C:\Program Files\OSCAR20-test-BLE` as "OSCAR 2 (test) -BLE", next to any other OSCAR,
+and keeps its settings separate from them. Windows SmartScreen may warn that the
+installer is unsigned: choose **More info → Run anyway**. The `-Portable-BLE.zip` is the
+same program to unzip and run without installing.
+
 ## Building
 
 You need Qt 6 with the **Bluetooth** module.
@@ -30,7 +38,8 @@ You need Qt 6 with the **Bluetooth** module.
   bluetooth`).
 - **Windows:** build with an **MSVC** kit (e.g. *Desktop Qt 6.10 MSVC2022 64-bit*, plus
   the free Visual Studio Build Tools). Qt 6 has no working Bluetooth with **MinGW**, so a
-  MinGW build leaves the menu item greyed out.
+  MinGW build leaves the menu item greyed out. `Building\Windows\buildall-msvc.bat
+  6.10.2 <Qt folder> -BLE` builds it and makes the installer (needs Inno Setup 6).
 
 ```bash
 git clone -b vihealth-dev https://gitlab.com/Seeker4/OSCAR-code.git
