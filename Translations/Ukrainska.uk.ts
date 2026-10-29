@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
+<!-- OSCAR Ukrainian (uk_UA) translation - by Volodymyr Havryliuk -->
 <TS version="2.1" language="uk_UA">
 <context>
     <name>AboutDialog</name>
