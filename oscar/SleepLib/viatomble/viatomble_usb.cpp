@@ -15,13 +15,19 @@
 
 #include "viatomble_usb.h"
 
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX)
 #include <cerrno>
 #include <cstring>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <linux/usbdevice_fs.h>
+#elif defined(Q_OS_WIN)
+#include <windows.h>
+#include <setupapi.h>
+extern "C" {
+#include <hidsdi.h>
+}
 #endif
 
 namespace ViatomBle {
@@ -73,7 +79,7 @@ QString permissionHint()
         "then unplug the cable and plug it in again.");
 }
 
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX)
 
 bool supported()
 {
@@ -117,6 +123,62 @@ QList<Port> findPorts()
     return ports;
 }
 
+#elif defined(Q_OS_WIN)
+
+bool supported()
+{
+    return true;
+}
+
+QList<Port> findPorts()
+{
+    QList<Port> ports;
+    GUID hidGuid;
+    HidD_GetHidGuid(&hidGuid);
+    HDEVINFO set = SetupDiGetClassDevsW(&hidGuid, nullptr, nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+    if (set == INVALID_HANDLE_VALUE) {
+        return ports;
+    }
+    SP_DEVICE_INTERFACE_DATA iface;
+    iface.cbSize = sizeof(iface);
+    for (DWORD i = 0; SetupDiEnumDeviceInterfaces(set, nullptr, &hidGuid, i, &iface); i++) {
+        DWORD needed = 0;
+        SetupDiGetDeviceInterfaceDetailW(set, &iface, nullptr, 0, &needed, nullptr);
+        if (needed == 0) {
+            continue;
+        }
+        QByteArray buffer(int(needed), '\0');
+        auto *detail = reinterpret_cast<SP_DEVICE_INTERFACE_DETAIL_DATA_W *>(buffer.data());
+        detail->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_W);
+        if (!SetupDiGetDeviceInterfaceDetailW(set, &iface, detail, needed, nullptr, nullptr)) {
+            continue;
+        }
+        const QString path = QString::fromWCharArray(detail->DevicePath);
+        // No access rights are needed to read the attributes, so this works even while
+        // another program has the device open.
+        HANDLE h = CreateFileW(detail->DevicePath, 0, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                               nullptr, OPEN_EXISTING, 0, nullptr);
+        if (h == INVALID_HANDLE_VALUE) {
+            continue;
+        }
+        HIDD_ATTRIBUTES attributes;
+        attributes.Size = sizeof(attributes);
+        const bool match = HidD_GetAttributes(h, &attributes)
+                           && attributes.VendorID == VENDOR_ID && attributes.ProductID == PRODUCT_ID;
+        CloseHandle(h);
+        if (match) {
+            Port port;
+            port.path = path;
+            port.location = ports.isEmpty() ? QCoreApplication::translate(tr_context, "USB")
+                                            : QCoreApplication::translate(tr_context, "USB %1").arg(ports.size() + 1);
+            port.accessible = true;
+            ports.append(port);
+        }
+    }
+    SetupDiDestroyDeviceInfoList(set);
+    return ports;
+}
+
 #else
 
 bool supported()
@@ -135,17 +197,8 @@ QList<Port> findPorts()
 
 // ---------------------------------------------------------------------------------------
 
-#ifdef Q_OS_LINUX
-static const unsigned char EP_OUT = 0x02;
-static const unsigned char EP_IN = 0x82;
 static const unsigned int TIMEOUT_MS = 1000;
 static const unsigned int READ_POLL_MS = 100;   // how soon the reader notices close()
-
-static QString errorText(int err)
-{
-    return QString::fromLocal8Bit(strerror(err));
-}
-#endif
 
 UsbLink::UsbLink(QObject *parent)
     : Link(parent)
@@ -166,7 +219,7 @@ void UsbLink::fail(const QString &reason)
 
 void UsbLink::lose(const QString &reason)
 {
-    if (m_fd < 0) {
+    if (!m_open) {
         return;
     }
     qWarning().noquote() << "ViatomUsb: link lost:" << reason;
@@ -174,7 +227,39 @@ void UsbLink::lose(const QString &reason)
     emit linkLost(reason);
 }
 
-#ifdef Q_OS_LINUX
+void UsbLink::startReader()
+{
+    m_stop = false;
+    m_reader = QThread::create([this]() { readLoop(); });
+    m_reader->start();
+    QTimer::singleShot(0, this, [this]() {
+        if (m_open) {
+            emit ready();
+        }
+    });
+}
+
+void UsbLink::deliver(const QByteArray &report)
+{
+    const QByteArray data = Usb::fromReport(report);
+    if (!data.isEmpty()) {
+        QMetaObject::invokeMethod(this, [this, data]() {
+            if (m_open) {
+                emit dataReceived(data);
+            }
+        }, Qt::QueuedConnection);
+    }
+}
+
+#if defined(Q_OS_LINUX)
+
+static const unsigned char EP_OUT = 0x02;
+static const unsigned char EP_IN = 0x82;
+
+static QString errorText(int err)
+{
+    return QString::fromLocal8Bit(strerror(err));
+}
 
 void UsbLink::open(const QString &path)
 {
@@ -186,6 +271,7 @@ void UsbLink::open(const QString &path)
                                            : tr("Could not open %1: %2").arg(path, errorText(err)));
         return;
     }
+    m_open = true;
 
     // Take the interface from the HID driver for as long as the link is open.
     usbdevfs_ioctl detach {};
@@ -225,14 +311,7 @@ void UsbLink::open(const QString &path)
     }
 
     qDebug().noquote() << "ViatomUsb: opened" << path;
-    m_stop = false;
-    m_reader = QThread::create([this]() { readLoop(); });
-    m_reader->start();
-    QTimer::singleShot(0, this, [this]() {
-        if (m_fd >= 0) {
-            emit ready();
-        }
-    });
+    startReader();
 }
 
 void UsbLink::readLoop()
@@ -255,20 +334,13 @@ void UsbLink::readLoop()
             QMetaObject::invokeMethod(this, [this, reason]() { lose(reason); }, Qt::QueuedConnection);
             return;
         }
-        const QByteArray data = Usb::fromReport(QByteArray(buffer, n));
-        if (!data.isEmpty()) {
-            QMetaObject::invokeMethod(this, [this, data]() {
-                if (m_fd >= 0) {
-                    emit dataReceived(data);
-                }
-            }, Qt::QueuedConnection);
-        }
+        deliver(QByteArray(buffer, n));
     }
 }
 
 void UsbLink::send(const QByteArray &frame)
 {
-    if (m_fd < 0) {
+    if (!m_open) {
         return;
     }
     for (QByteArray report : Usb::toReports(frame)) {
@@ -292,6 +364,7 @@ void UsbLink::close()
         delete m_reader;
         m_reader = nullptr;
     }
+    m_open = false;
     if (m_fd < 0) {
         return;
     }
@@ -307,6 +380,147 @@ void UsbLink::close()
     ::ioctl(m_fd, USBDEVFS_IOCTL, &attach);
     ::close(m_fd);
     m_fd = -1;
+}
+
+#elif defined(Q_OS_WIN)
+
+static QString errorText(DWORD err)
+{
+    wchar_t *text = nullptr;
+    FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                   nullptr, err, 0, reinterpret_cast<wchar_t *>(&text), 0, nullptr);
+    const QString message = text ? QString::fromWCharArray(text).trimmed() : QString::number(err);
+    LocalFree(text);
+    return message;
+}
+
+void UsbLink::open(const QString &path)
+{
+    close();
+    HANDLE h = CreateFileW(reinterpret_cast<const wchar_t *>(path.utf16()), GENERIC_READ | GENERIC_WRITE,
+                           FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, nullptr);
+    if (h == INVALID_HANDLE_VALUE) {
+        const DWORD err = GetLastError();
+        fail(err == ERROR_ACCESS_DENIED || err == ERROR_SHARING_VIOLATION
+                 ? tr("The USB cable is in use by another program, such as O2 Insight Pro. Close it and try again.")
+                 : tr("Could not open the USB cable: %1").arg(errorText(err)));
+        return;
+    }
+    m_handle = h;
+    m_open = true;
+
+    // Report sizes as Windows has them, including the report ID byte (0 here).
+    PHIDP_PREPARSED_DATA preparsed = nullptr;
+    HIDP_CAPS caps {};
+    if (HidD_GetPreparsedData(h, &preparsed)) {
+        HidP_GetCaps(preparsed, &caps);
+        HidD_FreePreparsedData(preparsed);
+    }
+    m_inputSize = caps.InputReportByteLength ? caps.InputReportByteLength : Usb::REPORT_SIZE + 1;
+    m_outputSize = caps.OutputReportByteLength ? caps.OutputReportByteLength : Usb::REPORT_SIZE + 1;
+
+    // The setup report goes as a control transfer (SET_REPORT), as O2 Insight Pro sends it.
+    QByteArray setup(1, '\0');
+    setup.append(Usb::bridgeSetupReport());
+    setup.resize(qMax(setup.size(), m_outputSize));
+    if (!HidD_SetOutputReport(h, setup.data(), ULONG(m_outputSize))) {
+        fail(tr("The USB cable did not accept its setup: %1").arg(errorText(GetLastError())));
+        return;
+    }
+
+    qDebug().noquote() << "ViatomUsb: opened" << path << "input" << m_inputSize << "output" << m_outputSize;
+    startReader();
+}
+
+void UsbLink::readLoop()
+{
+    HANDLE h = m_handle;
+    OVERLAPPED ov {};
+    ov.hEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
+    QByteArray buffer(m_inputSize, '\0');
+    bool pending = false;
+    while (!m_stop) {
+        if (!pending) {
+            ResetEvent(ov.hEvent);
+            if (!ReadFile(h, buffer.data(), DWORD(buffer.size()), nullptr, &ov)
+                    && GetLastError() != ERROR_IO_PENDING) {
+                const QString reason = tr("The USB cable stopped working: %1").arg(errorText(GetLastError()));
+                QMetaObject::invokeMethod(this, [this, reason]() { lose(reason); }, Qt::QueuedConnection);
+                break;
+            }
+            pending = true;
+        }
+        if (WaitForSingleObject(ov.hEvent, READ_POLL_MS) != WAIT_OBJECT_0) {
+            continue;
+        }
+        pending = false;
+        DWORD got = 0;
+        if (!GetOverlappedResult(h, &ov, &got, FALSE)) {
+            const QString reason = tr("The USB cable stopped working: %1").arg(errorText(GetLastError()));
+            QMetaObject::invokeMethod(this, [this, reason]() { lose(reason); }, Qt::QueuedConnection);
+            break;
+        }
+        if (got > 1) {
+            deliver(buffer.mid(1, int(got) - 1));   // without the report ID
+        }
+    }
+    if (pending) {
+        CancelIoEx(h, &ov);
+        DWORD got = 0;
+        GetOverlappedResult(h, &ov, &got, TRUE);
+    }
+    CloseHandle(ov.hEvent);
+}
+
+void UsbLink::send(const QByteArray &frame)
+{
+    if (!m_open) {
+        return;
+    }
+    OVERLAPPED ov {};
+    ov.hEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
+    QString error;
+    for (const QByteArray &report : Usb::toReports(frame)) {
+        QByteArray out(1, '\0');   // report ID
+        out.append(report);
+        out.resize(qMax(out.size(), m_outputSize));
+        ResetEvent(ov.hEvent);
+        DWORD written = 0;
+        if (!WriteFile(m_handle, out.constData(), DWORD(m_outputSize), nullptr, &ov)
+                && GetLastError() != ERROR_IO_PENDING) {
+            error = errorText(GetLastError());
+            break;
+        }
+        if (WaitForSingleObject(ov.hEvent, TIMEOUT_MS) != WAIT_OBJECT_0) {
+            CancelIoEx(m_handle, &ov);
+            GetOverlappedResult(m_handle, &ov, &written, TRUE);
+            error = tr("timed out");
+            break;
+        }
+        if (!GetOverlappedResult(m_handle, &ov, &written, FALSE)) {
+            error = errorText(GetLastError());
+            break;
+        }
+    }
+    CloseHandle(ov.hEvent);
+    if (!error.isEmpty()) {
+        lose(tr("Could not send to the USB cable: %1").arg(error));
+    }
+}
+
+void UsbLink::close()
+{
+    if (m_reader) {
+        m_stop = true;
+        m_reader->wait();
+        delete m_reader;
+        m_reader = nullptr;
+    }
+    m_open = false;
+    if (m_handle) {
+        CloseHandle(m_handle);
+        m_handle = nullptr;
+    }
 }
 
 #else
@@ -326,6 +540,7 @@ void UsbLink::send(const QByteArray &)
 
 void UsbLink::close()
 {
+    m_open = false;
 }
 
 #endif

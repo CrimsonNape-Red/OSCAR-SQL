@@ -155,7 +155,7 @@ QWidget *ViatomBleImportDialog::buildWelcomePage()
         "<p>This works with Viatom/Wellue oximeters such as the O2Ring, SleepU, Checkme O2 and "
         "Wearable O2. Support for the O2Ring S family (O2Ring S, SC, SF, SP) is new and "
         "experimental: if it fails, OSCAR's debug log shows what happened.</p>"
-        "<p>A SleepU can also be read through its USB cable (on Linux, for now). Plug it in "
+        "<p>A SleepU can also be read through its USB cable (on Linux and Windows). Plug it in "
         "before searching; it is listed first. The O2Ring's cable should work the same way "
         "but has not been tested.</p>"
         "<p><b>Before you start:</b></p>"

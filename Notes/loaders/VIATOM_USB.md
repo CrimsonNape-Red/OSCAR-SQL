@@ -1,9 +1,10 @@
 # Viatom/Wellue USB cable (SleepU, O2Ring)
 
-How OSCAR reads a SleepU through its USB cable, worked out on 2026-10-30 from a USB
-capture of Wellue's O2 Insight Pro (Windows) and confirmed by downloading recordings on
-Linux. The O2Ring's cable is expected to work the same way but has not been tested. The
-O2Ring S family uses a different protocol and is not expected to work over the cable.
+How OSCAR reads a SleepU through its USB cable, on Linux and Windows, worked out on
+2026-10-30 from a USB capture of Wellue's O2 Insight Pro (Windows) and confirmed by
+downloading recordings on Linux. The O2Ring's cable is expected to work the same way but
+has not been tested. The O2Ring S family uses a different protocol and is not expected to
+work over the cable.
 
 ## The cable
 
@@ -54,8 +55,18 @@ The usbfs node is root-only by default. The Debian packages install a udev rule 
 SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="e010", MODE="0660", TAG+="uaccess"
 ```
 
+## Windows
+
+Windows needs no driver and no permission. `UsbLink` finds the cable among the HID
+devices by its USB ID (SetupAPI, `HidD_GetAttributes`) and opens it through the HID driver:
+
+- `HidD_SetOutputReport` sends an output report through the **control** endpoint, which is
+  what the setup needs. (Windows sends `SET_IDLE` itself when the device is plugged in.)
+- `WriteFile` and `ReadFile` on the HID handle carry the data reports over the interrupt
+  endpoints. Windows adds the report ID byte (0) in front: 33 bytes per report.
+- While O2 Insight Pro has the cable open, OSCAR can usually open it too, but the two
+  programs would talk over each other, so close O2 Insight Pro first.
+
 ## Other systems
 
-Not implemented yet. On Windows, `HidD_SetOutputReport` sends an output report through
-the control endpoint, which is what the setup needs, and `ReadFile`/`WriteFile` on the HID
-handle carry the data reports.
+Not implemented on macOS.

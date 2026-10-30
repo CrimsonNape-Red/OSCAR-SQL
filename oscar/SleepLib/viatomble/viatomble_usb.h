@@ -31,7 +31,9 @@ namespace ViatomBle {
  *
  *  Linux's HID driver sends output reports over the interrupt endpoint, which the bridge
  *  doesn't take as setup, so on Linux the link uses usbfs directly: it detaches the HID
- *  driver while connected and hands the interface back when closed.
+ *  driver while connected and hands the interface back when closed. On Windows,
+ *  HidD_SetOutputReport() sends the setup as a control transfer, so the link uses the
+ *  HID driver.
  */
 namespace Usb {
 
@@ -74,18 +76,28 @@ class UsbLink : public Link
     void open(const QString &path);
 
     void send(const QByteArray &frame) override;
-    bool isReady() const override { return m_fd >= 0; }
+    bool isReady() const override { return m_open; }
     void close() override;
 
   private:
     void fail(const QString &reason);
     void lose(const QString &reason);
     void readLoop();
+    void startReader();
+    //! Called from the reader thread.
+    void deliver(const QByteArray &report);
 
-    int m_fd = -1;
-    bool m_claimed = false;
+    bool m_open = false;
     QThread *m_reader = nullptr;
     std::atomic<bool> m_stop { false };
+#if defined(Q_OS_WIN)
+    void *m_handle = nullptr;      //!< HANDLE of the HID device, opened for overlapped I/O
+    int m_inputSize = 0;           //!< report ID byte + input report
+    int m_outputSize = 0;          //!< report ID byte + output report
+#else
+    int m_fd = -1;
+    bool m_claimed = false;
+#endif
 };
 
 } // namespace ViatomBle
