@@ -99,7 +99,7 @@ ViatomBleImportDialog::ViatomBleImportDialog(std::function<bool(const QString &)
     auto *panelLayout = new QVBoxLayout(panel);
     auto *icon = new QLabel(panel);
     icon->setStyleSheet("border: 0px;");
-    icon->setPixmap(QPixmap(":/icons/oximeter.png").scaled(110, 110, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    icon->setPixmap(QPixmap(":/icons/wellue.png").scaled(110, 110, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     icon->setAlignment(Qt::AlignCenter);
     panelLayout->addStretch();
     panelLayout->addWidget(icon);

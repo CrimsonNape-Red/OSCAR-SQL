@@ -1307,6 +1307,13 @@ void OximeterImport::on_oximeterType_currentIndexChanged(int index)
 {
     const int oxitype = ui->oximeterType->itemData(index).toInt();
     const bool viatom = (oxitype == OXI_VIATOM);
+    // The panel picture and the device-import icons show the chosen kind of oximeter.
+    const QString picture = viatom ? QStringLiteral(":/icons/wellue.png") : QStringLiteral(":/icons/oximeter.png");
+    ui->label_5->setPixmap(QPixmap(picture).scaled(200, 200, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    ui->directImportButton->setIcon(QIcon(picture));
+    if (m_viatomBleButton) {
+        m_viatomBleButton->setIcon(QIcon(picture));
+    }
     ui->liveImportButton->setVisible(!viatom);
     ui->directImportButton->setText(viatom
         ? tr("Import directly through the oximeter's USB cable (SleepU, O2Ring)")
