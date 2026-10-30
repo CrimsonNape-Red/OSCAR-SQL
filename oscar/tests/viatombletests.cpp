@@ -21,6 +21,7 @@
 #include "SleepLib/viatomble/viatomble_o2rings.h"
 #include "SleepLib/viatomble/viatomble_link.h"
 #include "SleepLib/viatomble/viatomble_protocol.h"
+#include "SleepLib/viatomble/viatomble_usb.h"
 
 using namespace ViatomBle;
 
@@ -102,6 +103,7 @@ class FakeDevice : public Link
     int startReplyDelay = 0;                // ms before READ_START is answered
     int loseLinkAtChunk = -1;
     bool onlyAcknowledged = false;          // ignores writes until useAcknowledgedWrites()
+    bool ignoresUsbHello = false;           // gives no answer to CMD_USB_HELLO
     bool acknowledged = false;
     int acknowledgedSwitches = 0;
     QList<QByteArray> sent;
@@ -184,6 +186,11 @@ class FakeDevice : public Link
             QTimer::singleShot(endReplyDelay, this, [this, r]() { reply(r); });
             break;
         }
+        case CMD_USB_HELLO:
+            if (!ignoresUsbHello) {
+                reply(makeReply(0, 0, QByteArray(4, '\0')));
+            }
+            break;
         case CMD_PARA_SYNC:
         {
             lastSetTime = QJsonDocument::fromJson(payload).object().value("SetTIME").toString();
@@ -612,6 +619,63 @@ void ViatomBleTests::testInfoTimeout()
 
     QCOMPARE(dev.countSent(CMD_INFO), 3);
     QVERIFY(!dl.isBusy());
+}
+
+void ViatomBleTests::testUsbReports()
+{
+    // A frame travels as reports of 32 bytes: length, up to 31 data bytes, zero padding.
+    const QByteArray info = buildRequest(CMD_INFO, 0);
+    QList<QByteArray> reports = Usb::toReports(info);
+    QCOMPARE(reports.size(), 1);
+    QCOMPARE(reports[0], QByteArray(1, char(info.size())) + info + QByteArray(32 - 1 - info.size(), '\0'));
+    QCOMPARE(Usb::fromReport(reports[0]), info);
+
+    const QByteArray big = buildRequest(CMD_READ_START, 0, QByteArray(40, 'x'));   // 48 bytes
+    reports = Usb::toReports(big);
+    QCOMPARE(reports.size(), 2);
+    QCOMPARE(int(quint8(reports[0][0])), 31);
+    QCOMPARE(int(quint8(reports[1][0])), big.size() - 31);
+    QCOMPARE(Usb::fromReport(reports[0]) + Usb::fromReport(reports[1]), big);
+    for (const QByteArray &r : reports) {
+        QCOMPARE(r.size(), Usb::REPORT_SIZE);
+    }
+
+    // A length the report can't hold is not data, e.g. the bridge's setup report.
+    QVERIFY(Usb::fromReport(Usb::bridgeSetupReport()).isEmpty());
+    QVERIFY(Usb::fromReport(QByteArray()).isEmpty());
+    QCOMPARE(Usb::bridgeSetupReport(), QByteArray::fromHex("ffc783cc30") + QByteArray(27, '\0'));
+}
+
+void ViatomBleTests::testUsbInfo_data()
+{
+    QTest::addColumn<bool>("ignoresHello");
+    QTest::newRow("hello answered") << false;
+    QTest::newRow("hello ignored") << true;
+}
+
+void ViatomBleTests::testUsbInfo()
+{
+    QFETCH(bool, ignoresHello);
+    FakeDevice dev;
+    dev.infoJson = "{\"Model\":\"1654\",\"SN\":\"20032B4004\",\"FileList\":\"20260715005945,\"}";
+    dev.ignoresUsbHello = ignoresHello;
+    Downloader dl(&dev, std::make_unique<ClassicUsbDialect>());
+    dl.setReplyTimeout(20);
+    dl.setMaxRetries(1);
+    QSignalSpy info(&dl, &Downloader::infoReceived);
+    QSignalSpy failed(&dl, &Downloader::failed);
+
+    dl.requestInfo();
+    QVERIFY(info.wait(5000));
+    QCOMPARE(failed.count(), 0);
+
+    // The hello goes first, as O2 Insight Pro sends it; info is asked for either way.
+    QCOMPARE(quint8(dev.sent.first()[1]), quint8(CMD_USB_HELLO));
+    QCOMPARE(dev.countSent(CMD_USB_HELLO), ignoresHello ? 2 : 1);
+    QCOMPARE(dev.countSent(CMD_INFO), 1);
+    const DeviceInfo got = info.first().first().value<DeviceInfo>();
+    QCOMPARE(got.serialNumber, QStringLiteral("20032B4004"));
+    QCOMPARE(got.files, QStringList({"20260715005945"}));
 }
 
 void ViatomBleTests::testSwitchesToAcknowledgedWrites()

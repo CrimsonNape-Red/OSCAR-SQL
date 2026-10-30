@@ -1,0 +1,3 @@
+# Lets the logged-in user read Viatom/Wellue oximeters (SleepU, O2Ring) through their
+# USB cable, which holds a WCH "HID To Serial" bridge. OSCAR talks to it through usbfs.
+SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="e010", MODE="0660", TAG+="uaccess"

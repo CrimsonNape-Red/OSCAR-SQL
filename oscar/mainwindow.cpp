@@ -125,6 +125,7 @@
 #include "zip.h"
 #include "speedcheck.h"
 #include "SleepLib/viatomble/viatomble_availability.h"
+#include "SleepLib/viatomble/viatomble_usb.h"
 #ifdef OSCAR_HAVE_BLUETOOTH
 #include "viatombleimportdialog.h"
 #endif
@@ -4052,9 +4053,12 @@ void MainWindow::updateViatomBleAction()
         logged = true;
         lastLogged = availability;
     }
-    ui->actionViatom_BLE_Import->setEnabled(available && p_profile != nullptr);
-    ui->actionViatom_BLE_Import->setToolTip(available
-        ? tr("Download recordings from a Viatom/Wellue oximeter over Bluetooth")
+    // Without Bluetooth, a SleepU can still be read over its USB cable.
+    const bool usable = available
+        || (availability != ViatomBle::Availability::NotBuilt && ViatomBle::Usb::supported());
+    ui->actionViatom_BLE_Import->setEnabled(usable && p_profile != nullptr);
+    ui->actionViatom_BLE_Import->setToolTip(usable
+        ? tr("Download recordings from a Viatom/Wellue oximeter over Bluetooth or USB")
         : ViatomBle::availabilityReason(availability));
 }
 

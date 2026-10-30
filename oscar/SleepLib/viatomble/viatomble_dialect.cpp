@@ -62,6 +62,31 @@ Dialect::Request ClassicDialect::endRequest()
 }
 
 // ---------------------------------------------------------------------------------------
+// Classic over USB
+
+Dialect::Request ClassicUsbDialect::infoRequest(int step)
+{
+    if (step == Hello) {
+        return Request{buildRequest(CMD_USB_HELLO, 0), -1, 0};
+    }
+    return ClassicDialect::infoRequest(step);
+}
+
+QString ClassicUsbDialect::handleInfoReply(int step, const Reply &reply, DeviceInfo &info)
+{
+    if (step == Hello) {
+        return reply.ok() ? QString() : tr("The device refused the opening request.");
+    }
+    return ClassicDialect::handleInfoReply(step, reply, info);
+}
+
+QString ClassicUsbDialect::infoTimeoutMessage(int) const
+{
+    return tr("The device did not answer over USB. Check that the cable is plugged in firmly "
+              "and that the oximeter is switched on.");
+}
+
+// ---------------------------------------------------------------------------------------
 // O2Ring S
 
 O2RingSDialect::O2RingSDialect(std::function<QDateTime()> now)

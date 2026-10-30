@@ -31,6 +31,7 @@ enum Command : quint8 {
     CMD_READ_CONTENT = 0x04,
     CMD_READ_END     = 0x05,
     CMD_INFO         = 0x14,
+    CMD_USB_HELLO    = 0x15,   // sent first over the USB cable by O2 Insight Pro; 4 zero bytes back
     CMD_PARA_SYNC    = 0x16,   // settings as JSON; used here to set the clock
 };
 

@@ -17,6 +17,7 @@
 
 #include "SleepLib/viatomble/viatomble_protocol.h"
 #include "SleepLib/viatomble/viatomble_scanner.h"
+#include "SleepLib/viatomble/viatomble_usb.h"
 
 class QCheckBox;
 class QLabel;
@@ -27,11 +28,12 @@ class QPushButton;
 class QStackedWidget;
 
 namespace ViatomBle {
-class Device;
 class Downloader;
+class Link;
 }
 
-/*! \brief Downloads recordings from a classic Viatom/Wellue oximeter over Bluetooth LE.
+/*! \brief Downloads recordings from a Viatom/Wellue oximeter over Bluetooth LE, or over
+ *  the USB cable of a SleepU (or O2Ring).
  *
  *  Steps, in the style of the oximeter import wizard: instructions, choose a device,
  *  choose files, download. Files are kept in <profile folder>/Oximetry_Data/<serial>/ and,
@@ -97,6 +99,7 @@ class ViatomBleImportDialog : public QDialog
     QPushButton *m_rescanButton = nullptr;
     QPushButton *m_connectButton = nullptr;
     QCheckBox *m_setClock = nullptr;
+    QList<ViatomBle::Usb::Port> m_usbPorts;      // listed first, then m_devices
     QList<QBluetoothDeviceInfo> m_devices;
     QList<ViatomBle::DeviceFamily> m_families;   // parallel to m_devices
 
@@ -118,7 +121,7 @@ class ViatomBleImportDialog : public QDialog
     QPushButton *m_searchAgainButton = nullptr;
 
     ViatomBle::Scanner *m_scanner = nullptr;
-    ViatomBle::Device *m_device = nullptr;
+    ViatomBle::Link *m_link = nullptr;          // a Device or a UsbLink
     ViatomBle::Downloader *m_downloader = nullptr;
     ViatomBle::DeviceInfo m_info;
     QString m_folder;

@@ -28,6 +28,7 @@
 #include "ui_oximeterimport.h"
 #include "SleepLib/calcs.h"
 #include "SleepLib/viatomble/viatomble_availability.h"
+#include "SleepLib/viatomble/viatomble_usb.h"
 #include "mainwindow.h"
 
 extern MainWindow * mainwin;
@@ -194,12 +195,15 @@ OximeterImport::OximeterImport(QWidget *parent) :
     };
     if (QBoxLayout *box = holder(ui->fileImportButton->parentWidget()->layout())) {
         auto *bleButton = m_viatomBleButton = new QPushButton(QIcon(":/icons/oximeter.png"),
-            tr("Download from a Viatom/Wellue oximeter over Bluetooth (O2Ring, O2Ring S, SleepU, Checkme O2)"), this);
+            tr("Download from a Viatom/Wellue oximeter over Bluetooth or USB (O2Ring, O2Ring S, SleepU, Checkme O2)"), this);
         bleButton->setIconSize(ui->fileImportButton->iconSize());
         bleButton->setAutoDefault(false);
         const ViatomBle::Availability availability = ViatomBle::availability();
-        bleButton->setEnabled(availability == ViatomBle::Availability::Available);
-        bleButton->setToolTip(availability == ViatomBle::Availability::Available
+        // Without Bluetooth, a SleepU can still be read over its USB cable.
+        const bool usable = availability == ViatomBle::Availability::Available
+            || (availability != ViatomBle::Availability::NotBuilt && ViatomBle::Usb::supported());
+        bleButton->setEnabled(usable);
+        bleButton->setToolTip(usable
             ? tr("Opens Viatom BLE Import, which saves the recordings and can import them as they arrive.")
             : ViatomBle::availabilityReason(availability));
         connect(bleButton, &QPushButton::clicked, this, [this]() {

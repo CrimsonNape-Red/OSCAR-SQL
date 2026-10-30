@@ -88,6 +88,23 @@ class ClassicDialect : public Dialect
     FrameSplitter m_splitter;
 };
 
+/*! SleepU and O2Ring on their USB cable: classic, but Wellue's O2 Insight Pro sends
+ *  command 0x15 before the info request. Its meaning is unknown; the device answers
+ *  with four zero bytes. If that request goes unanswered or is refused, info is
+ *  asked for anyway.
+ */
+class ClassicUsbDialect : public ClassicDialect
+{
+  public:
+    enum InfoStep { Hello, Info };
+
+    int nextInfoStep(int step) const override { return step == Hello ? Info : -1; }
+    int infoFallbackStep(int step) const override { return step == Hello ? Info : -1; }
+    Request infoRequest(int step) override;
+    QString handleInfoReply(int step, const Reply &reply, DeviceInfo &info) override;
+    QString infoTimeoutMessage(int step) const override;
+};
+
 /*! O2Ring S, SC, SF, SP, ...: replies name their command.
  *
  *  ViHealth sets up an encrypted session only for a few models (not the O2Ring S,

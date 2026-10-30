@@ -424,6 +424,7 @@ SOURCES += \
     SleepLib/viatomble/viatomble_downloader.cpp \
     SleepLib/viatomble/viatomble_o2rings.cpp \
     SleepLib/viatomble/viatomble_protocol.cpp \
+    SleepLib/viatomble/viatomble_usb.cpp \
     SleepLib/loader_plugins/weinmann_loader.cpp \
     SleepLib/loader_plugins/yuwell_loader.cpp \
     SleepLib/loader_plugins/zeo_loader.cpp \
@@ -609,6 +610,7 @@ HEADERS  += \
     SleepLib/viatomble/viatomble_link.h \
     SleepLib/viatomble/viatomble_o2rings.h \
     SleepLib/viatomble/viatomble_protocol.h \
+    SleepLib/viatomble/viatomble_usb.h \
     SleepLib/loader_plugins/yuwell_loader.h \
     SleepLib/loader_plugins/zeo_loader.h \
     SleepLib/loader_plugins/resvent_loader.h \

@@ -43,14 +43,11 @@ class Device : public Link
     //! Connects and sets up the family's service; answers with ready() or connectFailed().
     void connectToDevice(const QBluetoothDeviceInfo &info, DeviceFamily family = DeviceFamily::Classic);
     void disconnectFromDevice();
-    bool isReady() const { return m_ready; }
+    bool isReady() const override { return m_ready; }
+    void close() override { disconnectFromDevice(); }
 
     void send(const QByteArray &frame) override;
     bool useAcknowledgedWrites() override;
-
-  signals:
-    void ready();
-    void connectFailed(const QString &reason);
 
   private slots:
     void onConnected();

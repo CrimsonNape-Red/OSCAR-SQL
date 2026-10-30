@@ -15,8 +15,8 @@
 namespace ViatomBle {
 
 //! A connected channel to a device: frames go out with send(), notification
-//! chunks come back through dataReceived(). The Bluetooth implementation is
-//! ViatomBle::Device; the unit tests use a scripted fake.
+//! chunks come back through dataReceived(). The implementations are ViatomBle::Device
+//! (Bluetooth LE) and ViatomBle::UsbLink (the USB cable); the unit tests use a scripted fake.
 class Link : public QObject
 {
     Q_OBJECT
@@ -32,7 +32,15 @@ class Link : public QObject
      *  that or can't. */
     virtual bool useAcknowledgedWrites() { return false; }
 
+    //! True once ready() has been emitted and until the link is closed or lost.
+    virtual bool isReady() const { return true; }
+    //! Closes the connection; nothing is emitted afterwards.
+    virtual void close() {}
+
   signals:
+    //! The connection is open; requests can be sent.
+    void ready();
+    void connectFailed(const QString &reason);
     void dataReceived(const QByteArray &chunk);
     void linkLost(const QString &reason);
 };

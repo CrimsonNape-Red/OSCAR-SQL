@@ -27,6 +27,7 @@
 #include "SleepLib/common.h"
 #include "SleepLib/preferences.h"
 #include "SleepLib/profiles.h"
+#include "SleepLib/viatomble/viatomble_availability.h"
 #include "SleepLib/viatomble/viatomble_dialect.h"
 #include "SleepLib/viatomble/viatomble_device.h"
 #include "SleepLib/viatomble/viatomble_downloader.h"
@@ -149,10 +150,13 @@ QWidget *ViatomBleImportDialog::buildWelcomePage()
     text->setWordWrap(true);
     text->setTextFormat(Qt::RichText);
     text->setText(tr(
-        "<h3>Download recordings from your oximeter over Bluetooth</h3>"
+        "<h3>Download recordings from your oximeter over Bluetooth or USB</h3>"
         "<p>This works with Viatom/Wellue oximeters such as the O2Ring, SleepU, Checkme O2 and "
         "Wearable O2. Support for the O2Ring S family (O2Ring S, SC, SF, SP) is new and "
         "experimental: if it fails, OSCAR's debug log shows what happened.</p>"
+        "<p>A SleepU can also be read through its USB cable (on Linux, for now). Plug it in "
+        "before searching; it is listed first. The O2Ring's cable should work the same way "
+        "but has not been tested.</p>"
         "<p><b>Before you start:</b></p>"
         "<ul>"
         "<li>Close the ViHealth app on your phone, or turn the phone's Bluetooth off. "
@@ -333,13 +337,36 @@ QString ViatomBleImportDialog::deviceLabel(const QBluetoothDeviceInfo &info) con
 void ViatomBleImportDialog::startScan()
 {
     closeConnection();
+    m_usbPorts.clear();
     m_devices.clear();
     m_families.clear();
     m_deviceList->clear();
     showPage(DevicesPage);
+
+    // USB cables are found at once and listed before any Bluetooth device.
+    for (const Usb::Port &port : Usb::findPorts()) {
+        m_usbPorts.append(port);
+        auto *item = new QListWidgetItem(tr("SleepU or O2Ring on the USB cable   %1").arg(port.location), m_deviceList);
+        if (!port.accessible) {
+            item->setText(item->text() + tr("   (no permission)"));
+            item->setToolTip(Usb::permissionHint());
+        }
+    }
+    if (m_deviceList->count() > 0) {
+        m_deviceList->setCurrentRow(0);
+    }
+    updateConnectButton();
+
+    const Availability ble = availability();
+    if (ble != Availability::Available) {
+        m_status->setText(m_usbPorts.isEmpty()
+            ? tr("No oximeter on a USB cable, and Bluetooth can't be used: %1").arg(availabilityReason(ble))
+            : tr("Choose your oximeter and click Connect. (Bluetooth can't be used: %1)").arg(availabilityReason(ble)));
+        m_rescanButton->setEnabled(true);
+        return;
+    }
     m_rescanButton->setEnabled(false);
     m_status->setText(tr("Searching for Viatom devices..."));
-    updateConnectButton();
     m_scanner->start(10000);
 }
 
@@ -368,14 +395,14 @@ void ViatomBleImportDialog::onDeviceFound(const QBluetoothDeviceInfo &info, Devi
         // The family can change as more of the advertisement arrives, e.g. a late name.
         m_devices[row] = info;
         m_families[row] = family;
-        m_deviceList->item(row)->setText(text);
+        m_deviceList->item(m_usbPorts.size() + row)->setText(text);
     }
     updateConnectButton();
 }
 
 void ViatomBleImportDialog::onScanFinished()
 {
-    if (m_device) {
+    if (m_link) {
         // Stopping the scan to connect reports "finished" too, possibly after the connect
         // has started; the connection now owns the buttons and status.
         return;
@@ -384,7 +411,7 @@ void ViatomBleImportDialog::onScanFinished()
     if (m_pages->currentIndex() != DevicesPage) {
         return;
     }
-    if (m_devices.isEmpty()) {
+    if (m_devices.isEmpty() && m_usbPorts.isEmpty()) {
         m_status->setText(tr("No Viatom device found. Check that it is in standby, close to the computer, "
                              "and not connected to the phone app, then search again."));
     } else {
@@ -395,29 +422,39 @@ void ViatomBleImportDialog::onScanFinished()
 void ViatomBleImportDialog::updateConnectButton()
 {
     QListWidgetItem *item = m_deviceList->currentItem();
-    m_connectButton->setEnabled(item && (item->flags() & Qt::ItemIsEnabled) && !m_device);
+    m_connectButton->setEnabled(item && (item->flags() & Qt::ItemIsEnabled) && !m_link);
 }
 
 void ViatomBleImportDialog::connectToSelected()
 {
     const int row = m_deviceList->currentRow();
-    if (row < 0 || row >= m_devices.size() || m_device) {
+    if (row < 0 || row >= m_usbPorts.size() + m_devices.size() || m_link) {
         return;
     }
     m_scanner->stop();
-    const QBluetoothDeviceInfo info = m_devices.at(row);
-    const DeviceFamily family = m_families.at(row);
-
-    m_device = new Device(this);
-    if (family == DeviceFamily::O2RingS) {
-        m_downloader = new Downloader(m_device, std::make_unique<O2RingSDialect>(), this);
+    const bool usb = row < m_usbPorts.size();
+    UsbLink *usbLink = nullptr;
+    Device *device = nullptr;
+    QBluetoothDeviceInfo info;
+    DeviceFamily family = DeviceFamily::Classic;
+    if (usb) {
+        m_link = usbLink = new UsbLink(this);
+        // The SleepU and O2Ring use the classic protocol over the cable.
+        m_downloader = new Downloader(m_link, std::make_unique<ClassicUsbDialect>(), this);
     } else {
-        m_downloader = new Downloader(m_device, this);
+        info = m_devices.at(row - m_usbPorts.size());
+        family = m_families.at(row - m_usbPorts.size());
+        m_link = device = new Device(this);
+        if (family == DeviceFamily::O2RingS) {
+            m_downloader = new Downloader(m_link, std::make_unique<O2RingSDialect>(), this);
+        } else {
+            m_downloader = new Downloader(m_link, this);
+        }
     }
-    connect(m_device, &Device::ready, this, &ViatomBleImportDialog::onDeviceReady);
-    connect(m_device, &Device::connectFailed, this, &ViatomBleImportDialog::onConnectFailed);
-    connect(m_device, &Link::linkLost, this, [this](const QString &reason) {
-        if (!m_device || (m_downloader && m_downloader->isBusy())) {
+    connect(m_link, &Link::ready, this, &ViatomBleImportDialog::onDeviceReady);
+    connect(m_link, &Link::connectFailed, this, &ViatomBleImportDialog::onConnectFailed);
+    connect(m_link, &Link::linkLost, this, [this](const QString &reason) {
+        if (!m_link || (m_downloader && m_downloader->isBusy())) {
             return;   // during a transfer the downloader reports it
         }
         if (m_pages->currentIndex() == TransferPage) {
@@ -442,10 +479,17 @@ void ViatomBleImportDialog::connectToSelected()
 
     m_connectButton->setEnabled(false);
     m_rescanButton->setEnabled(false);
+    if (usb) {
+        const Usb::Port port = m_usbPorts.at(row);
+        m_status->setText(tr("Connecting to the USB cable..."));
+        qDebug().noquote() << "ViatomBleImport: connecting over USB to" << port.path << port.location;
+        usbLink->open(port.path);
+        return;
+    }
     m_status->setText(tr("Connecting to %1...").arg(info.name()));
     qDebug().noquote() << "ViatomBleImport: connecting to" << info.name() << deviceLabel(info)
                        << (family == DeviceFamily::O2RingS ? "as O2Ring S family" : "as classic");
-    m_device->connectToDevice(info, family);
+    device->connectToDevice(info, family);
 }
 
 void ViatomBleImportDialog::onDeviceReady()
@@ -470,11 +514,11 @@ void ViatomBleImportDialog::closeConnection()
         m_downloader->deleteLater();
         m_downloader = nullptr;
     }
-    if (m_device) {
-        m_device->disconnect(this);
-        m_device->disconnectFromDevice();
-        m_device->deleteLater();
-        m_device = nullptr;
+    if (m_link) {
+        m_link->disconnect(this);
+        m_link->close();
+        m_link->deleteLater();
+        m_link = nullptr;
     }
 }
 
@@ -484,7 +528,7 @@ QString ViatomBleImportDialog::folderFor(const DeviceInfo &info) const
     QString name = info.serialNumber;
     name.remove(QRegularExpression(QStringLiteral("[^A-Za-z0-9_-]")));
     if (name.isEmpty()) {
-        const int row = m_deviceList->currentRow();
+        const int row = m_deviceList->currentRow() - m_usbPorts.size();
         if (row >= 0 && row < m_devices.size()) {
             const QBluetoothDeviceInfo &dev = m_devices.at(row);
             name = dev.address().isNull() ? dev.deviceUuid().toString() : dev.address().toString();
@@ -683,7 +727,7 @@ void ViatomBleImportDialog::onFileFailed(const QString &name, const QString &rea
 void ViatomBleImportDialog::onDownloadFinished(bool cancelled)
 {
     m_cancelButton->setVisible(false);
-    m_moreButton->setVisible(m_device && m_device->isReady());
+    m_moreButton->setVisible(m_link && m_link->isReady());
     m_currentFile->clear();
 
     QStringList summary;
