@@ -34,7 +34,7 @@ class Downloader;
 /*! \brief Downloads recordings from a classic Viatom/Wellue oximeter over Bluetooth LE.
  *
  *  Steps, in the style of the oximeter import wizard: instructions, choose a device,
- *  choose files, download. Files are kept in <data folder>/Oximetry_Data/<serial>/ and,
+ *  choose files, download. Files are kept in <profile folder>/Oximetry_Data/<serial>/ and,
  *  if the user wants, each one is imported as soon as it has arrived.
  *  See Notes/specs/2026-10-27-viatom-ble-import-design.md.
  */

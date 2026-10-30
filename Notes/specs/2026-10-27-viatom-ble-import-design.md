@@ -130,11 +130,13 @@ arrives.
 ### Download folder
 
 ```
-<data folder>/Oximetry_Data/<device serial>/<file name as reported by the device>
+<profile folder>/Oximetry_Data/<device serial>/<file name as reported by the device>
 ```
 
-- `<data folder>` is `GetAppData()`, i.e. `OSCAR20_Data`, or the portable-mode location in a
-  portable build.
+- `<profile folder>` is the open profile's `{DataFolder}`, i.e.
+  `<data folder>/Profiles/<user>`, where `<data folder>` is `GetAppData()` (`OSCAR20_Data`
+  or whatever the user renamed or chose it to be, or the portable-mode location). The
+  recordings belong to one person, so they stay with that person's profile.
 - **Keep the device's own file names.** `ViatomLoader` takes the session start from the
   14-digit timestamp in the file name and the serial number from the parent folder name
   (`viatom_loader.cpp`, `ParseFileViatom`). Storing files this way means the existing
@@ -168,7 +170,7 @@ arrives.
 | oxytool's BlueZ write workaround | `OxyDevice::sendPacketDBus`, `acquireNotifyDBus` | Needed on Linux: Qt's BlueZ backend silently drops writes to characteristics that only allow write-without-response |
 | Viatom file parser, including the 2026-10-27 fixes | `SleepLib/loader_plugins/viatom_loader.cpp` | Imports the downloaded files unchanged |
 | Non-CPAP import from a file list | `MainWindow::importNonCPAPFiles` | Import as files arrive |
-| Data folder | `GetAppData()`, `STR_AppData` | Root for `Oximetry_Data` |
+| Profile folder | `p_profile->Get("{DataFolder}")` | Root for `Oximetry_Data` |
 | Data menu | `mainwindow.ui`, `menu_Data` | New action next to `actionImport_Viatom_Data` |
 | Qt Bluetooth 6 | installed on the Linux build machine (6.4.2) | Scanning, GATT |
 

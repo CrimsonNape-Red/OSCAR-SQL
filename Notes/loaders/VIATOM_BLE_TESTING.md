@@ -78,7 +78,7 @@ Whatever happens, even if it fails at the first step, please send:
 3. **Your ring's details:** model and firmware version (shown in ViHealth under the
    device's settings).
 4. **If a download worked:** the downloaded file(s) from
-   `OSCAR20_Data/Oximetry_Data/<serial>/` and, if you can, the same night's file
+   `OSCAR20_Data/Profiles/<your profile>/Oximetry_Data/<serial>/` and, if you can, the same night's file
    exported from ViHealth. Comparing the two is the best check.
 
 ## Known limits

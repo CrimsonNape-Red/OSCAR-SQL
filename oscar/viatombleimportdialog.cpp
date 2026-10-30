@@ -43,6 +43,13 @@ static bool profileFlag(const QString &key)
 }
 static const QString OXIMETRY_DATA_FOLDER = QStringLiteral("Oximetry_Data");
 
+//! <profile folder>/Oximetry_Data: each user's recordings stay with their own profile.
+static QString oximetryDataFolder()
+{
+    const QString base = p_profile ? p_profile->Get("{" + STR_GEN_DataFolder + "}") : GetAppData();
+    return QDir(base).filePath(OXIMETRY_DATA_FOLDER);
+}
+
 //! A device file name with its recording start in front, e.g. "Sat Oct 25 2026 22:00  (20261025220000.vld)".
 static QString describeFile(const QString &name)
 {
@@ -158,7 +165,7 @@ QWidget *ViatomBleImportDialog::buildWelcomePage()
         "</ul>"
         "<p>Downloaded files are kept in <i>%1</i> and can also be imported later with "
         "<i>Data → Import Viatom/Wellue Data</i>.</p>")
-        .arg(QDir::toNativeSeparators(QDir(GetAppData()).filePath(OXIMETRY_DATA_FOLDER))));
+        .arg(QDir::toNativeSeparators(oximetryDataFolder())));
 
     auto *search = new QPushButton(tr("Search for devices"), page);
     connect(search, &QPushButton::clicked, this, &ViatomBleImportDialog::startScan);
@@ -487,7 +494,7 @@ QString ViatomBleImportDialog::folderFor(const DeviceInfo &info) const
     if (name.isEmpty()) {
         name = QStringLiteral("Unknown");
     }
-    return QDir(GetAppData()).filePath(OXIMETRY_DATA_FOLDER + QLatin1Char('/') + name);
+    return QDir(oximetryDataFolder()).filePath(name);
 }
 
 void ViatomBleImportDialog::onInfoReceived(const DeviceInfo &info)
