@@ -589,7 +589,7 @@ class OxiSettings : public PrefSettings
         initPref(STR_OS_EnableOximetry, false);
         initPref(STR_OS_DefaultDevice, QString());
         initPref(STR_OS_SyncOximeterClock, true);
-        initPref(STR_OS_OximeterType, 0);
+        initPref(STR_OS_OximeterType, 3); // Viatom/Wellue, see OximeterTypeId in oximeterimport.cpp
         initPref(STR_OS_SkipOxiIntroScreen, false);
 
         // Initialize Changeable via GUI parameters with default values

@@ -2040,8 +2040,10 @@ void MainWindow::on_oximetryButton_clicked()
         PopulatePurgeMenu();
         if (overview) overview->ReloadGraphs();
         if (welcome) welcome->refreshPage();
-        if (oxiimp.viatomBleImportRequested()) {
+        if (oxiimp.viatomRequest() == OximeterImport::ViatomBleImport) {
             on_actionViatom_BLE_Import_triggered();
+        } else if (oxiimp.viatomRequest() == OximeterImport::ViatomFileImport) {
+            on_actionImport_Viatom_Data_triggered();
         }
     }
 }

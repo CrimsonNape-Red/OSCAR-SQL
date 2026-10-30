@@ -599,12 +599,12 @@ background: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 white, stop:1 #cccccc)
              </property>
              <item>
               <property name="text">
-               <string notr="true">CMS50D+/E/F, Pulox PO-200/300</string>
+               <string notr="true">CMS50Fv3.7+/H/I, CMS50D+v4.6, Pulox PO-400/500</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string notr="true">CMS50Fv3.7+/H/I, CMS50D+v4.6, Pulox PO-400/500</string>
+               <string notr="true">CMS50D+/E/F, Pulox PO-200/300</string>
               </property>
              </item>
              <item>

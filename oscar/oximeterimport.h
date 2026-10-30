@@ -33,9 +33,10 @@ public:
     explicit OximeterImport(QWidget *parent = 0);
     ~OximeterImport();
 
-    //! True if the user chose to download from a Viatom oximeter over Bluetooth; the
-    //! caller then opens the Viatom BLE Import dialog.
-    bool viatomBleImportRequested() const { return m_viatomBleImportRequested; }
+    //! What the user chose for a Viatom/Wellue oximeter. The wizard closes and the
+    //! caller runs it: the Viatom file import or the Viatom BLE Import dialog.
+    enum ViatomRequest { NoViatomRequest, ViatomFileImport, ViatomBleImport };
+    ViatomRequest viatomRequest() const { return m_viatomRequest; }
 
 
 private slots:
@@ -106,7 +107,10 @@ protected:
 
 private:
     Ui::OximeterImport *ui;
-    bool m_viatomBleImportRequested = false;
+    ViatomRequest m_viatomRequest = NoViatomRequest;
+    QPushButton *m_viatomBleButton = nullptr;
+    QString m_fileImportText;
+    QString m_fileImportToolTip;
     SerialOximeter * oximodule;
     gGraphView * liveView;
     gGraph * plethyGraph;

@@ -18,6 +18,7 @@
 #include <QStandardPaths>
 #include <QDesktopServices>
 #include <QElapsedTimer>
+#include <QSignalBlocker>
 
 #include "Graphs/gYAxis.h"
 #include "Graphs/gXAxis.h"
@@ -37,6 +38,11 @@ extern MainWindow * mainwin;
 
 Qt::DayOfWeek firstDayOfWeekFromLocale();
 QList<SerialOximeter *> GetOxiLoaders();
+
+// The oximeter types, as stored in the profile (STR_OS_OximeterType) and kept as item
+// data in the oximeterType box. The CMS50 loaders check the stored value, so these
+// never change, whatever order the box lists them in.
+enum OximeterTypeId { OXI_CMS50F37 = 0, OXI_CMS50 = 1, OXI_MD300W1 = 2, OXI_VIATOM = 3 };
 
 OximeterImport::OximeterImport(QWidget *parent) :
     QDialog(parent),
@@ -157,14 +163,21 @@ OximeterImport::OximeterImport(QWidget *parent) :
     setInformation();
 
     ui->cms50DeviceName->setText(p_profile->oxi->defaultDevice());
-    int oxitype = p_profile->oxi->oximeterType();
-    ui->oximeterType->setCurrentIndex(oxitype);
-    on_oximeterType_currentIndexChanged(oxitype);
+    m_fileImportText = ui->fileImportButton->text();
+    m_fileImportToolTip = ui->fileImportButton->toolTip();
+    // The serial oximeters keep their stored type values; Viatom/Wellue goes first.
+    {
+        const QSignalBlocker blocker(ui->oximeterType);
+        for (int i = 0; i < ui->oximeterType->count(); i++) {
+            ui->oximeterType->setItemData(i, i);
+        }
+        ui->oximeterType->insertItem(0, tr("Viatom/Wellue: O2Ring, O2Ring S, SleepU, Checkme O2"), OXI_VIATOM);
+    }
     ui->cms50DeviceName->setEnabled(false);
     ui->cms50SyncTime->setChecked(p_profile->oxi->syncOximeterClock());
 
     // Viatom/Wellue oximeters download over Bluetooth in their own dialog; this button
-    // closes the wizard and asks MainWindow to open it.
+    // closes the wizard and asks MainWindow to open it. It shows only for Viatom/Wellue.
     std::function<QBoxLayout *(QLayout *)> holder = [&holder, this](QLayout *layout) -> QBoxLayout * {
         if (!layout) {
             return nullptr;
@@ -180,7 +193,7 @@ OximeterImport::OximeterImport(QWidget *parent) :
         return nullptr;
     };
     if (QBoxLayout *box = holder(ui->fileImportButton->parentWidget()->layout())) {
-        auto *bleButton = new QPushButton(QIcon(":/icons/oximeter.png"),
+        auto *bleButton = m_viatomBleButton = new QPushButton(QIcon(":/icons/oximeter.png"),
             tr("Download from a Viatom/Wellue oximeter over Bluetooth (O2Ring, O2Ring S, SleepU, Checkme O2)"), this);
         bleButton->setIconSize(ui->fileImportButton->iconSize());
         bleButton->setAutoDefault(false);
@@ -190,11 +203,19 @@ OximeterImport::OximeterImport(QWidget *parent) :
             ? tr("Opens Viatom BLE Import, which saves the recordings and can import them as they arrive.")
             : ViatomBle::availabilityReason(availability));
         connect(bleButton, &QPushButton::clicked, this, [this]() {
-            m_viatomBleImportRequested = true;
+            m_viatomRequest = ViatomBleImport;
             accept();
         });
         box->insertWidget(box->indexOf(ui->fileImportButton) + 1, bleButton);
     }
+
+    // The last oximeter chosen; Viatom/Wellue for a new profile.
+    int oxiIndex = ui->oximeterType->findData(p_profile->oxi->oximeterType());
+    if (oxiIndex < 0) {
+        oxiIndex = ui->oximeterType->findData(OXI_VIATOM);
+    }
+    ui->oximeterType->setCurrentIndex(oxiIndex);
+    on_oximeterType_currentIndexChanged(ui->oximeterType->currentIndex());
 }
 
 OximeterImport::~OximeterImport()
@@ -255,13 +276,14 @@ SerialOximeter * OximeterImport::detectOximeter()
 
     QList<SerialOximeter *> loaders; // GetOxiLoaders();
 
-    if (ui->oximeterType->currentIndex() == 0) { // CMS50F3.7
+    const int oxitype = ui->oximeterType->currentData().toInt();
+    if (oxitype == OXI_CMS50F37) {
         SerialOximeter * oxi = qobject_cast<SerialOximeter*>(lookupLoader(cms50f37_class_name));
         loaders.push_back(oxi);
-    } else if (ui->oximeterType->currentIndex() == 1) { // CMS50D+/E/F
+    } else if (oxitype == OXI_CMS50) { // CMS50D+/E/F
         SerialOximeter * oxi = qobject_cast<SerialOximeter*>(lookupLoader(cms50_class_name));
         loaders.push_back(oxi);
-    } else if (ui->oximeterType->currentIndex() == 2) { // ChoiceMed
+    } else if (oxitype == OXI_MD300W1) { // ChoiceMed
         SerialOximeter * oxi = qobject_cast<SerialOximeter*>(lookupLoader(md300w1_class_name));
         loaders.push_back(oxi);
     } else return nullptr;
@@ -481,6 +503,13 @@ void OximeterImport::doUpdateProgress(int v, int t)
 
 void OximeterImport::on_fileImportButton_clicked()
 {
+    // Viatom files are read by the Viatom loader, which MainWindow runs once the wizard closes.
+    if (ui->oximeterType->currentData().toInt() == OXI_VIATOM) {
+        m_viatomRequest = ViatomFileImport;
+        accept();
+        return;
+    }
+
     QString documentsFolder = (*p_profile)[STR_PREF_LastOximetryPath].toString();
     if (documentsFolder.isEmpty())
         documentsFolder = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
@@ -1245,15 +1274,34 @@ void OximeterImport::setInformation()
 
 void OximeterImport::on_oximeterType_currentIndexChanged(int index)
 {
-    switch (index) {
-    case 0: // New CMS50's version 7 protocol
+    const int oxitype = ui->oximeterType->itemData(index).toInt();
+    const bool viatom = (oxitype == OXI_VIATOM);
+    ui->directImportButton->setVisible(!viatom);
+    ui->liveImportButton->setVisible(!viatom);
+    if (m_viatomBleButton) {
+        m_viatomBleButton->setVisible(viatom);
+    }
+    ui->fileImportButton->setText(viatom
+        ? tr("Import from data files copied from the oximeter or exported from the ViHealth app")
+        : m_fileImportText);
+    ui->fileImportButton->setToolTip(viatom
+        ? tr("Choose the folder or files holding the recordings, as Data → Import Viatom/Wellue Data does.")
+        : m_fileImportToolTip);
+
+    switch (oxitype) {
+    case OXI_VIATOM:
+        ui->fileImportButton->setEnabled(true);
+        ui->oldCMS50specific->setVisible(false);
+        ui->newCMS50settingsPanel->setVisible(false);
+        break;
+    case OXI_CMS50F37: // New CMS50's version 7 protocol
         ui->directImportButton->setEnabled(true);
         ui->liveImportButton->setEnabled(false);
         ui->fileImportButton->setEnabled(true);
         ui->oldCMS50specific->setVisible(false);
         ui->newCMS50settingsPanel->setVisible(true);
         break;
-    case 1: // Old CMS50's
+    case OXI_CMS50: // Old CMS50's
         ui->directImportButton->setEnabled(true);
         ui->liveImportButton->setEnabled(true);
         ui->fileImportButton->setEnabled(true);
@@ -1267,7 +1315,7 @@ void OximeterImport::on_oximeterType_currentIndexChanged(int index)
         ui->oldCMS50specific->setVisible(false);
         ui->newCMS50settingsPanel->setVisible(false);
     }
-    p_profile->oxi->setOximeterType(index);
+    p_profile->oxi->setOximeterType(oxitype);
 
 }
 
