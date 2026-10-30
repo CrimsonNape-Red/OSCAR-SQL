@@ -34,9 +34,14 @@ public:
     ~OximeterImport();
 
     //! What the user chose for a Viatom/Wellue oximeter. The wizard closes and the
-    //! caller runs it: the Viatom file import or the Viatom BLE Import dialog.
-    enum ViatomRequest { NoViatomRequest, ViatomFileImport, ViatomBleImport };
+    //! caller runs it: the Viatom file import, or the Viatom BLE Import dialog started
+    //! on Bluetooth or on the USB cable.
+    enum ViatomRequest { NoViatomRequest, ViatomFileImport, ViatomBleImport, ViatomUsbImport };
     ViatomRequest viatomRequest() const { return m_viatomRequest; }
+
+    //! Selects Viatom/Wellue and goes straight to the import choices, skipping the
+    //! welcome page (for Data → Import Viatom/Wellue Data).
+    void showViatomImport();
 
 
 private slots:
@@ -111,6 +116,8 @@ private:
     QPushButton *m_viatomBleButton = nullptr;
     QString m_fileImportText;
     QString m_fileImportToolTip;
+    QString m_directImportText;
+    QString m_directImportToolTip;
     SerialOximeter * oximodule;
     gGraphView * liveView;
     gGraph * plethyGraph;

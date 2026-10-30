@@ -124,8 +124,6 @@
 #include "statistics.h"
 #include "zip.h"
 #include "speedcheck.h"
-#include "SleepLib/viatomble/viatomble_availability.h"
-#include "SleepLib/viatomble/viatomble_usb.h"
 #ifdef OSCAR_HAVE_BLUETOOTH
 #include "viatombleimportdialog.h"
 #endif
@@ -143,10 +141,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // Viatom BLE Import is greyed out, with the reason in its tooltip, when Bluetooth
-    // can't be used; checked each time the Data menu opens.
-    ui->menu_Data->setToolTipsVisible(true);
-    connect(ui->menu_Data, &QMenu::aboutToShow, this, &MainWindow::updateViatomBleAction);
 
     {
         QAction *searchIcon = ui->filterBookmarks->addAction(
@@ -2035,16 +2029,25 @@ QDateTime datetimeDialog(QDateTime datetime, QString message);
 
 void MainWindow::on_oximetryButton_clicked()
 {
+    runOximetryWizard(false);
+}
+
+void MainWindow::runOximetryWizard(bool viatom)
+{
     if (p_profile) {
         OximeterImport oxiimp(this);
+        if (viatom) {
+            oxiimp.showViatomImport();
+        }
         oxiimp.exec();
         PopulatePurgeMenu();
         if (overview) overview->ReloadGraphs();
         if (welcome) welcome->refreshPage();
-        if (oxiimp.viatomRequest() == OximeterImport::ViatomBleImport) {
-            on_actionViatom_BLE_Import_triggered();
+        if (oxiimp.viatomRequest() == OximeterImport::ViatomBleImport
+                || oxiimp.viatomRequest() == OximeterImport::ViatomUsbImport) {
+            openViatomImportDialog(oxiimp.viatomRequest() == OximeterImport::ViatomUsbImport);
         } else if (oxiimp.viatomRequest() == OximeterImport::ViatomFileImport) {
-            on_actionImport_Viatom_Data_triggered();
+            importViatomFiles();
         }
     }
 }
@@ -4037,34 +4040,21 @@ void MainWindow::on_actionImport_Somnopose_Data_triggered()
 
 void MainWindow::on_actionImport_Viatom_Data_triggered()
 {
+    // The wizard offers every way in: data files, and Bluetooth or USB download.
+    runOximetryWizard(true);
+}
+
+void MainWindow::importViatomFiles()
+{
     ViatomLoader viatom;
     importNonCPAP(viatom);
 }
 
-void MainWindow::updateViatomBleAction()
+void MainWindow::openViatomImportDialog(bool usb)
 {
-    const ViatomBle::Availability availability = ViatomBle::availability();
-    const bool available = (availability == ViatomBle::Availability::Available);
-    static bool logged = false;
-    static ViatomBle::Availability lastLogged;
-    if (!logged || availability != lastLogged) {
-        qDebug() << "ViatomBle availability:"
-                 << (available ? QStringLiteral("available") : ViatomBle::availabilityReason(availability));
-        logged = true;
-        lastLogged = availability;
-    }
-    // Without Bluetooth, a SleepU can still be read over its USB cable.
-    const bool usable = available
-        || (availability != ViatomBle::Availability::NotBuilt && ViatomBle::Usb::supported());
-    ui->actionViatom_BLE_Import->setEnabled(usable && p_profile != nullptr);
-    ui->actionViatom_BLE_Import->setToolTip(usable
-        ? tr("Download recordings from a Viatom/Wellue oximeter over Bluetooth or USB")
-        : ViatomBle::availabilityReason(availability));
-}
-
-void MainWindow::on_actionViatom_BLE_Import_triggered()
-{
-#ifdef OSCAR_HAVE_BLUETOOTH
+#ifndef OSCAR_HAVE_BLUETOOTH
+    Q_UNUSED(usb);
+#else
     if (p_profile == nullptr) {
         QMessageBox::warning(this, tr("Import"), tr("Please open or create a profile before importing data."));
         return;
@@ -4073,6 +4063,9 @@ void MainWindow::on_actionViatom_BLE_Import_triggered()
         ViatomLoader viatom;
         return importNonCPAPFiles(viatom, QStringList(path), true, false);
     }, this);
+    if (usb) {
+        dialog.startWithUsb();
+    }
     dialog.exec();
 
     if (dialog.importedAny()) {

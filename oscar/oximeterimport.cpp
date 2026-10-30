@@ -166,6 +166,8 @@ OximeterImport::OximeterImport(QWidget *parent) :
     ui->cms50DeviceName->setText(p_profile->oxi->defaultDevice());
     m_fileImportText = ui->fileImportButton->text();
     m_fileImportToolTip = ui->fileImportButton->toolTip();
+    m_directImportText = ui->directImportButton->text();
+    m_directImportToolTip = ui->directImportButton->toolTip();
     // The serial oximeters keep their stored type values; Viatom/Wellue goes first.
     {
         const QSignalBlocker blocker(ui->oximeterType);
@@ -195,13 +197,11 @@ OximeterImport::OximeterImport(QWidget *parent) :
     };
     if (QBoxLayout *box = holder(ui->fileImportButton->parentWidget()->layout())) {
         auto *bleButton = m_viatomBleButton = new QPushButton(QIcon(":/icons/oximeter.png"),
-            tr("Download from a Viatom/Wellue oximeter over Bluetooth or USB (O2Ring, O2Ring S, SleepU, Checkme O2)"), this);
+            tr("Download from the oximeter over Bluetooth (O2Ring, O2Ring S, SleepU, Checkme O2)"), this);
         bleButton->setIconSize(ui->fileImportButton->iconSize());
         bleButton->setAutoDefault(false);
         const ViatomBle::Availability availability = ViatomBle::availability();
-        // Without Bluetooth, a SleepU can still be read over its USB cable.
-        const bool usable = availability == ViatomBle::Availability::Available
-            || (availability != ViatomBle::Availability::NotBuilt && ViatomBle::Usb::supported());
+        const bool usable = availability == ViatomBle::Availability::Available;
         bleButton->setEnabled(usable);
         bleButton->setToolTip(usable
             ? tr("Opens Viatom BLE Import, which saves the recordings and can import them as they arrive.")
@@ -220,6 +220,14 @@ OximeterImport::OximeterImport(QWidget *parent) :
     }
     ui->oximeterType->setCurrentIndex(oxiIndex);
     on_oximeterType_currentIndexChanged(ui->oximeterType->currentIndex());
+}
+
+void OximeterImport::showViatomImport()
+{
+    ui->oximeterType->setCurrentIndex(ui->oximeterType->findData(OXI_VIATOM));
+    ui->stackedWidget->setCurrentWidget(ui->importSelectionPage);
+    ui->nextButton->setVisible(false);
+    ui->informationButton->setVisible(true);
 }
 
 OximeterImport::~OximeterImport()
@@ -342,6 +350,13 @@ SerialOximeter * OximeterImport::detectOximeter()
 
 void OximeterImport::on_directImportButton_clicked()
 {
+    // Viatom/Wellue: the import dialog reads the oximeter through its USB cable once the wizard closes.
+    if (ui->oximeterType->currentData().toInt() == OXI_VIATOM) {
+        m_viatomRequest = ViatomUsbImport;
+        accept();
+        return;
+    }
+
     ui->informationButton->setVisible(false);
     ui->stackedWidget->setCurrentWidget(ui->directImportPage);
 
@@ -1254,7 +1269,16 @@ void OximeterImport::setInformation()
     "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
             +tr("OSCAR gives you the ability to track Oximetry data alongside CPAP session data, which can give valuable insight into the effectiveness of CPAP treatment. It will also work standalone with your Pulse Oximeter, allowing you to store, track and review your recorded data.")+"</p>"
     "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
-            +tr("OSCAR is currently compatible with Contec CMS50D+, CMS50E, CMS50F and CMS50I serial oximeters.<br/>(Note: Direct importing from bluetooth models is <span style=\" font-weight:600;\">probably not</span> possible yet)")+"</p>"
+            "<span style=\" font-weight:600;\">"+tr("Viatom/Wellue")+" </span>"
+            +tr("(O2Ring, SleepU, Checkme O2, Wearable O2 and similar): OSCAR downloads the recordings over Bluetooth, "
+                "or imports data files copied from the oximeter or exported from the ViHealth app. "
+                "A SleepU can also be read through its USB cable (on Linux, for now); the O2Ring's cable should work "
+                "the same way but has not been tested. Support for the O2Ring S family (O2Ring S, SC, SF, SP) is new "
+                "and experimental. OSCAR can set the oximeter's clock each time it connects.")+"</p>"
+    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
+            "<span style=\" font-weight:600;\">"+tr("Contec CMS50")+" </span>"
+            +tr("(CMS50D+, CMS50E, CMS50F, CMS50I): OSCAR imports recordings directly through the serial USB cable, "
+                "and older models can also record live while attached to the computer overnight.")+"</p>"
     "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
         +tr("You may wish to note, other companies, such as Pulox, simply rebadge Contec CMS50's under new names, such as the Pulox PO-200, PO-300, PO-400. These should also work.")+"</p>"
 
@@ -1268,6 +1292,9 @@ void OximeterImport::setInformation()
             "<span style=\" font-weight:600;\">"+tr("Important Notes:")+" </span>"
             +tr("For OSCAR to be able to locate and read directly from your Oximeter device, you need to ensure the correct device drivers (eg. USB to Serial UART) have been installed on your computer. For more information about this, %1click here%2.").arg("<a href=\"https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers\"><span style=\" text-decoration: underline; color:#0000ff;\">").arg("</span></a>")+"</p>"
     "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
+            +tr("That driver is for the Contec CMS50 cable. A Viatom/Wellue USB cable needs no driver; on Linux, "
+                "OSCAR's package gives OSCAR permission to use it.")+"</p>"
+    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
             +tr("Contec CMS50D+ devices do not have an internal clock, and do not record a starting time. If you do not have a CPAP session to link a recording to, you will have to enter the start time manually after the import process is completed.")+"</p>"
     "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
             +tr("Even for devices with an internal clock, it is still recommended to get into the habit of starting oximeter records at the same time as CPAP sessions, because CPAP internal clocks tend to drift over time, and not all can be reset easily.")+"</p></body></html>";
@@ -1280,8 +1307,14 @@ void OximeterImport::on_oximeterType_currentIndexChanged(int index)
 {
     const int oxitype = ui->oximeterType->itemData(index).toInt();
     const bool viatom = (oxitype == OXI_VIATOM);
-    ui->directImportButton->setVisible(!viatom);
     ui->liveImportButton->setVisible(!viatom);
+    ui->directImportButton->setText(viatom
+        ? tr("Import directly through the oximeter's USB cable (SleepU, O2Ring)")
+        : m_directImportText);
+    ui->directImportButton->setToolTip(viatom
+        ? tr("Reads the recordings through the cable that came with the oximeter. "
+             "The O2Ring's cable has not been tested yet.")
+        : m_directImportToolTip);
     if (m_viatomBleButton) {
         m_viatomBleButton->setVisible(viatom);
     }
@@ -1289,15 +1322,23 @@ void OximeterImport::on_oximeterType_currentIndexChanged(int index)
         ? tr("Import from data files copied from the oximeter or exported from the ViHealth app")
         : m_fileImportText);
     ui->fileImportButton->setToolTip(viatom
-        ? tr("Choose the folder or files holding the recordings, as Data → Import Viatom/Wellue Data does.")
+        ? tr("Choose the folder or files holding the recordings.")
         : m_fileImportToolTip);
 
     switch (oxitype) {
-    case OXI_VIATOM:
+    case OXI_VIATOM: {
+        // The cable is read by the Viatom BLE Import dialog, which needs a Bluetooth build.
+        const bool usb = ViatomBle::Usb::supported()
+                         && ViatomBle::availability() != ViatomBle::Availability::NotBuilt;
+        ui->directImportButton->setEnabled(usb);
+        if (!usb) {
+            ui->directImportButton->setToolTip(tr("This version of OSCAR can't read the oximeter's USB cable."));
+        }
         ui->fileImportButton->setEnabled(true);
         ui->oldCMS50specific->setVisible(false);
         ui->newCMS50settingsPanel->setVisible(false);
         break;
+    }
     case OXI_CMS50F37: // New CMS50's version 7 protocol
         ui->directImportButton->setEnabled(true);
         ui->liveImportButton->setEnabled(false);

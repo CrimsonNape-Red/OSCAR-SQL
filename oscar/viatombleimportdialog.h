@@ -52,6 +52,11 @@ class ViatomBleImportDialog : public QDialog
     //! True if at least one file was imported, so the caller should refresh its views.
     bool importedAny() const { return m_importedCount > 0; }
 
+    /*! Starts on the USB cable instead of the welcome page, without searching for
+     *  Bluetooth devices; connects at once if exactly one usable cable is plugged in.
+     *  Call before exec(). */
+    void startWithUsb();
+
   public slots:
     void reject() override;
 
@@ -81,6 +86,8 @@ class ViatomBleImportDialog : public QDialog
     QWidget *buildFilesPage();
     QWidget *buildTransferPage();
     void showPage(Page page);
+    //! Clears the device list and lists the USB cables plugged in now.
+    void listUsbPorts();
     void showFiles();
     void log(const QString &text);
     void updateConnectButton();

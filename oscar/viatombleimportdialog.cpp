@@ -21,6 +21,7 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QStackedWidget>
+#include <QTimer>
 #include <QVBoxLayout>
 
 #include "viatombleimportdialog.h"
@@ -337,25 +338,9 @@ QString ViatomBleImportDialog::deviceLabel(const QBluetoothDeviceInfo &info) con
 void ViatomBleImportDialog::startScan()
 {
     closeConnection();
-    m_usbPorts.clear();
-    m_devices.clear();
-    m_families.clear();
-    m_deviceList->clear();
     showPage(DevicesPage);
-
     // USB cables are found at once and listed before any Bluetooth device.
-    for (const Usb::Port &port : Usb::findPorts()) {
-        m_usbPorts.append(port);
-        auto *item = new QListWidgetItem(tr("SleepU or O2Ring on the USB cable   %1").arg(port.location), m_deviceList);
-        if (!port.accessible) {
-            item->setText(item->text() + tr("   (no permission)"));
-            item->setToolTip(Usb::permissionHint());
-        }
-    }
-    if (m_deviceList->count() > 0) {
-        m_deviceList->setCurrentRow(0);
-    }
-    updateConnectButton();
+    listUsbPorts();
 
     const Availability ble = availability();
     if (ble != Availability::Available) {
@@ -368,6 +353,45 @@ void ViatomBleImportDialog::startScan()
     m_rescanButton->setEnabled(false);
     m_status->setText(tr("Searching for Viatom devices..."));
     m_scanner->start(10000);
+}
+
+void ViatomBleImportDialog::listUsbPorts()
+{
+    m_usbPorts.clear();
+    m_devices.clear();
+    m_families.clear();
+    m_deviceList->clear();
+    for (const Usb::Port &port : Usb::findPorts()) {
+        m_usbPorts.append(port);
+        auto *item = new QListWidgetItem(tr("SleepU or O2Ring on the USB cable   %1").arg(port.location), m_deviceList);
+        if (!port.accessible) {
+            item->setText(item->text() + tr("   (no permission)"));
+            item->setToolTip(Usb::permissionHint());
+        }
+    }
+    if (m_deviceList->count() > 0) {
+        m_deviceList->setCurrentRow(0);
+    }
+    updateConnectButton();
+}
+
+void ViatomBleImportDialog::startWithUsb()
+{
+    closeConnection();
+    showPage(DevicesPage);
+    listUsbPorts();
+    m_rescanButton->setEnabled(true);   // "Search again" also searches for Bluetooth devices
+    if (m_usbPorts.isEmpty()) {
+        m_status->setText(tr("No oximeter found on a USB cable. Plug in the cable and click Search again."));
+        return;
+    }
+    if (m_usbPorts.size() == 1 && m_usbPorts.first().accessible) {
+        // Once the dialog is showing, so the connection's messages appear in it.
+        QTimer::singleShot(0, this, &ViatomBleImportDialog::connectToSelected);
+        return;
+    }
+    m_status->setText(m_usbPorts.size() == 1 ? Usb::permissionHint()
+                                             : tr("Choose your oximeter and click Connect."));
 }
 
 void ViatomBleImportDialog::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFamily family)

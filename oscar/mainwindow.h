@@ -383,9 +383,8 @@ class MainWindow : public QMainWindow
 
     void on_actionImport_Somnopose_Data_triggered();
 
+    //! Opens the Oximetry Wizard on its import choices, with Viatom/Wellue selected.
     void on_actionImport_Viatom_Data_triggered();
-    void on_actionViatom_BLE_Import_triggered();
-    void updateViatomBleAction();
 
     //! \brief Populates the statistics with information.
     void on_statisticsButton_clicked();
@@ -488,6 +487,12 @@ private:
     void importCPAPDataCards(const QList<ImportPath> & datacards);
     void addMachineToMenu(Machine* mach, QMenu* menu);
     void purgeDay(MachineType type);
+    //! \brief Runs the Oximetry Wizard; viatom opens it on the import choices for Viatom/Wellue.
+    void runOximetryWizard(bool viatom);
+    //! \brief Imports Viatom/Wellue files chosen by the user (the wizard's file choice).
+    void importViatomFiles();
+    //! \brief Opens Viatom BLE Import (the wizard's choice); usb starts it on the USB cable.
+    void openViatomImportDialog(bool usb);
     //! \brief Import non-CPAP files. Returns false if the import failed, was aborted or cancelled.
     bool importNonCPAP(MachineLoader &loader, const QString &folderPrefKey = STR_PREF_LastOximetryPath);
 

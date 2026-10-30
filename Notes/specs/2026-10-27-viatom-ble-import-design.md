@@ -1,6 +1,10 @@
 # Viatom BLE Import: design
 
 **Date:** 2026-10-27
+**Update 2026-10-30:** the separate **Data → Viatom BLE Import…** item described below has
+been removed. **Data → Import Viatom/Wellue Data** now opens the Oximetry Wizard on its
+import choices with Viatom/Wellue selected, and the wizard offers data files or the
+Bluetooth/USB download, which opens this dialog.
 **Status:** draft, not implemented. Development happens in `~/QtProjects/2.2-Dev/OSCAR-code`,
 branch `vihealth-dev`.
 **Background:**
