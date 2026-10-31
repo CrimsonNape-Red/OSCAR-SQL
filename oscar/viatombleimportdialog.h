@@ -26,6 +26,7 @@ class QPlainTextEdit;
 class QProgressBar;
 class QPushButton;
 class QStackedWidget;
+class QTimer;
 
 namespace ViatomBle {
 class Downloader;
@@ -33,7 +34,7 @@ class Link;
 }
 
 /*! \brief Downloads recordings from a Viatom/Wellue oximeter over Bluetooth LE, or over
- *  the USB cable of a SleepU (or O2Ring).
+ *  its USB cable (SleepU, O2Ring S; the O2Ring's is untested). Titled "Viatom/Wellue Import".
  *
  *  Steps, in the style of the oximeter import wizard: instructions, choose a device,
  *  choose files, download. Files are kept in <profile folder>/Oximetry_Data/<serial>/ and,
@@ -107,6 +108,7 @@ class ViatomBleImportDialog : public QDialog
     QPushButton *m_connectButton = nullptr;
     QCheckBox *m_setClock = nullptr;
     QList<ViatomBle::Usb::Port> m_usbPorts;      // listed first, then m_devices
+    QTimer *m_usbWatch = nullptr;                // waits for a cable after startWithUsb() found none
     QList<QBluetoothDeviceInfo> m_devices;
     QList<ViatomBle::DeviceFamily> m_families;   // parallel to m_devices
 

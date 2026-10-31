@@ -1,10 +1,17 @@
-# Viatom/Wellue USB cable (SleepU, O2Ring)
+# Viatom/Wellue USB cable (SleepU, O2Ring S, O2Ring)
 
 How OSCAR reads a SleepU through its USB cable, on Linux and Windows, worked out on
 2026-10-30 from a USB capture of Wellue's O2 Insight Pro (Windows) and confirmed by
-downloading recordings on Linux. The O2Ring's cable is expected to work the same way but
-has not been tested. The O2Ring S family uses a different protocol and is not expected to
-work over the cable.
+downloading recordings on Linux and Windows.
+
+On 2026-10-30 a tester also downloaded recordings from an **O2Ring S** through its cable
+on Windows 11. Over Bluetooth the O2Ring S uses its own protocol, but over the cable it
+answers the classic one described here. The classic O2Ring's cable is expected to work
+the same way but has not been tested.
+
+The same tester found that with the ring already on the cable, OSCAR didn't find it until
+the ring was taken off the cable and put back. When it finds no cable, the import dialog
+therefore keeps looking every second and connects once one appears.
 
 ## The cable
 

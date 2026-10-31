@@ -204,7 +204,7 @@ OximeterImport::OximeterImport(QWidget *parent) :
         const bool usable = availability == ViatomBle::Availability::Available;
         bleButton->setEnabled(usable);
         bleButton->setToolTip(usable
-            ? tr("Opens Viatom BLE Import, which saves the recordings and can import them as they arrive.")
+            ? tr("Opens Viatom/Wellue Import, which saves the recordings and can import them as they arrive.")
             : ViatomBle::availabilityReason(availability));
         connect(bleButton, &QPushButton::clicked, this, [this]() {
             m_viatomRequest = ViatomBleImport;
@@ -1272,8 +1272,8 @@ void OximeterImport::setInformation()
             "<span style=\" font-weight:600;\">"+tr("Viatom/Wellue")+" </span>"
             +tr("(O2Ring, SleepU, Checkme O2, Wearable O2 and similar): OSCAR downloads the recordings over Bluetooth, "
                 "or imports data files copied from the oximeter or exported from the ViHealth app. "
-                "A SleepU can also be read through its USB cable (on Linux and Windows); the O2Ring's cable should work "
-                "the same way but has not been tested. Support for the O2Ring S family (O2Ring S, SC, SF, SP) is new "
+                "A SleepU or O2Ring S can also be read through its USB cable (on Linux and Windows); the O2Ring's "
+                "cable should work the same way but has not been tested. Support for the O2Ring S family (O2Ring S, SC, SF, SP) is new "
                 "and experimental. OSCAR can set the oximeter's clock each time it connects.")+"</p>"
     "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
             "<span style=\" font-weight:600;\">"+tr("Contec CMS50")+" </span>"
@@ -1316,7 +1316,7 @@ void OximeterImport::on_oximeterType_currentIndexChanged(int index)
     }
     ui->liveImportButton->setVisible(!viatom);
     ui->directImportButton->setText(viatom
-        ? tr("Import directly through the oximeter's USB cable (SleepU, O2Ring)")
+        ? tr("Import directly through the oximeter's USB cable (SleepU, O2Ring S, O2Ring)")
         : m_directImportText);
     ui->directImportButton->setToolTip(viatom
         ? tr("Reads the recordings through the cable that came with the oximeter. "

@@ -69,7 +69,7 @@ static QString describeFile(const QString &name)
 ViatomBleImportDialog::ViatomBleImportDialog(std::function<bool(const QString &)> importFile, QWidget *parent)
     : QDialog(parent), m_importFile(std::move(importFile))
 {
-    setWindowTitle(tr("Viatom BLE Import"));
+    setWindowTitle(tr("Viatom/Wellue Import"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     resize(820, 560);
 
@@ -85,7 +85,7 @@ ViatomBleImportDialog::ViatomBleImportDialog(std::function<bool(const QString &)
         "QPushButton:pressed  { background-color: #cce4f7; border-color: #0078d7; }"
         "QPushButton:disabled { color: #a0a0a0; border-color: #d0d0d0; }");
 
-    auto *title = new QLabel(tr("Viatom BLE Import"), this);
+    auto *title = new QLabel(tr("Viatom/Wellue Import"), this);
     QFont titleFont = title->font();
     titleFont.setPointSize(18);
     title->setFont(titleFont);
@@ -128,6 +128,22 @@ ViatomBleImportDialog::ViatomBleImportDialog(std::function<bool(const QString &)
     layout->addLayout(middle, 1);
     layout->addLayout(bottom);
 
+    // Some oximeters show up on USB only once they are put on the cable; after
+    // startWithUsb() found none, look again every second and connect when one appears.
+    m_usbWatch = new QTimer(this);
+    m_usbWatch->setInterval(1000);
+    connect(m_usbWatch, &QTimer::timeout, this, [this]() {
+        if (m_link || m_pages->currentIndex() != DevicesPage) {
+            m_usbWatch->stop();
+            return;
+        }
+        if (!Usb::findPorts().isEmpty()) {
+            m_usbWatch->stop();
+            qDebug().noquote() << "ViatomBleImport: a USB cable appeared";
+            startWithUsb();
+        }
+    });
+
     m_scanner = new Scanner(this);
     connect(m_scanner, &Scanner::deviceFound, this, &ViatomBleImportDialog::onDeviceFound);
     connect(m_scanner, &Scanner::finished, this, &ViatomBleImportDialog::onScanFinished);
@@ -155,9 +171,9 @@ QWidget *ViatomBleImportDialog::buildWelcomePage()
         "<p>This works with Viatom/Wellue oximeters such as the O2Ring, SleepU, Checkme O2 and "
         "Wearable O2. Support for the O2Ring S family (O2Ring S, SC, SF, SP) is new and "
         "experimental: if it fails, OSCAR's debug log shows what happened.</p>"
-        "<p>A SleepU can also be read through its USB cable (on Linux and Windows). Plug it in "
-        "before searching; it is listed first. The O2Ring's cable should work the same way "
-        "but has not been tested.</p>"
+        "<p>A SleepU or O2Ring S can also be read through its USB cable (on Linux and Windows). "
+        "Plug it in before searching; it is listed first. The O2Ring's cable should work the "
+        "same way but has not been tested.</p>"
         "<p><b>Before you start:</b></p>"
         "<ul>"
         "<li>Close the ViHealth app on your phone, or turn the phone's Bluetooth off. "
@@ -337,6 +353,7 @@ QString ViatomBleImportDialog::deviceLabel(const QBluetoothDeviceInfo &info) con
 
 void ViatomBleImportDialog::startScan()
 {
+    m_usbWatch->stop();
     closeConnection();
     showPage(DevicesPage);
     // USB cables are found at once and listed before any Bluetooth device.
@@ -363,7 +380,7 @@ void ViatomBleImportDialog::listUsbPorts()
     m_deviceList->clear();
     for (const Usb::Port &port : Usb::findPorts()) {
         m_usbPorts.append(port);
-        auto *item = new QListWidgetItem(tr("SleepU or O2Ring on the USB cable   %1").arg(port.location), m_deviceList);
+        auto *item = new QListWidgetItem(tr("Viatom/Wellue oximeter on the USB cable   %1").arg(port.location), m_deviceList);
         if (!port.accessible) {
             item->setText(item->text() + tr("   (no permission)"));
             item->setToolTip(Usb::permissionHint());
@@ -381,8 +398,11 @@ void ViatomBleImportDialog::startWithUsb()
     showPage(DevicesPage);
     listUsbPorts();
     m_rescanButton->setEnabled(true);   // "Search again" also searches for Bluetooth devices
+    qDebug().noquote() << "ViatomBleImport: USB cables found:" << m_usbPorts.size();
     if (m_usbPorts.isEmpty()) {
-        m_status->setText(tr("No oximeter found on a USB cable. Plug in the cable and click Search again."));
+        m_status->setText(tr("Waiting for the oximeter on its USB cable. Plug in the cable; if the oximeter "
+                             "is already on it, take it off the cable and put it back."));
+        m_usbWatch->start();
         return;
     }
     if (m_usbPorts.size() == 1 && m_usbPorts.first().accessible) {
@@ -734,11 +754,24 @@ void ViatomBleImportDialog::onFileSaved(const QString &name, const QString &path
     }
 }
 
-void ViatomBleImportDialog::onFileSkipped(const QString &name, const QString &)
+void ViatomBleImportDialog::onFileSkipped(const QString &name, const QString &path)
 {
     m_skippedCount++;
     m_totalProgress->setValue(++m_filesDone);
     log(tr("Skipped %1: already downloaded").arg(describeFile(name)));
+
+    // The saved copy is imported anyway, so a recording removed from OSCAR (purged)
+    // comes back without downloading it again. One already in OSCAR is left as it is.
+    if (m_importAsArrive->isChecked() && m_importFile) {
+        if (m_importFile(path)) {
+            m_importedCount++;
+            m_batchImportedCount++;
+            log(tr("    imported the saved copy into OSCAR (if it was already there, it is unchanged)"));
+        } else {
+            m_importFailedCount++;
+            log(tr("    the saved copy could not be imported"));
+        }
+    }
 }
 
 void ViatomBleImportDialog::onFileFailed(const QString &name, const QString &reason)
@@ -777,7 +810,7 @@ void ViatomBleImportDialog::onDownloadFinished(bool cancelled)
 void ViatomBleImportDialog::reject()
 {
     if (m_downloader && m_downloader->isBusy() && m_pages->currentIndex() == TransferPage) {
-        if (QMessageBox::question(this, tr("Viatom BLE Import"),
+        if (QMessageBox::question(this, tr("Viatom/Wellue Import"),
                                   tr("A download is in progress. Stop it and close?")) != QMessageBox::Yes) {
             return;
         }
