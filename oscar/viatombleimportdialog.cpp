@@ -123,9 +123,15 @@ ViatomBleImportDialog::ViatomBleImportDialog(std::function<bool(const QString &)
     bottom->addWidget(m_status, 1);
     bottom->addWidget(m_closeButton);
 
+    m_warning = new QLabel(this);
+    m_warning->setWordWrap(true);
+    m_warning->setStyleSheet("QLabel { color: #a00000; font-weight: bold; }");
+    m_warning->setVisible(false);
+
     auto *layout = new QVBoxLayout(this);
     layout->addWidget(title);
     layout->addLayout(middle, 1);
+    layout->addWidget(m_warning);
     layout->addLayout(bottom);
 
     // Some oximeters show up on USB only once they are put on the cable; after
@@ -354,6 +360,7 @@ QString ViatomBleImportDialog::deviceLabel(const QBluetoothDeviceInfo &info) con
 void ViatomBleImportDialog::startScan()
 {
     m_usbWatch->stop();
+    m_autoRescanned = false;
     closeConnection();
     showPage(DevicesPage);
     // USB cables are found at once and listed before any Bluetooth device.
@@ -451,6 +458,16 @@ void ViatomBleImportDialog::onScanFinished()
         // has started; the connection now owns the buttons and status.
         return;
     }
+    // Windows can report a device before its name, and the name only by the next search,
+    // so a search that found nothing is repeated once before giving up.
+    if (m_pages->currentIndex() == DevicesPage && m_devices.isEmpty() && m_usbPorts.isEmpty()
+            && !m_autoRescanned && availability() == Availability::Available) {
+        m_autoRescanned = true;
+        qDebug().noquote() << "ViatomBleImport: nothing found, searching once more";
+        m_status->setText(tr("Still searching for Viatom devices..."));
+        m_scanner->start(10000);
+        return;
+    }
     m_rescanButton->setEnabled(true);
     if (m_pages->currentIndex() != DevicesPage) {
         return;
@@ -477,6 +494,7 @@ void ViatomBleImportDialog::connectToSelected()
     }
     m_scanner->stop();
     const bool usb = row < m_usbPorts.size();
+    m_warning->setVisible(false);   // a new connection starts afresh
     UsbLink *usbLink = nullptr;
     Device *device = nullptr;
     QBluetoothDeviceInfo info;
@@ -520,6 +538,16 @@ void ViatomBleImportDialog::connectToSelected()
     connect(m_downloader, &Downloader::fileSkipped, this, &ViatomBleImportDialog::onFileSkipped);
     connect(m_downloader, &Downloader::fileFailed, this, &ViatomBleImportDialog::onFileFailed);
     connect(m_downloader, &Downloader::downloadFinished, this, &ViatomBleImportDialog::onDownloadFinished);
+    if (usb) {
+        // Over Bluetooth only one program can be connected; a cable can be shared.
+        connect(m_downloader, &Downloader::unrequestedReplies, this, [this]() {
+            const QString text = tr("Another program seems to be using the oximeter's USB cable, such as "
+                                    "O2 Insight Pro. Close it for a reliable download.");
+            m_warning->setText(text);
+            m_warning->setVisible(true);
+            log(text);
+        });
+    }
 
     m_connectButton->setEnabled(false);
     m_rescanButton->setEnabled(false);

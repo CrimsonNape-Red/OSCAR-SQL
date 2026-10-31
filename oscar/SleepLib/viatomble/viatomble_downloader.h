@@ -82,6 +82,10 @@ class Downloader : public QObject
     void downloadFinished(bool cancelled);
     //! The info request failed, or the link was lost; nothing more will happen.
     void failed(const QString &reason);
+    /*! Replies keep arriving that answer no request of ours, so another program is
+     *  probably talking to the device too (over a USB cable, e.g. O2 Insight Pro).
+     *  Emitted once. */
+    void unrequestedReplies();
 
   private slots:
     void onDataReceived(const QByteArray &chunk);
@@ -107,6 +111,8 @@ class Downloader : public QObject
     void endFile(const QString &reason);
     void finishFile();
     void discardPartFile();
+    //! Counts a reply that can't be ours; emits unrequestedReplies() at the second.
+    void noteUnrequested(const char *why);
     QString targetPath(const QString &name) const;
 
     Link *m_link;
@@ -126,6 +132,7 @@ class Downloader : public QObject
     bool m_timedOut = false;   // the current request ran out of retries
     bool m_settling = false;
     bool m_heardFromDevice = false;      //!< any bytes at all have arrived
+    int m_unrequested = 0;               //!< replies that answered no request of ours
     bool m_triedAcknowledged = false;    //!< asked the link for acknowledged writes
     int m_rawChunksLogged = 0;
     //! Bumped when an operation ends abnormally, so a pending pause doesn't resume it.

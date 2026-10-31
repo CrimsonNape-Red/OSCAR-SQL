@@ -153,12 +153,19 @@ void Downloader::onDataReceived(const QByteArray &chunk)
         qDebug().noquote() << QStringLiteral("ViatomBle rx: cmd %1 status %2 seq %3 len %4:")
                                   .arg(reply.cmd, 0, 16).arg(reply.status, 0, 16).arg(reply.seq).arg(reply.payload.size())
                            << reply.payload.left(32).toHex(' ');
+        // During a file our replies carry a recent chunk's number; 0 belongs to someone
+        // else's request, such as another program's info request on a shared USB cable.
+        const bool foreign = m_echoSeq && m_pending.seq >= 2 && reply.seq == 0;
         if (m_settling) {
             qDebug() << "ViatomBle::Downloader: dropping late reply after a retry";
+            if (foreign) {
+                noteUnrequested("numbered 0 during a file");
+            }
             continue;
         }
         if (m_state == Idle) {
             qDebug() << "ViatomBle::Downloader: ignoring reply while idle";
+            noteUnrequested("while idle");
             continue;
         }
         if (m_pending.cmd >= 0 && reply.cmd != m_pending.cmd) {
@@ -174,10 +181,23 @@ void Downloader::onDataReceived(const QByteArray &chunk)
                 // A late reply to an earlier, retried request.
                 qDebug() << "ViatomBle::Downloader: dropping reply numbered" << reply.seq
                          << "while waiting for" << m_pending.seq;
+                if (foreign) {
+                    noteUnrequested("numbered 0 during a file");
+                }
                 continue;
             }
         }
         handleReply(reply);
+    }
+}
+
+void Downloader::noteUnrequested(const char *why)
+{
+    // One could be a reply of ours that came after we gave up on it; two are not.
+    if (++m_unrequested == 2) {
+        qWarning() << "ViatomBle::Downloader: replies to requests not ours (" << why
+                   << "): another program may be using the device";
+        emit unrequestedReplies();
     }
 }
 

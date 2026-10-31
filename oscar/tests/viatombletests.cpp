@@ -108,6 +108,12 @@ class FakeDevice : public Link
     int acknowledgedSwitches = 0;
     QList<QByteArray> sent;
 
+    //! A reply to a request someone else sent, as another program on a USB cable causes.
+    void sendForeignReply()
+    {
+        reply(makeReply(0, 0, QByteArray(4, '\0')));
+    }
+
     bool useAcknowledgedWrites() override
     {
         if (!onlyAcknowledged || acknowledged) {
@@ -676,6 +682,39 @@ void ViatomBleTests::testUsbInfo()
     const DeviceInfo got = info.first().first().value<DeviceInfo>();
     QCOMPARE(got.serialNumber, QStringLiteral("20032B4004"));
     QCOMPARE(got.files, QStringList({"20260715005945"}));
+}
+
+void ViatomBleTests::testNoticesAnotherProgram()
+{
+    FakeDevice dev;
+    dev.infoJson = "{\"SN\":\"20032B4004\",\"FileList\":\"20260715005945,\"}";
+    dev.files["20260715005945"] = QByteArray(3000, 'x');
+    Downloader dl(&dev, std::make_unique<ClassicUsbDialect>());
+    dl.setReplyTimeout(50);
+    QSignalSpy info(&dl, &Downloader::infoReceived);
+    QSignalSpy unrequested(&dl, &Downloader::unrequestedReplies);
+
+    dl.requestInfo();
+    QVERIFY(info.wait(5000));
+    QCOMPARE(unrequested.count(), 0);
+
+    // One stray reply could be a late one of ours; a second one means someone else.
+    dev.sendForeignReply();
+    QTest::qWait(20);
+    QCOMPARE(unrequested.count(), 0);
+    dev.sendForeignReply();
+    QTest::qWait(20);
+    QCOMPARE(unrequested.count(), 1);
+
+    // Said once, however many more arrive; downloading still works.
+    dev.sendForeignReply();
+    QTemporaryDir dir;
+    QSignalSpy finished(&dl, &Downloader::downloadFinished);
+    QSignalSpy saved(&dl, &Downloader::fileSaved);
+    dl.download(QStringList{"20260715005945"}, dir.path(), true);
+    QVERIFY(finished.wait(10000));
+    QCOMPARE(saved.count(), 1);
+    QCOMPARE(unrequested.count(), 1);
 }
 
 void ViatomBleTests::testSwitchesToAcknowledgedWrites()

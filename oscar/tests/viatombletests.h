@@ -42,6 +42,7 @@ class ViatomBleTests : public QObject
     void testUsbReports();
     void testUsbInfo_data();
     void testUsbInfo();
+    void testNoticesAnotherProgram();
     void testSwitchesToAcknowledgedWrites();
     void testSetTime();
     void testLateInfoReplyIsNotTakenForSetTime();

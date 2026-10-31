@@ -11,6 +11,7 @@
 
 #include <QBluetoothDeviceDiscoveryAgent>
 #include <QBluetoothDeviceInfo>
+#include <QHash>
 #include <QObject>
 
 namespace ViatomBle {
@@ -18,7 +19,7 @@ namespace ViatomBle {
 enum class DeviceFamily {
     NotViatom,
     Classic,     // SleepU, Checkme O2, O2Ring, ...: supported
-    O2RingS,     // O2Ring S and relatives: different protocol with encryption, not supported yet
+    O2RingS,     // O2Ring S and relatives: their own protocol (see O2RingSDialect)
 };
 
 //! Classifies a device from its advertised services and name.
@@ -48,6 +49,10 @@ class Scanner : public QObject
     void consider(const QBluetoothDeviceInfo &info);
 
     QBluetoothDeviceDiscoveryAgent m_agent;
+    //! Name last logged for each device seen in this scan, so the log shows every
+    //! device once, and again if its name arrives later.
+    QHash<QString, QString> m_seen;
+    int m_viatomSeen = 0;
 };
 
 } // namespace ViatomBle

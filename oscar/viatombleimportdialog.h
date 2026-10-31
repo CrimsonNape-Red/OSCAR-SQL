@@ -100,6 +100,7 @@ class ViatomBleImportDialog : public QDialog
 
     QStackedWidget *m_pages = nullptr;
     QLabel *m_status = nullptr;
+    QLabel *m_warning = nullptr;     // stays up, unlike m_status, e.g. another program on the cable
     QPushButton *m_closeButton = nullptr;
 
     // Devices page
@@ -108,6 +109,7 @@ class ViatomBleImportDialog : public QDialog
     QPushButton *m_connectButton = nullptr;
     QCheckBox *m_setClock = nullptr;
     QList<ViatomBle::Usb::Port> m_usbPorts;      // listed first, then m_devices
+    bool m_autoRescanned = false;                // a search that found nothing was repeated once
     QTimer *m_usbWatch = nullptr;                // waits for a cable after startWithUsb() found none
     QList<QBluetoothDeviceInfo> m_devices;
     QList<ViatomBle::DeviceFamily> m_families;   // parallel to m_devices

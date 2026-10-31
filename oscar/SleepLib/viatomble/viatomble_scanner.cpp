@@ -8,6 +8,7 @@
 
 #include <QBluetoothUuid>
 #include <QCoreApplication>
+#include <QDebug>
 #if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
 #include <QPermissions>
 #endif
@@ -78,8 +79,13 @@ Scanner::Scanner(QObject *parent)
     connect(&m_agent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, &Scanner::consider);
     connect(&m_agent, &QBluetoothDeviceDiscoveryAgent::deviceUpdated, this,
             [this](const QBluetoothDeviceInfo &info, QBluetoothDeviceInfo::Fields) { consider(info); });
-    connect(&m_agent, &QBluetoothDeviceDiscoveryAgent::finished, this, &Scanner::finished);
-    connect(&m_agent, &QBluetoothDeviceDiscoveryAgent::canceled, this, &Scanner::finished);
+    auto done = [this]() {
+        qDebug().noquote() << "ViatomBle::Scanner: scan ended;" << m_seen.size() << "Bluetooth LE devices seen,"
+                           << m_viatomSeen << "of them Viatom";
+        emit finished();
+    };
+    connect(&m_agent, &QBluetoothDeviceDiscoveryAgent::finished, this, done);
+    connect(&m_agent, &QBluetoothDeviceDiscoveryAgent::canceled, this, done);
     connect(&m_agent, &QBluetoothDeviceDiscoveryAgent::errorOccurred, this,
             [this](QBluetoothDeviceDiscoveryAgent::Error) { emit error(m_agent.errorString()); });
 }
@@ -111,6 +117,9 @@ void Scanner::start(int timeoutMs)
     }
 #endif
     m_agent.stop();
+    m_seen.clear();
+    m_viatomSeen = 0;
+    qDebug().noquote() << "ViatomBle::Scanner: scanning for" << timeoutMs << "ms";
     m_agent.setLowEnergyDiscoveryTimeout(timeoutMs);
     m_agent.start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 }
@@ -126,6 +135,28 @@ void Scanner::consider(const QBluetoothDeviceInfo &info)
         return;
     }
     const DeviceFamily family = deviceFamily(info);
+
+    // Each device once, and again when its name changes: a Bluetooth stack can report a
+    // device before its name, which OSCAR needs to recognise most Viatom devices.
+    const QString id = info.address().isNull() ? info.deviceUuid().toString() : info.address().toString();
+    const auto seen = m_seen.constFind(id);
+    if (seen == m_seen.constEnd() || seen.value() != info.name()) {
+        const bool wasViatom = seen != m_seen.constEnd() && deviceFamilyFromName(seen.value()) != DeviceFamily::NotViatom;
+        if (family != DeviceFamily::NotViatom && !wasViatom) {
+            m_viatomSeen++;
+        }
+        m_seen.insert(id, info.name());
+        QStringList services;
+        for (const QBluetoothUuid &uuid : info.serviceUuids()) {
+            services << uuid.toString(QUuid::WithoutBraces);
+        }
+        qDebug().noquote() << "ViatomBle::Scanner: saw"
+                           << (info.name().isEmpty() ? QStringLiteral("(no name)") : info.name())
+                           << id << "rssi" << info.rssi() << "services [" << services.join(QLatin1Char(' ')) << "]"
+                           << (family == DeviceFamily::O2RingS ? "-> O2Ring S family"
+                               : family == DeviceFamily::Classic ? "-> classic Viatom" : "");
+    }
+
     if (family != DeviceFamily::NotViatom) {
         emit deviceFound(info, family);
     }
