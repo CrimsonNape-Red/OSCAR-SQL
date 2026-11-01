@@ -40,17 +40,6 @@ MD300W1Loader::MD300W1Loader()
 {
     m_type = MT_OXIMETER;
     m_abort = false;
-    m_streaming = false;
-    m_importing = false;
-    imp_callbacks = 0;
-
-    // have no idea.. assuming it's another CP2102 USB UART, which won't help detection :/
-    m_vendorID = 0;
-    m_productID = 0;
-
-    startTimer.setParent(this);
-    resetTimer.setParent(this);
-
 }
 
 MD300W1Loader::~MD300W1Loader()
@@ -65,38 +54,10 @@ bool MD300W1Loader::Detect(const QString &path)
 
 int MD300W1Loader::Open(const QString & path)
 {
-    // Only one active Oximeter module at a time, set in preferences
-
 	qDebug() << "MD300W1 Loader opening " << path;
 
-    m_itemCnt = 0;
-    m_itemTotal = 0;
-
     m_abort = false;
-    m_importing = false;
 
-    started_import = false;
-    started_reading = false;
-    finished_import = false;
-
-    imp_callbacks = 0;
-    cb_reset = 0;
-
-    m_time.start();
-
-    // Cheating using path for two serial oximetry modes
-
-    if (path.compare("import") == 0) {
-        setStatus(IMPORTING);
-
-        startTimer.stop();
-        startImportTimeout();
-        return 1;
-    } else if (path.compare("live") == 0) {
-        m_startTime = oxitime = QDateTime::currentDateTime();
-        setStatus(LIVE);
-        return 1;
-    }
     QString ext = path.section(".", -1);	// find the last '.'
     if (ext.compare("dat", Qt::CaseInsensitive)==0) {
         // try to read and process SpoR file..
@@ -104,49 +65,6 @@ int MD300W1Loader::Open(const QString & path)
     }
 
     return 0;
-}
-
-
-void MD300W1Loader::processBytes(QByteArray bytes)
-{
-    Q_UNUSED(bytes);
-    return;
-}
-
-int MD300W1Loader::doImportMode()
-{
-    return 0;
-}
-
-int MD300W1Loader::doLiveMode()
-{
-    return 0;
-}
-
-// Switch MD300W1 device to live streaming mode
-void MD300W1Loader::resetDevice()
-{
-}
-
-// Switch MD300W1 device to record transmission mode
-void MD300W1Loader::requestData()
-{
-}
-
-void MD300W1Loader::killTimers()
-{
-    startTimer.stop();
-    resetTimer.stop();
-}
-
-void MD300W1Loader::startImportTimeout()
-{
-    return;
-}
-
-void MD300W1Loader::resetImportTimeout()
-{
-    return;
 }
 
 

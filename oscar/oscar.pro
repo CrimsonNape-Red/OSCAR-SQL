@@ -846,11 +846,11 @@ win32-g++:greaterThan(QT_MAJOR_VERSION, 5) {
     SOURCES += \
         SleepLib/viatomble/viatomble_device.cpp \
         SleepLib/viatomble/viatomble_scanner.cpp \
-        viatombleimportdialog.cpp
+        viatomimportpanel.cpp
     HEADERS += \
         SleepLib/viatomble/viatomble_device.h \
         SleepLib/viatomble/viatomble_scanner.h \
-        viatombleimportdialog.h
+        viatomimportpanel.h
     # Qt's BlueZ backend drops write-without-response; the device writes through BlueZ over D-Bus.
     unix:!macx:!haiku:qtHaveModule(dbus) {
         QT += dbus

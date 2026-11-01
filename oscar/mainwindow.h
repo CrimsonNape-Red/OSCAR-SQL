@@ -489,10 +489,6 @@ private:
     void purgeDay(MachineType type);
     //! \brief Runs the Oximetry Wizard; viatom opens it on the import choices for Viatom/Wellue.
     void runOximetryWizard(bool viatom);
-    //! \brief Imports Viatom/Wellue files chosen by the user (the wizard's file choice).
-    void importViatomFiles();
-    //! \brief Opens Viatom BLE Import (the wizard's choice); usb starts it on the USB cable.
-    void openViatomImportDialog(bool usb);
     //! \brief Import non-CPAP files. Returns false if the import failed, was aborted or cancelled.
     bool importNonCPAP(MachineLoader &loader, const QString &folderPrefKey = STR_PREF_LastOximetryPath);
 

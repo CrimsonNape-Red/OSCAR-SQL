@@ -1,7 +1,7 @@
 /* Oximeter Import Wizard Implementation
  *
  * Copyright (c) 2019-2026 The OSCAR Team
- * Copyright (c) 2011-2018 Mark Watkins 
+ * Copyright (c) 2011-2018 Mark Watkins
  *
  * This file is subject to the terms and conditions of the GNU General Public
  * License. See the file COPYING in the main directory of the source code
@@ -10,18 +10,19 @@
 #define TEST_MACROS_ENABLEDoff
 #include <test_macros.h>
 
-#include <functional>
-#include <QThread>
-#include <QTimeZone>
-#include <QMessageBox>
+#include <QButtonGroup>
+#include <QDir>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QStandardPaths>
-#include <QDesktopServices>
-#include <QElapsedTimer>
-#include <QSignalBlocker>
-
-#include "Graphs/gYAxis.h"
-#include "Graphs/gXAxis.h"
+#include <QStyle>
+#include <QTimeZone>
+#include <QVBoxLayout>
 
 #include "oximeterimport.h"
 #include "translation.h"
@@ -30,20 +31,56 @@
 #include "SleepLib/viatomble/viatomble_availability.h"
 #include "SleepLib/viatomble/viatomble_usb.h"
 #include "mainwindow.h"
+#ifdef OSCAR_HAVE_BLUETOOTH
+#include "viatomimportpanel.h"
+#endif
 
 extern MainWindow * mainwin;
-
-#include "SleepLib/loader_plugins/cms50_loader.h"
-#include "SleepLib/loader_plugins/cms50f37_loader.h"
-#include "SleepLib/loader_plugins/md300w1_loader.h"
 
 Qt::DayOfWeek firstDayOfWeekFromLocale();
 QList<SerialOximeter *> GetOxiLoaders();
 
-// The oximeter types, as stored in the profile (STR_OS_OximeterType) and kept as item
-// data in the oximeterType box. The CMS50 loaders check the stored value, so these
-// never change, whatever order the box lists them in.
+// The oximeter types, as stored in the profile (STR_OS_OximeterType). The values never
+// change, whatever order the wizard shows the devices in.
 enum OximeterTypeId { OXI_CMS50F37 = 0, OXI_CMS50 = 1, OXI_MD300W1 = 2, OXI_VIATOM = 3 };
+
+// The device cards' order on the first page.
+static const int DEVICE_ORDER[] = { OXI_VIATOM, OXI_CMS50F37, OXI_CMS50, OXI_MD300W1 };
+
+//! A dark theme: a few colours (badges, notes) need lighter shades on it.
+static bool darkTheme(const QWidget *w)
+{
+    return w->palette().color(QPalette::Base).lightness() < 128;
+}
+
+static QString goodColor(const QWidget *w) { return darkTheme(w) ? "#6fcf97" : "#1b6b43"; }
+static QString warnColor(const QWidget *w) { return darkTheme(w) ? "#f2b36b" : "#9a4a00"; }
+
+//! A picture scaled for the screen's pixel density.
+static QPixmap devicePicture(const QString &path, const QSize &size, const QWidget *w)
+{
+    const qreal dpr = w->devicePixelRatioF();
+    QPixmap pm = QPixmap(path).scaled(size * dpr, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    pm.setDevicePixelRatio(dpr);
+    return pm;
+}
+
+//! A label that passes clicks through to the card or option button it sits on.
+static QLabel *passiveLabel(const QString &text, QWidget *parent)
+{
+    auto *label = new QLabel(text, parent);
+    label->setAttribute(Qt::WA_TransparentForMouseEvents);
+    label->setWordWrap(true);
+    return label;
+}
+
+// Cards and options are checkable buttons drawn with the theme's own colours.
+static const char *const CARD_STYLE =
+    "QPushButton#wizardCard { text-align: left; padding: 0px; border: 1px solid palette(mid);"
+    "  border-radius: 10px; background: palette(base); }"
+    "QPushButton#wizardCard:hover { border-color: palette(highlight); }"
+    "QPushButton#wizardCard:checked { border: 2px solid palette(highlight); }"
+    "QPushButton#wizardCard:disabled { background: palette(window); }";
 
 OximeterImport::OximeterImport(QWidget *parent) :
     QDialog(parent),
@@ -51,641 +88,812 @@ OximeterImport::OximeterImport(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle(tr("Oximeter Import Wizard"));
-    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    resize(1000, 700);
+    setStyleSheet(CARD_STYLE);
 
-    // Force light appearance throughout the wizard in system dark mode.
-    // The 'frame' left-panel has its own gradient stylesheet and is unaffected.
-    // All other containers (stackedWidget, its 6 pages, group boxes, frames) need
-    // explicit backgrounds because QPalette changes are ignored by native renderers.
-    setStyleSheet(
-        // --- Container backgrounds ---
-        "QDialog                { background-color: #f0f0f0; }"
-        "QStackedWidget         { background-color: #f0f0f0; }"
-        "#welcomePage, #importSelectionPage, #directImportPage,"
-        "#liveImportPage, #chooseSessionPage, #syncPage { background-color: #f0f0f0; }"
-        "#liveViewFrame, #frame_3 { background-color: #f0f0f0; }"
-        "QGroupBox { background-color: #f0f0f0; color: black;"
-        "    border: 1px solid #c0c0c0; border-radius: 4px; margin-top: 8px; }"
-        "QGroupBox::title { color: black; subcontrol-origin: margin; left: 8px; }"
-        // --- Text ---
-        "QLabel      { color: black; }"
-        "QTextBrowser { color: black; background-color: white; }"
-        // --- Buttons ---
-        "QPushButton { color: black; background-color: #f0f0f0;"
-        "    border: 1px solid #adadad; border-radius: 3px; padding: 3px 8px; }"
-        "QPushButton:hover    { background-color: #e5f1fb; border-color: #0078d7; }"
-        "QPushButton:pressed  { background-color: #cce4f7; border-color: #0078d7; }"
-        "QPushButton:disabled { color: #a0a0a0; border-color: #d0d0d0; }"
-        // --- Other input controls ---
-        "QCheckBox   { color: black; }"
-        "QRadioButton { color: black; }"
-        "QComboBox   { color: black; background-color: white; border: 1px solid #adadad; border-radius: 2px; }"
-        "QSpinBox    { color: black; background-color: white; border: 1px solid #adadad; }"
-        "QTimeEdit   { color: black; background-color: white; border: 1px solid #adadad; }"
-        "QLineEdit   { color: black; background-color: white; border: 1px solid #adadad; }"
-        "QListWidget { color: black; background-color: white; }"
-        "QTreeWidget { color: black; background-color: white; }"
-        // --- Calendar widget internals ---
-        "#qt_calendar_monthbutton { color: black; }"
-        "#qt_calendar_yearbutton  { color: black; }"
-        "QCalendarWidget QWidget#qt_calendar_navigationbar { background-color: #e0e0e0; }"
-        "QCalendarWidget QAbstractItemView:enabled { background-color: white; color: black;"
-        "    selection-background-color: #3a7fc2; selection-color: white; }"
-        "QCalendarWidget QAbstractItemView:disabled { color: #808080; }"
-        "QCalendarWidget QHeaderView::section { background-color: #e0e0e0; color: black; }"
-    );
-    ui->stackedWidget->setCurrentIndex(0);
-    ui->retryButton->setVisible(false);
-    ui->stopButton->setVisible(false);
-    ui->saveButton->setVisible(false);
-    ui->syncButton->setVisible(false);
-    ui->chooseSessionButton->setVisible(false);
+    // The step bar above the pages, the footer below them.
+    auto *layout = qobject_cast<QVBoxLayout *>(this->layout());
+    layout->insertWidget(0, buildStepBar());
+    layout->addWidget(buildFooter());
 
-    oximodule = nullptr;
-    importMode = IM_UNDEFINED;
+    m_devicePage = buildDevicePage();
+    m_methodPage = buildMethodPage();
+    m_summaryPage = buildSummaryPage();
+    ui->stackedWidget->addWidget(m_devicePage);
+    ui->stackedWidget->addWidget(m_methodPage);
+    ui->stackedWidget->addWidget(m_summaryPage);
 
-    liveView = new gGraphView(this);
-    liveView->setVisible(false);
-    liveView->setShowAuthorMessage(false);
-    QVBoxLayout * lvlayout = new QVBoxLayout;
-    lvlayout->setContentsMargins(0, 0, 0, 0);
-    lvlayout->addWidget(liveView);
-    ui->liveViewFrame->setLayout(lvlayout);
-
-    plethyGraph = new gGraph("Plethy", liveView, STR_TR_Plethy, STR_UNIT_Hz);
-    plethyGraph->AddLayer(new gYAxis(), LayerLeft, gYAxis::Margin);
-    plethyGraph->AddLayer(new gXAxis(), LayerBottom, 0, 20);
-    plethyGraph->AddLayer(plethyChart = new gLineChart(OXI_Plethy));
-    plethyGraph->setVisible(true);
-    plethyGraph->setRecMinY(0);
-    plethyGraph->setRecMaxY(128);
-
-    ui->calendarWidget->setFirstDayOfWeek(Qt::Sunday);
-    QTextCharFormat format = ui->calendarWidget->weekdayTextFormat(Qt::Saturday);
-    format.setForeground(QBrush(Qt::black, Qt::SolidPattern));
-    ui->calendarWidget->setWeekdayTextFormat(Qt::Saturday, format);
-    ui->calendarWidget->setWeekdayTextFormat(Qt::Sunday, format);
-    ui->calendarWidget->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
-    Qt::DayOfWeek dow=firstDayOfWeekFromLocale();
+    // CPAP-sync page
+    Qt::DayOfWeek dow = firstDayOfWeekFromLocale();
     ui->calendarWidget->setFirstDayOfWeek(dow);
-
+    ui->calendarWidget->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
     ui->dateTimeEdit->setMinimumHeight(ui->dateTimeEdit->height() + 10);
     ui->syncCPAPGroup->setVisible(false);
 
-    QVBoxLayout * layout = new QVBoxLayout;
-    layout->setContentsMargins(0, 0, 0, 0);
-    ui->sessBarFrame->setLayout(layout);
+    QVBoxLayout * barLayout = new QVBoxLayout;
+    barLayout->setContentsMargins(0, 0, 0, 0);
+    ui->sessBarFrame->setLayout(barLayout);
     sessbar = new SessionBar(this);
     sessbar->setSelectMode(true);
     sessbar->setMouseTracking(true);
     sessbar->setMinimumHeight(40);
     connect(sessbar, SIGNAL(sessionClicked(Session*)), this, SLOT(onSessionSelected(Session*)));
-    layout->addWidget(sessbar, 1);
+    barLayout->addWidget(sessbar, 1);
 
-    dummyday = nullptr;
-    session = nullptr;
-    ELplethy = nullptr;
-
-    pulse = spo2 = -1;
-
-
-    ui->skipWelcomeCheckbox->setChecked(p_profile->oxi->skipOxiIntroScreen());
-    if (p_profile->oxi->skipOxiIntroScreen()) {
-        ui->stackedWidget->setCurrentWidget(ui->importSelectionPage);
-        ui->nextButton->setVisible(false);
-        ui->informationButton->setVisible(true);
-    } else {
-        ui->stackedWidget->setCurrentWidget(ui->welcomePage);
-        ui->nextButton->setVisible(true);
-        ui->informationButton->setVisible(false);
+    m_suggestion = new QLabel(ui->syncPage);
+    m_suggestion->setWordWrap(true);
+    m_suggestion->setVisible(false);
+    if (auto *syncLayout = qobject_cast<QVBoxLayout *>(ui->syncPage->layout())) {
+        syncLayout->insertWidget(1, m_suggestion);
     }
+    ui->tableOxiSessions->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    ui->dateTimeEdit->setMinimumHeight(ui->dateTimeEdit->height()+10);
-    setInformation();
-
-    ui->cms50DeviceName->setText(p_profile->oxi->defaultDevice());
-    m_fileImportText = ui->fileImportButton->text();
-    m_fileImportToolTip = ui->fileImportButton->toolTip();
-    m_directImportText = ui->directImportButton->text();
-    m_directImportToolTip = ui->directImportButton->toolTip();
-    // The serial oximeters keep their stored type values; Viatom/Wellue goes first.
-    {
-        const QSignalBlocker blocker(ui->oximeterType);
-        for (int i = 0; i < ui->oximeterType->count(); i++) {
-            ui->oximeterType->setItemData(i, i);
-        }
-        ui->oximeterType->insertItem(0, tr("Viatom/Wellue: O2Ring, O2Ring S, SleepU, Checkme O2"), OXI_VIATOM);
-    }
-    ui->cms50DeviceName->setEnabled(false);
-    ui->cms50SyncTime->setChecked(p_profile->oxi->syncOximeterClock());
-
-    // Viatom/Wellue oximeters download over Bluetooth in their own dialog; this button
-    // closes the wizard and asks MainWindow to open it. It shows only for Viatom/Wellue.
-    std::function<QBoxLayout *(QLayout *)> holder = [&holder, this](QLayout *layout) -> QBoxLayout * {
-        if (!layout) {
-            return nullptr;
-        }
-        if (layout->indexOf(ui->fileImportButton) >= 0) {
-            return qobject_cast<QBoxLayout *>(layout);
-        }
-        for (int i = 0; i < layout->count(); i++) {
-            if (QBoxLayout *found = holder(layout->itemAt(i)->layout())) {
-                return found;
-            }
-        }
-        return nullptr;
-    };
-    if (QBoxLayout *box = holder(ui->fileImportButton->parentWidget()->layout())) {
-        auto *bleButton = m_viatomBleButton = new QPushButton(QIcon(":/icons/oximeter.png"),
-            tr("Download from the oximeter over Bluetooth (O2Ring, O2Ring S, SleepU, Checkme O2)"), this);
-        bleButton->setIconSize(ui->fileImportButton->iconSize());
-        bleButton->setAutoDefault(false);
-        const ViatomBle::Availability availability = ViatomBle::availability();
-        const bool usable = availability == ViatomBle::Availability::Available;
-        bleButton->setEnabled(usable);
-        bleButton->setToolTip(usable
-            ? tr("Opens Viatom/Wellue Import, which saves the recordings and can import them as they arrive.")
-            : ViatomBle::availabilityReason(availability));
-        connect(bleButton, &QPushButton::clicked, this, [this]() {
-            m_viatomRequest = ViatomBleImport;
-            accept();
-        });
-        box->insertWidget(box->indexOf(ui->fileImportButton) + 1, bleButton);
-    }
+    // A Viatom/Wellue cable can be plugged in while the first page is showing.
+    m_cableTimer.setInterval(2000);
+    connect(&m_cableTimer, &QTimer::timeout, this, &OximeterImport::updateCableBadge);
 
     // The last oximeter chosen; Viatom/Wellue for a new profile.
-    int oxiIndex = ui->oximeterType->findData(p_profile->oxi->oximeterType());
-    if (oxiIndex < 0) {
-        oxiIndex = ui->oximeterType->findData(OXI_VIATOM);
+    int type = p_profile->oxi->oximeterType();
+    if (!m_devices->button(type)) {
+        type = OXI_VIATOM;
     }
-    ui->oximeterType->setCurrentIndex(oxiIndex);
-    on_oximeterType_currentIndexChanged(ui->oximeterType->currentIndex());
-}
+    m_devices->button(type)->setChecked(true);
 
-void OximeterImport::showViatomImport()
-{
-    ui->oximeterType->setCurrentIndex(ui->oximeterType->findData(OXI_VIATOM));
-    ui->stackedWidget->setCurrentWidget(ui->importSelectionPage);
-    ui->nextButton->setVisible(false);
-    ui->informationButton->setVisible(true);
+    updateCableBadge();
+    showPage(m_devicePage, DeviceStep);
 }
 
 OximeterImport::~OximeterImport()
 {
-    if (dummyday != nullptr) {
-        delete dummyday;
+    if (oximodule) {
+        oximodule->trashRecords();
     }
-    if (session != nullptr) {
-        delete session;
-    }
-    if (ELplethy != nullptr) {
-        delete ELplethy;
-    }
-
     disconnect(sessbar, SIGNAL(sessionClicked(Session*)), this, SLOT(onSessionSelected(Session*)));
     delete ui;
 }
 
-void OximeterImport::on_nextButton_clicked()
+void OximeterImport::setViatomFileImporter(std::function<bool(const QString &)> importFile)
 {
-    int i = ui->stackedWidget->currentIndex();
-    i++;
-    if (i >= ui->stackedWidget->count()) i = 0;
+    m_importViatomFile = std::move(importFile);
+}
 
-    switch (i) {
-    case 0:
-        ui->nextButton->setVisible(true);
-        ui->nextButton->setText(tr("Start"));
+void OximeterImport::setViatomFilesImporter(std::function<bool()> importFiles)
+{
+    m_importViatomFiles = std::move(importFiles);
+}
+
+void OximeterImport::showViatomImport()
+{
+    m_devices->button(OXI_VIATOM)->setChecked(true);
+    p_profile->oxi->setOximeterType(OXI_VIATOM);
+    refreshMethods();
+    showPage(m_methodPage, MethodStep);
+}
+
+bool OximeterImport::importedAny() const
+{
+#ifdef OSCAR_HAVE_BLUETOOTH
+    if (m_viatomPanel && m_viatomPanel->importedAny()) {
+        return true;
+    }
+#endif
+    return m_importedFiles;
+}
+
+int OximeterImport::oximeterType() const
+{
+    return m_devices->checkedId();
+}
+
+OximeterImport::Method OximeterImport::method() const
+{
+    const int id = m_methods->checkedId();
+    return id < 0 ? NoMethod : Method(id);
+}
+
+QString OximeterImport::deviceName(int type) const
+{
+    switch (type) {
+    case OXI_VIATOM:   return tr("Viatom/Wellue");
+    case OXI_CMS50F37: return tr("Contec CMS50F v3.7+");
+    case OXI_CMS50:    return tr("Contec CMS50D+/E/F");
+    case OXI_MD300W1:  return tr("ChoiceMMed MD300W1");
+    }
+    return QString();
+}
+
+bool OximeterImport::viatomUsbBuilt() const
+{
+    // The cable is read in the Viatom import panel, which needs a Bluetooth build.
+    return ViatomBle::Usb::supported() && ViatomBle::availability() != ViatomBle::Availability::NotBuilt;
+}
+
+// ----------------------------------------------------------------------------------------
+// Frame: step bar and footer
+
+QWidget *OximeterImport::buildStepBar()
+{
+    auto *bar = new QWidget(this);
+    bar->setAutoFillBackground(true);
+    bar->setBackgroundRole(QPalette::Base);
+    auto *row = new QHBoxLayout(bar);
+    row->setContentsMargins(28, 12, 28, 12);
+    row->setSpacing(26);
+    const QStringList titles = { tr("Oximeter"), tr("Method"), tr("Import"), tr("Match to CPAP") };
+    for (int i = 0; i < titles.size(); i++) {
+        auto *number = new QLabel(QString::number(i + 1), bar);
+        number->setFixedSize(24, 24);
+        number->setAlignment(Qt::AlignCenter);
+        auto *title = new QLabel(titles[i], bar);
+        auto *step = new QHBoxLayout;
+        step->setSpacing(8);
+        step->addWidget(number);
+        step->addWidget(title);
+        row->addLayout(step);
+        m_stepNumbers << number;
+        m_stepTitles << title;
+    }
+    row->addStretch();
+    return bar;
+}
+
+QWidget *OximeterImport::buildFooter()
+{
+    auto *footer = new QWidget(this);
+    footer->setAutoFillBackground(true);
+    footer->setBackgroundRole(QPalette::Base);
+    auto *row = new QHBoxLayout(footer);
+    row->setContentsMargins(20, 12, 20, 12);
+
+    auto *about = new QLabel(QStringLiteral("<a href=\"about\">%1</a>").arg(tr("About oximetry in OSCAR")), footer);
+    connect(about, &QLabel::linkActivated, this, [this]() { showAbout(); });
+
+    m_cancelButton = new QPushButton(tr("Cancel"), footer);
+    m_backButton = new QPushButton(tr("Back"), footer);
+    m_nextButton = new QPushButton(tr("Next"), footer);
+    m_nextButton->setDefault(true);
+    for (QPushButton *b : { m_cancelButton, m_backButton, m_nextButton }) {
+        b->setAutoDefault(false);
+        b->setMinimumSize(96, 34);
+    }
+    connect(m_cancelButton, &QPushButton::clicked, this, &OximeterImport::reject);
+    connect(m_backButton, &QPushButton::clicked, this, &OximeterImport::goBack);
+    connect(m_nextButton, &QPushButton::clicked, this, &OximeterImport::goNext);
+
+    row->addWidget(about);
+    row->addStretch();
+    row->addWidget(m_cancelButton);
+    row->addWidget(m_backButton);
+    row->addWidget(m_nextButton);
+    return footer;
+}
+
+void OximeterImport::showPage(QWidget *page, Step step)
+{
+    ui->stackedWidget->setCurrentWidget(page);
+    m_step = step;
+    if (step == DeviceStep) {
+        m_cableTimer.start();
+    } else {
+        m_cableTimer.stop();
+    }
+    updateStepBar();
+    updateFooter();
+}
+
+void OximeterImport::updateStepBar()
+{
+    const QString highlight = palette().color(QPalette::Highlight).name();
+    const QString onHighlight = palette().color(QPalette::HighlightedText).name();
+    const QString muted = palette().color(QPalette::PlaceholderText).name();
+
+    // What was chosen replaces a finished step's title; the last step depends on the device.
+    QStringList titles = { tr("Oximeter"), tr("Method"), tr("Import"),
+                           oximeterType() == OXI_VIATOM ? tr("Summary") : tr("Match to CPAP") };
+    if (m_step > DeviceStep) {
+        titles[0] = deviceName(oximeterType());
+    }
+    if (m_step > MethodStep) {
+        titles[1] = method() == UsbMethod ? tr("USB cable") : method() == BluetoothMethod ? tr("Bluetooth") : tr("Data files");
+    }
+
+    for (int i = 0; i < m_stepNumbers.size(); i++) {
+        QLabel *number = m_stepNumbers[i];
+        QLabel *title = m_stepTitles[i];
+        title->setText(titles[i]);
+        QFont f = title->font();
+        f.setBold(i == m_step);
+        title->setFont(f);
+        if (i < m_step) {
+            number->setText(QString(QChar(0x2713)));   // check mark
+            number->setStyleSheet(QString("border-radius: 12px; background: %1; color: %2;").arg(goodColor(this), darkTheme(this) ? "#10241a" : "#ffffff"));
+            title->setStyleSheet(QString());
+        } else if (i == m_step) {
+            number->setText(QString::number(i + 1));
+            number->setStyleSheet(QString("border-radius: 12px; background: %1; color: %2;").arg(highlight, onHighlight));
+            title->setStyleSheet(QString("color: %1;").arg(highlight));
+        } else {
+            number->setText(QString::number(i + 1));
+            number->setStyleSheet(QString("border-radius: 12px; border: 1px solid %1; color: %1;").arg(muted));
+            title->setStyleSheet(QString("color: %1;").arg(muted));
+        }
+    }
+}
+
+void OximeterImport::updateFooter()
+{
+    QWidget *page = ui->stackedWidget->currentWidget();
+    m_backButton->setVisible(m_step != DeviceStep && page != m_summaryPage);
+    m_nextButton->setEnabled(true);
+    if (page == ui->syncPage) {
+        m_nextButton->setText(tr("Save"));
+    } else if (page == m_summaryPage) {
+        m_nextButton->setText(tr("Finish"));
+    } else if (page == m_methodPage && method() == FilesMethod) {
+        m_nextButton->setText(tr("Choose files..."));
+    } else if (page == m_methodPage) {
+        m_nextButton->setText(tr("Connect"));
+        m_nextButton->setEnabled(method() != NoMethod);
+    } else {
+        m_nextButton->setText(tr("Next"));
+    }
+    m_cancelButton->setVisible(page != m_summaryPage);
+}
+
+void OximeterImport::showAbout()
+{
+    QMessageBox::information(this, tr("About oximetry in OSCAR"),
+        "<p>" + tr("Pulse Oximeters are medical devices used to measure blood oxygen saturation. During extended Apnea events and abnormal breathing patterns, blood oxygen saturation levels can drop significantly, and can indicate issues that need medical attention.") + "</p>"
+        "<p>" + tr("OSCAR gives you the ability to track Oximetry data alongside CPAP session data, which can give valuable insight into the effectiveness of CPAP treatment. It will also work standalone with your Pulse Oximeter, allowing you to store, track and review your recorded data.") + "</p>"
+        "<p><b>" + tr("Please remember:") + "</b> <i>"
+        + tr("If you are trying to sync oximetry and CPAP data, please make sure you imported your CPAP sessions first before proceeding!") + "</i></p>"
+        "<p>" + tr("Even for devices with an internal clock, it is still recommended to get into the habit of starting oximeter records at the same time as CPAP sessions, because CPAP internal clocks tend to drift over time, and not all can be reset easily.") + "</p>");
+}
+
+// ----------------------------------------------------------------------------------------
+// Step 1: the oximeter
+
+QWidget *OximeterImport::buildDevicePage()
+{
+    auto *page = new QWidget(this);
+    auto *layout = new QVBoxLayout(page);
+    layout->setContentsMargins(32, 24, 32, 16);
+    layout->setSpacing(16);
+
+    auto *heading = new QLabel(tr("Which oximeter do you have?"), page);
+    QFont hf = heading->font();
+    hf.setPointSizeF(hf.pointSizeF() * 1.6);
+    hf.setBold(true);
+    heading->setFont(hf);
+    auto *subtitle = new QLabel(tr("Choose your model. OSCAR remembers it for next time."), page);
+    layout->addWidget(heading);
+    layout->addWidget(subtitle);
+
+    struct Card { int type; QString picture; QString models; QString methods; };
+    const QList<Card> cards = {
+        { OXI_VIATOM, ":/icons/wellue.png", tr("O2Ring, O2Ring S, SleepU, Checkme O2, Wearable O2"),
+          tr("USB cable · Bluetooth · Data files") },
+        { OXI_CMS50F37, ":/icons/cms50f.png", tr("CMS50F v3.7+, CMS50H, CMS50I, CMS50D+ v4.6, Pulox PO-400/500"),
+          tr("Data files") },
+        { OXI_CMS50, ":/icons/oximeter.png", tr("CMS50D+, CMS50E, CMS50F, Pulox PO-200/300"),
+          tr("Data files") },
+        { OXI_MD300W1, QString(), tr("Data files (.dat) saved by its own software"), tr("Data files") },
+    };
+
+    m_devices = new QButtonGroup(this);
+    auto *grid = new QHBoxLayout;
+    grid->setSpacing(14);
+    for (const Card &c : cards) {
+        auto *card = new QPushButton(page);
+        card->setObjectName("wizardCard");
+        card->setCheckable(true);
+        card->setMinimumSize(200, 300);
+        card->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        card->setAccessibleName(deviceName(c.type));
+        auto *v = new QVBoxLayout(card);
+        v->setContentsMargins(14, 12, 14, 14);
+        v->setSpacing(8);
+
+        auto *badgeRow = new QHBoxLayout;
+        badgeRow->addStretch();
+        QLabel *badge = passiveLabel(QString(), card);
+        badge->setWordWrap(false);
+        badgeRow->addWidget(badge);
+        v->addLayout(badgeRow);
+        if (c.type == OXI_VIATOM) {
+            m_cableBadge = badge;
+        }
+
+        QLabel *picture = passiveLabel(QString(), card);
+        picture->setAlignment(Qt::AlignCenter);
+        picture->setMinimumHeight(118);
+        picture->setPixmap(c.picture.isEmpty()
+            ? style()->standardIcon(QStyle::SP_FileIcon).pixmap(64, 64)
+            : devicePicture(c.picture, QSize(140, 112), this));
+        v->addWidget(picture);
+
+        QLabel *name = passiveLabel(deviceName(c.type), card);
+        QFont nf = name->font();
+        nf.setBold(true);
+        nf.setPointSizeF(nf.pointSizeF() * 1.15);
+        name->setFont(nf);
+        v->addWidget(name);
+        QLabel *models = passiveLabel(c.models, card);
+        models->setForegroundRole(QPalette::PlaceholderText);
+        v->addWidget(models);
+        v->addStretch();
+        QLabel *methods = passiveLabel(c.methods, card);
+        QFont mf = methods->font();
+        mf.setPointSizeF(mf.pointSizeF() * 0.92);
+        methods->setFont(mf);
+        v->addWidget(methods);
+
+        m_devices->addButton(card, c.type);
+        grid->addWidget(card, 1);
+    }
+    layout->addLayout(grid);
+
+    // Remembered at once, so the next wizard starts on it.
+    connect(m_devices, &QButtonGroup::idClicked, this, [this](int type) {
+        p_profile->oxi->setOximeterType(type);
+        updateStepBar();
+    });
+
+    layout->addWidget(new QLabel(tr("Not sure which one? Plug in your oximeter's cable: a Viatom/Wellue cable is marked when OSCAR finds it."), page));
+    layout->addStretch();
+    return page;
+}
+
+void OximeterImport::updateCableBadge()
+{
+    if (!m_cableBadge) {
+        return;
+    }
+    const bool found = viatomUsbBuilt() && !ViatomBle::Usb::findPorts().isEmpty();
+    m_cableBadge->setText(found ? QString(QChar(0x2713)) + QLatin1Char(' ') + tr("Cable found") : QString());
+    m_cableBadge->setStyleSheet(found ? QString("color: %1; font-weight: bold;").arg(goodColor(this)) : QString());
+}
+
+// ----------------------------------------------------------------------------------------
+// Step 2: how to import
+
+QWidget *OximeterImport::buildMethodPage()
+{
+    auto *page = new QWidget(this);
+    auto *layout = new QVBoxLayout(page);
+    layout->setContentsMargins(32, 24, 32, 16);
+    layout->setSpacing(12);
+
+    auto *heading = new QLabel(tr("How do you want to import?"), page);
+    QFont hf = heading->font();
+    hf.setPointSizeF(hf.pointSizeF() * 1.6);
+    hf.setBold(true);
+    heading->setFont(hf);
+    m_methodSubtitle = new QLabel(page);
+    layout->addWidget(heading);
+    layout->addWidget(m_methodSubtitle);
+
+    m_methods = new QButtonGroup(this);
+    auto option = [this, page, layout](Method id, const QString &title, QLabel **detailOut, QLabel **noteOut) {
+        auto *button = new QPushButton(page);
+        button->setObjectName("wizardCard");
+        button->setCheckable(true);
+        button->setAccessibleName(title);
+        auto *v = new QVBoxLayout(button);
+        v->setContentsMargins(16, 12, 16, 12);
+        v->setSpacing(4);
+        QLabel *t = passiveLabel(title, button);
+        QFont tf = t->font();
+        tf.setBold(true);
+        tf.setPointSizeF(tf.pointSizeF() * 1.1);
+        t->setFont(tf);
+        QLabel *detail = passiveLabel(QString(), button);
+        QLabel *note = passiveLabel(QString(), button);
+        v->addWidget(t);
+        v->addWidget(detail);
+        v->addWidget(note);
+        // A button doesn't size itself to labels laid out on it: room for the title, two
+        // lines of detail and a note.
+        button->setMinimumHeight(QFontMetrics(tf).lineSpacing() + 3 * button->fontMetrics().lineSpacing() + 32);
+        button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        m_methods->addButton(button, id);
+        layout->addWidget(button);
+        if (detailOut) *detailOut = detail;
+        if (noteOut) *noteOut = note;
+        return button;
+    };
+
+    QLabel *usbDetail = nullptr;
+    QLabel *bluetoothDetail = nullptr;
+    m_usbOption = option(UsbMethod, tr("Through the USB cable"), &usbDetail, &m_usbNote);
+    usbDetail->setText(tr("Use the cable that came with the oximeter. Close O2 Insight Pro first."));
+    m_bluetoothOption = option(BluetoothMethod, tr("Over Bluetooth"), &bluetoothDetail, &m_bluetoothNote);
+    bluetoothDetail->setText(tr("Put the oximeter in standby and close the ViHealth app on your phone. The oximeter "
+                                "switches itself off after about two minutes without a connection."));
+    m_filesOption = option(FilesMethod, tr("From data files"), &m_filesDetail, nullptr);
+
+    m_deviceHelp = new QLabel(page);
+    m_deviceHelp->setWordWrap(true);
+    m_deviceHelp->setForegroundRole(QPalette::PlaceholderText);
+    layout->addSpacing(6);
+    layout->addWidget(m_deviceHelp);
+    layout->addStretch();
+
+    connect(m_methods, &QButtonGroup::idClicked, this, [this]() {
+        updateStepBar();
+        updateFooter();
+    });
+    return page;
+}
+
+void OximeterImport::refreshMethods()
+{
+    const int type = oximeterType();
+    const bool viatom = (type == OXI_VIATOM);
+    m_methodSubtitle->setText(tr("From your %1 oximeter.").arg(deviceName(type)));
+
+    m_usbOption->setVisible(viatom);
+    m_bluetoothOption->setVisible(viatom);
+
+    const QString good = QString("color: %1; font-weight: bold;").arg(goodColor(this));
+    const QString warn = QString("color: %1; font-weight: bold;").arg(warnColor(this));
+
+    // USB cable
+    bool usbOk = viatomUsbBuilt();
+    const bool cable = usbOk && !ViatomBle::Usb::findPorts().isEmpty();
+    m_usbOption->setEnabled(usbOk);
+    m_usbNote->setText(!usbOk ? tr("This version of OSCAR can't read the oximeter's USB cable.")
+                       : cable ? tr("Cable found on USB.")
+                               : tr("No cable found yet. Plug it in; OSCAR waits for it on the next page."));
+    m_usbNote->setStyleSheet(!usbOk ? warn : cable ? good : QString());
+
+    // Bluetooth
+    const ViatomBle::Availability ble = ViatomBle::availability();
+    const bool bleOk = (ble == ViatomBle::Availability::Available);
+    m_bluetoothOption->setEnabled(bleOk);
+    m_bluetoothNote->setText(bleOk ? tr("Bluetooth is ready.") : ViatomBle::availabilityReason(ble));
+    m_bluetoothNote->setStyleSheet(bleOk ? good : warn);
+
+    // Data files and help for the device
+    switch (type) {
+    case OXI_VIATOM:
+        m_filesDetail->setText(tr("Files copied from the oximeter, or exported from the ViHealth app."));
+        m_deviceHelp->setText(tr("Recordings downloaded over the cable or Bluetooth are kept in your profile's "
+                                 "Oximetry_Data folder, so they can be imported again later. OSCAR can set the "
+                                 "oximeter's clock when it connects, which keeps oximetry in step with CPAP data."));
         break;
-    case 1:
-        ui->nextButton->setVisible(false);
-        ui->informationButton->setVisible(true);
-
+    case OXI_MD300W1:
+        m_filesDetail->setText(tr("MedView .dat files saved by the ChoiceMMed software."));
+        m_deviceHelp->setText(tr("If you want to match the recording to CPAP data, import your CPAP data first."));
         break;
     default:
-        ui->informationButton->setVisible(true);
-        ui->nextButton->setVisible(true);
+        m_filesDetail->setText(tr("Files saved by SpO2Review or a similar program (.spo, .spor, .spo2)."));
+        m_deviceHelp->setText(tr("Contec CMS50D+ devices do not have an internal clock, and do not record a starting time. If you do not have a CPAP session to link a recording to, you will have to enter the start time manually after the import process is completed."));
+        break;
     }
-    ui->stackedWidget->setCurrentIndex(i);
+
+    // Keep a usable choice: the cable if it is there, else Bluetooth, else files.
+    QAbstractButton *checked = m_methods->checkedButton();
+    if (!checked || !checked->isVisible() || !checked->isEnabled()) {
+        QPushButton *pick = !viatom ? m_filesOption
+                          : cable ? m_usbOption
+                          : bleOk ? m_bluetoothOption
+                          : usbOk ? m_usbOption : m_filesOption;
+        pick->setChecked(true);
+    }
 }
 
-void OximeterImport::updateStatus(QString msg)
+// ----------------------------------------------------------------------------------------
+// Navigation
+
+void OximeterImport::goNext()
 {
-	qDebug() << "oximod - updateStatus to " << msg;
-    ui->logBox->appendPlainText(msg);
-    ui->directImportStatus->setText(msg);
-    ui->liveStatusLabel->setText(msg);
-}
-
-
-SerialOximeter * OximeterImport::detectOximeter()
-{
-    const int PORTSCAN_TIMEOUT=30000;
-    const int delay=100;
-
-	qDebug() << "oximod - Attempt to detect Oximeter";
-    ui->retryButton->setVisible(false);
-
-    QList<SerialOximeter *> loaders; // GetOxiLoaders();
-
-    const int oxitype = ui->oximeterType->currentData().toInt();
-    if (oxitype == OXI_CMS50F37) {
-        SerialOximeter * oxi = qobject_cast<SerialOximeter*>(lookupLoader(cms50f37_class_name));
-        loaders.push_back(oxi);
-    } else if (oxitype == OXI_CMS50) { // CMS50D+/E/F
-        SerialOximeter * oxi = qobject_cast<SerialOximeter*>(lookupLoader(cms50_class_name));
-        loaders.push_back(oxi);
-    } else if (oxitype == OXI_MD300W1) { // ChoiceMed
-        SerialOximeter * oxi = qobject_cast<SerialOximeter*>(lookupLoader(md300w1_class_name));
-        loaders.push_back(oxi);
-    } else return nullptr;
-
-
-    updateStatus(tr("Scanning for compatible oximeters"));
-
-    ui->progressBar->setMaximum(PORTSCAN_TIMEOUT);
-
-    QElapsedTimer time;
-    time.start();
-
-    oximodule = nullptr;
-    int elapsed=0;
-    do {
-        for (int i=0; i < loaders.size(); ++i) {
-            SerialOximeter * oxi = loaders[i];
-            if (oxi->openDevice()) {
-                oximodule = oxi;
-                break;
-            }
-        }
-
-        if (oximodule)
-            break;
-
-        QThread::msleep(delay);
-        elapsed = time.elapsed();
-        ui->progressBar->setValue(elapsed);
-        QApplication::processEvents();
-        if (!isVisible()) {
-            return oximodule = nullptr;
-        }
-
-    } while (elapsed < PORTSCAN_TIMEOUT);
-
-    if (!oximodule) {
-        updateStatus(tr("Could not detect any connected oximeter devices."));
-        ui->retryButton->setVisible(true);
-        return nullptr;
-    }
-
-    QString devicename = oximodule->getDeviceString();
-    if (devicename.isEmpty()) oximodule->loaderName();
-
-    updateStatus(tr("Connecting to %1 Oximeter").arg(devicename));
-
-    return oximodule;
-}
-
-
-
-void OximeterImport::on_directImportButton_clicked()
-{
-    // Viatom/Wellue: the import dialog reads the oximeter through its USB cable once the wizard closes.
-    if (ui->oximeterType->currentData().toInt() == OXI_VIATOM) {
-        m_viatomRequest = ViatomUsbImport;
-        accept();
-        return;
-    }
-
-    ui->informationButton->setVisible(false);
-    ui->stackedWidget->setCurrentWidget(ui->directImportPage);
-
-	qDebug() << "oximod - Direct Import button clicked" ;
-    oximodule = detectOximeter();
-    if (!oximodule)
-        return;
-
-    if (p_profile->oxi->syncOximeterClock()) {
-        oximodule->syncClock();
-    }
-
-    QString model = oximodule->getModel();
-    QString user = oximodule->getUser();
-    QString devid = oximodule->getDeviceID();
-
-    if (oximodule->commandDriven()) {
-        if (devid != ui->cms50DeviceName->text()) {
-            if (ui->cms50CheckName->isChecked()) {
-                mainwin->Notify(STR_MessageBox_Information, tr("Renaming this oximeter from '%1' to '%2'").arg(devid).arg(ui->cms50DeviceName->text()));
-                oximodule->setDeviceID(ui->cms50DeviceName->text());
-            } else {
-                QMessageBox::information(this, STR_MessageBox_Information, tr("Oximeter name is different.. If you only have one and are sharing it between profiles, set the name to the same on both profiles."), QMessageBox::Ok);
-            }
-        }
-    }
-
-    oximodule->resetDevice();
-    int session_count = oximodule->getSessionCount();
-    QDateTime startTime = QDateTime();
-    int duration = 0;
-    qDebug() << "oximod - Session count: " << session_count;
-
-    if (session_count > 1) {
-        ui->stackedWidget->setCurrentWidget(ui->chooseSessionPage);
-        ui->syncButton->setVisible(false);
-        ui->chooseSessionButton->setVisible(true);
-
-        ui->tableOxiSessions->clearContents();
-        QTableWidgetItem * item;
-
-        ui->tableOxiSessions->setRowCount(session_count);
-        ui->tableOxiSessions->setSelectionBehavior(QAbstractItemView::SelectRows);
-
-        ui->tableOxiSessions->setColumnWidth(0,150);
-
-        int h, m, s;
-        for (int i=0; i< session_count; ++i) {
-            duration = oximodule->getDuration(i);
-            startTime = oximodule->getDateTime(i);
-            h = duration / 3600;
-            m = (duration / 60) % 60;
-            s = duration % 60;
-
-            item = new QTableWidgetItem(startTime.date().toString(QLocale::system().dateFormat(QLocale::ShortFormat))+" "+startTime.time().toString("HH:mm:ss"));
-            ui->tableOxiSessions->setItem(i, 0, item);
-            item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-
-            item = new QTableWidgetItem( QString::asprintf("%02i:%02i:%02i", h,m,s));
-            ui->tableOxiSessions->setItem(i, 1, item);
-            item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-
-            item = new QTableWidgetItem(tr("\"%1\", session %2").arg(user).arg(i+1, 0));
-            ui->tableOxiSessions->setItem(i, 2, item);
-            item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-        }
-
-        selecting_session = true;
-        ui->tableOxiSessions->selectRow(0);
-        return;
-    } else if (session_count > 0) {
-        chosen_sessions.push_back(0);
-        duration = oximodule->getDuration(0);
-        startTime = oximodule->getDateTime(0);
-        oximodule->setStartTime(startTime);
-        qDebug() << "oximod - Session start time: " << startTime.toString();
-    }
-    doImport();
-}
-
-void OximeterImport::doImport()
-{
-	qDebug() << "oximod - Starting doImport";
-	
-    if (oximodule->commandDriven()) {
-        if (chosen_sessions.size() == 0) {
-            qDebug() << "oximod - Chosen session size is zero - quitting";
-            ui->connectLabel->setText("<h2>"+tr("Nothing to import")+"</h2>");
-            updateStatus(tr("Your oximeter did not have any valid sessions."));
-            ui->cancelButton->setText(tr("Close"));
+    QWidget *page = ui->stackedWidget->currentWidget();
+    if (page == m_devicePage) {
+        p_profile->oxi->setOximeterType(oximeterType());
+        refreshMethods();
+        showPage(m_methodPage, MethodStep);
+    } else if (page == m_methodPage) {
+        startImport();
+    } else if (page == m_viatomPage) {
+#ifdef OSCAR_HAVE_BLUETOOTH
+        if (!m_viatomPanel->stopForClose()) {
             return;
         }
-        ui->connectLabel->setText("<h2>"+tr("Waiting for %1 to start").arg(oximodule->getModel())+"</h2>");
-        updateStatus(tr("Waiting for the device to start the upload process..."));
-    } else {
-        ui->connectLabel->setText("<h2>"+tr("Select upload option on %1").arg(oximodule->loaderName())+"</h2>");
-        ui->logBox->appendPlainText(tr("You need to tell your oximeter to begin sending data to the computer."));
-        updateStatus(tr("Please connect your oximeter, enter it's menu and select upload to commence data transfer..."));
-    }
-
-    connect(oximodule, SIGNAL(updateProgress(int,int)), this, SLOT(doUpdateProgress(int,int)));
-    oximodule->Open("import");
-
-    if (oximodule->commandDriven()) {
-        int chosen = chosen_sessions.at(0);
-        oximodule->getSessionData(chosen);
-    }
-
-    // Wait to start import streaming..
-    while (!oximodule->isImporting() && !oximodule->isAborted()) {
-        QApplication::processEvents();
-        if (!isVisible()) {
-            disconnect(oximodule, SIGNAL(updateProgress(int,int)), this, SLOT(doUpdateProgress(int,int)));
-            oximodule->abort();
-            break;
-        }
-
-    }
-
-    if (!oximodule->isStreaming()) {
-        disconnect(oximodule, SIGNAL(updateProgress(int,int)), this, SLOT(doUpdateProgress(int,int)));
-        ui->retryButton->setVisible(true);
-        ui->progressBar->setValue(0);
-        oximodule->abort();
-        return;
-    }
-    ui->connectLabel->setText("<h2>"+tr("%1 device is uploading data...").arg(oximodule->loaderName())+"</h2>");
-    updateStatus(tr("Please wait until oximeter upload process completes. Do not unplug your oximeter."));
-
-    importMode = IM_RECORDING;
-
-    // Can't abort this bit or the oximeter will get confused...
-    ui->cancelButton->setVisible(false);
-
-    connect(oximodule, SIGNAL(importComplete(SerialOximeter*)), this, SLOT(finishedImport(SerialOximeter*)));
-}
-
-void OximeterImport::finishedImport(SerialOximeter * oxi)
-{
-    Q_UNUSED(oxi);
-
-	qDebug() << "oximod - finished Import ";
-	
-    connect(oximodule, SIGNAL(importComplete(SerialOximeter*)), this, SLOT(finishedImport(SerialOximeter*)));
-    ui->cancelButton->setVisible(true);
-    disconnect(oximodule, SIGNAL(updateProgress(int,int)), this, SLOT(doUpdateProgress(int,int)));
-    updateStatus(tr("Oximeter import completed.."));
-
-    if (oximodule->oxisessions.size() > 1) {
-        chooseSession();
-    } else {
-        on_syncButton_clicked();
-    }
-}
-
-void OximeterImport::doUpdateProgress(int v, int t)
-{
-    ui->progressBar->setMaximum(t);
-    ui->progressBar->setValue(v);
-    QApplication::processEvents();
-}
-
-
-void OximeterImport::on_fileImportButton_clicked()
-{
-    // Viatom files are read by the Viatom loader, which MainWindow runs once the wizard closes.
-    if (ui->oximeterType->currentData().toInt() == OXI_VIATOM) {
-        m_viatomRequest = ViatomFileImport;
+        const int n = m_viatomPanel->importedCount();
+        showSummary(n > 0 ? tr("%n recording(s) imported into OSCAR.", "", n)
+                          : tr("No recordings were imported."));
+#endif
+    } else if (page == ui->chooseSessionPage) {
+        QTableWidgetItem * item_0 = ui->tableOxiSessions->item(ui->tableOxiSessions->currentRow(), 0);
+        if (!item_0) return;
+        oximodule->setStartTime(item_0->data(Qt::UserRole).toDateTime());
+        showSyncPage();
+    } else if (page == ui->syncPage) {
+        saveSession();
+    } else if (page == m_summaryPage) {
         accept();
+    }
+}
+
+void OximeterImport::goBack()
+{
+    QWidget *page = ui->stackedWidget->currentWidget();
+    if (page == m_methodPage) {
+        showPage(m_devicePage, DeviceStep);
+    } else if (page == m_viatomPage) {
+#ifdef OSCAR_HAVE_BLUETOOTH
+        if (!m_viatomPanel->stopForClose()) {
+            return;
+        }
+#endif
+        refreshMethods();
+        showPage(m_methodPage, MethodStep);
+    } else if (page == ui->chooseSessionPage) {
+        refreshMethods();
+        showPage(m_methodPage, MethodStep);
+    } else if (page == ui->syncPage) {
+        if (oximodule && oximodule->oxisessions.size() > 1) {
+            showPage(ui->chooseSessionPage, ImportStep);
+        } else {
+            refreshMethods();
+            showPage(m_methodPage, MethodStep);
+        }
+    }
+}
+
+void OximeterImport::reject()
+{
+#ifdef OSCAR_HAVE_BLUETOOTH
+    if (m_viatomPanel && ui->stackedWidget->currentWidget() == m_viatomPage && !m_viatomPanel->stopForClose()) {
         return;
     }
+#endif
+    qDebug() << "oximod - Cancel button clicked";
+    QDialog::reject();
+}
 
+// ----------------------------------------------------------------------------------------
+// Step 3: import
+
+void OximeterImport::startImport()
+{
+    if (oximeterType() != OXI_VIATOM) {
+        importOximeterFile();
+        return;
+    }
+    if (method() == FilesMethod) {
+        // Chooses and imports the files, with its own progress and messages.
+        if (m_importViatomFiles && m_importViatomFiles()) {
+            m_importedFiles = true;
+            showSummary(tr("The Viatom/Wellue data files were imported into OSCAR."));
+        }
+        return;
+    }
+#ifdef OSCAR_HAVE_BLUETOOTH
+    if (!m_viatomPanel) {
+        m_viatomPanel = new ViatomImportPanel(m_importViatomFile, this);
+        m_viatomPage = new QWidget(this);
+        auto *v = new QVBoxLayout(m_viatomPage);
+        v->setContentsMargins(32, 20, 32, 12);
+        v->addWidget(m_viatomPanel);
+        ui->stackedWidget->addWidget(m_viatomPage);
+    }
+    showPage(m_viatomPage, ImportStep);
+    if (method() == UsbMethod) {
+        m_viatomPanel->startWithUsb();
+    } else {
+        m_viatomPanel->startScan();
+    }
+#endif
+}
+
+void OximeterImport::importOximeterFile()
+{
     QString documentsFolder = (*p_profile)[STR_PREF_LastOximetryPath].toString();
     if (documentsFolder.isEmpty())
         documentsFolder = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
 
-    qDebug() << "oximod - File Import button clicked";
-	
-    QString filename = QFileDialog::getOpenFileName(nullptr, tr("Select a valid oximetry data file"), documentsFolder, tr("Oximetry Files (*.spo *.spor *.spo2 *.SpO2 *.dat)"), nullptr, nativeDialogOption());
-
+    const QString filter = oximeterType() == OXI_MD300W1 ? tr("Oximetry Files (*.dat)")
+                                                         : tr("Oximetry Files (*.spo *.spor *.spo2 *.SpO2 *.dat)");
+    QString filename = QFileDialog::getOpenFileName(this, tr("Select a valid oximetry data file"), documentsFolder,
+                                                    filter, nullptr, nativeDialogOption());
     if (filename.isEmpty())
         return;
 
-    // Make sure filename dialog had time to close properly..
-    QApplication::processEvents();
-
     qDebug() << "oximod - Chosen filename is " << filename;
-    QList<SerialOximeter *> loaders = GetOxiLoaders();
-
-    bool success = false;
 
     oximodule = nullptr;
-    Q_FOREACH(SerialOximeter * loader, loaders) {
+    for (SerialOximeter * loader : GetOxiLoaders()) {
         if (loader && loader->Open(filename)) { // there is a null entry in loaders. so ths check is necessary
-            success = true;
             oximodule = loader;
             break;
         }
     }
-    if (!success) {
+    if (!oximodule) {
         QMessageBox::warning(this, STR_MessageBox_Warning, tr("No Oximetry module could parse the given file:")+QString("\n\n%1").arg(filename), QMessageBox::Ok);
         return;
     }
     qDebug() << "oximod - Using loader " << oximodule->loaderName();
-    
-    ui->informationButton->setVisible(false);
-    importMode = IM_FILE;
+
+    (*p_profile)[STR_PREF_LastOximetryPath] = QFileInfo(filename).absolutePath();
 
     if (oximodule->oxisessions.size() > 1) {
         chooseSession();
     } else {
-    //	oximodule->setStartTime( ??? );  Nope, it was set in the loader module by the file import routime
-        on_syncButton_clicked();
+        showSyncPage();
     }
-
-    QDir oxdir(filename.section("/",0,-1));
-    (*p_profile)[STR_PREF_LastOximetryPath] = oxdir.canonicalPath();
-
-    qDebug() << "oximod - Finished file import: Oximodule startTime is " << oximodule->startTime().toString("yyyy-MMM-dd HH:mm:ss");
 }
 
-void OximeterImport::on_liveImportButton_clicked()
+void OximeterImport::chooseSession()
 {
-    ui->informationButton->setVisible(false);
+    qDebug() << "oximod - Oximeter Choose Session called";
+    ui->tableOxiSessions->clearContents();
+    ui->tableOxiSessions->setRowCount(oximodule->oxisessions.size());
 
-	qDebug() << "oximod - Live Import button clicked";
-    ui->stackedWidget->setCurrentWidget(ui->liveImportPage);
-    ui->liveImportPage->layout()->addWidget(ui->progressBar);
-    QApplication::processEvents();
+    int row = 0;
+    for (auto it = oximodule->oxisessions.begin(); it != oximodule->oxisessions.end(); ++it) {
+        const QDateTime & key = it.key();
+        QVector<OxiRecord> * oxirec = it.value();
+        auto *item = new QTableWidgetItem(QLocale().toString(key, QLocale::ShortFormat));
+        item->setData(Qt::UserRole, key);
+        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+        ui->tableOxiSessions->setItem(row, 0, item);
 
-    liveView->setEmptyText(tr("Oximeter not detected"));
-    liveView->setVisible(true);
-    QApplication::processEvents();
+        long int duration = oxirec->size() * oximodule->importResolution() / 1000L;
+        item = new QTableWidgetItem(QString::asprintf("%02li:%02li:%02li", duration / 3600, (duration / 60) % 60, duration % 60));
+        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+        ui->tableOxiSessions->setItem(row, 1, item);
 
-    SerialOximeter * oximodule = detectOximeter();
+        item = new QTableWidgetItem(tr("Oximeter Session %1").arg(row + 1));
+        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+        ui->tableOxiSessions->setItem(row, 2, item);
+        row++;
+    }
+    ui->tableOxiSessions->selectRow(0);
+    showPage(ui->chooseSessionPage, ImportStep);
+}
 
-    if (!oximodule) {
-        updateStatus(tr("Couldn't access oximeter"));
-        ui->retryButton->setVisible(true);
-        ui->progressBar->setValue(0);
+// ----------------------------------------------------------------------------------------
+// Step 4: match to CPAP, or a summary
 
+QWidget *OximeterImport::buildSummaryPage()
+{
+    auto *page = new QWidget(this);
+    auto *layout = new QVBoxLayout(page);
+    layout->setContentsMargins(32, 24, 32, 16);
+    auto *heading = new QLabel(tr("Import finished"), page);
+    QFont hf = heading->font();
+    hf.setPointSizeF(hf.pointSizeF() * 1.6);
+    hf.setBold(true);
+    heading->setFont(hf);
+    m_summaryText = new QLabel(page);
+    m_summaryText->setWordWrap(true);
+    layout->addWidget(heading);
+    layout->addWidget(m_summaryText);
+    layout->addWidget(new QLabel(tr("Viatom/Wellue recordings carry their own start time, so there is nothing to match to CPAP data."), page));
+    layout->addStretch();
+    return page;
+}
+
+void OximeterImport::showSummary(const QString &text)
+{
+    m_summaryText->setText(text);
+    showPage(m_summaryPage, FinishStep);
+}
+
+void OximeterImport::showSyncPage()
+{
+    if (oximodule == nullptr) {
+        qCritical() << "oximod - OximeterImport::showSyncPage called when oximodule is null";
+        return;
+    }
+    qDebug() << "oximod Start Time is " << oximodule->startTime().toString("yyyy-MMM-dd HH.mm.ss");
+
+    showPage(ui->syncPage, FinishStep);
+
+    QDate first = p_profile->FirstDay();
+    QDate last = p_profile->LastDay();
+    QDate oxidate = oximodule->startTime().date();
+
+    if ((oxidate >= first) && (oxidate <= last)) {
+        ui->calendarWidget->setMinimumDate(first);
+        ui->calendarWidget->setMaximumDate(last);
+        ui->calendarWidget->setCurrentPage(oxidate.year(), oxidate.month());
+        ui->calendarWidget->setSelectedDate(oxidate);
+        on_calendarWidget_clicked(oximodule->startTime().date());
+    } else {
+        // No CPAP sessions to sync it to.. kill the CPAP sync option
+        on_calendarWidget_clicked(last);
+        ui->calendarWidget->setCurrentPage(oxidate.year(), oxidate.month());
+        ui->calendarWidget->setSelectedDate(oxidate);
+    }
+
+    ui->radioSyncOximeter->setChecked(true);
+    on_radioSyncOximeter_clicked();
+
+    if (!oximodule->isStartTimeValid()) {
+        // Oximeter doesn't provide a clock
+        ui->labelSyncOximeter->setText(tr("I need to set the time manually, because my oximeter doesn't have an internal clock."));
+    }
+
+    suggestCpapSession();
+}
+
+void OximeterImport::suggestCpapSession()
+{
+    m_suggestion->setVisible(false);
+    if (!oximodule || !oximodule->oxisessions.contains(oximodule->startTime())) {
+        return;
+    }
+    const qint64 oxStart = oximodule->startTime().toMSecsSinceEpoch();
+    const qint64 oxLength = qint64(oximodule->oxisessions[oximodule->startTime()]->size()) * oximodule->importResolution();
+    const qint64 oxEnd = oxStart + oxLength;
+
+    // With a clock: the CPAP session on that night that overlaps the recording most.
+    // Without one the date means nothing, so: on the last night with CPAP data, the
+    // session closest in length to the recording.
+    QList<QDate> days;
+    if (oximodule->isStartTimeValid()) {
+        const QDate d = oximodule->startTime().date();
+        days << d.addDays(-1) << d << d.addDays(1);
+    } else {
+        days << p_profile->LastGoodDay(MT_CPAP);
+    }
+
+    Session *best = nullptr;
+    QDate bestDay;
+    qint64 bestScore = 0;
+    for (const QDate &date : days) {
+        Day *day = p_profile->GetGoodDay(date, MT_CPAP);
+        if (!day) {
+            continue;
+        }
+        for (Session *s : *day) {
+            qint64 score;
+            if (oximodule->isStartTimeValid()) {
+                score = qMin(oxEnd, s->last()) - qMax(oxStart, s->first());   // overlap
+            } else {
+                score = oxLength - qAbs(s->length() - oxLength);              // closeness in length
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                best = s;
+                bestDay = date;
+            }
+        }
+    }
+    if (!best) {
+        qDebug() << "oximod - no CPAP session to suggest";
         return;
     }
 
-    MachineInfo info = oximodule->newInfo();
-    Machine *mach = p_profile->CreateMachine(info);
-
-    connect(oximodule, SIGNAL(updatePlethy(QByteArray)), this, SLOT(on_updatePlethy(QByteArray)));
-    ui->liveConnectLabel->setText(tr("Live Oximetry Mode"));
-
-
-    liveView->setEmptyText(tr("Starting up..."));
-    updateStatus(tr("If you can still read this after a few seconds, cancel and try again"));
-    ui->progressBar->hide();
-    liveView->update();
-    oximodule->Open("live");
-    ui->stopButton->setVisible(true);
-
-    dummyday = new Day();
-
-    quint32 starttime = oximodule->startTime().toSecsSinceEpoch();
-    ti = qint64(starttime) * 1000L;
-    start_ti = ti;
-
-    session = new Session(mach, starttime);
-
-    ELplethy = session->AddEventList(OXI_Plethy, EVL_Waveform, 1.0, 0.0, 0.0, 0.0, 20);
-
-    ELplethy->setFirst(start_ti);
-    session->really_set_first(start_ti);
-    session->setOpened(true);
-
-    dummyday->addSession(session);
-
-    plethyChart->setMinX(start_ti);
-    plethyGraph->SetMinX(start_ti);
-
-    liveView->setDay(dummyday);
-
-    updateTimer.setParent(this);
-    updateTimer.setInterval(50);
-    updateTimer.start();
-    connect(&updateTimer, SIGNAL(timeout()), this, SLOT(updateLiveDisplay()));
-    connect(ui->stopButton, SIGNAL(clicked()), this, SLOT(finishedRecording()));
-
-    importMode = IM_LIVE;
-
-}
-
-void OximeterImport::finishedRecording()
-{
-	qDebug() << "oximod - Finished Recording";
-	
-    updateTimer.stop();
-    oximodule->closeDevice();
-    disconnect(&updateTimer, SIGNAL(timeout()), this, SLOT(updateLiveDisplay()));
-    disconnect(ui->stopButton, SIGNAL(clicked()), this, SLOT(finishedRecording()));
-
-    ui->stopButton->setVisible(false);
-    ui->liveConnectLabel->setText(tr("Live Import Stopped"));
-    liveView->setEmptyText(tr("Live Oximetry Stopped"));
-    updateStatus(tr("Live Oximetry import has been stopped"));
-
-    disconnect(oximodule, SIGNAL(updatePlethy(QByteArray)), this, SLOT(on_updatePlethy(QByteArray)));
-
-    ui->syncButton->setVisible(true);
-
-    plethyGraph->SetMinX(start_ti);
-    liveView->SetXBounds(start_ti, ti, 0, true);
-
-    plethyGraph->setBlockZoom(false);
-}
-
-void OximeterImport::on_retryButton_clicked()
-{
-	qDebug() << "oximod - Retry button clicked";
-    if (ui->stackedWidget->currentWidget() == ui->directImportPage) {
-        on_directImportButton_clicked();
-    } else if (ui->stackedWidget->currentWidget() == ui->liveImportPage) {
-        on_liveImportButton_clicked();
+    ui->radioSyncCPAP->setChecked(true);
+    ui->syncCPAPGroup->setVisible(true);
+    ui->calendarWidget->setSelectedDate(bestDay);   // fills the session bar for that day
+    on_calendarWidget_clicked(bestDay);
+    for (int i = 0; i < sessbar->count(); i++) {
+        if (sessbar->session(i) == best) {
+            sessbar->setSelected(i);
+            sessbar->update();
+            break;
+        }
     }
-}
+    const QDateTime start = QDateTime::fromMSecsSinceEpoch(best->first(), QTimeZone::systemTimeZone());
+    ui->dateTimeEdit->setDateTime(start);
 
-void OximeterImport::on_stopButton_clicked()
-{
-	qDebug() << "oximod - Stop button clicked";
-    if (oximodule) {
-        oximodule->abort();
+    QString why;
+    if (oximodule->isStartTimeValid()) {
+        why = tr("it overlaps the recording by %1%.").arg(qRound(100.0 * bestScore / qMax<qint64>(1, oxLength)));
+    } else {
+        why = tr("its length is closest to the recording's, on the last night with CPAP data.");
     }
+    m_suggestion->setText(tr("Suggested: the CPAP session starting %1, because %2 Choose another below if it isn't right.")
+                              .arg(QLocale().toString(start, QLocale::ShortFormat), why));
+    m_suggestion->setStyleSheet(QString("color: %1; font-weight: bold;").arg(goodColor(this)));
+    m_suggestion->setVisible(true);
+    qDebug() << "oximod - suggested CPAP session" << best->session() << "score" << bestScore;
 }
 
 void OximeterImport::on_calendarWidget_clicked(const QDate &date)
@@ -765,203 +973,25 @@ void OximeterImport::on_sessionForwardButton_clicked()
 void OximeterImport::on_radioSyncCPAP_clicked()
 {
 	qDebug() << "oximod - Use CPAP Time button clicked";
-    on_calendarWidget_clicked(oximodule->startTime().date());
+    on_calendarWidget_clicked(ui->calendarWidget->selectedDate());
 
     ui->syncCPAPGroup->setVisible(true);
-
 }
 
 void OximeterImport::on_radioSyncOximeter_clicked()
 {
 	qDebug() << "oximod - Use OximeterTime button clicked";
     ui->syncCPAPGroup->setVisible(false);
+    m_suggestion->setVisible(false);
     if ( oximodule ) {
-    	if (oximodule->isStartTimeValid()) {
-    		qDebug() << "oximod - Oximeter time is " << oximodule->startTime().toString("yyyy-MMM-dd HH:mm:ssap");
-        	ui->calendarWidget->setSelectedDate(oximodule->startTime().date());
-        	ui->dateTimeEdit->setDateTime(oximodule->startTime());
-        } else {
-        	qDebug() << "oximod - Oximeter time is faked" << oximodule->startTime().toString("yyyy-MMM-dd HH:mm:ssap");
-        	ui->calendarWidget->setSelectedDate(oximodule->startTime().date());
-        	ui->dateTimeEdit->setDateTime(oximodule->startTime());
-        }
+        qDebug() << "oximod - Oximeter time is " << oximodule->startTime().toString("yyyy-MMM-dd HH:mm:ssap")
+                 << (oximodule->isStartTimeValid() ? "" : "(no clock)");
+        ui->calendarWidget->setSelectedDate(oximodule->startTime().date());
+        ui->dateTimeEdit->setDateTime(oximodule->startTime());
     }
 }
 
-void OximeterImport::on_updatePlethy(QByteArray plethy)
-{
-    if (!session) {
-        return;
-    }
-    int size = plethy.size();
-    quint64 dur = qint64(size) * 20L;
-    ELplethy->AddWaveform(ti, plethy.data(), size, dur);
-    ti += dur;
-}
-
-void OximeterImport::updateLiveDisplay()
-{
-    if (!session) {
-        return;
-    }
-
-    if (ui->showLiveGraphs->isChecked()) {
-        qint64 sti = ti - 20000;
-        plethyChart->setMinY(ELplethy->Min());
-        plethyChart->setMaxY(ELplethy->Max());
-        plethyGraph->SetMinY(ELplethy->Min());
-        plethyGraph->SetMaxY(ELplethy->Max());
-        plethyGraph->SetMinX(sti);
-        plethyGraph->SetMaxX(ti);
-        plethyGraph->setBlockZoom(true);
-        ELplethy->setLast(ti);
-        session->really_set_last(ti);
-
-
-        session->setMin(OXI_Plethy, ELplethy->Min());
-        session->setMax(OXI_Plethy, ELplethy->Max());
-        session->setLast(OXI_Plethy, ti);
-        session->setCount(OXI_Plethy, ELplethy->count());
-
-        for (int i = 0; i < liveView->size(); i++) {
-            (*liveView)[i]->SetXBounds(sti, ti);
-        }
-
-        liveView->updateScale();
-        liveView->redraw();
-    }
-
-    if (!oximodule->oxirec) return;
-    int size = oximodule->oxirec->size();
-
-    if (size > 0) {
-        int i = oximodule->startTime().secsTo(QDateTime::currentDateTime());
-
-        int seconds = i % 60;
-        int minutes = (i / 60) % 60;
-        int hours = i / 3600;
-
-        size--;
-
-        bool datagood = (*(oximodule->oxirec))[size].pulse > 0;
-
-
-        if (datagood & (pulse <= 0)) {
-            QString STR_recording = tr("Recording...");
-            updateStatus(STR_recording);
-            liveView->setEmptyText(STR_recording);
-            if (!ui->showLiveGraphs->isChecked()) {
-                liveView->redraw();
-            }
-        } else if (!datagood & (pulse != 0)) {
-            QString STR_nofinger = tr("Finger not detected");
-            updateStatus(STR_nofinger);
-            liveView->setEmptyText(STR_nofinger);
-            if (!ui->showLiveGraphs->isChecked()) {
-                liveView->redraw();
-            }
-        }
-        pulse = (*(oximodule->oxirec))[size].pulse;
-        spo2 = (*(oximodule->oxirec))[size].spo2;
-        if (pulse > 0) {
-            ui->pulseDisplay->display(QString::asprintf("%3i", pulse));
-        } else {
-            ui->pulseDisplay->display("---");
-        }
-        if (spo2 > 0) {
-            ui->spo2Display->display(QString::asprintf("%2i", spo2));
-        } else {
-            ui->spo2Display->display("--");
-        }
-
-        ui->lcdDuration->display(QString::asprintf("%02i:%02i:%02i",hours, minutes, seconds));
-
-    }
-}
-
-
-void OximeterImport::on_cancelButton_clicked()
-{
-	qDebug() << "oximod - Cancel button clicked";
-    if (oximodule && oximodule->isStreaming()) {
-        oximodule->closeDevice();
-        oximodule->trashRecords();
-    }
-    reject();
-}
-
-void OximeterImport::on_showLiveGraphs_clicked(bool checked)
-{
-    if (checked) {
-        updateTimer.setInterval(50);
-    } else {
-        // Don't need to call the timer so often.. Save a little CPU..
-        updateTimer.setInterval(500);
-    }
-    plethyGraph->setVisible(checked);
-    liveView->redraw();
-}
-
-void OximeterImport::on_skipWelcomeCheckbox_clicked(bool checked)
-{
-    p_profile->oxi->setSkipOxiIntroScreen(checked);
-}
-
-void OximeterImport::on_informationButton_clicked()
-{
-    ui->stackedWidget->setCurrentWidget(ui->welcomePage);
-    ui->nextButton->setVisible(true);
-    ui->informationButton->setVisible(false);
-}
-
-void OximeterImport::on_syncButton_clicked()
-{
-	qDebug() << "oximod - Sync button clicked";
-    if (oximodule == nullptr) {
-        qCritical() << "oximod - OximeterImport::on_syncButton_clicked called when oximodule is null";
-        return;
-    }
-	qDebug() << "oximod Start Time is " << oximodule->startTime().toString("yyyy-MMM-dd HH.mm.ss") << "Duration: " << oximodule->getDuration(/* dummy */ 0 );
-
-    ui->stackedWidget->setCurrentWidget(ui->syncPage);
-
-    ui->syncButton->setVisible(false);
-    ui->saveButton->setVisible(true);
-
-    QDate first = p_profile->FirstDay();
-    QDate last = p_profile->LastDay();
-
-    QDate oxidate = oximodule->startTime().date();
-    qDebug() << "oximod - start date is " << oxidate.toString("yyyy-MMM-dd");
-
-
-    if ((oxidate >= first) && (oxidate <= last)) {
-        // TODO: think this through better.. do I need to pick the day before?
-        ui->calendarWidget->setMinimumDate(first);
-        ui->calendarWidget->setMaximumDate(last);
-        ui->calendarWidget->setCurrentPage(oxidate.year(), oxidate.month());
-        ui->calendarWidget->setSelectedDate(oxidate);
-        on_calendarWidget_clicked(oximodule->startTime().date());
-    } else {
-        // No CPAP sessions to sync it to.. kill the CPAP sync option
-        on_calendarWidget_clicked(last);
-        ui->calendarWidget->setCurrentPage(oxidate.year(), oxidate.month());
-        ui->calendarWidget->setSelectedDate(oxidate);
-    }
-
-    ui->radioSyncOximeter->setChecked(true);
-    on_radioSyncOximeter_clicked();
-
-    if (importMode == IM_LIVE) {
-        // Live Recording
-        ui->labelSyncOximeter->setText(tr("I want to use the time my computer recorded for this live oximetry session."));
-    } else if (!oximodule->isStartTimeValid()) {
-        // Oximeter doesn't provide a clock
-        ui->labelSyncOximeter->setText(tr("I need to set the time manually, because my oximeter doesn't have an internal clock."));
-    }
-}
-
-void OximeterImport::on_saveButton_clicked()
+void OximeterImport::saveSession()
 {
 	qDebug() << "oximod - Oximeter Save button clicked";
     if (!oximodule) return;
@@ -979,36 +1009,15 @@ void OximeterImport::on_saveButton_clicked()
         return;
     }
 
-
     // this can move to SerialOximeter class process function...
     MachineInfo info = oximodule->newInfo();
     Machine * mach = p_profile->CreateMachine(info);
     SessionID sid = ui->dateTimeEdit->dateTime().toUTC().toSecsSinceEpoch();
     quint64 start = quint64(sid) * 1000L;
 
+    Session * session = new Session(mach, sid);
+    session->really_set_first(start);
 
-    if (!session) {
-        session = new Session(mach, sid);
-        session->really_set_first(start);
-    } else {
-        // Live recording...
-        if (dummyday) {
-            dummyday->removeSession(session);
-            delete dummyday;
-            dummyday = nullptr;
-        }
-        session->SetSessionID(sid);
-        session->really_set_first(start);
-        ELplethy->setFirst(start);
-        session->setFirst(OXI_Plethy, start);
-        quint64 duration = start + (ELplethy->count() * ELplethy->rate());
-        quint64 end = start + duration;
-        session->setLast(OXI_Plethy, end);
-
-        session->count(OXI_Plethy);
-        session->Min(OXI_Plethy);
-        session->Max(OXI_Plethy);
-    }
     EventList * ELpulse = nullptr;
     EventList * ELspo2 = nullptr;
     EventList * ELperf = nullptr;
@@ -1025,7 +1034,7 @@ void OximeterImport::on_saveButton_clicked()
     quint64 ti = start;
 
 
-    qint64 step = (importMode == IM_LIVE) ? oximodule->liveResolution() : oximodule->importResolution();
+    qint64 step = oximodule->importResolution();
     int size = oxirec->size();
 
     // why was I skipping the first sample? not priming it anymore..
@@ -1181,216 +1190,8 @@ void OximeterImport::on_saveButton_clicked()
     mainwin->getDaily()->LoadDate(mainwin->getDaily()->getDate());
     mainwin->getOverview()->ReloadGraphs();
 
-    ELplethy = nullptr;
-    session = nullptr;
-
+    m_importedFiles = true;
     oximodule->trashRecords();
+    oximodule = nullptr;
     accept();
-}
-
-void OximeterImport::chooseSession()
-{
-	qDebug() << "oximod - Oximeter Choose Session called";
-    selecting_session = false;
-
-    ui->stackedWidget->setCurrentWidget(ui->chooseSessionPage);
-    ui->syncButton->setVisible(false);
-    ui->chooseSessionButton->setVisible(true);
-    QMap<QDateTime, QVector<OxiRecord> *>::iterator it;
-
-    ui->tableOxiSessions->clearContents();
-    int row = 0;
-    QTableWidgetItem * item;
-    QVector<OxiRecord> * oxirec;
-
-    ui->tableOxiSessions->setRowCount(oximodule->oxisessions.size());
-    ui->tableOxiSessions->setSelectionBehavior(QAbstractItemView::SelectRows);
-
-    for (it = oximodule->oxisessions.begin(); it != oximodule->oxisessions.end(); ++it) {
-        const QDateTime & key = it.key();
-        oxirec = it.value();
-        item = new QTableWidgetItem(key.toString(Qt::ISODate));
-        ui->tableOxiSessions->setItem(row, 0, item);
-        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-
-		long int duration = oxirec->size() * oximodule->importResolution() / 1000L;
-        int  h = duration / 3600;
-        int  m = (duration / 60) % 60;
-        int  s = duration % 60;
- 
-        item = new QTableWidgetItem( QString::asprintf("%02i:%02i:%02i", h,m,s));
-        ui->tableOxiSessions->setItem(row, 1, item);
-        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-
-        item = new QTableWidgetItem(tr("Oximeter Session %1").arg(row+1, 0));
-        ui->tableOxiSessions->setItem(row, 2, item);
-        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-
-        row++;
-    }
-
-    ui->tableOxiSessions->selectRow(0);
-}
-
-void OximeterImport::on_chooseSessionButton_clicked()
-{
-	qDebug() << "oximod - Chosen session clicked";
-    ui->chooseSessionButton->setVisible(false);
-
-    QTableWidgetItem * item_0 = ui->tableOxiSessions->item(ui->tableOxiSessions->currentRow(),0);
-    QTableWidgetItem * item_1 = ui->tableOxiSessions->item(ui->tableOxiSessions->currentRow(),1);
-
-    if (!item_0 || !item_1) return;
-    QDateTime datetime = item_0->data(Qt::DisplayRole).toDateTime();
-    oximodule->setStartTime(datetime);
-    oximodule->setDuration(item_1->data(Qt::DisplayRole).toInt());
-
-    if (selecting_session) {
-        ui->stackedWidget->setCurrentWidget(ui->directImportPage);
-        chosen_sessions.push_back(ui->tableOxiSessions->currentRow());
-
-        // go back and start import
-        doImport();
-    } else {
-        on_syncButton_clicked();
-    }
-}
-
-void OximeterImport::setInformation()
-{
-    QString html="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">"
-    "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">"
-    "p, li { white-space: pre-wrap; }"
-    "</style></head><body style=\" font-family:'.Lucida Grande UI'; font-size:13pt; font-weight:400; font-style:normal;\">"
-    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18pt;\">"
-            +tr("Welcome to the Oximeter Import Wizard")+"</span></p>"
-    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
-            +tr("Pulse Oximeters are medical devices used to measure blood oxygen saturation. During extended Apnea events and abnormal breathing patterns, blood oxygen saturation levels can drop significantly, and can indicate issues that need medical attention.")+"</p>"
-    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
-            +tr("OSCAR gives you the ability to track Oximetry data alongside CPAP session data, which can give valuable insight into the effectiveness of CPAP treatment. It will also work standalone with your Pulse Oximeter, allowing you to store, track and review your recorded data.")+"</p>"
-    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
-            "<span style=\" font-weight:600;\">"+tr("Viatom/Wellue")+" </span>"
-            +tr("(O2Ring, SleepU, Checkme O2, Wearable O2 and similar): OSCAR downloads the recordings over Bluetooth, "
-                "or imports data files copied from the oximeter or exported from the ViHealth app. "
-                "A SleepU or O2Ring S can also be read through its USB cable (on Linux and Windows); the O2Ring's "
-                "cable should work the same way but has not been tested. Support for the O2Ring S family (O2Ring S, SC, SF, SP) is new "
-                "and experimental. OSCAR can set the oximeter's clock each time it connects.")+"</p>"
-    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
-            "<span style=\" font-weight:600;\">"+tr("Contec CMS50")+" </span>"
-            +tr("(CMS50D+, CMS50E, CMS50F, CMS50I): OSCAR imports recordings directly through the serial USB cable, "
-                "and older models can also record live while attached to the computer overnight.")+"</p>"
-    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
-        +tr("You may wish to note, other companies, such as Pulox, simply rebadge Contec CMS50's under new names, such as the Pulox PO-200, PO-300, PO-400. These should also work.")+"</p>"
-
-    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
-            +tr("It also can read from ChoiceMMed MD300W1 oximeter .dat files.")+"</p>"
-    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
-            "<span style=\" font-weight:600;\">"+tr("Please remember:")+" </span>"
-            "<span style=\" font-weight:600; font-style:italic;\">"
-            +tr("If you are trying to sync oximetry and CPAP data, please make sure you imported your CPAP sessions first before proceeding!")+"</span></p>"
-    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
-            "<span style=\" font-weight:600;\">"+tr("Important Notes:")+" </span>"
-            +tr("For OSCAR to be able to locate and read directly from your Oximeter device, you need to ensure the correct device drivers (eg. USB to Serial UART) have been installed on your computer. For more information about this, %1click here%2.").arg("<a href=\"https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers\"><span style=\" text-decoration: underline; color:#0000ff;\">").arg("</span></a>")+"</p>"
-    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
-            +tr("That driver is for the Contec CMS50 cable. A Viatom/Wellue USB cable needs no driver; on Linux, "
-                "OSCAR's package gives OSCAR permission to use it.")+"</p>"
-    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
-            +tr("Contec CMS50D+ devices do not have an internal clock, and do not record a starting time. If you do not have a CPAP session to link a recording to, you will have to enter the start time manually after the import process is completed.")+"</p>"
-    "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
-            +tr("Even for devices with an internal clock, it is still recommended to get into the habit of starting oximeter records at the same time as CPAP sessions, because CPAP internal clocks tend to drift over time, and not all can be reset easily.")+"</p></body></html>";
-    ui->textBrowser->setHtml(html);
-    ui->textBrowser->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    ui->textBrowser->setOpenExternalLinks(true);
-}
-
-void OximeterImport::on_oximeterType_currentIndexChanged(int index)
-{
-    const int oxitype = ui->oximeterType->itemData(index).toInt();
-    const bool viatom = (oxitype == OXI_VIATOM);
-    // The panel picture and the device-import icons show the chosen kind of oximeter.
-    const QString picture = viatom ? QStringLiteral(":/icons/wellue.png") : QStringLiteral(":/icons/oximeter.png");
-    ui->label_5->setPixmap(QPixmap(picture).scaled(200, 200, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    ui->directImportButton->setIcon(QIcon(picture));
-    if (m_viatomBleButton) {
-        m_viatomBleButton->setIcon(QIcon(picture));
-    }
-    ui->liveImportButton->setVisible(!viatom);
-    ui->directImportButton->setText(viatom
-        ? tr("Import directly through the oximeter's USB cable (SleepU, O2Ring S, O2Ring)")
-        : m_directImportText);
-    ui->directImportButton->setToolTip(viatom
-        ? tr("Reads the recordings through the cable that came with the oximeter. "
-             "The O2Ring's cable has not been tested yet.")
-        : m_directImportToolTip);
-    if (m_viatomBleButton) {
-        m_viatomBleButton->setVisible(viatom);
-    }
-    ui->fileImportButton->setText(viatom
-        ? tr("Import from data files copied from the oximeter or exported from the ViHealth app")
-        : m_fileImportText);
-    ui->fileImportButton->setToolTip(viatom
-        ? tr("Choose the folder or files holding the recordings.")
-        : m_fileImportToolTip);
-
-    switch (oxitype) {
-    case OXI_VIATOM: {
-        // The cable is read by the Viatom BLE Import dialog, which needs a Bluetooth build.
-        const bool usb = ViatomBle::Usb::supported()
-                         && ViatomBle::availability() != ViatomBle::Availability::NotBuilt;
-        ui->directImportButton->setEnabled(usb);
-        if (!usb) {
-            ui->directImportButton->setToolTip(tr("This version of OSCAR can't read the oximeter's USB cable."));
-        }
-        ui->fileImportButton->setEnabled(true);
-        ui->oldCMS50specific->setVisible(false);
-        ui->newCMS50settingsPanel->setVisible(false);
-        break;
-    }
-    case OXI_CMS50F37: // New CMS50's version 7 protocol
-        ui->directImportButton->setEnabled(true);
-        ui->liveImportButton->setEnabled(false);
-        ui->fileImportButton->setEnabled(true);
-        ui->oldCMS50specific->setVisible(false);
-        ui->newCMS50settingsPanel->setVisible(true);
-        break;
-    case OXI_CMS50: // Old CMS50's
-        ui->directImportButton->setEnabled(true);
-        ui->liveImportButton->setEnabled(true);
-        ui->fileImportButton->setEnabled(true);
-        ui->oldCMS50specific->setVisible(true);
-        ui->newCMS50settingsPanel->setVisible(false);
-        break;
-    default: // ChoiceMMed oximeters, and others?
-        ui->directImportButton->setEnabled(false);
-        ui->liveImportButton->setEnabled(false);
-        ui->fileImportButton->setEnabled(true);
-        ui->oldCMS50specific->setVisible(false);
-        ui->newCMS50settingsPanel->setVisible(false);
-    }
-    p_profile->oxi->setOximeterType(oxitype);
-
-}
-
-void OximeterImport::on_cms50CheckName_clicked(bool checked)
-{
-    ui->cms50DeviceName->setEnabled(checked);
-    if (checked) {
-        ui->cms50DeviceName->setFocus();
-        ui->cms50DeviceName->setCursorPosition(0);
-    }
-}
-
-void OximeterImport::on_cms50SyncTime_clicked(bool checked)
-{
-    p_profile->oxi->setSyncOximeterClock(checked);
-}
-
-void OximeterImport::on_cms50DeviceName_textEdited(const QString &arg1)
-{
-    p_profile->oxi->setDefaultDevice(arg1);
-}
-
-void OximeterImport::on_textBrowser_anchorClicked(const QUrl &arg1)
-{
-    QDesktopServices::openUrl(arg1);
 }

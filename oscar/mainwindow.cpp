@@ -124,9 +124,6 @@
 #include "statistics.h"
 #include "zip.h"
 #include "speedcheck.h"
-#ifdef OSCAR_HAVE_BLUETOOTH
-#include "viatombleimportdialog.h"
-#endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,4,0)
 #include <QOpenGLFunctions>
@@ -2036,6 +2033,16 @@ void MainWindow::runOximetryWizard(bool viatom)
 {
     if (p_profile) {
         OximeterImport oxiimp(this);
+        // Viatom/Wellue: each downloaded recording is imported as it arrives, silently;
+        // data files go through the usual import, with its own messages.
+        oxiimp.setViatomFileImporter([this](const QString &path) {
+            ViatomLoader viatom;
+            return importNonCPAPFiles(viatom, QStringList(path), true, false);
+        });
+        oxiimp.setViatomFilesImporter([this]() {
+            ViatomLoader viatom;
+            return importNonCPAP(viatom);
+        });
         if (viatom) {
             oxiimp.showViatomImport();
         }
@@ -2043,11 +2050,9 @@ void MainWindow::runOximetryWizard(bool viatom)
         PopulatePurgeMenu();
         if (overview) overview->ReloadGraphs();
         if (welcome) welcome->refreshPage();
-        if (oxiimp.viatomRequest() == OximeterImport::ViatomBleImport
-                || oxiimp.viatomRequest() == OximeterImport::ViatomUsbImport) {
-            openViatomImportDialog(oxiimp.viatomRequest() == OximeterImport::ViatomUsbImport);
-        } else if (oxiimp.viatomRequest() == OximeterImport::ViatomFileImport) {
-            importViatomFiles();
+        if (oxiimp.importedAny()) {
+            GenerateStatistics();
+            if (daily) daily->LoadDate(daily->getDate());
         }
     }
 }
@@ -4042,41 +4047,6 @@ void MainWindow::on_actionImport_Viatom_Data_triggered()
 {
     // The wizard offers every way in: data files, and Bluetooth or USB download.
     runOximetryWizard(true);
-}
-
-void MainWindow::importViatomFiles()
-{
-    ViatomLoader viatom;
-    importNonCPAP(viatom);
-}
-
-void MainWindow::openViatomImportDialog(bool usb)
-{
-#ifndef OSCAR_HAVE_BLUETOOTH
-    Q_UNUSED(usb);
-#else
-    if (p_profile == nullptr) {
-        QMessageBox::warning(this, tr("Import"), tr("Please open or create a profile before importing data."));
-        return;
-    }
-    ViatomBleImportDialog dialog([this](const QString &path) {
-        ViatomLoader viatom;
-        return importNonCPAPFiles(viatom, QStringList(path), true, false);
-    }, this);
-    if (usb) {
-        dialog.startWithUsb();
-    }
-    dialog.exec();
-
-    if (dialog.importedAny()) {
-        // The imports ran silently, so refresh once here.
-        PopulatePurgeMenu();
-        if (overview) overview->ReloadGraphs();
-        if (welcome) welcome->refreshPage();
-        GenerateStatistics();
-        if (daily) daily->LoadDate(daily->getDate());
-    }
-#endif
 }
 
 void MainWindow::GenerateStatistics()

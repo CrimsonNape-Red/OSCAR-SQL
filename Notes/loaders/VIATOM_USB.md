@@ -10,8 +10,8 @@ answers the classic one described here. The classic O2Ring's cable is expected t
 the same way but has not been tested.
 
 The same tester found that with the ring already on the cable, OSCAR didn't find it until
-the ring was taken off the cable and put back. When it finds no cable, the import dialog
-therefore keeps looking every second and connects once one appears.
+the ring was taken off the cable and put back. When it finds no cable, the wizard's
+import page therefore keeps looking every second and connects once one appears.
 
 ## The cable
 

@@ -1,9 +1,9 @@
 # Testing Viatom BLE Import (branch `vihealth-dev`)
 
-Thank you for helping. This branch adds Viatom BLE Import, which downloads recordings
-from a Viatom/Wellue oximeter over Bluetooth (or, for a SleepU on Linux, its USB cable) and
-imports them into OSCAR. Open it from **Data → Import Viatom/Wellue Data**, which opens the
-Oximetry Wizard with Viatom/Wellue selected, then choose the Bluetooth or USB download.
+Thank you for helping. This branch lets the Oximetry Wizard download recordings from a
+Viatom/Wellue oximeter over Bluetooth, or over its USB cable (SleepU, O2Ring S), and import
+them into OSCAR. Open it with **Data → Import Viatom/Wellue Data**, which starts the wizard
+with Viatom/Wellue selected, then choose **Over Bluetooth** or **Through the USB cable**.
 
 - **Classic models:** O2Ring, SleepU, Checkme O2 and their relatives.
 - **O2Ring S family:** O2Ring S, SC, SF, SP. This support is **experimental**. It was
@@ -59,10 +59,10 @@ reason, and the log has a `ViatomBle availability:` line.
 
 1. **Prepare the ring.** Wear it for a night, or at least ten minutes, so there is a
    recording. Then take it off and wait until it shows its standby screen.
-2. **Open the dialog.** Start the OSCAR you built, open your test profile, choose
-   **Data → Import Viatom/Wellue Data**, then click the Bluetooth or USB download button.
-3. **Connect.** Click **Search for devices**. Your ring should be listed, marked
-   *(O2Ring S family: experimental)*. Select it and click **Connect**.
+2. **Open the wizard.** Start the OSCAR you built, open your test profile, choose
+   **Data → Import Viatom/Wellue Data**, select **Over Bluetooth** and click **Connect**.
+3. **Connect.** OSCAR searches for devices. Your ring should be listed, marked
+   *(O2Ring S family: experimental)*. Select it and click **Connect** below the list.
 4. **Download.** If it gets as far as a list of recordings, download one or two and let
    OSCAR import them.
 5. **Check the result.** Look at the night in OSCAR's Daily view. Do SpO2, pulse and the

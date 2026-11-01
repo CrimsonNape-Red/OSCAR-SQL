@@ -1,4 +1,4 @@
-/* Viatom BLE Import dialog
+/* Viatom/Wellue import panel
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -6,13 +6,13 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
-#ifndef VIATOMBLEIMPORTDIALOG_H
-#define VIATOMBLEIMPORTDIALOG_H
+#ifndef VIATOMIMPORTPANEL_H
+#define VIATOMIMPORTPANEL_H
 
 #include <functional>
 
 #include <QBluetoothDeviceInfo>
-#include <QDialog>
+#include <QWidget>
 #include <QList>
 
 #include "SleepLib/viatomble/viatomble_protocol.h"
@@ -34,35 +34,41 @@ class Link;
 }
 
 /*! \brief Downloads recordings from a Viatom/Wellue oximeter over Bluetooth LE, or over
- *  its USB cable (SleepU, O2Ring S; the O2Ring's is untested). Titled "Viatom/Wellue Import".
+ *  its USB cable (SleepU, O2Ring S; the O2Ring's is untested).
  *
- *  Steps, in the style of the oximeter import wizard: instructions, choose a device,
- *  choose files, download. Files are kept in <profile folder>/Oximetry_Data/<serial>/ and,
+ *  The Oximetry Wizard's import step for these oximeters: choose a device, choose
+ *  recordings, download. Files are kept in <profile folder>/Oximetry_Data/<serial>/ and,
  *  if the user wants, each one is imported as soon as it has arrived.
  *  See Notes/specs/2026-10-27-viatom-ble-import-design.md.
  */
-class ViatomBleImportDialog : public QDialog
+class ViatomImportPanel : public QWidget
 {
     Q_OBJECT
 
   public:
     //! importFile imports one downloaded file into the open profile; true on success.
-    ViatomBleImportDialog(std::function<bool(const QString &)> importFile, QWidget *parent = nullptr);
-    ~ViatomBleImportDialog() override;
+    ViatomImportPanel(std::function<bool(const QString &)> importFile, QWidget *parent = nullptr);
+    ~ViatomImportPanel() override;
 
     //! True if at least one file was imported, so the caller should refresh its views.
     bool importedAny() const { return m_importedCount > 0; }
+    int importedCount() const { return m_importedCount; }
 
-    /*! Starts on the USB cable instead of the welcome page, without searching for
-     *  Bluetooth devices; connects at once if exactly one usable cable is plugged in.
-     *  Call before exec(). */
+    /*! Starts on the USB cable without searching for Bluetooth devices; connects at
+     *  once if exactly one usable cable is plugged in. */
     void startWithUsb();
 
+    /*! Before leaving the panel: asks whether to stop a download in progress. False if
+     *  the user wants to carry on; otherwise everything is stopped. */
+    bool stopForClose();
+    //! Stops searching and drops the connection, without asking.
+    void stop();
+
   public slots:
-    void reject() override;
+    //! Lists USB cables, then searches for Bluetooth devices.
+    void startScan();
 
   private slots:
-    void startScan();
     void onDeviceFound(const QBluetoothDeviceInfo &info, ViatomBle::DeviceFamily family);
     void onScanFinished();
     void connectToSelected();
@@ -80,9 +86,8 @@ class ViatomBleImportDialog : public QDialog
     void onDownloadFinished(bool cancelled);
 
   private:
-    enum Page { WelcomePage, DevicesPage, FilesPage, TransferPage };
+    enum Page { DevicesPage, FilesPage, TransferPage };
 
-    QWidget *buildWelcomePage();
     QWidget *buildDevicesPage();
     QWidget *buildFilesPage();
     QWidget *buildTransferPage();
@@ -101,7 +106,6 @@ class ViatomBleImportDialog : public QDialog
     QStackedWidget *m_pages = nullptr;
     QLabel *m_status = nullptr;
     QLabel *m_warning = nullptr;     // stays up, unlike m_status, e.g. another program on the cable
-    QPushButton *m_closeButton = nullptr;
 
     // Devices page
     QListWidget *m_deviceList = nullptr;
@@ -148,4 +152,4 @@ class ViatomBleImportDialog : public QDialog
     int m_importFailedCount = 0;
 };
 
-#endif // VIATOMBLEIMPORTDIALOG_H
+#endif // VIATOMIMPORTPANEL_H

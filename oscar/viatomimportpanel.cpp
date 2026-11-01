@@ -1,4 +1,4 @@
-/* Viatom BLE Import dialog
+/* Viatom/Wellue import panel
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -24,7 +24,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 
-#include "viatombleimportdialog.h"
+#include "viatomimportpanel.h"
 #include "SleepLib/common.h"
 #include "SleepLib/preferences.h"
 #include "SleepLib/profiles.h"
@@ -66,62 +66,16 @@ static QString describeFile(const QString &name)
     return name;
 }
 
-ViatomBleImportDialog::ViatomBleImportDialog(std::function<bool(const QString &)> importFile, QWidget *parent)
-    : QDialog(parent), m_importFile(std::move(importFile))
+ViatomImportPanel::ViatomImportPanel(std::function<bool(const QString &)> importFile, QWidget *parent)
+    : QWidget(parent), m_importFile(std::move(importFile))
 {
-    setWindowTitle(tr("Viatom/Wellue Import"));
-    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    resize(820, 560);
-
-    // The same light appearance as the oximeter import wizard.
-    setStyleSheet(
-        "QDialog, QStackedWidget, QStackedWidget > QWidget { background-color: #f0f0f0; }"
-        "QLabel { color: black; }"
-        "QCheckBox { color: black; }"
-        "QListWidget, QPlainTextEdit { color: black; background-color: white; }"
-        "QPushButton { color: black; background-color: #f0f0f0;"
-        "    border: 1px solid #adadad; border-radius: 3px; padding: 4px 10px; }"
-        "QPushButton:hover    { background-color: #e5f1fb; border-color: #0078d7; }"
-        "QPushButton:pressed  { background-color: #cce4f7; border-color: #0078d7; }"
-        "QPushButton:disabled { color: #a0a0a0; border-color: #d0d0d0; }");
-
-    auto *title = new QLabel(tr("Viatom/Wellue Import"), this);
-    QFont titleFont = title->font();
-    titleFont.setPointSize(18);
-    title->setFont(titleFont);
-    title->setAlignment(Qt::AlignCenter);
-
-    // Left panel, as in the wizard
-    auto *panel = new QFrame(this);
-    panel->setStyleSheet("QFrame { background: qlineargradient(x1:0 y1:0, x2:1 y2:0, stop:0 white, stop:1 #789abc);"
-                         " border: 1px solid gray; border-radius: 15px; }");
-    panel->setFixedWidth(150);
-    auto *panelLayout = new QVBoxLayout(panel);
-    auto *icon = new QLabel(panel);
-    icon->setStyleSheet("border: 0px;");
-    icon->setPixmap(QPixmap(":/icons/wellue.png").scaled(110, 110, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    icon->setAlignment(Qt::AlignCenter);
-    panelLayout->addStretch();
-    panelLayout->addWidget(icon);
-    panelLayout->addStretch();
-
     m_pages = new QStackedWidget(this);
-    m_pages->addWidget(buildWelcomePage());
     m_pages->addWidget(buildDevicesPage());
     m_pages->addWidget(buildFilesPage());
     m_pages->addWidget(buildTransferPage());
 
-    auto *middle = new QHBoxLayout;
-    middle->addWidget(panel);
-    middle->addWidget(m_pages, 1);
-
     m_status = new QLabel(this);
     m_status->setWordWrap(true);
-    m_closeButton = new QPushButton(tr("Close"), this);
-    connect(m_closeButton, &QPushButton::clicked, this, &ViatomBleImportDialog::reject);
-    auto *bottom = new QHBoxLayout;
-    bottom->addWidget(m_status, 1);
-    bottom->addWidget(m_closeButton);
 
     m_warning = new QLabel(this);
     m_warning->setWordWrap(true);
@@ -129,10 +83,10 @@ ViatomBleImportDialog::ViatomBleImportDialog(std::function<bool(const QString &)
     m_warning->setVisible(false);
 
     auto *layout = new QVBoxLayout(this);
-    layout->addWidget(title);
-    layout->addLayout(middle, 1);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(m_pages, 1);
     layout->addWidget(m_warning);
-    layout->addLayout(bottom);
+    layout->addWidget(m_status);
 
     // Some oximeters show up on USB only once they are put on the cable; after
     // startWithUsb() found none, look again every second and connect when one appears.
@@ -151,71 +105,33 @@ ViatomBleImportDialog::ViatomBleImportDialog(std::function<bool(const QString &)
     });
 
     m_scanner = new Scanner(this);
-    connect(m_scanner, &Scanner::deviceFound, this, &ViatomBleImportDialog::onDeviceFound);
-    connect(m_scanner, &Scanner::finished, this, &ViatomBleImportDialog::onScanFinished);
+    connect(m_scanner, &Scanner::deviceFound, this, &ViatomImportPanel::onDeviceFound);
+    connect(m_scanner, &Scanner::finished, this, &ViatomImportPanel::onScanFinished);
     connect(m_scanner, &Scanner::error, this, [this](const QString &reason) {
         m_status->setText(tr("Bluetooth search failed: %1").arg(reason));
         onScanFinished();
     });
 
-    showPage(WelcomePage);
+    showPage(DevicesPage);
 }
 
-ViatomBleImportDialog::~ViatomBleImportDialog()
+ViatomImportPanel::~ViatomImportPanel()
 {
     closeConnection();
 }
 
-QWidget *ViatomBleImportDialog::buildWelcomePage()
-{
-    auto *page = new QWidget(this);
-    auto *text = new QLabel(page);
-    text->setWordWrap(true);
-    text->setTextFormat(Qt::RichText);
-    text->setText(tr(
-        "<h3>Download recordings from your oximeter over Bluetooth or USB</h3>"
-        "<p>This works with Viatom/Wellue oximeters such as the O2Ring, SleepU, Checkme O2 and "
-        "Wearable O2. Support for the O2Ring S family (O2Ring S, SC, SF, SP) is new and "
-        "experimental: if it fails, OSCAR's debug log shows what happened.</p>"
-        "<p>A SleepU or O2Ring S can also be read through its USB cable (on Linux and Windows). "
-        "Plug it in before searching; it is listed first. The O2Ring's cable should work the "
-        "same way but has not been tested.</p>"
-        "<p><b>Before you start:</b></p>"
-        "<ul>"
-        "<li>Close the ViHealth app on your phone, or turn the phone's Bluetooth off. "
-        "The oximeter talks to only one device at a time.</li>"
-        "<li>Put the oximeter in standby. For an O2Ring, take it off your finger and wait until "
-        "the countdown ends and it shows END. If it is switched off, put your finger in briefly "
-        "and take it out again.</li>"
-        "<li>Keep it close to the computer. It switches itself off after about two minutes "
-        "without a connection.</li>"
-        "</ul>"
-        "<p>Downloaded files are kept in <i>%1</i> and can also be imported later with "
-        "<i>Data → Import Viatom/Wellue Data</i>.</p>")
-        .arg(QDir::toNativeSeparators(oximetryDataFolder())));
-
-    auto *search = new QPushButton(tr("Search for devices"), page);
-    connect(search, &QPushButton::clicked, this, &ViatomBleImportDialog::startScan);
-
-    auto *layout = new QVBoxLayout(page);
-    layout->addWidget(text);
-    layout->addStretch();
-    layout->addWidget(search, 0, Qt::AlignRight);
-    return page;
-}
-
-QWidget *ViatomBleImportDialog::buildDevicesPage()
+QWidget *ViatomImportPanel::buildDevicesPage()
 {
     auto *page = new QWidget(this);
     auto *heading = new QLabel(tr("<h3>Choose your oximeter</h3>"), page);
     m_deviceList = new QListWidget(page);
-    connect(m_deviceList, &QListWidget::currentRowChanged, this, &ViatomBleImportDialog::updateConnectButton);
-    connect(m_deviceList, &QListWidget::itemDoubleClicked, this, &ViatomBleImportDialog::connectToSelected);
+    connect(m_deviceList, &QListWidget::currentRowChanged, this, &ViatomImportPanel::updateConnectButton);
+    connect(m_deviceList, &QListWidget::itemDoubleClicked, this, &ViatomImportPanel::connectToSelected);
 
     m_rescanButton = new QPushButton(tr("Search again"), page);
-    connect(m_rescanButton, &QPushButton::clicked, this, &ViatomBleImportDialog::startScan);
+    connect(m_rescanButton, &QPushButton::clicked, this, &ViatomImportPanel::startScan);
     m_connectButton = new QPushButton(tr("Connect"), page);
-    connect(m_connectButton, &QPushButton::clicked, this, &ViatomBleImportDialog::connectToSelected);
+    connect(m_connectButton, &QPushButton::clicked, this, &ViatomImportPanel::connectToSelected);
 
     // ViHealth sets the clock on every connection. The recordings' start times come from
     // this clock, so keeping it right keeps oximetry in step with CPAP data.
@@ -240,7 +156,7 @@ QWidget *ViatomBleImportDialog::buildDevicesPage()
     return page;
 }
 
-QWidget *ViatomBleImportDialog::buildFilesPage()
+QWidget *ViatomImportPanel::buildFilesPage()
 {
     auto *page = new QWidget(this);
     auto *heading = new QLabel(tr("<h3>Choose recordings to download</h3>"), page);
@@ -270,7 +186,7 @@ QWidget *ViatomBleImportDialog::buildFilesPage()
     });
 
     m_downloadButton = new QPushButton(tr("Download"), page);
-    connect(m_downloadButton, &QPushButton::clicked, this, &ViatomBleImportDialog::startDownload);
+    connect(m_downloadButton, &QPushButton::clicked, this, &ViatomImportPanel::startDownload);
 
     auto *buttons = new QHBoxLayout;
     buttons->addStretch();
@@ -287,7 +203,7 @@ QWidget *ViatomBleImportDialog::buildFilesPage()
     return page;
 }
 
-QWidget *ViatomBleImportDialog::buildTransferPage()
+QWidget *ViatomImportPanel::buildTransferPage()
 {
     auto *page = new QWidget(this);
     auto *heading = new QLabel(tr("<h3>Downloading</h3>"), page);
@@ -308,12 +224,12 @@ QWidget *ViatomBleImportDialog::buildTransferPage()
 
     // After a download, back to the file list (refreshed) while still connected.
     m_moreButton = new QPushButton(tr("Choose more recordings"), page);
-    connect(m_moreButton, &QPushButton::clicked, this, &ViatomBleImportDialog::showFiles);
+    connect(m_moreButton, &QPushButton::clicked, this, &ViatomImportPanel::showFiles);
 
     // After the connection is lost, start again from the device search.
     m_searchAgainButton = new QPushButton(tr("Search again"), page);
     m_searchAgainButton->setVisible(false);
-    connect(m_searchAgainButton, &QPushButton::clicked, this, &ViatomBleImportDialog::startScan);
+    connect(m_searchAgainButton, &QPushButton::clicked, this, &ViatomImportPanel::startScan);
 
     auto *buttons = new QHBoxLayout;
     buttons->addStretch();
@@ -333,18 +249,18 @@ QWidget *ViatomBleImportDialog::buildTransferPage()
     return page;
 }
 
-void ViatomBleImportDialog::showPage(Page page)
+void ViatomImportPanel::showPage(Page page)
 {
     m_pages->setCurrentIndex(page);
 }
 
-void ViatomBleImportDialog::log(const QString &text)
+void ViatomImportPanel::log(const QString &text)
 {
     m_log->appendPlainText(text);
     qDebug().noquote() << "ViatomBleImport:" << text;
 }
 
-QString ViatomBleImportDialog::deviceLabel(const QBluetoothDeviceInfo &info) const
+QString ViatomImportPanel::deviceLabel(const QBluetoothDeviceInfo &info) const
 {
     const QString id = info.address().isNull() ? info.deviceUuid().toString() : info.address().toString();
     QString label = QStringLiteral("%1   %2").arg(info.name().isEmpty() ? tr("(unnamed)") : info.name(), id);
@@ -357,7 +273,7 @@ QString ViatomBleImportDialog::deviceLabel(const QBluetoothDeviceInfo &info) con
 // ----------------------------------------------------------------------------------------
 // Searching and connecting
 
-void ViatomBleImportDialog::startScan()
+void ViatomImportPanel::startScan()
 {
     m_usbWatch->stop();
     m_autoRescanned = false;
@@ -379,7 +295,7 @@ void ViatomBleImportDialog::startScan()
     m_scanner->start(10000);
 }
 
-void ViatomBleImportDialog::listUsbPorts()
+void ViatomImportPanel::listUsbPorts()
 {
     m_usbPorts.clear();
     m_devices.clear();
@@ -399,7 +315,7 @@ void ViatomBleImportDialog::listUsbPorts()
     updateConnectButton();
 }
 
-void ViatomBleImportDialog::startWithUsb()
+void ViatomImportPanel::startWithUsb()
 {
     closeConnection();
     showPage(DevicesPage);
@@ -414,14 +330,14 @@ void ViatomBleImportDialog::startWithUsb()
     }
     if (m_usbPorts.size() == 1 && m_usbPorts.first().accessible) {
         // Once the dialog is showing, so the connection's messages appear in it.
-        QTimer::singleShot(0, this, &ViatomBleImportDialog::connectToSelected);
+        QTimer::singleShot(0, this, &ViatomImportPanel::connectToSelected);
         return;
     }
     m_status->setText(m_usbPorts.size() == 1 ? Usb::permissionHint()
                                              : tr("Choose your oximeter and click Connect."));
 }
 
-void ViatomBleImportDialog::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFamily family)
+void ViatomImportPanel::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFamily family)
 {
     // deviceFound repeats when the signal strength changes; update the existing row.
     int row = -1;
@@ -451,7 +367,7 @@ void ViatomBleImportDialog::onDeviceFound(const QBluetoothDeviceInfo &info, Devi
     updateConnectButton();
 }
 
-void ViatomBleImportDialog::onScanFinished()
+void ViatomImportPanel::onScanFinished()
 {
     if (m_link) {
         // Stopping the scan to connect reports "finished" too, possibly after the connect
@@ -480,13 +396,13 @@ void ViatomBleImportDialog::onScanFinished()
     }
 }
 
-void ViatomBleImportDialog::updateConnectButton()
+void ViatomImportPanel::updateConnectButton()
 {
     QListWidgetItem *item = m_deviceList->currentItem();
     m_connectButton->setEnabled(item && (item->flags() & Qt::ItemIsEnabled) && !m_link);
 }
 
-void ViatomBleImportDialog::connectToSelected()
+void ViatomImportPanel::connectToSelected()
 {
     const int row = m_deviceList->currentRow();
     if (row < 0 || row >= m_usbPorts.size() + m_devices.size() || m_link) {
@@ -513,8 +429,8 @@ void ViatomBleImportDialog::connectToSelected()
             m_downloader = new Downloader(m_link, this);
         }
     }
-    connect(m_link, &Link::ready, this, &ViatomBleImportDialog::onDeviceReady);
-    connect(m_link, &Link::connectFailed, this, &ViatomBleImportDialog::onConnectFailed);
+    connect(m_link, &Link::ready, this, &ViatomImportPanel::onDeviceReady);
+    connect(m_link, &Link::connectFailed, this, &ViatomImportPanel::onConnectFailed);
     connect(m_link, &Link::linkLost, this, [this](const QString &reason) {
         if (!m_link || (m_downloader && m_downloader->isBusy())) {
             return;   // during a transfer the downloader reports it
@@ -529,15 +445,15 @@ void ViatomBleImportDialog::connectToSelected()
         // e.g. it switched itself off while the recordings were being chosen
         onFailed(tr("The device disconnected: %1").arg(reason));
     });
-    connect(m_downloader, &Downloader::infoReceived, this, &ViatomBleImportDialog::onInfoReceived);
-    connect(m_downloader, &Downloader::timeSet, this, &ViatomBleImportDialog::onTimeSet);
-    connect(m_downloader, &Downloader::failed, this, &ViatomBleImportDialog::onFailed);
-    connect(m_downloader, &Downloader::fileStarted, this, &ViatomBleImportDialog::onFileStarted);
-    connect(m_downloader, &Downloader::fileProgress, this, &ViatomBleImportDialog::onFileProgress);
-    connect(m_downloader, &Downloader::fileSaved, this, &ViatomBleImportDialog::onFileSaved);
-    connect(m_downloader, &Downloader::fileSkipped, this, &ViatomBleImportDialog::onFileSkipped);
-    connect(m_downloader, &Downloader::fileFailed, this, &ViatomBleImportDialog::onFileFailed);
-    connect(m_downloader, &Downloader::downloadFinished, this, &ViatomBleImportDialog::onDownloadFinished);
+    connect(m_downloader, &Downloader::infoReceived, this, &ViatomImportPanel::onInfoReceived);
+    connect(m_downloader, &Downloader::timeSet, this, &ViatomImportPanel::onTimeSet);
+    connect(m_downloader, &Downloader::failed, this, &ViatomImportPanel::onFailed);
+    connect(m_downloader, &Downloader::fileStarted, this, &ViatomImportPanel::onFileStarted);
+    connect(m_downloader, &Downloader::fileProgress, this, &ViatomImportPanel::onFileProgress);
+    connect(m_downloader, &Downloader::fileSaved, this, &ViatomImportPanel::onFileSaved);
+    connect(m_downloader, &Downloader::fileSkipped, this, &ViatomImportPanel::onFileSkipped);
+    connect(m_downloader, &Downloader::fileFailed, this, &ViatomImportPanel::onFileFailed);
+    connect(m_downloader, &Downloader::downloadFinished, this, &ViatomImportPanel::onDownloadFinished);
     if (usb) {
         // Over Bluetooth only one program can be connected; a cable can be shared.
         connect(m_downloader, &Downloader::unrequestedReplies, this, [this]() {
@@ -564,13 +480,13 @@ void ViatomBleImportDialog::connectToSelected()
     device->connectToDevice(info, family);
 }
 
-void ViatomBleImportDialog::onDeviceReady()
+void ViatomImportPanel::onDeviceReady()
 {
     m_status->setText(tr("Connected. Reading the list of recordings..."));
     m_downloader->requestInfo();
 }
 
-void ViatomBleImportDialog::onConnectFailed(const QString &reason)
+void ViatomImportPanel::onConnectFailed(const QString &reason)
 {
     closeConnection();
     showPage(DevicesPage);
@@ -579,7 +495,7 @@ void ViatomBleImportDialog::onConnectFailed(const QString &reason)
     m_status->setText(tr("Could not connect: %1").arg(reason));
 }
 
-void ViatomBleImportDialog::closeConnection()
+void ViatomImportPanel::closeConnection()
 {
     if (m_downloader) {
         m_downloader->disconnect(this);
@@ -594,7 +510,7 @@ void ViatomBleImportDialog::closeConnection()
     }
 }
 
-QString ViatomBleImportDialog::folderFor(const DeviceInfo &info) const
+QString ViatomImportPanel::folderFor(const DeviceInfo &info) const
 {
     // The Viatom loader uses the folder name as the device's serial number.
     QString name = info.serialNumber;
@@ -613,7 +529,7 @@ QString ViatomBleImportDialog::folderFor(const DeviceInfo &info) const
     return QDir(oximetryDataFolder()).filePath(name);
 }
 
-void ViatomBleImportDialog::onInfoReceived(const DeviceInfo &info)
+void ViatomImportPanel::onInfoReceived(const DeviceInfo &info)
 {
     m_info = info;
     m_folder = folderFor(info);
@@ -644,7 +560,7 @@ void ViatomBleImportDialog::onInfoReceived(const DeviceInfo &info)
     m_downloader->setTime(now);
 }
 
-void ViatomBleImportDialog::onTimeSet(const QString &error)
+void ViatomImportPanel::onTimeSet(const QString &error)
 {
     if (error.isEmpty()) {
         m_clockNote = (m_clockNote.isEmpty() ? QString() : m_clockNote + QLatin1Char(' '))
@@ -656,7 +572,7 @@ void ViatomBleImportDialog::onTimeSet(const QString &error)
     showFiles();
 }
 
-void ViatomBleImportDialog::showFiles()
+void ViatomImportPanel::showFiles()
 {
     const DeviceInfo &info = m_info;
 
@@ -697,7 +613,7 @@ void ViatomBleImportDialog::showFiles()
                                            : tr("%n recording(s) on the device.", "", info.files.size()));
 }
 
-void ViatomBleImportDialog::onFailed(const QString &reason)
+void ViatomImportPanel::onFailed(const QString &reason)
 {
     if (m_pages->currentIndex() == TransferPage) {
         // The link was lost during a download; the per-file failure is already logged.
@@ -717,7 +633,7 @@ void ViatomBleImportDialog::onFailed(const QString &reason)
 // ----------------------------------------------------------------------------------------
 // Downloading
 
-void ViatomBleImportDialog::startDownload()
+void ViatomImportPanel::startDownload()
 {
     QStringList files;
     for (int i = 0; i < m_fileList->count(); i++) {
@@ -750,20 +666,20 @@ void ViatomBleImportDialog::startDownload()
     m_downloader->download(files, m_folder, m_redownload->isChecked());
 }
 
-void ViatomBleImportDialog::onFileStarted(const QString &name, qint64 size)
+void ViatomImportPanel::onFileStarted(const QString &name, qint64 size)
 {
     m_currentFile->setText(describeFile(name));
     m_fileProgress->setRange(0, int(qMax<qint64>(size, 1)));
     m_fileProgress->setValue(0);
 }
 
-void ViatomBleImportDialog::onFileProgress(const QString &, qint64 received, qint64 size)
+void ViatomImportPanel::onFileProgress(const QString &, qint64 received, qint64 size)
 {
     m_fileProgress->setRange(0, int(qMax<qint64>(size, 1)));
     m_fileProgress->setValue(int(received));
 }
 
-void ViatomBleImportDialog::onFileSaved(const QString &name, const QString &path)
+void ViatomImportPanel::onFileSaved(const QString &name, const QString &path)
 {
     m_savedCount++;
     m_totalProgress->setValue(++m_filesDone);
@@ -782,7 +698,7 @@ void ViatomBleImportDialog::onFileSaved(const QString &name, const QString &path
     }
 }
 
-void ViatomBleImportDialog::onFileSkipped(const QString &name, const QString &path)
+void ViatomImportPanel::onFileSkipped(const QString &name, const QString &path)
 {
     m_skippedCount++;
     m_totalProgress->setValue(++m_filesDone);
@@ -802,14 +718,14 @@ void ViatomBleImportDialog::onFileSkipped(const QString &name, const QString &pa
     }
 }
 
-void ViatomBleImportDialog::onFileFailed(const QString &name, const QString &reason)
+void ViatomImportPanel::onFileFailed(const QString &name, const QString &reason)
 {
     m_failedCount++;
     m_totalProgress->setValue(++m_filesDone);
     log(tr("Failed %1: %2").arg(describeFile(name), reason));
 }
 
-void ViatomBleImportDialog::onDownloadFinished(bool cancelled)
+void ViatomImportPanel::onDownloadFinished(bool cancelled)
 {
     m_cancelButton->setVisible(false);
     m_moreButton->setVisible(m_link && m_link->isReady());
@@ -835,16 +751,22 @@ void ViatomBleImportDialog::onDownloadFinished(bool cancelled)
     m_status->setText(text + QLatin1Char(' ') + tr("Files are in %1.").arg(QDir::toNativeSeparators(m_folder)));
 }
 
-void ViatomBleImportDialog::reject()
+bool ViatomImportPanel::stopForClose()
 {
     if (m_downloader && m_downloader->isBusy() && m_pages->currentIndex() == TransferPage) {
         if (QMessageBox::question(this, tr("Viatom/Wellue Import"),
-                                  tr("A download is in progress. Stop it and close?")) != QMessageBox::Yes) {
-            return;
+                                  tr("A download is in progress. Stop it?")) != QMessageBox::Yes) {
+            return false;
         }
         // Closing drops the connection; the partial file is removed by the downloader.
     }
+    stop();
+    return true;
+}
+
+void ViatomImportPanel::stop()
+{
+    m_usbWatch->stop();
     m_scanner->stop();
     closeConnection();
-    QDialog::reject();
 }
