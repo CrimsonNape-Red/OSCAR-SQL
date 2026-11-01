@@ -429,7 +429,8 @@ bool PreferencesRepository::saveOxiSettings(qint64 profileId, OxiSettings* oxi)
     
     // Oximetry settings keys defined in profiles.h (STR_OS_*)
     QStringList oxiKeys = {
-        "OximeterType", "SPO2DropDuration", "SPO2DropPercentage",
+        "EnableOximetry", "DefaultOxiDevice", "SyncOximeterClock", "OximeterType",
+        "SkipOxiIntroScreen", "SPO2DropDuration", "SPO2DropPercentage",
         "PulseChangeDuration", "PulseChangeBPM", "OxiDiscardThreshold",
         "oxiDesaturationThreshold", "flagPulseAbove", "flagPulseBelow",
         "baseSpO2Option", "SpO2BaselineMethod", "SpO2BaselineWindow", "SpO2ManualBaseline",

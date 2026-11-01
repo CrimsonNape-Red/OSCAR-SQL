@@ -51,6 +51,7 @@
 #include "speedcheck.h"
 #include "SleepLib/common.h"
 #include "SleepLib/portablemode.h"
+#include "SleepLib/deviceconnection.h"
 #include "Graphs/gGraph.h"
 
 
@@ -1688,6 +1689,21 @@ int main(int argc, char *argv[]) {
 
     AppSetting->setVersionString(getVersion());
 
+    // Begin logging device connection activity.
+    QString connectionsLogDir = GetLogDir() + "/connections";
+    rotateLogs(connectionsLogDir);  // keep a limited set of previous logs
+    if (!QDir(connectionsLogDir).mkpath(".")) {
+        qWarning().noquote() << "Main: Unable to create directory" << connectionsLogDir;
+    }
+
+    QFile deviceLog(connectionsLogDir + "/devices.xml");
+    if (deviceLog.open(QFile::ReadWrite)) {
+        qDebug().noquote() << "Main: Logging device connections to" << deviceLog.fileName();
+        DeviceConnectionManager::getInstance().record(&deviceLog);
+    } else {
+        qWarning().noquote() << "Main: Unable to start device connection logging to" << deviceLog.fileName();
+    }
+
     schema::setOrders(); // could be called in init...
 
     // Scan for user profiles
@@ -1702,6 +1718,7 @@ int main(int argc, char *argv[]) {
 
         auto cleanupApp = [&]() {
             lockFile.unlock();
+            DeviceConnectionManager::getInstance().record(nullptr);
             for (auto & loader : GetLoaders()) {
                 loader->setParent(nullptr);
             }
@@ -1793,6 +1810,8 @@ int main(int argc, char *argv[]) {
     // Release the lock immediately so a restarted instance (e.g. after a language change)
     // can acquire it without racing against our potentially-slow widget/DB cleanup below.
     lockFile.unlock();
+
+    DeviceConnectionManager::getInstance().record(nullptr);
 
     // Un-parent the machine loaders from the main window before deleting it.
     // Loaders are parented to MainWindow in Startup() but are owned by the global

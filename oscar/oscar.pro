@@ -25,7 +25,7 @@ lessThan(QT_MAJOR_VERSION,6) {
 # get rid of the help browser, at least for now
 DEFINES += helpless
 
-QT += core gui network xml printsupport sql widgets help concurrent
+QT += core gui network xml printsupport serialport sql widgets help concurrent
 contains(DEFINES, helpless) {
     QT -= help
 }
@@ -383,6 +383,7 @@ SOURCES += \
     SleepLib/calcs.cpp \
     SleepLib/common.cpp \
     SleepLib/day.cpp \
+    SleepLib/deviceconnection.cpp \
     SleepLib/event.cpp \
     SleepLib/importcontext.cpp \
     SleepLib/journal.cpp \
@@ -441,6 +442,7 @@ SOURCES += \
     SleepLib/session.cpp \
     SleepLib/session_split.cpp \
     SleepLib/thirdparty/miniz.c \
+    SleepLib/xmlreplay.cpp \
     database/database_manager.cpp \
     database/database_schema.cpp \
     database/profile_repository.cpp \
@@ -630,6 +632,8 @@ HEADERS  += \
     translation.h \
     statistics.h \
     oximeterimport.h \
+    SleepLib/deviceconnection.h \
+    SleepLib/xmlreplay.h \
     SleepLib/serialoximeter.h \
     SleepLib/loader_plugins/md300w1_loader.h \
     importhandover.h \
@@ -890,6 +894,7 @@ test {
         tests/viatomtests.cpp \
         tests/viatombletests.cpp \
         tests/emaytests.cpp \
+        tests/deviceconnectiontests.cpp \
         tests/cryptotests.cpp \
         tests/dreemtests.cpp \
         tests/eventstabtests.cpp \
@@ -918,6 +923,7 @@ test {
         tests/viatomtests.h \
         tests/viatombletests.h \
         tests/emaytests.h \
+        tests/deviceconnectiontests.h \
         tests/cryptotests.h \
         tests/dreemtests.h \
         tests/eventstabtests.h \

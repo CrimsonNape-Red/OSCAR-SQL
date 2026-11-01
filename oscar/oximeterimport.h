@@ -19,7 +19,10 @@
 #include "sessionbar.h"
 
 class QButtonGroup;
+class QCheckBox;
 class QLabel;
+class QPlainTextEdit;
+class QProgressBar;
 class QPushButton;
 class ViatomImportPanel;
 
@@ -31,9 +34,11 @@ class OximeterImport;
  *  line the recording up with CPAP data (or, for Viatom/Wellue, see a summary).
  *
  *  Viatom/Wellue oximeters are read over their USB cable, over Bluetooth (both in an
- *  embedded ViatomImportPanel) or from data files; Contec CMS50 and ChoiceMMed from the
- *  data files their own software saves. The step bar, device and method pages, summary
- *  and footer are built in code; the session list and CPAP-sync pages come from the .ui.
+ *  embedded ViatomImportPanel) or from data files; the EMAY EMO-80 over Bluetooth; older
+ *  Contec CMS50s over their USB-to-serial cable; Contec CMS50 and ChoiceMMed from the data
+ *  files their own software saves. The step bar, device, method, serial-download and
+ *  summary pages and the footer are built in code; the session list and CPAP-sync pages
+ *  come from the .ui.
  */
 class OximeterImport : public QDialog
 {
@@ -71,13 +76,14 @@ private slots:
 
 private:
     enum Step { DeviceStep, MethodStep, ImportStep, FinishStep };
-    enum Method { NoMethod, UsbMethod, BluetoothMethod, FilesMethod };
+    enum Method { NoMethod, UsbMethod, BluetoothMethod, FilesMethod, SerialMethod };
 
     QWidget *buildStepBar();
     QWidget *buildFooter();
     QWidget *buildDevicePage();
     QWidget *buildMethodPage();
     QWidget *buildSummaryPage();
+    QWidget *buildSerialPage();
 
     void showPage(QWidget *page, Step step);
     void updateStepBar();
@@ -89,13 +95,24 @@ private:
     void startImport();
     //! CMS50 and ChoiceMMed: asks for a data file and reads it.
     void importOximeterFile();
+
+    // Older CMS50 oximeters: download over their USB-to-serial cable.
+    void startSerialImport();
+    SerialOximeter *detectSerialOximeter();
+    void doSerialImport();
+    void onSerialProgress(int value, int total);
+    void onSerialImportComplete(SerialOximeter *oxi);
+    void serialStatus(const QString &text);
+    void stopSerial();
     void chooseSession();
     void showSyncPage();
     //! Preselects the CPAP session that best fits the recording, if there is one.
     void suggestCpapSession();
     void saveSession();
-    //! Stores oxirec as a session of mod's device starting at startTime.
-    void storeSession(SerialOximeter *mod, QVector<OxiRecord> *oxirec, const QDateTime &startTime);
+    /*! Stores oxirec as a session of mod's device starting at startTime. askDevice: the
+     *  recording came over the serial cable, so the reader can ask the device for its model. */
+    void storeSession(SerialOximeter *mod, QVector<OxiRecord> *oxirec, const QDateTime &startTime,
+                      bool askDevice = false);
     /*! Imports a downloaded recording file that carries its own start time (an EMAY
      *  .spo2); true if it was imported or is already in OSCAR. */
     bool importRecordingFile(const QString &path);
@@ -124,6 +141,19 @@ private:
     QLabel *m_bluetoothNote = nullptr;
     QLabel *m_bluetoothDetail = nullptr;
     QLabel *m_filesDetail = nullptr;
+    QPushButton *m_serialOption = nullptr;
+    QLabel *m_serialDetail = nullptr;
+    QCheckBox *m_serialSyncClock = nullptr;
+    QWidget *m_serialPage = nullptr;
+    QLabel *m_serialTitle = nullptr;
+    QLabel *m_serialStatus = nullptr;
+    QProgressBar *m_serialProgress = nullptr;
+    QPlainTextEdit *m_serialLog = nullptr;
+    QPushButton *m_serialRetry = nullptr;
+    bool m_serialBusy = false;           //!< searching for or downloading from the device
+    bool m_serialImport = false;         //!< the recording being matched came over the cable
+    bool m_selectingSerialSession = false;
+    int m_chosenSerialSession = -1;
     QLabel *m_deviceHelp = nullptr;
     QWidget *m_viatomPage = nullptr;
     ViatomImportPanel *m_viatomPanel = nullptr;

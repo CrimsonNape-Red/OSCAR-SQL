@@ -10,12 +10,12 @@
 #ifndef SERIALOXIMETER_H
 #define SERIALOXIMETER_H
 
-#include <QDateTime>
-#include <QMap>
-#include <QVector>
+#include <QTimer>
+#include "SleepLib/deviceconnection.h"
 
 #include "SleepLib/machine_loader.h"
 
+const int START_TIMEOUT = 30000;
 
 
 struct OxiRecord
@@ -39,19 +39,13 @@ struct OxiRecord
     }
 };
 
-/*! \brief Base class of the oximeter file readers the Oximetry Wizard uses (CMS50,
- *  ChoiceMMed). A reader fills oxisessions from a data file; the wizard then lines
- *  the recording up with CPAP data and saves it.
- *
- *  The name is historical: these readers used to download over the CMS50's serial
- *  cable as well, which no current CMS50 uses, so that was removed.
- */
 class SerialOximeter : public MachineLoader
 {
 Q_OBJECT
 public:
     SerialOximeter() : MachineLoader() {
-        oxirec = nullptr;
+        m_importing = m_streaming = false;
+        m_productID = m_vendorID = 0;
         have_perfindex = false;
     }
     virtual ~SerialOximeter() {}
@@ -64,16 +58,42 @@ public:
     virtual int Version()=0;
     virtual const QString &loaderName()=0;
 
+    virtual QDateTime getDateTime(int session) { Q_UNUSED(session); return QDateTime(); }
+    virtual int getDuration(int session) { Q_UNUSED(session); return 0; }
+    virtual int getSessionCount() { return 0; }
+    virtual QString getUser() { return QString(); }
     virtual QString getModel() { return QString(); }
     virtual QString getVendor()  { return QString(); }
+    virtual QString getDeviceString()  { return QString(); }
+
+    virtual void getSessionData(int session) { Q_UNUSED(session); }
+    virtual void syncClock() {}
+
+    virtual QString getDeviceID() { return QString(); }
+    virtual void setDeviceID(const QString &) {}
+
+    virtual void eraseSession(int /*user*/, int /*session*/) {}
+
+
+
+    virtual bool commandDriven() { return false; }
 
     virtual MachineInfo newInfo() {
         return MachineInfo(MT_OXIMETER, 0, "", QString(), QString(), QString(), QString(), "Generic", QDateTime::currentDateTime(), 0);
     }
 
+    // Serial Stuff
+    virtual bool scanDevice(QString keyword="",quint16 vendor_id=0, quint16 product_id=0);
+    virtual bool openDevice();
+    virtual void closeDevice();
+
+    inline bool isStreaming() { return m_streaming; }
+    inline bool isImporting() { return m_importing; }
+
     bool havePerfIndex() { return have_perfindex; }
 
     virtual void process() {}
+
 
     // available sessions
     QMap<QDateTime, QVector<OxiRecord> *> oxisessions;
@@ -87,12 +107,48 @@ public:
     virtual void setDuration(int) { }
 
     virtual qint64 importResolution() { return 1000; }
+    virtual qint64 liveResolution() { return 20; }
 
     void trashRecords();
+    virtual void resetDevice() {}
+
+
+signals:
+    void noDeviceFound();
+    void deviceDetected();
+    void updatePlethy(QByteArray plethy);
+    void importComplete(SerialOximeter *);
+
+protected slots:
+    virtual void dataAvailable();
+    virtual void resetImportTimeout() {}
+    virtual void startImportTimeout() {}
+
+    virtual void stopRecording();
+    virtual void shutdownPorts() {}
+//    virtual void abortTask();
 
 protected:
+    virtual void processBytes(QByteArray buffer) { Q_UNUSED(buffer) }
+
+    virtual void killTimers() {}
+    virtual void requestData() {}
+
+    QString port;
+    SerialPort serial;
+
+    QTimer startTimer;
+    QTimer resetTimer;
+
     QDateTime m_startTime;
+
+    quint16 m_productID;
+    quint16 m_vendorID;
+
+    bool m_streaming;
+    bool m_importing;
     bool have_perfindex;
+
 };
 
 #endif // SERIALOXIMETER_H

@@ -14,7 +14,7 @@ Both the old and new models look the same.  The newer models have updated hardwa
 
 [[File:Old-contec-sm.png|thumb|left|150px|alt=CMS50F older model|CMS50F older model]] 
 <br /><br /><br />
-The older CMS50F model will briefly show <code>Ver 6.1</code> when it is first turned on.  Use the Smart Device Assistant v3.1.0.1 software (Windows only) to save its data as an SpO2 file, then import that file into OSCAR.  (OSCAR 1.x could also import these older models directly over their cable.  That was removed after OSCAR 2.1.1, since no current CMS50 works that way.)
+The older CMS50F model will briefly show <code>Ver 6.1</code> when it is first turned on.  These models can be imported directly into OSCAR using the cable supplied with the oximeter, or by using the Smart Device Assistant v3.1.0.1 software (Windows only) and importing the SpO2 file.
 <div style="clear:both;"></div>
 
 [[File:New-contec-sm.png|thumb|left|150px|alt=CMS50F newer model|CMS50F newer model]] 
@@ -24,6 +24,13 @@ OSCAR can't import directly from these newer models.  The "Smart Device Assistan
 <div style="clear:both;"></div>
 
 == Importing your oximetry data ==
+
+=== Older model direct import into OSCAR ===
+
+Remove the fingertip sensor.  Using the cable that was supplied with your oximeter, attach the oximeter to your computer.  Turn the oximeter on.  Open OSCAR and import your CPAP data first.  From the Welcome screen click the Oximetry Wizard icon (alternatively from the menubar select Data > Oximetry Wizard or the F7 key (fn+F7 for Mac)).
+# '''Oximeter:''' choose your model and click "Next".
+# '''Method:''' choose "Through its serial cable" and click "Connect".  OSCAR looks for the oximeter on its cable for up to 30 seconds.  With the older CMS50D+/E/F, select upload in the oximeter's menu when OSCAR asks.  If the oximeter holds several recordings, choose one.  Don't unplug the oximeter while it is uploading.
+# '''Match to CPAP:''' as for an SpO2 file (below).  Click "Save".
 
 === Software import SpO2 files, both models ===
 

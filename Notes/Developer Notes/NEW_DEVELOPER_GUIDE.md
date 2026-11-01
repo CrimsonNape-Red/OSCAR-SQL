@@ -227,8 +227,10 @@ original card.
 | `somnopose_loader` | Body position |
 
 Oximeter import has its own wizard (`oximeterimport.cpp`). CMS50 and ChoiceMMed data
-files go through `SleepLib/serialoximeter.cpp`; Viatom/Wellue downloads over Bluetooth or
-the USB cable through `SleepLib/viatomble/` and `viatomimportpanel.cpp`.
+files, and older CMS50s over their serial cable, go through `SleepLib/serialoximeter.cpp`;
+`deviceconnection.cpp` with `xmlreplay.cpp` can record and replay serial-device traffic
+for tests. Viatom/Wellue and EMAY downloads over Bluetooth, and Viatom's USB cable, go
+through `SleepLib/viatomble/` and `viatomimportpanel.cpp`.
 
 **Rule:** a change to one loader must not affect any other loader unless that is the
 explicit goal. Card formats and detection fingerprints are documented in

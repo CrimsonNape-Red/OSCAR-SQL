@@ -24,6 +24,9 @@
 #include <QDebug>
 #include <QList>
 #include <QMessageBox>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QPushButton>
 
 
 // The qt5.15 obsolescence of hex requires this change.
@@ -47,8 +50,19 @@ CMS50Loader::CMS50Loader()
 {
     m_type = MT_OXIMETER;
     m_abort = false;
+    m_streaming = false;
+    m_importing = false;
+    imp_callbacks = 0;
+
+    m_vendorID = 0x10c4;
+    m_productID = 0xea60;
     cms50dplus = false;
+
     oxirec = nullptr;
+
+    startTimer.setParent(this);
+    resetTimer.setParent(this);
+
 }
 
 CMS50Loader::~CMS50Loader()
@@ -67,16 +81,59 @@ bool CMS50Loader::Detect(const QString &path)
 
 int CMS50Loader::Open(const QString & path)
 {
-    // Reads a data file saved by SpO2Review or similar. (Downloading from the
-    // oximeter's serial cable, which no current CMS50 uses, was removed.)
+    // Only one active Oximeter module at a time, set in preferences
+
+    m_itemCnt = 0;
+    m_itemTotal = 0;
+
     m_abort = false;
-    cms50dplus = false;
+    m_importing = false;
+
+    started_import = false;
+    started_reading = false;
+    finished_import = false;
     setStatus(NEUTRAL);
+
+    imp_callbacks = 0;
+    cb_reset = 0;
+
+    m_time.start();
 
     if (oxirec) {
         trashRecords();
     }
 
+    // Cheating using path for two serial oximetry modes
+
+    if (path.compare("import") == 0) {
+        for (int i=0; i<5; ++i) {
+            resetDevice();
+            serial.flush();
+            QApplication::processEvents();
+        }
+        serial.clear();
+
+        setStatus(IMPORTING);
+
+        startTimer.stop();
+        startImportTimeout();
+        return 1;
+    } else if (path.compare("live") == 0) {
+        for (int i=0; i<5; ++i) {
+            resetDevice();
+            serial.flush();
+            QApplication::processEvents();
+        }
+        serial.clear();
+
+        m_startTime = QDateTime::currentDateTime();
+
+        oxirec = new QVector<OxiRecord>;
+        oxisessions[m_startTime] = oxirec;
+
+        setStatus(LIVE);
+        return 1;
+    }
     QString ext = path.section(".", -1);	// find the last '.'
     if ((ext.compare("spo2", Qt::CaseInsensitive)==0) || (ext.compare("spo", Qt::CaseInsensitive)==0) || (ext.compare("spor", Qt::CaseInsensitive)==0)) {
         // try to read and process SpoR file..
@@ -85,6 +142,403 @@ int CMS50Loader::Open(const QString & path)
 
     return 0;
 }
+
+
+void CMS50Loader::processBytes(QByteArray bytes)
+{
+    // Sync to start of message type we are interested in
+    quint8 c;
+    quint8 msgcode = 0x80;
+
+    int idx=0;
+    int bytesread = bytes.size();
+    while ((idx < bytesread) && (((c=(quint8)bytes.at(idx)) & msgcode)!=msgcode)) {
+        if (buffer.length()>0) {
+            // If buffer is the start of a valid but short frame, add to it..
+            buffer.append(c);
+        }// otherwise dump these bytes, as they are out of sequence.
+        ++idx;
+    }
+
+    // Copy the rest to the buffer.
+    buffer.append(bytes.mid(idx));
+
+    int available = buffer.length();
+
+    switch (status()) {
+    case IMPORTING:
+        idx = doImportMode();
+        break;
+    case LIVE:
+        idx = doLiveMode();
+        break;
+    default:
+        ;
+    }
+
+    if (idx >= available) {
+        buffer.clear();
+    } else if (idx > 0) {
+        // Trim any processed bytes from the buffer.
+        buffer = buffer.mid(idx);
+    }
+
+    if (buffer.length() > 0) {
+        // If what's left doesn't start with a marker bit, dump it
+        if (((unsigned char)buffer.at(0) & 0x80) != 0x80) {
+            buffer.clear();
+        }
+    }
+
+}
+
+int CMS50Loader::doImportMode()
+{
+    int available = buffer.size();
+
+    int hour,minute;
+    int idx = 0;
+    while (idx < available) {
+        unsigned char c=(unsigned char)buffer.at(idx);
+        if (!started_import) {
+            // There are three [0xf2 0xXX 0xXX] trio's at start of recording
+            // Followed by [0xfX 0xXX 0xXX] trios containing spo2 and pulse till the end of recording
+
+            // Scan for first header trio starting byte.
+            if (c != 0xf2) {
+                idx++;
+                continue;
+            }
+
+            // sometimes a f2 starting trio can be corrupted by live data
+            // peek ahead and see where the f2 headers are
+            int f2cnt = 0;
+            int f2idx[3] = {-1};
+
+            for (int i=0; i < 30; ++i) {
+
+                if ((idx + i) >= available) {
+                    qDebug() << "Not enough bytes to read CMS50 headers";
+                    break;
+                }
+
+                c = (unsigned char)buffer.at(idx+i);
+
+                if (c == 0xf2) {
+                    f2idx[f2cnt++] = idx+i;
+                    if (f2cnt >= 3)
+                        break;  // got all 3 headers
+
+                    // Skip the following two bytes
+                    i += 2;
+                }
+            }
+
+            if (f2cnt<3) {
+                qDebug() << "Did not get all header Trio's";
+            }
+
+            f2cnt--;
+
+            // CHECK: Check there might be length data after the last header trio..
+
+
+            received_bytes=0;
+            bool badheader = false;
+
+            // Look for the best of three headers trios
+            int bestf2 = 0;
+
+            if ((f2cnt >= 1) && ((f2idx[1] - f2idx[0]) == 3)) {
+                bestf2 = f2idx[0];
+            } else if ((f2cnt >= 2) && ((f2idx[2] - f2idx[1]) == 3)) {
+                bestf2 = f2idx[1];
+            } else {
+                bestf2 = f2idx[f2cnt];
+
+                // ouch.. check if f0 starts afterwards
+                if (((unsigned char)buffer.at(bestf2+3) & 0xf0) != 0xf0) {
+                    // crap.. bad time
+                    badheader = true;
+                }
+            }
+
+            if (!badheader) {
+                hour = (unsigned char)buffer.at(bestf2 + 1) & 0x7f;
+                minute = (unsigned char)buffer.at(bestf2 + 2) & 0x7f;
+            } else {
+                hour = 0;
+                minute = 0;
+            }
+
+            // Either a CMS50D+, has a bad header, or it's really midnight, set a flag anyway for later to help choose the right sync time
+            cms50dplus = (hour == 0) && (minute == 0);
+
+            MachineInfo info = newInfo();
+            info.model = cms50dplus ? QObject::tr("CMS50D+") : QObject::tr("CMS50E/F");
+            info.serial = QString();
+            Machine * mach = p_profile->CreateMachine(info);
+
+            Q_UNUSED(mach);
+
+            qDebug() << QString("Receiving Oximeter transmission %1:%2").arg(hour).arg(minute);
+            // set importing to true or whatever..
+
+            finished_import = false;
+            started_import = true;
+            started_reading = false;
+
+            m_importing = true;
+
+            m_itemCnt=0;
+            m_itemTotal=5000;
+
+            killTimers();
+            qDebug() << "Getting ready for import";
+
+            oxirec = new QVector<OxiRecord>;
+            oxirec->reserve(30000);
+
+            QDate oda=QDate::currentDate();
+            QTime oti=QTime(hour,minute); // Only CMS50E/F's have a realtime clock. CMS50D+ will set this to midnight
+
+
+            // If the oximeter record time is more than the current time, then assume it was from the day before
+            // Or should I use split time preference instead??? Foggy Confusements..
+            if (oti > QTime::currentTime()) {
+                oda = oda.addDays(-1);
+            }
+
+            m_startTime = QDateTime(oda,oti);
+
+            oxisessions[m_startTime] = oxirec;
+            qDebug() << "Session start (according to CMS50)" << m_startTime << QTHEX << buffer.at(idx + 1) << buffer.at(idx + 2) << ":" << QTDEC << hour << minute ;
+
+            cb_reset = 1;
+
+            // CMS50D+ needs an end timer because it just stops dead after uploading
+            resetTimer.singleShot(2000,this,SLOT(resetImportTimeout()));
+
+            QStringList data;
+
+            int len = f2idx[f2cnt]+3;
+            for (int i=idx; i < len; ++i) {
+                data.append(QString::number((unsigned char)buffer.at(i),16));
+            }
+            qDebug() << "CMS50 Record Header bytes:" << data.join(",");
+
+            idx = len;
+
+            // peek ahead to see if there really is data length bytes..
+            data.clear();
+            for (int i=0; i < 12; ++i) {
+                if ((idx+i) > available) break;
+                data.push_back(QString::number((unsigned char)buffer.at(idx+i), 16));
+            }
+            qDebug() << "bytes directly following header trio's:" << data.join(",");
+
+        } else { // have started import
+            if ((c & 0xf0) == 0xf0) { // Data trio
+                started_reading=true; // Sometimes errornous crap is sent after data rec header
+
+                // Recording import
+                if ((idx + 2) >= available) {
+                    return idx;
+                }
+
+                quint8 pulse=(unsigned char)((buffer.at(idx + 1) & 0x7f) | ((c & 1) << 7));
+                quint8 spo2=(unsigned char)buffer.at(idx + 2) & 0xff;
+
+                oxirec->append(OxiRecord(pulse,spo2));
+                received_bytes+=3;
+
+                // TODO: Store the data to the session
+
+                emit updateProgress(0, 0);
+
+                idx += 3;
+            } else if (!started_reading) { // have not got a valid trio yet, skip...
+                idx += 1;
+            } else {
+                // scan ahead for another 0xf0 in case it's corrupted..
+                bool resync = false;
+
+                for (int i=idx; i < available; ++i) {
+                    c=(unsigned char)buffer.at(i);
+                    if ((c & 0xf0) == 0xf0) {
+                        idx = i;
+                        resync = true;
+                        break;
+                    }
+                }
+
+                if (!resync) {
+                    // Data transfer has completed
+                    finished_import = true;
+                    killTimers();
+                    m_importing = false;
+                    m_status = NEUTRAL;
+                    emit importComplete(this);
+                    resetTimer.singleShot(2000, this, SLOT(shutdownPorts()));
+                    return available;
+                }
+            }
+        }
+    }
+
+    if (!started_import) {
+        imp_callbacks = 0;
+    } else {
+        imp_callbacks++;
+    }
+
+    return idx;
+}
+
+int CMS50Loader::doLiveMode()
+{
+    if (oxirec == nullptr) {
+        qWarning() << "CMS50Loader::doLiveMode() called when null oxirec object";
+        return 0;
+    }
+
+    int available = buffer.size();
+    int idx = 0;
+
+    QByteArray plethy;
+    while (idx < available-5) {
+        if (((unsigned char)buffer.at(idx) & 0x80) != 0x80) {
+            idx++;
+            continue;
+        }
+        int pwave=(unsigned char)buffer.at(idx + 1);
+        int pbeat=(unsigned char)buffer.at(idx + 2);
+        int pulse=((unsigned char)buffer.at(idx + 3) & 0x7f) | ((pbeat & 0x40) << 1);
+        int spo2=(unsigned char)buffer.at(idx + 4) & 0x7f;
+
+        oxirec->append(OxiRecord(pulse, spo2));
+        plethy.append(pwave);
+
+        idx += 5;
+    }
+    emit updatePlethy(plethy);
+
+    return idx;
+}
+
+void CMS50Loader::resetDevice() // Switch CMS50D+ device to live streaming mode
+{
+
+    static unsigned char b1[3]={0xf6,0xf6,0xf6};
+
+    if (serial.write((char *)b1,3) == -1) {
+        qDebug() << "Couldn't write data reset bytes to CMS50";
+    }
+
+    QApplication::processEvents();
+}
+
+void CMS50Loader::requestData() // Switch CMS50D+ device to record transmission mode
+{
+    static unsigned char b1[2]={0xf5,0xf5};
+
+    if (serial.write((char *)b1,2) == -1) {
+        qDebug() << "Couldn't write data request bytes to CMS50";
+    }
+    QApplication::processEvents();
+}
+
+void CMS50Loader::killTimers()
+{
+    startTimer.stop();
+    resetTimer.stop();
+}
+
+void CMS50Loader::startImportTimeout()
+{
+    if (!m_streaming)
+        return;
+
+    if (started_import) {
+        return;
+    }
+    if (finished_import != false) {
+        qWarning() << "CMS50Loader::startImportTimeout() called when finished_import != false";
+        return;
+    }
+
+
+    // Wait until events really are jammed on the CMS50D+ before re-requesting data.
+
+    const int delay = 500;
+
+    if (m_abort) {
+        m_streaming = false;
+        closeDevice();
+        return;
+    }
+
+    if (imp_callbacks == 0) { // Frozen, but still hasn't started?
+        m_itemCnt = m_time.elapsed();
+        if (m_itemCnt > START_TIMEOUT) { // Give up after START_TIMEOUT
+            closeDevice();
+            abort();
+            QMessageBox::warning(nullptr, STR_MessageBox_Error, "<h2>"+tr("Could not get data transmission from oximeter.")+"<br/><br/>"+tr("Please ensure you select 'upload' from the oximeter device menu.")+"</h2>");
+            return;
+        } else {
+            // Note: Newer CMS50 devices transmit from user input, but there is no way of differentiating between models
+            requestData();
+        }
+        emit updateProgress(m_itemCnt, START_TIMEOUT);
+
+        // Schedule another callback to make sure it's started
+        startTimer.singleShot(delay, this, SLOT(startImportTimeout()));
+    }
+}
+
+void CMS50Loader::resetImportTimeout()
+{
+    if (finished_import) {
+        return;
+    }
+
+    if (imp_callbacks != cb_reset) {
+        // Still receiving data.. reset timer
+        qDebug() << "Still receiving data in resetImportTimeout()" << imp_callbacks << cb_reset;
+        if (resetTimer.isActive())
+            resetTimer.stop();
+
+        if (!finished_import) resetTimer.singleShot(2000, this, SLOT(resetImportTimeout()));
+    } else {
+        qDebug() << "Oximeter device stopped transmitting.. Transfer complete";
+        // We were importing, but now are done
+        if (!finished_import && (started_import && started_reading)) {
+            qDebug() << "Switching CMS50 back to live mode and finalizing import";
+            // Turn back on live streaming so the end of capture can be dealt with
+            resetTimer.stop();
+
+            resetDevice(); // Send Reset to CMS50D+
+            serial.flush();
+            QThread::msleep(200);
+            resetDevice(); // Send Reset to CMS50D+
+            serial.flush();
+            serial.clear();
+
+            return;
+        }
+        qDebug() << "Should CMS50 resetImportTimeout reach here?";
+        // else what???
+    }
+    cb_reset = imp_callbacks;
+}
+
+void CMS50Loader::shutdownPorts()
+{
+    closeDevice();
+}
+
+
+
 
 bool CMS50Loader::readSpoRFile(QString path)
 {

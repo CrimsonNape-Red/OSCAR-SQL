@@ -11,6 +11,8 @@
 #include <test_macros.h>
 
 #include <QButtonGroup>
+#include <QCheckBox>
+#include <QElapsedTimer>
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -18,9 +20,12 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMessageBox>
+#include <QPlainTextEdit>
+#include <QProgressBar>
 #include <QPushButton>
 #include <QStandardPaths>
 #include <QStyle>
+#include <QThread>
 #include <QTimeZone>
 #include <QVBoxLayout>
 
@@ -28,6 +33,8 @@
 #include "translation.h"
 #include "ui_oximeterimport.h"
 #include "SleepLib/calcs.h"
+#include "SleepLib/loader_plugins/cms50_loader.h"
+#include "SleepLib/loader_plugins/cms50f37_loader.h"
 #include "SleepLib/viatomble/viatomble_availability.h"
 #include "SleepLib/viatomble/viatomble_usb.h"
 #include "mainwindow.h"
@@ -107,9 +114,11 @@ OximeterImport::OximeterImport(QWidget *parent) :
     m_devicePage = buildDevicePage();
     m_methodPage = buildMethodPage();
     m_summaryPage = buildSummaryPage();
+    m_serialPage = buildSerialPage();
     ui->stackedWidget->addWidget(m_devicePage);
     ui->stackedWidget->addWidget(m_methodPage);
     ui->stackedWidget->addWidget(m_summaryPage);
+    ui->stackedWidget->addWidget(m_serialPage);
 
     // CPAP-sync page
     Qt::DayOfWeek dow = firstDayOfWeekFromLocale();
@@ -153,6 +162,9 @@ OximeterImport::OximeterImport(QWidget *parent) :
 
 OximeterImport::~OximeterImport()
 {
+    if (oximodule && (m_serialBusy || m_serialImport)) {
+        oximodule->closeDevice();
+    }
     if (oximodule) {
         oximodule->trashRecords();
     }
@@ -304,7 +316,8 @@ void OximeterImport::updateStepBar()
         titles[0] = deviceName(oximeterType());
     }
     if (m_step > MethodStep) {
-        titles[1] = method() == UsbMethod ? tr("USB cable") : method() == BluetoothMethod ? tr("Bluetooth") : tr("Data files");
+        titles[1] = method() == UsbMethod ? tr("USB cable") : method() == BluetoothMethod ? tr("Bluetooth")
+                  : method() == SerialMethod ? tr("Serial cable") : tr("Data files");
     }
 
     for (int i = 0; i < m_stepNumbers.size(); i++) {
@@ -333,8 +346,11 @@ void OximeterImport::updateStepBar()
 void OximeterImport::updateFooter()
 {
     QWidget *page = ui->stackedWidget->currentWidget();
-    m_backButton->setVisible(m_step != DeviceStep && page != m_summaryPage);
+    m_backButton->setVisible(m_step != DeviceStep && page != m_summaryPage
+                             && !(page == m_serialPage && m_serialBusy));
     m_nextButton->setEnabled(true);
+    // During a serial upload the oximeter can't be interrupted.
+    m_cancelButton->setEnabled(!(m_serialBusy && oximodule && oximodule->isStreaming()));
     if (page == ui->syncPage) {
         m_nextButton->setText(tr("Save"));
     } else if (page == m_summaryPage) {
@@ -344,6 +360,9 @@ void OximeterImport::updateFooter()
     } else if (page == m_methodPage) {
         m_nextButton->setText(tr("Connect"));
         m_nextButton->setEnabled(method() != NoMethod);
+    } else if (page == m_serialPage) {
+        m_nextButton->setText(tr("Next"));
+        m_nextButton->setEnabled(false);   // the wizard moves on when the upload is complete
     } else {
         m_nextButton->setText(tr("Next"));
     }
@@ -386,9 +405,9 @@ QWidget *OximeterImport::buildDevicePage()
         { OXI_EMAY, ":/icons/emay.png", tr("EMO-80 (Bluetooth sleep oximeter)"),
           tr("Bluetooth") },
         { OXI_CMS50F37, ":/icons/cms50f.png", tr("CMS50F v3.7+, CMS50H, CMS50I, CMS50D+ v4.6, Pulox PO-400/500"),
-          tr("Data files") },
+          tr("Serial cable · Data files") },
         { OXI_CMS50, ":/icons/oximeter.png", tr("CMS50D+, CMS50E, CMS50F, Pulox PO-200/300"),
-          tr("Data files") },
+          tr("Serial cable · Data files") },
         { OXI_MD300W1, QString(), tr("Data files (.dat) saved by its own software"), tr("Data files") },
     };
 
@@ -519,6 +538,11 @@ QWidget *OximeterImport::buildMethodPage()
     m_usbOption = option(UsbMethod, tr("Through the USB cable"), &usbDetail, &m_usbNote);
     usbDetail->setText(tr("Use the cable that came with the oximeter. Close O2 Insight Pro first."));
     m_bluetoothOption = option(BluetoothMethod, tr("Over Bluetooth"), &m_bluetoothDetail, &m_bluetoothNote);
+    m_serialOption = option(SerialMethod, tr("Through its serial cable"), &m_serialDetail, nullptr);
+    m_serialSyncClock = new QCheckBox(tr("Set the oximeter's clock to this computer's time when connecting"), page);
+    m_serialSyncClock->setChecked(p_profile->oxi->syncOximeterClock());
+    connect(m_serialSyncClock, &QCheckBox::toggled, this, [](bool on) { p_profile->oxi->setSyncOximeterClock(on); });
+    layout->addWidget(m_serialSyncClock);
     m_filesOption = option(FilesMethod, tr("From data files"), &m_filesDetail, nullptr);
 
     m_deviceHelp = new QLabel(page);
@@ -529,6 +553,7 @@ QWidget *OximeterImport::buildMethodPage()
     layout->addStretch();
 
     connect(m_methods, &QButtonGroup::idClicked, this, [this]() {
+        m_serialSyncClock->setVisible(oximeterType() == OXI_CMS50F37 && method() == SerialMethod);
         updateStepBar();
         updateFooter();
     });
@@ -544,6 +569,13 @@ void OximeterImport::refreshMethods()
 
     m_usbOption->setVisible(viatom);
     m_bluetoothOption->setVisible(viatom || emay);
+    // Older CMS50s are read over their USB-to-serial cable (as in OSCAR 2.1 and earlier).
+    m_serialOption->setVisible(type == OXI_CMS50F37 || type == OXI_CMS50);
+    m_serialSyncClock->setVisible(type == OXI_CMS50F37 && method() == SerialMethod);
+    m_serialDetail->setText(type == OXI_CMS50F37
+        ? tr("Download straight from the oximeter over the USB cable that came with it, for models "
+             "that support it. Close Contec's software first.")
+        : tr("Plug in the oximeter's USB cable, then choose upload in the oximeter's menu when OSCAR asks."));
 
     const QString good = QString("color: %1; font-weight: bold;").arg(goodColor(this));
     const QString warn = QString("color: %1; font-weight: bold;").arg(warnColor(this));
@@ -624,6 +656,15 @@ void OximeterImport::goNext()
         showSummary(n > 0 ? tr("%n recording(s) imported into OSCAR.", "", n)
                           : tr("No recordings were imported."));
 #endif
+    } else if (page == ui->chooseSessionPage && m_selectingSerialSession) {
+        // Which recording to download from the oximeter.
+        QTableWidgetItem * item_0 = ui->tableOxiSessions->item(ui->tableOxiSessions->currentRow(), 0);
+        if (!item_0 || !oximodule) return;
+        m_selectingSerialSession = false;
+        m_chosenSerialSession = ui->tableOxiSessions->currentRow();
+        oximodule->setStartTime(item_0->data(Qt::UserRole).toDateTime());
+        showPage(m_serialPage, ImportStep);
+        doSerialImport();
     } else if (page == ui->chooseSessionPage) {
         QTableWidgetItem * item_0 = ui->tableOxiSessions->item(ui->tableOxiSessions->currentRow(), 0);
         if (!item_0) return;
@@ -649,7 +690,15 @@ void OximeterImport::goBack()
 #endif
         refreshMethods();
         showPage(m_methodPage, MethodStep);
+    } else if (page == m_serialPage) {
+        stopSerial();
+        refreshMethods();
+        showPage(m_methodPage, MethodStep);
     } else if (page == ui->chooseSessionPage) {
+        if (m_selectingSerialSession) {
+            m_selectingSerialSession = false;
+            stopSerial();
+        }
         refreshMethods();
         showPage(m_methodPage, MethodStep);
     } else if (page == ui->syncPage) {
@@ -669,6 +718,11 @@ void OximeterImport::reject()
         return;
     }
 #endif
+    if (m_serialBusy && oximodule && oximodule->isStreaming()) {
+        serialStatus(tr("Please wait until the oximeter has finished uploading. Do not unplug it."));
+        return;
+    }
+    stopSerial();
     qDebug() << "oximod - Cancel button clicked";
     QDialog::reject();
 }
@@ -679,6 +733,10 @@ void OximeterImport::reject()
 void OximeterImport::startImport()
 {
     const int type = oximeterType();
+    if (method() == SerialMethod) {
+        startSerialImport();
+        return;
+    }
     if (!downloadsInPanel(type) || (type == OXI_EMAY && method() == FilesMethod)) {
         importOximeterFile();
         return;
@@ -724,6 +782,7 @@ void OximeterImport::startImport()
 
 void OximeterImport::importOximeterFile()
 {
+    m_serialImport = false;
     QString documentsFolder = (*p_profile)[STR_PREF_LastOximetryPath].toString();
     if (documentsFolder.isEmpty())
         documentsFolder = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
@@ -760,6 +819,247 @@ void OximeterImport::importOximeterFile()
 
     (*p_profile)[STR_PREF_LastOximetryPath] = QFileInfo(filename).absolutePath();
 
+    if (oximodule->oxisessions.size() > 1) {
+        chooseSession();
+    } else {
+        showSyncPage();
+    }
+}
+
+// ----------------------------------------------------------------------------------------
+// Older CMS50s over their USB-to-serial cable (the direct import of OSCAR 2.1 and earlier)
+
+QWidget *OximeterImport::buildSerialPage()
+{
+    auto *page = new QWidget(this);
+    auto *layout = new QVBoxLayout(page);
+    layout->setContentsMargins(32, 24, 32, 16);
+    layout->setSpacing(10);
+
+    m_serialTitle = new QLabel(page);
+    QFont hf = m_serialTitle->font();
+    hf.setPointSizeF(hf.pointSizeF() * 1.4);
+    hf.setBold(true);
+    m_serialTitle->setFont(hf);
+    m_serialTitle->setWordWrap(true);
+    m_serialStatus = new QLabel(page);
+    m_serialStatus->setWordWrap(true);
+    m_serialProgress = new QProgressBar(page);
+    m_serialLog = new QPlainTextEdit(page);
+    m_serialLog->setReadOnly(true);
+    m_serialRetry = new QPushButton(tr("Try again"), page);
+    m_serialRetry->setVisible(false);
+    connect(m_serialRetry, &QPushButton::clicked, this, &OximeterImport::startSerialImport);
+
+    auto *buttons = new QHBoxLayout;
+    buttons->addStretch();
+    buttons->addWidget(m_serialRetry);
+
+    layout->addWidget(m_serialTitle);
+    layout->addWidget(m_serialStatus);
+    layout->addWidget(m_serialProgress);
+    layout->addWidget(m_serialLog, 1);
+    layout->addLayout(buttons);
+    return page;
+}
+
+void OximeterImport::serialStatus(const QString &text)
+{
+    qDebug().noquote() << "oximod -" << text;
+    m_serialLog->appendPlainText(text);
+    m_serialStatus->setText(text);
+}
+
+void OximeterImport::stopSerial()
+{
+    // A search, an upload in progress, or a finished upload whose port is still open.
+    if (!oximodule || !(m_serialBusy || m_serialImport)) {
+        m_serialBusy = false;
+        return;
+    }
+    disconnect(oximodule, &SerialOximeter::updateProgress, this, &OximeterImport::onSerialProgress);
+    disconnect(oximodule, &SerialOximeter::importComplete, this, &OximeterImport::onSerialImportComplete);
+    oximodule->abort();
+    oximodule->closeDevice();
+    oximodule->trashRecords();
+    oximodule = nullptr;
+    m_serialBusy = false;
+    m_serialImport = false;
+}
+
+SerialOximeter *OximeterImport::detectSerialOximeter()
+{
+    const int PORTSCAN_TIMEOUT = 30000;
+    const int delay = 100;
+
+    SerialOximeter *oxi = nullptr;
+    if (oximeterType() == OXI_CMS50F37) {
+        oxi = qobject_cast<SerialOximeter *>(lookupLoader(cms50f37_class_name));
+    } else if (oximeterType() == OXI_CMS50) {
+        oxi = qobject_cast<SerialOximeter *>(lookupLoader(cms50_class_name));
+    }
+    if (!oxi) {
+        return nullptr;
+    }
+
+    serialStatus(tr("Looking for the oximeter on its cable..."));
+    m_serialProgress->setRange(0, PORTSCAN_TIMEOUT);
+    QElapsedTimer time;
+    time.start();
+    int elapsed = 0;
+    do {
+        if (oxi->openDevice()) {
+            return oxi;
+        }
+        QThread::msleep(delay);
+        elapsed = int(time.elapsed());
+        m_serialProgress->setValue(elapsed);
+        QApplication::processEvents();
+        if (!isVisible() || ui->stackedWidget->currentWidget() != m_serialPage) {
+            return nullptr;
+        }
+    } while (elapsed < PORTSCAN_TIMEOUT);
+    return nullptr;
+}
+
+void OximeterImport::startSerialImport()
+{
+    stopSerial();
+    m_serialImport = false;
+    m_selectingSerialSession = false;
+    m_chosenSerialSession = -1;
+    m_serialLog->clear();
+    m_serialRetry->setVisible(false);
+    m_serialProgress->setValue(0);
+    m_serialTitle->setText(tr("Connecting to your %1").arg(deviceName(oximeterType())));
+    showPage(m_serialPage, ImportStep);
+    m_serialBusy = true;
+    updateFooter();
+
+    oximodule = detectSerialOximeter();
+    if (!oximodule) {
+        m_serialBusy = false;
+        if (isVisible() && ui->stackedWidget->currentWidget() == m_serialPage) {
+            serialStatus(tr("No oximeter was found on a serial cable. Check that it is plugged in and "
+                            "switched on, and that no other program is using it."));
+            m_serialRetry->setVisible(true);
+            updateFooter();
+        }
+        return;
+    }
+
+    QString name = oximodule->getDeviceString();
+    if (name.isEmpty()) {
+        name = oximodule->loaderName();
+    }
+    serialStatus(tr("Connecting to %1...").arg(name));
+
+    if (p_profile->oxi->syncOximeterClock()) {
+        oximodule->syncClock();
+    }
+    oximodule->resetDevice();
+
+    const int count = oximodule->getSessionCount();
+    qDebug() << "oximod - Session count:" << count;
+    if (count > 1) {
+        // Ask which recording to download.
+        const QString user = oximodule->getUser();
+        ui->tableOxiSessions->clearContents();
+        ui->tableOxiSessions->setRowCount(count);
+        for (int i = 0; i < count; ++i) {
+            const int duration = oximodule->getDuration(i);
+            const QDateTime start = oximodule->getDateTime(i);
+            auto *item = new QTableWidgetItem(QLocale().toString(start, QLocale::ShortFormat));
+            item->setData(Qt::UserRole, start);
+            item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+            ui->tableOxiSessions->setItem(i, 0, item);
+            item = new QTableWidgetItem(QString::asprintf("%02i:%02i:%02i", duration / 3600, (duration / 60) % 60, duration % 60));
+            item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+            ui->tableOxiSessions->setItem(i, 1, item);
+            item = new QTableWidgetItem(tr("\"%1\", session %2").arg(user).arg(i + 1));
+            item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+            ui->tableOxiSessions->setItem(i, 2, item);
+        }
+        ui->tableOxiSessions->selectRow(0);
+        m_selectingSerialSession = true;
+        showPage(ui->chooseSessionPage, ImportStep);
+        return;
+    }
+    if (count > 0) {
+        m_chosenSerialSession = 0;
+        oximodule->setStartTime(oximodule->getDateTime(0));
+    }
+    doSerialImport();
+}
+
+void OximeterImport::doSerialImport()
+{
+    if (!oximodule) {
+        return;
+    }
+    m_serialBusy = true;
+    if (oximodule->commandDriven()) {
+        if (m_chosenSerialSession < 0) {
+            m_serialTitle->setText(tr("Nothing to import"));
+            serialStatus(tr("Your oximeter did not have any valid sessions."));
+            stopSerial();
+            updateFooter();
+            return;
+        }
+        m_serialTitle->setText(tr("Waiting for %1 to start").arg(oximodule->getModel()));
+        serialStatus(tr("Waiting for the device to start the upload process..."));
+    } else {
+        m_serialTitle->setText(tr("Select upload on your oximeter"));
+        m_serialLog->appendPlainText(tr("You need to tell your oximeter to begin sending data to the computer."));
+        serialStatus(tr("Please connect your oximeter, enter its menu and select upload to commence data transfer..."));
+    }
+    updateFooter();
+
+    connect(oximodule, &SerialOximeter::updateProgress, this, &OximeterImport::onSerialProgress);
+    oximodule->Open("import");
+    if (oximodule->commandDriven()) {
+        oximodule->getSessionData(m_chosenSerialSession);
+    }
+
+    // Wait for the upload to start.
+    while (oximodule && !oximodule->isImporting() && !oximodule->isAborted()) {
+        QApplication::processEvents();
+        if (!isVisible() || ui->stackedWidget->currentWidget() != m_serialPage) {
+            stopSerial();
+            return;
+        }
+    }
+    if (!oximodule) {
+        return;
+    }
+    if (!oximodule->isStreaming()) {
+        serialStatus(tr("The oximeter did not start sending."));
+        stopSerial();
+        m_serialRetry->setVisible(true);
+        m_serialProgress->setValue(0);
+        updateFooter();
+        return;
+    }
+    m_serialTitle->setText(tr("%1 is uploading data...").arg(oximodule->loaderName()));
+    serialStatus(tr("Please wait until the oximeter upload process completes. Do not unplug your oximeter."));
+    updateFooter();
+    connect(oximodule, &SerialOximeter::importComplete, this, &OximeterImport::onSerialImportComplete);
+}
+
+void OximeterImport::onSerialProgress(int value, int total)
+{
+    m_serialProgress->setRange(0, qMax(total, 1));
+    m_serialProgress->setValue(value);
+}
+
+void OximeterImport::onSerialImportComplete(SerialOximeter *)
+{
+    disconnect(oximodule, &SerialOximeter::updateProgress, this, &OximeterImport::onSerialProgress);
+    disconnect(oximodule, &SerialOximeter::importComplete, this, &OximeterImport::onSerialImportComplete);
+    m_serialBusy = false;
+    m_serialImport = true;
+    serialStatus(tr("Oximeter import completed."));
+    updateFooter();
     if (oximodule->oxisessions.size() > 1) {
         chooseSession();
     } else {
@@ -1050,7 +1350,7 @@ void OximeterImport::saveSession()
         return;
     }
 
-    storeSession(oximodule, oxirec, ui->dateTimeEdit->dateTime());
+    storeSession(oximodule, oxirec, ui->dateTimeEdit->dateTime(), m_serialImport);
 
     mainwin->EnableTabs(true);  // somebody has to do it...
 
@@ -1058,12 +1358,17 @@ void OximeterImport::saveSession()
     mainwin->getOverview()->ReloadGraphs();
 
     m_importedFiles = true;
+    if (m_serialImport) {
+        oximodule->closeDevice();
+        m_serialImport = false;
+    }
     oximodule->trashRecords();
     oximodule = nullptr;
     accept();
 }
 
-void OximeterImport::storeSession(SerialOximeter *mod, QVector<OxiRecord> *oxirec, const QDateTime &startTime)
+void OximeterImport::storeSession(SerialOximeter *mod, QVector<OxiRecord> *oxirec, const QDateTime &startTime,
+                                  bool askDevice)
 {
     MachineInfo info = mod->newInfo();
     Machine * mach = p_profile->CreateMachine(info);
@@ -1195,8 +1500,12 @@ void OximeterImport::storeSession(SerialOximeter *mod, QVector<OxiRecord> *oxire
 
     qDebug() << "oximod - Setting up device and session";
 
-    mach->setModel(mod->getModel());
-    mach->setBrand(mod->getVendor());
+    if (askDevice) {
+        // Only over the cable: for a file, a CMS50F v3.7 would wait for an answer from a
+        // device that isn't there.
+        mach->setModel(mod->getModel());
+        mach->setBrand(mod->getVendor());
+    }
 
     session->first(OXI_Pulse);
     session->first(OXI_SPO2);

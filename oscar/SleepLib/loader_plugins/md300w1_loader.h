@@ -10,6 +10,7 @@
 #ifndef MD300W1LOADER_H
 #define MD300W1LOADER_H
 
+#include <QElapsedTimer>
 #include "SleepLib/serialoximeter.h"
 
 const QString md300w1_class_name = "MD300W1";
@@ -44,11 +45,48 @@ Q_OBJECT
 
     virtual bool isStartTimeValid() { return true; }
 
+protected slots:
+    virtual void resetImportTimeout();
+    virtual void startImportTimeout();
+
 protected:
+
     bool readDATFile(const QString & path);
+    virtual void processBytes(QByteArray bytes);
+
+    int doImportMode();
+    int doLiveMode();
+
+    virtual void killTimers();
+
+    // Switch MD300W1 device to live streaming mode
+    virtual void resetDevice();
+
+    // Switch MD300W1 device to record transmission mode
+    void requestData();
 
   private:
+    EventList *PULSE;
+    EventList *SPO2;
+
+    QElapsedTimer m_time;
+
+    QByteArray buffer;
+
+    bool started_import;
+    bool finished_import;
+    bool started_reading;
     QDateTime oxitime;
+
+    int cb_reset,imp_callbacks;
+
+    int received_bytes;
+
+    int m_itemCnt;
+    int m_itemTotal;
+
+
 };
+
 
 #endif // MD300W1LOADER_H
