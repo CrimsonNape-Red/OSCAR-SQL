@@ -17,17 +17,25 @@
 namespace ViatomBle {
 
 enum class DeviceFamily {
-    NotViatom,
+    NotViatom,   // not an oximeter OSCAR knows
     Classic,     // SleepU, Checkme O2, O2Ring, ...: supported
     O2RingS,     // O2Ring S and relatives: their own protocol (see O2RingSDialect)
+    Emay,        // EMAY EMO-80: EMAY's own protocol (see EmayDownloader)
+    Contec,      // Contec CMS50 Bluetooth models ("SpO2xx"): recognised, not supported yet
 };
+
+//! True for the families OSCAR can download from.
+inline bool isSupported(DeviceFamily family)
+{
+    return family == DeviceFamily::Classic || family == DeviceFamily::O2RingS || family == DeviceFamily::Emay;
+}
 
 //! Classifies a device from its advertised services and name.
 DeviceFamily deviceFamily(const QBluetoothDeviceInfo &info);
 //! The same, by Bluetooth name only (exposed for the unit tests).
 DeviceFamily deviceFamilyFromName(const QString &name);
 
-//! Searches for Viatom devices over Bluetooth LE.
+//! Searches for oximeters over Bluetooth LE: Viatom/Wellue, EMAY, Contec.
 class Scanner : public QObject
 {
     Q_OBJECT

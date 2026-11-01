@@ -26,6 +26,7 @@
 #endif
 
 #include "viatomble_device.h"
+#include "emay.h"
 #include "viatomble_o2rings.h"
 #include "viatomble_protocol.h"
 
@@ -49,7 +50,11 @@ void Device::connectToDevice(const QBluetoothDeviceInfo &info, DeviceFamily fami
 {
     disconnectFromDevice();
     m_info = info;
-    m_acknowledgedWrites = false;
+    // EMAY's app writes with response; Viatom's devices take the faster writes without.
+    m_acknowledgedWrites = (family == DeviceFamily::Emay);
+#ifdef OSCAR_BLE_BLUEZ_DBUS
+    m_dbusWriteType = m_acknowledgedWrites ? QStringLiteral("request") : QStringLiteral("command");
+#endif
 
     const ServiceSpec classic{QString::fromLatin1(SERVICE_UUID), QString::fromLatin1(WRITE_UUID),
                               QString::fromLatin1(NOTIFY_UUID)};
@@ -57,7 +62,10 @@ void Device::connectToDevice(const QBluetoothDeviceInfo &info, DeviceFamily fami
                               QString::fromLatin1(O2RingS::NOTIFY_UUID)};
     // The SDK can also put an O2Ring S on the classic service (its UUIDProtocol V1);
     // the frames are the O2Ring S ones either way.
+    const ServiceSpec emay{QString::fromLatin1(Emay::SERVICE_UUID), QString::fromLatin1(Emay::WRITE_UUID),
+                           QString::fromLatin1(Emay::NOTIFY_UUID)};
     m_candidates = (family == DeviceFamily::O2RingS) ? QList<ServiceSpec>{o2ringS, classic}
+                 : (family == DeviceFamily::Emay)    ? QList<ServiceSpec>{emay}
                                                      : QList<ServiceSpec>{classic};
 
     m_controller = QLowEnergyController::createCentral(info, this);

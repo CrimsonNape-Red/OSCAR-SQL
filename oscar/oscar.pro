@@ -25,7 +25,7 @@ lessThan(QT_MAJOR_VERSION,6) {
 # get rid of the help browser, at least for now
 DEFINES += helpless
 
-QT += core gui network xml printsupport serialport sql widgets help concurrent
+QT += core gui network xml printsupport sql widgets help concurrent
 contains(DEFINES, helpless) {
     QT -= help
 }
@@ -383,7 +383,6 @@ SOURCES += \
     SleepLib/calcs.cpp \
     SleepLib/common.cpp \
     SleepLib/day.cpp \
-    SleepLib/deviceconnection.cpp \
     SleepLib/event.cpp \
     SleepLib/importcontext.cpp \
     SleepLib/journal.cpp \
@@ -426,6 +425,7 @@ SOURCES += \
     SleepLib/viatomble/viatomble_o2rings.cpp \
     SleepLib/viatomble/viatomble_protocol.cpp \
     SleepLib/viatomble/viatomble_usb.cpp \
+    SleepLib/viatomble/emay.cpp \
     SleepLib/loader_plugins/weinmann_loader.cpp \
     SleepLib/loader_plugins/yuwell_loader.cpp \
     SleepLib/loader_plugins/zeo_loader.cpp \
@@ -441,7 +441,6 @@ SOURCES += \
     SleepLib/session.cpp \
     SleepLib/session_split.cpp \
     SleepLib/thirdparty/miniz.c \
-    SleepLib/xmlreplay.cpp \
     database/database_manager.cpp \
     database/database_schema.cpp \
     database/profile_repository.cpp \
@@ -612,6 +611,8 @@ HEADERS  += \
     SleepLib/viatomble/viatomble_o2rings.h \
     SleepLib/viatomble/viatomble_protocol.h \
     SleepLib/viatomble/viatomble_usb.h \
+    SleepLib/viatomble/emay.h \
+    SleepLib/viatomble/viatomble_downloaderbase.h \
     SleepLib/loader_plugins/yuwell_loader.h \
     SleepLib/loader_plugins/zeo_loader.h \
     SleepLib/loader_plugins/resvent_loader.h \
@@ -629,8 +630,6 @@ HEADERS  += \
     translation.h \
     statistics.h \
     oximeterimport.h \
-    SleepLib/deviceconnection.h \
-    SleepLib/xmlreplay.h \
     SleepLib/serialoximeter.h \
     SleepLib/loader_plugins/md300w1_loader.h \
     importhandover.h \
@@ -701,7 +700,6 @@ FORMS += \
     daily.ui \
     overview.ui \
     mainwindow.ui \
-    oximetry.ui \
     preferencesdialog.ui \
     newprofile.ui \
     devicetimecorrectiondialog.ui \
@@ -891,7 +889,7 @@ test {
         tests/versiontests.cpp \
         tests/viatomtests.cpp \
         tests/viatombletests.cpp \
-        tests/deviceconnectiontests.cpp \
+        tests/emaytests.cpp \
         tests/cryptotests.cpp \
         tests/dreemtests.cpp \
         tests/eventstabtests.cpp \
@@ -919,7 +917,7 @@ test {
         tests/versiontests.h \
         tests/viatomtests.h \
         tests/viatombletests.h \
-        tests/deviceconnectiontests.h \
+        tests/emaytests.h \
         tests/cryptotests.h \
         tests/dreemtests.h \
         tests/eventstabtests.h \

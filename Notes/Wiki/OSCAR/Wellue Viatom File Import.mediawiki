@@ -13,6 +13,21 @@ OSCAR 1.1.0 supports the Wellue (Viatom) pulse oximeters listed below. Viatom de
 * Probably Lookee Wrist sleep monitor (untested)
 * Possibly others, such as the KidsO2 but they are currently untested.
 
+== Download directly into OSCAR (versions after OSCAR 2.1.1) ==
+
+OSCAR can download recordings from the oximeter itself, without Wellue's software, through the USB cable that came with it or over Bluetooth.  Tested with the SleepU (cable), the O2Ring (Bluetooth) and the O2Ring S (cable and Bluetooth).
+
+# Import your CPAP data first.
+# Select '''Data > Import Viatom/Wellue Data''' (or open the Oximetry Wizard and choose '''Viatom/Wellue''').
+# Choose '''Through the USB cable''' or '''Over Bluetooth''' and click '''Next'''.
+#* Cable: plug it in. Close O2 Insight Pro first; the two programs can't share the cable.
+#* Bluetooth: put the oximeter in standby and close the ViHealth app on your phone (or turn the phone's Bluetooth off), then pick your oximeter from the list and click '''Connect'''.
+# Tick the recordings you want and click '''Download'''. Each one is imported into OSCAR as soon as it has arrived. OSCAR also sets the oximeter's clock to your computer's time, unless you untick that option.
+
+The downloaded files are kept in your profile's <code>Oximetry_Data</code> folder, so they can be imported again later.
+
+On Linux the cable needs permission to be opened by your user. OSCAR's Debian/Ubuntu packages install a udev rule for it; with other builds, add <code>SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="e010", MODE="0660", TAG+="uaccess"</code> to a file in <code>/etc/udev/rules.d/</code> and plug the cable in again. The cable is not supported on macOS yet.
+
 == Download Recorded Sessions from the Pulse Oximeter ==
  '''<big>Note:You MUST use the binary data file. No other file type will work.</big>''' 
 
@@ -128,7 +143,7 @@ The Oximeter binary file can now be imported into OSCAR and will have the same s
 
 == Import the Downloaded Sessions into OSCAR ==
 
-# Select '''Data > Import Viatom/Wellue Data''' in OSCAR's menu bar.
+# Select '''Data > Import Viatom/Wellue Data''' in OSCAR's menu bar. In versions after OSCAR 2.1.1 this opens the Oximetry Wizard: choose '''From data files''' and click '''Choose files...'''.
 # Navigate to the folder where your downloaded session files are stored. See above for the location, depending on how you downloaded the data from the device. ''The session files are named after the time at which each night's recording started, e.g. 20200408214533 for April 8, 2020 at 9:45:33 pm.''
 # Select the folder containing the session files and click '''Open'''. All sessions in that folder will be imported, and previously imported sessions will be skipped.<br>Alternatively, if you want to import only a single session, you can select just that session file.<br>''Note: On Windows, you cannot directly open a folder. Shift-click to select more than one session file in the folder, and all files in that folder will be imported.''
 

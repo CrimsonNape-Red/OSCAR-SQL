@@ -29,12 +29,13 @@ class QStackedWidget;
 class QTimer;
 
 namespace ViatomBle {
-class Downloader;
+class DownloaderBase;
 class Link;
 }
 
-/*! \brief Downloads recordings from a Viatom/Wellue oximeter over Bluetooth LE, or over
- *  its USB cable (SleepU, O2Ring S; the O2Ring's is untested).
+/*! \brief Downloads recordings from an oximeter over Bluetooth LE (Viatom/Wellue, EMAY
+ *  EMO-80), or from a Viatom/Wellue oximeter over its USB cable (SleepU, O2Ring S; the
+ *  O2Ring's is untested). Contec's Bluetooth models are listed but can't be used yet.
  *
  *  The Oximetry Wizard's import step for these oximeters: choose a device, choose
  *  recordings, download. Files are kept in <profile folder>/Oximetry_Data/<serial>/ and,
@@ -63,6 +64,13 @@ class ViatomImportPanel : public QWidget
     bool stopForClose();
     //! Stops searching and drops the connection, without asking.
     void stop();
+
+    //! Devices of these families are listed first (the brand chosen in the wizard).
+    void setPreferredFamilies(const QList<ViatomBle::DeviceFamily> &families) { m_preferred = families; }
+    //! The connected device's details, e.g. for importing what it sent.
+    const ViatomBle::DeviceInfo &deviceInfo() const { return m_info; }
+    //! The family of the connected device (Classic for the USB cable).
+    ViatomBle::DeviceFamily connectedFamily() const { return m_connectedFamily; }
 
   public slots:
     //! Lists USB cables, then searches for Bluetooth devices.
@@ -137,7 +145,9 @@ class ViatomImportPanel : public QWidget
 
     ViatomBle::Scanner *m_scanner = nullptr;
     ViatomBle::Link *m_link = nullptr;          // a Device or a UsbLink
-    ViatomBle::Downloader *m_downloader = nullptr;
+    ViatomBle::DownloaderBase *m_downloader = nullptr;
+    QList<ViatomBle::DeviceFamily> m_preferred;
+    ViatomBle::DeviceFamily m_connectedFamily = ViatomBle::DeviceFamily::Classic;
     ViatomBle::DeviceInfo m_info;
     QString m_folder;
     QString m_clockNote;

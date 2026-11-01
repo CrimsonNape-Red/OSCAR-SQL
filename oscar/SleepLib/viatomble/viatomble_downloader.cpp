@@ -21,7 +21,7 @@ Downloader::Downloader(Link *link, QObject *parent)
 }
 
 Downloader::Downloader(Link *link, std::unique_ptr<Dialect> dialect, QObject *parent)
-    : QObject(parent), m_link(link), m_dialect(std::move(dialect))
+    : DownloaderBase(parent), m_link(link), m_dialect(std::move(dialect))
 {
     m_timer.setSingleShot(true);
     connect(&m_timer, &QTimer::timeout, this, &Downloader::onTimeout);

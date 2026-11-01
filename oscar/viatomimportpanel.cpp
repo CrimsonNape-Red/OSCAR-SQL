@@ -32,6 +32,7 @@
 #include "SleepLib/viatomble/viatomble_dialect.h"
 #include "SleepLib/viatomble/viatomble_device.h"
 #include "SleepLib/viatomble/viatomble_downloader.h"
+#include "SleepLib/viatomble/emay.h"
 
 using namespace ViatomBle;
 
@@ -291,7 +292,7 @@ void ViatomImportPanel::startScan()
         return;
     }
     m_rescanButton->setEnabled(false);
-    m_status->setText(tr("Searching for Viatom devices..."));
+    m_status->setText(tr("Searching for oximeters..."));
     m_scanner->start(10000);
 }
 
@@ -348,21 +349,47 @@ void ViatomImportPanel::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFa
         }
     }
     QString text = deviceLabel(info);
-    if (family == DeviceFamily::O2RingS) {
-        text += tr("   (O2Ring S family: experimental)");
+    if (!isSupported(family)) {
+        text += tr("   Contec: not supported yet");
     }
+    QListWidgetItem *item = nullptr;
     if (row < 0) {
-        m_devices.append(info);
-        m_families.append(family);
-        new QListWidgetItem(text, m_deviceList);
-        if (m_deviceList->currentRow() < 0) {
-            m_deviceList->setCurrentRow(m_deviceList->count() - 1);
+        // Devices of the brand chosen in the wizard go above the others.
+        int at = m_devices.size();
+        if (m_preferred.contains(family)) {
+            for (int i = 0; i < m_families.size(); i++) {
+                if (!m_preferred.contains(m_families[i])) {
+                    at = i;
+                    break;
+                }
+            }
         }
+        m_devices.insert(at, info);
+        m_families.insert(at, family);
+        item = new QListWidgetItem(text);
+        m_deviceList->insertItem(m_usbPorts.size() + at, item);
     } else {
         // The family can change as more of the advertisement arrives, e.g. a late name.
         m_devices[row] = info;
         m_families[row] = family;
-        m_deviceList->item(m_usbPorts.size() + row)->setText(text);
+        item = m_deviceList->item(m_usbPorts.size() + row);
+        item->setText(text);
+    }
+    if (isSupported(family)) {
+        item->setFlags(item->flags() | Qt::ItemIsEnabled);
+        item->setToolTip(QString());
+    } else {
+        item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+        item->setToolTip(tr("OSCAR can't download from Contec oximeters over Bluetooth yet. Use the data "
+                            "files saved by Contec's own software instead."));
+    }
+    QListWidgetItem *current = m_deviceList->currentItem();
+    if (!current || !(current->flags() & Qt::ItemIsEnabled)
+            || (m_preferred.contains(family) && isSupported(family) && row < 0
+                && m_deviceList->row(current) > m_deviceList->row(item))) {
+        if (item->flags() & Qt::ItemIsEnabled) {
+            m_deviceList->setCurrentItem(item);
+        }
     }
     updateConnectButton();
 }
@@ -380,7 +407,7 @@ void ViatomImportPanel::onScanFinished()
             && !m_autoRescanned && availability() == Availability::Available) {
         m_autoRescanned = true;
         qDebug().noquote() << "ViatomBleImport: nothing found, searching once more";
-        m_status->setText(tr("Still searching for Viatom devices..."));
+        m_status->setText(tr("Still searching for oximeters..."));
         m_scanner->start(10000);
         return;
     }
@@ -389,8 +416,8 @@ void ViatomImportPanel::onScanFinished()
         return;
     }
     if (m_devices.isEmpty() && m_usbPorts.isEmpty()) {
-        m_status->setText(tr("No Viatom device found. Check that it is in standby, close to the computer, "
-                             "and not connected to the phone app, then search again."));
+        m_status->setText(tr("No oximeter found. Check that it is switched on or in standby, close to the "
+                             "computer, and not connected to a phone app, then search again."));
     } else {
         m_status->setText(tr("Choose your oximeter and click Connect."));
     }
@@ -411,19 +438,27 @@ void ViatomImportPanel::connectToSelected()
     m_scanner->stop();
     const bool usb = row < m_usbPorts.size();
     m_warning->setVisible(false);   // a new connection starts afresh
+    m_info = DeviceInfo();
     UsbLink *usbLink = nullptr;
     Device *device = nullptr;
     QBluetoothDeviceInfo info;
     DeviceFamily family = DeviceFamily::Classic;
     if (usb) {
+        m_connectedFamily = DeviceFamily::Classic;
         m_link = usbLink = new UsbLink(this);
         // The SleepU and O2Ring use the classic protocol over the cable.
         m_downloader = new Downloader(m_link, std::make_unique<ClassicUsbDialect>(), this);
     } else {
         info = m_devices.at(row - m_usbPorts.size());
         family = m_families.at(row - m_usbPorts.size());
+        if (!isSupported(family)) {
+            return;
+        }
+        m_connectedFamily = family;
         m_link = device = new Device(this);
-        if (family == DeviceFamily::O2RingS) {
+        if (family == DeviceFamily::Emay) {
+            m_downloader = new EmayDownloader(m_link, this);
+        } else if (family == DeviceFamily::O2RingS) {
             m_downloader = new Downloader(m_link, std::make_unique<O2RingSDialect>(), this);
         } else {
             m_downloader = new Downloader(m_link, this);
@@ -445,18 +480,18 @@ void ViatomImportPanel::connectToSelected()
         // e.g. it switched itself off while the recordings were being chosen
         onFailed(tr("The device disconnected: %1").arg(reason));
     });
-    connect(m_downloader, &Downloader::infoReceived, this, &ViatomImportPanel::onInfoReceived);
-    connect(m_downloader, &Downloader::timeSet, this, &ViatomImportPanel::onTimeSet);
-    connect(m_downloader, &Downloader::failed, this, &ViatomImportPanel::onFailed);
-    connect(m_downloader, &Downloader::fileStarted, this, &ViatomImportPanel::onFileStarted);
-    connect(m_downloader, &Downloader::fileProgress, this, &ViatomImportPanel::onFileProgress);
-    connect(m_downloader, &Downloader::fileSaved, this, &ViatomImportPanel::onFileSaved);
-    connect(m_downloader, &Downloader::fileSkipped, this, &ViatomImportPanel::onFileSkipped);
-    connect(m_downloader, &Downloader::fileFailed, this, &ViatomImportPanel::onFileFailed);
-    connect(m_downloader, &Downloader::downloadFinished, this, &ViatomImportPanel::onDownloadFinished);
+    connect(m_downloader, &DownloaderBase::infoReceived, this, &ViatomImportPanel::onInfoReceived);
+    connect(m_downloader, &DownloaderBase::timeSet, this, &ViatomImportPanel::onTimeSet);
+    connect(m_downloader, &DownloaderBase::failed, this, &ViatomImportPanel::onFailed);
+    connect(m_downloader, &DownloaderBase::fileStarted, this, &ViatomImportPanel::onFileStarted);
+    connect(m_downloader, &DownloaderBase::fileProgress, this, &ViatomImportPanel::onFileProgress);
+    connect(m_downloader, &DownloaderBase::fileSaved, this, &ViatomImportPanel::onFileSaved);
+    connect(m_downloader, &DownloaderBase::fileSkipped, this, &ViatomImportPanel::onFileSkipped);
+    connect(m_downloader, &DownloaderBase::fileFailed, this, &ViatomImportPanel::onFileFailed);
+    connect(m_downloader, &DownloaderBase::downloadFinished, this, &ViatomImportPanel::onDownloadFinished);
     if (usb) {
         // Over Bluetooth only one program can be connected; a cable can be shared.
-        connect(m_downloader, &Downloader::unrequestedReplies, this, [this]() {
+        connect(m_downloader, &DownloaderBase::unrequestedReplies, this, [this]() {
             const QString text = tr("Another program seems to be using the oximeter's USB cable, such as "
                                     "O2 Insight Pro. Close it for a reliable download.");
             m_warning->setText(text);
@@ -476,7 +511,8 @@ void ViatomImportPanel::connectToSelected()
     }
     m_status->setText(tr("Connecting to %1...").arg(info.name()));
     qDebug().noquote() << "ViatomBleImport: connecting to" << info.name() << deviceLabel(info)
-                       << (family == DeviceFamily::O2RingS ? "as O2Ring S family" : "as classic");
+                       << (family == DeviceFamily::O2RingS ? "as O2Ring S family"
+            : family == DeviceFamily::Emay ? "as EMAY" : "as classic");
     device->connectToDevice(info, family);
 }
 
@@ -512,7 +548,8 @@ void ViatomImportPanel::closeConnection()
 
 QString ViatomImportPanel::folderFor(const DeviceInfo &info) const
 {
-    // The Viatom loader uses the folder name as the device's serial number.
+    // The Viatom loader uses the folder name as the device's serial number. EMAY
+    // recordings (.spo2 files) get their own folders.
     QString name = info.serialNumber;
     name.remove(QRegularExpression(QStringLiteral("[^A-Za-z0-9_-]")));
     if (name.isEmpty()) {
@@ -525,6 +562,9 @@ QString ViatomImportPanel::folderFor(const DeviceInfo &info) const
     }
     if (name.isEmpty()) {
         name = QStringLiteral("Unknown");
+    }
+    if (m_connectedFamily == DeviceFamily::Emay) {
+        name.prepend(QStringLiteral("EMAY_"));
     }
     return QDir(oximetryDataFolder()).filePath(name);
 }
@@ -754,7 +794,7 @@ void ViatomImportPanel::onDownloadFinished(bool cancelled)
 bool ViatomImportPanel::stopForClose()
 {
     if (m_downloader && m_downloader->isBusy() && m_pages->currentIndex() == TransferPage) {
-        if (QMessageBox::question(this, tr("Viatom/Wellue Import"),
+        if (QMessageBox::question(this, tr("Oximeter Download"),
                                   tr("A download is in progress. Stop it?")) != QMessageBox::Yes) {
             return false;
         }

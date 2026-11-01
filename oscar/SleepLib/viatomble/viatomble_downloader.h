@@ -18,6 +18,7 @@
 #include <QTimer>
 
 #include "viatomble_dialect.h"
+#include "viatomble_downloaderbase.h"
 #include "viatomble_protocol.h"
 
 namespace ViatomBle {
@@ -38,7 +39,7 @@ class Link;
  *  and renamed to "<name>" only when it has the size the device announced, so an
  *  interrupted transfer never leaves a file that looks complete.
  */
-class Downloader : public QObject
+class Downloader : public DownloaderBase
 {
     Q_OBJECT
 
@@ -54,38 +55,15 @@ class Downloader : public QObject
     void setOpenTimeout(int ms) { m_openTimeoutMs = ms; }
     void setMaxRetries(int retries) { m_maxRetries = retries; }
 
-    bool isBusy() const { return m_state != Idle; }
+    bool isBusy() const override { return m_state != Idle; }
 
-    //! Asks the device for its info; answers with infoReceived() or failed().
-    void requestInfo();
-
-    //! Sets the device clock; answers with timeSet(). A failure here isn't fatal.
-    void setTime(const QDateTime &localTime);
-
-    /*! Downloads files into folder, one after another, then emits downloadFinished().
-     *  A file already in folder with the size the device reports is skipped unless
+    void requestInfo() override;
+    void setTime(const QDateTime &localTime) override;
+    /*! A file already in folder with the size the device reports is skipped unless
      *  overwriteExisting is set. */
-    void download(const QStringList &files, const QString &folder, bool overwriteExisting);
-
+    void download(const QStringList &files, const QString &folder, bool overwriteExisting) override;
     //! Stops after closing the current file on the device; the partial file is removed.
-    void cancel();
-
-  signals:
-    void infoReceived(const ViatomBle::DeviceInfo &info);
-    //! error is empty on success.
-    void timeSet(const QString &error);
-    void fileStarted(const QString &name, qint64 size);
-    void fileProgress(const QString &name, qint64 received, qint64 size);
-    void fileSaved(const QString &name, const QString &path);
-    void fileSkipped(const QString &name, const QString &path);
-    void fileFailed(const QString &name, const QString &reason);
-    void downloadFinished(bool cancelled);
-    //! The info request failed, or the link was lost; nothing more will happen.
-    void failed(const QString &reason);
-    /*! Replies keep arriving that answer no request of ours, so another program is
-     *  probably talking to the device too (over a USB cable, e.g. O2 Insight Pro).
-     *  Emitted once. */
-    void unrequestedReplies();
+    void cancel() override;
 
   private slots:
     void onDataReceived(const QByteArray &chunk);

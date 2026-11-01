@@ -226,9 +226,9 @@ original card.
 | `zeo_loader`, `dreem_loader`, `applehealth_loader` | Sleep stages (Apple Health also imports vitals and weight) |
 | `somnopose_loader` | Body position |
 
-Oximeter import has its own UI (`oximeterimport.cpp`, `SleepLib/serialoximeter.cpp`).
-`deviceconnection.cpp` with `xmlreplay.cpp` can record and replay serial-device traffic
-for tests.
+Oximeter import has its own wizard (`oximeterimport.cpp`). CMS50 and ChoiceMMed data
+files go through `SleepLib/serialoximeter.cpp`; Viatom/Wellue downloads over Bluetooth or
+the USB cable through `SleepLib/viatomble/` and `viatomimportpanel.cpp`.
 
 **Rule:** a change to one loader must not affect any other loader unless that is the
 explicit goal. Card formats and detection fingerprints are documented in

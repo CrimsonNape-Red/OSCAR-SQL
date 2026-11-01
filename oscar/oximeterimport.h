@@ -94,6 +94,11 @@ private:
     //! Preselects the CPAP session that best fits the recording, if there is one.
     void suggestCpapSession();
     void saveSession();
+    //! Stores oxirec as a session of mod's device starting at startTime.
+    void storeSession(SerialOximeter *mod, QVector<OxiRecord> *oxirec, const QDateTime &startTime);
+    /*! Imports a downloaded recording file that carries its own start time (an EMAY
+     *  .spo2); true if it was imported or is already in OSCAR. */
+    bool importRecordingFile(const QString &path);
     void showSummary(const QString &text);
 
     int oximeterType() const;
@@ -117,6 +122,7 @@ private:
     QPushButton *m_filesOption = nullptr;
     QLabel *m_usbNote = nullptr;
     QLabel *m_bluetoothNote = nullptr;
+    QLabel *m_bluetoothDetail = nullptr;
     QLabel *m_filesDetail = nullptr;
     QLabel *m_deviceHelp = nullptr;
     QWidget *m_viatomPage = nullptr;

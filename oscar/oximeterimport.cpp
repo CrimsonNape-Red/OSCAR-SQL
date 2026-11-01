@@ -42,10 +42,17 @@ QList<SerialOximeter *> GetOxiLoaders();
 
 // The oximeter types, as stored in the profile (STR_OS_OximeterType). The values never
 // change, whatever order the wizard shows the devices in.
-enum OximeterTypeId { OXI_CMS50F37 = 0, OXI_CMS50 = 1, OXI_MD300W1 = 2, OXI_VIATOM = 3 };
+enum OximeterTypeId { OXI_CMS50F37 = 0, OXI_CMS50 = 1, OXI_MD300W1 = 2, OXI_VIATOM = 3, OXI_EMAY = 4 };
 
 // The device cards' order on the first page.
-static const int DEVICE_ORDER[] = { OXI_VIATOM, OXI_CMS50F37, OXI_CMS50, OXI_MD300W1 };
+static const int DEVICE_ORDER[] = { OXI_VIATOM, OXI_EMAY, OXI_CMS50F37, OXI_CMS50, OXI_MD300W1 };
+
+//! Oximeters whose recordings carry their own start time and are downloaded in the
+//! import panel (over Bluetooth, or a Viatom/Wellue cable).
+static bool downloadsInPanel(int type)
+{
+    return type == OXI_VIATOM || type == OXI_EMAY;
+}
 
 //! A dark theme: a few colours (badges, notes) need lighter shades on it.
 static bool darkTheme(const QWidget *w)
@@ -196,6 +203,7 @@ QString OximeterImport::deviceName(int type) const
 {
     switch (type) {
     case OXI_VIATOM:   return tr("Viatom/Wellue");
+    case OXI_EMAY:     return tr("EMAY");
     case OXI_CMS50F37: return tr("Contec CMS50F v3.7+");
     case OXI_CMS50:    return tr("Contec CMS50D+/E/F");
     case OXI_MD300W1:  return tr("ChoiceMMed MD300W1");
@@ -290,7 +298,8 @@ void OximeterImport::updateStepBar()
 
     // What was chosen replaces a finished step's title; the last step depends on the device.
     QStringList titles = { tr("Oximeter"), tr("Method"), tr("Import"),
-                           oximeterType() == OXI_VIATOM ? tr("Summary") : tr("Match to CPAP") };
+                           downloadsInPanel(oximeterType()) && method() != FilesMethod ? tr("Summary")
+                                                                                    : tr("Match to CPAP") };
     if (m_step > DeviceStep) {
         titles[0] = deviceName(oximeterType());
     }
@@ -374,6 +383,8 @@ QWidget *OximeterImport::buildDevicePage()
     const QList<Card> cards = {
         { OXI_VIATOM, ":/icons/wellue.png", tr("O2Ring, O2Ring S, SleepU, Checkme O2, Wearable O2"),
           tr("USB cable · Bluetooth · Data files") },
+        { OXI_EMAY, QStringLiteral("text:EMAY"), tr("EMO-80 (Bluetooth sleep oximeter)"),
+          tr("Bluetooth") },
         { OXI_CMS50F37, ":/icons/cms50f.png", tr("CMS50F v3.7+, CMS50H, CMS50I, CMS50D+ v4.6, Pulox PO-400/500"),
           tr("Data files") },
         { OXI_CMS50, ":/icons/oximeter.png", tr("CMS50D+, CMS50E, CMS50F, Pulox PO-200/300"),
@@ -388,7 +399,7 @@ QWidget *OximeterImport::buildDevicePage()
         auto *card = new QPushButton(page);
         card->setObjectName("wizardCard");
         card->setCheckable(true);
-        card->setMinimumSize(200, 300);
+        card->setMinimumSize(165, 300);
         card->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         card->setAccessibleName(deviceName(c.type));
         auto *v = new QVBoxLayout(card);
@@ -408,9 +419,18 @@ QWidget *OximeterImport::buildDevicePage()
         QLabel *picture = passiveLabel(QString(), card);
         picture->setAlignment(Qt::AlignCenter);
         picture->setMinimumHeight(118);
-        picture->setPixmap(c.picture.isEmpty()
-            ? style()->standardIcon(QStyle::SP_FileIcon).pixmap(64, 64)
-            : devicePicture(c.picture, QSize(140, 112), this));
+        if (c.picture.startsWith(QLatin1String("text:"))) {
+            // No picture to hand: the brand name, large.
+            picture->setText(c.picture.mid(5));
+            QFont pf = picture->font();
+            pf.setBold(true);
+            pf.setPointSizeF(pf.pointSizeF() * 2.6);
+            picture->setFont(pf);
+        } else {
+            picture->setPixmap(c.picture.isEmpty()
+                ? style()->standardIcon(QStyle::SP_FileIcon).pixmap(64, 64)
+                : devicePicture(c.picture, QSize(140, 112), this));
+        }
         v->addWidget(picture);
 
         QLabel *name = passiveLabel(deviceName(c.type), card);
@@ -505,12 +525,9 @@ QWidget *OximeterImport::buildMethodPage()
     };
 
     QLabel *usbDetail = nullptr;
-    QLabel *bluetoothDetail = nullptr;
     m_usbOption = option(UsbMethod, tr("Through the USB cable"), &usbDetail, &m_usbNote);
     usbDetail->setText(tr("Use the cable that came with the oximeter. Close O2 Insight Pro first."));
-    m_bluetoothOption = option(BluetoothMethod, tr("Over Bluetooth"), &bluetoothDetail, &m_bluetoothNote);
-    bluetoothDetail->setText(tr("Put the oximeter in standby and close the ViHealth app on your phone. The oximeter "
-                                "switches itself off after about two minutes without a connection."));
+    m_bluetoothOption = option(BluetoothMethod, tr("Over Bluetooth"), &m_bluetoothDetail, &m_bluetoothNote);
     m_filesOption = option(FilesMethod, tr("From data files"), &m_filesDetail, nullptr);
 
     m_deviceHelp = new QLabel(page);
@@ -531,10 +548,11 @@ void OximeterImport::refreshMethods()
 {
     const int type = oximeterType();
     const bool viatom = (type == OXI_VIATOM);
+    const bool emay = (type == OXI_EMAY);
     m_methodSubtitle->setText(tr("From your %1 oximeter.").arg(deviceName(type)));
 
     m_usbOption->setVisible(viatom);
-    m_bluetoothOption->setVisible(viatom);
+    m_bluetoothOption->setVisible(viatom || emay);
 
     const QString good = QString("color: %1; font-weight: bold;").arg(goodColor(this));
     const QString warn = QString("color: %1; font-weight: bold;").arg(warnColor(this));
@@ -552,16 +570,25 @@ void OximeterImport::refreshMethods()
     const ViatomBle::Availability ble = ViatomBle::availability();
     const bool bleOk = (ble == ViatomBle::Availability::Available);
     m_bluetoothOption->setEnabled(bleOk);
-    m_bluetoothNote->setText(bleOk ? tr("Bluetooth is ready.") : ViatomBle::availabilityReason(ble));
+    m_bluetoothNote->setText(bleOk ? tr("Bluetooth is ready.") : ViatomBle::availabilityReason(ble) + QLatin1Char('.'));
     m_bluetoothNote->setStyleSheet(bleOk ? good : warn);
 
     // Data files and help for the device
     switch (type) {
     case OXI_VIATOM:
+        m_bluetoothDetail->setText(tr("Put the oximeter in standby and close the ViHealth app on your phone. The oximeter "
+                                      "switches itself off after about two minutes without a connection."));
         m_filesDetail->setText(tr("Files copied from the oximeter, or exported from the ViHealth app."));
         m_deviceHelp->setText(tr("Recordings downloaded over the cable or Bluetooth are kept in your profile's "
                                  "Oximetry_Data folder, so they can be imported again later. OSCAR can set the "
                                  "oximeter's clock when it connects, which keeps oximetry in step with CPAP data."));
+        break;
+    case OXI_EMAY:
+        m_bluetoothDetail->setText(tr("Switch the oximeter on and close EMAY's app on your phone."));
+        m_filesDetail->setText(tr("Recordings OSCAR downloaded earlier (.spo2), in your profile's Oximetry_Data folder."));
+        m_deviceHelp->setText(tr("OSCAR can set the oximeter's clock when it connects, and never deletes "
+                                 "recordings from it. EMAY support was written from EMAY's app and hasn't been "
+                                 "tried on a device yet: please report how it goes."));
         break;
     case OXI_MD300W1:
         m_filesDetail->setText(tr("MedView .dat files saved by the ChoiceMMed software."));
@@ -576,7 +603,8 @@ void OximeterImport::refreshMethods()
     // Keep a usable choice: the cable if it is there, else Bluetooth, else files.
     QAbstractButton *checked = m_methods->checkedButton();
     if (!checked || !checked->isVisible() || !checked->isEnabled()) {
-        QPushButton *pick = !viatom ? m_filesOption
+        QPushButton *pick = emay ? (bleOk ? m_bluetoothOption : m_filesOption)
+                          : !viatom ? m_filesOption
                           : cable ? m_usbOption
                           : bleOk ? m_bluetoothOption
                           : usbOk ? m_usbOption : m_filesOption;
@@ -659,7 +687,8 @@ void OximeterImport::reject()
 
 void OximeterImport::startImport()
 {
-    if (oximeterType() != OXI_VIATOM) {
+    const int type = oximeterType();
+    if (!downloadsInPanel(type) || (type == OXI_EMAY && method() == FilesMethod)) {
         importOximeterFile();
         return;
     }
@@ -673,12 +702,25 @@ void OximeterImport::startImport()
     }
 #ifdef OSCAR_HAVE_BLUETOOTH
     if (!m_viatomPanel) {
-        m_viatomPanel = new ViatomImportPanel(m_importViatomFile, this);
+        // A downloaded Viatom file goes to the Viatom loader, an EMAY recording (.spo2)
+        // straight into a session with its own start time.
+        auto importFile = [this](const QString &path) {
+            if (path.endsWith(QLatin1String(".spo2"), Qt::CaseInsensitive)) {
+                return importRecordingFile(path);
+            }
+            return m_importViatomFile && m_importViatomFile(path);
+        };
+        m_viatomPanel = new ViatomImportPanel(importFile, this);
         m_viatomPage = new QWidget(this);
         auto *v = new QVBoxLayout(m_viatomPage);
         v->setContentsMargins(32, 20, 32, 12);
         v->addWidget(m_viatomPanel);
         ui->stackedWidget->addWidget(m_viatomPage);
+    }
+    if (type == OXI_EMAY) {
+        m_viatomPanel->setPreferredFamilies({ ViatomBle::DeviceFamily::Emay });
+    } else {
+        m_viatomPanel->setPreferredFamilies({ ViatomBle::DeviceFamily::Classic, ViatomBle::DeviceFamily::O2RingS });
     }
     showPage(m_viatomPage, ImportStep);
     if (method() == UsbMethod) {
@@ -695,7 +737,15 @@ void OximeterImport::importOximeterFile()
     if (documentsFolder.isEmpty())
         documentsFolder = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
 
+    if (oximeterType() == OXI_EMAY) {
+        // Recordings OSCAR downloaded from an EMAY oximeter are kept with the profile.
+        const QString saved = QDir(p_profile->Get("{" + STR_GEN_DataFolder + "}")).filePath(QStringLiteral("Oximetry_Data"));
+        if (QDir(saved).exists()) {
+            documentsFolder = saved;
+        }
+    }
     const QString filter = oximeterType() == OXI_MD300W1 ? tr("Oximetry Files (*.dat)")
+                         : oximeterType() == OXI_EMAY    ? tr("Recordings OSCAR downloaded (*.spo2)")
                                                          : tr("Oximetry Files (*.spo *.spor *.spo2 *.SpO2 *.dat)");
     QString filename = QFileDialog::getOpenFileName(this, tr("Select a valid oximetry data file"), documentsFolder,
                                                     filter, nullptr, nativeDialogOption());
@@ -772,7 +822,7 @@ QWidget *OximeterImport::buildSummaryPage()
     m_summaryText->setWordWrap(true);
     layout->addWidget(heading);
     layout->addWidget(m_summaryText);
-    layout->addWidget(new QLabel(tr("Viatom/Wellue recordings carry their own start time, so there is nothing to match to CPAP data."), page));
+    layout->addWidget(new QLabel(tr("Downloaded recordings carry their own start time, so there is nothing to match to CPAP data."), page));
     layout->addStretch();
     return page;
 }
@@ -1009,10 +1059,24 @@ void OximeterImport::saveSession()
         return;
     }
 
-    // this can move to SerialOximeter class process function...
-    MachineInfo info = oximodule->newInfo();
+    storeSession(oximodule, oxirec, ui->dateTimeEdit->dateTime());
+
+    mainwin->EnableTabs(true);  // somebody has to do it...
+
+    mainwin->getDaily()->LoadDate(mainwin->getDaily()->getDate());
+    mainwin->getOverview()->ReloadGraphs();
+
+    m_importedFiles = true;
+    oximodule->trashRecords();
+    oximodule = nullptr;
+    accept();
+}
+
+void OximeterImport::storeSession(SerialOximeter *mod, QVector<OxiRecord> *oxirec, const QDateTime &startTime)
+{
+    MachineInfo info = mod->newInfo();
     Machine * mach = p_profile->CreateMachine(info);
-    SessionID sid = ui->dateTimeEdit->dateTime().toUTC().toSecsSinceEpoch();
+    SessionID sid = startTime.toUTC().toSecsSinceEpoch();
     quint64 start = quint64(sid) * 1000L;
 
     Session * session = new Session(mach, sid);
@@ -1029,12 +1093,12 @@ void OximeterImport::saveSession()
     quint16 lastgoodspo2 = 0;
     quint16 lastgoodperf = 0;
 
-    bool haveperf = oximodule->havePerfIndex();
+    bool haveperf = mod->havePerfIndex();
 
     quint64 ti = start;
 
 
-    qint64 step = oximodule->importResolution();
+    qint64 step = mod->importResolution();
     int size = oxirec->size();
 
     // why was I skipping the first sample? not priming it anymore..
@@ -1140,8 +1204,8 @@ void OximeterImport::saveSession()
 
     qDebug() << "oximod - Setting up device and session";
 
-    mach->setModel(oximodule->getModel());
-    mach->setBrand(oximodule->getVendor());
+    mach->setModel(mod->getModel());
+    mach->setBrand(mod->getVendor());
 
     session->first(OXI_Pulse);
     session->first(OXI_SPO2);
@@ -1184,14 +1248,38 @@ void OximeterImport::saveSession()
     mach->Save();
     p_profile->StoreMachines();
     p_profile->calculateDailySummaries();
+}
 
-    mainwin->EnableTabs(true);  // somebody has to do it...
-
-    mainwin->getDaily()->LoadDate(mainwin->getDaily()->getDate());
-    mainwin->getOverview()->ReloadGraphs();
-
-    m_importedFiles = true;
-    oximodule->trashRecords();
-    oximodule = nullptr;
-    accept();
+bool OximeterImport::importRecordingFile(const QString &path)
+{
+    // A recording downloaded with its start time, e.g. from an EMAY EMO-80 (.spo2): read
+    // by the oximetry file readers, then stored at that time without the CPAP-sync step.
+    SerialOximeter *mod = nullptr;
+    for (SerialOximeter *loader : GetOxiLoaders()) {
+        if (loader && loader->Open(path)) {
+            mod = loader;
+            break;
+        }
+    }
+    if (!mod) {
+        qWarning().noquote() << "oximod - no reader for" << path;
+        return false;
+    }
+    const QDateTime start = mod->startTime();
+    QVector<OxiRecord> *oxirec = mod->oxisessions.value(start, nullptr);
+    if (!oxirec || oxirec->size() < 10 || !start.isValid()) {
+        qWarning().noquote() << "oximod -" << path << "has no usable recording";
+        mod->trashRecords();
+        return false;
+    }
+    Machine *mach = p_profile->CreateMachine(mod->newInfo());
+    const SessionID sid = start.toUTC().toSecsSinceEpoch();
+    if (mach && mach->SessionExists(sid)) {
+        qDebug().noquote() << "oximod -" << path << "is already in OSCAR";
+        mod->trashRecords();
+        return true;
+    }
+    storeSession(mod, oxirec, start);
+    mod->trashRecords();
+    return true;
 }

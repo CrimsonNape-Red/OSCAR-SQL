@@ -13,6 +13,8 @@
 #include <QPermissions>
 #endif
 
+#include <QRegularExpression>
+
 #include "viatomble_protocol.h"
 #include "viatomble_scanner.h"
 
@@ -45,6 +47,15 @@ static bool matchesName(const QString &name, const char *prefix)
 DeviceFamily deviceFamilyFromName(const QString &rawName)
 {
     const QString name = rawName.trimmed();
+    // EMAY's app matches its names by prefix alone, e.g. "EMO-80" followed by anything.
+    if (name.startsWith(QLatin1String("EMO-80"), Qt::CaseInsensitive)) {
+        return DeviceFamily::Emay;
+    }
+    // Contec's SDK: "SpO2" and a two-digit model code, e.g. "SpO202" for a CMS50F.
+    static const QRegularExpression contec(QStringLiteral("^SpO2\\d\\d"));
+    if (contec.match(name).hasMatch()) {
+        return DeviceFamily::Contec;
+    }
     // The O2Ring S names overlap the classic "O2Ring" and "PO2", so check them first.
     for (const char *prefix : O2RING_S_NAMES) {
         if (matchesName(name, prefix)) {
@@ -81,7 +92,7 @@ Scanner::Scanner(QObject *parent)
             [this](const QBluetoothDeviceInfo &info, QBluetoothDeviceInfo::Fields) { consider(info); });
     auto done = [this]() {
         qDebug().noquote() << "ViatomBle::Scanner: scan ended;" << m_seen.size() << "Bluetooth LE devices seen,"
-                           << m_viatomSeen << "of them Viatom";
+                           << m_viatomSeen << "of them oximeters OSCAR knows";
         emit finished();
     };
     connect(&m_agent, &QBluetoothDeviceDiscoveryAgent::finished, this, done);
@@ -154,7 +165,9 @@ void Scanner::consider(const QBluetoothDeviceInfo &info)
                            << (info.name().isEmpty() ? QStringLiteral("(no name)") : info.name())
                            << id << "rssi" << info.rssi() << "services [" << services.join(QLatin1Char(' ')) << "]"
                            << (family == DeviceFamily::O2RingS ? "-> O2Ring S family"
-                               : family == DeviceFamily::Classic ? "-> classic Viatom" : "");
+                               : family == DeviceFamily::Classic ? "-> classic Viatom"
+                               : family == DeviceFamily::Emay ? "-> EMAY"
+                               : family == DeviceFamily::Contec ? "-> Contec (not supported yet)" : "");
     }
 
     if (family != DeviceFamily::NotViatom) {

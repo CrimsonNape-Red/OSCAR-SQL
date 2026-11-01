@@ -67,7 +67,7 @@ In OSCAR 2.0 the active data folder contains:
 - `oscar.db` (+ its `-shm` / `-wal` siblings while open)
 - `Profiles/<username>/...`, including `Profiles/<machine>/Backup/` which
   holds the SD-card backups (the "SD data" mentioned in earlier discussion)
-- `logs/` (debug log + `connections/devices.xml`)
+- `logs/` (debug log)
 - screenshots and any backup files written by the Backup feature
 
 `Preferences.xml` and `layoutSettings/` no longer exist as files —
@@ -257,8 +257,6 @@ process-lifetime singleton:
   `profileSelector`.
 - Daily / Overview / Welcome views — destroy and recreate.
 - MachineLoader caches — registry reset.
-- `DeviceConnectionManager` — close `connections/devices.xml`, reopen at
-  the new path.
 
 Estimate: 2–3 weeks of careful work and a thorough crash-test pass — much
 more than Phase 1.

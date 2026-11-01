@@ -14,20 +14,16 @@ Both the old and new models look the same.  The newer models have updated hardwa
 
 [[File:Old-contec-sm.png|thumb|left|150px|alt=CMS50F older model|CMS50F older model]] 
 <br /><br /><br />
-The older CMS50F model will briefly show <code>Ver 6.1</code> when it is first turned on.  These models are capable of being directly imported into OSCAR using the cable supplied with the oximeter, or by using the Smart Device Assistant v3.1.0.1 software (Windows only) and importing the SpO2 file.
+The older CMS50F model will briefly show <code>Ver 6.1</code> when it is first turned on.  Use the Smart Device Assistant v3.1.0.1 software (Windows only) to save its data as an SpO2 file, then import that file into OSCAR.  (OSCAR 1.x could also import these older models directly over their cable.  That was removed after OSCAR 2.1.1, since no current CMS50 works that way.)
 <div style="clear:both;"></div>
 
 [[File:New-contec-sm.png|thumb|left|150px|alt=CMS50F newer model|CMS50F newer model]] 
 <br /><br />
 The newer CMS50F will briefly show <code>Hard. Ver. 2.0.0</code> and <code>Soft. Ver. 2.0.4</code> when first turned on. The hardware and software versions are also listed in the "System Menu".<br />
-OSCAR is not currently compatible with directly importing the data from these newer models.  The "Smart Device Assistant" software (Windows only) must be used.  The software will extract the data from the oximeter and save it as an SpO2 file which can be imported into OSCAR.
+OSCAR can't import directly from these newer models.  The "Smart Device Assistant" software (Windows only) must be used.  The software will extract the data from the oximeter and save it as an SpO2 file which can be imported into OSCAR.
 <div style="clear:both;"></div>
 
 == Importing your oximetry data ==
-
-=== Older model direct import into OSCAR ===
-
-Remove the fingertip sensor.  Using the cable that was supplied with your oximeter, attach the oximeter to your computer.  Turn the oximeter on.  Open OSCAR and import your CPAP data.  From the Welcome screen select "Oximetry Wizard" (alternatively from the menubar select Data > Oximetry Wizard or the F7 key (fn+F7 for Mac)), select the correct oximeter from the dropdown list, and click "Import directly from a recording device".  Another screen will appear saying it is connecting to your device and your device is uploading data.  Once the upload is complete the window will ask you when the recording started and show a calendar.  It is suggested that you check the box labeled "I started this oximeter recording at (or near) the same time as a session on my CPAP device".  The CPAP session you are importing into should show along with a horizontal bar showing the length of the session.  Click the "Save and Finish" button.  Your oximetry data should now show in the OSCAR graphs.
 
 === Software import SpO2 files, both models ===
 
@@ -46,7 +42,11 @@ Click the Folder icon.  In the address bar you can navigate to the location (lis
 
 ==== Importing SpO2 files into OSCAR ====
 
-Open OSCAR.  From the Welcome screen click the Oximetry Wizard icon (alternatively from the menubar select Data > Oximetry Wizard or the F7 key (fn+F7 for Mac)).  From the Oximeter Import Wizard screen click the floppy disk icon (Import from a datafile saved by another program).  A File Explorer like screen will open where you can navigate to the SpO2 data location (listed above).  Select the SpO2 file that was created in the previous section.  The next window will ask you when the recording started and show a calendar.  It is suggested that you check the box labeled "I started this oximeter recording at (or near) the same time as a session on my CPAP device".  The CPAP session you are importing into should show along with a horizontal bar showing the length of the session.  Click the "Save and Finish" button.  Your oximetry data should now show in the OSCAR graphs.
+Open OSCAR and import your CPAP data first.  From the Welcome screen click the Oximetry Wizard icon (alternatively from the menubar select Data > Oximetry Wizard or the F7 key (fn+F7 for Mac)).
+# '''Oximeter:''' choose your model ("Contec CMS50F v3.7+" for the newer models, "Contec CMS50D+/E/F" for the older ones) and click "Next".  OSCAR remembers your choice.
+# '''Method:''' "From data files" is selected.  Click "Choose files...".  A File Explorer like screen will open where you can navigate to the SpO2 data location (listed above).  Select the SpO2 file that was created in the previous section.
+# '''Match to CPAP:''' the wizard asks when the recording started and shows a calendar.  It is suggested that you choose "I started this oximeter recording at (or near) the same time as a session on my CPAP device".  OSCAR preselects the CPAP session that fits the recording best, shown with a horizontal bar for its length; pick another one if it's wrong.  Click "Save".
+Your oximetry data should now show in the OSCAR graphs.
 
 == Smart Device Assistant software ==
 

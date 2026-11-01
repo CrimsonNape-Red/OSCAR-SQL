@@ -356,11 +356,7 @@ const QString STR_UI_TimeZone = "TimeZone";
 const QString STR_PI_Source = "Source"; ///< How the profile was created: "Local", "Backup", "Share", or "Import"
 
 // OxiSettings Strings
-const QString STR_OS_EnableOximetry = "EnableOximetry";
-const QString STR_OS_DefaultDevice = "DefaultOxiDevice";
-const QString STR_OS_SyncOximeterClock = "SyncOximeterClock";
 const QString STR_OS_OximeterType = "OximeterType";
-const QString STR_OS_SkipOxiIntroScreen = "SkipOxiIntroScreen";
 
 const QString STR_OS_SPO2DropDuration = "SPO2DropDuration";
 const QString STR_OS_SPO2DropPercentage = "SPO2DropPercentage";
@@ -585,12 +581,8 @@ class OxiSettings : public PrefSettings
       : PrefSettings(profile)
     {
 
-        // Intialized non-user changable item - set during import of data?
-        initPref(STR_OS_EnableOximetry, false);
-        initPref(STR_OS_DefaultDevice, QString());
-        initPref(STR_OS_SyncOximeterClock, true);
+        // The oximeter last chosen in the Oximetry Wizard
         initPref(STR_OS_OximeterType, 3); // Viatom/Wellue, see OximeterTypeId in oximeterimport.cpp
-        initPref(STR_OS_SkipOxiIntroScreen, false);
 
         // Initialize Changeable via GUI parameters with default values
         initPref(STR_OS_SPO2DropDuration, defaultValue_OS_SPO2DropDuration);
@@ -628,11 +620,7 @@ class OxiSettings : public PrefSettings
     const int defaultValue_OS_SpO2BaselinePercentile = 50;  // the median
 
 
-    bool oximetryEnabled() const { return getPref(STR_OS_EnableOximetry).toBool(); }
-    QString defaultDevice() const { return getPref(STR_OS_DefaultDevice).toString(); }
-    bool syncOximeterClock() const { return getPref(STR_OS_SyncOximeterClock).toBool(); }
     int oximeterType() const { return getPref(STR_OS_OximeterType).toInt(); }
-    bool skipOxiIntroScreen() const { return getPref(STR_OS_SkipOxiIntroScreen).toBool(); }
 
     double spO2DropDuration() const { return getPref(STR_OS_SPO2DropDuration).toDouble(); }
     double spO2DropPercentage() const { return getPref(STR_OS_SPO2DropPercentage).toDouble(); }
@@ -644,14 +632,10 @@ class OxiSettings : public PrefSettings
     double  flagPulseAbove() const { return getPref(STR_OS_flagPulseAbove).toDouble(); }
     double  flagPulseBelow() const { return getPref(STR_OS_flagPulseBelow).toDouble(); }
 
-    void setOximetryEnabled(bool enabled) { setPref(STR_OS_EnableOximetry, enabled); }
-    void setDefaultDevice(QString name) { setPref(STR_OS_DefaultDevice, name); }
-    void setSyncOximeterClock(bool synced) { setPref(STR_OS_SyncOximeterClock, synced); }
     void setOximeterType(int oxitype) { setPref(STR_OS_OximeterType, oxitype); }
     void setOxiDiscardThreshold(double thresh) { setPref(STR_OS_OxiDiscardThreshold, thresh); }
     void setSpO2DropDuration(double duration) { setPref(STR_OS_SPO2DropDuration, duration); }
     void setPulseChangeBPM(double bpm) { setPref(STR_OS_PulseChangeBPM, bpm); }
-    void setSkipOxiIntroScreen(bool skip) { setPref(STR_OS_SkipOxiIntroScreen, skip); }
     void setSpO2DropPercentage(double percentage) {
         setPref(STR_OS_SPO2DropPercentage, percentage);
     }
