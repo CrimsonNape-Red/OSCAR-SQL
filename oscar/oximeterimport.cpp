@@ -383,7 +383,7 @@ QWidget *OximeterImport::buildDevicePage()
     const QList<Card> cards = {
         { OXI_VIATOM, ":/icons/wellue.png", tr("O2Ring, O2Ring S, SleepU, Checkme O2, Wearable O2"),
           tr("USB cable · Bluetooth · Data files") },
-        { OXI_EMAY, QStringLiteral("text:EMAY"), tr("EMO-80 (Bluetooth sleep oximeter)"),
+        { OXI_EMAY, ":/icons/emay.png", tr("EMO-80 (Bluetooth sleep oximeter)"),
           tr("Bluetooth") },
         { OXI_CMS50F37, ":/icons/cms50f.png", tr("CMS50F v3.7+, CMS50H, CMS50I, CMS50D+ v4.6, Pulox PO-400/500"),
           tr("Data files") },
@@ -419,18 +419,9 @@ QWidget *OximeterImport::buildDevicePage()
         QLabel *picture = passiveLabel(QString(), card);
         picture->setAlignment(Qt::AlignCenter);
         picture->setMinimumHeight(118);
-        if (c.picture.startsWith(QLatin1String("text:"))) {
-            // No picture to hand: the brand name, large.
-            picture->setText(c.picture.mid(5));
-            QFont pf = picture->font();
-            pf.setBold(true);
-            pf.setPointSizeF(pf.pointSizeF() * 2.6);
-            picture->setFont(pf);
-        } else {
-            picture->setPixmap(c.picture.isEmpty()
-                ? style()->standardIcon(QStyle::SP_FileIcon).pixmap(64, 64)
-                : devicePicture(c.picture, QSize(140, 112), this));
-        }
+        picture->setPixmap(c.picture.isEmpty()
+            ? style()->standardIcon(QStyle::SP_FileIcon).pixmap(64, 64)
+            : devicePicture(c.picture, QSize(140, 112), this));
         v->addWidget(picture);
 
         QLabel *name = passiveLabel(deviceName(c.type), card);

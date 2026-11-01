@@ -338,8 +338,10 @@ void ViatomImportPanel::startWithUsb()
                                              : tr("Choose your oximeter and click Connect."));
 }
 
-void ViatomImportPanel::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFamily family)
+void ViatomImportPanel::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFamily scanned)
 {
+    // A name both brands use ("SleepO2") goes by the brand chosen in the wizard.
+    const DeviceFamily family = m_preferred.contains(DeviceFamily::Emay) ? deviceFamily(info, true) : scanned;
     // deviceFound repeats when the signal strength changes; update the existing row.
     int row = -1;
     for (int i = 0; i < m_devices.size(); i++) {
@@ -348,9 +350,9 @@ void ViatomImportPanel::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFa
             break;
         }
     }
-    QString text = deviceLabel(info);
+    QString text = deviceLabel(info) + QStringLiteral("   ") + brandName(info.name(), family);
     if (!isSupported(family)) {
-        text += tr("   Contec: not supported yet");
+        text += tr(": not supported yet");
     }
     QListWidgetItem *item = nullptr;
     if (row < 0) {
@@ -380,8 +382,8 @@ void ViatomImportPanel::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFa
         item->setToolTip(QString());
     } else {
         item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
-        item->setToolTip(tr("OSCAR can't download from Contec oximeters over Bluetooth yet. Use the data "
-                            "files saved by Contec's own software instead."));
+        item->setToolTip(tr("This oximeter uses Contec's Bluetooth protocol, which OSCAR can't download "
+                            "from yet."));
     }
     QListWidgetItem *current = m_deviceList->currentItem();
     if (!current || !(current->flags() & Qt::ItemIsEnabled)

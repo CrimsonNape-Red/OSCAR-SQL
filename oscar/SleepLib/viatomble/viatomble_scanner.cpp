@@ -44,17 +44,36 @@ static bool matchesName(const QString &name, const char *prefix)
         || name.startsWith(p + QLatin1Char(' '), Qt::CaseInsensitive);
 }
 
+// EMAY's names (its Android app matches them by prefix alone). EMO-80 has EMAY's own
+// protocol; the others use Contec's, which OSCAR can't download from yet. "SleepO2" is
+// also a Viatom name, so it is handled in deviceFamily().
+static const char *const EMAY_CONTEC_NAMES[] = {
+    "SleepO2-2", "EMO-100", "EM90", "EM60", "EMAY BT Oximeter", "EMAY Oximeter",
+};
+static const char *const EMAY_SERVICE = "0000ff12-0000-1000-8000-00805f9b34fb";
+
+//! A "SleepO2" name, which Viatom and EMAY share (not EMAY's "SleepO2-2").
+static bool isSleepO2(const QString &name)
+{
+    return name.startsWith(QLatin1String("SleepO2"), Qt::CaseInsensitive)
+        && !name.startsWith(QLatin1String("SleepO2-2"), Qt::CaseInsensitive);
+}
+
 DeviceFamily deviceFamilyFromName(const QString &rawName)
 {
     const QString name = rawName.trimmed();
-    // EMAY's app matches its names by prefix alone, e.g. "EMO-80" followed by anything.
     if (name.startsWith(QLatin1String("EMO-80"), Qt::CaseInsensitive)) {
         return DeviceFamily::Emay;
+    }
+    for (const char *prefix : EMAY_CONTEC_NAMES) {
+        if (name.startsWith(QLatin1String(prefix), Qt::CaseInsensitive)) {
+            return DeviceFamily::Unsupported;
+        }
     }
     // Contec's SDK: "SpO2" and a two-digit model code, e.g. "SpO202" for a CMS50F.
     static const QRegularExpression contec(QStringLiteral("^SpO2\\d\\d"));
     if (contec.match(name).hasMatch()) {
-        return DeviceFamily::Contec;
+        return DeviceFamily::Unsupported;
     }
     // The O2Ring S names overlap the classic "O2Ring" and "PO2", so check them first.
     for (const char *prefix : O2RING_S_NAMES) {
@@ -67,21 +86,58 @@ DeviceFamily deviceFamilyFromName(const QString &rawName)
             return DeviceFamily::Classic;
         }
     }
+    // EMAY's SleepO2 names need no space after "SleepO2", unlike Viatom's.
+    if (isSleepO2(name)) {
+        return DeviceFamily::Unsupported;
+    }
     return DeviceFamily::NotViatom;
 }
 
-DeviceFamily deviceFamily(const QBluetoothDeviceInfo &info)
+DeviceFamily deviceFamily(const QString &rawName, const QStringList &services, bool preferEmay)
 {
-    const QList<QBluetoothUuid> services = info.serviceUuids();
-    if (services.contains(QBluetoothUuid(QString::fromLatin1(O2RING_S_SERVICE)))) {
+    const QString name = rawName.trimmed();
+    auto has = [&services](const char *uuid) {
+        return services.contains(QString::fromLatin1(uuid), Qt::CaseInsensitive);
+    };
+    if (has(O2RING_S_SERVICE)) {
         return DeviceFamily::O2RingS;
     }
-    if (services.contains(QBluetoothUuid(QString::fromLatin1(SERVICE_UUID)))) {
+    if (has(SERVICE_UUID)) {
         // The O2Ring S family can also be set to use this service, so let the name decide.
-        DeviceFamily byName = deviceFamilyFromName(info.name());
+        DeviceFamily byName = deviceFamilyFromName(name);
         return byName == DeviceFamily::O2RingS ? byName : DeviceFamily::Classic;
     }
-    return deviceFamilyFromName(info.name());
+    if (isSleepO2(name)) {
+        // Viatom's or EMAY's: EMAY's service says EMAY, and so does the user's choice.
+        return (has(EMAY_SERVICE) || preferEmay) ? DeviceFamily::Unsupported : DeviceFamily::Classic;
+    }
+    return deviceFamilyFromName(name);
+}
+
+DeviceFamily deviceFamily(const QBluetoothDeviceInfo &info, bool preferEmay)
+{
+    QStringList services;
+    for (const QBluetoothUuid &uuid : info.serviceUuids()) {
+        services << uuid.toString(QUuid::WithoutBraces);
+    }
+    return deviceFamily(info.name(), services, preferEmay);
+}
+
+QString brandName(const QString &rawName, DeviceFamily family)
+{
+    switch (family) {
+    case DeviceFamily::Classic:
+    case DeviceFamily::O2RingS:
+        return QStringLiteral("Viatom/Wellue");
+    case DeviceFamily::Emay:
+        return QStringLiteral("EMAY");
+    case DeviceFamily::Unsupported:
+        return rawName.trimmed().startsWith(QLatin1String("SpO2"), Qt::CaseInsensitive)
+            ? QStringLiteral("Contec") : QStringLiteral("EMAY");
+    case DeviceFamily::NotViatom:
+        break;
+    }
+    return QString();
 }
 
 Scanner::Scanner(QObject *parent)
@@ -167,7 +223,7 @@ void Scanner::consider(const QBluetoothDeviceInfo &info)
                            << (family == DeviceFamily::O2RingS ? "-> O2Ring S family"
                                : family == DeviceFamily::Classic ? "-> classic Viatom"
                                : family == DeviceFamily::Emay ? "-> EMAY"
-                               : family == DeviceFamily::Contec ? "-> Contec (not supported yet)" : "");
+                               : family == DeviceFamily::Unsupported ? "-> not supported yet" : "");
     }
 
     if (family != DeviceFamily::NotViatom) {

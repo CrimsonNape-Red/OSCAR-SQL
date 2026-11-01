@@ -449,12 +449,32 @@ void EmayTests::testDeviceFamily()
 {
     QCOMPARE(deviceFamilyFromName(QStringLiteral("EMO-80")), DeviceFamily::Emay);
     QCOMPARE(deviceFamilyFromName(QStringLiteral("EMO-80-1A2B")), DeviceFamily::Emay);
-    QCOMPARE(deviceFamilyFromName(QStringLiteral("SpO202")), DeviceFamily::Contec);
-    QCOMPARE(deviceFamilyFromName(QStringLiteral("SpO213 1234")), DeviceFamily::Contec);
+    QCOMPARE(deviceFamilyFromName(QStringLiteral("SpO202")), DeviceFamily::Unsupported);
+    QCOMPARE(deviceFamilyFromName(QStringLiteral("SpO213 1234")), DeviceFamily::Unsupported);
     QCOMPARE(deviceFamilyFromName(QStringLiteral("SpO2")), DeviceFamily::NotViatom);
-    QCOMPARE(deviceFamilyFromName(QStringLiteral("EMO-100")), DeviceFamily::NotViatom);
+    QCOMPARE(deviceFamilyFromName(QStringLiteral("EMO-100")), DeviceFamily::Unsupported);
+    QCOMPARE(deviceFamilyFromName(QStringLiteral("EM90 12")), DeviceFamily::Unsupported);
+    QCOMPARE(deviceFamilyFromName(QStringLiteral("SleepO2-2 AB")), DeviceFamily::Unsupported);
+    QCOMPARE(deviceFamilyFromName(QStringLiteral("SleepO2_AB12")), DeviceFamily::Unsupported);   // EMAY style
+    QCOMPARE(deviceFamilyFromName(QStringLiteral("SleepO2 1234")), DeviceFamily::Classic);       // Viatom style
     QVERIFY(isSupported(DeviceFamily::Emay));
-    QVERIFY(!isSupported(DeviceFamily::Contec));
+    QVERIFY(!isSupported(DeviceFamily::Unsupported));
     QCOMPARE(deviceFamilyFromName(QStringLiteral("O2Ring 1234")), DeviceFamily::Classic);
+
+    // "SleepO2": the advertised service decides, then the brand chosen in the wizard.
+    const QString viatomService = QStringLiteral("14839ac4-7d7e-415c-9a42-167340cf2339");
+    const QString emayService = QStringLiteral("0000ff12-0000-1000-8000-00805f9b34fb");
+    const QString name = QStringLiteral("SleepO2 1234");
+    QCOMPARE(deviceFamily(name, {}, false), DeviceFamily::Classic);
+    QCOMPARE(deviceFamily(name, {}, true), DeviceFamily::Unsupported);
+    QCOMPARE(deviceFamily(name, { emayService }, false), DeviceFamily::Unsupported);
+    QCOMPARE(deviceFamily(name, { viatomService }, true), DeviceFamily::Classic);
+    // Other names don't depend on the choice.
+    QCOMPARE(deviceFamily(QStringLiteral("O2Ring 1"), {}, true), DeviceFamily::Classic);
+    QCOMPARE(deviceFamily(QStringLiteral("EMO-80"), {}, false), DeviceFamily::Emay);
+
+    QCOMPARE(brandName(name, DeviceFamily::Classic), QStringLiteral("Viatom/Wellue"));
+    QCOMPARE(brandName(name, DeviceFamily::Unsupported), QStringLiteral("EMAY"));
+    QCOMPARE(brandName(QStringLiteral("SpO202"), DeviceFamily::Unsupported), QStringLiteral("Contec"));
 }
 #endif

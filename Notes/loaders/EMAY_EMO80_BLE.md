@@ -126,6 +126,11 @@ Implemented on 2026-11-01, from this write-up only; not yet tried on a device.
   CPAP-matching step like any CMS50 file.
 - The wizard has an EMAY card (Bluetooth, or files OSCAR saved earlier). Contec's
   Bluetooth models (`SpO2xx`) are listed in the Bluetooth search but greyed out.
+- EMAY's other recording oximeters (SleepO2, SleepO2 Pro = `SleepO2-2`, EMO-90 = `EM90`,
+  EMO-100) use Contec's protocol and are listed greyed out, labelled EMAY. Viatom also has
+  a "SleepO2": the advertised service decides (Viatom's, or `ff12` for EMAY); without one,
+  the card chosen in the wizard does, and Viatom is assumed otherwise. The list shows the
+  brand OSCAR assumed.
 - Tests: `tests/emaytests.cpp`, against a scripted fake EMO-80.
 
 ## Notes from the review
