@@ -706,187 +706,217 @@ Servizi supportati: Dropbox, Google Drive, OneDrive, Box, 0x0.st, o qualsiasi co
         <translation>Mostra/nascondi i grafici disponibili.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="359"/>
+        <location filename="../oscar/daily.cpp" line="360"/>
         <source>Breakdown</source>
         <translation>Interruzione</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="359"/>
+        <location filename="../oscar/daily.cpp" line="360"/>
         <source>events</source>
         <translation>eventi</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="373"/>
+        <location filename="../oscar/daily.cpp" line="374"/>
         <source>UF1</source>
         <translation>UF1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="374"/>
+        <location filename="../oscar/daily.cpp" line="375"/>
         <source>UF2</source>
         <translation>UF2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="433"/>
+        <location filename="../oscar/daily.cpp" line="434"/>
         <source>Time at Pressure</source>
         <translation>Tempo pressione</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="725"/>
+        <location filename="../oscar/daily.cpp" line="726"/>
         <source>No %1 events are recorded on this day</source>
         <translation>Nessun evento %1 viene registrato in questo giorno</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="864"/>
+        <location filename="../oscar/daily.cpp" line="865"/>
         <source>%1 event</source>
         <translation>%1 evento</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="865"/>
+        <location filename="../oscar/daily.cpp" line="866"/>
         <source>%1 events</source>
         <translation>%1 eventi</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="931"/>
+        <location filename="../oscar/daily.cpp" line="932"/>
         <source>Session Start Times</source>
         <translation>Inizio Sessione</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="932"/>
+        <location filename="../oscar/daily.cpp" line="933"/>
         <source>Session End Times</source>
         <translation>Fine Sessione</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="963"/>
+        <location filename="../oscar/daily.cpp" line="964"/>
         <source>All</source>
         <translation type="unfinished">Tutti</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1209"/>
+        <location filename="../oscar/daily.cpp" line="1210"/>
         <source>Session Information</source>
         <translation>Informazioni Sessione</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1230"/>
+        <location filename="../oscar/daily.cpp" line="1231"/>
         <source>CPAP Sessions</source>
         <translation>CPAP Sessione</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1236"/>
+        <location filename="../oscar/daily.cpp" line="1237"/>
         <source>Sleep Stage Sessions</source>
         <translation>Sessione Fase Di Sonno</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1239"/>
+        <location filename="../oscar/daily.cpp" line="1240"/>
         <source>Position Sensor Sessions</source>
         <translation>Sessioni del sensore di posizione</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1244"/>
+        <location filename="../oscar/daily.cpp" line="1245"/>
         <source>Unknown Session</source>
         <translation>Non conosco sessione</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1253"/>
+        <location filename="../oscar/daily.cpp" line="1254"/>
         <source>Duration</source>
         <translation>Durata</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1323"/>
+        <location filename="../oscar/daily.cpp" line="1324"/>
         <source>DEVICE SETTINGS ERROR</source>
         <translation type="unfinished">ERRORE IMPOSTAZIONI DISPOSITIVO</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1332"/>
+        <location filename="../oscar/daily.cpp" line="1333"/>
         <source>&lt;b&gt;Please Note:&lt;/b&gt; All settings shown below are based on assumptions that nothing has changed since previous days.</source>
         <translation>b&gt;Nota:/b&gt; Tutte le impostazioni mostrate di seguito sono basate sull&apos;ipotesi che non sia cambiato nulla rispetto ai giorni precedenti.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1469"/>
+        <location filename="../oscar/daily.cpp" line="1470"/>
         <source>Oximeter Information</source>
         <translation>Informazioni sull&apos;ossimetro</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1475"/>
+        <location filename="../oscar/daily.cpp" line="1476"/>
         <source>Recorded by %1 %2</source>
         <translation type="unfinished">Registrato da %1 %2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1487"/>
+        <location filename="../oscar/daily.cpp" line="1488"/>
         <source>SpO2 spot checks</source>
         <translation type="unfinished">Controlli spot di SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1488"/>
+        <location filename="../oscar/daily.cpp" line="1489"/>
         <source>Pulse readings</source>
         <translation type="unfinished">Letture del battito</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1489"/>
+        <location filename="../oscar/daily.cpp" line="1490"/>
         <source>Spot-check data; desaturation detection is not applicable</source>
         <translation type="unfinished">Dati di controllo spot; il rilevamento delle desaturazioni non è applicabile</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1520"/>
+        <location filename="../oscar/daily.cpp" line="1521"/>
         <source>SpO2 Desaturations</source>
         <translation>SpO2 Desaturazioni</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1521"/>
+        <location filename="../oscar/daily.cpp" line="1522"/>
         <source>Pulse Change events</source>
         <translation>Eventi cambio pulsazioni</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1522"/>
+        <location filename="../oscar/daily.cpp" line="1523"/>
         <source>SpO2 Baseline Used</source>
         <translation>Linea di base SpO2 utilizzata</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1555"/>
+        <location filename="../oscar/daily.cpp" line="1571"/>
+        <source>Reported by the oximeter</source>
+        <translation type="unfinished">Riportato dall&apos;ossimetro</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1573"/>
+        <source>O2 Score</source>
+        <translation type="unfinished">Punteggio O2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1575"/>
+        <source>3% / 4% Drops</source>
+        <translation type="unfinished">Cali del 3% / 4%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1576"/>
+        <source>Time below 90%</source>
+        <translation type="unfinished">Tempo sotto il 90%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1578"/>
+        <source>Asleep</source>
+        <translation type="unfinished">Sonno</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1581"/>
+        <source>Steps</source>
+        <translation type="unfinished">Passi</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1611"/>
         <source>(Mode and Pressure settings missing; yesterday&apos;s shown.)</source>
         <translation>(Mancano le impostazioni di Modalità e Pressione; quelle di ieri sono mostrate.)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1590"/>
+        <location filename="../oscar/daily.cpp" line="1646"/>
         <source>Statistics</source>
         <translation>Statistiche</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1741"/>
+        <location filename="../oscar/daily.cpp" line="1797"/>
         <source>General</source>
         <translation type="unfinished">Generale</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1810"/>
+        <location filename="../oscar/daily.cpp" line="1866"/>
         <source>Obstructive and Central shares of the %1</source>
         <translation type="unfinished">Quote Ostruttive e Centrali del %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1888"/>
+        <location filename="../oscar/daily.cpp" line="1944"/>
         <source>Breathing Disturbances (Apple)</source>
         <translation type="unfinished">Disturbi Respiratori (Apple)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1900"/>
+        <location filename="../oscar/daily.cpp" line="1956"/>
         <source>Wrist Temperature</source>
         <translation type="unfinished">Temperatura del Polso</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1981"/>
+        <location filename="../oscar/daily.cpp" line="2037"/>
         <source>Time within the watch&apos;s sleep session spent without the CPAP mask on, and its share of that session</source>
         <translation type="unfinished">Tempo trascorso durante la sessione di sonno dell&apos;orologio senza indossare la maschera CPAP, e la sua quota rispetto a quella sessione</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1986"/>
+        <location filename="../oscar/daily.cpp" line="2042"/>
         <source>Unmasked Sleep</source>
         <translation type="unfinished">Sonno senza Maschera</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2324"/>
+        <location filename="../oscar/daily.cpp" line="2380"/>
         <source>No CPAP data is available for this day</source>
         <translation type="unfinished">Nessun dato CPAP disponibile per questo giorno</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3040"/>
+        <location filename="../oscar/daily.cpp" line="3096"/>
         <source>This bookmark is in a currently disabled area..</source>
         <translation>Questo segnalibro si trova in un&apos;area attualmente disabilitata..</translation>
     </message>
@@ -899,168 +929,168 @@ Servizi supportati: Dropbox, Google Drive, OneDrive, Box, 0x0.st, o qualsiasi co
         <translation type="vanished">valore</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1233"/>
+        <location filename="../oscar/daily.cpp" line="1234"/>
         <source>Oximetry Sessions</source>
         <translation>Sessioni di ossimetria</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="231"/>
+        <location filename="../oscar/daily.cpp" line="232"/>
         <source>Details</source>
         <translation>Dettagli</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="644"/>
+        <location filename="../oscar/daily.cpp" line="645"/>
         <source>Clinical Mode</source>
         <translation>Modalità clinica</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1273"/>
+        <location filename="../oscar/daily.cpp" line="1274"/>
         <source>Click to %1 this session.</source>
         <translation>Fai clic su %1 questa sessione.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1273"/>
+        <location filename="../oscar/daily.cpp" line="1274"/>
         <source>disable</source>
         <translation>Disabilita</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1273"/>
+        <location filename="../oscar/daily.cpp" line="1274"/>
         <source>enable</source>
         <translation>Abilita</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1289"/>
+        <location filename="../oscar/daily.cpp" line="1290"/>
         <source>%1 Session #%2</source>
         <translation>%1 Sessione #%2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1290"/>
+        <location filename="../oscar/daily.cpp" line="1291"/>
         <source>%1h %2m %3s</source>
         <translation>%1h %2m %3s</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1326"/>
+        <location filename="../oscar/daily.cpp" line="1327"/>
         <source>Device Settings</source>
         <translation>impostazioni del dispositivo</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1546"/>
+        <location filename="../oscar/daily.cpp" line="1602"/>
         <source>Model %1 - %2</source>
         <translation>Modello %1 - %2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1551"/>
+        <location filename="../oscar/daily.cpp" line="1607"/>
         <source>PAP Mode: %1</source>
         <translation>Modalità PAP: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1675"/>
+        <location filename="../oscar/daily.cpp" line="1731"/>
         <source>This day just contains summary data, only limited information is available.</source>
         <translation>Questo giorno contiene solo i dati di sintesi, solo le informazioni limitate sono disponibili.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1685"/>
+        <location filename="../oscar/daily.cpp" line="1741"/>
         <source>Total time in apnea</source>
         <translation>Tempo totale
 in apnea</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1695"/>
+        <location filename="../oscar/daily.cpp" line="1751"/>
         <source>Time over leak redline</source>
         <translation>Tempo su perdita fuori limite</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1701"/>
+        <location filename="../oscar/daily.cpp" line="1757"/>
         <source>Total ramp time</source>
         <translation>Tempo totale di rampa</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1705"/>
+        <location filename="../oscar/daily.cpp" line="1761"/>
         <source>Time outside of ramp</source>
         <translation>Tempo al di fuori della rampa</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1750"/>
+        <location filename="../oscar/daily.cpp" line="1806"/>
         <source>Start</source>
         <translation>Inizio</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1750"/>
+        <location filename="../oscar/daily.cpp" line="1806"/>
         <source>End</source>
         <translation>Fine</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2301"/>
+        <location filename="../oscar/daily.cpp" line="2357"/>
         <source>no data :(</source>
         <translation>nessun dato :(</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2302"/>
+        <location filename="../oscar/daily.cpp" line="2358"/>
         <source>Sorry, this device only provides compliance data.</source>
         <translation>Siamo spiacenti, questo dispositivo fornisce solo i dati di conformità.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2048"/>
+        <location filename="../oscar/daily.cpp" line="2104"/>
         <source>Event Breakdown</source>
         <translation>eventi Interruzione</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="644"/>
+        <location filename="../oscar/daily.cpp" line="645"/>
         <source> Disabling Sessions requires Permissive Mode be set in OSCAR Preferences in the Clinical tab.</source>
         <translation> La disattivazione delle sessioni richiede che la modalità permissiva sia impostata nelle preferenze OSCAR nella scheda Clinica.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2078"/>
+        <location filename="../oscar/daily.cpp" line="2134"/>
         <source>Unable to display Pie Chart on this system</source>
         <translation>Impossibile visualizzare il grafico a torta su questo sistema</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1794"/>
+        <location filename="../oscar/daily.cpp" line="1850"/>
         <source>This CPAP device does NOT record detailed data</source>
         <translation>Questo dispositivo CPAP NON registra dati dettagliati</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2292"/>
+        <location filename="../oscar/daily.cpp" line="2348"/>
         <source>Sessions all off!</source>
         <translation>Le sessioni sono tutte spente!</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2294"/>
+        <location filename="../oscar/daily.cpp" line="2350"/>
         <source>Sessions exist for this day but are switched off.</source>
         <translation>Le sessioni esistono per questo giorno, ma sono spente.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2297"/>
+        <location filename="../oscar/daily.cpp" line="2353"/>
         <source>Impossibly short session</source>
         <translation>Sessione incredibilmente breve</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2298"/>
+        <location filename="../oscar/daily.cpp" line="2354"/>
         <source>Zero hours??</source>
         <translation>Zero ore??</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2303"/>
+        <location filename="../oscar/daily.cpp" line="2359"/>
         <source>Complain to your Equipment Provider!</source>
         <translation>Lamentatevi con il vostro fornitore di attrezzature!</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2340"/>
+        <location filename="../oscar/daily.cpp" line="2396"/>
         <source>&quot;Nothing&apos;s here!&quot;</source>
         <translation>&quot;Non c&apos;è niente qui!&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2343"/>
+        <location filename="../oscar/daily.cpp" line="2399"/>
         <source>No data is available for this day.</source>
         <translation>Non sono disponibili dati per questo giorno.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2698"/>
+        <location filename="../oscar/daily.cpp" line="2754"/>
         <source>Pick a Color</source>
         <translation>Scegli un colore</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2991"/>
+        <location filename="../oscar/daily.cpp" line="3047"/>
         <source>Bookmark at %1</source>
         <translation>Segnalibro a %1</translation>
     </message>
@@ -9251,7 +9281,7 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="767"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2908"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2935"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="181"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="207"/>
         <source>Humidifier</source>
         <translation>Umidificatore</translation>
     </message>
@@ -10276,7 +10306,7 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1116"/>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1117"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="182"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="208"/>
         <source>Humidifier level</source>
         <translation>Livello dell&apos;umidificatore</translation>
     </message>
@@ -11008,7 +11038,7 @@ Titolazione automatica: l&apos;impostazione della pressione che si regola automa
         <location filename="../oscar/SleepLib/loader_plugins/apex_loader.cpp" line="195"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="1026"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="167"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="1223"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="1251"/>
         <source>Creating data backup...</source>
         <translation type="unfinished">Creazione backup dati in corso...</translation>
     </message>
@@ -11632,7 +11662,7 @@ Titolazione automatica: l&apos;impostazione della pressione che si regola automa
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1119"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2938"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="234"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="183"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="209"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="1012"/>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1492"/>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1493"/>
@@ -14115,17 +14145,99 @@ Per opzioni di recupero avanzate, consultare la documentazione di OSCAR.
         <translation type="unfinished">Il tuo dispositivo Viatom ha registrato una batteria scarica durante il funzionamento.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="40"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="467"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="469"/>
+        <source>O2 Score</source>
+        <translation type="unfinished">Punteggio O2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="468"/>
+        <source>Oxygen score calculated by the oximeter (0-10)</source>
+        <translation type="unfinished">Punteggio di ossigeno calcolato dall&apos;ossimetro (0-10)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="473"/>
+        <source>3% SpO2 drops</source>
+        <translation type="unfinished">Cali di SpO2 del 3%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="474"/>
+        <source>Number of SpO2 drops of 3% or more counted by the oximeter</source>
+        <translation type="unfinished">Numero di cali di SpO2 del 3% o più contati dall&apos;ossimetro</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="475"/>
+        <source>3% drops</source>
+        <translation type="unfinished">Cali 3%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="479"/>
+        <source>4% SpO2 drops</source>
+        <translation type="unfinished">Cali di SpO2 del 4%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="480"/>
+        <source>Number of SpO2 drops of 4% or more counted by the oximeter</source>
+        <translation type="unfinished">Numero di cali di SpO2 del 4% o più contati dall&apos;ossimetro</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="481"/>
+        <source>4% drops</source>
+        <translation type="unfinished">Cali 4%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="485"/>
+        <source>Time below 90% SpO2</source>
+        <translation type="unfinished">Tempo con SpO2 sotto il 90%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="486"/>
+        <source>Time with SpO2 below 90% according to the oximeter</source>
+        <translation type="unfinished">Tempo con SpO2 sotto il 90% secondo l&apos;ossimetro</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="487"/>
+        <source>Time &lt; 90%</source>
+        <translation type="unfinished">Tempo &lt; 90%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="491"/>
+        <source>Asleep time</source>
+        <translation type="unfinished">Tempo di sonno</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="492"/>
+        <source>Time asleep according to the oximeter</source>
+        <translation type="unfinished">Tempo di sonno secondo l&apos;ossimetro</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="493"/>
+        <source>Asleep</source>
+        <translation type="unfinished">Sonno</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="497"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="499"/>
+        <source>Steps</source>
+        <translation type="unfinished">Passi</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="498"/>
+        <source>Steps counted by the oximeter during the recording</source>
+        <translation type="unfinished">Passi contati dall&apos;ossimetro durante la registrazione</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="46"/>
         <source>Viatom</source>
         <translation>Viatom</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="40"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="46"/>
         <source>Viatom Software</source>
         <translation>Software Viatom</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="40"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="46"/>
         <source>Viatom Oximeter</source>
         <translation type="unfinished">Viatom Oximeter</translation>
     </message>
@@ -14212,24 +14324,24 @@ Per opzioni di recupero avanzate, consultare la documentazione di OSCAR.
         <translation>Questa pagine in altre lingue:</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3315"/>
+        <location filename="../oscar/daily.cpp" line="3371"/>
         <location filename="../oscar/overview.cpp" line="488"/>
         <source>%1 Graphs</source>
         <translation>%1 Grafico</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3319"/>
+        <location filename="../oscar/daily.cpp" line="3375"/>
         <location filename="../oscar/overview.cpp" line="492"/>
         <source>%1 of %2 Graphs</source>
         <translation>%1 di %2 Grafici</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3356"/>
+        <location filename="../oscar/daily.cpp" line="3412"/>
         <source>%1 Event Types</source>
         <translation>%1 Tipi di Eventi</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3360"/>
+        <location filename="../oscar/daily.cpp" line="3416"/>
         <source>%1 of %2 Event Types</source>
         <translation>%1 di %2 Tipi di Eventi</translation>
     </message>
@@ -14575,59 +14687,59 @@ I dati Dreem devono essere formattati come file CSV delimitato da punto e virgol
         <translation type="unfinished">Sonno rilevato da Watch</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="195"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="221"/>
         <source>Mask Leak Setting</source>
         <translation type="unfinished">Impostazione perdita maschera</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="196"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="222"/>
         <source>Theoretical mask leak at 12 cmH2O</source>
         <translation type="unfinished">Perdita teorica della maschera a 12 cmH2O</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="197"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="223"/>
         <source>Mask Leak</source>
         <translation type="unfinished">Perdita dalla maschera</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="208"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="210"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="234"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="236"/>
         <source>Comfort Control Plus</source>
         <translation type="unfinished">Comfort Control Plus</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="209"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="235"/>
         <source>Comfort Control Plus level</source>
         <translation type="unfinished">Livello Comfort Control Plus</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="220"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="222"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="246"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="248"/>
         <source>Patient Circuit</source>
         <translation type="unfinished">Circuito paziente</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="221"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="247"/>
         <source>Patient circuit diameter</source>
         <translation type="unfinished">Diametro del circuito paziente</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="222"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="248"/>
         <source>mm</source>
         <translation type="unfinished">mm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="228"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="254"/>
         <source>15 mm</source>
         <translation type="unfinished">15 mm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="229"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="255"/>
         <source>22 mm</source>
         <translation type="unfinished">22 mm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="749"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="775"/>
         <source>Reading %1 card...</source>
         <translation type="unfinished">Lettura della scheda %1 in corso...</translation>
     </message>
@@ -17178,7 +17290,7 @@ Tabelle comuni: daily_summaries, session_summaries, sessions, machines, session_
         <translation>Modifica la descrizione della selezione. Come un doppio clic.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="797"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="790"/>
         <source>Graph Short-Cuts Help</source>
         <translation>Aiuto Scorciatoie Grafico</translation>
     </message>
@@ -17315,25 +17427,25 @@ Tabelle comuni: daily_summaries, session_summaries, sessions, machines, session_
         <translation>Le impostazioni di layout per il quotidiano e la panoramica sono gestite in modo indipendente.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="510"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="503"/>
         <source>Maximum number of Items exceeded.</source>
         <translation>Superato il numero massimo di elementi.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="516"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="525"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="534"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="563"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="509"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="518"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="527"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="556"/>
         <source>No Item Selected</source>
         <translation>Nessun elemento selezionato</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="517"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="510"/>
         <source>Ok to Update?</source>
         <translation>Ok per aggiornare?</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="564"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="557"/>
         <source>Ok To Delete?</source>
         <translation>OK per eliminare?</translation>
     </message>

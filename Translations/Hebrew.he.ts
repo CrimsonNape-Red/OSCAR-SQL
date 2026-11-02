@@ -532,7 +532,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation>אל היום האחרון שיש בו נתונים</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="231"/>
+        <location filename="../oscar/daily.cpp" line="232"/>
         <source>Details</source>
         <translation>פרטים</translation>
     </message>
@@ -705,348 +705,378 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation>הסר סימניה</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="359"/>
+        <location filename="../oscar/daily.cpp" line="360"/>
         <source>Breakdown</source>
         <translation>סיווג</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="359"/>
+        <location filename="../oscar/daily.cpp" line="360"/>
         <source>events</source>
         <translation>אירועים</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="644"/>
+        <location filename="../oscar/daily.cpp" line="645"/>
         <source>Clinical Mode</source>
         <translation type="unfinished">מצב קליני</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="725"/>
+        <location filename="../oscar/daily.cpp" line="726"/>
         <source>No %1 events are recorded on this day</source>
         <translation>אין אירוע %1 שהוקלטו היום</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="864"/>
+        <location filename="../oscar/daily.cpp" line="865"/>
         <source>%1 event</source>
         <translation>אירוע %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="865"/>
+        <location filename="../oscar/daily.cpp" line="866"/>
         <source>%1 events</source>
         <translation>אירועי %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1332"/>
+        <location filename="../oscar/daily.cpp" line="1333"/>
         <source>&lt;b&gt;Please Note:&lt;/b&gt; All settings shown below are based on assumptions that nothing has changed since previous days.</source>
         <translation type="unfinished">&lt;b&gt;שים לב:&lt;/b&gt; כל ההגדרות המוצגות להלן מבוססות על הנחות שלא השתנה דבר מאז הימים הקודמים.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2048"/>
+        <location filename="../oscar/daily.cpp" line="2104"/>
         <source>Event Breakdown</source>
         <translation>סיווג האירועים</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2078"/>
+        <location filename="../oscar/daily.cpp" line="2134"/>
         <source>Unable to display Pie Chart on this system</source>
         <translation>אין אפשרות להציג גרף עוגה</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1794"/>
+        <location filename="../oscar/daily.cpp" line="1850"/>
         <source>This CPAP device does NOT record detailed data</source>
         <translation>המכשיר לא רושם נתונים מפורטים</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2292"/>
+        <location filename="../oscar/daily.cpp" line="2348"/>
         <source>Sessions all off!</source>
         <translation>כל השימושים מכובים!</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2294"/>
+        <location filename="../oscar/daily.cpp" line="2350"/>
         <source>Sessions exist for this day but are switched off.</source>
         <translation>קיימים שימושים ליום זה אבל הם כובו.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2297"/>
+        <location filename="../oscar/daily.cpp" line="2353"/>
         <source>Impossibly short session</source>
         <translation>שימוש קצר מדי</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2298"/>
+        <location filename="../oscar/daily.cpp" line="2354"/>
         <source>Zero hours??</source>
         <translation>אפס שעות??</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2303"/>
+        <location filename="../oscar/daily.cpp" line="2359"/>
         <source>Complain to your Equipment Provider!</source>
         <translation>התלונן לספק הציוד שלך!</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1590"/>
+        <location filename="../oscar/daily.cpp" line="1646"/>
         <source>Statistics</source>
         <translation>סטטיסטיקה</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1469"/>
+        <location filename="../oscar/daily.cpp" line="1470"/>
         <source>Oximeter Information</source>
         <translation>מידע אוקסימטר</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1520"/>
+        <location filename="../oscar/daily.cpp" line="1521"/>
         <source>SpO2 Desaturations</source>
         <translation>ירידות בריווי חמצן</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1521"/>
+        <location filename="../oscar/daily.cpp" line="1522"/>
         <source>Pulse Change events</source>
         <translation>אירועי שינוי דופק</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1522"/>
+        <location filename="../oscar/daily.cpp" line="1523"/>
         <source>SpO2 Baseline Used</source>
         <translation>נתון בסיס ריווי חמצן</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="373"/>
+        <location filename="../oscar/daily.cpp" line="374"/>
         <source>UF1</source>
         <translation>UF1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="374"/>
+        <location filename="../oscar/daily.cpp" line="375"/>
         <source>UF2</source>
         <translation>UF2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="433"/>
+        <location filename="../oscar/daily.cpp" line="434"/>
         <source>Time at Pressure</source>
         <translatorcomment>Keep chart titles in English so they can be posted to an English forum</translatorcomment>
         <translation>זמן בלחץ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="644"/>
+        <location filename="../oscar/daily.cpp" line="645"/>
         <source> Disabling Sessions requires Permissive Mode be set in OSCAR Preferences in the Clinical tab.</source>
         <translation type="unfinished"> השבתת סשנים דורשת שמצב מתירני יוגדר בהעדפות OSCAR בלשונית הקלינית.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="931"/>
+        <location filename="../oscar/daily.cpp" line="932"/>
         <source>Session Start Times</source>
         <translation>זמני התחלת שימוש</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="932"/>
+        <location filename="../oscar/daily.cpp" line="933"/>
         <source>Session End Times</source>
         <translation>זמני סיום שימוש</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="963"/>
+        <location filename="../oscar/daily.cpp" line="964"/>
         <source>All</source>
         <translation type="unfinished">הכל</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1209"/>
+        <location filename="../oscar/daily.cpp" line="1210"/>
         <source>Session Information</source>
         <translation>נתוני שימוש</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1239"/>
+        <location filename="../oscar/daily.cpp" line="1240"/>
         <source>Position Sensor Sessions</source>
         <translation type="unfinished">סשני חיישן מיקום</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1244"/>
+        <location filename="../oscar/daily.cpp" line="1245"/>
         <source>Unknown Session</source>
         <translation>שימוש כללי</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1253"/>
+        <location filename="../oscar/daily.cpp" line="1254"/>
         <source>Duration</source>
         <translation>משך</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1273"/>
+        <location filename="../oscar/daily.cpp" line="1274"/>
         <source>Click to %1 this session.</source>
         <translation>ללחוץ כדי %1 שימוש זה.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1273"/>
+        <location filename="../oscar/daily.cpp" line="1274"/>
         <source>disable</source>
         <translation>להסתיר</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1273"/>
+        <location filename="../oscar/daily.cpp" line="1274"/>
         <source>enable</source>
         <translation>לכלול</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1289"/>
+        <location filename="../oscar/daily.cpp" line="1290"/>
         <source>%1 Session #%2</source>
         <translation>%1 שימוש %2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1290"/>
+        <location filename="../oscar/daily.cpp" line="1291"/>
         <source>%1h %2m %3s</source>
         <translation>%1ש %2ד %3ש</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1323"/>
+        <location filename="../oscar/daily.cpp" line="1324"/>
         <source>DEVICE SETTINGS ERROR</source>
         <translation type="unfinished">שגיאת הגדרות מכשיר</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1326"/>
+        <location filename="../oscar/daily.cpp" line="1327"/>
         <source>Device Settings</source>
         <translation>הגדרות המכשיר</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1475"/>
+        <location filename="../oscar/daily.cpp" line="1476"/>
         <source>Recorded by %1 %2</source>
         <translation type="unfinished">הוקלט על ידי %1 %2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1487"/>
+        <location filename="../oscar/daily.cpp" line="1488"/>
         <source>SpO2 spot checks</source>
         <translation type="unfinished">בדיקות SpO2 מזדמנות</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1488"/>
+        <location filename="../oscar/daily.cpp" line="1489"/>
         <source>Pulse readings</source>
         <translation type="unfinished">קריאות דופק</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1489"/>
+        <location filename="../oscar/daily.cpp" line="1490"/>
         <source>Spot-check data; desaturation detection is not applicable</source>
         <translation type="unfinished">נתוני בדיקה מזדמנת; זיהוי צניחת רוויה אינו רלוונטי</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1555"/>
+        <location filename="../oscar/daily.cpp" line="1571"/>
+        <source>Reported by the oximeter</source>
+        <translation type="unfinished">דווח על ידי האוקסימטר</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1573"/>
+        <source>O2 Score</source>
+        <translation type="unfinished">ציון O2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1575"/>
+        <source>3% / 4% Drops</source>
+        <translation type="unfinished">ירידות 3% / 4%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1576"/>
+        <source>Time below 90%</source>
+        <translation type="unfinished">זמן מתחת ל-90%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1578"/>
+        <source>Asleep</source>
+        <translation type="unfinished">שינה</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1581"/>
+        <source>Steps</source>
+        <translation type="unfinished">צעדים</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1611"/>
         <source>(Mode and Pressure settings missing; yesterday&apos;s shown.)</source>
         <translation>(חסרות הגדרות מצב ולחץ: מראה של אתמול)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1741"/>
+        <location filename="../oscar/daily.cpp" line="1797"/>
         <source>General</source>
         <translation type="unfinished">כללי</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1810"/>
+        <location filename="../oscar/daily.cpp" line="1866"/>
         <source>Obstructive and Central shares of the %1</source>
         <translation type="unfinished">חלקי חסימתי ומרכזי של ה-%1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1888"/>
+        <location filename="../oscar/daily.cpp" line="1944"/>
         <source>Breathing Disturbances (Apple)</source>
         <translation type="unfinished">הפרעות נשימה (Apple)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1900"/>
+        <location filename="../oscar/daily.cpp" line="1956"/>
         <source>Wrist Temperature</source>
         <translation type="unfinished">טמפרטורת פרק היד</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1981"/>
+        <location filename="../oscar/daily.cpp" line="2037"/>
         <source>Time within the watch&apos;s sleep session spent without the CPAP mask on, and its share of that session</source>
         <translation type="unfinished">זמן במהלך מפגש השינה של השעון שבו לא נלבשה מסכת ה-CPAP, וחלקו היחסי במפגש זה</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1986"/>
+        <location filename="../oscar/daily.cpp" line="2042"/>
         <source>Unmasked Sleep</source>
         <translation type="unfinished">שינה ללא מסכה</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2324"/>
+        <location filename="../oscar/daily.cpp" line="2380"/>
         <source>No CPAP data is available for this day</source>
         <translation type="unfinished">אין נתוני CPAP זמינים עבור יום זה</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3040"/>
+        <location filename="../oscar/daily.cpp" line="3096"/>
         <source>This bookmark is in a currently disabled area..</source>
         <translation>סימניה באזור שכרגע מוסתר.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1546"/>
+        <location filename="../oscar/daily.cpp" line="1602"/>
         <source>Model %1 - %2</source>
         <translation>מודל %1 - %2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1551"/>
+        <location filename="../oscar/daily.cpp" line="1607"/>
         <source>PAP Mode: %1</source>
         <translation>מצב פאפ: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1675"/>
+        <location filename="../oscar/daily.cpp" line="1731"/>
         <source>This day just contains summary data, only limited information is available.</source>
         <translation>עבור יום זה קיימים רק נתוני סיכום.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1685"/>
+        <location filename="../oscar/daily.cpp" line="1741"/>
         <source>Total time in apnea</source>
         <translation>סה&quot;כ זמן בדום נשימה</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1695"/>
+        <location filename="../oscar/daily.cpp" line="1751"/>
         <source>Time over leak redline</source>
         <translation>משך חריגה מרמת דליפה תקינה</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1701"/>
+        <location filename="../oscar/daily.cpp" line="1757"/>
         <source>Total ramp time</source>
         <translation>סה&quot;כ זמן ראמפ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1705"/>
+        <location filename="../oscar/daily.cpp" line="1761"/>
         <source>Time outside of ramp</source>
         <translation>זמן מחוץ לראמפ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1750"/>
+        <location filename="../oscar/daily.cpp" line="1806"/>
         <source>Start</source>
         <translation>התחלה</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1750"/>
+        <location filename="../oscar/daily.cpp" line="1806"/>
         <source>End</source>
         <translation>סוף</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2340"/>
+        <location filename="../oscar/daily.cpp" line="2396"/>
         <source>&quot;Nothing&apos;s here!&quot;</source>
         <translation>לא קיימים נתונים</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1230"/>
+        <location filename="../oscar/daily.cpp" line="1231"/>
         <source>CPAP Sessions</source>
         <translation>שימושי סיפאפ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1233"/>
+        <location filename="../oscar/daily.cpp" line="1234"/>
         <source>Oximetry Sessions</source>
         <translation>שימושי אוקסימטריה</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1236"/>
+        <location filename="../oscar/daily.cpp" line="1237"/>
         <source>Sleep Stage Sessions</source>
         <translation>שימושי שלב שינה</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2301"/>
+        <location filename="../oscar/daily.cpp" line="2357"/>
         <source>no data :(</source>
         <translation>חסרים נתונים :(</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2302"/>
+        <location filename="../oscar/daily.cpp" line="2358"/>
         <source>Sorry, this device only provides compliance data.</source>
         <translation>המכשיר לא רושם נתונים מפורטים.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2343"/>
+        <location filename="../oscar/daily.cpp" line="2399"/>
         <source>No data is available for this day.</source>
         <translation>אין נתונים ליום זה.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2698"/>
+        <location filename="../oscar/daily.cpp" line="2754"/>
         <source>Pick a Color</source>
         <translation>בחר צבע</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2991"/>
+        <location filename="../oscar/daily.cpp" line="3047"/>
         <source>Bookmark at %1</source>
         <translation>סימניה ב %1</translation>
     </message>
@@ -8887,7 +8917,7 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="767"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2908"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2935"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="181"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="207"/>
         <source>Humidifier</source>
         <translation>מעשיר לחות</translation>
     </message>
@@ -10321,7 +10351,7 @@ popout window, delete it, then pop out this graph again.</source>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1116"/>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1117"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="182"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="208"/>
         <source>Humidifier level</source>
         <translation type="unfinished">רמת מכשיר הלחות</translation>
     </message>
@@ -11047,7 +11077,7 @@ popout window, delete it, then pop out this graph again.</source>
         <location filename="../oscar/SleepLib/loader_plugins/apex_loader.cpp" line="195"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="1026"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="167"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="1223"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="1251"/>
         <source>Creating data backup...</source>
         <translation type="unfinished">יוצר גיבוי נתונים...</translation>
     </message>
@@ -11668,7 +11698,7 @@ popout window, delete it, then pop out this graph again.</source>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1119"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2938"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="234"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="183"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="209"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="1012"/>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1492"/>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1493"/>
@@ -13893,17 +13923,99 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation type="unfinished">המכשיר Viatom שלך רשם סוללה מרוקנת במהלך הפעולה.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="40"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="467"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="469"/>
+        <source>O2 Score</source>
+        <translation type="unfinished">ציון O2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="468"/>
+        <source>Oxygen score calculated by the oximeter (0-10)</source>
+        <translation type="unfinished">ציון חמצן שחושב על ידי האוקסימטר (0-10)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="473"/>
+        <source>3% SpO2 drops</source>
+        <translation type="unfinished">ירידות SpO2 של 3%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="474"/>
+        <source>Number of SpO2 drops of 3% or more counted by the oximeter</source>
+        <translation type="unfinished">מספר ירידות SpO2 של 3% או יותר שנספרו על ידי האוקסימטר</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="475"/>
+        <source>3% drops</source>
+        <translation type="unfinished">ירידות 3%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="479"/>
+        <source>4% SpO2 drops</source>
+        <translation type="unfinished">ירידות SpO2 של 4%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="480"/>
+        <source>Number of SpO2 drops of 4% or more counted by the oximeter</source>
+        <translation type="unfinished">מספר ירידות SpO2 של 4% או יותר שנספרו על ידי האוקסימטר</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="481"/>
+        <source>4% drops</source>
+        <translation type="unfinished">ירידות 4%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="485"/>
+        <source>Time below 90% SpO2</source>
+        <translation type="unfinished">זמן עם SpO2 מתחת ל-90%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="486"/>
+        <source>Time with SpO2 below 90% according to the oximeter</source>
+        <translation type="unfinished">זמן עם SpO2 מתחת ל-90% לפי האוקסימטר</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="487"/>
+        <source>Time &lt; 90%</source>
+        <translation type="unfinished">זמן &lt; 90%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="491"/>
+        <source>Asleep time</source>
+        <translation type="unfinished">זמן שינה</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="492"/>
+        <source>Time asleep according to the oximeter</source>
+        <translation type="unfinished">זמן שינה לפי האוקסימטר</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="493"/>
+        <source>Asleep</source>
+        <translation type="unfinished">שינה</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="497"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="499"/>
+        <source>Steps</source>
+        <translation type="unfinished">צעדים</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="498"/>
+        <source>Steps counted by the oximeter during the recording</source>
+        <translation type="unfinished">צעדים שנספרו על ידי האוקסימטר במהלך ההקלטה</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="46"/>
         <source>Viatom</source>
         <translation>Viatom</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="40"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="46"/>
         <source>Viatom Software</source>
         <translation>Viatom Software</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="40"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="46"/>
         <source>Viatom Oximeter</source>
         <translation type="unfinished">Viatom Oximeter</translation>
     </message>
@@ -13990,24 +14102,24 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation type="unfinished">דף זה בשפות אחרות:</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3315"/>
+        <location filename="../oscar/daily.cpp" line="3371"/>
         <location filename="../oscar/overview.cpp" line="488"/>
         <source>%1 Graphs</source>
         <translation type="unfinished">%1 גרפים</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3319"/>
+        <location filename="../oscar/daily.cpp" line="3375"/>
         <location filename="../oscar/overview.cpp" line="492"/>
         <source>%1 of %2 Graphs</source>
         <translation type="unfinished">%1 מתוך %2 גרפים</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3356"/>
+        <location filename="../oscar/daily.cpp" line="3412"/>
         <source>%1 Event Types</source>
         <translation type="unfinished">%1 סוגי אירועים</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3360"/>
+        <location filename="../oscar/daily.cpp" line="3416"/>
         <source>%1 of %2 Event Types</source>
         <translation type="unfinished">%1 מתוך %2 סוגי אירועים</translation>
     </message>
@@ -14333,59 +14445,59 @@ Dreem data must be formatted as a semicolon-delimited CSV file. Please ensure yo
         <translation type="unfinished">שינה לפי Watch</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="195"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="221"/>
         <source>Mask Leak Setting</source>
         <translation type="unfinished">הגדרת דליפת מסכה</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="196"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="222"/>
         <source>Theoretical mask leak at 12 cmH2O</source>
         <translation type="unfinished">דליפת מסכה תיאורטית ב-12 cmH2O</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="197"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="223"/>
         <source>Mask Leak</source>
         <translation type="unfinished">דליפת מסכה</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="208"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="210"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="234"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="236"/>
         <source>Comfort Control Plus</source>
         <translation type="unfinished">Comfort Control Plus</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="209"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="235"/>
         <source>Comfort Control Plus level</source>
         <translation type="unfinished">רמת Comfort Control Plus</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="220"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="222"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="246"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="248"/>
         <source>Patient Circuit</source>
         <translation type="unfinished">מעגל מטופל</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="221"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="247"/>
         <source>Patient circuit diameter</source>
         <translation type="unfinished">קוטר מעגל מטופל</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="222"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="248"/>
         <source>mm</source>
         <translation type="unfinished">מ&quot;מ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="228"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="254"/>
         <source>15 mm</source>
         <translation type="unfinished">15 מ&quot;מ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="229"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="255"/>
         <source>22 mm</source>
         <translation type="unfinished">22 מ&quot;מ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="749"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="775"/>
         <source>Reading %1 card...</source>
         <translation type="unfinished">קורא כרטיס %1...</translation>
     </message>
@@ -16932,7 +17044,7 @@ Common tables: daily_summaries, session_summaries, sessions, machines, session_s
         <translation type="unfinished">שנה את תיאור הבחירה. זהה ללחיצה כפולה.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="797"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="790"/>
         <source>Graph Short-Cuts Help</source>
         <translation type="unfinished">עזרה לקיצורי דרך בגרף</translation>
     </message>
@@ -17068,25 +17180,25 @@ Common tables: daily_summaries, session_summaries, sessions, machines, session_s
         <translation type="unfinished">הגדרות פריסה עבור תצוגה יומית וסקירה כללית מנוהלות באופן עצמאי.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="510"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="503"/>
         <source>Maximum number of Items exceeded.</source>
         <translation type="unfinished">חרגת ממספר הפריטים המרבי.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="516"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="525"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="534"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="563"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="509"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="518"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="527"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="556"/>
         <source>No Item Selected</source>
         <translation type="unfinished">לא נבחר פריט</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="517"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="510"/>
         <source>Ok to Update?</source>
         <translation type="unfinished">אישור לעדכון?</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="564"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="557"/>
         <source>Ok To Delete?</source>
         <translation type="unfinished">אישור למחיקה?</translation>
     </message>

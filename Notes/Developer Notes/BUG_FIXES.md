@@ -4,6 +4,21 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-02 - Weinmann: import reports too many sessions (MR !62)
+
+**Files:** `oscar/SleepLib/loader_plugins/weinmann_loader.cpp`
+
+**Symptom:** The import summary counted a night with two sessions as four.
+
+**Root cause:** `WeinmannLoader::Open()` incremented its count for each week-data session and
+again for each detailed session. The detailed data replaces the week session of the same night
+(it is taken out of `new_sessions`), so those nights were counted twice.
+
+**Fix:** The count is `new_sessions.size()` just before `finishAddingSessions()`, i.e. the
+sessions actually handed to the database.
+
+---
+
 ## 2026-10-27 - SEFAM S.Box: no events or settings on a well-used device (GitLab #354)
 
 **Files:** `oscar/SleepLib/loader_plugins/sefamDataParsing.cpp/.h`,
@@ -7515,3 +7530,34 @@ row and the per-session AHI in the CSV export now show 0.
 With the guards in place the SEFAM loader no longer skips a session in which the blower
 never ran (2026-09-13 entry): `addMaskSlices()` gives it only MaskOff slices, so it is
 kept with zero usage, as the vendor software shows it.
+
+---
+
+## 2026-10-28 - Layout dialog buttons used their own tooltip style and the graph title font (#355)
+
+**Files:** `oscar/saveGraphLayoutSettings.cpp`
+
+The graph Layout dialog's buttons carried a `QToolTip` rule in their style sheet (bright
+yellow, black border, 14px font), so their tooltips looked unlike every other standard
+tooltip, and `newBtnRtn()` set the button text to the graph title font (`mediumfont`). Both
+are removed: the tooltips now come from the platform style and the button text uses the
+dialog's application font. The button colors (enabled/disabled) are unchanged.
+
+Standard tooltips keep the platform background (light gray under the Windows 11 style, pale
+yellow under Fusion); the info blocks OSCAR paints on the graphs (`gToolTip::paint`) keep
+their own yellow on all platforms. Raised in MR !60.
+
+---
+
+## 2026-10-29 - Build fails with NO_CHECKUPDATES defined (#359)
+
+**Files:** `oscar/checkupdates.cpp`, `oscar/SleepLib/appsettings.h`
+
+Uncommenting `DEFINES += NO_CHECKUPDATES` in `oscar.pro` broke the build in two places:
+`CheckUpdates::checkForUpdates()` called `AppSetting->allowEarlyUpdates()`, and
+`ProfileImporter::migrateAppSettings()` named `STR_GEN_SkippedReleaseVersion`,
+`STR_GEN_SkippedTestVersion` and `STR_GEN_UpdatesLastChecked` in its skip list. All of these
+are compiled out by the define. The `allowEarlyUpdates()` call is now inside
+`#ifndef NO_CHECKUPDATES`, and the update-check key-name constants are always defined, so a
+1.x migration still skips those keys in either build. Verified by compiling every file that
+uses the update-check settings with the define set.

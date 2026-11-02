@@ -673,7 +673,6 @@ int WeinmannLoader::Open(const QString &dirpath)
 {
     QString path(dirpath);
     path = path.replace("\\", "/");
-    int imported = 0;
 
 
     QFile wmdata(path + "/WM_DATA.TDF");
@@ -1002,7 +1001,6 @@ int WeinmannLoader::Open(const QString &dirpath)
 
             sess->UpdateSummaries();
             addSession(sess);
-            imported++;
             delete[] wleakf;
         }
         pwio += 0xb4;
@@ -1387,7 +1385,6 @@ int WeinmannLoader::Open(const QString &dirpath)
 
         sess->UpdateSummaries();
         addSession(sess);
-        imported++;
 
         reportProgress(60 + int((i * 30) / compinfo.size()));
     }
@@ -1423,6 +1420,9 @@ int WeinmannLoader::Open(const QString &dirpath)
 
     reportProgress(95);
 
+    // Counted here and not when the sessions are added: a week session that is replaced by the detailed data
+    // of the same night would otherwise be counted twice.
+    const int imported = new_sessions.size();
     finishAddingSessions();
     mach->Save();
     reportProgress(100);
