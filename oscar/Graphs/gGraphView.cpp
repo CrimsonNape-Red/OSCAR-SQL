@@ -1679,6 +1679,13 @@ void gGraphView::leaveEvent(QEvent * event)
         timedRedraw(0);
     }
 
+    // Drop the drawn tooltip with the mouse, so it can't linger beside a standard tooltip
+    // shown by whatever widget the mouse moves to next.
+    if (m_tooltip->visible()) {
+        m_tooltip->cancel();
+        timedRedraw(0);
+    }
+
     // Hand focus back to whatever had it before hovering. If nothing did, the graph keeps it.
     QWidget * previous = m_focusBeforeHover;
     m_focusBeforeHover = nullptr;

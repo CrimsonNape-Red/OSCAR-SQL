@@ -4,6 +4,21 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-02 - Graph tooltip lingers after the mouse leaves the graph (GitLab #364)
+
+**Files:** `oscar/Graphs/gGraphView.cpp`
+
+**Symptom:** A drawn (yellow) graph tooltip stayed on screen after the mouse left the graph
+area, so it could show at the same time as a standard tooltip from the widget under the mouse.
+
+**Root cause:** `gToolTip` hides only on its timeout or when another drawn tooltip replaces it.
+`gGraphView::leaveEvent()` did not cancel it.
+
+**Fix:** `leaveEvent()` cancels a visible `m_tooltip` and redraws. The parent tooltip
+(`m_parent_tooltip`, messages from Daily/Overview) is left alone.
+
+---
+
 ## 2026-11-02 - Weinmann: import reports too many sessions (MR !62)
 
 **Files:** `oscar/SleepLib/loader_plugins/weinmann_loader.cpp`
