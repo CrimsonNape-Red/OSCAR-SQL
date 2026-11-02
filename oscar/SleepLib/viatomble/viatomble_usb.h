@@ -14,6 +14,7 @@
 #include <QByteArray>
 #include <QList>
 #include <QString>
+#include <QStringList>
 
 #include "viatomble_link.h"
 
@@ -65,6 +66,15 @@ bool supported();
 QList<Port> findPorts();
 //! How to give OSCAR access to the cable, for when a port isn't accessible.
 QString permissionHint();
+/*! Linux: the udev rule that lets the logged-in user open the cable, and where OSCAR
+ *  installs it. The .deb packages install the same rule; an AppImage can't. */
+extern const char *const UDEV_RULE;
+extern const char *const UDEV_RULE_FILE;
+//! True if OSCAR can install the rule itself (Linux, with pkexec for the password prompt).
+bool canInstallPermission();
+/*! The program and arguments that install the rule as root, through the desktop's
+ *  password prompt (pkexec), and apply it to a cable that is plugged in. */
+QStringList installPermissionCommand();
 
 } // namespace Usb
 

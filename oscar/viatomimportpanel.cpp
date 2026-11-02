@@ -6,6 +6,8 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
+#include <algorithm>
+
 #include <QCheckBox>
 #include <QDateTime>
 #include <QDebug>
@@ -17,6 +19,7 @@
 #include <QLocale>
 #include <QMessageBox>
 #include <QPlainTextEdit>
+#include <QProcess>
 #include <QProgressBar>
 #include <QPushButton>
 #include <QRegularExpression>
@@ -145,8 +148,16 @@ QWidget *ViatomImportPanel::buildDevicesPage()
         }
     });
 
+    m_permissionButton = new QPushButton(tr("Allow OSCAR to use the cable..."), page);
+    m_permissionButton->setToolTip(tr("Installs a rule that lets you use the oximeter's USB cable "
+                                      "(%1). You are asked for your password once.")
+                                       .arg(QString::fromLatin1(Usb::UDEV_RULE_FILE)));
+    m_permissionButton->setVisible(false);
+    connect(m_permissionButton, &QPushButton::clicked, this, &ViatomImportPanel::installCablePermission);
+
     auto *buttons = new QHBoxLayout;
     buttons->addWidget(m_rescanButton);
+    buttons->addWidget(m_permissionButton);
     buttons->addStretch();
     buttons->addWidget(m_connectButton);
 
@@ -358,7 +369,46 @@ void ViatomImportPanel::listUsbPorts()
     if (m_deviceList->count() > 0) {
         m_deviceList->setCurrentRow(0);
     }
+    const bool blocked = std::any_of(m_usbPorts.begin(), m_usbPorts.end(),
+                                     [](const Usb::Port &p) { return !p.accessible; });
+    m_permissionButton->setVisible(blocked && Usb::canInstallPermission());
+    m_permissionButton->setEnabled(true);
     updateConnectButton();
+}
+
+void ViatomImportPanel::installCablePermission()
+{
+    const QStringList cmd = Usb::installPermissionCommand();
+    auto *process = new QProcess(this);
+    m_permissionButton->setEnabled(false);
+    m_status->setText(tr("Waiting for your password..."));
+    qDebug().noquote() << "ViatomBleImport: installing the cable's udev rule with" << cmd.first();
+    connect(process, &QProcess::finished, this, [this, process](int code, QProcess::ExitStatus status) {
+        const QString err = QString::fromLocal8Bit(process->readAllStandardError()).trimmed();
+        process->deleteLater();
+        qDebug().noquote() << "ViatomBleImport: udev rule install finished, exit" << code << err;
+        if (status == QProcess::NormalExit && code == 0) {
+            m_status->setText(tr("Done: OSCAR can now use the cable."));
+            // Listed again once udev has applied the rule; connects if it's the only cable.
+            QTimer::singleShot(500, this, &ViatomImportPanel::startWithUsb);
+            return;
+        }
+        m_permissionButton->setEnabled(true);
+        if (code == 126) {   // pkexec: the password prompt was cancelled
+            m_status->setText(tr("Not changed: the password prompt was cancelled."));
+        } else {
+            m_status->setText(tr("The permission could not be set up (%1). %2")
+                                  .arg(err.isEmpty() ? tr("exit code %1").arg(code) : err, Usb::permissionHint()));
+        }
+    });
+    connect(process, &QProcess::errorOccurred, this, [this, process](QProcess::ProcessError error) {
+        if (error == QProcess::FailedToStart) {
+            process->deleteLater();
+            m_permissionButton->setEnabled(true);
+            m_status->setText(Usb::permissionHint());
+        }
+    });
+    process->start(cmd.first(), cmd.mid(1));
 }
 
 void ViatomImportPanel::startWithUsb()
@@ -379,8 +429,15 @@ void ViatomImportPanel::startWithUsb()
         QTimer::singleShot(0, this, &ViatomImportPanel::connectToSelected);
         return;
     }
-    m_status->setText(m_usbPorts.size() == 1 ? Usb::permissionHint()
-                                             : tr("Choose your oximeter and click Connect."));
+    const bool blocked = std::any_of(m_usbPorts.begin(), m_usbPorts.end(),
+                                     [](const Usb::Port &p) { return !p.accessible; });
+    if (blocked && Usb::canInstallPermission()) {
+        m_status->setText(tr("OSCAR needs your permission to use the oximeter's USB cable. Click \"Allow OSCAR "
+                             "to use the cable\"; you are asked for your password once."));
+    } else {
+        m_status->setText(m_usbPorts.size() == 1 ? Usb::permissionHint()
+                                                 : tr("Choose your oximeter and click Connect."));
+    }
 }
 
 void ViatomImportPanel::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFamily scanned)

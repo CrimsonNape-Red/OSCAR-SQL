@@ -113,6 +113,8 @@ class ViatomImportPanel : public QWidget
     void showPage(Page page);
     //! Clears the device list and lists the USB cables plugged in now.
     void listUsbPorts();
+    //! Linux: installs the udev rule for the cable, asking for the password once.
+    void installCablePermission();
     void showFiles();
     void log(const QString &text);
     void updateConnectButton();
@@ -130,6 +132,7 @@ class ViatomImportPanel : public QWidget
     QListWidget *m_deviceList = nullptr;
     QPushButton *m_rescanButton = nullptr;
     QPushButton *m_connectButton = nullptr;
+    QPushButton *m_permissionButton = nullptr;   // a cable is listed that OSCAR may not open
     QCheckBox *m_setClock = nullptr;
     QList<ViatomBle::Usb::Port> m_usbPorts;      // listed first, then m_devices
     bool m_autoRescanned = false;                // a search that found nothing was repeated once

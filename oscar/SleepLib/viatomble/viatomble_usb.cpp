@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QStandardPaths>
 #include <QThread>
 #include <QTimer>
 
@@ -68,6 +69,31 @@ QByteArray bridgeSetupReport()
     QByteArray report = QByteArray::fromHex("ffc783cc30");
     report.append(QByteArray(REPORT_SIZE - report.size(), '\0'));
     return report;
+}
+
+const char *const UDEV_RULE =
+    "SUBSYSTEM==\"usb\", ATTR{idVendor}==\"1a86\", ATTR{idProduct}==\"e010\", MODE=\"0660\", TAG+=\"uaccess\"";
+const char *const UDEV_RULE_FILE = "/etc/udev/rules.d/60-oscar-viatom-usb.rules";
+
+bool canInstallPermission()
+{
+#if defined(Q_OS_LINUX)
+    return !QStandardPaths::findExecutable(QStringLiteral("pkexec")).isEmpty();
+#else
+    return false;
+#endif
+}
+
+QStringList installPermissionCommand()
+{
+    // One root shell: write the rule, reload, and re-apply it to a cable already plugged in
+    // (so it needn't be unplugged), then wait until udev has done so.
+    const QString script = QStringLiteral(
+        "printf '%s\\n' '%1' > '%2' && chmod 644 '%2' && udevadm control --reload-rules && "
+        "udevadm trigger --action=change --subsystem-match=usb --attr-match=idVendor=1a86 "
+        "--attr-match=idProduct=e010 && udevadm settle --timeout=5")
+        .arg(QString::fromLatin1(UDEV_RULE), QString::fromLatin1(UDEV_RULE_FILE));
+    return { QStringLiteral("pkexec"), QStringLiteral("/bin/sh"), QStringLiteral("-c"), script };
 }
 
 QString permissionHint()

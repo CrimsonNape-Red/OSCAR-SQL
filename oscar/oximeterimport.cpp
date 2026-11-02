@@ -10,6 +10,8 @@
 #define TEST_MACROS_ENABLEDoff
 #include <test_macros.h>
 
+#include <algorithm>
+
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QElapsedTimer>
@@ -25,7 +27,11 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QStandardPaths>
+#include <QStackedWidget>
 #include <QStyle>
+#include <QGuiApplication>
+#include <QScreen>
+#include <QScrollArea>
 #include <QThread>
 #include <QTimeZone>
 #include <QVBoxLayout>
@@ -101,6 +107,34 @@ static const char *const CARD_STYLE =
     "QPushButton#wizardCard:checked { border: 2px solid palette(highlight); }"
     "QPushButton#wizardCard:disabled { background: palette(window); }";
 
+/*! The wizard's pages. A QStackedWidget is as large as its largest page, so every page
+ *  was as tall as the CPAP-matching one and the window as tall as that; this one takes
+ *  the size of the page showing, and the page area scrolls when the screen is smaller. */
+class PageStack : public QStackedWidget
+{
+  public:
+    explicit PageStack(QWidget *parent) : QStackedWidget(parent)
+    {
+        connect(this, &QStackedWidget::currentChanged, this, [this]() { updateGeometry(); });
+    }
+    QSize sizeHint() const override
+    {
+        return currentWidget() ? currentWidget()->sizeHint() : QStackedWidget::sizeHint();
+    }
+    QSize minimumSizeHint() const override
+    {
+        return currentWidget() ? currentWidget()->minimumSizeHint() : QStackedWidget::minimumSizeHint();
+    }
+    bool hasHeightForWidth() const override
+    {
+        return currentWidget() && currentWidget()->hasHeightForWidth();
+    }
+    int heightForWidth(int width) const override
+    {
+        return currentWidget() ? currentWidget()->heightForWidth(width) : -1;
+    }
+};
+
 OximeterImport::OximeterImport(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::OximeterImport)
@@ -108,11 +142,30 @@ OximeterImport::OximeterImport(QWidget *parent) :
     ui->setupUi(this);
     setWindowTitle(tr("Oximeter Import Wizard"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    resize(1000, 700);
     setStyleSheet(CARD_STYLE);
 
-    // The step bar above the pages, the footer below them.
+    // The step bar above the pages, the footer below them. The pages scroll when the
+    // screen is too small for one (the CPAP-matching page is the tallest).
     auto *layout = qobject_cast<QVBoxLayout *>(this->layout());
+    // A stack that is only as large as the page showing (see PageStack), in place of the
+    // one from the .ui, with the same pages.
+    const int at = layout->indexOf(ui->stackedWidget);
+    layout->removeWidget(ui->stackedWidget);
+    auto *stack = new PageStack(this);
+    while (ui->stackedWidget->count() > 0) {
+        QWidget *w = ui->stackedWidget->widget(0);
+        ui->stackedWidget->removeWidget(w);
+        stack->addWidget(w);
+    }
+    stack->setObjectName(ui->stackedWidget->objectName());
+    delete ui->stackedWidget;
+    ui->stackedWidget = stack;
+    m_pageScroll = new QScrollArea(this);
+    m_pageScroll->setWidgetResizable(true);
+    m_pageScroll->setFrameShape(QFrame::NoFrame);
+    m_pageScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_pageScroll->setWidget(ui->stackedWidget);
+    layout->insertWidget(at, m_pageScroll, 1);
     layout->insertWidget(0, buildStepBar());
     layout->addWidget(buildFooter());
 
@@ -163,6 +216,15 @@ OximeterImport::OximeterImport(QWidget *parent) :
 
     updateCableBadge();
     showPage(m_devicePage, DeviceStep);
+
+    // 1000 x 700, or less on a small screen: at most 95% of the width and 90% of the
+    // height the screen has free (the pages scroll if they need more).
+    QSize size(1000, 700);
+    if (QScreen *screen = parent ? parent->screen() : QGuiApplication::primaryScreen()) {
+        const QRect free = screen->availableGeometry();
+        size = size.boundedTo(QSize(free.width() * 95 / 100, free.height() * 90 / 100));
+    }
+    resize(size);
 }
 
 OximeterImport::~OximeterImport()
@@ -641,12 +703,17 @@ void OximeterImport::refreshMethods()
 
     // USB cable
     bool usbOk = viatomUsbBuilt();
-    const bool cable = usbOk && !ViatomBle::Usb::findPorts().isEmpty();
+    const QList<ViatomBle::Usb::Port> ports = usbOk ? ViatomBle::Usb::findPorts() : QList<ViatomBle::Usb::Port>();
+    const bool cable = !ports.isEmpty();
+    const bool blocked = cable && std::none_of(ports.begin(), ports.end(),
+                                               [](const ViatomBle::Usb::Port &p) { return p.accessible; });
     m_usbOption->setEnabled(usbOk);
     m_usbNote->setText(!usbOk ? tr("This version of OSCAR can't read the oximeter's USB cable.")
+                       : blocked ? tr("Cable found, but OSCAR needs your permission to use it; the next page "
+                                      "can set that up.")
                        : cable ? tr("Cable found on USB.")
                                : tr("No cable found yet. Plug it in; OSCAR waits for it on the next page."));
-    m_usbNote->setStyleSheet(!usbOk ? warn : cable ? good : QString());
+    m_usbNote->setStyleSheet(!usbOk || blocked ? warn : cable ? good : QString());
 
     // Bluetooth
     const ViatomBle::Availability ble = ViatomBle::availability();

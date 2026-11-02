@@ -41,6 +41,7 @@ class ViatomBleTests : public QObject
     void testInfo();
     void testInfoTimeout();
     void testUsbReports();
+    void testUsbPermissionCommand();
     void testUsbInfo_data();
     void testUsbInfo();
     void testNoticesAnotherProgram();

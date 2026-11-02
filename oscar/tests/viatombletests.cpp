@@ -7,6 +7,8 @@
  * for more details. */
 
 #include <QDir>
+#include <QFileInfo>
+#include <QProcess>
 #include <QElapsedTimer>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -695,6 +697,32 @@ void ViatomBleTests::testUsbReports()
     QVERIFY(Usb::fromReport(Usb::bridgeSetupReport()).isEmpty());
     QVERIFY(Usb::fromReport(QByteArray()).isEmpty());
     QCOMPARE(Usb::bridgeSetupReport(), QByteArray::fromHex("ffc783cc30") + QByteArray(27, '\0'));
+}
+
+void ViatomBleTests::testUsbPermissionCommand()
+{
+    // The root shell that installs the cable's udev rule: run here with a scratch file and
+    // without udevadm, to check that the rule is written exactly, quoting and all.
+    const QStringList cmd = Usb::installPermissionCommand();
+    QCOMPARE(cmd.size(), 4);
+    QCOMPARE(cmd[0], QStringLiteral("pkexec"));
+    QCOMPARE(cmd[1], QStringLiteral("/bin/sh"));
+    QString script = cmd[3];
+    QVERIFY(script.contains(QString::fromLatin1(Usb::UDEV_RULE_FILE)));
+#ifdef Q_OS_LINUX
+    QTemporaryDir dir;
+    const QString target = dir.filePath(QStringLiteral("60-oscar-viatom-usb.rules"));
+    script.replace(QString::fromLatin1(Usb::UDEV_RULE_FILE), target);
+    script.replace(QStringLiteral("udevadm"), QStringLiteral("true"));
+    QProcess sh;
+    sh.start(QStringLiteral("/bin/sh"), { QStringLiteral("-c"), script });
+    QVERIFY(sh.waitForFinished(5000));
+    QCOMPARE(sh.exitCode(), 0);
+    QFile f(target);
+    QVERIFY(f.open(QIODevice::ReadOnly));
+    QCOMPARE(QString::fromLatin1(f.readAll()), QString::fromLatin1(Usb::UDEV_RULE) + QLatin1Char('\n'));
+    QCOMPARE(int(QFileInfo(target).permissions() & QFileDevice::ReadOther), int(QFileDevice::ReadOther));
+#endif
 }
 
 void ViatomBleTests::testUsbInfo_data()

@@ -133,6 +133,7 @@ private:
     QList<QLabel *> m_stepTitles;
     QButtonGroup *m_devices = nullptr;
     QLabel *m_cableBadge = nullptr;
+    class QScrollArea *m_pageScroll = nullptr;
     QWidget *m_devicePage = nullptr;
     QWidget *m_methodPage = nullptr;
     QLabel *m_methodSubtitle = nullptr;
