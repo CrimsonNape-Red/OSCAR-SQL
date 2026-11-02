@@ -1,0 +1,6 @@
+*.sh text eol=lf
+*.bat text eol=crlf
+
+# macOS build scripts without a .sh extension, run directly by oscar.pro
+Building/MacOS/create_dmg text eol=lf
+Building/MacOS/finalize_plist text eol=lf
