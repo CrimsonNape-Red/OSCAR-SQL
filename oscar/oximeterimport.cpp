@@ -481,7 +481,7 @@ QWidget *OximeterImport::buildDevicePage()
           tr("Serial cable · Data files") },
         { OXI_CMS50, ":/icons/oximeter.png", tr("CMS50D+, CMS50E, CMS50F, Pulox PO-200/300"),
           tr("Serial cable · Data files") },
-        { OXI_MD300W1, QString(), tr("Data files (.dat) saved by its own software"), tr("Data files") },
+        { OXI_MD300W1, ":/icons/cm300.png", tr("Data files (.dat) saved by its own software"), tr("Data files") },
         { OXI_CSV, QString(), tr("A CSV file with the date and time, SpO2 and pulse on each row"), tr("Data files") },
     };
 
