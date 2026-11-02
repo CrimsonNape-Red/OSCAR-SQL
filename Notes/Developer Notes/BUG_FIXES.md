@@ -7546,3 +7546,18 @@ dialog's application font. The button colors (enabled/disabled) are unchanged.
 Standard tooltips keep the platform background (light gray under the Windows 11 style, pale
 yellow under Fusion); the info blocks OSCAR paints on the graphs (`gToolTip::paint`) keep
 their own yellow on all platforms. Raised in MR !60.
+
+---
+
+## 2026-10-29 - Build fails with NO_CHECKUPDATES defined (#359)
+
+**Files:** `oscar/checkupdates.cpp`, `oscar/SleepLib/appsettings.h`
+
+Uncommenting `DEFINES += NO_CHECKUPDATES` in `oscar.pro` broke the build in two places:
+`CheckUpdates::checkForUpdates()` called `AppSetting->allowEarlyUpdates()`, and
+`ProfileImporter::migrateAppSettings()` named `STR_GEN_SkippedReleaseVersion`,
+`STR_GEN_SkippedTestVersion` and `STR_GEN_UpdatesLastChecked` in its skip list. All of these
+are compiled out by the define. The `allowEarlyUpdates()` call is now inside
+`#ifndef NO_CHECKUPDATES`, and the update-check key-name constants are always defined, so a
+1.x migration still skips those keys in either build. Verified by compiling every file that
+uses the update-check settings with the define set.
