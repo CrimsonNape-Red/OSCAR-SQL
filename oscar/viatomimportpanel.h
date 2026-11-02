@@ -72,6 +72,17 @@ class ViatomImportPanel : public QWidget
     //! The family of the connected device (Classic for the USB cable).
     ViatomBle::DeviceFamily connectedFamily() const { return m_connectedFamily; }
 
+    /*! The wizard's Next button carries out this step's action: Connect on the device
+     *  list, Download on the recording list. */
+    QString primaryActionText() const;
+    bool primaryActionEnabled() const;
+    //! Carries out the step's action; false when none is left (the wizard moves on).
+    bool primaryAction();
+
+  signals:
+    //! The step's action, or whether it can be taken, changed.
+    void actionChanged();
+
   public slots:
     //! Lists USB cables, then searches for Bluetooth devices.
     void startScan();

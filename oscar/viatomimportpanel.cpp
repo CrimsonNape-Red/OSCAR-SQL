@@ -133,6 +133,7 @@ QWidget *ViatomImportPanel::buildDevicesPage()
     connect(m_rescanButton, &QPushButton::clicked, this, &ViatomImportPanel::startScan);
     m_connectButton = new QPushButton(tr("Connect"), page);
     connect(m_connectButton, &QPushButton::clicked, this, &ViatomImportPanel::connectToSelected);
+    m_connectButton->setVisible(false);   // the wizard's Next button connects
 
     // ViHealth sets the clock on every connection. The recordings' start times come from
     // this clock, so keeping it right keeps oximetry in step with CPAP data.
@@ -188,6 +189,7 @@ QWidget *ViatomImportPanel::buildFilesPage()
 
     m_downloadButton = new QPushButton(tr("Download"), page);
     connect(m_downloadButton, &QPushButton::clicked, this, &ViatomImportPanel::startDownload);
+    m_downloadButton->setVisible(false);   // the wizard's Next button downloads
 
     auto *buttons = new QHBoxLayout;
     buttons->addStretch();
@@ -253,6 +255,49 @@ QWidget *ViatomImportPanel::buildTransferPage()
 void ViatomImportPanel::showPage(Page page)
 {
     m_pages->setCurrentIndex(page);
+    emit actionChanged();
+}
+
+QString ViatomImportPanel::primaryActionText() const
+{
+    switch (m_pages->currentIndex()) {
+    case DevicesPage:
+        return tr("Connect");
+    case FilesPage:
+        return tr("Download");
+    default:
+        return tr("Next");
+    }
+}
+
+bool ViatomImportPanel::primaryActionEnabled() const
+{
+    switch (m_pages->currentIndex()) {
+    case DevicesPage:
+        return m_connectButton->isEnabled();
+    case FilesPage:
+        return m_downloadButton->isEnabled();
+    default:
+        return !(m_downloader && m_downloader->isBusy());
+    }
+}
+
+bool ViatomImportPanel::primaryAction()
+{
+    switch (m_pages->currentIndex()) {
+    case DevicesPage:
+        if (m_connectButton->isEnabled()) {
+            connectToSelected();
+        }
+        return true;
+    case FilesPage:
+        if (m_downloadButton->isEnabled()) {
+            startDownload();
+        }
+        return true;
+    default:
+        return m_downloader && m_downloader->isBusy();
+    }
 }
 
 void ViatomImportPanel::log(const QString &text)
@@ -429,6 +474,7 @@ void ViatomImportPanel::updateConnectButton()
 {
     QListWidgetItem *item = m_deviceList->currentItem();
     m_connectButton->setEnabled(item && (item->flags() & Qt::ItemIsEnabled) && !m_link);
+    emit actionChanged();
 }
 
 void ViatomImportPanel::connectToSelected()
@@ -651,6 +697,7 @@ void ViatomImportPanel::showFiles()
 
     showPage(FilesPage);
     m_downloadButton->setEnabled(!info.files.isEmpty());
+    emit actionChanged();
     m_status->setText(info.files.isEmpty() ? tr("There are no recordings on this device.")
                                            : tr("%n recording(s) on the device.", "", info.files.size()));
 }
@@ -706,6 +753,7 @@ void ViatomImportPanel::startDownload()
     m_status->setText(tr("Downloading. Keep the oximeter close to the computer."));
 
     m_downloader->download(files, m_folder, m_redownload->isChecked());
+    emit actionChanged();
 }
 
 void ViatomImportPanel::onFileStarted(const QString &name, qint64 size)
@@ -771,6 +819,7 @@ void ViatomImportPanel::onDownloadFinished(bool cancelled)
 {
     m_cancelButton->setVisible(false);
     m_moreButton->setVisible(m_link && m_link->isReady());
+    emit actionChanged();
     m_currentFile->clear();
 
     QStringList summary;

@@ -58,6 +58,8 @@ class Dialect
     virtual QString infoTimeoutMessage(int step) const = 0;
 
     virtual Request setTimeRequest(const QDateTime &localTime) = 0;
+    //! How long the device needs after setting its clock before it takes another request.
+    virtual int pauseAfterSetTimeMs() const { return 0; }
     virtual Request startRequest(const QString &name) = 0;
     //! File size from a successful start reply, or -1.
     virtual qint64 fileSize(const Reply &reply) const = 0;
@@ -103,6 +105,9 @@ class ClassicUsbDialect : public ClassicDialect
     Request infoRequest(int step) override;
     QString handleInfoReply(int step, const Reply &reply, DeviceInfo &info) override;
     QString infoTimeoutMessage(int step) const override;
+    //! A SleepU on its cable ignored the request sent right after setting its clock;
+    //! 1.5 s later it answered.
+    int pauseAfterSetTimeMs() const override { return 1500; }
 };
 
 /*! O2Ring S, SC, SF, SP, ...: replies name their command.

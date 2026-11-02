@@ -363,6 +363,11 @@ void OximeterImport::updateFooter()
     } else if (page == m_serialPage) {
         m_nextButton->setText(tr("Next"));
         m_nextButton->setEnabled(false);   // the wizard moves on when the upload is complete
+#ifdef OSCAR_HAVE_BLUETOOTH
+    } else if (m_viatomPanel && page == m_viatomPage) {
+        m_nextButton->setText(m_viatomPanel->primaryActionText());
+        m_nextButton->setEnabled(m_viatomPanel->primaryActionEnabled());
+#endif
     } else {
         m_nextButton->setText(tr("Next"));
     }
@@ -649,12 +654,21 @@ void OximeterImport::goNext()
         startImport();
     } else if (page == m_viatomPage) {
 #ifdef OSCAR_HAVE_BLUETOOTH
+        // Next is the step's own action (Connect, Download) until a download has ended.
+        if (m_viatomPanel->primaryAction()) {
+            return;
+        }
         if (!m_viatomPanel->stopForClose()) {
             return;
         }
         const int n = m_viatomPanel->importedCount();
-        showSummary(n > 0 ? tr("%n recording(s) imported into OSCAR.", "", n)
-                          : tr("No recordings were imported."));
+        if (n > 0) {
+            showSummary(tr("%n recording(s) imported into OSCAR.", "", n));
+        } else {
+            showSummary(tr("No recordings were imported. Go back to download them, or check the "
+                           "download's messages for what went wrong."),
+                        tr("Nothing was imported"));
+        }
 #endif
     } else if (page == ui->chooseSessionPage && m_selectingSerialSession) {
         // Which recording to download from the oximeter.
@@ -760,6 +774,7 @@ void OximeterImport::startImport()
             return m_importViatomFile && m_importViatomFile(path);
         };
         m_viatomPanel = new ViatomImportPanel(importFile, this);
+        connect(m_viatomPanel, &ViatomImportPanel::actionChanged, this, &OximeterImport::updateFooter);
         m_viatomPage = new QWidget(this);
         auto *v = new QVBoxLayout(m_viatomPage);
         v->setContentsMargins(32, 20, 32, 12);
@@ -1104,22 +1119,23 @@ QWidget *OximeterImport::buildSummaryPage()
     auto *page = new QWidget(this);
     auto *layout = new QVBoxLayout(page);
     layout->setContentsMargins(32, 24, 32, 16);
-    auto *heading = new QLabel(tr("Import finished"), page);
-    QFont hf = heading->font();
+    m_summaryHeading = new QLabel(page);
+    QFont hf = m_summaryHeading->font();
     hf.setPointSizeF(hf.pointSizeF() * 1.6);
     hf.setBold(true);
-    heading->setFont(hf);
+    m_summaryHeading->setFont(hf);
     m_summaryText = new QLabel(page);
     m_summaryText->setWordWrap(true);
-    layout->addWidget(heading);
+    layout->addWidget(m_summaryHeading);
     layout->addWidget(m_summaryText);
     layout->addWidget(new QLabel(tr("Downloaded recordings carry their own start time, so there is nothing to match to CPAP data."), page));
     layout->addStretch();
     return page;
 }
 
-void OximeterImport::showSummary(const QString &text)
+void OximeterImport::showSummary(const QString &text, const QString &heading)
 {
+    m_summaryHeading->setText(heading.isEmpty() ? tr("Import finished") : heading);
     m_summaryText->setText(text);
     showPage(m_summaryPage, FinishStep);
 }

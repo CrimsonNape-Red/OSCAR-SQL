@@ -35,6 +35,7 @@ class ViatomBleTests : public QObject
     void testDropsLateReplyAfterRetry();
     void testDropsLateReplyAfterGivingUp();
     void testDeviceRefusesFile();
+    void testClosesFileAfterUnansweredOpen();
     void testLinkLostRemovesPartialFile();
     void testCancelStopsAndCleansUp();
     void testInfo();
@@ -45,6 +46,7 @@ class ViatomBleTests : public QObject
     void testNoticesAnotherProgram();
     void testSwitchesToAcknowledgedWrites();
     void testSetTime();
+    void testUsbPausesAfterSetTime();
     void testLateInfoReplyIsNotTakenForSetTime();
 
     // O2Ring S family

@@ -116,7 +116,7 @@ private:
     /*! Imports a downloaded recording file that carries its own start time (an EMAY
      *  .spo2); true if it was imported or is already in OSCAR. */
     bool importRecordingFile(const QString &path);
-    void showSummary(const QString &text);
+    void showSummary(const QString &text, const QString &heading = QString());
 
     int oximeterType() const;
     Method method() const;
@@ -158,6 +158,7 @@ private:
     QWidget *m_viatomPage = nullptr;
     ViatomImportPanel *m_viatomPanel = nullptr;
     QWidget *m_summaryPage = nullptr;
+    QLabel *m_summaryHeading = nullptr;
     QLabel *m_summaryText = nullptr;
     QLabel *m_suggestion = nullptr;
     QPushButton *m_backButton = nullptr;

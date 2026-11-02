@@ -343,7 +343,12 @@ void UsbLink::send(const QByteArray &frame)
     if (!m_open) {
         return;
     }
+    bool first = true;
     for (QByteArray report : Usb::toReports(frame)) {
+        if (!first) {
+            QThread::msleep(Usb::REPORT_GAP_MS);   // see REPORT_GAP_MS
+        }
+        first = false;
         usbdevfs_bulktransfer out {};
         out.ep = EP_OUT;
         out.len = report.size();
@@ -480,7 +485,12 @@ void UsbLink::send(const QByteArray &frame)
     OVERLAPPED ov {};
     ov.hEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
     QString error;
+    bool first = true;
     for (const QByteArray &report : Usb::toReports(frame)) {
+        if (!first) {
+            QThread::msleep(Usb::REPORT_GAP_MS);   // see REPORT_GAP_MS
+        }
+        first = false;
         QByteArray out(1, '\0');   // report ID
         out.append(report);
         out.resize(qMax(out.size(), m_outputSize));

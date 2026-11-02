@@ -7,6 +7,7 @@
  * for more details. */
 
 #include <QDir>
+#include <QElapsedTimer>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSet>
@@ -104,6 +105,7 @@ class FakeDevice : public Link
     int loseLinkAtChunk = -1;
     bool onlyAcknowledged = false;          // ignores writes until useAcknowledgedWrites()
     bool ignoresUsbHello = false;           // gives no answer to CMD_USB_HELLO
+    QSet<QString> ignoreReadStart;          // files whose READ_START gets no answer
     bool acknowledged = false;
     int acknowledgedSwitches = 0;
     QList<QByteArray> sent;
@@ -153,6 +155,9 @@ class FakeDevice : public Link
         }
         case CMD_READ_START: {
             const QString name = QString::fromLatin1(payload.left(payload.indexOf('\0')));
+            if (ignoreReadStart.contains(name)) {
+                break;
+            }
             if (!files.contains(name)) {
                 reply(makeReply(1, 0, QByteArray()));
             } else {
@@ -554,6 +559,46 @@ void ViatomBleTests::testDeviceRefusesFile()
     QCOMPARE(folderEntries(dir.path()), QStringList({"20261026230000"}));
 }
 
+void ViatomBleTests::testClosesFileAfterUnansweredOpen()
+{
+    QTemporaryDir dir;
+    FakeDevice dev;
+    dev.files["20261025220000"] = pattern(100, 4);
+    dev.files["20261026230000"] = pattern(100, 5);
+    dev.ignoreReadStart = { QStringLiteral("20261025220000") };
+    Downloader dl(&dev);
+    dl.setReplyTimeout(50);
+    dl.setOpenTimeout(50);
+    dl.setMaxRetries(1);
+    QSignalSpy failed(&dl, &Downloader::fileFailed);
+    QSignalSpy saved(&dl, &Downloader::fileSaved);
+    QSignalSpy finished(&dl, &Downloader::downloadFinished);
+
+    dl.download({"20261025220000", "20261026230000"}, dir.path(), false);
+    QVERIFY(finished.wait(5000));
+    QCOMPARE(failed.size(), 1);
+    QCOMPARE(failed.first().first().toString(), QStringLiteral("20261025220000"));
+    QVERIFY(failed.first().at(1).toString().contains(QStringLiteral("open")));
+    QCOMPARE(saved.size(), 1);
+
+    // After the unanswered opens, the file is closed before the next one is opened.
+    int lastStart = -1, firstEndAfter = -1, nextStart = -1;
+    for (int i = 0; i < dev.sent.size(); i++) {
+        const quint8 cmd = quint8(dev.sent[i][1]);
+        const bool first = dev.sent[i].contains(QByteArray("20261025220000"));
+        if (cmd == CMD_READ_START && first) {
+            lastStart = i;
+        } else if (cmd == CMD_READ_END && lastStart >= 0 && firstEndAfter < 0) {
+            firstEndAfter = i;
+        } else if (cmd == CMD_READ_START && !first && nextStart < 0) {
+            nextStart = i;
+        }
+    }
+    QVERIFY(lastStart >= 0);
+    QVERIFY(firstEndAfter > lastStart);
+    QVERIFY(nextStart > firstEndAfter);
+}
+
 void ViatomBleTests::testLinkLostRemovesPartialFile()
 {
     QTemporaryDir dir;
@@ -766,6 +811,31 @@ void ViatomBleTests::testSetTime()
     QVERIFY(timeSet.wait(5000));
     QVERIFY(!timeSet.last().first().toString().isEmpty());
     QVERIFY(!dl.isBusy());
+}
+
+void ViatomBleTests::testUsbPausesAfterSetTime()
+{
+    // On the cable, the device needs a moment after setting its clock: the downloader
+    // stays busy until then, so the next request isn't sent too early.
+    FakeDevice dev;
+    Downloader dl(&dev, std::make_unique<ClassicUsbDialect>());
+    QSignalSpy timeSet(&dl, &Downloader::timeSet);
+    QElapsedTimer t;
+    t.start();
+    dl.setTime(QDateTime(QDate(2026, 11, 2), QTime(9, 0, 0)));
+    QVERIFY(dl.isBusy());
+    QVERIFY(timeSet.wait(5000));
+    QCOMPARE(timeSet.first().first().toString(), QString());
+    QVERIFY(t.elapsed() >= ClassicUsbDialect().pauseAfterSetTimeMs() - 50);
+    QVERIFY(!dl.isBusy());
+
+    // Over Bluetooth there is no pause.
+    Downloader ble(&dev);
+    QSignalSpy bleSet(&ble, &Downloader::timeSet);
+    t.restart();
+    ble.setTime(QDateTime::currentDateTime());
+    QVERIFY(bleSet.wait(5000));
+    QVERIFY(t.elapsed() < 1000);
 }
 
 void ViatomBleTests::testLateInfoReplyIsNotTakenForSetTime()

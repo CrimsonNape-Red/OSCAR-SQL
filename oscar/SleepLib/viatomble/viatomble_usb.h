@@ -40,6 +40,10 @@ namespace Usb {
 constexpr quint16 VENDOR_ID = 0x1a86;
 constexpr quint16 PRODUCT_ID = 0xe010;
 constexpr int REPORT_SIZE = 32;
+/*! The pause between the reports of one frame. A SleepU lost the rest of a frame sent
+ *  as reports back to back (a frame longer than 31 bytes, such as setting the clock),
+ *  then stopped answering until it was switched off; 20 ms apart, it took them. */
+constexpr int REPORT_GAP_MS = 20;
 
 //! A frame split into reports of REPORT_SIZE bytes: length byte, data, zero padding.
 QList<QByteArray> toReports(const QByteArray &frame);

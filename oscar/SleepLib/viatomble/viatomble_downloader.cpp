@@ -211,8 +211,21 @@ void Downloader::handleReply(const Reply &reply)
         m_timer.stop();
         const QString error = reply.ok() ? QString() : tr("The device refused the new time.");
         continueWith([this, error]() {
-            m_state = Idle;
-            emit timeSet(error);
+            const int pause = error.isEmpty() ? m_dialect->pauseAfterSetTimeMs() : 0;
+            if (pause <= 0) {
+                m_state = Idle;
+                emit timeSet(error);
+                return;
+            }
+            // Busy until the device takes requests again.
+            const int generation = m_generation;
+            QTimer::singleShot(pause, this, [this, generation, error]() {
+                if (generation != m_generation) {
+                    return;
+                }
+                m_state = Idle;
+                emit timeSet(error);
+            });
         });
         return;
     }
@@ -435,8 +448,9 @@ void Downloader::onTimeout()
         });
         return;
     case WaitStart:
-        emit fileFailed(m_current, tr("The device did not answer the request to open the file."));
-        continueWith([this]() { startNextFile(); });
+        // The device may have opened the file without its answer reaching us; close it
+        // to be sure it isn't left in the middle of a transfer.
+        continueWith([this]() { endFile(tr("The device did not answer the request to open the file.")); });
         return;
     case WaitContent:
         continueWith([this]() { endFile(tr("The device stopped sending the file.")); });
