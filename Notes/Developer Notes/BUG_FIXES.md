@@ -4,6 +4,21 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-02 - Weinmann: import reports too many sessions (MR !62)
+
+**Files:** `oscar/SleepLib/loader_plugins/weinmann_loader.cpp`
+
+**Symptom:** The import summary counted a night with two sessions as four.
+
+**Root cause:** `WeinmannLoader::Open()` incremented its count for each week-data session and
+again for each detailed session. The detailed data replaces the week session of the same night
+(it is taken out of `new_sessions`), so those nights were counted twice.
+
+**Fix:** The count is `new_sessions.size()` just before `finishAddingSessions()`, i.e. the
+sessions actually handed to the database.
+
+---
+
 ## 2026-10-27 - SEFAM S.Box: no events or settings on a well-used device (GitLab #354)
 
 **Files:** `oscar/SleepLib/loader_plugins/sefamDataParsing.cpp/.h`,
