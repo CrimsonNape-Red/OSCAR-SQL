@@ -20,6 +20,7 @@
 
 class QButtonGroup;
 class QCheckBox;
+class QLineEdit;
 class QLabel;
 class QPlainTextEdit;
 class QProgressBar;
@@ -95,6 +96,8 @@ private:
     void startImport();
     //! CMS50 and ChoiceMMed: asks for a data file and reads it.
     void importOximeterFile();
+    //! Other oximeters: imports CSV files with the date and time, SpO2 and pulse on each row.
+    void importCsvFiles();
 
     // Older CMS50 oximeters: download over their USB-to-serial cable.
     void startSerialImport();
@@ -141,6 +144,8 @@ private:
     QLabel *m_bluetoothNote = nullptr;
     QLabel *m_bluetoothDetail = nullptr;
     QLabel *m_filesDetail = nullptr;
+    QWidget *m_csvBox = nullptr;
+    QLineEdit *m_csvName = nullptr;
     QPushButton *m_serialOption = nullptr;
     QLabel *m_serialDetail = nullptr;
     QCheckBox *m_serialSyncClock = nullptr;

@@ -19,6 +19,7 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QProgressBar>
@@ -35,6 +36,7 @@
 #include "SleepLib/calcs.h"
 #include "SleepLib/loader_plugins/cms50_loader.h"
 #include "SleepLib/loader_plugins/cms50f37_loader.h"
+#include "SleepLib/loader_plugins/csvoximetry.h"
 #include "SleepLib/viatomble/viatomble_availability.h"
 #include "SleepLib/viatomble/viatomble_usb.h"
 #include "mainwindow.h"
@@ -49,10 +51,13 @@ QList<SerialOximeter *> GetOxiLoaders();
 
 // The oximeter types, as stored in the profile (STR_OS_OximeterType). The values never
 // change, whatever order the wizard shows the devices in.
-enum OximeterTypeId { OXI_CMS50F37 = 0, OXI_CMS50 = 1, OXI_MD300W1 = 2, OXI_VIATOM = 3, OXI_EMAY = 4 };
+enum OximeterTypeId { OXI_CMS50F37 = 0, OXI_CMS50 = 1, OXI_MD300W1 = 2, OXI_VIATOM = 3, OXI_EMAY = 4, OXI_CSV = 5 };
 
 // The device cards' order on the first page.
-static const int DEVICE_ORDER[] = { OXI_VIATOM, OXI_EMAY, OXI_CMS50F37, OXI_CMS50, OXI_MD300W1 };
+static const int DEVICE_ORDER[] = { OXI_VIATOM, OXI_EMAY, OXI_CMS50F37, OXI_CMS50, OXI_MD300W1, OXI_CSV };
+
+//! The name given to the last CSV oximeter, offered again next time.
+static const QString PREF_CsvDeviceName = QStringLiteral("CsvOximetryDeviceName");
 
 //! Oximeters whose recordings carry their own start time and are downloaded in the
 //! import panel (over Bluetooth, or a Viatom/Wellue cable).
@@ -219,6 +224,7 @@ QString OximeterImport::deviceName(int type) const
     case OXI_CMS50F37: return tr("Contec CMS50F v3.7+");
     case OXI_CMS50:    return tr("Contec CMS50D+/E/F");
     case OXI_MD300W1:  return tr("ChoiceMMed MD300W1");
+    case OXI_CSV:      return tr("Other oximeter (CSV)");
     }
     return QString();
 }
@@ -310,8 +316,8 @@ void OximeterImport::updateStepBar()
 
     // What was chosen replaces a finished step's title; the last step depends on the device.
     QStringList titles = { tr("Oximeter"), tr("Method"), tr("Import"),
-                           downloadsInPanel(oximeterType()) && method() != FilesMethod ? tr("Summary")
-                                                                                    : tr("Match to CPAP") };
+                           (downloadsInPanel(oximeterType()) && method() != FilesMethod)
+                               || oximeterType() == OXI_CSV ? tr("Summary") : tr("Match to CPAP") };
     if (m_step > DeviceStep) {
         titles[0] = deviceName(oximeterType());
     }
@@ -414,6 +420,7 @@ QWidget *OximeterImport::buildDevicePage()
         { OXI_CMS50, ":/icons/oximeter.png", tr("CMS50D+, CMS50E, CMS50F, Pulox PO-200/300"),
           tr("Serial cable · Data files") },
         { OXI_MD300W1, QString(), tr("Data files (.dat) saved by its own software"), tr("Data files") },
+        { OXI_CSV, QString(), tr("A CSV file with the date and time, SpO2 and pulse on each row"), tr("Data files") },
     };
 
     m_devices = new QButtonGroup(this);
@@ -423,7 +430,7 @@ QWidget *OximeterImport::buildDevicePage()
         auto *card = new QPushButton(page);
         card->setObjectName("wizardCard");
         card->setCheckable(true);
-        card->setMinimumSize(165, 300);
+        card->setMinimumSize(140, 300);   // six side by side in the wizard's 1000 px
         card->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         card->setAccessibleName(deviceName(c.type));
         auto *v = new QVBoxLayout(card);
@@ -448,7 +455,8 @@ QWidget *OximeterImport::buildDevicePage()
             : devicePicture(c.picture, QSize(140, 112), this));
         v->addWidget(picture);
 
-        QLabel *name = passiveLabel(deviceName(c.type), card);
+        // No break at a slash (a word joiner after it), so "Contec CMS50D+/E/F" wraps at the space.
+        QLabel *name = passiveLabel(deviceName(c.type).replace(QLatin1Char('/'), QStringLiteral("/\u2060")), card);
         QFont nf = name->font();
         nf.setBold(true);
         nf.setPointSizeF(nf.pointSizeF() * 1.15);
@@ -550,6 +558,47 @@ QWidget *OximeterImport::buildMethodPage()
     layout->addWidget(m_serialSyncClock);
     m_filesOption = option(FilesMethod, tr("From data files"), &m_filesDetail, nullptr);
 
+    // CSV files: the accepted format, and an optional name for the oximeter.
+    m_csvBox = new QWidget(page);
+    auto *csv = new QVBoxLayout(m_csvBox);
+    csv->setContentsMargins(0, 4, 0, 0);
+    csv->setSpacing(8);
+    auto *nameRow = new QHBoxLayout;
+    nameRow->addWidget(new QLabel(tr("Oximeter name (optional):"), m_csvBox));
+    m_csvName = new QLineEdit(m_csvBox);
+    m_csvName->setPlaceholderText(tr("Oximeter (CSV)"));
+    m_csvName->setToolTip(tr("Leave it empty to keep all CSV imports together. Give each of your oximeters "
+                             "its own name to keep their recordings apart."));
+    m_csvName->setMaximumWidth(260);
+    nameRow->addWidget(m_csvName);
+    nameRow->addStretch();
+    csv->addLayout(nameRow);
+    auto *format = new QLabel(m_csvBox);
+    format->setWordWrap(true);
+    format->setTextFormat(Qt::RichText);
+    format->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    format->setText(
+        "<b>" + tr("Accepted format") + "</b>"
+        "<pre style=\"margin: 6px 0\">DateTime,SpO2,Pulse\n"
+        "2026-11-02 02:24:12,97,58\n"
+        "2026-11-02 02:24:16,96,59\n"
+        "2026-11-02 02:24:20,,\n"
+        "2026-11-02 02:24:24,95,61</pre>"
+        "<ul style=\"margin-left: -20px\">"
+        "<li>" + tr("One reading per row: date and time, SpO2 (%), pulse (bpm). Any sampling rate works, "
+                     "because each row has its own time.") + "</li>"
+        "<li>" + tr("Date and time as <tt>yyyy-MM-dd HH:mm:ss</tt> (seconds optional; a \"T\" between date "
+                     "and time is fine). Local time, unless an offset such as <tt>+01:00</tt> is given.") + "</li>"
+        "<li>" + tr("The header is optional. With one, the columns can be in any order, and date and time "
+                     "can be two columns (\"Date\", \"Time\").") + "</li>"
+        "<li>" + tr("Comma, semicolon or tab between fields.") + "</li>"
+        "<li>" + tr("An empty field or 0 means no reading at that moment.") + "</li>"
+        "<li>" + tr("A pause of more than 5 minutes starts a new recording, so one file can hold several nights.") + "</li>"
+        "<li>" + tr("Files saved with <i>Export as CSV</i> in Wellue's O2 Insight Pro import as they are.") + "</li>"
+        "</ul>");
+    csv->addWidget(format);
+    layout->addWidget(m_csvBox);
+
     m_deviceHelp = new QLabel(page);
     m_deviceHelp->setWordWrap(true);
     m_deviceHelp->setForegroundRole(QPalette::PlaceholderText);
@@ -570,10 +619,15 @@ void OximeterImport::refreshMethods()
     const int type = oximeterType();
     const bool viatom = (type == OXI_VIATOM);
     const bool emay = (type == OXI_EMAY);
-    m_methodSubtitle->setText(tr("From your %1 oximeter.").arg(deviceName(type)));
+    m_methodSubtitle->setText(type == OXI_CSV ? tr("From a CSV file.")
+                                              : tr("From your %1 oximeter.").arg(deviceName(type)));
 
     m_usbOption->setVisible(viatom);
     m_bluetoothOption->setVisible(viatom || emay);
+    m_csvBox->setVisible(type == OXI_CSV);
+    if (type == OXI_CSV && m_csvName->text().isEmpty() && p_profile->contains(PREF_CsvDeviceName)) {
+        m_csvName->setText((*p_profile)[PREF_CsvDeviceName].toString());
+    }
     // Older CMS50s are read over their USB-to-serial cable (as in OSCAR 2.1 and earlier).
     m_serialOption->setVisible(type == OXI_CMS50F37 || type == OXI_CMS50);
     m_serialSyncClock->setVisible(type == OXI_CMS50F37 && method() == SerialMethod);
@@ -617,6 +671,11 @@ void OximeterImport::refreshMethods()
         m_deviceHelp->setText(tr("OSCAR can set the oximeter's clock when it connects, and never deletes "
                                  "recordings from it. EMAY support was written from EMAY's app and hasn't been "
                                  "tried on a device yet: please report how it goes."));
+        break;
+    case OXI_CSV:
+        m_filesDetail->setText(tr("A CSV file with the date and time, SpO2 and pulse on each row (format below)."));
+        m_deviceHelp->setText(tr("Each recording is stored at its own time, so there is nothing to match to CPAP "
+                                 "data. Recordings already in OSCAR are skipped."));
         break;
     case OXI_MD300W1:
         m_filesDetail->setText(tr("MedView .dat files saved by the ChoiceMMed software."));
@@ -749,6 +808,10 @@ void OximeterImport::startImport()
     const int type = oximeterType();
     if (method() == SerialMethod) {
         startSerialImport();
+        return;
+    }
+    if (type == OXI_CSV) {
+        importCsvFiles();
         return;
     }
     if (!downloadsInPanel(type) || (type == OXI_EMAY && method() == FilesMethod)) {
@@ -1082,6 +1145,92 @@ void OximeterImport::onSerialImportComplete(SerialOximeter *)
     }
 }
 
+// ----------------------------------------------------------------------------------------
+// Other oximeters: a CSV file with the date and time, SpO2 and pulse on each row
+
+void OximeterImport::importCsvFiles()
+{
+    QString folder = (*p_profile)[STR_PREF_LastOximetryPath].toString();
+    if (folder.isEmpty()) {
+        folder = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    }
+    const QStringList files = QFileDialog::getOpenFileNames(this, tr("Choose CSV oximetry files"), folder,
+                                                            tr("CSV files (*.csv *.txt);;All files (*)"),
+                                                            nullptr, nativeDialogOption());
+    if (files.isEmpty()) {
+        return;
+    }
+    (*p_profile)[STR_PREF_LastOximetryPath] = QFileInfo(files.first()).absolutePath();
+    const QString name = m_csvName->text().trimmed();
+    (*p_profile)[PREF_CsvDeviceName] = name;
+
+    // Read everything first, so a machine is only created when there is something for it.
+    QList<CsvOximetry::Recording> recordings;
+    QStringList problems;
+    for (const QString &path : files) {
+        const QString file = QFileInfo(path).fileName();
+        const CsvOximetry::Result r = CsvOximetry::read(path);
+        if (!r.ok()) {
+            problems << file + QStringLiteral(": ") + r.error;
+            continue;
+        }
+        recordings << r.recordings;
+        for (const QString &p : r.problems) {
+            problems << file + QStringLiteral(", ") + p;
+        }
+        if (r.badRows > r.problems.size()) {
+            problems << tr("%1: %2 more line(s) could not be read").arg(file).arg(r.badRows - r.problems.size());
+        }
+        qDebug().noquote() << "oximod - CSV" << path << r.rows << "rows," << r.badRows << "unreadable,"
+                           << r.recordings.size() << "recording(s)";
+    }
+
+    int imported = 0;
+    int already = 0;
+    if (!recordings.isEmpty()) {
+        Machine *mach = CsvOximetry::machine(name);
+        for (const CsvOximetry::Recording &rec : recordings) {
+            const SessionID sid = SessionID(rec.start().toUTC().toSecsSinceEpoch());
+            if (mach->SessionExists(sid)) {
+                already++;
+                continue;
+            }
+            if (Session *session = CsvOximetry::buildSession(mach, rec)) {
+                mach->AddSession(session);
+                imported++;
+            }
+        }
+        if (imported > 0) {
+            mach->Save();
+            p_profile->StoreMachines();
+            p_profile->calculateDailySummaries();
+            m_importedFiles = true;
+        }
+    }
+
+    QString text;
+    const QString device = name.isEmpty() ? tr("Oximeter (CSV)") : name;
+    if (imported > 0) {
+        text = tr("%n recording(s) imported into OSCAR as \"%1\".", "", imported).arg(device.toHtmlEscaped());
+    } else {
+        text = tr("No recordings were imported.");
+    }
+    if (already > 0) {
+        text += QLatin1Char(' ') + tr("%n recording(s) were already in OSCAR.", "", already);
+    }
+    if (!problems.isEmpty()) {
+        text += "<p><b>" + tr("Problems found:") + "</b><br>";
+        for (const QString &p : problems.mid(0, 15)) {
+            text += p.toHtmlEscaped() + "<br>";
+        }
+        if (problems.size() > 15) {
+            text += tr("... and %n more.", "", int(problems.size() - 15));
+        }
+        text += "</p>";
+    }
+    showSummary(text, imported > 0 || already > 0 ? QString() : tr("Nothing was imported"));
+}
+
 void OximeterImport::chooseSession()
 {
     qDebug() << "oximod - Oximeter Choose Session called";
@@ -1128,7 +1277,7 @@ QWidget *OximeterImport::buildSummaryPage()
     m_summaryText->setWordWrap(true);
     layout->addWidget(m_summaryHeading);
     layout->addWidget(m_summaryText);
-    layout->addWidget(new QLabel(tr("Downloaded recordings carry their own start time, so there is nothing to match to CPAP data."), page));
+    layout->addWidget(new QLabel(tr("These recordings carry their own start time, so there is nothing to match to CPAP data."), page));
     layout->addStretch();
     return page;
 }

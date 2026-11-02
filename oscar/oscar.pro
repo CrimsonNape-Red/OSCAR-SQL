@@ -388,6 +388,7 @@ SOURCES += \
     SleepLib/importcontext.cpp \
     SleepLib/journal.cpp \
     SleepLib/loader_plugins/applehealthDataParsing.cpp \
+    SleepLib/loader_plugins/csvoximetry.cpp \
     SleepLib/loader_plugins/applehealth_loader.cpp \
     SleepLib/loader_plugins/apexDataParsing.cpp \
     SleepLib/loader_plugins/apex_loader.cpp \
@@ -636,6 +637,7 @@ HEADERS  += \
     SleepLib/xmlreplay.h \
     SleepLib/serialoximeter.h \
     SleepLib/loader_plugins/md300w1_loader.h \
+    SleepLib/loader_plugins/csvoximetry.h \
     importhandover.h \
     logger.h \
     SleepLib/loader_plugins/weinmann_loader.h \
@@ -894,6 +896,7 @@ test {
         tests/viatomtests.cpp \
         tests/viatombletests.cpp \
         tests/emaytests.cpp \
+        tests/csvoximetrytests.cpp \
         tests/deviceconnectiontests.cpp \
         tests/cryptotests.cpp \
         tests/dreemtests.cpp \
@@ -923,6 +926,7 @@ test {
         tests/viatomtests.h \
         tests/viatombletests.h \
         tests/emaytests.h \
+        tests/csvoximetrytests.h \
         tests/deviceconnectiontests.h \
         tests/cryptotests.h \
         tests/dreemtests.h \
