@@ -1097,6 +1097,9 @@ QString Daily::calendarJournalLine(Day *journalDay, int bookmarks)
 // Sets font appearence in calendar to reflect what data is present for that day.
 void Daily::UpdateCalendarDay(QDate date)
 {
+    if (!date.isValid()) {
+        return;  // setDateTextFormat() with a null date would clear every day's format
+    }
     QFont font = ui->calendar->font();
     font.setPointSize(10);
     ui->calendar->setFont(font);
@@ -1117,8 +1120,8 @@ void Daily::UpdateCalendarDay(QDate date)
     Day * posDay = p_profile->FindDay(date, MT_POSITION);
     bool haspos = posDay != nullptr;
 
-    const int bookmarks = hasjournal && journalDay->settingExists(Bookmark_Start)
-                          ? journalDay->firstSession(MT_JOURNAL)->settings[Bookmark_Start].toList().size() : 0;
+    Session *journal = hasjournal ? journalDay->firstSession(MT_JOURNAL) : nullptr;
+    const int bookmarks = journal ? journal->settings.value(Bookmark_Start).toList().size() : 0;
     bool hasbookmarks = bookmarks > 0;
 
     // The tooltip's legend: each style adds its entry where it is set, so the two cannot drift apart.
@@ -3298,7 +3301,7 @@ void Daily::update_Bookmarks()
     journal->SetChanged(true);
     BookmarksChanged=true;
     mainwin->updateFavourites();
-    if (previous_date.isValid()) UpdateCalendarDay(previous_date);   // the day's style and hint show its bookmarks
+    UpdateCalendarDay(previous_date);   // the day's style and hint show its bookmarks
 }
 
 void Daily::on_removeBookmarkButton_clicked()
@@ -3425,7 +3428,7 @@ void Daily::on_ZombieSlider_valueChanged(int uiValue)
     set_ZombieUI(uiValue);
     set_JournalZombie(previous_date, uiValue);
     mainwin->updateOverview();
-    if (previous_date.isValid()) UpdateCalendarDay(previous_date);   // the day's hint shows the feeling
+    UpdateCalendarDay(previous_date);   // the day's hint shows the feeling
 }
 
 void Daily::on_ZombieSpinBox_valueChanged(double spinValue)
@@ -3473,7 +3476,7 @@ void Daily::on_weightSpinBox_editingFinished()
         if (g) g->setDay(nullptr);
     }
     mainwin->updateOverview();
-    if (previous_date.isValid()) UpdateCalendarDay(previous_date);   // the day's hint shows the weight
+    UpdateCalendarDay(previous_date);   // the day's hint shows the weight
 }
 #endif
 
