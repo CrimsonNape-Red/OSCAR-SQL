@@ -86,13 +86,15 @@ Whatever happens, even if it fails at the first step, please send:
 
 | Device | Firmware | Connection | System | Result |
 |---|---|---|---|---|
-| SleepU | | USB cable | Linux, Windows 10 | Works |
+| SleepU (model 1654) | 1.2.0 | USB cable | Linux, Windows 10 | Works |
 | O2Ring S | | Bluetooth | Windows 11 (two testers) | Works |
 | O2Ring S | | USB cable | Windows 11 | Works |
 | O2Ring S | 1.13.0 | Bluetooth | Windows 11 26H2 | Works |
 | O2Ring | 1.9.0 | Bluetooth | Windows 11 26H2 | Works |
 | O2Ring | 1.4.0 | Bluetooth | Windows 11 26H2 | Works |
 | O2Ring, small finger (kids) | 1.2.0 | Bluetooth | Windows 11 26H2 | Works |
+| Checkme O2 Max ("O2M", model 1642) | 1.7 | Bluetooth | Linux Mint 22, Windows | Works |
+| Checkme O2 Max ("O2M", model 1642) | 1.7 | USB cable | Linux Mint 22, Windows | Works |
 
 The 2026-11-01 report (the last four rows) also found:
 
@@ -107,8 +109,8 @@ The 2026-11-01 report (the last four rows) also found:
 The EMAY EMO-80 (Bluetooth, see `EMAY_EMO80_BLE.md`) is untested too: choose the **EMAY**
 card in the wizard, then **Over Bluetooth**.
 
-Untested: the classic O2Ring over its cable, the Checkme O2 and Checkme O2 Max, the
-O2Ring SC/SF/SP, and anything on macOS.
+Untested: the classic O2Ring over its cable, the Checkme O2, the O2Ring SC/SF/SP, and
+anything on macOS.
 
 ## Known limits
 
