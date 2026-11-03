@@ -46,9 +46,7 @@
 #include "SleepLib/viatomble/viatomble_availability.h"
 #include "SleepLib/viatomble/viatomble_usb.h"
 #include "mainwindow.h"
-#ifdef OSCAR_HAVE_BLUETOOTH
 #include "viatomimportpanel.h"
-#endif
 
 extern MainWindow * mainwin;
 
@@ -259,11 +257,9 @@ void OximeterImport::showViatomImport()
 
 bool OximeterImport::importedAny() const
 {
-#ifdef OSCAR_HAVE_BLUETOOTH
     if (m_viatomPanel && m_viatomPanel->importedAny()) {
         return true;
     }
-#endif
     return m_importedFiles;
 }
 
@@ -293,8 +289,8 @@ QString OximeterImport::deviceName(int type) const
 
 bool OximeterImport::viatomUsbBuilt() const
 {
-    // The cable is read in the Viatom import panel, which needs a Bluetooth build.
-    return ViatomBle::Usb::supported() && ViatomBle::availability() != ViatomBle::Availability::NotBuilt;
+    // Read in the Viatom import panel, which every build has (Bluetooth or not).
+    return ViatomBle::Usb::supported();
 }
 
 // ----------------------------------------------------------------------------------------
@@ -431,11 +427,9 @@ void OximeterImport::updateFooter()
     } else if (page == m_serialPage) {
         m_nextButton->setText(tr("Next"));
         m_nextButton->setEnabled(false);   // the wizard moves on when the upload is complete
-#ifdef OSCAR_HAVE_BLUETOOTH
     } else if (m_viatomPanel && page == m_viatomPage) {
         m_nextButton->setText(m_viatomPanel->primaryActionText());
         m_nextButton->setEnabled(m_viatomPanel->primaryActionEnabled());
-#endif
     } else {
         m_nextButton->setText(tr("Next"));
     }
@@ -779,7 +773,6 @@ void OximeterImport::goNext()
     } else if (page == m_methodPage) {
         startImport();
     } else if (page == m_viatomPage) {
-#ifdef OSCAR_HAVE_BLUETOOTH
         // Next is the step's own action (Connect, Download) until a download has ended.
         if (m_viatomPanel->primaryAction()) {
             return;
@@ -795,7 +788,6 @@ void OximeterImport::goNext()
                            "download's messages for what went wrong."),
                         tr("Nothing was imported"));
         }
-#endif
     } else if (page == ui->chooseSessionPage && m_selectingSerialSession) {
         // Which recording to download from the oximeter.
         QTableWidgetItem * item_0 = ui->tableOxiSessions->item(ui->tableOxiSessions->currentRow(), 0);
@@ -823,11 +815,9 @@ void OximeterImport::goBack()
     if (page == m_methodPage) {
         showPage(m_devicePage, DeviceStep);
     } else if (page == m_viatomPage) {
-#ifdef OSCAR_HAVE_BLUETOOTH
         if (!m_viatomPanel->stopForClose()) {
             return;
         }
-#endif
         refreshMethods();
         showPage(m_methodPage, MethodStep);
     } else if (page == m_serialPage) {
@@ -853,11 +843,9 @@ void OximeterImport::goBack()
 
 void OximeterImport::reject()
 {
-#ifdef OSCAR_HAVE_BLUETOOTH
     if (m_viatomPanel && ui->stackedWidget->currentWidget() == m_viatomPage && !m_viatomPanel->stopForClose()) {
         return;
     }
-#endif
     if (m_serialBusy && oximodule && oximodule->isStreaming()) {
         serialStatus(tr("Please wait until the oximeter has finished uploading. Do not unplug it."));
         return;
@@ -893,7 +881,6 @@ void OximeterImport::startImport()
         }
         return;
     }
-#ifdef OSCAR_HAVE_BLUETOOTH
     if (!m_viatomPanel) {
         // A downloaded Viatom file goes to the Viatom loader, an EMAY recording (.spo2)
         // straight into a session with its own start time.
@@ -922,7 +909,6 @@ void OximeterImport::startImport()
     } else {
         m_viatomPanel->startScan();
     }
-#endif
 }
 
 void OximeterImport::importOximeterFile()

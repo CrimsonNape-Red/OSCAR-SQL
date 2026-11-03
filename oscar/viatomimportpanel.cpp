@@ -33,7 +33,9 @@
 #include "SleepLib/profiles.h"
 #include "SleepLib/viatomble/viatomble_availability.h"
 #include "SleepLib/viatomble/viatomble_dialect.h"
+#ifdef OSCAR_HAVE_BLUETOOTH
 #include "SleepLib/viatomble/viatomble_device.h"
+#endif
 #include "SleepLib/viatomble/viatomble_downloader.h"
 #include "SleepLib/viatomble/emay.h"
 
@@ -108,6 +110,7 @@ ViatomImportPanel::ViatomImportPanel(std::function<bool(const QString &)> import
         }
     });
 
+#ifdef OSCAR_HAVE_BLUETOOTH
     m_scanner = new Scanner(this);
     connect(m_scanner, &Scanner::deviceFound, this, &ViatomImportPanel::onDeviceFound);
     connect(m_scanner, &Scanner::finished, this, &ViatomImportPanel::onScanFinished);
@@ -115,6 +118,7 @@ ViatomImportPanel::ViatomImportPanel(std::function<bool(const QString &)> import
         m_status->setText(tr("Bluetooth search failed: %1").arg(reason));
         onScanFinished();
     });
+#endif
 
     showPage(DevicesPage);
 }
@@ -317,6 +321,16 @@ void ViatomImportPanel::log(const QString &text)
     qDebug().noquote() << "ViatomBleImport:" << text;
 }
 
+int ViatomImportPanel::bluetoothCount() const
+{
+#ifdef OSCAR_HAVE_BLUETOOTH
+    return m_devices.size();
+#else
+    return 0;
+#endif
+}
+
+#ifdef OSCAR_HAVE_BLUETOOTH
 QString ViatomImportPanel::deviceLabel(const QBluetoothDeviceInfo &info) const
 {
     const QString id = info.address().isNull() ? info.deviceUuid().toString() : info.address().toString();
@@ -326,6 +340,7 @@ QString ViatomImportPanel::deviceLabel(const QBluetoothDeviceInfo &info) const
     }
     return label;
 }
+#endif
 
 // ----------------------------------------------------------------------------------------
 // Searching and connecting
@@ -340,7 +355,7 @@ void ViatomImportPanel::startScan()
     listUsbPorts();
 
     const Availability ble = availability();
-    if (ble != Availability::Available) {
+    if (ble != Availability::Available || !m_scanner) {
         m_status->setText(m_usbPorts.isEmpty()
             ? tr("No oximeter on a USB cable, and Bluetooth can't be used: %1").arg(availabilityReason(ble))
             : tr("Choose your oximeter and click Connect. (Bluetooth can't be used: %1)").arg(availabilityReason(ble)));
@@ -349,13 +364,17 @@ void ViatomImportPanel::startScan()
     }
     m_rescanButton->setEnabled(false);
     m_status->setText(tr("Searching for oximeters..."));
+#ifdef OSCAR_HAVE_BLUETOOTH
     m_scanner->start(10000);
+#endif
 }
 
 void ViatomImportPanel::listUsbPorts()
 {
     m_usbPorts.clear();
+#ifdef OSCAR_HAVE_BLUETOOTH
     m_devices.clear();
+#endif
     m_families.clear();
     m_deviceList->clear();
     for (const Usb::Port &port : Usb::findPorts()) {
@@ -443,6 +462,7 @@ void ViatomImportPanel::startWithUsb()
     }
 }
 
+#ifdef OSCAR_HAVE_BLUETOOTH
 void ViatomImportPanel::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFamily scanned)
 {
     // A name both brands use ("SleepO2") goes by the brand chosen in the wizard.
@@ -500,6 +520,7 @@ void ViatomImportPanel::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFa
     }
     updateConnectButton();
 }
+#endif
 
 void ViatomImportPanel::onScanFinished()
 {
@@ -510,6 +531,7 @@ void ViatomImportPanel::onScanFinished()
     }
     // Windows can report a device before its name, and the name only by the next search,
     // so a search that found nothing is repeated once before giving up.
+#ifdef OSCAR_HAVE_BLUETOOTH
     if (m_pages->currentIndex() == DevicesPage && m_devices.isEmpty() && m_usbPorts.isEmpty()
             && !m_autoRescanned && availability() == Availability::Available) {
         m_autoRescanned = true;
@@ -518,11 +540,12 @@ void ViatomImportPanel::onScanFinished()
         m_scanner->start(10000);
         return;
     }
+#endif
     m_rescanButton->setEnabled(true);
     if (m_pages->currentIndex() != DevicesPage) {
         return;
     }
-    if (m_devices.isEmpty() && m_usbPorts.isEmpty()) {
+    if (bluetoothCount() == 0 && m_usbPorts.isEmpty()) {
         m_status->setText(tr("No oximeter found. Check that it is switched on or in standby, close to the "
                              "computer, and not connected to a phone app, then search again."));
     } else {
@@ -540,17 +563,21 @@ void ViatomImportPanel::updateConnectButton()
 void ViatomImportPanel::connectToSelected()
 {
     const int row = m_deviceList->currentRow();
-    if (row < 0 || row >= m_usbPorts.size() + m_devices.size() || m_link) {
+    if (row < 0 || row >= m_usbPorts.size() + bluetoothCount() || m_link) {
         return;
     }
+#ifdef OSCAR_HAVE_BLUETOOTH
     m_scanner->stop();
+#endif
     const bool usb = row < m_usbPorts.size();
     m_warning->setVisible(false);   // a new connection starts afresh
     m_info = DeviceInfo();
     UsbLink *usbLink = nullptr;
+#ifdef OSCAR_HAVE_BLUETOOTH
     Device *device = nullptr;
     QBluetoothDeviceInfo info;
     DeviceFamily family = DeviceFamily::Classic;
+#endif
     if (usb) {
         m_connectedFamily = DeviceFamily::Classic;
         m_link = usbLink = new UsbLink(this);
@@ -562,6 +589,7 @@ void ViatomImportPanel::connectToSelected()
             m_downloader = new Downloader(m_link, std::make_unique<ClassicUsbDialect>(), this);
         }
     } else {
+#ifdef OSCAR_HAVE_BLUETOOTH
         info = m_devices.at(row - m_usbPorts.size());
         family = m_families.at(row - m_usbPorts.size());
         if (!isSupported(family)) {
@@ -576,6 +604,9 @@ void ViatomImportPanel::connectToSelected()
         } else {
             m_downloader = new Downloader(m_link, this);
         }
+#else
+        return;   // only cables are listed without Bluetooth
+#endif
     }
     connect(m_link, &Link::ready, this, &ViatomImportPanel::onDeviceReady);
     connect(m_link, &Link::connectFailed, this, &ViatomImportPanel::onConnectFailed);
@@ -622,11 +653,13 @@ void ViatomImportPanel::connectToSelected()
         usbLink->open(port);
         return;
     }
+#ifdef OSCAR_HAVE_BLUETOOTH
     m_status->setText(tr("Connecting to %1...").arg(info.name()));
     qDebug().noquote() << "ViatomBleImport: connecting to" << info.name() << deviceLabel(info)
                        << (family == DeviceFamily::O2RingS ? "as O2Ring S family"
             : family == DeviceFamily::Emay ? "as EMAY" : "as classic");
     device->connectToDevice(info, family);
+#endif
 }
 
 void ViatomImportPanel::onDeviceReady()
@@ -666,12 +699,14 @@ QString ViatomImportPanel::folderFor(const DeviceInfo &info) const
     QString name = info.serialNumber;
     name.remove(QRegularExpression(QStringLiteral("[^A-Za-z0-9_-]")));
     if (name.isEmpty()) {
+#ifdef OSCAR_HAVE_BLUETOOTH
         const int row = m_deviceList->currentRow() - m_usbPorts.size();
         if (row >= 0 && row < m_devices.size()) {
             const QBluetoothDeviceInfo &dev = m_devices.at(row);
             name = dev.address().isNull() ? dev.deviceUuid().toString() : dev.address().toString();
             name.remove(QRegularExpression(QStringLiteral("[^A-Za-z0-9_-]")));
         }
+#endif
     }
     if (name.isEmpty()) {
         name = QStringLiteral("Unknown");
@@ -923,6 +958,8 @@ bool ViatomImportPanel::stopForClose()
 void ViatomImportPanel::stop()
 {
     m_usbWatch->stop();
+#ifdef OSCAR_HAVE_BLUETOOTH
     m_scanner->stop();
+#endif
     closeConnection();
 }

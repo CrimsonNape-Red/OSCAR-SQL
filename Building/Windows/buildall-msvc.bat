@@ -2,7 +2,8 @@ setlocal
 :::@echo off
 ::: Build the 64-bit version of OSCAR for Windows with MSVC, then the installer and the
 ::: portable ZIP (deploy.bat). Qt Bluetooth works on Windows only in MSVC builds, so
-::: this is the build that has Data -> Viatom BLE Import.
+::: this is the build that has Bluetooth downloads in the Oximetry Wizard (MinGW builds
+::: have the USB cables but no Bluetooth).
 :::
 ::: Usage: buildall-msvc.bat [qtVersion] [qtPath] [installerSuffix]
 :::     qtVersion  defaults to 6.10.2

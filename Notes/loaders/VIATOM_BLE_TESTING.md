@@ -39,7 +39,8 @@ You need Qt 6 with the **Bluetooth** module.
   bluetooth`).
 - **Windows:** build with an **MSVC** kit (e.g. *Desktop Qt 6.10 MSVC2022 64-bit*, plus
   the free Visual Studio Build Tools). Qt 6 has no working Bluetooth with **MinGW**, so a
-  MinGW build leaves the menu item greyed out. `Building\Windows\buildall-msvc.bat
+  MinGW build offers only the USB cable and data files in the Oximetry Wizard, with
+  "Over Bluetooth" greyed out. `Building\Windows\buildall-msvc.bat
   6.10.2 <Qt folder> -BLE` builds it and makes the installer (needs Inno Setup 6).
 
 ```bash
@@ -50,9 +51,11 @@ make -j$(nproc)
 ```
 
 On Debian/Ubuntu the Qt packages are `qt6-base-dev qt6-connectivity-dev` (plus the usual
-OSCAR build packages). If the qmake output says "Qt Bluetooth not found" or "does not work
-with MinGW", the menu item will stay greyed out. Hovering over a greyed-out item shows the
-reason, and the log has a `ViatomBle availability:` line.
+OSCAR build packages). Without the Bluetooth module (or, on Linux, Qt D-Bus) qmake stops
+with an error, so no build goes out without Bluetooth by accident; `CONFIG+=no_bluetooth`
+builds without it on purpose. A MinGW build on Windows says "does not work with MinGW"
+and builds without Bluetooth: the wizard's "Over Bluetooth" choice is greyed out and says
+why (the USB cable still works); the log has a `ViatomBle availability:` line.
 
 ## The test
 

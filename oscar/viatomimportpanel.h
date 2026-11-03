@@ -11,12 +11,15 @@
 
 #include <functional>
 
-#include <QBluetoothDeviceInfo>
 #include <QWidget>
 #include <QList>
 
-#include "SleepLib/viatomble/viatomble_protocol.h"
+#ifdef OSCAR_HAVE_BLUETOOTH
+#include <QBluetoothDeviceInfo>
 #include "SleepLib/viatomble/viatomble_scanner.h"
+#endif
+#include "SleepLib/viatomble/viatomble_family.h"
+#include "SleepLib/viatomble/viatomble_protocol.h"
 #include "SleepLib/viatomble/viatomble_usb.h"
 
 class QCheckBox;
@@ -31,11 +34,14 @@ class QTimer;
 namespace ViatomBle {
 class DownloaderBase;
 class Link;
+class Scanner;
 }
 
 /*! \brief Downloads recordings from an oximeter over Bluetooth LE (Viatom/Wellue, EMAY
  *  EMO-80), or from a Viatom/Wellue oximeter over its USB cable (SleepU, O2Ring S; the
  *  O2Ring's is untested). Contec's Bluetooth models are listed but can't be used yet.
+ *  Without Qt Bluetooth (OSCAR_HAVE_BLUETOOTH unset, e.g. a MinGW build on Windows) only
+ *  the USB cables are offered.
  *
  *  The Oximetry Wizard's import step for these oximeters: choose a device, choose
  *  recordings, download. Files are kept in <profile folder>/Oximetry_Data/<serial>/ and,
@@ -88,7 +94,9 @@ class ViatomImportPanel : public QWidget
     void startScan();
 
   private slots:
+#ifdef OSCAR_HAVE_BLUETOOTH
     void onDeviceFound(const QBluetoothDeviceInfo &info, ViatomBle::DeviceFamily family);
+#endif
     void onScanFinished();
     void connectToSelected();
     void onDeviceReady();
@@ -120,7 +128,11 @@ class ViatomImportPanel : public QWidget
     void updateConnectButton();
     void closeConnection();
     QString folderFor(const ViatomBle::DeviceInfo &info) const;
+    //! Bluetooth devices listed below the cables (always 0 without Bluetooth).
+    int bluetoothCount() const;
+#ifdef OSCAR_HAVE_BLUETOOTH
     QString deviceLabel(const QBluetoothDeviceInfo &info) const;
+#endif
 
     std::function<bool(const QString &)> m_importFile;
 
@@ -137,7 +149,9 @@ class ViatomImportPanel : public QWidget
     QList<ViatomBle::Usb::Port> m_usbPorts;      // listed first, then m_devices
     bool m_autoRescanned = false;                // a search that found nothing was repeated once
     QTimer *m_usbWatch = nullptr;                // waits for a cable after startWithUsb() found none
+#ifdef OSCAR_HAVE_BLUETOOTH
     QList<QBluetoothDeviceInfo> m_devices;
+#endif
     QList<ViatomBle::DeviceFamily> m_families;   // parallel to m_devices
 
     // Files page
@@ -157,7 +171,7 @@ class ViatomImportPanel : public QWidget
     QPushButton *m_moreButton = nullptr;
     QPushButton *m_searchAgainButton = nullptr;
 
-    ViatomBle::Scanner *m_scanner = nullptr;
+    ViatomBle::Scanner *m_scanner = nullptr;    // null without Bluetooth
     ViatomBle::Link *m_link = nullptr;          // a Device or a UsbLink
     ViatomBle::DownloaderBase *m_downloader = nullptr;
     QList<ViatomBle::DeviceFamily> m_preferred;

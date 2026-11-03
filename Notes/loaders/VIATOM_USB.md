@@ -81,6 +81,13 @@ devices by its USB ID (SetupAPI, `HidD_GetAttributes`) and opens it through the 
   endpoints. Windows adds the report ID byte (0) in front: 33 bytes per report.
 - While O2 Insight Pro has the cable open, OSCAR can usually open it too, but the two
   programs would talk over each other, so close O2 Insight Pro first.
+- The cable needs no Qt Bluetooth, so MinGW builds have it too (since 2026-11-03): the
+  wizard's import panel is in every build, and only its Bluetooth search and connection
+  depend on `OSCAR_HAVE_BLUETOOTH`. Bluetooth itself still needs an MSVC build on Windows.
+  `qmake CONFIG+=no_bluetooth` makes such a build on any system, for testing.
+  Tested on 2026-11-03: a Windows 10 MinGW build (Qt 6.10.2, mingw1310_64) and a Linux
+  `no_bluetooth` build each downloaded and imported a Checkme O2 Max recording over its
+  cable, identical to the MSVC and Bluetooth builds' download.
 
 ## Checkme O2 cable
 

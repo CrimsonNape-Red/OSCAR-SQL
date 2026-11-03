@@ -14,22 +14,9 @@
 #include <QHash>
 #include <QObject>
 
+#include "viatomble_family.h"
+
 namespace ViatomBle {
-
-enum class DeviceFamily {
-    NotViatom,   // not an oximeter OSCAR knows
-    Classic,     // SleepU, Checkme O2, O2Ring, ...: supported
-    O2RingS,     // O2Ring S and relatives: their own protocol (see O2RingSDialect)
-    Emay,        // EMAY EMO-80: EMAY's own protocol (see EmayDownloader)
-    Unsupported, // recognised but not supported yet: Contec's Bluetooth models ("SpO2xx")
-                 // and EMAY's models that use Contec's protocol (SleepO2, EMO-90, EMO-100, ...)
-};
-
-//! True for the families OSCAR can download from.
-inline bool isSupported(DeviceFamily family)
-{
-    return family == DeviceFamily::Classic || family == DeviceFamily::O2RingS || family == DeviceFamily::Emay;
-}
 
 /*! Classifies a device from its advertised services and name. Viatom and EMAY both sell
  *  a "SleepO2": a service the device advertises decides, and otherwise preferEmay (the

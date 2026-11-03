@@ -9,10 +9,11 @@ additionally, the QT modules libqt5help5, qttools5-dev, and qttools5-dev-tools a
 
 Linux also needs libudev-dev and zlib1g-dev
 
-For Qt 6 builds, Data → Viatom BLE Import needs the Qt Bluetooth module (package
-qt6-connectivity-dev) and Qt D-Bus (part of qt6-base-dev). Without Qt Bluetooth, OSCAR
-still builds, with that menu item disabled. At run time it needs libqt6bluetooth6 and
-the BlueZ Bluetooth service (package bluez, `systemctl status bluetooth`).
+For Qt 6 builds, the Oximetry Wizard's Bluetooth downloads need the Qt Bluetooth module
+(package qt6-connectivity-dev) and Qt D-Bus (part of qt6-base-dev). qmake stops if either
+is missing; add `CONFIG+=no_bluetooth` to build without Bluetooth on purpose (the
+Viatom/Wellue USB cables and data files still work). At run time Bluetooth needs
+libqt6bluetooth6 and the BlueZ Bluetooth service (package bluez, `systemctl status bluetooth`).
 The current pre-built downloads use the distribution-supplied version of Qt.
 
 Shadow building is recommneded to avoid cluttering up the git source code folder.

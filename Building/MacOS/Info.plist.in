@@ -25,6 +25,6 @@
   <key>NSRequiresAquaSystemAppearance</key>
   <true/>
   <key>NSBluetoothAlwaysUsageDescription</key>
-  <string>OSCAR uses Bluetooth to download recordings from Viatom/Wellue oximeters (Data, Viatom BLE Import).</string>
+  <string>OSCAR uses Bluetooth to download recordings from Viatom/Wellue and EMAY oximeters (Oximetry Wizard).</string>
 </dict>
 </plist>

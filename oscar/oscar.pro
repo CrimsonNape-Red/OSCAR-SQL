@@ -428,6 +428,7 @@ SOURCES += \
     SleepLib/viatomble/viatomble_protocol.cpp \
     SleepLib/viatomble/viatomble_usb.cpp \
     SleepLib/viatomble/emay.cpp \
+    viatomimportpanel.cpp \
     SleepLib/loader_plugins/weinmann_loader.cpp \
     SleepLib/loader_plugins/yuwell_loader.cpp \
     SleepLib/loader_plugins/zeo_loader.cpp \
@@ -616,6 +617,8 @@ HEADERS  += \
     SleepLib/viatomble/viatomble_usb.h \
     SleepLib/viatomble/emay.h \
     SleepLib/viatomble/viatomble_downloaderbase.h \
+    SleepLib/viatomble/viatomble_family.h \
+    viatomimportpanel.h \
     SleepLib/loader_plugins/yuwell_loader.h \
     SleepLib/loader_plugins/zeo_loader.h \
     SleepLib/loader_plugins/resvent_loader.h \
@@ -839,29 +842,40 @@ memdebug {
     }
 }
 
-# Viatom BLE Import (Data menu). Without Qt Bluetooth the menu item stays disabled.
-# Qt 6 has no working Bluetooth backend on Windows with MinGW (only a dummy), so
-# Windows needs an MSVC build.
-win32-g++:greaterThan(QT_MAJOR_VERSION, 5) {
-    message("Qt Bluetooth does not work with MinGW: building without Viatom BLE Import (use an MSVC kit)")
-} else:qtHaveModule(bluetooth) {
+# Bluetooth downloads in the Oximetry Wizard (Viatom/Wellue, EMAY). Without Qt Bluetooth
+# the wizard still downloads over the Viatom/Wellue USB cables; only Bluetooth is off.
+#
+# Where Bluetooth can work (Linux, macOS, Windows with MSVC) it is required: qmake stops
+# if the Qt Bluetooth module (and on Linux Qt D-Bus) is missing, so no package goes out
+# without it by accident. "CONFIG+=no_bluetooth" builds without it on purpose, e.g. to
+# try a MinGW-like build on Linux. Qt 6 has no working Bluetooth backend on Windows with
+# MinGW (only a dummy), so MinGW builds have the cables but no Bluetooth.
+no_bluetooth {
+    message("no_bluetooth: building without Bluetooth oximeter downloads")
+} else:win32-g++:greaterThan(QT_MAJOR_VERSION, 5) {
+    message("Qt Bluetooth does not work with MinGW: building without Bluetooth oximeter downloads (the USB cables work; use an MSVC kit for Bluetooth)")
+} else:haiku {
+    message("Haiku: building without Bluetooth oximeter downloads")
+} else {
+    !qtHaveModule(bluetooth) {
+        error("Qt Bluetooth is missing. OSCAR packages for this platform must have Bluetooth oximeter downloads: install the Qt Bluetooth module (Debian/Ubuntu: qt6-connectivity-dev; Qt installer: Qt Connectivity), or add CONFIG+=no_bluetooth to build without it on purpose.")
+    }
+    unix:!macx:!qtHaveModule(dbus) {
+        error("Qt D-Bus is missing: OSCAR's Bluetooth downloads on Linux need it (Debian/Ubuntu: qt6-base-dev). Add CONFIG+=no_bluetooth to build without Bluetooth on purpose.")
+    }
     QT += bluetooth
     DEFINES += OSCAR_HAVE_BLUETOOTH
     SOURCES += \
         SleepLib/viatomble/viatomble_device.cpp \
-        SleepLib/viatomble/viatomble_scanner.cpp \
-        viatomimportpanel.cpp
+        SleepLib/viatomble/viatomble_scanner.cpp
     HEADERS += \
         SleepLib/viatomble/viatomble_device.h \
-        SleepLib/viatomble/viatomble_scanner.h \
-        viatomimportpanel.h
+        SleepLib/viatomble/viatomble_scanner.h
     # Qt's BlueZ backend drops write-without-response; the device writes through BlueZ over D-Bus.
-    unix:!macx:!haiku:qtHaveModule(dbus) {
+    unix:!macx {
         QT += dbus
         DEFINES += OSCAR_BLE_BLUEZ_DBUS
     }
-} else {
-    message("Qt Bluetooth not found: building without Viatom BLE Import")
 }
 
 # Turn on unit testing by adding "CONFIG+=test" to your qmake command

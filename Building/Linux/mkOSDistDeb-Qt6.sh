@@ -111,7 +111,7 @@ if [ -z "$libSQL" ]; then
     libSQL="libqt6sql6"
 fi
 
-# Viatom BLE Import (Data menu): Qt Bluetooth, and Qt D-Bus for writes through BlueZ.
+# Bluetooth oximeter downloads (Oximetry Wizard): Qt Bluetooth, and Qt D-Bus for writes through BlueZ.
 libBluetooth=""
 getPkg libqt6bluetooth6
 libBluetooth=$PKGNAME
