@@ -41,15 +41,29 @@ namespace Usb {
 constexpr quint16 VENDOR_ID = 0x1a86;
 constexpr quint16 PRODUCT_ID = 0xe010;
 constexpr int REPORT_SIZE = 32;
+
+/*! The cables OSCAR knows. Both carry the classic protocol in HID reports of a length
+ *  byte and the data:
+ *  - WchBridge: the SleepU's (and O2Ring S's) WCH "HID To Serial" bridge, 1a86:e010,
+ *    32-byte reports; it needs a setup report first, and on Linux usbfs (see above).
+ *  - Checkme: the Checkme O2 / O2 Max's own cable, a Nordic "Checkme O2" HID device,
+ *    1915:f33d, 64-byte reports, no setup; its HID driver sends output reports as control
+ *    transfers itself (the device has no OUT endpoint), so on Linux hidraw serves.
+ */
+enum class Cable { WchBridge, Checkme };
+constexpr quint16 CHECKME_VENDOR_ID = 0x1915;
+constexpr quint16 CHECKME_PRODUCT_ID = 0xf33d;
+constexpr int CHECKME_REPORT_SIZE = 64;
+inline int reportSize(Cable cable) { return cable == Cable::Checkme ? CHECKME_REPORT_SIZE : REPORT_SIZE; }
 /*! The pause between the reports of one frame. A SleepU lost the rest of a frame sent
  *  as reports back to back (a frame longer than 31 bytes, such as setting the clock),
  *  then stopped answering until it was switched off; 20 ms apart, it took them. */
 constexpr int REPORT_GAP_MS = 20;
 
-//! A frame split into reports of REPORT_SIZE bytes: length byte, data, zero padding.
-QList<QByteArray> toReports(const QByteArray &frame);
+//! A frame split into reports of reportSize bytes: length byte, data, zero padding.
+QList<QByteArray> toReports(const QByteArray &frame, int reportSize = REPORT_SIZE);
 //! The data carried by one report; empty if the length byte is out of range.
-QByteArray fromReport(const QByteArray &report);
+QByteArray fromReport(const QByteArray &report, int reportSize = REPORT_SIZE);
 //! The output report that sets up the bridge, as O2 Insight Pro sends it.
 QByteArray bridgeSetupReport();
 
@@ -58,6 +72,7 @@ struct Port
     QString path;        //!< what UsbLink::open() takes
     QString location;    //!< e.g. "USB bus 3, port 7", for the device list
     bool accessible = false;
+    Cable cable = Cable::WchBridge;
 };
 
 //! Whether this build of OSCAR can use the USB cable.
@@ -87,6 +102,8 @@ class UsbLink : public Link
     ~UsbLink() override;
 
     //! Opens the port; answers with ready() or connectFailed().
+    void open(const Usb::Port &port);
+    //! The same for a WCH bridge cable at path.
     void open(const QString &path);
 
     void send(const QByteArray &frame) override;
@@ -102,6 +119,8 @@ class UsbLink : public Link
     void deliver(const QByteArray &report);
 
     bool m_open = false;
+    Usb::Cable m_cable = Usb::Cable::WchBridge;
+    int m_reportSize = Usb::REPORT_SIZE;
     QThread *m_reader = nullptr;
     std::atomic<bool> m_stop { false };
 #if defined(Q_OS_WIN)
@@ -111,6 +130,7 @@ class UsbLink : public Link
 #else
     int m_fd = -1;
     bool m_claimed = false;
+    bool m_hidraw = false;   //!< a Checkme cable through /dev/hidraw, not usbfs
 #endif
 };
 

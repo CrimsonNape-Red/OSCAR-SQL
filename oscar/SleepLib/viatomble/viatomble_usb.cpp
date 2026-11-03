@@ -20,6 +20,7 @@
 #include <cerrno>
 #include <cstring>
 #include <fcntl.h>
+#include <poll.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <linux/usbdevice_fs.h>
@@ -37,26 +38,26 @@ namespace Usb {
 
 static const char *const tr_context = "ViatomBle::UsbLink";
 
-QList<QByteArray> toReports(const QByteArray &frame)
+QList<QByteArray> toReports(const QByteArray &frame, int reportSize)
 {
     QList<QByteArray> reports;
-    for (int i = 0; i < frame.size(); i += REPORT_SIZE - 1) {
-        const QByteArray part = frame.mid(i, REPORT_SIZE - 1);
+    for (int i = 0; i < frame.size(); i += reportSize - 1) {
+        const QByteArray part = frame.mid(i, reportSize - 1);
         QByteArray report(1, char(part.size()));
         report.append(part);
-        report.append(QByteArray(REPORT_SIZE - report.size(), '\0'));
+        report.append(QByteArray(reportSize - report.size(), '\0'));
         reports.append(report);
     }
     return reports;
 }
 
-QByteArray fromReport(const QByteArray &report)
+QByteArray fromReport(const QByteArray &report, int reportSize)
 {
     if (report.isEmpty()) {
         return QByteArray();
     }
     const int len = quint8(report.at(0));
-    if (len > REPORT_SIZE - 1 || len > report.size() - 1) {
+    if (len > reportSize - 1 || len > report.size() - 1) {
         return QByteArray();
     }
     return report.mid(1, len);
@@ -72,7 +73,8 @@ QByteArray bridgeSetupReport()
 }
 
 const char *const UDEV_RULE =
-    "SUBSYSTEM==\"usb\", ATTR{idVendor}==\"1a86\", ATTR{idProduct}==\"e010\", MODE=\"0660\", TAG+=\"uaccess\"";
+    "SUBSYSTEM==\"usb\", ATTR{idVendor}==\"1a86\", ATTR{idProduct}==\"e010\", MODE=\"0660\", TAG+=\"uaccess\"\n"
+    "SUBSYSTEM==\"hidraw\", ATTRS{idVendor}==\"1915\", ATTRS{idProduct}==\"f33d\", MODE=\"0660\", TAG+=\"uaccess\"";
 const char *const UDEV_RULE_FILE = "/etc/udev/rules.d/60-oscar-viatom-usb.rules";
 
 bool canInstallPermission()
@@ -91,7 +93,8 @@ QStringList installPermissionCommand()
     const QString script = QStringLiteral(
         "printf '%s\\n' '%1' > '%2' && chmod 644 '%2' && udevadm control --reload-rules && "
         "udevadm trigger --action=change --subsystem-match=usb --attr-match=idVendor=1a86 "
-        "--attr-match=idProduct=e010 && udevadm settle --timeout=5")
+        "--attr-match=idProduct=e010 && udevadm trigger --action=change --subsystem-match=hidraw && "
+        "udevadm settle --timeout=5")
         .arg(QString::fromLatin1(UDEV_RULE), QString::fromLatin1(UDEV_RULE_FILE));
     return { QStringLiteral("pkexec"), QStringLiteral("/bin/sh"), QStringLiteral("-c"), script };
 }
@@ -100,9 +103,8 @@ QString permissionHint()
 {
     return QCoreApplication::translate(tr_context,
         "OSCAR needs permission to use the oximeter's USB cable. Install the OSCAR package, "
-        "or add a udev rule such as /etc/udev/rules.d/60-oscar-viatom-usb.rules containing\n"
-        "SUBSYSTEM==\"usb\", ATTR{idVendor}==\"1a86\", ATTR{idProduct}==\"e010\", MODE=\"0660\", TAG+=\"uaccess\"\n"
-        "then unplug the cable and plug it in again.");
+        "or add a udev rule such as /etc/udev/rules.d/60-oscar-viatom-usb.rules containing\n%1\n"
+        "then unplug the cable and plug it in again.").arg(QString::fromLatin1(UDEV_RULE));
 }
 
 #if defined(Q_OS_LINUX)
@@ -143,6 +145,29 @@ QList<Port> findPorts()
                                                      .arg(devnum, 3, 10, QLatin1Char('0'));
         const QString devpath = readSysfs(dir, "devpath");
         port.location = QCoreApplication::translate(tr_context, "USB bus %1, port %2").arg(bus).arg(devpath);
+        port.accessible = ::access(QFile::encodeName(port.path).constData(), R_OK | W_OK) == 0;
+        ports.append(port);
+    }
+
+    // Checkme O2 cables, through hidraw: the HID device's uevent names it,
+    // e.g. HID_ID=0003:00001915:0000F33D.
+    const QString hidroot = QStringLiteral("/sys/class/hidraw");
+    for (const QString &entry : QDir(hidroot).entryList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::System, QDir::Name)) {
+        QFile uevent(hidroot + QLatin1Char('/') + entry + QStringLiteral("/device/uevent"));
+        if (!uevent.open(QIODevice::ReadOnly)) {
+            continue;
+        }
+        const QString text = QString::fromLatin1(uevent.readAll()).toUpper();
+        const QString id = QStringLiteral("HID_ID=0003:%1:%2")
+                               .arg(CHECKME_VENDOR_ID, 8, 16, QLatin1Char('0'))
+                               .arg(CHECKME_PRODUCT_ID, 8, 16, QLatin1Char('0')).toUpper();
+        if (!text.contains(id)) {
+            continue;
+        }
+        Port port;
+        port.cable = Cable::Checkme;
+        port.path = QStringLiteral("/dev/") + entry;
+        port.location = QCoreApplication::translate(tr_context, "USB (%1)").arg(entry);
         port.accessible = ::access(QFile::encodeName(port.path).constData(), R_OK | W_OK) == 0;
         ports.append(port);
     }
@@ -189,11 +214,14 @@ QList<Port> findPorts()
         }
         HIDD_ATTRIBUTES attributes;
         attributes.Size = sizeof(attributes);
-        const bool match = HidD_GetAttributes(h, &attributes)
-                           && attributes.VendorID == VENDOR_ID && attributes.ProductID == PRODUCT_ID;
+        const bool ok = HidD_GetAttributes(h, &attributes);
+        const bool wch = ok && attributes.VendorID == VENDOR_ID && attributes.ProductID == PRODUCT_ID;
+        const bool checkme = ok && attributes.VendorID == CHECKME_VENDOR_ID
+                             && attributes.ProductID == CHECKME_PRODUCT_ID;
         CloseHandle(h);
-        if (match) {
+        if (wch || checkme) {
             Port port;
+            port.cable = checkme ? Cable::Checkme : Cable::WchBridge;
             port.path = path;
             port.location = ports.isEmpty() ? QCoreApplication::translate(tr_context, "USB")
                                             : QCoreApplication::translate(tr_context, "USB %1").arg(ports.size() + 1);
@@ -236,6 +264,13 @@ UsbLink::~UsbLink()
     close();
 }
 
+void UsbLink::open(const QString &path)
+{
+    Usb::Port port;
+    port.path = path;
+    open(port);
+}
+
 void UsbLink::fail(const QString &reason)
 {
     qWarning().noquote() << "ViatomUsb: connect failed:" << reason;
@@ -267,7 +302,7 @@ void UsbLink::startReader()
 
 void UsbLink::deliver(const QByteArray &report)
 {
-    const QByteArray data = Usb::fromReport(report);
+    const QByteArray data = Usb::fromReport(report, m_reportSize);
     if (!data.isEmpty()) {
         QMetaObject::invokeMethod(this, [this, data]() {
             if (m_open) {
@@ -287,9 +322,13 @@ static QString errorText(int err)
     return QString::fromLocal8Bit(strerror(err));
 }
 
-void UsbLink::open(const QString &path)
+void UsbLink::open(const Usb::Port &port)
 {
     close();
+    const QString path = port.path;
+    m_cable = port.cable;
+    m_reportSize = Usb::reportSize(port.cable);
+    m_hidraw = (port.cable == Usb::Cable::Checkme);
     m_fd = ::open(QFile::encodeName(path).constData(), O_RDWR | O_CLOEXEC);
     if (m_fd < 0) {
         const int err = errno;
@@ -298,6 +337,12 @@ void UsbLink::open(const QString &path)
         return;
     }
     m_open = true;
+    if (m_hidraw) {
+        // A Checkme cable: its HID driver does the rest; no setup report.
+        qDebug().noquote() << "ViatomUsb: opened" << path << "(Checkme cable, hidraw)";
+        startReader();
+        return;
+    }
 
     // Take the interface from the HID driver for as long as the link is open.
     usbdevfs_ioctl detach {};
@@ -343,11 +388,29 @@ void UsbLink::open(const QString &path)
 void UsbLink::readLoop()
 {
     const int fd = m_fd;
-    char buffer[Usb::REPORT_SIZE];
+    char buffer[Usb::CHECKME_REPORT_SIZE];
+    while (!m_stop && m_hidraw) {
+        pollfd pfd { fd, POLLIN, 0 };
+        const int r = ::poll(&pfd, 1, int(READ_POLL_MS));
+        if (r == 0 || (r < 0 && errno == EINTR)) {
+            continue;
+        }
+        const int n = r > 0 ? int(::read(fd, buffer, sizeof(buffer))) : -1;
+        if (n <= 0) {
+            if (m_stop) {
+                break;
+            }
+            const QString reason = tr("The USB cable stopped working: %1")
+                                       .arg(n == 0 ? tr("unplugged") : errorText(errno));
+            QMetaObject::invokeMethod(this, [this, reason]() { lose(reason); }, Qt::QueuedConnection);
+            return;
+        }
+        deliver(QByteArray(buffer, n));
+    }
     while (!m_stop) {
         usbdevfs_bulktransfer in {};
         in.ep = EP_IN;
-        in.len = sizeof(buffer);
+        in.len = Usb::REPORT_SIZE;
         in.timeout = READ_POLL_MS;
         in.data = buffer;
         const int n = ::ioctl(fd, USBDEVFS_BULK, &in);
@@ -370,11 +433,20 @@ void UsbLink::send(const QByteArray &frame)
         return;
     }
     bool first = true;
-    for (QByteArray report : Usb::toReports(frame)) {
+    for (QByteArray report : Usb::toReports(frame, m_reportSize)) {
         if (!first) {
             QThread::msleep(Usb::REPORT_GAP_MS);   // see REPORT_GAP_MS
         }
         first = false;
+        if (m_hidraw) {
+            // hidraw: the report number (0, the device has none) first, then the report.
+            const QByteArray out = QByteArray(1, '\0') + report;
+            if (::write(m_fd, out.constData(), size_t(out.size())) != out.size()) {
+                lose(tr("Could not send to the USB cable: %1").arg(errorText(errno)));
+                return;
+            }
+            continue;
+        }
         usbdevfs_bulktransfer out {};
         out.ep = EP_OUT;
         out.len = report.size();
@@ -397,6 +469,12 @@ void UsbLink::close()
     }
     m_open = false;
     if (m_fd < 0) {
+        return;
+    }
+    if (m_hidraw) {
+        ::close(m_fd);
+        m_fd = -1;
+        m_hidraw = false;
         return;
     }
     if (m_claimed) {
@@ -425,9 +503,12 @@ static QString errorText(DWORD err)
     return message;
 }
 
-void UsbLink::open(const QString &path)
+void UsbLink::open(const Usb::Port &port)
 {
     close();
+    const QString path = port.path;
+    m_cable = port.cable;
+    m_reportSize = Usb::reportSize(port.cable);
     HANDLE h = CreateFileW(reinterpret_cast<const wchar_t *>(path.utf16()), GENERIC_READ | GENERIC_WRITE,
                            FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, nullptr);
     if (h == INVALID_HANDLE_VALUE) {
@@ -447,8 +528,15 @@ void UsbLink::open(const QString &path)
         HidP_GetCaps(preparsed, &caps);
         HidD_FreePreparsedData(preparsed);
     }
-    m_inputSize = caps.InputReportByteLength ? caps.InputReportByteLength : Usb::REPORT_SIZE + 1;
-    m_outputSize = caps.OutputReportByteLength ? caps.OutputReportByteLength : Usb::REPORT_SIZE + 1;
+    m_inputSize = caps.InputReportByteLength ? caps.InputReportByteLength : m_reportSize + 1;
+    m_outputSize = caps.OutputReportByteLength ? caps.OutputReportByteLength : m_reportSize + 1;
+    if (m_cable == Usb::Cable::Checkme) {
+        // A Checkme cable: no setup report.
+        qDebug().noquote() << "ViatomUsb: opened" << path << "(Checkme cable) input" << m_inputSize
+                           << "output" << m_outputSize;
+        startReader();
+        return;
+    }
 
     // The setup report goes as a control transfer (SET_REPORT), as O2 Insight Pro sends it.
     QByteArray setup(1, '\0');
@@ -512,7 +600,7 @@ void UsbLink::send(const QByteArray &frame)
     ov.hEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
     QString error;
     bool first = true;
-    for (const QByteArray &report : Usb::toReports(frame)) {
+    for (const QByteArray &report : Usb::toReports(frame, m_reportSize)) {
         if (!first) {
             QThread::msleep(Usb::REPORT_GAP_MS);   // see REPORT_GAP_MS
         }
@@ -561,7 +649,7 @@ void UsbLink::close()
 
 #else
 
-void UsbLink::open(const QString &)
+void UsbLink::open(const Usb::Port &)
 {
     fail(tr("This version of OSCAR can't use the USB cable."));
 }

@@ -360,7 +360,10 @@ void ViatomImportPanel::listUsbPorts()
     m_deviceList->clear();
     for (const Usb::Port &port : Usb::findPorts()) {
         m_usbPorts.append(port);
-        auto *item = new QListWidgetItem(tr("Viatom/Wellue oximeter on the USB cable   %1").arg(port.location), m_deviceList);
+        auto *item = new QListWidgetItem(port.cable == Usb::Cable::Checkme
+                                             ? tr("Checkme O2 on the USB cable   %1").arg(port.location)
+                                             : tr("Viatom/Wellue oximeter on the USB cable   %1").arg(port.location),
+                                         m_deviceList);
         if (!port.accessible) {
             item->setText(item->text() + tr("   (no permission)"));
             item->setToolTip(Usb::permissionHint());
@@ -551,8 +554,13 @@ void ViatomImportPanel::connectToSelected()
     if (usb) {
         m_connectedFamily = DeviceFamily::Classic;
         m_link = usbLink = new UsbLink(this);
-        // The SleepU and O2Ring use the classic protocol over the cable.
-        m_downloader = new Downloader(m_link, std::make_unique<ClassicUsbDialect>(), this);
+        // The classic protocol over the cable. The SleepU's WCH bridge wants O2 Insight Pro's
+        // hello first; a Checkme's own cable just takes the requests.
+        if (m_usbPorts.at(row).cable == Usb::Cable::Checkme) {
+            m_downloader = new Downloader(m_link, this);
+        } else {
+            m_downloader = new Downloader(m_link, std::make_unique<ClassicUsbDialect>(), this);
+        }
     } else {
         info = m_devices.at(row - m_usbPorts.size());
         family = m_families.at(row - m_usbPorts.size());
@@ -611,7 +619,7 @@ void ViatomImportPanel::connectToSelected()
         const Usb::Port port = m_usbPorts.at(row);
         m_status->setText(tr("Connecting to the USB cable..."));
         qDebug().noquote() << "ViatomBleImport: connecting over USB to" << port.path << port.location;
-        usbLink->open(port.path);
+        usbLink->open(port);
         return;
     }
     m_status->setText(tr("Connecting to %1...").arg(info.name()));

@@ -1,3 +1,5 @@
-# Lets the logged-in user read Viatom/Wellue oximeters (SleepU, O2Ring) through their
-# USB cable, which holds a WCH "HID To Serial" bridge. OSCAR talks to it through usbfs.
+# Lets the logged-in user read Viatom/Wellue oximeters through their USB cable.
+# SleepU, O2Ring S: a WCH "HID To Serial" bridge, which OSCAR talks to through usbfs.
 SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="e010", MODE="0660", TAG+="uaccess"
+# Checkme O2 / O2 Max: its own HID cable (Nordic "Checkme O2"), through hidraw.
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="f33d", MODE="0660", TAG+="uaccess"

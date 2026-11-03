@@ -693,6 +693,20 @@ void ViatomBleTests::testUsbReports()
         QCOMPARE(r.size(), Usb::REPORT_SIZE);
     }
 
+    // A Checkme cable: 64-byte reports, up to 63 data bytes. Setting the clock (41 bytes)
+    // fits one; the info reply comes in several.
+    const QByteArray setTime = buildRequest(CMD_PARA_SYNC, 0, setTimePayload(QDateTime(QDate(2026, 11, 3), QTime(10, 0, 0))));
+    reports = Usb::toReports(setTime, Usb::CHECKME_REPORT_SIZE);
+    QCOMPARE(reports.size(), 1);
+    QCOMPARE(reports[0].size(), Usb::CHECKME_REPORT_SIZE);
+    QCOMPARE(int(quint8(reports[0][0])), setTime.size());
+    QCOMPARE(Usb::fromReport(reports[0], Usb::CHECKME_REPORT_SIZE), setTime);
+    const QByteArray long1 = QByteArray(63, 'x');
+    QCOMPARE(Usb::fromReport(QByteArray(1, char(63)) + long1, Usb::CHECKME_REPORT_SIZE), long1);
+    QVERIFY(Usb::fromReport(QByteArray(1, char(63)) + long1).isEmpty());   // too long for a WCH report
+    QCOMPARE(Usb::reportSize(Usb::Cable::Checkme), 64);
+    QCOMPARE(Usb::reportSize(Usb::Cable::WchBridge), 32);
+
     // A length the report can't hold is not data, e.g. the bridge's setup report.
     QVERIFY(Usb::fromReport(Usb::bridgeSetupReport()).isEmpty());
     QVERIFY(Usb::fromReport(QByteArray()).isEmpty());
