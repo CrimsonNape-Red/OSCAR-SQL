@@ -201,6 +201,18 @@ of the work carries over to later screens.
 - Later screens build on that foundation, each on its own short branch merged into `ui-next`
   (see section 1). Nothing reaches master until the whole redesign is released.
 
+### Pilot status
+
+- 2026-10-31: first Qt build of the Welcome pilot on branch `welcome-pilot` (off `ui-next`),
+  following `WELCOME_PILOT_DESIGN.md` and `WELCOME_PILOT_PLAN.md`. Switch in Preferences →
+  Appearance: "Use the new Welcome page" and "Welcome card colour".
+- Reusable pieces are in `oscar/uikit/` (theme, cards, tiles, sparkline, event bar, icons,
+  panels, labels); card data is in `oscar/welcomemetrics.*`.
+- For testers to judge: is the new page better than the old one, and which card colouring
+  (Plain, By group, By status) works best.
+- Still to check: macOS painting speed with the card shadows (#235), Linux, HiDPI, and
+  long translated strings.
+
 ---
 
 ## Open decisions

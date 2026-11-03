@@ -23,7 +23,7 @@ extern MainWindow * mainwin;
 
 
 Welcome::Welcome(QWidget *parent) :
-    QWidget(parent),
+    WelcomePageBase(parent),
     ui(new Ui::Welcome)
 {
     ui->setupUi(this);

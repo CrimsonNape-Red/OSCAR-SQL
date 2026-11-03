@@ -9,6 +9,10 @@
         <file>docs/schema.xml</file>
         <file>docs/channels.xml</file>
         <file>fonts/FreeSans.ttf</file>
+        <file>fonts/Lexend-Regular.ttf</file>
+        <file>fonts/Lexend-Medium.ttf</file>
+        <file>fonts/AtkinsonHyperlegible-Regular.ttf</file>
+        <file>fonts/AtkinsonHyperlegible-Bold.ttf</file>
         <file>icons/sdcard.png</file>
         <file>icons/preferences.png</file>
         <file>icons/overview.png</file>

@@ -499,11 +499,17 @@ private:
 
     void FreeSessions();
 
+    //! \brief Creates the Welcome page chosen in Preferences (original or redesigned)
+    WelcomePageBase *createWelcomePage();
+
+    //! \brief Replaces the Welcome tab's page after the Preferences choice changes
+    void rebuildWelcomePage();
+
     Ui::MainWindow *ui;
     Daily *daily;
     Overview *overview;
     ProfileSelector *profileSelector;
-    Welcome * welcome;
+    WelcomePageBase * welcome;
 #ifndef helpless
     Help * help;
 #endif

@@ -237,6 +237,12 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->eventFlagSessionBar->setChecked(profile->appearance->eventFlagSessionBar());
     ui->disableDailyGraphTitles->setChecked(AppSetting->disableDailyGraphTitles());
     ui->useFusionTheme->setChecked(AppSetting->useFusionTheme());
+    ui->useNewWelcome->setChecked(AppSetting->useNewWelcome());
+    ui->welcomeCardColour->setCurrentIndex(int(AppSetting->welcomeCardColour()));
+    ui->welcomeCardColour->setEnabled(AppSetting->useNewWelcome());
+    ui->welcomeCardColourLabel->setEnabled(AppSetting->useNewWelcome());
+    connect(ui->useNewWelcome, &QCheckBox::toggled, ui->welcomeCardColour, &QWidget::setEnabled);
+    connect(ui->useNewWelcome, &QCheckBox::toggled, ui->welcomeCardColourLabel, &QWidget::setEnabled);
 
 #if defined(STEADY_BREATHING)
     // In Clinical Mode steadyBreathing() already reports SB_INACTIVE, so nothing is written here
@@ -928,6 +934,9 @@ bool PreferencesDialog::Save()
         AppSetting->setUseFusionTheme(ui->useFusionTheme->isChecked());
         needs_restart = true;
     }
+    // MainWindow rebuilds the Welcome tab when either of these changes.
+    AppSetting->setUseNewWelcome(ui->useNewWelcome->isChecked());
+    AppSetting->setWelcomeCardColour(WelcomeCardColour(ui->welcomeCardColour->currentIndex()));
 
     bool clicicalModeChanged = profile->cpap->clinicalMode() != ui->clinicalMode->isChecked() ;
 #if defined(STEADY_BREATHING)

@@ -352,6 +352,19 @@ SOURCES += \
     treecheckdelegate.cpp \
     version.cpp \
     welcome.cpp \
+    welcomepage.cpp \
+    uikit/theme.cpp \
+    uikit/comparison.cpp \
+    uikit/formatting.cpp \
+    uikit/actiontile.cpp \
+    uikit/eventbar.cpp \
+    uikit/label.cpp \
+    uikit/lineicons.cpp \
+    uikit/metriccard.cpp \
+    uikit/panel.cpp \
+    uikit/sectionheader.cpp \
+    uikit/sparkline.cpp \
+    welcomemetrics.cpp \
     zip.cpp \
     Graphs/gAHIChart.cpp \
     Graphs/gdailysummary.cpp \
@@ -627,6 +640,20 @@ HEADERS  += \
     SleepLib/loader_plugins/edfparser.h \
     aboutdialog.h \
     welcome.h \
+    welcomepage.h \
+    welcomepagebase.h \
+    uikit/theme.h \
+    uikit/comparison.h \
+    uikit/formatting.h \
+    uikit/actiontile.h \
+    uikit/eventbar.h \
+    uikit/label.h \
+    uikit/lineicons.h \
+    uikit/metriccard.h \
+    uikit/panel.h \
+    uikit/sectionheader.h \
+    uikit/sparkline.h \
+    welcomemetrics.h \
     mytextbrowser.h \
     staticQMessageBox.h \
     git_info.h \
@@ -856,7 +883,10 @@ test {
         tests/bmcusrsessionstests.cpp \
         tests/steadybreathingsettingstests.cpp \
         tests/oximetryeventstests.cpp \
-        tests/oximetryrecalctests.cpp
+        tests/oximetryrecalctests.cpp \
+        tests/themetests.cpp \
+        tests/comparisontests.cpp \
+        tests/sparklinetests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -883,7 +913,10 @@ test {
         tests/bmcusrsessionstests.h \
         tests/steadybreathingsettingstests.h \
         tests/oximetryeventstests.h \
-        tests/oximetryrecalctests.h
+        tests/oximetryrecalctests.h \
+        tests/themetests.h \
+        tests/comparisontests.h \
+        tests/sparklinetests.h
 }
 
 macx {

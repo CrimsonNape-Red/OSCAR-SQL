@@ -9,13 +9,13 @@
 #ifndef WELCOME_H
 #define WELCOME_H
 
-#include <QWidget>
+#include "welcomepagebase.h"
 
 namespace Ui {
 class Welcome;
 }
 
-class Welcome : public QWidget
+class Welcome : public WelcomePageBase
 {
     Q_OBJECT
 
@@ -23,7 +23,7 @@ public:
     explicit Welcome(QWidget *parent = 0);
     ~Welcome();
 
-    void refreshPage();
+    void refreshPage() override;
 
 private slots:
     void on_dailyButton_clicked();

@@ -83,6 +83,7 @@
 #include <QScopedValueRollback>
 
 #include "mainwindow.h"
+#include "welcomepage.h"
 #include "importhandover.h"
 #include "ui_mainwindow.h"
 #include "devicetimecorrectiondialog.h"
@@ -796,7 +797,7 @@ bool MainWindow::OpenProfile(QString profileName)
     }
     SpeedCheck sc(500);
     PERF_TIMER_START("MW::OP::Welcome");
-    welcome = new Welcome(ui->tabWidget);
+    welcome = createWelcomePage();
     ui->tabWidget->insertTab(1, welcome, tr("Welcome"));
     sc.check("created Welcome page");
     PERF_TIMER_STOP("MW::OP::Welcome");
@@ -1903,6 +1904,32 @@ void MainWindow::on_action_Advanced_Graph_Order_triggered()
     if (overview && (ui->tabWidget->currentWidget() == overview)) { overview->ResetGraphOrder(2); }
 }
 
+WelcomePageBase *MainWindow::createWelcomePage()
+{
+    if (AppSetting->useNewWelcome()) {
+        return new WelcomePage(ui->tabWidget);
+    }
+    return new Welcome(ui->tabWidget);
+}
+
+void MainWindow::rebuildWelcomePage()
+{
+    int index = ui->tabWidget->indexOf(welcome);
+    if (index < 0) return;
+    bool wasCurrent = (ui->tabWidget->currentWidget() == welcome);
+
+    // Remove the old page from the tab first so the tab widget never shows a deleted page
+    ui->tabWidget->removeTab(index);
+    delete welcome;
+
+    welcome = createWelcomePage();
+    ui->tabWidget->insertTab(index, welcome, tr("Welcome"));
+    if (wasCurrent) {
+        ui->tabWidget->setCurrentWidget(welcome);
+    }
+    welcome->refreshPage();
+}
+
 void MainWindow::on_action_Preferences_triggered()
 {
     if (!p_profile) {
@@ -1913,10 +1940,18 @@ void MainWindow::on_action_Preferences_triggered()
     PreferencesDialog pd(this, p_profile);
     prefdialog = &pd;
 
+    const bool oldNewWelcome = AppSetting->useNewWelcome();
+    const WelcomeCardColour oldCardColour = AppSetting->welcomeCardColour();
+
     if (pd.exec() == PreferencesDialog::Accepted) {
         // Apply any updates from preference changes (notably fonts)
 
         setApplicationFont();
+
+        if (welcome && (oldNewWelcome != AppSetting->useNewWelcome()
+                        || oldCardColour != AppSetting->welcomeCardColour())) {
+            rebuildWelcomePage();
+        }
 
 
         if (m_clinicalMode != p_profile->cpap->clinicalMode()) {
@@ -3146,7 +3181,7 @@ void MainWindow::doReprocessEvents()
     p_profile->recalculateOximetryEvents(&progress);
     progress.close();
 
-    welcome = new Welcome(ui->tabWidget);
+    welcome = createWelcomePage();
     ui->tabWidget->insertTab(1, welcome, tr("Welcome"));
 
     daily = new Daily(ui->tabWidget, nullptr);

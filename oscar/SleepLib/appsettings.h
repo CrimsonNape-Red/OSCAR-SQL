@@ -65,6 +65,8 @@ const QString STR_AS_SteadyBreathingDuration = "SteadyBreathingDuration";
 #endif
 const QString STR_AS_GraphTooltips = "GraphTooltips";
 const QString STR_AS_UseFusionTheme = "UseFusionTheme";
+const QString STR_AS_UseNewWelcome = "UseNewWelcome";
+const QString STR_AS_WelcomeCardColour = "WelcomeCardColour";
 const QString STR_AS_LineThickness = "LineThickness";
 const QString STR_AS_GridLineOpacity = "GridLineOpacity";
 const QString STR_AS_LineCursorMode = "LineCursorMode";
@@ -99,6 +101,13 @@ const QString STR_PREF_AllowEarlyUpdates = "AllowEarlyUpdates";
 const QString STR_GEN_SkippedReleaseVersion = "SkippedReleaseVersion";
 const QString STR_GEN_SkippedTestVersion = "SkippedTestVersion";
 #endif
+
+//! \brief How the redesigned Welcome page colours its metric cards
+enum WelcomeCardColour {
+    WCC_Plain = 0,      //!< No card tint
+    WCC_ByGroup = 1,    //!< Tint shows the kind of number (breathing, mask, usage)
+    WCC_ByStatus = 2    //!< Green or red when the night is better or worse than both averages
+};
 
 
 class AppWideSetting: public PrefSettings
@@ -170,6 +179,12 @@ public:
   inline bool graphTooltips() const { return m_graphTooltips; }
   //! \brief Whether to use the Fusion theme instead of the platform-native theme
   inline bool useFusionTheme() const { return m_useFusionTheme; }
+  //! \brief Whether to show the redesigned Welcome page instead of the original one
+  bool useNewWelcome() const { return getPref(STR_AS_UseNewWelcome).toBool(); }
+  //! \brief How the redesigned Welcome page colours its metric cards
+  WelcomeCardColour welcomeCardColour() const {
+      return WelcomeCardColour(getPref(STR_AS_WelcomeCardColour).toInt());
+  }
   inline int  alternatingColorsCombo() { return m_alternatingColorsCombo;}
   //! \brief Pen width of line plots
   inline float lineThickness() const { return m_lineThickness; }
@@ -248,6 +263,10 @@ public:
   void setGraphTooltips(bool b) { setPref(STR_AS_GraphTooltips, m_graphTooltips=b); }
   //! \brief Sets whether to use the Fusion theme instead of the platform-native theme
   void setUseFusionTheme(bool b) { setPref(STR_AS_UseFusionTheme, m_useFusionTheme=b); }
+  //! \brief Sets whether to show the redesigned Welcome page
+  void setUseNewWelcome(bool b) { setPref(STR_AS_UseNewWelcome, b); }
+  //! \brief Sets how the redesigned Welcome page colours its metric cards
+  void setWelcomeCardColour(WelcomeCardColour c) { setPref(STR_AS_WelcomeCardColour, int(c)); }
   //! \brief Sets the type of overlay flags (which are displayed over the Flow Waveform)
   void setAlternatingColorsCombo(int b) { setPref(STR_AS_setAlternatingColorsCombo, m_alternatingColorsCombo=b); }
 #ifndef REMOVE_FITNESS

@@ -3228,6 +3228,62 @@ OSCAR will restart when you click OK.</string>
                     </widget>
                    </item>
                    <item>
+                    <widget class="QCheckBox" name="useNewWelcome">
+                     <property name="toolTip">
+                      <string>Show the redesigned Welcome page. Untick to go back to the original page.</string>
+                     </property>
+                     <property name="text">
+                      <string>Use the new Welcome page</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="welcomeCardColourLayout">
+                     <item>
+                      <widget class="QLabel" name="welcomeCardColourLabel">
+                       <property name="text">
+                        <string>Welcome card colour</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="welcomeCardColour">
+                       <property name="toolTip">
+                        <string>Plain: no card colour. By group: tint shows the kind of number. By status: green or red when the night is better or worse than both averages.</string>
+                       </property>
+                       <item>
+                        <property name="text">
+                         <string>Plain</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>By group</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>By status</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="welcomeCardColourSpacer">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
                     <spacer name="verticalSpacer">
                      <property name="orientation">
                       <enum>Qt::Vertical</enum>
