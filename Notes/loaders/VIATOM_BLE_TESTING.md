@@ -94,13 +94,16 @@ Whatever happens, even if it fails at the first step, please send:
 | O2Ring | 1.4.0 | Bluetooth | Windows 11 26H2 | Works |
 | O2Ring, small finger (kids) | 1.2.0 | Bluetooth | Windows 11 26H2 | Works |
 | Checkme O2 Max ("O2M", model 1642) | 1.7 | Bluetooth | Linux Mint 22, Windows | Works |
-| Checkme O2 Max ("O2M", model 1642) | 1.7.0 | USB cable | Linux Mint 22 | Connects, reads the details, sets the clock; download not yet tested |
+| Checkme O2 Max ("O2M", model 1642) | 1.7.0 | USB cable | Linux Mint 22, Windows 10 | Works |
 
 The Checkme O2 Max was first reported (2026-11-02) as working over Bluetooth and its USB
 cable, but both of those tests were really over Bluetooth: its cable is a different USB
 device (`1915:f33d`), which OSCAR didn't support then. Cable support was added on
 2026-11-03 (see `VIATOM_USB.md`) and tested on Linux with a Checkme that held no
-recordings, so the download itself and Windows are still to be tested.
+recordings; the same day the Windows 10 portable build (a9f2a6b5) did the same through
+the HID driver, with no driver to install. A 25-minute recording made afterwards then
+downloaded and imported over the cable on both systems; the two downloaded files were
+identical (3,885 bytes).
 
 The 2026-11-01 report (the last four rows) also found:
 

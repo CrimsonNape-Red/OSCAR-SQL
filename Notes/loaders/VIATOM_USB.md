@@ -108,8 +108,11 @@ without the setup report. The wizard lists it as "Checkme O2 on the USB cable".
 On Linux it needs the hidraw rule above. Without it the node is root-only and OSCAR
 offers the permission button.
 
-Tested on Linux, 2026-11-03: connects, reads the details (model 1642, firmware 1.7.0,
-battery) and sets the clock. Downloading a recording and Windows are not yet tested.
+Tested on 2026-11-03 on Linux and on Windows 10 (no driver needed; Windows lists it as
+"HID-compliant vendor-defined device"): connects, reads the details (model 1642, firmware
+1.7.0, battery), sets the clock, and downloads and imports a recording (25 minutes,
+3,885 bytes, the same file on both systems; shown in the Daily view with SpO2, pulse and
+movement).
 
 ## Other systems
 
