@@ -4,12 +4,26 @@ GitLab #331. Loader: `oscar/SleepLib/loader_plugins/prismavent_loader.cpp`
 (class `PrismaVentLoader`, loader name `PrismaVent`). Tests:
 `oscar/tests/prismaventtests.cpp`.
 
-Two VENT50-C cards have been examined:
+Three cards have been examined, two VENT50-C and one VENT40 (GitLab #365):
 
-| Card | Firmware | Day archives | Sessions | Notes |
-|---|---|---|---|---|
-| A | 3.9.0011 (`release-P34A11.3-3.09`) | 19 (2023) | 81 | Multi-session days, up to 19 per day |
-| B | 3.9.0017 (`release-P34A11.6-3.09`) | 1 (2026) | 3 | Two device folders on one card; only one has data |
+| Card | Model | Firmware | Day archives | Sessions | Notes |
+|---|---|---|---|---|---|
+| A | VENT50-C | 3.9.0011 (`release-P34A11.3-3.09`) | 19 (2023) | 81 | Multi-session days, up to 19 per day |
+| B | VENT50-C | 3.9.0017 (`release-P34A11.6-3.09`) | 1 (2026) | 3 | Two device folders on one card; only one has data |
+| C | VENT40 | 3.9.0017 (`release-P34A11.6-3.09`) | 16 (2026) | 55 | All sessions in autoS/T; `WM29510` |
+
+Card C has the same layout, archive members, 29 WMEDF signals and
+`parametersmap.xml` as the VENT50-C cards, and the same vendor plugin. Its only
+differences are the device type and the therapy mode (see below).
+
+### Device type
+
+`Device_type` in `device.xml` is the `DeviceProductType` parameter. prismaTS names
+each product type in its localization resources (keys
+`WTS/Therapy/DeviceTypes/P3_2/<product>_<branding>_<battery>`). With the Löwenstein
+branding: 0 = VENT30, 1 = VENT40, 2 = VENT50, 3 = VENT30-C, 4 = "prisma VENT dev",
+5 and 6 = VENT50-C, 7 = VENT40-C. Other brandings rename some types (TIVAN 30/40/50,
+Prisma Comfort40); the loader uses the Löwenstein names.
 
 The card-level layout and `device.xml` / `configuration.json` schemas are also
 described in `SD_CARD_FINGERPRINTS.md` ("Löwenstein Prisma VENT V50-C"). That
@@ -192,12 +206,43 @@ PCV, MPVp, MPVv, SIMVp. It agrees on 2 but puts MPVp at 7, while the report
 shows TherapyMode 8 as MPVp. That list is therefore not the device's numbering
 (it lacks autoST and HFT; one of those may sit at 7). Only 2 and 8 are taken
 as known. The loader stores the raw number
-(`PrismaVent_Mode`, labelled "S/T", "MPVp" or "Mode N"). It treats S/T as
+(`PrismaVent_Mode`, labelled "S/T", "autoST", "MPVp" or "Mode N"). It treats S/T as
 `MODE_BILEVEL_FIXED`, with IPAP/EPAP/PS, backup rate, Ti timed, Ti min/max,
 triggers, rise/fall, softSTART time (`CPAP_RampTime`) and pressure
 (`CPAP_RampPressure`). Any other mode, MPVp included, gets `MODE_UNKNOWN` and
 is reported as unexpected until a session in it has been checked, because
 volume, CPAP and high-flow modes use different parameters.
+
+**TherapyMode 3 = autoS/T (card C, confirmed in prismaTS 5.21.0.11).** All 55
+sessions use it. prismaTS's numbered list says 3 = T, but its settings view of
+card C shows "Mode: autoS/T" for program 3 with EPAPmax 14, EPAPmin 10, ΔPinsp 2,
+autoF Off, F min 10, Ti max 4, Ti min 0.5, Ti timed auto, Trigger auto, RAMP IN 4,
+RAMP EX 2, softSTART max 10, all matching the loader. It also shows 1 % mandatory
+breaths, 7 days on program 2 and 9 on program 3. The signals agree:
+Part Spont Insp. is 99–100 % and Phase Trigger is 1 (patient-triggered) for all
+but ~1 % of breaths, and the pressure targets follow the autoEPAP parameters exactly:
+
+- `EPAPsoll` stays within `AutoEPAPmin`..`AutoEPAPmax` (10–12 hPa with 1000/1200;
+  10–12.3 hPa with 1000/1400).
+- `IPAPsoll` is `EPAPsoll` + `AutoEPAPdeltaPinsp` throughout (+1 hPa with 100,
+  +2 hPa with 200). `IPAP`=1000 and `EPAP`=400 are set but not used.
+- softSTART (event 241) lasts exactly `sSTART_T` (300 s with 5, 600 s with 10)
+  and ramps EPAP linearly from 8 hPa to `AutoEPAPmin`. 8 hPa is `sSTART_EPAPmin`
+  (800); `sSTART_EPAP` is 400, so S/T and autoST use different softSTART pressures.
+- The rare untriggered breaths last 0.7–4.0 s, within `Ti_min`..`Ti_max` (0.5–4.0 s),
+  not the fixed `Ti` (1.2 s). `Ti_timed` is 0.
+
+The loader treats autoST as `MODE_BILEVEL_AUTO_FIXED_PS`: `CPAP_EPAPLo`/`EPAPHi`
+from autoEPAP min/max, `CPAP_IPAPLo`/`IPAPHi` = those + ΔPinsp, `CPAP_PS` = ΔPinsp,
+`CPAP_RampPressure` = `sSTART_EPAPmin`, and the same backup rate, Ti min/max,
+triggers, rise/fall and softSTART time as S/T. It reports no Ti ("Ti timed: auto",
+`Ti_timed` = 0). The device order may be CPAP, S, S/T, autoS/T, T, aPCV, PSV, PCV,
+MPVp, ..., which fits 2, 3 and 8; beyond those it is a guess.
+
+**TriggerType.** 0 = "Trigger: Manually", 1 = "Trigger: auto". prismaTS lists
+Trigger IN/EX only for a manual trigger, so the loader stores `TriggerType`
+(`PrismaVent_TriggerType`) and the sensitivities only when it is 0. Cards A and C
+use auto on every program; card B uses manual.
 
 Not used yet: `Humidifier`/`HumidifierLevel` (card B has `Humidifier=0` with
 level 3, meaning unclear), alarm settings, LIAM, AutoEPAP and volume-target
@@ -216,7 +261,8 @@ parameters.
 - **Backup**: the `SN` folder is copied to `<backup>/WM…/SN…/` without `logs/`.
   Files whose size is unchanged are skipped.
 - **Untested**: `deviceIsUntested` is raised for every model except the
-  VENT50-C (`Device_type` 5 or 6), which has been checked against prismaTS.
+  VENT50-C (`Device_type` 5 or 6) and VENT40 (1), which have been checked
+  against prismaTS.
 - Device type: OSCAR has no ventilator machine type, so the device is
   `MT_CPAP`. Whether sleep-oriented summaries (AHI, usage) suit round-the-clock
   ventilator use is an open question (#331).
@@ -232,19 +278,24 @@ variables point at them, since sample cards carry serial numbers:
 - `OSCAR_PRISMAVENT_CARDS` = `;`-separated card roots: imports every session
   and checks ids are unique, flow and mode are present, and events lie inside
   their session. Card A: 81 sessions from 19 archives. Card B: 3 from 1.
+  Card C: 55 from 16.
+
+`testAutoSTSettings` checks the autoS/T settings mapping and the automatic trigger
+on a synthetic log built from card C's program 3.
 
 Neither test exercises `Open()` end to end (database, backup, daily rollup).
 That still needs a real import in the app.
 
 ## Open questions
 
-1. TherapyMode numbering beyond 2 (S/T) and 8 (MPVp), and the MPVp parameter
-   set (needs a session recorded in that mode).
+1. TherapyMode numbering beyond 2 (S/T), 3 (autoS/T) and 8 (MPVp), and the
+   MPVp parameter set (needs a session recorded in that mode).
 2. Whether prismaTS counts the unclassified 106/108/113 in its AHI. The loader
    counts them, via `CPAP_Apnea` and `CPAP_Hypopnea`.
-3. `event.xml` ids 55/56/75 (55 behaves as ventilation on/off) and `alarm.xml`
-   id 581.
+3. `event.xml` ids 55/56/75 (55 behaves as ventilation on/off), and 52/70/82
+   on card C; `alarm.xml` id 581, and 460/580 on card C.
 4. `trendcurve/*.tc` (JSON header `{"Type":"P32",…,"Offset":"0061"}` then
    binary) and `statistic.proto`.
-5. Other VENT models (VENT30/40/50 without -C): device type numbers and whether
-   the layout is the same.
+5. Other VENT models (VENT30, VENT30-C, VENT40-C, VENT50): the device type numbers
+   are known from prismaTS; the VENT40 card has the VENT50-C layout, so the others
+   probably do too.

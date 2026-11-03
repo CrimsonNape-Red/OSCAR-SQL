@@ -4,6 +4,28 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-02 - prisma VENT40: sessions imported with an unknown mode and no settings (GitLab #365)
+
+**Files:** `oscar/SleepLib/loader_plugins/prismavent_loader.cpp`, `oscar/tests/prismaventtests.cpp`
+
+**Symptom:** A prisma VENT40 card imported, but every session showed "Mode 3" with no
+pressure settings, an "unknown therapy mode" message was raised, and the device was named
+"prisma VENT V40".
+
+**Root cause:** The loader knew only TherapyMode 2 (S/T) and 8 (MPVp), both from VENT50-C
+cards. The VENT40 card's sessions all use mode 3, which runs on the autoEPAP parameters
+rather than IPAP/EPAP. Model names were hard-coded only for Device_type 5 and 6.
+
+**Fix:** Mode 3 is read as autoS/T (`MODE_BILEVEL_AUTO_FIXED_PS`): EPAP range from
+`AutoEPAPmin`/`AutoEPAPmax`, PS from `AutoEPAPdeltaPinsp`, softSTART pressure from
+`sSTART_EPAPmin`. The mode and settings were confirmed in prismaTS and against the card's
+pressure-target signals. Device types are named from prismaTS's product-type table, and
+the VENT40 is no longer flagged untested. A new Trigger setting (Manual/Auto) is stored,
+and trigger sensitivities only for a manual trigger, as prismaTS shows them. This also
+corrects VENT50-C cards whose trigger is automatic.
+
+---
+
 ## 2026-11-02 - Graph tooltip lingers after the mouse leaves the graph (GitLab #364)
 
 **Files:** `oscar/Graphs/gGraphView.cpp`
