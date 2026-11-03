@@ -7627,3 +7627,17 @@ on Windows; elsewhere `\` is a legal file-name character, so the value is unchan
 behaviour is correct, and the marker file ships only in the Windows portable ZIP, so the code
 is unchanged. The backslash cases are now Windows-only, and Linux/macOS check forward-slash
 paths and that a backslash is kept. The failure was hidden by #356.
+
+---
+
+## 2026-11-03 - Preferences save leaked the graph fonts; graph tooltips kept the old font (#358)
+
+**Files:** `oscar/Graphs/gGraph.cpp`, `oscar/Graphs/gGraph.h`, `oscar/preferencesdialog.cpp`
+
+`PreferencesDialog::Save()` replaced `defaultfont`, `mediumfont` and `bigfont` with new
+`QFont` objects on every save and never deleted the old ones. `gToolTip` holds the pointer
+it saw at construction (`m_font = defaultfont`), so after a graph-font change the graph
+popups kept drawing in the old font until the graph views were re-created. Save also dropped
+the `AnyStyle` style hint set at startup. A new `ApplyGraphFontPreferences()` assigns the
+fonts in place from the `Fonts_*` preferences; `InitGraphGlobals()` and `Save()` both use it,
+so held pointers stay valid and follow the change.

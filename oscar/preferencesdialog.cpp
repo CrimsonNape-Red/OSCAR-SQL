@@ -1092,21 +1092,9 @@ bool PreferencesDialog::Save()
 
     // Changes to the application font will be set by the caller (mainwindow.cpp)
 
-    // Set other fonts for use by graph etc. pages
-    defaultfont = new QFont(((*p_pref)["Fonts_Graph_Name"]).toString());
-    defaultfont->setPointSize(((*p_pref)["Fonts_Graph_Size"]).toInt());
-    defaultfont->setWeight(((*p_pref)["Fonts_Graph_Bold"]).toBool() ? QFont::Bold : QFont::Normal);
-    defaultfont->setItalic(((*p_pref)["Fonts_Graph_Italic"]).toBool());
-
-    mediumfont = new QFont(((*p_pref)["Fonts_Title_Name"]).toString());
-    mediumfont->setPointSize(((*p_pref)["Fonts_Title_Size"]).toInt());
-    mediumfont->setWeight(((*p_pref)["Fonts_Title_Bold"]).toBool() ? QFont::Bold : QFont::Normal);
-    mediumfont->setItalic(((*p_pref)["Fonts_Title_Italic"]).toBool());
-
-    bigfont = new QFont(((*p_pref)["Fonts_Big_Name"]).toString());
-    bigfont->setPointSize(((*p_pref)["Fonts_Big_Size"]).toInt());
-    bigfont->setWeight(((*p_pref)["Fonts_Big_Bold"]).toBool() ? QFont::Bold : QFont::Normal);
-    bigfont->setItalic(((*p_pref)["Fonts_Big_Italic"]).toBool());
+    // Set other fonts for use by graph etc. pages. Updated in place (not re-created) so
+    // pointers held by tooltips etc. stay valid and follow the change (#358).
+    ApplyGraphFontPreferences();
 
     saveChanInfo();
     saveWaveInfo();
