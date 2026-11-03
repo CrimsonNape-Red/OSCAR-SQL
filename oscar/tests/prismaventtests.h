@@ -21,6 +21,7 @@ private slots:
     void testParseLogTime();
     void testParseRespEvents();
     void testParameterLogFollowsActiveProgram();
+    void testAutoSTSettings();
 
     // Whole-card import; skipped unless OSCAR_PRISMAVENT_CARD names a card folder
     void testSampleCard();

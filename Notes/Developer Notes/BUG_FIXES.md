@@ -4,6 +4,43 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-02 - prisma VENT40: sessions imported with an unknown mode and no settings (GitLab #365)
+
+**Files:** `oscar/SleepLib/loader_plugins/prismavent_loader.cpp`, `oscar/tests/prismaventtests.cpp`
+
+**Symptom:** A prisma VENT40 card imported, but every session showed "Mode 3" with no
+pressure settings, an "unknown therapy mode" message was raised, and the device was named
+"prisma VENT V40".
+
+**Root cause:** The loader knew only TherapyMode 2 (S/T) and 8 (MPVp), both from VENT50-C
+cards. The VENT40 card's sessions all use mode 3, which runs on the autoEPAP parameters
+rather than IPAP/EPAP. Model names were hard-coded only for Device_type 5 and 6.
+
+**Fix:** Mode 3 is read as autoS/T (`MODE_BILEVEL_AUTO_FIXED_PS`): EPAP range from
+`AutoEPAPmin`/`AutoEPAPmax`, PS from `AutoEPAPdeltaPinsp`, softSTART pressure from
+`sSTART_EPAPmin`. The mode and settings were confirmed in prismaTS and against the card's
+pressure-target signals. Device types are named from prismaTS's product-type table, and
+the VENT40 is no longer flagged untested. A new Trigger setting (Manual/Auto) is stored,
+and trigger sensitivities only for a manual trigger, as prismaTS shows them. This also
+corrects VENT50-C cards whose trigger is automatic.
+
+---
+
+## 2026-11-02 - Graph tooltip lingers after the mouse leaves the graph (GitLab #364)
+
+**Files:** `oscar/Graphs/gGraphView.cpp`
+
+**Symptom:** A drawn (yellow) graph tooltip stayed on screen after the mouse left the graph
+area, so it could show at the same time as a standard tooltip from the widget under the mouse.
+
+**Root cause:** `gToolTip` hides only on its timeout or when another drawn tooltip replaces it.
+`gGraphView::leaveEvent()` did not cancel it.
+
+**Fix:** `leaveEvent()` cancels a visible `m_tooltip` and redraws. The parent tooltip
+(`m_parent_tooltip`, messages from Daily/Overview) is left alone.
+
+---
+
 ## 2026-11-02 - Weinmann: import reports too many sessions (MR !62)
 
 **Files:** `oscar/SleepLib/loader_plugins/weinmann_loader.cpp`
@@ -7561,3 +7598,46 @@ are compiled out by the define. The `allowEarlyUpdates()` call is now inside
 `#ifndef NO_CHECKUPDATES`, and the update-check key-name constants are always defined, so a
 1.x migration still skips those keys in either build. Verified by compiling every file that
 uses the update-check settings with the define set.
+
+---
+
+## 2026-11-03 - A QSKIP in initTestCase() silently skipped later test classes (#356)
+
+**Files:** `oscar/tests/eventstabtests.cpp`, `oscar/tests/steadybreathingsettingstests.cpp`,
+`oscar/tests/AutoTest.h`
+
+All test classes run in one process (`AutoTest::run()`). A `QSKIP` in `initTestCase()` leaves
+QtTest's skip state set, so every class that ran after it in the same process ran nothing
+and reported `0 passed, 0 failed`. The run still exited 0. `EventsTabTests` always skipped
+this way (pending #332), and `SteadyBreathingSettingsTests` did the same in builds without
+`STEADY_BREATHING`. Both now set nothing up in `initTestCase()` and skip each test
+instead: `EventsTabTests` in `init()` (and `cleanup()` returns early), `SteadyBreathingSettingsTests`
+in each test function. `AutoTest.h` notes the rule. Verified on Windows with each class's
+results in its own file: all 23 classes run, 0 failures, and `EventsTabTests` reports 3 skips.
+
+---
+
+## 2026-11-03 - PortableModeTests::testDataFolderSetting failed on Linux and macOS (#357)
+
+**Files:** `oscar/tests/portablemodetests.cpp`
+
+The test expected `..\OSCAR Portable Data` and `E:\My Data` to come back with forward
+slashes. `dataFolderSetting()` uses `QDir::fromNativeSeparators()`, which converts `\` only
+on Windows; elsewhere `\` is a legal file-name character, so the value is unchanged. That
+behaviour is correct, and the marker file ships only in the Windows portable ZIP, so the code
+is unchanged. The backslash cases are now Windows-only, and Linux/macOS check forward-slash
+paths and that a backslash is kept. The failure was hidden by #356.
+
+---
+
+## 2026-11-03 - Preferences save leaked the graph fonts; graph tooltips kept the old font (#358)
+
+**Files:** `oscar/Graphs/gGraph.cpp`, `oscar/Graphs/gGraph.h`, `oscar/preferencesdialog.cpp`
+
+`PreferencesDialog::Save()` replaced `defaultfont`, `mediumfont` and `bigfont` with new
+`QFont` objects on every save and never deleted the old ones. `gToolTip` holds the pointer
+it saw at construction (`m_font = defaultfont`), so after a graph-font change the graph
+popups kept drawing in the old font until the graph views were re-created. Save also dropped
+the `AnyStyle` style hint set at startup. A new `ApplyGraphFontPreferences()` assigns the
+fonts in place from the `Fonts_*` preferences; `InitGraphGlobals()` and `Save()` both use it,
+so held pointers stay valid and follow the change.

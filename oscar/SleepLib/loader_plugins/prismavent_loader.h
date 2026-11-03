@@ -46,14 +46,15 @@ const QString prismavent_class_name = "PrismaVent";
     Session settings taken from the active therapy program in parameter.xml.
     See Notes/loaders/PRISMA_VENT_CARD_ANALYSIS.md for how each was identified.
     @{ */
-extern ChannelID PrismaVent_Mode;            //!< Raw TherapyMode value; only S/T and MPVp are named.
+extern ChannelID PrismaVent_Mode;            //!< Raw TherapyMode value; only S/T, autoS/T and MPVp are named.
 extern ChannelID PrismaVent_Program;         //!< Active therapy program, 1-3.
 extern ChannelID PrismaVent_BackupRate;      //!< Backup breath rate, breaths/min.
 extern ChannelID PrismaVent_Ti;              //!< Inspiration time of a timed breath, s.
 extern ChannelID PrismaVent_TiMin;           //!< Minimum inspiration time, s.
 extern ChannelID PrismaVent_TiMax;           //!< Maximum inspiration time, s.
-extern ChannelID PrismaVent_TriggerInsp;     //!< Inspiratory trigger sensitivity level.
-extern ChannelID PrismaVent_TriggerExp;      //!< Expiratory trigger, % of peak flow.
+extern ChannelID PrismaVent_TriggerType;     //!< 0 = manual, 1 = automatic trigger.
+extern ChannelID PrismaVent_TriggerInsp;     //!< Inspiratory trigger sensitivity level; manual trigger only.
+extern ChannelID PrismaVent_TriggerExp;      //!< Expiratory trigger, % of peak flow; manual trigger only.
 extern ChannelID PrismaVent_InspRamp;        //!< Inspiratory pressure rise level.
 extern ChannelID PrismaVent_ExpRamp;         //!< Expiratory pressure fall level.
 /*! @} */

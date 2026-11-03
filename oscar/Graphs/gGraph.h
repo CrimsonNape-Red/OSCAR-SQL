@@ -33,6 +33,14 @@ extern QHash<QString, QImage *> images;
 bool InitGraphGlobals();
 void DestroyGraphGlobals();
 
+/*! \brief Reload defaultfont, mediumfont and bigfont from the Fonts_* preferences.
+ *
+ *  The existing QFont objects are modified in place, so pointers held elsewhere
+ *  (e.g. by gToolTip) stay valid and pick up the change. Does nothing before
+ *  InitGraphGlobals() has run.
+ */
+void ApplyGraphFontPreferences();
+
 const int mouse_movement_threshold = 6;
 
 enum ZoomyScaling {ZS_AUTO_FIT =0 , ZS_DEFAULT =1  , ZS_OVERRIDE =2};
