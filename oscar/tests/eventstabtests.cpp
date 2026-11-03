@@ -71,8 +71,10 @@ void EventsTabTests::initTestCase()
     DEBUGXD O("EventsTabTests::initTestCase");
 
     // The sample profile is in the OSCAR 1.7 file format, which 2.0 no longer reads: devices
-    // and sessions now come only from the database, and this test opens none.
-    QSKIP("Needs porting to the OSCAR 2.0 database (#332)");
+    // and sessions now come only from the database, and this test opens none. Each test
+    // skips itself in init() while m_app is unset. (A QSKIP here would silently skip every
+    // test class that runs after this one, see AutoTest.h.)
+    return;
 
     // note: need dummy app for Qt even though hidden
     int argc = 0;
@@ -173,6 +175,9 @@ void EventsTabTests::cleanupTestCase()
 void EventsTabTests::init()
 {
     DEBUGXD O("EventsTabTests::init");
+    if (!m_app) {
+        QSKIP("Needs porting to the OSCAR 2.0 database (#332)");
+    }
     // Install the custom message handler and store the original one
     originalMessageHandler = qInstallMessageHandler(capturingMessageOutput);
     capturedDebugMessages.clear(); // Ensure the list is empty before running tests
@@ -182,6 +187,9 @@ void EventsTabTests::init()
 void EventsTabTests::cleanup()
 {
     DEBUGXD O("EventsTabTests::cleanup");
+    if (!m_app) {
+        return;     // init() skipped before installing the message handler
+    }
     // Restore the original message handler
     qInstallMessageHandler(originalMessageHandler);
 

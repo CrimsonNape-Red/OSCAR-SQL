@@ -43,6 +43,12 @@ namespace AutoTest
         }
     }
 
+    /*
+     * Runs every registered test class in turn, in the static-initialisation order of the
+     * DECLARE_TEST objects. Never QSKIP in initTestCase(): QtTest keeps the skip state, and
+     * every class that runs after it in this process silently runs nothing (#356). Skip in
+     * init() or in each test function instead.
+     */
     inline int run(int argc, char *argv[])
     {
         int ret = 0;

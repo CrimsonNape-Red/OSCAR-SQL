@@ -23,7 +23,8 @@
 void SteadyBreathingSettingsTests::initTestCase()
 {
 #if !defined(STEADY_BREATHING)
-    QSKIP("STEADY_BREATHING is not defined in this build");
+    // Nothing to set up; each test skips itself. (A QSKIP here would silently skip every
+    // test class that runs after this one, see AutoTest.h.)
 #else
     // note: need dummy app for QtSql even though headless (each suite owns its own)
     static int argc = 1;
@@ -86,6 +87,8 @@ void SteadyBreathingSettingsTests::testAppWideValueCopiedOnce()
     QVERIFY(m_profileA->saveProfilePreferencesToDatabase());
     QVERIFY(m_profileA->loadExtendedDataFromDatabase());
     QCOMPARE(m_profileA->cpap->steadyBreathing(), SB_OFF);
+#else
+    QSKIP("STEADY_BREATHING is not defined in this build");
 #endif
 }
 
@@ -101,6 +104,8 @@ void SteadyBreathingSettingsTests::testProfilesAreIndependent()
     QVERIFY(m_profileB->loadExtendedDataFromDatabase());
     QCOMPARE(m_profileA->cpap->steadyBreathing(), SB_OFF);
     QCOMPARE(m_profileB->cpap->steadyBreathing(), SB_ACTIVE);
+#else
+    QSKIP("STEADY_BREATHING is not defined in this build");
 #endif
 }
 
@@ -125,6 +130,8 @@ void SteadyBreathingSettingsTests::testClinicalModeIsInactive()
     // A stored SB_INACTIVE (written by older builds) still means "turned on".
     m_profileC->cpap->setSteadyBreathing(SB_INACTIVE);
     QCOMPARE(m_profileC->cpap->steadyBreathing(), SB_ACTIVE);
+#else
+    QSKIP("STEADY_BREATHING is not defined in this build");
 #endif
 }
 
