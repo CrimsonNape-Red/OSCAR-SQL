@@ -1094,23 +1094,6 @@ QString Daily::calendarJournalLine(Day *journalDay, int bookmarks)
     return tr("Journal: %1").arg(parts.isEmpty() ? empty : parts.join(QStringLiteral(", ")));
 }
 
-/*! \brief All dates the calendar grid shows for its current page: the month and the days of the
- *  neighbouring months that fill its six weeks.
- */
-static QList<QDate> calendarVisibleDates(const QCalendarWidget *calendar)
-{
-    const QDate first(calendar->yearShown(), calendar->monthShown(), 1);
-    int before = (first.dayOfWeek() - calendar->firstDayOfWeek() + 7) % 7;
-    if (before == 0) {
-        before = 7;  // like QCalendarWidget: a month starting on the first weekday still gets a row before it
-    }
-    QList<QDate> dates;
-    for (int i = 0; i < 42; i++) {
-        dates << first.addDays(i - before);
-    }
-    return dates;
-}
-
 // Sets font appearence in calendar to reflect what data is present for that day.
 void Daily::UpdateCalendarDay(QDate date)
 {
@@ -2649,8 +2632,9 @@ void Daily::UnitsChanged()
     // just as if weight changed. may make bmi visible.
     on_weightSpinBox_editingFinished();
 #endif
-    // The calendar's day hints show the weight in the chosen units: refresh every day the grid shows.
-    updateCalendarDays(calendarVisibleDates(ui->calendar));
+    // The calendar's day hints show the weight in the chosen units: refresh every day that has a hint,
+    // including the neighbouring months' days the grid shows.
+    updateCalendarDays(ui->calendar->dateTextFormat().keys());
 }
 
 double  Daily::calculateBMI(double weight_kg, double height_cm) {
@@ -3457,8 +3441,9 @@ void Daily::on_Units10_100_clicked(){
     p_profile->appearance->setZombieMode(!mode);
     int uiValue = ui->ZombieSlider->value();
     set_ZombieUI(uiValue, true);
-    // The calendar's day hints show feelings on the chosen scale: refresh every day the grid shows.
-    updateCalendarDays(calendarVisibleDates(ui->calendar));
+    // The calendar's day hints show feelings on the chosen scale: refresh every day that has a hint,
+    // including the neighbouring months' days the grid shows.
+    updateCalendarDays(ui->calendar->dateTextFormat().keys());
 }
 
 void Daily::on_weightSpinBox_valueChanged(double )
