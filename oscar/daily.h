@@ -421,6 +421,13 @@ private:
     double user_height_cm;
 #endif
     constexpr static double zeroD = 0.0001 ;
+
+    /*! \brief The calendar hint's journal line: "Journal: weight 80.0 kg, feeling 7.0/10, notes, Bookmarks: 2".
+     *  \param journalDay The day's journal (MT_JOURNAL), not null.
+     *  \param bookmarks  Number of bookmarks on the day.
+     */
+    static QString calendarJournalLine(Day *journalDay, int bookmarks);
+
     bool BookmarksChanged;
 
     SaveGraphLayoutSettings* saveGraphLayoutSettings=nullptr;
