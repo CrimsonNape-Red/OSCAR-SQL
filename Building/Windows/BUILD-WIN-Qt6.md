@@ -58,6 +58,7 @@ From <http://gnuwin32.sourceforge.net/packages/gawk.htm>, download setup for “
         - Under Qt 6.9.3 (or 6.10.0) Additional Libraries, check:
           - Qt 5 Compatibility Module
           - Qt Serial Port.
+          - Qt Connectivity (Qt Bluetooth, for Bluetooth oximeter downloads in the Oximetry Wizard. An MSVC build stops at qmake without it; windeployqt copies Qt6Bluetooth.dll on its own.) **Qt 6 Bluetooth works only in MSVC builds:** with the MinGW kit OSCAR builds without Bluetooth, but the Viatom/Wellue USB cables and data files still work. For Bluetooth, also install the MSVC 2022 64-bit component and the Visual Studio Build Tools, and build with that kit (`buildall-msvc.bat`).
         - For development use, check:
           - Sources
           - QT Debug Information Files

@@ -126,6 +126,13 @@ function gene_script () {
 function getOS () {
   rel=$(lsb_release -r | awk '{print $2}')
   os=$(lsb_release -i | awk '{print $3}')
+  # Linux Mint is built on Ubuntu: name the package after its Ubuntu release,
+  # e.g. Ubuntu24 for Linux Mint 22 (Ubuntu 24.04)
+  upstream=/etc/upstream-release/lsb-release
+  if [ "$os" = "Linuxmint" ] && [ -f "$upstream" ]; then
+    os=$(awk -F= '/^DISTRIB_ID=/ {print $2}' "$upstream")
+    rel=$(awk -F= '/^DISTRIB_RELEASE=/ {print $2}' "$upstream")
+  fi
   tmp2=${os:0:3}
   echo "tmp2 = '$tmp2'"
   if [ "$tmp2" = "Ubu" ] ; then

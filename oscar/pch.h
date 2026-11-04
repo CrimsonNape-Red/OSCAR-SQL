@@ -34,7 +34,6 @@
 #include <QTime>
 #include <QUrl>
 #include <QPrinter>
-#include <QHelpEngine>
 #include <QTabWidget>
 #include <QAction>
 #include <QColor>

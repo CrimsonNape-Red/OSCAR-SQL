@@ -178,6 +178,89 @@ void PrismaVentTests::testParameterLogFollowsActiveProgram()
     QVERIFY(!ok);
 }
 
+void PrismaVentTests::testAutoSTSettings()
+{
+    // Program 2 (written as 1) of a VENT40 card in autoS/T; expected values are
+    // from prismaTS's settings table. Its IPAP, EPAP and sSTART_EPAP are set but
+    // not used in this mode, so they must not show.
+    const QByteArray map =
+        "<parameters version=\"6.3.0\" count=\"12\">"
+        "<parameter name=\"ActiveProgram\" id=\"1\"/>"
+        "<parameter name=\"TherapyMode\" id=\"2\"/>"
+        "<parameter name=\"IPAP\" id=\"3\"/>"
+        "<parameter name=\"EPAP\" id=\"4\"/>"
+        "<parameter name=\"AutoEPAPmin\" id=\"5\"/>"
+        "<parameter name=\"AutoEPAPmax\" id=\"6\"/>"
+        "<parameter name=\"AutoEPAPdeltaPinsp\" id=\"7\"/>"
+        "<parameter name=\"sSTART_T\" id=\"8\"/>"
+        "<parameter name=\"sSTART_EPAP\" id=\"9\"/>"
+        "<parameter name=\"sSTART_EPAPmin\" id=\"10\"/>"
+        "<parameter name=\"Frequency\" id=\"11\"/>"
+        "<parameter name=\"Ti\" id=\"12\"/>"
+        "<parameter name=\"TriggerType\" id=\"13\"/>"
+        "<parameter name=\"TriggerSensitivityInspiration\" id=\"14\"/>"
+        "</parameters>";
+    const QByteArray log =
+        "<log version=\"1\" date=\"2026-01-24\">"
+        "<start time=\"+0022:40:00.000\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"1\" value=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"2\" value=\"3\" program=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"3\" value=\"1000\" program=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"4\" value=\"400\" program=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"5\" value=\"1000\" program=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"6\" value=\"1400\" program=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"7\" value=\"200\" program=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"8\" value=\"10\" program=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"9\" value=\"400\" program=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"10\" value=\"800\" program=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"11\" value=\"100\" program=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"12\" value=\"1200\" program=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"13\" value=\"1\" program=\"1\"/>"
+        "<parameter time=\"+0022:40:00.000\" id=\"14\" value=\"3\" program=\"1\"/>"
+        "<stop time=\"+0029:00:00.000\"/>"
+        "</log>";
+    ParameterLog params;
+    QVERIFY(params.load(log, map));
+    const qint64 start = QDateTime(QDate(2026, 1, 24), QTime(23, 10, 51), EDFInfo::localNoDST).toMSecsSinceEpoch();
+
+    QTemporaryDir profileDir;
+    QVERIFY(profileDir.isValid());
+    Profile profile(profileDir.path(), false);
+    Profile * previousProfile = p_profile;
+    p_profile = &profile;
+
+    PrismaVentLoader loader;
+    CollectingContext ctx(&profile);
+    loader.SetContext(&ctx);
+    ctx.CreateMachineFromInfo(loader.newInfo());
+    Session * session = ctx.CreateSession(1);
+    ctx.sessions.append(session);   // so the context deletes it
+    loader.applySettings(session, params, start);
+
+    QCOMPARE(session->settings[PrismaVent_Program].toInt(), 2);
+    QCOMPARE(session->settings[PrismaVent_Mode].toInt(), 3);
+    QCOMPARE(session->settings[CPAP_Mode].toInt(), int(MODE_BILEVEL_AUTO_FIXED_PS));
+    QCOMPARE(session->settings[CPAP_EPAPLo].toDouble(), 10.0);
+    QCOMPARE(session->settings[CPAP_EPAPHi].toDouble(), 14.0);
+    QCOMPARE(session->settings[CPAP_IPAPLo].toDouble(), 12.0);
+    QCOMPARE(session->settings[CPAP_IPAPHi].toDouble(), 16.0);
+    QCOMPARE(session->settings[CPAP_PS].toDouble(), 2.0);
+    QCOMPARE(session->settings[PrismaVent_BackupRate].toDouble(), 10.0);
+    QCOMPARE(session->settings[CPAP_RampTime].toInt(), 10);
+    QCOMPARE(session->settings[CPAP_RampPressure].toDouble(), 8.0);
+    QVERIFY(!session->settings.contains(CPAP_IPAP));
+    QVERIFY(!session->settings.contains(CPAP_EPAP));
+    QVERIFY(!session->settings.contains(PrismaVent_Ti));
+    // An automatic trigger: prismaTS shows "Trigger: auto" and no sensitivities.
+    QCOMPARE(session->settings[PrismaVent_TriggerType].toInt(), 1);
+    QVERIFY(!session->settings.contains(PrismaVent_TriggerInsp));
+    QVERIFY(!session->settings.contains(PrismaVent_TriggerExp));
+    QVERIFY2(ctx.messages().isEmpty(), qPrintable(QStringList(ctx.messages().values()).join("; ")));
+
+    loader.SetContext(nullptr);
+    p_profile = previousProfile;
+}
+
 void PrismaVentTests::testSampleCard()
 {
     const QString card = qEnvironmentVariable("OSCAR_PRISMAVENT_CARD");
@@ -234,6 +317,7 @@ void PrismaVentTests::testSampleCard()
     QCOMPARE(night->settings[PrismaVent_Ti].toDouble(), 1.4);
     QCOMPARE(night->settings[PrismaVent_TiMin].toDouble(), 0.6);
     QCOMPARE(night->settings[PrismaVent_TiMax].toDouble(), 1.8);
+    QCOMPARE(night->settings[PrismaVent_TriggerType].toInt(), 0);   // "Trigger: Manually"
     QCOMPARE(night->settings[PrismaVent_TriggerInsp].toInt(), 3);
     QCOMPARE(night->settings[PrismaVent_TriggerExp].toInt(), 25);
     QCOMPARE(night->settings[CPAP_RampTime].toInt(), 10);
@@ -336,7 +420,8 @@ void PrismaVentTests::testEveryCardSession()
             }
         }
         QVERIFY2(ctx.messages().isEmpty(), qPrintable(QStringList(ctx.messages().values()).join("; ")));
-        qDebug() << "PrismaVent card imported" << ctx.sessions.size() << "sessions from" << zips.size() << "archives";
+        qDebug() << "PrismaVent card" << loader.PeekInfo(card).model << "imported" << ctx.sessions.size()
+                 << "sessions from" << zips.size() << "archives";
         loader.SetContext(nullptr);
     }
     p_profile = previousProfile;

@@ -158,6 +158,10 @@ cp -r ${build_folder}/oscar/Translations ${temp_folder}/share/${appli_name} 2>/d
 cp ./${icon_name}.png ${temp_folder}/share/icons/hicolor/48x48/apps/${icon_name}.png
 cp ./${icon_name}.svg ${temp_folder}/share/icons/hicolor/scalable/apps/${icon_name}.svg
 cp ./${icon_name}.desktop ${temp_folder}/share/applications/${icon_name}.desktop
+# udev rule for the USB cable of Viatom/Wellue oximeters; named per package, so the
+# release and test packages can be installed side by side
+mkdir -p ${temp_folder}/lib/udev/rules.d
+cp ./60-oscar-viatom-usb.rules ${temp_folder}/lib/udev/rules.d/60-${package_name}-viatom-usb.rules
 
 cp ./copyright $share_doc_folder/copyright
 

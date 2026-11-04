@@ -68,4 +68,11 @@ if [ -n "$desktop_folder_name" ]; then
     fi
 fi
 
+# apply the udev rules for the oximeters' USB cables to one already plugged in
+if command -v udevadm >/dev/null 2>&1; then
+    udevadm control --reload-rules || true
+    udevadm trigger --subsystem-match=usb --attr-match=idVendor=1a86 || true
+    udevadm trigger --action=change --subsystem-match=hidraw || true
+fi
+
 # end common script

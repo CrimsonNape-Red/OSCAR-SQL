@@ -77,11 +77,20 @@ void PortableModeTests::testEmptyAndRelativeInputs()
 }
 
 // The marker is read as text: Windows backslashes must survive, comments must not count.
+// A backslash is a separator only on Windows; elsewhere it is part of a file name.
 void PortableModeTests::testDataFolderSetting()
 {
+#ifdef Q_OS_WIN
     QCOMPARE(dataFolderSetting("; marker\r\n\r\n[Portable]\r\nDataFolder=..\\OSCAR Portable Data\r\n"),
              QString("../OSCAR Portable Data"));
     QCOMPARE(dataFolderSetting("datafolder = \"E:\\My Data\" \n"), QString("E:/My Data"));
+#else
+    QCOMPARE(dataFolderSetting("; marker\r\n\r\n[Portable]\r\nDataFolder=../OSCAR Portable Data\r\n"),
+             QString("../OSCAR Portable Data"));
+    QCOMPARE(dataFolderSetting("datafolder = \"/media/stick/My Data\" \n"),
+             QString("/media/stick/My Data"));
+    QCOMPARE(dataFolderSetting("DataFolder=a\\b\n"), QString("a\\b"));
+#endif
     QCOMPARE(dataFolderSetting(";DataFolder=..\\Commented\n# DataFolder=x\n"), QString());
     QCOMPARE(dataFolderSetting("; nothing here\n"), QString());
     QCOMPARE(dataFolderSetting(QByteArray()), QString());

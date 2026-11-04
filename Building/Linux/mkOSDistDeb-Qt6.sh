@@ -111,6 +111,21 @@ if [ -z "$libSQL" ]; then
     libSQL="libqt6sql6"
 fi
 
+# Bluetooth oximeter downloads (Oximetry Wizard): Qt Bluetooth, and Qt D-Bus for writes through BlueZ.
+libBluetooth=""
+getPkg libqt6bluetooth6
+libBluetooth=$PKGNAME
+if [ -z "$libBluetooth" ]; then
+    libBluetooth="libqt6bluetooth6"
+fi
+
+libDBus=""
+getPkg libqt6dbus6
+libDBus=$PKGNAME
+if [ -z "$libDBus" ]; then
+    libDBus="libqt6dbus6"
+fi
+
 # clean folders need to create the package
 if [ -d "${temp_folder}" ]; then
     rm -r ${temp_folder}
@@ -153,6 +168,10 @@ cp -r ${build_folder}/oscar/Translations ${temp_folder}/share/${appli_name} 2>/d
 cp ./${icon_name}.png ${temp_folder}/share/icons/hicolor/48x48/apps/${icon_name}.png
 cp ./${icon_name}.svg ${temp_folder}/share/icons/hicolor/scalable/apps/${icon_name}.svg
 cp ./${icon_name}.desktop ${temp_folder}/share/applications/${icon_name}.desktop
+# udev rule for the USB cable of Viatom/Wellue oximeters; named per package, so the
+# release and test packages can be installed side by side
+mkdir -p ${temp_folder}/lib/udev/rules.d
+cp ./60-oscar-viatom-usb.rules ${temp_folder}/lib/udev/rules.d/60-${package_name}-viatom-usb.rules
 
 cp ./copyright $share_doc_folder/copyright
 
@@ -207,6 +226,9 @@ fpm --input-type dir --output-type deb  \
     --depends ${libxml} \
     --depends libqt6serialport6 \
     --depends $libSQL \
+    --depends $libBluetooth \
+    --depends $libDBus \
+    --deb-recommends bluez \
     -C ${temp_folder} \
     -p ${deb_file} \
     .

@@ -138,6 +138,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+
     {
         QAction *searchIcon = ui->filterBookmarks->addAction(
             QIcon(":/icons/edit-find.png"), QLineEdit::LeadingPosition);
@@ -2025,12 +2026,34 @@ QDateTime datetimeDialog(QDateTime datetime, QString message);
 
 void MainWindow::on_oximetryButton_clicked()
 {
+    runOximetryWizard(false);
+}
+
+void MainWindow::runOximetryWizard(bool viatom)
+{
     if (p_profile) {
         OximeterImport oxiimp(this);
+        // Viatom/Wellue: each downloaded recording is imported as it arrives, silently;
+        // data files go through the usual import, with its own messages.
+        oxiimp.setViatomFileImporter([this](const QString &path) {
+            ViatomLoader viatom;
+            return importNonCPAPFiles(viatom, QStringList(path), true, false);
+        });
+        oxiimp.setViatomFilesImporter([this]() {
+            ViatomLoader viatom;
+            return importNonCPAP(viatom);
+        });
+        if (viatom) {
+            oxiimp.showViatomImport();
+        }
         oxiimp.exec();
         PopulatePurgeMenu();
         if (overview) overview->ReloadGraphs();
         if (welcome) welcome->refreshPage();
+        if (oxiimp.importedAny()) {
+            GenerateStatistics();
+            if (daily) daily->LoadDate(daily->getDate());
+        }
     }
 }
 
@@ -4022,8 +4045,8 @@ void MainWindow::on_actionImport_Somnopose_Data_triggered()
 
 void MainWindow::on_actionImport_Viatom_Data_triggered()
 {
-    ViatomLoader viatom;
-    importNonCPAP(viatom);
+    // The wizard offers every way in: data files, and Bluetooth or USB download.
+    runOximetryWizard(true);
 }
 
 void MainWindow::GenerateStatistics()

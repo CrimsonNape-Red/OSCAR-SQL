@@ -91,14 +91,14 @@ const QString STR_GEN_AutoOpenLastUsed = "AutoOpenLastUsed";
 const QString STR_GEN_Language = "Language";
 const QString STR_PREF_VersionString = "VersionString";
 const QString STR_GEN_ShowAboutDialog = "ShowAboutDialog";
-#ifndef NO_CHECKUPDATES
+// Update-check key names are defined even with NO_CHECKUPDATES: ProfileImporter uses
+// them to skip these keys when migrating a 1.x Preferences.xml.
 const QString STR_GEN_UpdatesLastChecked = "UpdatesLastChecked";
 const QString STR_GEN_UpdatesAutoCheck = "Updates_AutoCheck";
 const QString STR_GEN_UpdateCheckFrequency = "Updates_CheckFrequency";
 const QString STR_PREF_AllowEarlyUpdates = "AllowEarlyUpdates";
 const QString STR_GEN_SkippedReleaseVersion = "SkippedReleaseVersion";
 const QString STR_GEN_SkippedTestVersion = "SkippedTestVersion";
-#endif
 
 
 class AppWideSetting: public PrefSettings

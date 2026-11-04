@@ -25,6 +25,11 @@ CryptoResult decrypt_aes256_gcm(const QByteArray & key,
 CryptoResult encrypt_aes256_gcm(const QByteArray & key,
                                 const QByteArray & iv, const QByteArray & plaintext,
                                 QByteArray & ciphertext, QByteArray & tag);
+//! AES-128 in ECB mode with PKCS#5/#7 padding, as Viatom's O2Ring S protocol uses.
+//! decrypt fails (UnknownError) if the length or the padding is wrong.
+CryptoResult encrypt_aes128_ecb_pkcs7(const QByteArray & key, const QByteArray & plaintext, QByteArray & ciphertext);
+CryptoResult decrypt_aes128_ecb_pkcs7(const QByteArray & key, const QByteArray & ciphertext, QByteArray & plaintext);
+
 CryptoResult pbkdf2_sha256(const QByteArray & passphrase, const QByteArray & salt, int iterations, QByteArray & key);
 
 #endif // CRYPTO_H

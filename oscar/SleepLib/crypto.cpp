@@ -98,6 +98,63 @@ CryptoResult encrypt_aes256_gcm(const QByteArray & key,
 
 }
 
+CryptoResult encrypt_aes128_ecb_pkcs7(const QByteArray & key, const QByteArray & plaintext, QByteArray & ciphertext)
+{
+    CryptoResult result = OK;
+    ciphertext.clear();
+    try {
+        const std::vector<uint8_t> botan_key(key.begin(), key.end());
+        std::unique_ptr<Botan::BlockCipher> enc = Botan::BlockCipher::create("AES-128");
+        enc->set_key(botan_key);
+        // PKCS#7: always pad, by 1 to 16 bytes each holding the pad length
+        const size_t block = enc->block_size();
+        const size_t pad = block - (size_t(plaintext.size()) % block);
+        Botan::secure_vector<uint8_t> botan_message(plaintext.begin(), plaintext.end());
+        botan_message.insert(botan_message.end(), pad, uint8_t(pad));
+        enc->encrypt(botan_message);   // each block on its own: ECB
+        ciphertext = QByteArray((char*) botan_message.data(), int(botan_message.size()));
+    }
+    catch (std::exception& e) {
+        // Make sure no Botan exceptions leak out and terminate the application.
+        qWarning() << "Unexpected exception in encrypt_aes128_ecb_pkcs7:" << e.what();
+        result = UnknownError;
+    }
+    return result;
+}
+
+CryptoResult decrypt_aes128_ecb_pkcs7(const QByteArray & key, const QByteArray & ciphertext, QByteArray & plaintext)
+{
+    CryptoResult result = OK;
+    plaintext.clear();
+    try {
+        const std::vector<uint8_t> botan_key(key.begin(), key.end());
+        std::unique_ptr<Botan::BlockCipher> dec = Botan::BlockCipher::create("AES-128");
+        dec->set_key(botan_key);
+        const size_t block = dec->block_size();
+        if (ciphertext.isEmpty() || size_t(ciphertext.size()) % block != 0) {
+            return UnknownError;
+        }
+        Botan::secure_vector<uint8_t> botan_message(ciphertext.begin(), ciphertext.end());
+        dec->decrypt(botan_message);
+        const size_t pad = botan_message.back();
+        if (pad == 0 || pad > block) {
+            return UnknownError;
+        }
+        for (size_t i = botan_message.size() - pad; i < botan_message.size(); i++) {
+            if (botan_message[i] != pad) {
+                return UnknownError;
+            }
+        }
+        plaintext = QByteArray((char*) botan_message.data(), int(botan_message.size() - pad));
+    }
+    catch (std::exception& e) {
+        // Make sure no Botan exceptions leak out and terminate the application.
+        qWarning() << "Unexpected exception in decrypt_aes128_ecb_pkcs7:" << e.what();
+        result = UnknownError;
+    }
+    return result;
+}
+
 CryptoResult pbkdf2_sha256(const QByteArray & passphrase, const QByteArray & salt, int iterations, QByteArray & key)
 {
     CryptoResult result = OK;

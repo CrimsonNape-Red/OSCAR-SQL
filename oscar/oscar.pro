@@ -57,7 +57,7 @@ greaterThan(QT_MAJOR_VERSION, 5) {
     CONFIG += c++17
 ## Added for Qt6-Clang compiler - Crimson Nape 25-11-17
     CONFIG += warn_off
-    QMAKE_CXXFLAGS += -Wno-nonportable-include-path
+    !msvc: QMAKE_CXXFLAGS += -Wno-nonportable-include-path
 
 }
 
@@ -183,6 +183,7 @@ macx  {
 } else:win32 {
     DEFINES          += WINVER=0x0501 # needed for mingw to pull in appropriate dbt business...probably a better way to do this
     LIBS             += -lsetupapi
+    LIBS             += -lhid      # Viatom USB cable (HID)
     LIBS             += -ldbghelp # needed for call stack with names rather than addresses
 
     INCLUDEPATH += $$PWD
@@ -196,6 +197,7 @@ macx  {
     }
 
     if (*-msvc*) {
+        DEFINES += NOMINMAX   # keep windows.h from defining min() and max() macros
         CONFIG += precompile_header
         PRECOMPILED_HEADER = pch.h
         HEADERS += pch.h
@@ -386,6 +388,7 @@ SOURCES += \
     SleepLib/importcontext.cpp \
     SleepLib/journal.cpp \
     SleepLib/loader_plugins/applehealthDataParsing.cpp \
+    SleepLib/loader_plugins/csvoximetry.cpp \
     SleepLib/loader_plugins/applehealth_loader.cpp \
     SleepLib/loader_plugins/apexDataParsing.cpp \
     SleepLib/loader_plugins/apex_loader.cpp \
@@ -418,6 +421,14 @@ SOURCES += \
     SleepLib/loader_plugins/sleepstyle_loader.cpp \
     SleepLib/loader_plugins/somnopose_loader.cpp \
     SleepLib/loader_plugins/viatom_loader.cpp \
+    SleepLib/viatomble/viatomble_availability.cpp \
+    SleepLib/viatomble/viatomble_dialect.cpp \
+    SleepLib/viatomble/viatomble_downloader.cpp \
+    SleepLib/viatomble/viatomble_o2rings.cpp \
+    SleepLib/viatomble/viatomble_protocol.cpp \
+    SleepLib/viatomble/viatomble_usb.cpp \
+    SleepLib/viatomble/emay.cpp \
+    viatomimportpanel.cpp \
     SleepLib/loader_plugins/weinmann_loader.cpp \
     SleepLib/loader_plugins/yuwell_loader.cpp \
     SleepLib/loader_plugins/zeo_loader.cpp \
@@ -493,7 +504,11 @@ optimize.input = SOURCES_OPTIMIZE
 optimize.dependency_type = TYPE_C
 optimize.variable_out = OBJECTS
 optimize.output = ${QMAKE_FILE_IN_BASE}$${first(QMAKE_EXT_OBJ)}
-optimize.commands = $${QMAKE_CXX} -c $(CXXFLAGS) -O3 $(INCPATH) -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_IN}
+msvc {
+    optimize.commands = $${QMAKE_CXX} -c $(CXXFLAGS) -O2 $(INCPATH) -Fo${QMAKE_FILE_OUT} ${QMAKE_FILE_IN}
+} else {
+    optimize.commands = $${QMAKE_CXX} -c $(CXXFLAGS) -O3 $(INCPATH) -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_IN}
+}
 QMAKE_EXTRA_COMPILERS += optimize
 
 HEADERS  += \
@@ -593,6 +608,17 @@ HEADERS  += \
     SleepLib/loader_plugins/resmed_EDFinfo.h \
     SleepLib/loader_plugins/somnopose_loader.h \
     SleepLib/loader_plugins/viatom_loader.h \
+    SleepLib/viatomble/viatomble_availability.h \
+    SleepLib/viatomble/viatomble_dialect.h \
+    SleepLib/viatomble/viatomble_downloader.h \
+    SleepLib/viatomble/viatomble_link.h \
+    SleepLib/viatomble/viatomble_o2rings.h \
+    SleepLib/viatomble/viatomble_protocol.h \
+    SleepLib/viatomble/viatomble_usb.h \
+    SleepLib/viatomble/emay.h \
+    SleepLib/viatomble/viatomble_downloaderbase.h \
+    SleepLib/viatomble/viatomble_family.h \
+    viatomimportpanel.h \
     SleepLib/loader_plugins/yuwell_loader.h \
     SleepLib/loader_plugins/zeo_loader.h \
     SleepLib/loader_plugins/resvent_loader.h \
@@ -614,6 +640,7 @@ HEADERS  += \
     SleepLib/xmlreplay.h \
     SleepLib/serialoximeter.h \
     SleepLib/loader_plugins/md300w1_loader.h \
+    SleepLib/loader_plugins/csvoximetry.h \
     importhandover.h \
     logger.h \
     SleepLib/loader_plugins/weinmann_loader.h \
@@ -682,7 +709,6 @@ FORMS += \
     daily.ui \
     overview.ui \
     mainwindow.ui \
-    oximetry.ui \
     preferencesdialog.ui \
     newprofile.ui \
     devicetimecorrectiondialog.ui \
@@ -762,8 +788,13 @@ DISTFILES += help/default.css \
 message("CXXFLAGS pre-mods $$QMAKE_CXXFLAGS ")
 
 # Always treat warnings as errors, even (especially!) in release
-QMAKE_CFLAGS += -Werror
-QMAKE_CXXFLAGS += -Werror
+msvc {
+    QMAKE_CFLAGS += -WX
+    QMAKE_CXXFLAGS += -WX
+} else {
+    QMAKE_CFLAGS += -Werror
+    QMAKE_CXXFLAGS += -Werror
+}
 
 gcc | clang {
     COMPILER_VERSION = $$system($$QMAKE_CXX " -dumpversion")
@@ -811,6 +842,42 @@ memdebug {
     }
 }
 
+# Bluetooth downloads in the Oximetry Wizard (Viatom/Wellue, EMAY). Without Qt Bluetooth
+# the wizard still downloads over the Viatom/Wellue USB cables; only Bluetooth is off.
+#
+# Where Bluetooth can work (Linux, macOS, Windows with MSVC) it is required: qmake stops
+# if the Qt Bluetooth module (and on Linux Qt D-Bus) is missing, so no package goes out
+# without it by accident. "CONFIG+=no_bluetooth" builds without it on purpose, e.g. to
+# try a MinGW-like build on Linux. Qt 6 has no working Bluetooth backend on Windows with
+# MinGW (only a dummy), so MinGW builds have the cables but no Bluetooth.
+no_bluetooth {
+    message("no_bluetooth: building without Bluetooth oximeter downloads")
+} else:win32-g++:greaterThan(QT_MAJOR_VERSION, 5) {
+    message("Qt Bluetooth does not work with MinGW: building without Bluetooth oximeter downloads (the USB cables work; use an MSVC kit for Bluetooth)")
+} else:haiku {
+    message("Haiku: building without Bluetooth oximeter downloads")
+} else {
+    !qtHaveModule(bluetooth) {
+        error("Qt Bluetooth is missing. OSCAR packages for this platform must have Bluetooth oximeter downloads: install the Qt Bluetooth module (Debian/Ubuntu: qt6-connectivity-dev; Qt installer: Qt Connectivity), or add CONFIG+=no_bluetooth to build without it on purpose.")
+    }
+    unix:!macx:!qtHaveModule(dbus) {
+        error("Qt D-Bus is missing: OSCAR's Bluetooth downloads on Linux need it (Debian/Ubuntu: qt6-base-dev). Add CONFIG+=no_bluetooth to build without Bluetooth on purpose.")
+    }
+    QT += bluetooth
+    DEFINES += OSCAR_HAVE_BLUETOOTH
+    SOURCES += \
+        SleepLib/viatomble/viatomble_device.cpp \
+        SleepLib/viatomble/viatomble_scanner.cpp
+    HEADERS += \
+        SleepLib/viatomble/viatomble_device.h \
+        SleepLib/viatomble/viatomble_scanner.h
+    # Qt's BlueZ backend drops write-without-response; the device writes through BlueZ over D-Bus.
+    unix:!macx {
+        QT += dbus
+        DEFINES += OSCAR_BLE_BLUEZ_DBUS
+    }
+}
+
 # Turn on unit testing by adding "CONFIG+=test" to your qmake command
 test {
     TARGET = test
@@ -841,6 +908,9 @@ test {
         tests/importhandovertests.cpp \
         tests/versiontests.cpp \
         tests/viatomtests.cpp \
+        tests/viatombletests.cpp \
+        tests/emaytests.cpp \
+        tests/csvoximetrytests.cpp \
         tests/deviceconnectiontests.cpp \
         tests/cryptotests.cpp \
         tests/dreemtests.cpp \
@@ -868,6 +938,9 @@ test {
         tests/importhandovertests.h \
         tests/versiontests.h \
         tests/viatomtests.h \
+        tests/viatombletests.h \
+        tests/emaytests.h \
+        tests/csvoximetrytests.h \
         tests/deviceconnectiontests.h \
         tests/cryptotests.h \
         tests/dreemtests.h \

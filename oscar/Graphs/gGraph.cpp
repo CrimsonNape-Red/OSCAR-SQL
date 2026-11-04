@@ -97,31 +97,14 @@ bool InitGraphGlobals()
         (*p_pref)["Fonts_Big_Italic"] = false;
     }
 
-    defaultfont = new QFont((*p_pref)["Fonts_Graph_Name"].toString(),
-                            (*p_pref)["Fonts_Graph_Size"].toInt(),
-                            (*p_pref)["Fonts_Graph_Bold"].toBool() ? QFont::Bold : QFont::Normal,
-                            (*p_pref)["Fonts_Graph_Italic"].toBool()
-                           );
-    mediumfont = new QFont((*p_pref)["Fonts_Title_Name"].toString(),
-                           (*p_pref)["Fonts_Title_Size"].toInt(),
-                           (*p_pref)["Fonts_Title_Bold"].toBool() ? QFont::Bold : QFont::Normal,
-                           (*p_pref)["Fonts_Title_Italic"].toBool()
-                          );
-    bigfont = new QFont((*p_pref)["Fonts_Big_Name"].toString(),
-                        (*p_pref)["Fonts_Big_Size"].toInt(),
-                        (*p_pref)["Fonts_Big_Bold"].toBool() ? QFont::Bold : QFont::Normal,
-                        (*p_pref)["Fonts_Big_Italic"].toBool()
-                       );
-
-#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
-    defaultfont->setStyleHint(QFont::AnyStyle, QFont::OpenGLCompatible);
-    mediumfont->setStyleHint(QFont::AnyStyle, QFont::OpenGLCompatible);
-    bigfont->setStyleHint(QFont::AnyStyle, QFont::OpenGLCompatible);
-#else
-    defaultfont->setStyleHint(QFont::AnyStyle);
-    mediumfont->setStyleHint(QFont::AnyStyle);
-    bigfont->setStyleHint(QFont::AnyStyle);
-#endif
+    // The font objects are created once here and live until DestroyGraphGlobals().
+    // Other code (e.g. gToolTip::m_font) keeps these pointers, so later font changes
+    // must modify the objects in place rather than replace them.
+    defaultfont = new QFont();
+    mediumfont = new QFont();
+    bigfont = new QFont();
+    globalsInitialized = true;
+    ApplyGraphFontPreferences();
 
     images["oximeter"] = new QImage(":/icons/cubeoximeter.png");
     images["smiley"] = new QImage(":/icons/smileyface.png");
@@ -131,8 +114,31 @@ bool InitGraphGlobals()
     images["nographs"] = new QImage(":/icons/nographs.png");
     images["nodata"] = new QImage(":/icons/nodata.png");
 
-    globalsInitialized = true;
     return true;
+}
+
+/*! \brief Assign one graph font from its Fonts_<prefix>_* preferences.
+ *  \param font   Existing font object, overwritten in place.
+ *  \param prefix Preference key infix: "Graph", "Title" or "Big".
+ */
+static void applyGraphFontPreference(QFont *font, const QString &prefix)
+{
+    const QString key = "Fonts_" + prefix + "_";
+    *font = QFont((*p_pref)[key + "Name"].toString(),
+                  (*p_pref)[key + "Size"].toInt(),
+                  (*p_pref)[key + "Bold"].toBool() ? QFont::Bold : QFont::Normal,
+                  (*p_pref)[key + "Italic"].toBool());
+    font->setStyleHint(QFont::AnyStyle);
+}
+
+void ApplyGraphFontPreferences()
+{
+    if (!globalsInitialized) {
+        return;     // InitGraphGlobals() will apply the preferences when it creates the fonts
+    }
+    applyGraphFontPreference(defaultfont, "Graph");
+    applyGraphFontPreference(mediumfont, "Title");
+    applyGraphFontPreference(bigfont, "Big");
 }
 
 void DestroyGraphGlobals()

@@ -42,7 +42,7 @@
 ChannelID PrismaVent_Mode = 0, PrismaVent_Program = 0, PrismaVent_BackupRate = 0,
           PrismaVent_Ti = 0, PrismaVent_TiMin = 0, PrismaVent_TiMax = 0,
           PrismaVent_TriggerInsp = 0, PrismaVent_TriggerExp = 0,
-          PrismaVent_InspRamp = 0, PrismaVent_ExpRamp = 0;
+          PrismaVent_InspRamp = 0, PrismaVent_ExpRamp = 0, PrismaVent_TriggerType = 0;
 ChannelID PrismaVent_ePC = 0, PrismaVent_Disconnect = 0, PrismaVent_SEL = 0;
 
 // Event channels registered by the Prisma loader. The prisma VENT writes the same
@@ -55,10 +55,18 @@ static const char * DEVICE_FILE = "device.xml";
 static const char * MARKER_FILE = "prismaVENT.sdpvdat";
 static const char * CONFIG_FILE = "configuration.json";
 
-//! TherapyMode values confirmed against a prismaTS report of the same card. S/T is
-//! the only mode with sessions on the cards seen; MPVp was set in an unused program.
+//! TherapyMode values, each confirmed against prismaTS for the same card: S/T and
+//! MPVp on a VENT50-C (MPVp was set in an unused program), autoST on a VENT40.
+//! prismaTS's own numbered mode list puts T at 3 and MPVp at 7, so it is not the
+//! device's numbering.
 static const int PRISMAVENT_MODE_ST = 2;
+static const int PRISMAVENT_MODE_AUTOST = 3;
 static const int PRISMAVENT_MODE_MPVP = 8;
+
+//! TriggerType values: prismaTS shows "Trigger: Manually" for 0 and "Trigger: auto"
+//! for 1. Only a manual trigger uses the sensitivity levels.
+static const int PRISMAVENT_TRIGGER_MANUAL = 0;
+static const int PRISMAVENT_TRIGGER_AUTO = 1;
 
 //! Respiratory event ids not in Prisma_Event_Type. Names are prismaTS's own
 //! (EventsNames/RespEvent_<id> in its localization resources).
@@ -398,12 +406,18 @@ MachineInfo PrismaVentLoader::readDeviceInfo(const QString & deviceDir)
         qWarning() << "PrismaVent: device.xml has no serial number";
         return MachineInfo();
     }
-    // Device_type is numeric (5 on the VENT50-C) and Device_type_str its short
-    // name ("V50-C"). The vendor software names types 5 and 6 "prisma VENT50-C".
+    // Device_type is the numeric product type (1 on the VENT40, 5 on the VENT50-C)
+    // and Device_type_str its short name ("V40", "V50-C"). Names are those prismaTS
+    // gives each product type under the Löwenstein branding.
     info.modelnumber = text("Device_type");
+    static const QHash<QString, QString> productNames = {
+        { "0", "prisma VENT30" },   { "1", "prisma VENT40" },   { "2", "prisma VENT50" },
+        { "3", "prisma VENT30-C" }, { "5", "prisma VENT50-C" }, { "6", "prisma VENT50-C" },
+        { "7", "prisma VENT40-C" },
+    };
     const QString typeName = text("Device_type_str");
-    if (info.modelnumber == QLatin1String("5") || info.modelnumber == QLatin1String("6")) {
-        info.model = QStringLiteral("prisma VENT50-C");
+    if (productNames.contains(info.modelnumber)) {
+        info.model = productNames.value(info.modelnumber);
     } else if (!typeName.isEmpty()) {
         info.model = QStringLiteral("prisma VENT ") + typeName;
     }
@@ -491,9 +505,10 @@ int PrismaVentLoader::Open(const QString & path)
     }
     m_ctx->CreateMachineFromInfo(info);
 
-    // The VENT50-C (Device_type 5 or 6) has been checked against prismaTS
-    // reports; any other prisma VENT model is untested.
-    if (info.modelnumber != QLatin1String("5") && info.modelnumber != QLatin1String("6")) {
+    // The VENT50-C (Device_type 5 or 6) and VENT40 (1) have been checked against
+    // prismaTS; any other prisma VENT model is untested.
+    static const QSet<QString> checkedTypes = { "1", "5", "6" };
+    if (!checkedTypes.contains(info.modelnumber)) {
         emit deviceIsUntested(info);
     }
 
@@ -749,28 +764,58 @@ void PrismaVentLoader::applySettings(Session * session, const ParameterLog & par
     }
     session->settings[PrismaVent_Mode] = mode;
 
+    // Settings shared by the spontaneous/timed modes. Each matched prismaTS's
+    // settings table for the same session, in S/T and autoST (F min, Ti min/max,
+    // Trigger, Trigger IN/EX, RAMP IN/EX, softSTART max).
+    auto applyCommon = [&]() {
+        session->settings[PrismaVent_BackupRate] = value("Frequency") / 10.0;
+        session->settings[PrismaVent_TiMin] = value("Ti_min") / 1000.0;
+        session->settings[PrismaVent_TiMax] = value("Ti_max") / 1000.0;
+        // prismaTS lists Trigger IN/EX only for a manual trigger.
+        bool haveTrigger = false;
+        const int triggerType = value("TriggerType", &haveTrigger);
+        if (haveTrigger) {
+            session->settings[PrismaVent_TriggerType] = triggerType;
+        }
+        if (!haveTrigger || triggerType == PRISMAVENT_TRIGGER_MANUAL) {
+            session->settings[PrismaVent_TriggerInsp] = value("TriggerSensitivityInspiration");
+            session->settings[PrismaVent_TriggerExp] = value("TriggerSensitivityExspiration");
+        }
+        session->settings[PrismaVent_InspRamp] = value("InspirationRamp");
+        session->settings[PrismaVent_ExpRamp] = value("ExpirationRamp");
+        session->settings[CPAP_RampTime] = value("sSTART_T");
+    };
+
     if (mode == PRISMAVENT_MODE_ST) {
-        // Each value below matched the prismaTS report's settings table for the
-        // same session (IPAP, EPAP, F min, Ti timed/min/max, Trigger IN/EX,
-        // RAMP IN/EX, softSTART max and pressure).
+        // IPAP, EPAP, Ti timed and softSTART pressure also matched the report.
         const double ipap = value("IPAP") / 100.0;
         const double epap = value("EPAP") / 100.0;
         session->settings[CPAP_Mode] = (int)MODE_BILEVEL_FIXED;
         session->settings[CPAP_EPAP] = epap;
         session->settings[CPAP_IPAP] = ipap;
         session->settings[CPAP_PS] = ipap - epap;
-        session->settings[PrismaVent_BackupRate] = value("Frequency") / 10.0;
+        applyCommon();
         // Ti_timed, not Ti: prismaTS lists "Ti timed" for S/T; Ti belongs to
         // modes where every breath is timed (it shows for the MPVp program).
         session->settings[PrismaVent_Ti] = value("Ti_timed") / 1000.0;
-        session->settings[PrismaVent_TiMin] = value("Ti_min") / 1000.0;
-        session->settings[PrismaVent_TiMax] = value("Ti_max") / 1000.0;
-        session->settings[PrismaVent_TriggerInsp] = value("TriggerSensitivityInspiration");
-        session->settings[PrismaVent_TriggerExp] = value("TriggerSensitivityExspiration");
-        session->settings[PrismaVent_InspRamp] = value("InspirationRamp");
-        session->settings[PrismaVent_ExpRamp] = value("ExpirationRamp");
-        session->settings[CPAP_RampTime] = value("sSTART_T");
         session->settings[CPAP_RampPressure] = value("sSTART_EPAP") / 100.0;
+    } else if (mode == PRISMAVENT_MODE_AUTOST) {
+        // prismaTS lists EPAPmin, EPAPmax and delta-Pinsp for this mode, not IPAP
+        // or EPAP. On the VENT40 card the EPAPsoll targets stay between EPAPmin
+        // and EPAPmax and IPAPsoll sits delta-Pinsp above them. softSTART ramps
+        // EPAP up from sSTART_EPAPmin, not sSTART_EPAP. prismaTS shows "Ti timed:
+        // auto" (Ti_timed = 0), so no Ti is reported.
+        const double epapMin = value("AutoEPAPmin") / 100.0;
+        const double epapMax = value("AutoEPAPmax") / 100.0;
+        const double ps = value("AutoEPAPdeltaPinsp") / 100.0;
+        session->settings[CPAP_Mode] = (int)MODE_BILEVEL_AUTO_FIXED_PS;
+        session->settings[CPAP_EPAPLo] = epapMin;
+        session->settings[CPAP_EPAPHi] = epapMax;
+        session->settings[CPAP_IPAPLo] = epapMin + ps;
+        session->settings[CPAP_IPAPHi] = epapMax + ps;
+        session->settings[CPAP_PS] = ps;
+        applyCommon();
+        session->settings[CPAP_RampPressure] = value("sSTART_EPAPmin") / 100.0;
     } else {
         // Which parameters apply differs by mode (volume modes, CPAP, high flow),
         // so nothing is published until a sample of the mode has been checked.
@@ -793,8 +838,8 @@ void PrismaVentLoader::initChannels()
     Channel * chan = nullptr;
 
     // Daily shows the mode through this channel's options, so every value needs one.
-    // Values are numbered until each is matched to the vendor's name. 2 and 8 are
-    // named from a prismaTS report of the same card (see the analysis notes).
+    // Values are numbered until each is matched to the vendor's name. 2, 3 and 8
+    // are named from prismaTS for the same cards (see the analysis notes).
     channel.add(GRP_CPAP, chan = new Channel(PrismaVent_Mode = 0xe580, SETTING, MT_CPAP, SESSION,
         "PrismaVent_Mode", QObject::tr("Mode"),
         QObject::tr("Ventilation mode"),
@@ -804,6 +849,7 @@ void PrismaVentLoader::initChannels()
         chan->addOption(mode, QObject::tr("Mode %1").arg(mode));
     }
     chan->addOption(PRISMAVENT_MODE_ST, QObject::tr("S/T"));
+    chan->addOption(PRISMAVENT_MODE_AUTOST, QObject::tr("autoS/T"));
     chan->addOption(PRISMAVENT_MODE_MPVP, QObject::tr("MPVp"));
 
     channel.add(GRP_CPAP, new Channel(PrismaVent_Program = 0xe581, SETTING, MT_CPAP, SESSION,
@@ -841,6 +887,14 @@ void PrismaVentLoader::initChannels()
         QObject::tr("Inspiratory trigger sensitivity level"),
         QObject::tr("Insp. trigger"),
         "", INTEGER, Qt::green));
+
+    channel.add(GRP_CPAP, chan = new Channel(PrismaVent_TriggerType = 0xe58d, SETTING, MT_CPAP, SESSION,
+        "PrismaVent_TriggerType", QObject::tr("Trigger"),
+        QObject::tr("Whether the breath triggers are set manually or automatically"),
+        QObject::tr("Trigger"),
+        "", LOOKUP, Qt::green));
+    chan->addOption(PRISMAVENT_TRIGGER_MANUAL, QObject::tr("Manual"));
+    chan->addOption(PRISMAVENT_TRIGGER_AUTO, QObject::tr("Auto"));
 
     channel.add(GRP_CPAP, new Channel(PrismaVent_TriggerExp = 0xe587, SETTING, MT_CPAP, SESSION,
         "PrismaVent_TriggerExp", QObject::tr("Expiratory trigger"),

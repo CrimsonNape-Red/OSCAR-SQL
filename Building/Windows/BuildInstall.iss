@@ -27,6 +27,12 @@ SetupLogging=yes
       AppId={{4868B5EF-AFEE-45C1-BBE6-3C8AB37E1F7D}
       #define MyGroupName "OSCAR 2"
       #define MyDirName "OSCAR20"
+    #elif MySuffix != ""
+      ; A test build with a suffix (e.g. -BLE from buildall-msvc.bat) gets its own
+      ; installer ID and folder, so it doesn't replace other OSCAR 2 test installs.
+      AppId={{C76C13F4-8A9A-40AA-9F37-C906C949E04A}{#MySuffix}
+      #define MyGroupName "OSCAR 2 (test) " + MySuffix
+      #define MyDirName "OSCAR20-test" + MySuffix
     #else
       AppId={{C76C13F4-8A9A-40AA-9F37-C906C949E04A}
       #define MyGroupName "OSCAR 2 (test)"

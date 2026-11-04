@@ -69,7 +69,11 @@
 
 /* Target identification and feature test macros */
 
-#define BOTAN_TARGET_OS_IS_MINGW
+#if defined(_MSC_VER)
+  #define BOTAN_TARGET_OS_IS_WINDOWS
+#else
+  #define BOTAN_TARGET_OS_IS_MINGW
+#endif
 
 #define BOTAN_TARGET_OS_HAS_ATOMICS
 #define BOTAN_TARGET_OS_HAS_CERTIFICATE_STORE
@@ -81,7 +85,12 @@
 #define BOTAN_TARGET_OS_HAS_WIN32
 
 
-#define BOTAN_BUILD_COMPILER_IS_GCC
+/* OSCAR: this amalgamation was generated for MinGW; also allow MSVC builds */
+#if defined(_MSC_VER)
+  #define BOTAN_BUILD_COMPILER_IS_MSVC
+#else
+  #define BOTAN_BUILD_COMPILER_IS_GCC
+#endif
 
 
 

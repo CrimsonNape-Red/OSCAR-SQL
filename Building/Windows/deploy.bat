@@ -137,6 +137,17 @@ windeployqt.exe --force --compiler-runtime --no-translations --verbose 1 OSCAR.e
 
 
 :cleanup
+::: MSVC builds: windeployqt leaves the vc_redist installer, which nothing would run.
+::: Ship the C++ runtime DLLs next to OSCAR.exe instead (app-local deployment), so the
+::: installer and the portable ZIP work without the Visual C++ runtime installed.
+::: No parenthesised block here: the path has "(x86)" in it, which would end the block.
+if NOT exist vc_redist.x64.exe goto :msvcRuntimeDone
+del /q vc_redist.x64.exe
+if "%VCToolsRedistDir%"=="" (call :err 86	VCToolsRedistDir not set: run from a Visual Studio x64 environment	& goto :endProgram)
+for /d %%d in ("%VCToolsRedistDir%x64\Microsoft.VC*.CRT") do copy /y "%%d\*.dll" . 1>nul
+if NOT exist vcruntime140.dll (call :err 86	MSVC runtime DLLs not found	& goto :endProgram)
+:msvcRuntimeDone
+
 ::: Clean up unwanted translation files
 ::::For unknown reasons, Win64 build copies the .ts files into the release directory, while Win32 does not
 if exist Translations\*.ts del /q Translations\*.ts

@@ -47,7 +47,8 @@ NOTE: Official Qt5 builds are currently made with [macOS 10.14 Catalina] and Com
 	-    iOS   
 	-    Any web development package  
 	
-    D. Additional Libraries needed:  Qt Serial Port  
+    D. Additional Libraries needed:  Qt Serial Port, and Qt Connectivity (Qt Bluetooth, for Bluetooth oximeter downloads in the Oximetry Wizard; qmake stops without it).
+       Use Qt 6.6 or later, so that OSCAR can ask for permission to use Bluetooth; Info.plist.in already carries the usage text.  
 
 5. Install Qt   
     A. Mount and launch qt-opensource-mac dmg file.  This can be done by double-clicking on the file name.  

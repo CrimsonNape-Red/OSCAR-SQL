@@ -238,9 +238,12 @@ void CheckUpdates::checkForUpdates(bool showWhenCurrent)
             showMessage();
             return;
         }
-    } else {
+    }
+#ifndef NO_CHECKUPDATES
+    else {
         showTestVersion = AppSetting->allowEarlyUpdates();
     }
+#endif
 
     readTimer.start();
 
