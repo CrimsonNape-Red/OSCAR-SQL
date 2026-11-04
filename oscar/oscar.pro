@@ -364,6 +364,7 @@ SOURCES += \
     uikit/panel.cpp \
     uikit/sectionheader.cpp \
     uikit/iconbutton.cpp \
+    uikit/imagetrim.cpp \
     welcomemetrics.cpp \
     zip.cpp \
     Graphs/gAHIChart.cpp \
@@ -653,6 +654,7 @@ HEADERS  += \
     uikit/panel.h \
     uikit/sectionheader.h \
     uikit/iconbutton.h \
+    uikit/imagetrim.h \
     welcomemetrics.h \
     mytextbrowser.h \
     staticQMessageBox.h \
@@ -886,7 +888,8 @@ test {
         tests/oximetryrecalctests.cpp \
         tests/themetests.cpp \
         tests/comparisontests.cpp \
-        tests/welcomecardstests.cpp
+        tests/welcomecardstests.cpp \
+        tests/imagetrimtests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -916,7 +919,8 @@ test {
         tests/oximetryrecalctests.h \
         tests/themetests.h \
         tests/comparisontests.h \
-        tests/welcomecardstests.h
+        tests/welcomecardstests.h \
+        tests/imagetrimtests.h
 }
 
 macx {

@@ -212,9 +212,8 @@ of the work carries over to later screens.
 - 2026-11-03: the theme now follows the Oximetry Wizard: colours from the system palette
   (so a dark palette works), the wizard's good and warning colours, 10 px corners, and the
   application font instead of bundled fonts.
-- Deferred: the night strip is taller than the tiles because the device image is fixed at
-  76 px and many device pictures have empty margins. Trim the device images where possible,
-  then revisit the image size.
+- 2026-11-03: device pictures are trimmed in code (empty margins removed when shown, files
+  unchanged) and the night strip's picture box is 76 x 52 px, so the text sets its height.
 - For testers to judge: is the new page better than the old one, and which card colouring
   (Plain, By group, By status) works best.
 - Still to check: macOS painting speed with the card shadows (#235), Linux, HiDPI, and
@@ -225,5 +224,8 @@ of the work carries over to later screens.
 ## Open decisions
 
 - Native style vs. Fusion as the base for the redesigned UI.
-- Whether dark mode is a goal, and if so, the fallback for Qt < 6.5.
+- Whether dark mode is a goal, and if so, the fallback for Qt < 6.5. Since 2026-11-03,
+  `ui-next` no longer forces the light colour scheme (`main.cpp`), so OSCAR follows the
+  system setting while the redesign is in progress. **Before release:** if dark mode isn't
+  fully working, put the forced light scheme back.
 - Whether animation is wanted (can be deferred).

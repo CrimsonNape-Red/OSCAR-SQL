@@ -33,6 +33,7 @@
 #include "uikit/eventbar.h"
 #include "uikit/formatting.h"
 #include "uikit/iconbutton.h"
+#include "uikit/imagetrim.h"
 #include "uikit/label.h"
 #include "uikit/metriccard.h"
 #include "uikit/panel.h"
@@ -260,15 +261,18 @@ QWidget *WelcomePage::buildNightStrip(const NightSummary &night)
     row->setContentsMargins(18, 14, 18, 14);
     row->setSpacing(18);
 
+    // The picture's empty margins are trimmed, so most devices (wider than tall) fill the
+    // box and the text, not the picture, sets the strip's height.
+    const QSize imageBox(76, 52);
     auto *image = new QLabel(strip);
-    QPixmap pix(night.pixmapPath);
+    QPixmap pix = UiKit::trimmedPixmap(night.pixmapPath);
     if (!pix.isNull()) {
         const qreal dpr = devicePixelRatioF();
-        pix = pix.scaled(QSize(76, 76) * dpr, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        pix = pix.scaled(imageBox * dpr, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         pix.setDevicePixelRatio(dpr);
         image->setPixmap(pix);
     }
-    image->setFixedSize(76, 76);
+    image->setFixedSize(imageBox);
     image->setAlignment(Qt::AlignCenter);
     row->addWidget(image);
 

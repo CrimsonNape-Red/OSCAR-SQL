@@ -950,9 +950,11 @@ int main(int argc, char *argv[]) {
     // store and AppDataLocation; changing it would orphan existing settings. The name users
     // see (e.g. appended to window titles on Linux) covers every 2.x release.
     QGuiApplication::setApplicationDisplayName(getAppName() + " 2");
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    mainapp.styleHints()->setColorScheme(Qt::ColorScheme::Light);
-#endif
+    // Dark-mode trial (ui-next only): the forced light colour scheme is off, so OSCAR follows
+    // the system's light or dark setting.
+//#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+//    mainapp.styleHints()->setColorScheme(Qt::ColorScheme::Light);
+//#endif
     QStringList args = mainapp.arguments();
 
     // Everything shown before the preferences are loaded (language choice, data folder
