@@ -44,12 +44,11 @@ If you copied the card to your computer, click **Specify** instead of Yes and ch
 
 ### Warnings you may see {.noindex}
 
-[[idx:Untested device warning]]
+[[idx:Untested device warning]] [[idx:No data found]]
+- **No data found.** OSCAR shows *No supported data was found* or *Couldn't find any valid Device Data* when it does not recognise the data. This happens when you chose a folder inside the card instead of its top (root) folder, or when the card comes from a machine OSCAR does not support. See [Importing from a folder](#importing-from-a-folder) and [Supported CPAP devices](supported-cpap.md).
 - **Untested device.** OSCAR imports data from models its developers have not seen before, but tells you so. The developers would welcome a copy of the card to make sure it is handled correctly; see [Reporting a problem](troubleshooting.md#reporting-a-problem).
 - **Unexpected data.** The card contains something OSCAR has not seen before. The import continues; the developers would like to hear about it.
 - **Different machine.** The card comes from a different machine than the one already in this profile.
-
-You can turn each of these warnings off on the [Import tab of Preferences](preferences.md#import-tab).
 
 ### After the import {.noindex}
 
@@ -63,12 +62,15 @@ You can turn each of these warnings off on the [Import tab of Preferences](prefe
 [[idx:SD card!backups]]
 While importing, OSCAR keeps a copy of everything on the card in your profile's **Backup** folder. This matters because many machines delete old detailed data from the card after a while (ResMed S9 machines keep only 7 days of high-resolution data and 30 days of graph data). With the backup, OSCAR can rebuild your history even after the card has been erased or lost.
 
+!!! warning "Not every machine's backup is complete"
+    Not all machines' backups keep the full history. For newer loaders, such as **BMC** and **Sefam**, the backup holds only the most recent data — what is on the SD card at the last import. Older nights that are no longer on the card cannot be rebuilt from it, so keep your own copies of those cards, or [back up the profile](export-backup-share.md#backing-up-a-profile).
+
 Leave **Create SD Card Backups during Import** turned on (*Preferences → Import*) unless you are very short of disk space.
 
 ## Rebuilding CPAP data
 
 [[idx:Rebuild CPAP Data]]
-*Data → Rebuild CPAP Data* re-imports a device's data from OSCAR's backup copy. Use it after the developers fix a problem with your machine's data in a new version of OSCAR, or after changing settings that affect import, such as [custom event flagging](preferences.md#custom-cpap-user-event-flagging) or [Steady Breathing](preferences.md#steady-breathing).
+*Data → Rebuild CPAP Data* re-imports a device's data from OSCAR's backup copy. Use it after the developers fix a problem with your machine's data in a new version of OSCAR, or after changing settings that affect import, such as [custom event flagging](preferences.md#custom-cpap-user-event-flagging) or [Steady Breathing](preferences.md#steady-breathing). For machines whose backup holds only the most recent card data (such as BMC and Sefam), a rebuild can restore only the nights in that backup.
 
 ## Machines that use other import methods {.noindex}
 

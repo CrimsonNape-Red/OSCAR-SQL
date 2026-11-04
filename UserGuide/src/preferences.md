@@ -45,7 +45,7 @@ Split recordings at the day split time
 These options affect how much disk space OSCAR uses and how long imports take.
 
 Create SD Card Backups during Import
-:   Keeps a copy of your card's data in the profile's Backup folder. Highly recommended: many machines delete old detailed data from the card, and with the backup OSCAR can rebuild your history. Turn it off only if you are very short of space.
+:   Keeps a copy of your card's data in the profile's Backup folder. Highly recommended: many machines delete old detailed data from the card, and with the backup OSCAR can rebuild your history. For newer loaders such as BMC and Sefam, the backup holds only the most recent card data (see [SD card backups](importing-cpap.md#sd-card-backups)). Turn it off only if you are very short of space.
 
 Compress SD Card Backups
 :   Stores ResMed backups compressed (`.gz`), making them much smaller but the first import slower. OSCAR reads the compressed files directly; ResScan cannot until they are uncompressed. Changing this does not recompress existing backups.
@@ -66,15 +66,6 @@ Keep Waveform/Event data in memory
 
 Import without asking for confirmation
 :   Skips unimportant confirmation messages during import.
-
-Warn when importing data from an untested device
-:   Warns when the model has not been tested by the OSCAR developers.
-
-Warn when previously unseen data is encountered
-:   Warns when the data differs from anything the developers have seen.
-
-Warn when SD card is from a different machine
-:   When importing from a physical SD card, warns if it belongs to a different machine than the one already in this profile. Turn it off if you use two machines with the same profile.
 
 Auto-Launch CPAP Importer after opening profile
 :   Starts an import as soon as you open the profile.

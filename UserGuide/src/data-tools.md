@@ -60,7 +60,7 @@ Some device clocks run slightly fast or slow, so they drift further from the rig
 - after updating OSCAR, if the new version reads your machine's data better,
 - after turning on settings that only apply at import, such as [custom event flagging](preferences.md#custom-cpap-user-event-flagging) or [Steady Breathing](preferences.md#steady-breathing).
 
-Rebuilding needs the SD card backups (*Create SD Card Backups during Import*, on by default). Your journal notes and bookmarks are kept.
+Rebuilding needs the SD card backups (*Create SD Card Backups during Import*, on by default). Your journal notes and bookmarks are kept. Not every machine's backup is complete: for newer loaders such as BMC and Sefam it holds only the most recent card data, so only those nights can be rebuilt (see [SD card backups](importing-cpap.md#sd-card-backups)).
 
 ## Purging data
 

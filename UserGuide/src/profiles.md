@@ -53,7 +53,7 @@ Choose *File → Edit Profile* (or **Edit Profile** on the Profiles page) to cha
 
 A profile can hold several devices, for example a CPAP machine and an oximeter, or an old machine and its replacement. OSCAR shows each device's data on the same timeline.
 
-If you import an SD card from a different machine than the one already in the profile, OSCAR warns you, in case you inserted someone else's card. If you really do use two machines with the same profile, you can turn this warning off: *Preferences → Import → Warn when SD card is from a different machine*.
+If you import an SD card from a different machine than the one already in the profile, OSCAR warns you, in case you inserted someone else's card.
 
 ## Moving profiles between computers
 
