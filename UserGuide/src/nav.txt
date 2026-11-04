@@ -1,0 +1,29 @@
+# Getting started
+index.md
+installing.md
+profiles.md
+importing-cpap.md
+
+# Supported devices
+supported-cpap.md
+oximetry.md
+other-devices.md
+
+# Looking at your data
+daily.md
+overview.md
+statistics.md
+graphs.md
+
+# Settings and tools
+preferences.md +
+data-tools.md
+export-backup-share.md
+database.md
+
+# Menus and keyboard
+menus.md +
+
+# Reference
+troubleshooting.md
+glossary.md

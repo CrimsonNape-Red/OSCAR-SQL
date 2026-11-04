@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}} · {{guide_title}}</title>
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("oscar-guide-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <button class="menu-toggle" type="button" aria-label="Show or hide the contents" aria-controls="sidebar" aria-expanded="false">&#9776;</button>
+  <a class="brand" href="index.html">{{guide_title}}</a>
+  <form class="search-box" action="search.html" role="search">
+    <input type="search" name="q" placeholder="Search the guide" aria-label="Search the guide" autocomplete="off">
+  </form>
+  <button class="theme-toggle" type="button" aria-label="Switch between light and dark">&#9680;</button>
+</header>
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Contents">
+    <ul>
+{{sidebar}}
+    </ul>
+  </nav>
+  <main id="main" class="content">
+{{content}}
+{{pager}}
+  </main>
+  <aside class="toc-column">
+{{toc}}
+  </aside>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/guide.js"></script>
+</body>
+</html>
