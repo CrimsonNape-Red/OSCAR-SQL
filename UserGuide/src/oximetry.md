@@ -33,7 +33,10 @@ macOS
 
 Linux
 :   Bluetooth needs BlueZ (installed on almost every desktop distribution) and Bluetooth switched on.
-    The `.deb` package installs the permission rule that lets OSCAR read Viatom/Wellue cables. With the AppImage, the wizard offers an **Allow OSCAR to use the cable...** button the first time; it asks for your password once and installs the same rule.
+    The `.deb` package installs the permission rule that lets OSCAR read Viatom/Wellue cables.
+<!-- AppImage: held back until the AppImage is released. Append to the sentence above:
+    With the AppImage, the wizard offers an **Allow OSCAR to use the cable...** button the first time; it asks for your password once and installs the same rule.
+-->
 
 ## The Oximetry Wizard
 

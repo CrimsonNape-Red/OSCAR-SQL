@@ -56,6 +56,8 @@ def slugify(value, separator="-"):
 
 def read_page(path):
     text = path.read_text(encoding="utf-8")
+    # Text inside <!-- ... --> is held back: kept in the source for later, left out of the site and search.
+    text = re.sub(r"<!--.*?-->[ \t]*\n?", "", text, flags=re.S)
     meta = {}
     m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
     if m:

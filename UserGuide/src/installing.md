@@ -53,33 +53,60 @@ On newer versions of macOS the first window may have no *Open* button. Close it,
 
 ### Linux
 
-[[idx:Linux!installing]] [[idx:AppImage]] [[idx:.deb package]]
+[[idx:Linux!installing]] [[idx:.deb package]]
+OSCAR comes as a `.deb` package for Debian, Ubuntu, Mint and related distributions.
+<!-- AppImage: held back until the AppImage is released. Restore by replacing the sentence above with:
+[[idx:AppImage]]
 OSCAR comes as a `.deb` package for Debian, Ubuntu, Mint and related distributions, and as an AppImage that runs on most other distributions.
+-->
 
 **.deb package**
 
 1. Open the downloaded file with your software installer, or in a terminal run:
-   `sudo apt install ./OSCAR_<version>.deb`
-   The `./` is needed so `apt` installs the file rather than looking in the distribution's repositories. `gdebi` also works.
+
+        sudo apt install ./OSCAR_<version>.deb
+
+    The `./` is needed so `apt` installs the file rather than looking in the distribution's repositories. `gdebi` also works.
+
 2. OSCAR appears in your applications menu, and an icon is placed on your desktop. Some desktops ask you to double-click the icon and choose **Trust** or **Allow Launching** the first time.
 
 To upgrade, install the new `.deb` the same way.
 
+<!-- AppImage: held back until the AppImage is released.
 **AppImage**
 
 1. Make the file executable: right-click it, choose **Properties → Permissions** and tick *Allow executing file as program*, or run `chmod +x OSCAR*.AppImage`.
 2. Double-click it to run OSCAR.
 
 The AppImage does not need installing. To upgrade, replace the file with the new one.
+-->
 
 ## Removing OSCAR
 
 [[idx:Uninstalling]]
 - **Windows:** *Settings → Apps*, choose **OSCAR 2** and **Uninstall**.
 - **macOS:** drag OSCAR from Applications to the Trash.
-- **Linux:** `sudo apt remove` followed by the package name (shown in your software manager), or delete the AppImage file.
+- **Linux:** see below.
 
 Removing OSCAR leaves your data folder (`OSCAR20_Data`) in place, so a later installation finds your data again. Delete that folder yourself if you want your data gone too.
+
+### Removing OSCAR on Linux
+
+[[idx:Uninstalling!Linux]] [[idx:oscar20 package]]
+1. Find the OSCAR packages installed on your computer:
+
+        dpkg -l | grep oscar
+
+    The released version of OSCAR 2 is listed as **oscar20**. Test and other unreleased versions have a suffix, such as `oscar20-test`.
+
+2. Remove the package by the name shown, for example:
+
+        sudo apt purge oscar20
+
+    Repeat for any other OSCAR package listed that you want to remove.
+<!-- AppImage: held back until the AppImage is released.
+To remove the AppImage, delete the AppImage file.
+-->
 
 ## Choosing the data folder
 

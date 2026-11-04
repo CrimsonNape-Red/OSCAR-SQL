@@ -46,3 +46,6 @@ index: Daily view; Calendar; Journal
 - Notes and warnings use admonitions: `!!! note`, `!!! tip`, `!!! warning "Title"`,
   with the text indented four spaces.
 - Definition lists (`Term` on one line, `:   description` on the next) are used for options.
+- Text inside `<!-- ... -->` is held back: it stays in the source for later but is left out of
+  the site and the search. The AppImage instructions are held back this way until it is released.
+- Code inside a numbered list must be an indented block (8 spaces); fenced ``` blocks do not work there.
