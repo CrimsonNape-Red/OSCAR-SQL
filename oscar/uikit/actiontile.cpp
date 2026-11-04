@@ -57,12 +57,12 @@ void ActionTile::setTag(const QString &tag)
 
 QFont ActionTile::titleFont() const
 {
-    return Theme::font(Theme::FontRole::Display, 15, QFont::Medium);
+    return Theme::font(1.15, QFont::DemiBold);
 }
 
 QFont ActionTile::subtitleFont() const
 {
-    return Theme::font(Theme::FontRole::Body, 13);
+    return Theme::font(1.0);
 }
 
 int ActionTile::heightForWidth(int width) const
@@ -151,7 +151,7 @@ void ActionTile::paintEvent(QPaintEvent *)
 
     // Optional tag beside the icon
     if (!m_tag.isEmpty()) {
-        QFont tagFont = Theme::font(Theme::FontRole::Body, 11, QFont::Bold);
+        QFont tagFont = Theme::font(0.85, QFont::Bold);
         QFontMetrics fm(tagFont);
         QRectF tag(iconBox.right() + kTagGap, iconBox.center().y() - (fm.height() + 2) / 2.0,
                    fm.horizontalAdvance(m_tag) + 14, fm.height() + 2);

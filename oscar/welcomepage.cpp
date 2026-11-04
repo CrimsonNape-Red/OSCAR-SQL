@@ -43,7 +43,6 @@ extern MainWindow *mainwin;
 
 using namespace UiKit;
 using Theme::Role;
-using Theme::FontRole;
 
 namespace {
 
@@ -118,7 +117,7 @@ QWidget *makeLegend(const QVector<QPair<Role, QString>> &entries, QWidget *paren
         auto *item = new QHBoxLayout();
         item->setSpacing(5);
         item->addWidget(makeSwatch(e.first, legend));
-        item->addWidget(makeLabel(e.second, Theme::font(FontRole::Body, 12.5), Role::Ink2, legend));
+        item->addWidget(makeLabel(e.second, Theme::font(0.96), Role::Ink2, legend));
         row->addLayout(item);
     }
     row->addStretch(1);
@@ -131,8 +130,6 @@ QWidget *makeLegend(const QVector<QPair<Role, QString>> &entries, QWidget *paren
 WelcomePage::WelcomePage(QWidget *parent)
     : WelcomePageBase(parent)
 {
-    Theme::registerFonts();
-
     auto *outer = new QVBoxLayout(this);
     outer->setContentsMargins(0, 0, 0, 0);
 
@@ -188,9 +185,9 @@ QWidget *WelcomePage::buildHeader()
     auto *text = new QVBoxLayout();
     text->setSpacing(2);
     text->addWidget(makeLabel(tr("Welcome to the Open Source CPAP Analysis Reporter"),
-                              Theme::font(FontRole::Display, 25, QFont::Medium), Role::Ink, header, true));
+                              Theme::font(1.9, QFont::DemiBold), Role::Ink, header, true));
     text->addWidget(makeLabel(tr("What would you like to do?"),
-                              Theme::font(FontRole::Body, 15), Role::Ink2, header));
+                              Theme::font(1.15), Role::Ink2, header));
     row->addLayout(text, 1);
     return header;
 }
@@ -251,7 +248,7 @@ QWidget *WelcomePage::buildCardWarning()
     auto *text = makeLabel(tr("Warning: ResMed S9 SD cards need to be locked before inserting them into "
                               "your computer. Some operating systems write index files to the card "
                               "without asking, which can make the card unreadable by your CPAP device."),
-                           Theme::font(FontRole::Body, 14), Role::Warn, notice, true);
+                           Theme::font(1.08), Role::Warn, notice, true);
     row->addWidget(text, 1);
     return notice;
 }
@@ -278,10 +275,10 @@ QWidget *WelcomePage::buildNightStrip(const NightSummary &night)
     auto *text = new QVBoxLayout();
     text->setSpacing(2);
     text->addWidget(makeLabel(tr("Your most recent night on the %1").arg(night.deviceName),
-                              Theme::font(FontRole::Display, 19, QFont::Medium), Role::Ink, strip, true));
+                              Theme::font(1.45, QFont::DemiBold), Role::Ink, strip, true));
     text->addWidget(makeLabel(QLocale::system().toString(night.date, QLocale::LongFormat)
                                   + QString::fromUtf8(" · ") + daysAgoText(night.daysAgo),
-                              Theme::font(FontRole::Body, 15), Role::Ink2, strip, true));
+                              Theme::font(1.15), Role::Ink2, strip, true));
     row->addLayout(text, 1);
 
     // Chip: the night's therapy mode
@@ -393,7 +390,7 @@ QWidget *WelcomePage::buildCardsSection(const NightSummary &night)
     v->addWidget(grid);
     if (m_cards.isEmpty()) {
         v->addWidget(makeLabel(tr("All cards are hidden. Use the gear button to choose cards to show."),
-                               Theme::font(FontRole::Body, 14), Role::Ink2, section, true));
+                               Theme::font(1.08), Role::Ink2, section, true));
     }
     return section;
 }
@@ -441,7 +438,7 @@ QWidget *WelcomePage::buildFirstRun()
     v->setContentsMargins(22, 22, 22, 22);
     v->setSpacing(16);
     v->addWidget(makeLabel(tr("Let's get your first night into OSCAR"),
-                           Theme::font(FontRole::Display, 20, QFont::Medium), Role::Ink, panel, true));
+                           Theme::font(1.55, QFont::DemiBold), Role::Ink, panel, true));
 
     const QPair<QString, QString> steps[] = {
         { tr("Check your preferences"),
@@ -469,10 +466,10 @@ QWidget *WelcomePage::buildFirstRun()
         badge->setAlignment(Qt::AlignCenter);
         badge->setStyleSheet(QString("QLabel { color: %1; background: %2; border-radius: 13px; }")
                                  .arg(Theme::css(Role::OnAccent), Theme::css(Role::Accent)));
-        badge->setFont(Theme::font(FontRole::Display, 13));
+        badge->setFont(Theme::font(1.0));
         sv->addWidget(badge);
-        sv->addWidget(makeLabel(s.first, Theme::font(FontRole::Display, 15, QFont::Medium), Role::Ink, step, true));
-        sv->addWidget(makeLabel(s.second, Theme::font(FontRole::Body, 14), Role::Ink2, step, true));
+        sv->addWidget(makeLabel(s.first, Theme::font(1.15, QFont::DemiBold), Role::Ink, step, true));
+        sv->addWidget(makeLabel(s.second, Theme::font(1.08), Role::Ink2, step, true));
         sv->addStretch(1);
         m_steps.append(step);
     }
@@ -486,7 +483,7 @@ QWidget *WelcomePage::buildNoCpapNote()
     auto *v = new QVBoxLayout(panel);
     v->setContentsMargins(18, 14, 18, 14);
     v->addWidget(makeLabel(QCoreApplication::translate("Welcome", "No CPAP data has been imported yet."),
-                           Theme::font(FontRole::Body, 15), Role::Ink2, panel, true));
+                           Theme::font(1.15), Role::Ink2, panel, true));
     return panel;
 }
 

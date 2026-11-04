@@ -1,8 +1,9 @@
 /* Theme module
  *
  * Central colours, sizes and fonts for the redesigned UI. Widgets ask the theme for every
- * colour and font instead of hard-coding them, so a dark colour set can be added later
- * without touching the widgets.
+ * colour and font instead of hard-coding them. Colours come from the application palette
+ * and fonts from the application font, so the redesigned pages follow the system theme
+ * (including dark palettes) and the font chosen in Preferences, like the Oximetry Wizard.
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -15,28 +16,30 @@
 
 #include <QColor>
 #include <QFont>
+#include <QPalette>
 #include <QString>
 
 /*! \namespace Theme
-    \brief Named colour roles, size constants and font roles for the redesigned UI
+    \brief Named colour roles, size constants and fonts for the redesigned UI
 
-    Only the light colour set exists for now. Values come from the Welcome page mockup
-    (Notes/UI Redesign/Welcome_Concept.html). */
+    Base colours (page, surface, text, borders, accent) are read from the palette. Status
+    colours are fixed per light or dark palette, using the Oximetry Wizard's values where it
+    has them; their soft fills, tints and borders are mixed into the palette's surface. */
 namespace Theme {
 
 //! \brief What a colour is used for. Count must stay last.
 enum class Role {
-    Page,            //!< Page background
-    Surface,         //!< Card and tile background
+    Page,            //!< Page background (palette Window)
+    Surface,         //!< Card and tile background (palette Base)
     Surface2,        //!< Inset boxes on a surface (comparisons, steps)
-    Ink,             //!< Main text
+    Ink,             //!< Main text (palette Text)
     Ink2,            //!< Secondary text
-    Ink3,            //!< Muted text, captions, reference lines
-    Line,            //!< Borders and dividers
-    Accent,          //!< OSCAR blue: primary actions
-    AccentInk,       //!< Accent-coloured text on light backgrounds
+    Ink3,            //!< Muted text, captions, reference lines (palette PlaceholderText)
+    Line,            //!< Borders and dividers (palette Mid)
+    Accent,          //!< Primary actions (palette Highlight)
+    AccentInk,       //!< Accent-coloured text on a surface
     AccentSoft,      //!< Pale accent fills (icon boxes, tags, pressed buttons)
-    OnAccent,        //!< Text on an Accent background
+    OnAccent,        //!< Text on an Accent background (palette HighlightedText)
     Good,            //!< Better than the averages
     GoodSoft,
     GoodTint,        //!< Card background when the night is better
@@ -60,28 +63,34 @@ enum class Role {
     Count
 };
 
-//! \brief Returns the colour for \a role in the current theme
+//! \brief Returns true when \a palette is dark (its Base colour has lightness below 128),
+//!        the same test the Oximetry Wizard uses
+bool isDark(const QPalette &palette);
+
+//! \brief Returns the colour for \a role derived from \a palette
+QColor color(Role role, const QPalette &palette);
+
+//! \brief Returns the colour for \a role derived from the application palette
 QColor color(Role role);
 
-//! \brief Returns \a role's colour for a Qt stylesheet: "#rrggbb", or "rgba(r, g, b, a)"
-//!        with a 0-255 alpha when the colour is translucent
+//! \brief Returns \a c for a Qt stylesheet: "#rrggbb", or "rgba(r, g, b, a)" with a 0-255
+//!        alpha when the colour is translucent
+QString css(const QColor &c);
+
+//! \brief Returns \a role's colour (from the application palette) for a Qt stylesheet
 QString css(Role role);
 
-//! \brief Which typeface a piece of text uses
-enum class FontRole {
-    Display,         //!< Headings and large numbers (Lexend)
-    Body             //!< Everything else (Atkinson Hyperlegible)
-};
+/*! \brief Returns \a base scaled by \a scale, at least as heavy as \a weight
+    Point-sized fonts are scaled in points and pixel-sized fonts in pixels. The family,
+    style and any heavier weight of \a base are kept. */
+QFont font(qreal scale, QFont::Weight weight, const QFont &base);
 
-/*! \brief Returns a font for \a role at \a pixelSize pixels and \a weight
-    Falls back to the application font's family when the bundled fonts could not be
-    registered. */
-QFont font(FontRole role, qreal pixelSize, QFont::Weight weight = QFont::Normal);
+/*! \brief Returns the application font scaled by \a scale, at least as heavy as \a weight
+    Text sizes are multiples of the application font, so the size chosen in Preferences
+    applies to the redesigned pages too. 1.0 is body text. */
+QFont font(qreal scale, QFont::Weight weight = QFont::Normal);
 
-//! \brief Registers the bundled fonts with Qt. Safe to call more than once.
-void registerFonts();
-
-constexpr int Radius = 12;        //!< Card and tile corner radius
+constexpr int Radius = 10;        //!< Card and tile corner radius (as the Oximetry Wizard)
 constexpr int SmallRadius = 8;    //!< Corner radius of boxes inside cards
 constexpr int PagePadding = 24;   //!< Space around the page content
 constexpr int SectionGap = 22;    //!< Space between page sections

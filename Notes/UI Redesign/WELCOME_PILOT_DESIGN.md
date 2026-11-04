@@ -18,14 +18,15 @@ components) that later pages will build on.
 
 - Testers see the new page with their own most recent night, and can switch to the old page
   to compare.
-- The page looks like the mockup: same tiles, cards, fonts, spacing and colours.
+- The page follows the mockup's layout: same tiles, cards and spacing. Colours and fonts
+  follow the system theme and the application font (see Constraints).
 - Testers can try each card-colour option and say which they prefer.
 - The theme module and components are reusable by the next redesigned page.
 
 ## Non-goals
 
-- Dark mode. A contributor is preparing a separate dark-mode fix. The new page must not
-  hard-code colours (see Constraints), so a dark colour set can be added later.
+- Dark mode as a feature. OSCAR still forces the light colour scheme; the theme already
+  follows the palette, so the page will turn dark when OSCAR allows a dark palette.
 - Any change to Daily, Overview, Statistics, menus, or the tab bar. No Insights tab.
 - The Insights page itself.
 - Clickable cards. Cards are display-only in the pilot; click behaviour can be added once
@@ -47,10 +48,15 @@ components) that later pages will build on.
   the events bar). No QML, no WebEngine.
 - Cross-platform; must build on all ~25 targets, including testers on Qt < 6.5.
 - **No hard-coded colours, sizes or fonts in the page or its components.** All come from the
-  theme module, which is readable from C++. Only the light values are defined now. If the
-  contributor's dark-mode work introduces its own theme class, the two are merged.
-- Lexend and Atkinson Hyperlegible (both OFL) are bundled as resources and used on the new
-  page only. Include their licence files.
+  theme module, which is readable from C++.
+- **Same design rules as the Oximetry Wizard** (decided 2026-11-03). Base colours come from
+  the system palette (page = Window, cards = Base, text = Text, borders = Mid, accent =
+  Highlight). Good and warning colours are the wizard's, with light and dark values; other
+  status colours have both too, and their tints are mixed into the card colour. Cards and
+  tiles have a 10 px corner radius.
+- **Application font only**, sized as multiples of it (headings larger, captions smaller),
+  so the font and size chosen in Preferences apply. The bundled Lexend and Atkinson
+  Hyperlegible fonts were tried and removed.
 - New page and components in **new files**. The old `Welcome` class stays unchanged and fully
   working. Shared-file edits are limited to `mainwindow.cpp` (the page is created in two
   places, at startup and after a rebuild, and `refreshPage()` is called from many places
@@ -156,7 +162,8 @@ forced when a ResMed device is detected, and the first import can take a few min
 
 Kept in their own files so later pages can use them:
 
-- **Theme module:** named colour roles, spacing, corner radius, font roles.
+- **Theme module:** named colour roles derived from the palette, spacing, corner radius,
+  font sizes relative to the application font.
 - **Metric card**, **action tile**, **icon button**, and **section header** components.
 
 ## Left to the builder

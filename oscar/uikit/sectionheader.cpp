@@ -16,7 +16,7 @@ namespace UiKit {
 SectionHeader::SectionHeader(const QString &text, QWidget *parent)
     : QLabel(parent)
 {
-    QFont font = Theme::font(Theme::FontRole::Body, 12, QFont::Bold);
+    QFont font = Theme::font(0.92, QFont::Bold);
     font.setLetterSpacing(QFont::PercentageSpacing, 108);
     setFont(font);
     setTextFormat(Qt::PlainText);

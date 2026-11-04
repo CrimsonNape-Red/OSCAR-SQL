@@ -27,7 +27,7 @@ constexpr int kRowGap = 2;          //!< Between wrapped legend rows
 
 QFont legendFont()
 {
-    return Theme::font(Theme::FontRole::Body, 12.5);
+    return Theme::font(0.96);
 }
 
 QString entryText(const EventBar::Part &part)

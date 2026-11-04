@@ -209,6 +209,9 @@ of the work carries over to later screens.
 - Reusable pieces are in `oscar/uikit/` (theme, cards, tiles, icon button, event bar, icons,
   panels, labels); card data and the card table are in `oscar/welcomemetrics.*`.
 - 2026-11-03: cards can be shown or hidden per profile from a gear button beside the legend.
+- 2026-11-03: the theme now follows the Oximetry Wizard: colours from the system palette
+  (so a dark palette works), the wizard's good and warning colours, 10 px corners, and the
+  application font instead of bundled fonts.
 - Deferred: the night strip is taller than the tiles because the device image is fixed at
   76 px and many device pictures have empty margins. Trim the device images where possible,
   then revisit the image size.

@@ -12,8 +12,12 @@ class ThemeTests : public QObject
 {
     Q_OBJECT
 private slots:
-    void testLightValues();
+    void testFollowsPalette();
+    void testWizardStatusColours();
     void testEveryRoleDefined();
+    void testTintsSitBetweenSurfaceAndColour();
     void testCss();
+    void testFontScalesApplicationFont();
+    void testRadiusMatchesWizard();
 };
 DECLARE_TEST(ThemeTests)

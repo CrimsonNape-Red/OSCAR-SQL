@@ -43,7 +43,7 @@ QLabel *makeChip(const QString &text, Theme::Role foreground, Theme::Role backgr
 {
     auto *chip = new QLabel(text, parent);
     chip->setTextFormat(Qt::PlainText);
-    QFont font = Theme::font(Theme::FontRole::Body, 12.5);
+    QFont font = Theme::font(0.96);
     chip->setStyleSheet(QString("QLabel { color: %1; background: %2; border-radius: 11px; padding: 3px 10px; }")
                             .arg(Theme::css(foreground), Theme::css(background)));
     chip->setFont(font);

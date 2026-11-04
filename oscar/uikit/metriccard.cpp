@@ -8,6 +8,7 @@
 
 #include "metriccard.h"
 
+#include <QFontInfo>
 #include <QGraphicsDropShadowEffect>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -23,11 +24,20 @@ namespace UiKit {
 namespace {
 constexpr int kPadding = 12;        //!< Space inside the card (compact: smaller than Theme::CardPadding)
 constexpr int kInnerGap = 4;        //!< Between the card's rows
-constexpr int kValuePx = 24;        //!< Pixel size of the large value
-constexpr int kArrowSize = 16;      //!< Side of the trend arrow, in pixels
+constexpr qreal kValueScale = 1.85; //!< Size of the large value, relative to the application font
+constexpr qreal kArrowScale = 1.2;  //!< Side of the trend arrow, relative to the body text height
 constexpr double kArrowStroke = 3;  //!< Arrow stroke on the 24x24 icon grid
 constexpr int kShadowBlur = 18;
 constexpr int kShadowOffset = 6;
+
+//! \brief Returns a CSS declaration list for \a f (family, size, weight) for rich-text labels
+QString cssFont(const QFont &f)
+{
+    QString size = f.pointSizeF() > 0 ? QString("%1pt").arg(f.pointSizeF())
+                                      : QString("%1px").arg(f.pixelSize());
+    return QString("font-family:'%1'; font-size:%2; font-weight:%3;")
+        .arg(f.family(), size).arg(int(f.weight()));
+}
 
 QColor deltaColour(Trend trend)
 {
@@ -47,7 +57,8 @@ public:
     explicit TrendArrow(QWidget *parent)
         : QWidget(parent)
     {
-        setFixedSize(kArrowSize, kArrowSize);
+        int side = qRound(QFontInfo(Theme::font(1.0)).pixelSize() * kArrowScale);
+        setFixedSize(side, side);
     }
 
     void set(Direction direction, const QColor &colour)
@@ -82,12 +93,12 @@ public:
         auto *layout = new QVBoxLayout(this);
         layout->setContentsMargins(8, 4, 8, 4);
         layout->setSpacing(0);
-        m_label = makeLabel(QString(), Theme::font(Theme::FontRole::Body, 11.5), Theme::Role::Ink3, this);
+        m_label = makeLabel(QString(), Theme::font(0.9), Theme::Role::Ink3, this);
         layout->addWidget(m_label);
         auto *row = new QHBoxLayout();
         row->setSpacing(6);
-        m_avg = makeLabel(QString(), Theme::font(Theme::FontRole::Body, 13.5), Theme::Role::Ink2, this);
-        m_delta = makeLabel(QString(), Theme::font(Theme::FontRole::Body, 12.5), Theme::Role::Neutral, this);
+        m_avg = makeLabel(QString(), Theme::font(1.04), Theme::Role::Ink2, this);
+        m_delta = makeLabel(QString(), Theme::font(0.96), Theme::Role::Neutral, this);
         m_arrow = new TrendArrow(this);
         row->addWidget(m_avg);
         row->addWidget(m_delta);
@@ -151,7 +162,7 @@ MetricCard::MetricCard(QWidget *parent)
     layout->setContentsMargins(kPadding, kPadding, kPadding, kPadding);
     layout->setSpacing(kInnerGap);
 
-    m_title = makeLabel(QString(), Theme::font(Theme::FontRole::Body, 14), Theme::Role::Ink2, this);
+    m_title = makeLabel(QString(), Theme::font(1.08), Theme::Role::Ink2, this);
     layout->addWidget(m_title);
 
     m_value = new QLabel(this);
@@ -159,7 +170,7 @@ MetricCard::MetricCard(QWidget *parent)
     setLabelColour(m_value, Theme::Role::Ink);
     layout->addWidget(m_value);
 
-    m_sub = makeLabel(QString(), Theme::font(Theme::FontRole::Body, 13), Theme::Role::Ink2, this, true);
+    m_sub = makeLabel(QString(), Theme::font(1.0), Theme::Role::Ink2, this, true);
     layout->addWidget(m_sub);
 
     m_extra = new QVBoxLayout();
@@ -196,13 +207,11 @@ void MetricCard::setTitle(const QString &title)
 
 void MetricCard::setValue(const QString &value, const QString &unit)
 {
-    QFont valueFont = Theme::font(Theme::FontRole::Display, kValuePx, QFont::Medium);
-    QFont unitFont = Theme::font(Theme::FontRole::Body, 13);
-    QString html = QString("<span style=\"font-family:'%1'; font-size:%2px; font-weight:500;\">%3</span>")
-                       .arg(valueFont.family()).arg(kValuePx).arg(value.toHtmlEscaped());
+    QString html = QString("<span style=\"%1\">%2</span>")
+                       .arg(cssFont(Theme::font(kValueScale, QFont::DemiBold)), value.toHtmlEscaped());
     if (!unit.isEmpty()) {
-        html += QString("<span style=\"font-family:'%1'; font-size:13px; color:%2;\">&nbsp;%3</span>")
-                    .arg(unitFont.family(), Theme::css(Theme::Role::Ink3), unit.toHtmlEscaped());
+        html += QString("<span style=\"%1 color:%2;\">&nbsp;%3</span>")
+                    .arg(cssFont(Theme::font(1.0)), Theme::css(Theme::Role::Ink3), unit.toHtmlEscaped());
     }
     m_value->setText(html);
 }
