@@ -4,6 +4,22 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-03 - Lumis 150 device image has a white background (GitLab #367)
+
+**Files:** `oscar/icons/lumis150.png`
+
+**Symptom:** The Lumis 150 picture showed as a white rectangle on any non-white background,
+unlike the other device images.
+
+**Root cause:** The image had an opaque white background, and at 1600×1600 px it was far
+larger than the other device images (256–600 px).
+
+**Fix:** The white area connected to the image border was made transparent, faded by how
+close each pixel is to white so the shadow and the clear water tub's edges blend in. The
+image was scaled to 512×512 (433 KB to 119 KB).
+
+---
+
 ## 2026-11-02 - prisma VENT40: sessions imported with an unknown mode and no settings (GitLab #365)
 
 **Files:** `oscar/SleepLib/loader_plugins/prismavent_loader.cpp`, `oscar/tests/prismaventtests.cpp`
