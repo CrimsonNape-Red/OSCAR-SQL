@@ -1,7 +1,8 @@
 /* Redesigned Welcome page
  *
  * The UI redesign pilot's Welcome page: action tiles, the most recent night, and metric
- * cards comparing that night with the 7- and 30-day averages.
+ * cards comparing that night with the 7- and 30-day averages. A gear button beside the
+ * cards' legend lets the user choose which cards are shown; the choice is kept per profile.
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -58,6 +59,9 @@ private:
     QWidget *buildNoCpapNote();
     UiKit::MetricCard *buildMetricCard(const MetricData &m);
     UiKit::MetricCard *buildOximetryCard(const OximetrySummary &oxi);
+
+    //! \brief Shows the checklist of cards; on OK stores the choice in the profile and refreshes
+    void chooseCards();
 
     //! \brief Re-flows the grids for the current width (only when a column count changes)
     void relayout(bool force = false);

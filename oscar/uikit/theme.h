@@ -33,9 +33,9 @@ enum class Role {
     Ink2,            //!< Secondary text
     Ink3,            //!< Muted text, captions, reference lines
     Line,            //!< Borders and dividers
-    Accent,          //!< OSCAR blue: primary actions, sparklines
+    Accent,          //!< OSCAR blue: primary actions
     AccentInk,       //!< Accent-coloured text on light backgrounds
-    AccentSoft,      //!< Pale accent fills (sparkline area, tags)
+    AccentSoft,      //!< Pale accent fills (icon boxes, tags, pressed buttons)
     OnAccent,        //!< Text on an Accent background
     Good,            //!< Better than the averages
     GoodSoft,

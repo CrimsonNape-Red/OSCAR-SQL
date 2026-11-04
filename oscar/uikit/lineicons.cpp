@@ -10,6 +10,8 @@
 
 #include <QPainter>
 #include <QPainterPath>
+#include <QtMath>
+#include <cmath>
 
 namespace UiKit {
 
@@ -143,9 +145,35 @@ QPainterPath arrowDownRightIcon()
     return p;
 }
 
+//! \brief Gear: eight teeth around a hub
+QPainterPath settingsIcon()
+{
+    constexpr int kTeeth = 8;
+    constexpr double kOuter = 10, kInner = 7.6;     // tooth tip and root radii
+    constexpr double kTipHalf = 9, kRootHalf = 14;  // half-widths in degrees, at tip and root
+    const QPointF centre(12, 12);
+    auto at = [&centre](double radius, double degrees) {
+        const double r = qDegreesToRadians(degrees);
+        return centre + QPointF(radius * std::cos(r), radius * std::sin(r));
+    };
+    QPainterPath p;
+    for (int i = 0; i < kTeeth; ++i) {
+        const double a = i * 360.0 / kTeeth;
+        if (i == 0) p.moveTo(at(kInner, a - kRootHalf));
+        else p.lineTo(at(kInner, a - kRootHalf));
+        p.lineTo(at(kOuter, a - kTipHalf));
+        p.lineTo(at(kOuter, a + kTipHalf));
+        p.lineTo(at(kInner, a + kRootHalf));
+    }
+    p.closeSubpath();
+    p.addEllipse(centre, 3, 3);
+    return p;
+}
+
 QPainterPath iconPath(LineIcon icon)
 {
     switch (icon) {
+    case LineIcon::Settings: return settingsIcon();
     case LineIcon::ArrowUpRight: return arrowUpRightIcon();
     case LineIcon::ArrowDownRight: return arrowDownRightIcon();
     case LineIcon::Import: return importIcon();

@@ -1,9 +1,13 @@
 /* Welcome page metrics
  *
  * Gathers the numbers shown on the redesigned Welcome page: the most recent night, one
- * entry per metric card (the night's value, 7- and 30-day averages and a 30-night series)
- * and the night's oximetry summary. Every value comes from calculations OSCAR already
- * uses in Daily, Statistics and the original Welcome page.
+ * entry per metric card (the night's value and its 7- and 30-day averages) and the night's
+ * oximetry summary. Every value comes from calculations OSCAR already uses in Daily,
+ * Statistics and the original Welcome page.
+ *
+ * Also holds the catalog of cards and the profile's list of cards the user has hidden. To
+ * add a card: add a MetricId, write its builder in welcomemetrics.cpp, and add one row to
+ * the card table there. The card chooser and the stored list pick it up from the table.
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -16,6 +20,7 @@
 
 #include <QCoreApplication>
 #include <QDate>
+#include <QSet>
 #include <QString>
 #include <QVector>
 
@@ -23,7 +28,14 @@
 #include "uikit/eventbar.h"
 
 //! \brief Which metric a card shows
-enum class MetricId { TimeUsed, Ahi, Events, Pressure, Leak, LargeLeak, FlowLimit, Sessions };
+enum class MetricId { TimeUsed, Ahi, Events, Pressure, Leak, LargeLeak, FlowLimit, Sessions, Oximetry };
+
+//! \brief One card the page can show, as listed in the card chooser
+struct CardInfo {
+    MetricId id;
+    QString key;        //!< Stable name stored in the profile; never translated or changed
+    QString title;      //!< Translated name, as the card's title
+};
 
 //! \brief The kind of number, used by the "By group" card colouring
 enum class MetricGroup { Usage, Breathing, Mask };
@@ -42,7 +54,6 @@ struct MetricData {
     double avg30 = 0;           //!< Average over the 30 nights before
     int nights7 = 0;            //!< Nights with CPAP data in the 7-night window
     int nights30 = 0;           //!< Nights with CPAP data in the 30-night window
-    QVector<double> series;     //!< 31 values, night - 30 ... night; NaN where there is no data
     QVector<UiKit::EventBar::Part> events;   //!< Events card only: the breakdown
 };
 
@@ -79,8 +90,28 @@ public:
     //! \brief The profile's last CPAP night, as the original Welcome page shows it
     static NightSummary lastNight();
 
-    //! \brief The cards for \a night, only for metrics the device records, in display order
-    static QVector<MetricData> cards(QDate night);
+    //! \brief Every card the page can show, in display order (the oximetry card last)
+    static QVector<CardInfo> catalog();
+
+    //! \brief The stored key of the card for \a id
+    static QString cardKey(MetricId id);
+    //! \brief The translated title of the card for \a id
+    static QString cardTitle(MetricId id);
+
+    /*! \brief The metric cards for \a night, in display order
+        \param hidden Keys of cards the user has hidden; they are not computed
+        Only metrics the device records get a card. The oximetry card comes from oximetry(). */
+    static QVector<MetricData> cards(QDate night, const QSet<QString> &hidden = {});
+
+    //! \brief Keys of the cards hidden in the current profile
+    static QSet<QString> hiddenCards();
+    //! \brief Stores \a hidden in the current profile and saves the profile's preferences
+    static void setHiddenCards(const QSet<QString> &hidden);
+
+    //! \brief Reads a stored list of card keys ("ahi,leak"); blanks and spaces are ignored
+    static QSet<QString> parseCardKeys(const QString &text);
+    //! \brief Stored form of \a keys: sorted and comma-separated
+    static QString joinCardKeys(const QSet<QString> &keys);
 
     //! \brief The oximetry recorded on \a night
     static OximetrySummary oximetry(QDate night);

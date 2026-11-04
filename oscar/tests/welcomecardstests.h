@@ -1,4 +1,4 @@
-/* Sparkline geometry Unit Tests
+/* Welcome page card list Unit Tests
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -8,13 +8,13 @@
 
 #include "tests/AutoTest.h"
 
-class SparklineTests : public QObject
+class WelcomeCardsTests : public QObject
 {
     Q_OBJECT
 private slots:
-    void testEvenSpacing();
-    void testScale();
-    void testFlatSeries();
-    void testGaps();
+    void testCatalogCoversEveryCard();
+    void testCatalogKeysUnique();
+    void testCardKeysRoundTrip();
+    void testCardKeysTolerateJunk();
 };
-DECLARE_TEST(SparklineTests)
+DECLARE_TEST(WelcomeCardsTests)

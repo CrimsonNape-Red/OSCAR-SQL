@@ -43,8 +43,8 @@ components) that later pages will build on.
 
 ## Constraints
 
-- Qt Widgets and stylesheets, with custom painting only where needed (card shadows,
-  sparklines, the events bar). No QML, no WebEngine.
+- Qt Widgets and stylesheets, with custom painting only where needed (card shadows, icons,
+  the events bar). No QML, no WebEngine.
 - Cross-platform; must build on all ~25 targets, including testers on Qt < 6.5.
 - **No hard-coded colours, sizes or fonts in the page or its components.** All come from the
   theme module, which is readable from C++. Only the light values are defined now. If the
@@ -88,6 +88,8 @@ Top to bottom, as in the mockup.
 - A strip with the device image, brand and model, the night's date (long format, system
   locale) and "last night" / "N days ago", using the same wording rules as today's page.
 - The night shown is the profile's last CPAP day, as today.
+- A chip shows the night's therapy mode. The over/under compliance chip was removed
+  (2026-11-03).
 - Today's ResMed S9 card warning is kept.
 
 ### Metric cards
@@ -114,7 +116,18 @@ Each card shows:
   number (no % difference).
 
 Cards are compact. The sparkline of the last 30 nights was dropped after the first build
-(2026-11-02); its component stays in `oscar/uikit/` in case it returns.
+(2026-11-02) and its code removed (2026-11-03).
+
+**Choosing cards.** A gear button to the right of the colour legend opens a checklist of
+every card (oximetry included). Unticked cards are hidden. The choice is stored per profile
+as the list of *hidden* card keys (profile preference `WelcomeHiddenCards`), so a card added
+in a later version appears until the user hides it. If every card is hidden, a short note
+points to the gear button.
+
+**Adding a card later:** add a `MetricId`, write its builder function in
+`welcomemetrics.cpp`, and add one row (id, stored key, title, builder) to the card table
+there. The checklist and the stored list pick it up from that table; never change an
+existing key.
 
 Bi-level pressure cards compare IPAP, and the card says so ("Averages compare IPAP").
 
@@ -144,7 +157,7 @@ forced when a ResMed device is detected, and the first import can take a few min
 Kept in their own files so later pages can use them:
 
 - **Theme module:** named colour roles, spacing, corner radius, font roles.
-- **Metric card**, **action tile**, **sparkline**, and **section header** components.
+- **Metric card**, **action tile**, **icon button**, and **section header** components.
 
 ## Left to the builder
 

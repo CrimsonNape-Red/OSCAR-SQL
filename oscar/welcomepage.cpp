@@ -8,6 +8,9 @@
 
 #include "welcomepage.h"
 
+#include <QCheckBox>
+#include <QDialog>
+#include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -29,6 +32,7 @@
 #include "uikit/comparison.h"
 #include "uikit/eventbar.h"
 #include "uikit/formatting.h"
+#include "uikit/iconbutton.h"
 #include "uikit/label.h"
 #include "uikit/metriccard.h"
 #include "uikit/panel.h"
@@ -280,22 +284,11 @@ QWidget *WelcomePage::buildNightStrip(const NightSummary &night)
                               Theme::font(FontRole::Body, 15), Role::Ink2, strip, true));
     row->addLayout(text, 1);
 
-    // Chips: mode, and whether the night met the compliance threshold
+    // Chip: the night's therapy mode
     Day *day = p_profile->GetDay(night.date, MT_CPAP);
-    if (day) {
-        auto *chips = new QHBoxLayout();
-        chips->setSpacing(8);
-        QString mode = day->getCPAPModeStr();
-        if (!mode.isEmpty()) {
-            chips->addWidget(makeChip(tr("Mode: %1").arg(mode), Role::Ink2, Role::Surface2, strip));
-        }
-        const double compliance = p_profile->cpap->m_complianceHours;
-        if (day->hours(MT_CPAP) > compliance) {
-            chips->addWidget(makeChip(tr("Over %1 h compliance").arg(compliance), Role::Good, Role::GoodSoft, strip));
-        } else {
-            chips->addWidget(makeChip(tr("Under %1 h compliance").arg(compliance), Role::Bad, Role::BadSoft, strip));
-        }
-        row->addLayout(chips);
+    const QString mode = day ? day->getCPAPModeStr() : QString();
+    if (!mode.isEmpty()) {
+        row->addWidget(makeChip(tr("Mode: %1").arg(mode), Role::Ink2, Role::Surface2, strip));
     }
     return strip;
 }
@@ -338,7 +331,7 @@ MetricCard *WelcomePage::buildMetricCard(const MetricData &m)
 MetricCard *WelcomePage::buildOximetryCard(const OximetrySummary &oxi)
 {
     auto *card = new MetricCard();
-    card->setTitle(tr("Oximetry"));
+    card->setTitle(WelcomeMetrics::cardTitle(MetricId::Oximetry));
     QStringList detail;
     if (oxi.hasSpo2) {
         card->setValue(number(oxi.spo2Middle, 1), tr("% SpO₂ (%1)").arg(oxi.middleLabel));
@@ -372,6 +365,9 @@ QWidget *WelcomePage::buildCardsSection(const NightSummary &night)
     head->addWidget(makeLegend({ { Role::Good, tr("Better than average") },
                                  { Role::Bad, tr("Worse than average") },
                                  { Role::Neutral, tr("Neither better nor worse") } }, section));
+    auto *gear = new IconButton(LineIcon::Settings, tr("Choose which cards to show"), section);
+    connect(gear, &QAbstractButton::clicked, this, &WelcomePage::chooseCards);
+    head->addWidget(gear);
     v->addLayout(head);
 
     if (AppSetting->welcomeCardColour() == WCC_ByGroup) {
@@ -385,14 +381,56 @@ QWidget *WelcomePage::buildCardsSection(const NightSummary &night)
     m_cardGrid->setContentsMargins(0, 4, 0, 0);
     m_cardGrid->setSpacing(Theme::CardGap);
     m_cards.clear();
-    for (const MetricData &m : WelcomeMetrics::cards(night.date)) {
+    const QSet<QString> hidden = WelcomeMetrics::hiddenCards();
+    for (const MetricData &m : WelcomeMetrics::cards(night.date, hidden)) {
         m_cards.append(buildMetricCard(m));
     }
-    OximetrySummary oxi = WelcomeMetrics::oximetry(night.date);
-    if (oxi.present) m_cards.append(buildOximetryCard(oxi));
+    if (!hidden.contains(WelcomeMetrics::cardKey(MetricId::Oximetry))) {
+        OximetrySummary oxi = WelcomeMetrics::oximetry(night.date);
+        if (oxi.present) m_cards.append(buildOximetryCard(oxi));
+    }
     for (QWidget *c : m_cards) c->setParent(grid);
     v->addWidget(grid);
+    if (m_cards.isEmpty()) {
+        v->addWidget(makeLabel(tr("All cards are hidden. Use the gear button to choose cards to show."),
+                               Theme::font(FontRole::Body, 14), Role::Ink2, section, true));
+    }
     return section;
+}
+
+void WelcomePage::chooseCards()
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Welcome Page Cards"));
+    auto *v = new QVBoxLayout(&dialog);
+    v->addWidget(new QLabel(tr("Show these cards on the Welcome page:"), &dialog));
+
+    const QSet<QString> hidden = WelcomeMetrics::hiddenCards();
+    QVector<QPair<QString, QCheckBox *>> boxes;
+    for (const CardInfo &card : WelcomeMetrics::catalog()) {
+        auto *box = new QCheckBox(card.title, &dialog);
+        box->setChecked(!hidden.contains(card.key));
+        v->addWidget(box);
+        boxes.append({ card.key, box });
+    }
+    v->addWidget(new QLabel(tr("Cards are only shown when your device records that information."), &dialog));
+
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    v->addWidget(buttons);
+
+    if (dialog.exec() != QDialog::Accepted) return;
+
+    // Keep keys this build doesn't know (e.g. from a newer version), so they stay hidden there
+    QSet<QString> newHidden = hidden;
+    for (const auto &b : boxes) {
+        if (b.second->isChecked()) newHidden.remove(b.first);
+        else newHidden.insert(b.first);
+    }
+    if (newHidden == hidden) return;
+    WelcomeMetrics::setHiddenCards(newHidden);
+    refreshPage();
 }
 
 QWidget *WelcomePage::buildFirstRun()
@@ -473,8 +511,10 @@ void WelcomePage::refreshPage()
     // Rebuild the data-dependent sections
     const int scroll = m_scroll->verticalScrollBar()->value();
     if (m_dynamic) {
+        // deleteLater: the refresh may come from a button inside this section (the gear)
         m_column->removeWidget(m_dynamic);
-        delete m_dynamic;
+        m_dynamic->hide();
+        m_dynamic->deleteLater();
     }
     m_cardGrid = nullptr;
     m_stepGrid = nullptr;

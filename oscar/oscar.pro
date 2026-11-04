@@ -363,7 +363,7 @@ SOURCES += \
     uikit/metriccard.cpp \
     uikit/panel.cpp \
     uikit/sectionheader.cpp \
-    uikit/sparkline.cpp \
+    uikit/iconbutton.cpp \
     welcomemetrics.cpp \
     zip.cpp \
     Graphs/gAHIChart.cpp \
@@ -652,7 +652,7 @@ HEADERS  += \
     uikit/metriccard.h \
     uikit/panel.h \
     uikit/sectionheader.h \
-    uikit/sparkline.h \
+    uikit/iconbutton.h \
     welcomemetrics.h \
     mytextbrowser.h \
     staticQMessageBox.h \
@@ -886,7 +886,7 @@ test {
         tests/oximetryrecalctests.cpp \
         tests/themetests.cpp \
         tests/comparisontests.cpp \
-        tests/sparklinetests.cpp
+        tests/welcomecardstests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -916,7 +916,7 @@ test {
         tests/oximetryrecalctests.h \
         tests/themetests.h \
         tests/comparisontests.h \
-        tests/sparklinetests.h
+        tests/welcomecardstests.h
 }
 
 macx {
