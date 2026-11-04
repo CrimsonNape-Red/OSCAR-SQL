@@ -4,6 +4,21 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-04 - Destroy Profile button enabled with no profile selected (GitLab #368)
+
+**Files:** `oscar/profileselector.cpp`
+
+**Symptom:** On the Profile tab, Destroy Profile was always enabled, even with no profile
+selected; clicking it then did nothing. Open Profile and Edit Profile were disabled.
+
+**Root cause:** Only Open and Edit were ever enabled or disabled; Destroy was left out.
+
+**Fix:** Destroy is disabled at startup and whenever the list is rebuilt, and enabled when a
+row is selected. It needs only a selected row (not a loaded profile), because it also
+removes profiles whose folder is missing.
+
+---
+
 ## 2026-11-03 - Lumis 150 device image has a white background (GitLab #367)
 
 **Files:** `oscar/icons/lumis150.png`
