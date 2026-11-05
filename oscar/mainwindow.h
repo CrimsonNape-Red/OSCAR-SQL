@@ -239,6 +239,7 @@ class MainWindow : public QMainWindow
   protected:
     void closeEvent(QCloseEvent *) override;
     void keyPressEvent(QKeyEvent *event) override;
+    //! \brief Keeps the tooltip colors in place when the system theme changes
     void changeEvent(QEvent *event) override;
     void showEvent(QShowEvent *event) override;
 

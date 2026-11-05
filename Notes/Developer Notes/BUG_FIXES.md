@@ -4,6 +4,33 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-04 - Tooltip colors: startup prompts missed, defined three times, no system option (GitLab #371)
+
+**Files:** `oscar/tooltipcolors.cpp`, `tooltipcolors.h` (new), `oscar/main.cpp`, `mainwindow.cpp`,
+`mainwindow.h`, `preferencesdialog.cpp`, `preferencesdialog.ui`, `Graphs/gGraphView.cpp`,
+`SleepLib/appsettings.cpp`, `appsettings.h`, `oscar/oscar.pro`
+
+**Symptom:** Prompts shown before `MainWindow` exists kept the platform's tooltips. The fixed black on
+yellow also overrode dark and high contrast themes, with no way to turn it off.
+
+**Root cause:** The colors were applied in `MainWindow`'s constructor, and were defined separately in
+`gToolTip::paint`, the tooltip palette and the Windows style-sheet rule.
+
+**Fix:** `ToolTipColors` now owns the colors and the Windows application style sheet. `main()` applies them
+right after creating the `QApplication`, and again once the preferences are loaded. New option
+Preferences > Appearance > "Use system tooltip colors", off by default, takes effect on OK.
+
+**Non-obvious:**
+- `QToolTip::palette()` isn't what native Windows styles paint. `QWindowsVistaStyle::polish` replaces a
+  tooltip's palette with the application's, so with Qt 6.10.2 and 6.12.0 on a light system the palette says
+  `#ffffe1` while windows11 paints `#f3f3f3` and windowsvista `#f9f9f9`. The graphs' tooltips get the system
+  color by having the style paint a panel off screen.
+- OSCAR forces the Light color scheme, and Qt then reports only light tooltip colors. The system's dark
+  colors are read just before that, and forced on the tooltips like OSCAR's own.
+
+**Limits:** Dark mode is read once at startup, as no public Qt API reports it while Light is forced, so
+switching it needs a restart of OSCAR. Border and padding still differ by platform (#371 item 2).
+
 ## 2026-11-04 - prismaCR: model unrecognized, AcSV pressures wrong, settings dropped (GitLab #369)
 
 **Files:** `oscar/SleepLib/loader_plugins/prisma_loader.cpp`, `prisma_loader.h`,

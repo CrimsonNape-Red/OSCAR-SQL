@@ -98,7 +98,6 @@
 #include <QThread>
 #include <QEventLoop>
 #include <QPalette>
-#include <QToolTip>
 #include <functional>
 #include "purgerangedaysdialog.h"
 #include "exports/report_exporter.h"
@@ -126,6 +125,7 @@
 #include "statistics.h"
 #include "zip.h"
 #include "speedcheck.h"
+#include "tooltipcolors.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,4,0)
 #include <QOpenGLFunctions>
@@ -133,8 +133,6 @@
 
 CheckUpdates *updateChecker;
 bool openOk;
-
-static void applyToolTipPalette();  // below, with MainWindow::changeEvent
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -152,18 +150,12 @@ MainWindow::MainWindow(QWidget *parent) :
             });
     }
 
-    applyToolTipPalette();
-
-    // Qt 6 on Windows 11 renders menu bar items and combo box drop-down items
-    // with excessive vertical padding. Constrain to match earlier Qt versions.
+    // Qt 6 on Windows 11 renders menu bar items with excessive vertical padding.
+    // Constrain to match earlier Qt versions. (Combo box items: see ToolTipColors::apply().)
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0) && defined(Q_OS_WIN)
     ui->menubar->setStyleSheet(
         "QMenuBar { padding: 0px; }"
         "QMenuBar::item { padding: 2px 8px 1px 8px; }"
-    );
-    qApp->setStyleSheet(
-        "QComboBox QAbstractItemView::item { padding: 0px 0px; margin: 0px; }"
-        "QToolTip { color: black; background-color: rgb(255, 255, 128); border: 1px solid black; padding: 2px; }"
     );
 #endif
 
@@ -456,26 +448,12 @@ void MainWindow::showEvent(QShowEvent *event)
 #endif
 }
 
-// Every tooltip gets the colors of the ones the graphs paint themselves (gToolTip::paint), so
-// hovering gives the same popup everywhere. Through the tooltip palette: an application style
-// sheet would also change how other widgets are drawn (Fusion shades tabs and buttons
-// differently under it). Windows already has one, and its native styles may draw the tooltip
-// background from the system theme regardless of the palette, so there the same colors also go
-// into a QToolTip rule (MainWindow's constructor).
-static void applyToolTipPalette()
-{
-    QPalette tipPalette = QToolTip::palette();
-    tipPalette.setColor(QPalette::ToolTipBase, QColor(255, 255, 128));
-    tipPalette.setColor(QPalette::ToolTipText, Qt::black);
-    QToolTip::setPalette(tipPalette);
-}
-
 void MainWindow::changeEvent(QEvent *event)
 {
     if (event->type() == QEvent::ThemeChange) {
-        // A system theme change can give the tooltips the theme's palette again; set ours once
-        // the change has been handled.
-        QTimer::singleShot(0, this, [] { applyToolTipPalette(); });
+        // Qt has reset the tooltips to the theme's palette. Set their colors again once the
+        // change has been handled.
+        QTimer::singleShot(0, this, [] { ToolTipColors::apply(); });
     }
     QMainWindow::changeEvent(event);
 }

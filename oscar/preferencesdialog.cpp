@@ -26,6 +26,7 @@
 
 #include "preferencesdialog.h"
 #include "treecheckdelegate.h"
+#include "tooltipcolors.h"
 #include "version.h"
 
 #include <Graphs/gGraphView.h>
@@ -237,6 +238,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->eventFlagSessionBar->setChecked(profile->appearance->eventFlagSessionBar());
     ui->disableDailyGraphTitles->setChecked(AppSetting->disableDailyGraphTitles());
     ui->useFusionTheme->setChecked(AppSetting->useFusionTheme());
+    ui->useSystemTooltipColors->setChecked(AppSetting->useSystemTooltipColors());
 
 #if defined(STEADY_BREATHING)
     // In Clinical Mode steadyBreathing() already reports SB_INACTIVE, so nothing is written here
@@ -958,6 +960,11 @@ bool PreferencesDialog::Save()
     }
 
     AppSetting->setGraphTooltips(ui->graphTooltips->isChecked());
+
+    if (ui->useSystemTooltipColors->isChecked() != AppSetting->useSystemTooltipColors()) {
+        AppSetting->setUseSystemTooltipColors(ui->useSystemTooltipColors->isChecked());
+        ToolTipColors::apply();
+    }
 
     AppSetting->setAntiAliasing(ui->useAntiAliasing->isChecked());
     AppSetting->setUsePixmapCaching(ui->usePixmapCaching->isChecked());

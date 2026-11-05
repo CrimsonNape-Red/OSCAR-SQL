@@ -350,6 +350,7 @@ SOURCES += \
     speedcheck.cpp \
     staticQMessageBox.cpp \
     statistics.cpp \
+    tooltipcolors.cpp \
     translation.cpp \
     treecheckdelegate.cpp \
     version.cpp \
@@ -635,6 +636,7 @@ HEADERS  += \
     rawdata.h \
     translation.h \
     statistics.h \
+    tooltipcolors.h \
     oximeterimport.h \
     SleepLib/deviceconnection.h \
     SleepLib/xmlreplay.h \
