@@ -921,6 +921,7 @@ test {
         tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp \
         tests/prismaventtests.cpp \
+        tests/prismalinetests.cpp \
         tests/respiratoryeventstests.cpp \
         tests/bmcsessionendstests.cpp \
         tests/bmcusrsessionstests.cpp \
@@ -951,6 +952,7 @@ test {
         tests/portablemodetests.h \
         tests/sessionsplittests.h \
         tests/prismaventtests.h \
+        tests/prismalinetests.h \
         tests/respiratoryeventstests.h \
         tests/bmcsessionendstests.h \
         tests/bmcusrsessionstests.h \

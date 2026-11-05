@@ -72,6 +72,9 @@ enum Prisma_Parameters {
     // PRISMA_LINE_ALARM_DISCONNECTION_ACTIVE = 1203,
     PRISMA_LINE_APAP_DYNAMIC = 1209,
     PRISMA_LINE_EXTRA_OBSTRUCTION_PROTECTION = 1154, // BiSoft off = 0, BiSoft1 = 2, BiSoft2 = 3, TriLevel = 1
+    PRISMA_LINE_AUTO_F = 1156,   // autoF: 0 = off (prismaTS); AcSV sessions with F min = -1 have 3, not yet named
+    PRISMA_LINE_F_MIN = 1157,    // F min, breaths per minute; -1 when it doesn't apply (autoF on)
+    PRISMA_LINE_TI_T = 1158,     // Ti/T set, percent; -1 when it doesn't apply (autoF on)
     PRISMA_LINE_AUTO_PDIFF = 1219
 
 };

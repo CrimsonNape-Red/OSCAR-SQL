@@ -4,6 +4,35 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-04 - prismaCR: model unrecognized, AcSV pressures wrong, settings dropped (GitLab #369)
+
+**Files:** `oscar/SleepLib/loader_plugins/prisma_loader.cpp`, `prisma_loader.h`,
+`oscar/tests/prismalinetests.cpp`, `prismalinetests.h`, `oscar/oscar.pro`
+
+**Symptom:** A prismaCR card (DeviceType 13, firmware 5.07.0002, AcSV) was named "Unknown
+Model" and raised the untested-device warning. For settings of EEPAP 6-10, PDIFF 4-6 and IPAP
+max 13.5, the Daily page showed "EPAP 4 PS 4-6" and the Welcome page said EPAP was fixed at 4.
+Every session stored "Mode partially supported, please send sample data". Bi softPAP, autoF,
+F min, Ti/T and tube type were missing from the settings.
+
+**Root cause:** DeviceType 13 was not in `s_PrismaTestedModels`. AcSV was mapped to fixed-EPAP
+`MODE_ASV`, although it titrates EPAP between limits (commanded EPAP ran 4-9.25 in one night).
+The AcSV case never stored Bi softPAP, and parameters 1156-1158 were not read. In all LINE
+modes, the tube type check tested for the Smart parameter id (21), which LINE cards don't have,
+instead of the LINE id (1091).
+
+**Fix:** Added the model and mapped AcSV to `MODE_ASV_VARIABLE_EPAP`, with `CPAP_EPAPLo` from
+parameter 1201. The derived `CPAP_EPAP` and `CPAP_IPAP` settings are no longer stored for AcSV,
+and the warning is no longer written. Added `Prisma_AutoF`, `Prisma_FMin` and `Prisma_TiT`; F min
+and Ti/T are skipped when written as -1 (autoF on). Tube type now tests the LINE id.
+
+**Limits:** `prisma_data_version` is unchanged, so existing AcSV sessions keep the old mode and
+warning until Rebuild CPAP Data. autoF value 3 has no known name and displays as "3". The report
+confirms settings only for the latest of the card's two groups. Commanded pressures confirm the
+EPAP floor and EEPAP and IPAP limits for both.
+
+---
+
 ## 2026-11-04 - Destroy Profile button enabled with no profile selected (GitLab #368)
 
 **Files:** `oscar/profileselector.cpp`
