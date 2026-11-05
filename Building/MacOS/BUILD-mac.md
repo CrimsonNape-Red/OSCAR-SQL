@@ -10,7 +10,11 @@
 NOTE: Official Qt5 builds are currently made with [macOS 10.14 Catalina] and Command-Line Tools for [Xcode] 12.4.
 
 - [Qt 6] 
-- [macOS 13 Ventura] or higher for building (recommended: Qt 6.9 or higher) 
+- [macOS 13 Ventura] or higher for building (recommended: Qt 6.9 or higher)
+- **Qt Connectivity (Bluetooth) must be installed with the Qt version** (step 4D); qmake stops
+  without it. On an Intel Mac the Qt installer did not offer it for Qt 6.10.2 but does for
+  6.12.0, so use 6.12.0 or later if your version doesn't list it. (Apple Silicon: not yet
+  checked.)
 - Xcode command line tools. (Download instructions are below.)
 - Xcode - Website for the most current version for your mac distro: https://xcodereleases.com/
 
@@ -48,7 +52,8 @@ NOTE: Official Qt5 builds are currently made with [macOS 10.14 Catalina] and Com
 	-    Any web development package  
 	
     D. Additional Libraries needed:  Qt Serial Port, and Qt Connectivity (Qt Bluetooth, for Bluetooth oximeter downloads in the Oximetry Wizard; qmake stops without it).
-       Use Qt 6.6 or later, so that OSCAR can ask for permission to use Bluetooth; Info.plist.in already carries the usage text.  
+       Use Qt 6.6 or later, so that OSCAR can ask for permission to use Bluetooth; Info.plist.in already carries the usage text.
+       If Qt Connectivity isn't listed for your Qt version, choose a newer one (on an Intel Mac it wasn't listed for 6.10.2, and is for 6.12.0).  
 
 5. Install Qt   
     A. Mount and launch qt-opensource-mac dmg file.  This can be done by double-clicking on the file name.  
@@ -132,7 +137,7 @@ The resulting `OSCAR.app` will be natively compiled for Apple Silicon.
 
 ## Build Compatibility
 
-- **Intel Mac**: Use original Qt 5.12.8 instructions above
+- **Intel Mac**: Qt 6 builds need a Qt version whose installer offers Qt Connectivity (6.12.0 or later; not 6.10.2); Qt 5 builds use the Qt 5.12.8 instructions above
 - **Apple Silicon Mac**: Use either approach:
   - Original instructions (runs via Rosetta 2)
   - New ARM64 build (native performance) with newer Qt 5.15.9+

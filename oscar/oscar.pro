@@ -852,6 +852,8 @@ memdebug {
 # without it by accident. "CONFIG+=no_bluetooth" builds without it on purpose, e.g. to
 # try a MinGW-like build on Linux. Qt 6 has no working Bluetooth backend on Windows with
 # MinGW (only a dummy), so MinGW builds have the cables but no Bluetooth.
+# On an Intel Mac the Qt installer offered no Qt Connectivity (Bluetooth) for Qt 6.10.2,
+# but does for 6.12.0 (reported 2026-11-05), hence the hint in the error below.
 no_bluetooth {
     message("no_bluetooth: building without Bluetooth oximeter downloads")
 } else:win32-g++:greaterThan(QT_MAJOR_VERSION, 5) {
@@ -859,6 +861,9 @@ no_bluetooth {
 } else:haiku {
     message("Haiku: building without Bluetooth oximeter downloads")
 } else {
+    macx:!qtHaveModule(bluetooth) {
+        error("Qt Bluetooth is missing (this is Qt $$[QT_VERSION]). OSCAR packages for macOS must have Bluetooth oximeter downloads: in the Qt installer add Qt Connectivity to this Qt version. If the installer doesn't offer it (it didn't for Qt 6.10.2 on an Intel Mac), use Qt 6.12.0 or later. Or add CONFIG+=no_bluetooth to build without Bluetooth on purpose.")
+    }
     !qtHaveModule(bluetooth) {
         error("Qt Bluetooth is missing. OSCAR packages for this platform must have Bluetooth oximeter downloads: install the Qt Bluetooth module (Debian/Ubuntu: qt6-connectivity-dev; Qt installer: Qt Connectivity), or add CONFIG+=no_bluetooth to build without it on purpose.")
     }
