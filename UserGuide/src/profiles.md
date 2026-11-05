@@ -41,7 +41,7 @@ Only the **Profile Name** is required. Every other field is voluntary, but filli
 
         Health information linked to a real name is valuable to the wrong people. Your real name can go in the **First Name** and **Last Name** fields instead: those are shown only on printed reports, and on the Statistics page when you choose to show them.
 
-3. **Locale Settings.** Choose your **Country** and **TimeZone**. OSCAR uses the time zone to place your nights correctly.
+3. **Locale Settings.** Choose your **Country** and **TimeZone**. These are kept with your profile for your records; OSCAR places your nights using your computer's own time zone setting, so make sure that is correct. To correct a CPAP machine's clock, use [Time corrections](data-tools.md#time-corrections).
 
 4. **Personal Information (for reports).** First and last name, date of birth, gender and height.
 
