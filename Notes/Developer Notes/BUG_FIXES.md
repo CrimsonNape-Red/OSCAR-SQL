@@ -27,9 +27,17 @@ and the warning is no longer written. Added `Prisma_AutoF`, `Prisma_FMin` and `P
 and Ti/T are skipped when written as -1 (autoF on). Tube type now tests the LINE id.
 
 **Limits:** `prisma_data_version` is unchanged, so existing AcSV sessions keep the old mode and
-warning until Rebuild CPAP Data. autoF value 3 has no known name and displays as "3". The report
-confirms settings only for the latest of the card's two groups. Commanded pressures confirm the
-EPAP floor and EEPAP and IPAP limits for both.
+warning until Rebuild CPAP Data. prismaTS reports confirm the settings for both of the card's
+groups, including autoF 0 = Off and 3 = On. Those reports don't show the EPAP floor, which is
+confirmed by commanded pressures.
+
+**Follow-up (#370):** Named autoF 3 as On, and imported events 113, 171, 241, 305 and 330, which
+prismaTS therapy protocols identify by time and duration. softSTART goes to `CPAP_Ramp`, and
+Disconnection and SEL share the prisma VENT channels. 113 (hypopnea with very high leakage) has
+its own channel outside AHI, because counting it along with apneas during movement gave AHI 3.56
+on a night prismaTS reports as 3; the VENT loader still sends it to `CPAP_Hypopnea`. softSTART
+and Disconnection rows under a second long are skipped. Existing sessions pick up the events
+after Rebuild CPAP Data.
 
 ---
 

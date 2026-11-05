@@ -24,6 +24,9 @@ private slots:
     void testAcSVAutoF();
     void testTubeTypeInOtherModes();
 
+    // Event mapping, on synthetic session files
+    void testEventChannels();
+
     // Whole-card import; skipped unless OSCAR_PRISMACR_CARD names a prismaCR card folder
     void testPrismaCRCard();
 };
