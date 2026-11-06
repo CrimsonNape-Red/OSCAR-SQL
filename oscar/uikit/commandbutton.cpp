@@ -11,20 +11,24 @@
 #include <QEnterEvent>
 #include <QFontMetrics>
 #include <QPainter>
+#include <QtMath>
 
 #include "theme.h"
 
 namespace UiKit {
 
 namespace {
-constexpr int kPadX = 14;           //!< Left and right padding
-constexpr int kPadY = 12;           //!< Top and bottom padding
-constexpr int kIconBox = 40;        //!< Rounded square behind the icon
-constexpr int kIconBoxRadius = 10;
-constexpr int kIconSize = 22;
-constexpr int kIconGap = 12;        //!< Icon box to text
+constexpr int kPadX = 10;           //!< Left and right padding
+constexpr int kPadY = 8;            //!< Top and bottom padding
+constexpr int kIconBox = 32;        //!< Rounded square behind the icon
+constexpr int kIconBoxRadius = 8;
+constexpr int kIconSize = 18;
+constexpr int kIconGap = 10;        //!< Icon box to text
 constexpr int kTitleGap = 2;        //!< Title to subtitle
 constexpr int kTextFlags = Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap;
+constexpr int kMinWidth = 160;
+constexpr int kMaxWidth = 360;
+constexpr double kSubtitleShare = 0.55;     //!< Share of the subtitle to fit on one line
 }
 
 CommandButton::CommandButton(QWidget *parent)
@@ -69,12 +73,18 @@ void CommandButton::setKind(Kind kind)
 
 QFont CommandButton::titleFont() const
 {
-    return Theme::font(1.15, QFont::DemiBold);
+    return Theme::font(1.08, QFont::DemiBold);
 }
 
 QFont CommandButton::subtitleFont() const
 {
-    return Theme::font(1.0);
+    return Theme::font(0.92);
+}
+
+int CommandButton::preferredWidth(int titleWidth, int subtitleWidth)
+{
+    const int text = qMax(titleWidth, qCeil(subtitleWidth * kSubtitleShare));
+    return qBound(kMinWidth, 2 * kPadX + kIconBox + kIconGap + text, kMaxWidth);
 }
 
 int CommandButton::textWidth(int width) const
@@ -95,15 +105,13 @@ int CommandButton::heightForWidth(int width) const
 QSize CommandButton::sizeHint() const
 {
     QFontMetrics tf(titleFont()), sf(subtitleFont());
-    int w = 2 * kPadX + kIconBox + kIconGap
-            + qMax(tf.horizontalAdvance(text()), sf.horizontalAdvance(m_subtitle));
-    w = qBound(200, w, 360);
+    const int w = preferredWidth(tf.horizontalAdvance(text()), sf.horizontalAdvance(m_subtitle));
     return QSize(w, heightForWidth(w));
 }
 
 QSize CommandButton::minimumSizeHint() const
 {
-    return QSize(180, heightForWidth(180));
+    return QSize(kMinWidth, heightForWidth(kMinWidth));
 }
 
 void CommandButton::enterEvent(QEnterEvent *event)

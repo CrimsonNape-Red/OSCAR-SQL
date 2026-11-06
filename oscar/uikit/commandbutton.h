@@ -1,8 +1,8 @@
 /* Command button component
  *
- * A tile-style push button: a line icon beside a bold title and a one-line description.
- * Used for the Profile tab's actions; it looks like the Welcome page's action tiles but
- * is laid out sideways to fit a narrow column. It is a QPushButton, so it can replace a
+ * A tile-style push button: a line icon beside a bold title and a short description that
+ * wraps. Used for the Profile tab's actions; it looks like the Welcome page's action tiles
+ * but is laid out sideways to fit a narrow column. It is a QPushButton, so it can replace a
  * plain button in a Qt Designer form (promoted widget) without changing its connections.
  *
  * Copyright (c) 2026 The OSCAR Team
@@ -45,6 +45,12 @@ public:
     void setKind(Kind kind);
 
     QString subtitle() const { return m_subtitle; }
+
+    /*! \brief Width a button prefers: room for the title on one line, with a long subtitle
+               wrapping onto about two lines
+        \param titleWidth Width of the title on one line, in pixels
+        \param subtitleWidth Width of the subtitle on one line, in pixels */
+    static int preferredWidth(int titleWidth, int subtitleWidth);
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;

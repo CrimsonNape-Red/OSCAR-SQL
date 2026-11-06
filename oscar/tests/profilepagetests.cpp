@@ -11,6 +11,7 @@
 
 #include "profilepagetests.h"
 #include "profileselectorstyle.h"
+#include "uikit/commandbutton.h"
 #include "uikit/lineicons.h"
 #include "uikit/theme.h"
 
@@ -77,4 +78,28 @@ void ProfilePageTests::testNewIconsDraw()
                 if (qAlpha(img.pixel(x, y)) > 64) ++inked;
         QVERIFY2(inked > 60, qPrintable(QString("icon %1 drew %2 pixels").arg(int(icon)).arg(inked)));
     }
+}
+
+void ProfilePageTests::testTableHeaderIsShaded()
+{
+    QPalette palette;
+    palette.setColor(QPalette::Base, Qt::white);
+    palette.setColor(QPalette::Text, Qt::black);
+    const QString shade = Theme::css(Theme::color(Theme::Role::Surface2, palette));
+    const QString sheet = ProfileSelectorStyle::styleSheet(palette);
+    QVERIFY(sheet.contains("QHeaderView::section { background: " + shade));
+    QVERIFY(sheet.contains("QTableCornerButton::section { background: " + shade));
+}
+
+void ProfilePageTests::testCommandButtonWidthLetsSubtitleWrap()
+{
+    using UiKit::CommandButton;
+    const int chrome = 62;  // padding, icon box and the gap beside it
+    // A long subtitle gets a little over half its length, so it wraps onto about two lines
+    QCOMPARE(CommandButton::preferredWidth(105, 267), chrome + 147);
+    // The title is never wrapped just to narrow the button
+    QCOMPARE(CommandButton::preferredWidth(200, 100), chrome + 200);
+    // Limits for very short text and very long translations
+    QCOMPARE(CommandButton::preferredWidth(10, 10), 160);
+    QCOMPARE(CommandButton::preferredWidth(500, 100), 360);
 }
