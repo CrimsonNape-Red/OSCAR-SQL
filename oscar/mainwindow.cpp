@@ -786,10 +786,15 @@ bool MainWindow::OpenProfile(QString profileName)
         return false;
     }
 
-    if (!p_profile->LastDay(MT_CPAP).isValid() ) { // quick test if new profile or not.
-        // Override default value of clinicalMode if new profile.
-        // Allows permissiveMode (not clinicalMode) to be the default value for existing profiles.
-        p_profile->cpap->setClinicalMode(true);
+    if (!(*p_profile)[STR_PREF_ClinicalModeDefaultSet].toBool()) {
+        if (!p_profile->LastDay(MT_CPAP).isValid() ) { // quick test if new profile or not.
+            // Override default value of clinicalMode if new profile.
+            // Allows permissiveMode (not clinicalMode) to be the default value for existing profiles.
+            p_profile->cpap->setClinicalMode(true);
+        }
+        // Apply the default only once, so a mode the user picks before importing any data
+        // (e.g. Permissive Mode, to turn on Steady Breathing) isn't reset on the next reload.
+        p_profile->Set(STR_PREF_ClinicalModeDefaultSet, true);
     }
     m_clinicalMode = p_profile->cpap->clinicalMode();
 
