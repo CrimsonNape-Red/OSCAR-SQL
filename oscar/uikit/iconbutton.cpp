@@ -22,14 +22,26 @@ constexpr double kDisabledOpacity = 0.45;
 }
 
 IconButton::IconButton(LineIcon icon, const QString &toolTip, QWidget *parent)
-    : QAbstractButton(parent), m_icon(icon)
+    : IconButton(parent)
 {
+    m_icon = icon;
     setToolTip(toolTip);
     setAccessibleName(toolTip);
+}
+
+IconButton::IconButton(QWidget *parent)
+    : QAbstractButton(parent)
+{
     setCursor(Qt::PointingHandCursor);
     setFocusPolicy(Qt::TabFocus);   // keyboard users get a focus ring; mouse clicks don't leave one
     setAttribute(Qt::WA_Hover);
     setFixedSize(kSize, kSize);
+}
+
+void IconButton::setLineIcon(LineIcon icon)
+{
+    m_icon = icon;
+    update();
 }
 
 QSize IconButton::sizeHint() const

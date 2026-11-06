@@ -10,6 +10,8 @@
 #define TEST_MACROS_ENABLEDoff
 #include "test_macros.h"
 
+#include <QGuiApplication>
+#include <QHeaderView>
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QFileInfo>
@@ -17,6 +19,10 @@
 
 #include "profileselector.h"
 #include "ui_profileselector.h"
+#include "profileselectorstyle.h"
+#include "uikit/tagdelegate.h"
+#include "uikit/theme.h"
+#include "version.h"
 
 
 #include "SleepLib/profiles.h"
@@ -79,29 +85,55 @@ ProfileSelector::ProfileSelector(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // Force light appearance so the profile selector is legible in system dark mode.
-    // QPalette changes are ignored by native Windows style renderers, so use QSS instead.
-    // Qt::setColorScheme() (Qt 6.5+) is unavailable on the minimum supported versions.
+    // Colours come from the theme, which reads the application palette, so the page follows
+    // the system's light or dark setting like the Welcome page and the Oximetry Wizard.
     setAutoFillBackground(true);
-    QPalette p;
-    p.setColor(QPalette::Window, Qt::white);
-    setPalette(p);
-    setStyleSheet(
-        "QTableView { background-color: white; color: black; alternate-background-color: #f2f2f2; }"
-        "QTableView::item:selected { background-color: #3a7fc2; color: white; }"
-        "QLabel { color: black; background-color: transparent; }"
-        "QPushButton { color: black; background-color: #f0f0f0;"
-        "    border: 1px solid #adadad; border-radius: 3px; padding: 3px 8px; }"
-        "QPushButton:hover { background-color: #e5f1fb; border-color: #0078d7; }"
-        "QPushButton:pressed { background-color: #cce4f7; border-color: #0078d7; }"
-        "QPushButton:disabled { color: #a0a0a0; border-color: #d0d0d0; }"
-        "QToolButton { color: black; }"
-        "QLineEdit { background-color: white; color: black; border: 1px solid #adadad; border-radius: 2px; }"
-        "QGroupBox { color: black; border: 1px solid #c0c0c0; border-radius: 4px;"
-        "    margin-top: 8px; padding-top: 4px; }"
-        "QGroupBox::title { color: black; subcontrol-origin: margin; left: 8px; }"
-        "#frame_2 { background-color: white; }"
-    );
+    applyTheme();
+    ui->resetFilterButton->setLineIcon(UiKit::LineIcon::Clear);
+    ui->resetFilterButton->setAccessibleName(ui->resetFilterButton->toolTip());
+    ui->verticalLayout_2->setContentsMargins(Theme::PagePadding, Theme::PagePadding,
+                                             Theme::PagePadding, Theme::PagePadding);
+    ui->horizontalLayout->setSpacing(Theme::SectionGap);
+    ui->verticalLayout_1->setSpacing(Theme::TileGap);
+
+    // Tile-style buttons: a bold name and a line saying what the button does
+    using UiKit::CommandButton;
+    using UiKit::LineIcon;
+    ui->buttonOpenProfile->setup(LineIcon::FolderOpen, tr("Open Profile"),
+                                 tr("Load the selected profile's data"), CommandButton::Kind::Primary);
+    ui->buttonEditProfile->setup(LineIcon::Edit, tr("Edit Profile"),
+                                 tr("Change personal, device and doctor details"));
+    ui->buttonNewProfile->setup(LineIcon::UserAdd, tr("New Profile"),
+                                tr("Set up another person or device"));
+    ui->buttonDestroyProfile->setup(LineIcon::Delete, tr("Destroy Profile"),
+                                    tr("Permanently delete the profile and its backups"),
+                                    CommandButton::Kind::Danger);
+
+    // The table takes all the extra width; the button column stays at the buttons' width
+    int column = 0;
+    for (CommandButton *b : { ui->buttonOpenProfile, ui->buttonEditProfile,
+                              ui->buttonNewProfile, ui->buttonDestroyProfile }) {
+        column = qMax(column, b->sizeHint().width());
+    }
+    ui->frame_2->setMinimumWidth(0);
+    ui->frame_2->setFixedWidth(column);
+    ui->horizontalLayout->setStretch(0, 1);
+    ui->horizontalLayout->setStretch(1, 0);
+
+    // Text sizes are multiples of the application font, as on the Welcome page
+    ui->OSCAR_Label->setFont(Theme::font(1.6, QFont::DemiBold));
+    ui->versionLabel->setFont(Theme::font(1.0));
+    ui->versionLabel->setText(tr("Version %1").arg(getVersion().displayString()));
+    ui->profileInfoGroupBox->setFont(Theme::font(1.15, QFont::DemiBold));
+    ui->profileInfoLabel->setFont(Theme::font(1.0));
+    ui->diskSpaceInfo->setFont(Theme::font(1.0));
+
+    // Compact rows (users may have dozens of profiles); the open profile gets an "Open" tag
+    ui->profileView->setShowGrid(false);
+    ui->profileView->setItemDelegateForColumn(0, new UiKit::TagDelegate(ui->profileView));
+    QHeaderView *rows = ui->profileView->verticalHeader();
+    rows->setSectionResizeMode(QHeaderView::Fixed);
+    rows->setDefaultSectionSize(qRound(QFontMetrics(ui->profileView->font()).height() * 1.55));
 
     model = nullptr;
     proxy = nullptr;
@@ -109,7 +141,6 @@ ProfileSelector::ProfileSelector(QWidget *parent) :
     showDiskUsage = false;  // in case I want to preference it later
     on_diskSpaceInfo_linkActivated(showDiskUsage ? "show" : "hide");
 
-    ui->versionLabel->setText("");
     ui->diskSpaceInfo->setVisible(false);
 
     QItemSelectionModel * sm = ui->profileView->selectionModel();
@@ -117,9 +148,36 @@ ProfileSelector::ProfileSelector(QWidget *parent) :
         connect(sm, SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_selectionChanged(QModelIndex,QModelIndex)));
     ui->buttonEditProfile->setEnabled(false);
     ui->buttonOpenProfile->setEnabled(false);
+    ui->buttonDestroyProfile->setEnabled(false);
 
     connect(ui->profileView->horizontalHeader(), &QHeaderView::sortIndicatorChanged,
             this, &ProfileSelector::onSortIndicatorChanged);
+}
+
+void ProfileSelector::applyTheme()
+{
+    // The stylesheet bakes colours in, so it is rebuilt only when the palette really changed;
+    // that also stops the setPalette() below from re-entering through changeEvent().
+    const QPalette app = QGuiApplication::palette();
+    const QString key = app.color(QPalette::Base).name() + app.color(QPalette::Window).name()
+                        + app.color(QPalette::Text).name() + app.color(QPalette::Highlight).name();
+    if (key == m_themeKey) return;
+    m_themeKey = key;
+
+    QPalette p = palette();
+    p.setColor(QPalette::Window, Theme::color(Theme::Role::Page));
+    setPalette(p);
+    setStyleSheet(ProfileSelectorStyle::styleSheet(app));
+}
+
+void ProfileSelector::changeEvent(QEvent *event)
+{
+    QWidget::changeEvent(event);
+    // The system switched between light and dark (or another palette was applied)
+    if (event->type() == QEvent::ApplicationPaletteChange || event->type() == QEvent::PaletteChange
+        || event->type() == QEvent::ThemeChange) {
+        applyTheme();
+    }
 }
 
 void ProfileSelector::onSortIndicatorChanged(int column, Qt::SortOrder order)
@@ -198,8 +256,6 @@ ProfileSelector::~ProfileSelector()
     delete ui;
 }
 
-const Qt::GlobalColor openProfileHighlightColor = Qt::darkGreen;
-
 void ProfileSelector::updateProfileList()
 {
     QItemSelectionModel * sm = ui->profileView->selectionModel();
@@ -219,17 +275,9 @@ void ProfileSelector::updateProfileList()
     model->setHeaderData(4, Qt::Horizontal, tr("Last Imported"));
     model->setHeaderData(5, Qt::Horizontal, tr("Name"));
 
-    ui->profileView->setStyleSheet("QHeaderView::section { background-color: lightgrey; color: black; }");
-
     int row = 0;
 
     QFontMetrics fm(ui->profileView->font());
-    //#if QT_VERSION < QT_VERSION_CHECK(5,11,0) // not sure when this was fixed
-        QPalette palette = ui->profileView->palette();
-        palette.setColor(QPalette::Highlight, "#3a7fc2");
-        palette.setColor(QPalette::HighlightedText, "white");
-        ui->profileView->setPalette(palette);
-    //#endif
 
     ui->profileView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->profileView->setFocusPolicy(Qt::NoFocus);
@@ -286,18 +334,8 @@ void ProfileSelector::updateProfileList()
                 model->setData(model->index(row, 4, QModelIndex()), 
                                latestImport.toString(QLocale::system().dateFormat(QLocale::ShortFormat)));
             }
-            
-            // Highlight currently open profile
-            QBrush bg = QColor(Qt::black);
-            QFont font = QApplication::font();
-            if (p_profile && p_profile->user->userName() == name) {
-                bg = QBrush(openProfileHighlightColor);
-                font.setBold(true);
-            }
-            for (int i=0; i<columns; i++) {
-                model->setData(model->index(row, i, QModelIndex()), bg, Qt::ForegroundRole);
-            }
-            
+            // The open profile is marked by updateProfileHighlight(), called below.
+
             QRect rect = fm.boundingRect(name);
             if (rect.width() > w) w = rect.width();
             
@@ -364,6 +402,7 @@ void ProfileSelector::updateProfileList()
     ui->diskSpaceInfo->setVisible(false);
     ui->buttonOpenProfile->setEnabled(false);
     ui->buttonEditProfile->setEnabled(false);
+    ui->buttonDestroyProfile->setEnabled(false);
 
     proxy = new MySortFilterProxyModel2(this);
     proxy->setSourceModel(model);
@@ -392,18 +431,19 @@ void ProfileSelector::updateProfileList()
 void ProfileSelector::updateProfileHighlight(QString name)
 {
 
-    QFont font = QApplication::font();
+    // Clear the previous mark: plain font and no tag. Text colour comes from the stylesheet.
+    QFont font = ui->profileView->font();
     font.setBold(false);
-    QBrush bg = QColor(Qt::black);
     for (int row=0;row < model->rowCount(); row++) {
         for (int i=0; i<model->columnCount(); i++) {
             QModelIndex idx = model->index(row, i, QModelIndex());
-            model->setData(idx, bg, Qt::ForegroundRole);
+            model->setData(idx, QVariant(), Qt::ForegroundRole);
             model->setData(idx, font, Qt::FontRole);
         }
+        model->setData(model->index(row, 0, QModelIndex()), QVariant(), UiKit::TagDelegate::TagRole);
     }
 
-    bg = QBrush(openProfileHighlightColor);
+    // Mark the open profile: bold, with an "Open" tag after its name
     font.setBold(true);
 
     for (int row=0;row < proxy->rowCount(); row++) {
@@ -412,9 +452,9 @@ void ProfileSelector::updateProfileHighlight(QString name)
         if (proxy->data(idx).toString().compare(name)==0) {
             on_selectionChanged(idx, QModelIndex());
 
+            proxy->setData(idx, tr("Open"), UiKit::TagDelegate::TagRole);
             for (int i=0; i<proxy->columnCount(); i++) {
                 idx = proxy->index(row, i, QModelIndex());
-                proxy->setData(idx, bg, Qt::ForegroundRole);
                 proxy->setData(idx, font, Qt::FontRole);
             }
             break;
@@ -807,4 +847,7 @@ void ProfileSelector::on_selectionChanged(const QModelIndex &index, const QModel
     }
     ui->buttonOpenProfile->setEnabled(enabled);
     ui->buttonEditProfile->setEnabled(enabled);
+    // Destroy also works for a row whose profile folder is missing (it removes the
+    // database entry), so it only needs a selected row.
+    ui->buttonDestroyProfile->setEnabled(index.isValid());
 }

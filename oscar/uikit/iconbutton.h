@@ -29,6 +29,12 @@ public:
         \param toolTip Shown on hover and used as the accessible name */
     IconButton(LineIcon icon, const QString &toolTip, QWidget *parent = nullptr);
 
+    //! \brief For buttons created by a .ui form; call setLineIcon() and give it a tooltip
+    explicit IconButton(QWidget *parent = nullptr);
+
+    //! \brief Changes the icon
+    void setLineIcon(LineIcon icon);
+
     QSize sizeHint() const override;
 
 protected:
@@ -37,7 +43,7 @@ protected:
     void leaveEvent(QEvent *event) override;
 
 private:
-    LineIcon m_icon;
+    LineIcon m_icon = LineIcon::None;
     bool m_hover = false;
 };
 

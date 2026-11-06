@@ -341,6 +341,7 @@ SOURCES += \
     oximeterimport.cpp \
     preferencesdialog.cpp \
     profileselector.cpp \
+    profileselectorstyle.cpp \
     rawdata.cpp \
     reports.cpp \
     saveGraphLayoutSettings.cpp \
@@ -365,6 +366,8 @@ SOURCES += \
     uikit/sectionheader.cpp \
     uikit/iconbutton.cpp \
     uikit/imagetrim.cpp \
+    uikit/commandbutton.cpp \
+    uikit/tagdelegate.cpp \
     welcomemetrics.cpp \
     zip.cpp \
     Graphs/gAHIChart.cpp \
@@ -637,6 +640,7 @@ HEADERS  += \
     SleepLib/progressdialog.h \
     SleepLib/loader_plugins/cms50f37_loader.h \
     profileselector.h \
+    profileselectorstyle.h \
     SleepLib/appsettings.h \
     SleepLib/loader_plugins/edfparser.h \
     aboutdialog.h \
@@ -655,6 +659,8 @@ HEADERS  += \
     uikit/sectionheader.h \
     uikit/iconbutton.h \
     uikit/imagetrim.h \
+    uikit/commandbutton.h \
+    uikit/tagdelegate.h \
     welcomemetrics.h \
     mytextbrowser.h \
     staticQMessageBox.h \
@@ -889,7 +895,8 @@ test {
         tests/themetests.cpp \
         tests/comparisontests.cpp \
         tests/welcomecardstests.cpp \
-        tests/imagetrimtests.cpp
+        tests/imagetrimtests.cpp \
+        tests/profilepagetests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -920,7 +927,8 @@ test {
         tests/themetests.h \
         tests/comparisontests.h \
         tests/welcomecardstests.h \
-        tests/imagetrimtests.h
+        tests/imagetrimtests.h \
+        tests/profilepagetests.h
 }
 
 macx {

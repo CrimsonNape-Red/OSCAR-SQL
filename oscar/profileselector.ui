@@ -31,38 +31,30 @@
           <widget class="QLineEdit" name="profileFilter"/>
          </item>
          <item>
-          <widget class="QToolButton" name="resetFilterButton">
+          <widget class="UiKit::IconButton" name="resetFilterButton">
            <property name="toolTip">
             <string>Reset filter to see all profiles</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QToolButton {
- background: transparent;
- border-radius: 8px;
- border: 2px solid transparent;
-}
-
-QToolButton:hover {
- border: 2px solid #456789;
-}
-
-QToolButton:pressed {
- border: 2px solid #456789;
- background-color: #89abcd;
-}</string>
-           </property>
-           <property name="text">
-            <string notr="true">...</string>
-           </property>
-           <property name="icon">
-            <iconset resource="Resources.qrc">
-             <normaloff>:/icons/refresh.png</normaloff>:/icons/refresh.png</iconset>
            </property>
           </widget>
          </item>
         </layout>
        </item>
        <item>
+        <widget class="QFrame" name="tableCard">
+         <layout class="QVBoxLayout" name="tableCardLayout">
+          <property name="leftMargin">
+           <number>4</number>
+          </property>
+          <property name="topMargin">
+           <number>4</number>
+          </property>
+          <property name="rightMargin">
+           <number>4</number>
+          </property>
+          <property name="bottomMargin">
+           <number>4</number>
+          </property>
+          <item>
         <widget class="QTableView" name="profileView">
          <property name="focusPolicy">
           <enum>Qt::ClickFocus</enum>
@@ -74,7 +66,7 @@ QToolButton:pressed {
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
          <property name="alternatingRowColors">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::NoSelection</enum>
@@ -95,6 +87,9 @@ QToolButton:pressed {
           <bool>false</bool>
          </attribute>
         </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </item>
@@ -102,41 +97,46 @@ QToolButton:pressed {
       <widget class="QFrame" name="frame_2">
        <property name="minimumSize">
         <size>
-         <width>250</width>
+         <width>320</width>
          <height>0</height>
         </size>
        </property>
        <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
+        <enum>QFrame::NoFrame</enum>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>12</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Preferred</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
+          <property name="spacing">
+           <number>14</number>
+          </property>
           <item>
            <widget class="QLabel" name="OSCAR_Logo">
+            <property name="minimumSize">
+             <size>
+              <width>56</width>
+              <height>56</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
-              <width>128</width>
-              <height>128</height>
+              <width>56</width>
+              <height>56</height>
              </size>
             </property>
             <property name="text">
@@ -148,18 +148,33 @@ QToolButton:pressed {
             <property name="scaledContents">
              <bool>true</bool>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
            </widget>
           </item>
           <item>
-           <spacer name="horizontalSpacer_2">
+           <layout class="QVBoxLayout" name="titleLayout">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="OSCAR_Label">
+              <property name="text">
+               <string notr="true">OSCAR</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="versionLabel">
+              <property name="text">
+               <string>Version</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Preferred</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -172,70 +187,21 @@ QToolButton:pressed {
          </layout>
         </item>
         <item>
-         <widget class="QLabel" name="OSCAR_Label">
-          <property name="font">
-           <font>
-            <pointsize>13</pointsize>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string notr="true">OSCAR</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="versionLabel">
-          <property name="font">
-           <font>
-            <italic>false</italic>
-           </font>
-          </property>
-          <property name="text">
-           <string>Version</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="buttonOpenProfile">
+         <widget class="UiKit::CommandButton" name="buttonOpenProfile">
           <property name="text">
            <string>Open Profile</string>
           </property>
-          <property name="icon">
-           <iconset resource="Resources.qrc">
-            <normaloff>:/icons/forward.png</normaloff>:/icons/forward.png</iconset>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="buttonEditProfile">
+         <widget class="UiKit::CommandButton" name="buttonEditProfile">
           <property name="text">
            <string>Edit Profile</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="Line" name="line">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="buttonNewProfile">
+         <widget class="UiKit::CommandButton" name="buttonNewProfile">
           <property name="text">
            <string>New Profile</string>
           </property>
@@ -323,7 +289,7 @@ QToolButton:pressed {
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="buttonDestroyProfile">
+         <widget class="UiKit::CommandButton" name="buttonDestroyProfile">
           <property name="text">
            <string>Destroy Profile</string>
           </property>
@@ -336,6 +302,18 @@ QToolButton:pressed {
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>UiKit::CommandButton</class>
+   <extends>QPushButton</extends>
+   <header>uikit/commandbutton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>UiKit::IconButton</class>
+   <extends>QAbstractButton</extends>
+   <header>uikit/iconbutton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="Resources.qrc"/>
  </resources>

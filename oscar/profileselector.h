@@ -93,6 +93,10 @@ public:
     /// or an empty string if nothing is selected.
     QString selectedProfileName() const;
 
+protected:
+    //! @brief Re-applies the theme when the system's light/dark palette changes.
+    void changeEvent(QEvent *event) override;
+
 private slots:
     void on_profileView_doubleClicked(const QModelIndex &index);
 
@@ -113,6 +117,10 @@ private slots:
     void on_resetFilterButton_clicked();
 
 private:
+    //! @brief Applies the theme's colours (page background and stylesheet) from the current
+    //!        application palette, if they changed since the last call.
+    void applyTheme();
+
     QString getProfileDiskInfo(Profile *profile);
     QString formatSize(qint64 size);
     //! @brief Returns the user's full name formatted according to the current locale's conventions.
@@ -140,6 +148,9 @@ private:
     bool restoringSort = false;
 
     bool showDiskUsage;
+
+    //! Palette colours the current stylesheet was built from (see applyTheme()).
+    QString m_themeKey;
 };
 
 #endif // PROFILESELECTOR_H

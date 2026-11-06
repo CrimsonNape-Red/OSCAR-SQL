@@ -170,9 +170,91 @@ QPainterPath settingsIcon()
     return p;
 }
 
+//! \brief Folder with an arrow pointing in
+QPainterPath folderOpenIcon()
+{
+    QPainterPath p;
+    p.moveTo(4.5, 6);
+    p.lineTo(10, 6);
+    p.lineTo(12, 8.5);
+    p.lineTo(19.5, 8.5);
+    p.quadTo(21, 8.5, 21, 10);
+    p.lineTo(21, 18);
+    p.quadTo(21, 19.5, 19.5, 19.5);
+    p.lineTo(4.5, 19.5);
+    p.quadTo(3, 19.5, 3, 18);
+    p.lineTo(3, 7.5);
+    p.quadTo(3, 6, 4.5, 6);
+    p.closeSubpath();
+    line(p, 9, 14, 16.5, 14);
+    p.moveTo(13.5, 11);
+    p.lineTo(16.5, 14);
+    p.lineTo(13.5, 17);
+    return p;
+}
+
+//! \brief Pencil
+QPainterPath editIcon()
+{
+    QPainterPath p;
+    p.moveTo(4, 20);
+    p.lineTo(8, 20);
+    p.lineTo(19, 9);
+    p.lineTo(15, 5);
+    p.lineTo(4, 16);
+    p.closeSubpath();
+    line(p, 13, 7, 17, 11);
+    return p;
+}
+
+//! \brief Person with a plus sign
+QPainterPath userAddIcon()
+{
+    QPainterPath p;
+    p.addEllipse(QPointF(10, 8), 3.5, 3.5);
+    p.moveTo(3.5, 19.5);
+    p.cubicTo(4.3, 16.1, 6.9, 14, 10, 14);
+    p.cubicTo(11.6, 14, 13, 14.5, 14.1, 15.4);
+    line(p, 18, 14, 18, 20);
+    line(p, 15, 17, 21, 17);
+    return p;
+}
+
+//! \brief Waste bin
+QPainterPath deleteIcon()
+{
+    QPainterPath p;
+    line(p, 4, 7, 20, 7);
+    p.moveTo(9, 7);
+    p.lineTo(9, 4.5);
+    p.lineTo(15, 4.5);
+    p.lineTo(15, 7);
+    p.moveTo(6.5, 7);
+    p.lineTo(7.5, 19.5);
+    p.lineTo(16.5, 19.5);
+    p.lineTo(17.5, 7);
+    line(p, 10, 11, 10, 16);
+    line(p, 14, 11, 14, 16);
+    return p;
+}
+
+//! \brief A cross, for clearing a field
+QPainterPath clearIcon()
+{
+    QPainterPath p;
+    line(p, 6, 6, 18, 18);
+    line(p, 18, 6, 6, 18);
+    return p;
+}
+
 QPainterPath iconPath(LineIcon icon)
 {
     switch (icon) {
+    case LineIcon::Clear: return clearIcon();
+    case LineIcon::FolderOpen: return folderOpenIcon();
+    case LineIcon::Edit: return editIcon();
+    case LineIcon::UserAdd: return userAddIcon();
+    case LineIcon::Delete: return deleteIcon();
     case LineIcon::Settings: return settingsIcon();
     case LineIcon::ArrowUpRight: return arrowUpRightIcon();
     case LineIcon::ArrowDownRight: return arrowDownRightIcon();

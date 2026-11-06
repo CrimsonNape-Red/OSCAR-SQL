@@ -214,6 +214,11 @@ of the work carries over to later screens.
   application font instead of bundled fonts.
 - 2026-11-03: device pictures are trimmed in code (empty margins removed when shown, files
   unchanged) and the night strip's picture box is 76 x 52 px, so the text sets its height.
+- 2026-11-04: Profile tab restyled on branch `profile-page` (off `welcome-pilot`): same
+  layout, theme colours and fonts, tile-style buttons with a description line, the table in
+  a rounded card with compact rows and an "Open" tag on the open profile. Unlike the Welcome
+  page this edits the existing `profileselector.*` files (a restyle, not a new page), so
+  master fixes to them may conflict. Mockup: Profile Tab Redesign (published canvas).
 - For testers to judge: is the new page better than the old one, and which card colouring
   (Plain, By group, By status) works best.
 - Still to check: macOS painting speed with the card shadows (#235), Linux, HiDPI, and
