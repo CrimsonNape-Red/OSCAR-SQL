@@ -3228,6 +3228,17 @@ OSCAR will restart when you click OK.</string>
                     </widget>
                    </item>
                    <item>
+                    <widget class="QCheckBox" name="useSystemTooltipColors">
+                     <property name="toolTip">
+                      <string>Show tooltips, including those on graphs, in your system's colors instead of OSCAR's black on yellow.
+Follows high contrast themes, and dark mode if it was on when OSCAR started.</string>
+                     </property>
+                     <property name="text">
+                      <string>Use system tooltip colors</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
                     <widget class="QCheckBox" name="useNewWelcome">
                      <property name="toolTip">
                       <string>Show the redesigned Welcome page. Untick to go back to the original page.</string>

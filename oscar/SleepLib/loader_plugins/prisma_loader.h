@@ -72,6 +72,9 @@ enum Prisma_Parameters {
     // PRISMA_LINE_ALARM_DISCONNECTION_ACTIVE = 1203,
     PRISMA_LINE_APAP_DYNAMIC = 1209,
     PRISMA_LINE_EXTRA_OBSTRUCTION_PROTECTION = 1154, // BiSoft off = 0, BiSoft1 = 2, BiSoft2 = 3, TriLevel = 1
+    PRISMA_LINE_AUTO_F = 1156,   // autoF: 0 = off, 3 = on (prismaTS)
+    PRISMA_LINE_F_MIN = 1157,    // F min, breaths per minute; -1 when it doesn't apply (autoF on)
+    PRISMA_LINE_TI_T = 1158,     // Ti/T set, percent; -1 when it doesn't apply (autoF on)
     PRISMA_LINE_AUTO_PDIFF = 1219
 
 };
@@ -156,9 +159,13 @@ enum Prisma_Event_Type {
     PRISMA_EVENT_ARTIFACT = 141,
     PRISMA_EVENT_FLOW_LIMITATION = 151,
     PRISMA_EVENT_CRITICAL_LEAKAGE = 161,
+    PRISMA_EVENT_DISCONNECTION = 171,
     PRISMA_EVENT_CS_RESPIRATION = 181,
     PRISMA_EVENT_TIMED_BREATH = 221,
+    PRISMA_EVENT_SOFTSTART = 241,
     PRISMA_EVENT_EPOCH_DEEPSLEEP = 261,
+    PRISMA_EVENT_LEAKAGE_ALARM = 305,     // 304 marks the same alarm's start, with no duration
+    PRISMA_EVENT_SEL = 330,               // "Sudden End of Leakage (SEL)" in prismaTS protocols
 };
 
 

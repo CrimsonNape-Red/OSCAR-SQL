@@ -351,6 +351,7 @@ SOURCES += \
     speedcheck.cpp \
     staticQMessageBox.cpp \
     statistics.cpp \
+    tooltipcolors.cpp \
     translation.cpp \
     treecheckdelegate.cpp \
     version.cpp \
@@ -652,6 +653,7 @@ HEADERS  += \
     rawdata.h \
     translation.h \
     statistics.h \
+    tooltipcolors.h \
     oximeterimport.h \
     SleepLib/deviceconnection.h \
     SleepLib/xmlreplay.h \
@@ -956,6 +958,7 @@ test {
         tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp \
         tests/prismaventtests.cpp \
+        tests/prismalinetests.cpp \
         tests/respiratoryeventstests.cpp \
         tests/bmcsessionendstests.cpp \
         tests/bmcusrsessionstests.cpp \
@@ -991,6 +994,7 @@ test {
         tests/portablemodetests.h \
         tests/sessionsplittests.h \
         tests/prismaventtests.h \
+        tests/prismalinetests.h \
         tests/respiratoryeventstests.h \
         tests/bmcsessionendstests.h \
         tests/bmcusrsessionstests.h \

@@ -4,6 +4,85 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-04 - Tooltip colors: startup prompts missed, defined three times, no system option (GitLab #371)
+
+**Files:** `oscar/tooltipcolors.cpp`, `tooltipcolors.h` (new), `oscar/main.cpp`, `mainwindow.cpp`,
+`mainwindow.h`, `preferencesdialog.cpp`, `preferencesdialog.ui`, `Graphs/gGraphView.cpp`,
+`SleepLib/appsettings.cpp`, `appsettings.h`, `oscar/oscar.pro`
+
+**Symptom:** Prompts shown before `MainWindow` exists kept the platform's tooltips. The fixed black on
+yellow also overrode dark and high contrast themes, with no way to turn it off.
+
+**Root cause:** The colors were applied in `MainWindow`'s constructor, and were defined separately in
+`gToolTip::paint`, the tooltip palette and the Windows style-sheet rule.
+
+**Fix:** `ToolTipColors` now owns the colors and the Windows application style sheet. `main()` applies them
+right after creating the `QApplication`, and again once the preferences are loaded. New option
+Preferences > Appearance > "Use system tooltip colors", off by default, takes effect on OK.
+
+**Non-obvious:**
+- `QToolTip::palette()` isn't what native Windows styles paint. `QWindowsVistaStyle::polish` replaces a
+  tooltip's palette with the application's, so with Qt 6.10.2 and 6.12.0 on a light system the palette says
+  `#ffffe1` while windows11 paints `#f3f3f3` and windowsvista `#f9f9f9`. The graphs' tooltips get the system
+  color by having the style paint a panel off screen.
+- OSCAR forces the Light color scheme, and Qt then reports only light tooltip colors. The system's dark
+  colors are read just before that, and forced on the tooltips like OSCAR's own.
+
+**Limits:** Dark mode is read once at startup, as no public Qt API reports it while Light is forced, so
+switching it needs a restart of OSCAR. Border and padding still differ by platform (#371 item 2).
+
+## 2026-11-04 - prismaCR: model unrecognized, AcSV pressures wrong, settings dropped (GitLab #369)
+
+**Files:** `oscar/SleepLib/loader_plugins/prisma_loader.cpp`, `prisma_loader.h`,
+`oscar/tests/prismalinetests.cpp`, `prismalinetests.h`, `oscar/oscar.pro`
+
+**Symptom:** A prismaCR card (DeviceType 13, firmware 5.07.0002, AcSV) was named "Unknown
+Model" and raised the untested-device warning. For settings of EEPAP 6-10, PDIFF 4-6 and IPAP
+max 13.5, the Daily page showed "EPAP 4 PS 4-6" and the Welcome page said EPAP was fixed at 4.
+Every session stored "Mode partially supported, please send sample data". Bi softPAP, autoF,
+F min, Ti/T and tube type were missing from the settings.
+
+**Root cause:** DeviceType 13 was not in `s_PrismaTestedModels`. AcSV was mapped to fixed-EPAP
+`MODE_ASV`, although it titrates EPAP between limits (commanded EPAP ran 4-9.25 in one night).
+The AcSV case never stored Bi softPAP, and parameters 1156-1158 were not read. In all LINE
+modes, the tube type check tested for the Smart parameter id (21), which LINE cards don't have,
+instead of the LINE id (1091).
+
+**Fix:** Added the model and mapped AcSV to `MODE_ASV_VARIABLE_EPAP`, with `CPAP_EPAPLo` from
+parameter 1201. The derived `CPAP_EPAP` and `CPAP_IPAP` settings are no longer stored for AcSV,
+and the warning is no longer written. Added `Prisma_AutoF`, `Prisma_FMin` and `Prisma_TiT`; F min
+and Ti/T are skipped when written as -1 (autoF on). Tube type now tests the LINE id.
+
+**Limits:** `prisma_data_version` is unchanged, so existing AcSV sessions keep the old mode and
+warning until Rebuild CPAP Data. prismaTS reports confirm the settings for both of the card's
+groups, including autoF 0 = Off and 3 = On. Those reports don't show the EPAP floor, which is
+confirmed by commanded pressures.
+
+**Follow-up (#370):** Named autoF 3 as On, and imported events 113, 171, 241, 305 and 330, which
+prismaTS therapy protocols identify by time and duration. softSTART goes to `CPAP_Ramp`, and
+Disconnection and SEL share the prisma VENT channels. 113 (hypopnea with very high leakage) has
+its own channel outside AHI, because counting it along with apneas during movement gave AHI 3.56
+on a night prismaTS reports as 3; the VENT loader still sends it to `CPAP_Hypopnea`. softSTART
+and Disconnection rows under a second long are skipped. Existing sessions pick up the events
+after Rebuild CPAP Data.
+
+---
+
+## 2026-11-04 - Destroy Profile button enabled with no profile selected (GitLab #368)
+
+**Files:** `oscar/profileselector.cpp`
+
+**Symptom:** On the Profile tab, Destroy Profile was always enabled, even with no profile
+selected; clicking it then did nothing. Open Profile and Edit Profile were disabled.
+
+**Root cause:** Only Open and Edit were ever enabled or disabled; Destroy was left out.
+
+**Fix:** Destroy is disabled at startup and whenever the list is rebuilt, and enabled when a
+row is selected. It needs only a selected row (not a loaded profile), because it also
+removes profiles whose folder is missing.
+
+---
+
 ## 2026-11-03 - Lumis 150 device image has a white background (GitLab #367)
 
 **Files:** `oscar/icons/lumis150.png`

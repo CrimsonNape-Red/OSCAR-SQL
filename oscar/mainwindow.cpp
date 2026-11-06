@@ -98,6 +98,7 @@
 #include <QProgressDialog>
 #include <QThread>
 #include <QEventLoop>
+#include <QPalette>
 #include <functional>
 #include "purgerangedaysdialog.h"
 #include "exports/report_exporter.h"
@@ -125,6 +126,7 @@
 #include "statistics.h"
 #include "zip.h"
 #include "speedcheck.h"
+#include "tooltipcolors.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,4,0)
 #include <QOpenGLFunctions>
@@ -149,15 +151,12 @@ MainWindow::MainWindow(QWidget *parent) :
             });
     }
 
-    // Qt 6 on Windows 11 renders menu bar items and combo box drop-down items
-    // with excessive vertical padding. Constrain to match earlier Qt versions.
+    // Qt 6 on Windows 11 renders menu bar items with excessive vertical padding.
+    // Constrain to match earlier Qt versions. (Combo box items: see ToolTipColors::apply().)
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0) && defined(Q_OS_WIN)
     ui->menubar->setStyleSheet(
         "QMenuBar { padding: 0px; }"
         "QMenuBar::item { padding: 2px 8px 1px 8px; }"
-    );
-    qApp->setStyleSheet(
-        "QComboBox QAbstractItemView::item { padding: 0px 0px; margin: 0px; }"
     );
 #endif
 
@@ -448,6 +447,16 @@ void MainWindow::showEvent(QShowEvent *event)
         });
     }
 #endif
+}
+
+void MainWindow::changeEvent(QEvent *event)
+{
+    if (event->type() == QEvent::ThemeChange) {
+        // Qt has reset the tooltips to the theme's palette. Set their colors again once the
+        // change has been handled.
+        QTimer::singleShot(0, this, [] { ToolTipColors::apply(); });
+    }
+    QMainWindow::changeEvent(event);
 }
 
 void MainWindow::closeEvent(QCloseEvent * event)

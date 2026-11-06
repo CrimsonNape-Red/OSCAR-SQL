@@ -49,6 +49,7 @@
 #include "SleepLib/profiles.h"
 #include "translation.h"
 #include "speedcheck.h"
+#include "tooltipcolors.h"
 #include "SleepLib/common.h"
 #include "SleepLib/portablemode.h"
 #include "SleepLib/deviceconnection.h"
@@ -952,9 +953,10 @@ int main(int argc, char *argv[]) {
     QGuiApplication::setApplicationDisplayName(getAppName() + " 2");
     // Dark-mode trial (ui-next only): the forced light colour scheme is off, so OSCAR follows
     // the system's light or dark setting.
-//#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    ToolTipColors::captureSystemScheme();  // Qt hides the system's dark mode once Light is forced
 //    mainapp.styleHints()->setColorScheme(Qt::ColorScheme::Light);
-//#endif
+#endif
     QStringList args = mainapp.arguments();
 
     // Everything shown before the preferences are loaded (language choice, data folder
@@ -968,6 +970,8 @@ int main(int argc, char *argv[]) {
             QApplication::setFont(startupFont);
         }
     }
+    // Likewise OSCAR's tooltip colors, until the preferences can say which to use.
+    ToolTipColors::apply();
 
 #ifdef Q_OS_WIN
     // QMessageBox must come after the application is created. The graphics engine has to be selected before.
@@ -1537,6 +1541,7 @@ int main(int argc, char *argv[]) {
     if (AppSetting->useFusionTheme()) {
         QApplication::setStyle(QStyleFactory::create("Fusion"));
     }
+    ToolTipColors::apply();  // now from the preference, and for the final widget style
 
     QString language = settings.value(LangSetting, "").toString();
     AppSetting->setLanguage(language);
