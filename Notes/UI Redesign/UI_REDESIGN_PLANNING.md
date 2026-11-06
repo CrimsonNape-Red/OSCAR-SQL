@@ -201,10 +201,36 @@ of the work carries over to later screens.
 - Later screens build on that foundation, each on its own short branch merged into `ui-next`
   (see section 1). Nothing reaches master until the whole redesign is released.
 
+### Pilot status
+
+- 2026-10-31: first Qt build of the Welcome pilot on branch `welcome-pilot` (off `ui-next`),
+  following `WELCOME_PILOT_DESIGN.md` and `WELCOME_PILOT_PLAN.md`. Switch in Preferences →
+  Appearance: "Use the new Welcome page" and "Welcome card colour".
+- Reusable pieces are in `oscar/uikit/` (theme, cards, tiles, icon button, event bar, icons,
+  panels, labels); card data and the card table are in `oscar/welcomemetrics.*`.
+- 2026-11-03: cards can be shown or hidden per profile from a gear button beside the legend.
+- 2026-11-03: the theme now follows the Oximetry Wizard: colours from the system palette
+  (so a dark palette works), the wizard's good and warning colours, 10 px corners, and the
+  application font instead of bundled fonts.
+- 2026-11-03: device pictures are trimmed in code (empty margins removed when shown, files
+  unchanged) and the night strip's picture box is 76 x 52 px, so the text sets its height.
+- 2026-11-04: Profile tab restyled on branch `profile-page` (off `welcome-pilot`): same
+  layout, theme colours and fonts, tile-style buttons with a description line, the table in
+  a rounded card with compact rows and an "Open" tag on the open profile. Unlike the Welcome
+  page this edits the existing `profileselector.*` files (a restyle, not a new page), so
+  master fixes to them may conflict. Mockup: Profile Tab Redesign (published canvas).
+- For testers to judge: is the new page better than the old one, and which card colouring
+  (Plain, By group, By status) works best.
+- Still to check: macOS painting speed with the card shadows (#235), Linux, HiDPI, and
+  long translated strings.
+
 ---
 
 ## Open decisions
 
 - Native style vs. Fusion as the base for the redesigned UI.
-- Whether dark mode is a goal, and if so, the fallback for Qt < 6.5.
+- Whether dark mode is a goal, and if so, the fallback for Qt < 6.5. Since 2026-11-03,
+  `ui-next` no longer forces the light colour scheme (`main.cpp`), so OSCAR follows the
+  system setting while the redesign is in progress. **Before release:** if dark mode isn't
+  fully working, put the forced light scheme back.
 - Whether animation is wanted (can be deferred).

@@ -499,13 +499,14 @@ bool PreferencesRepository::saveUserSettings(qint64 profileId, UserSettings* gen
 {
     if (!general) return false;
     
-    // User/General settings keys defined in profiles.h (STR_US_*)
+    // User/General settings keys defined in profiles.h (STR_US_*), plus the Welcome page's
+    // hidden-card list (welcomemetrics.cpp)
     QStringList generalKeys = {
         "UnitSystem", "EventWindowSize", "SkipEmptyDays", "RebuildCache",
         "LinkGroups", "CalculateRDI", "PrefCalcMiddle", "PrefCalcPercentile",
         "PrefCalcMax", "ShowUnknownFlags", "StatReportMode", "StatReportDate",
         "StatReportRangeStart", "StatReportRangeEnd", "LastOverviewRange",
-        "CustomOverviewRangeStart", "CustomOverviewRangeEnd"
+        "CustomOverviewRangeStart", "CustomOverviewRangeEnd", "WelcomeHiddenCards"
     };
     
     for (const QString& key : generalKeys) {

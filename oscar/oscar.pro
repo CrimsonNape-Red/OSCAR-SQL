@@ -343,6 +343,7 @@ SOURCES += \
     oximeterimport.cpp \
     preferencesdialog.cpp \
     profileselector.cpp \
+    profileselectorstyle.cpp \
     rawdata.cpp \
     reports.cpp \
     saveGraphLayoutSettings.cpp \
@@ -354,6 +355,22 @@ SOURCES += \
     treecheckdelegate.cpp \
     version.cpp \
     welcome.cpp \
+    welcomepage.cpp \
+    uikit/theme.cpp \
+    uikit/comparison.cpp \
+    uikit/formatting.cpp \
+    uikit/actiontile.cpp \
+    uikit/eventbar.cpp \
+    uikit/label.cpp \
+    uikit/lineicons.cpp \
+    uikit/metriccard.cpp \
+    uikit/panel.cpp \
+    uikit/sectionheader.cpp \
+    uikit/iconbutton.cpp \
+    uikit/imagetrim.cpp \
+    uikit/commandbutton.cpp \
+    uikit/tagdelegate.cpp \
+    welcomemetrics.cpp \
     zip.cpp \
     Graphs/gAHIChart.cpp \
     Graphs/gdailysummary.cpp \
@@ -650,10 +667,28 @@ HEADERS  += \
     SleepLib/progressdialog.h \
     SleepLib/loader_plugins/cms50f37_loader.h \
     profileselector.h \
+    profileselectorstyle.h \
     SleepLib/appsettings.h \
     SleepLib/loader_plugins/edfparser.h \
     aboutdialog.h \
     welcome.h \
+    welcomepage.h \
+    welcomepagebase.h \
+    uikit/theme.h \
+    uikit/comparison.h \
+    uikit/formatting.h \
+    uikit/actiontile.h \
+    uikit/eventbar.h \
+    uikit/label.h \
+    uikit/lineicons.h \
+    uikit/metriccard.h \
+    uikit/panel.h \
+    uikit/sectionheader.h \
+    uikit/iconbutton.h \
+    uikit/imagetrim.h \
+    uikit/commandbutton.h \
+    uikit/tagdelegate.h \
+    welcomemetrics.h \
     mytextbrowser.h \
     staticQMessageBox.h \
     git_info.h \
@@ -926,7 +961,12 @@ test {
         tests/bmcusrsessionstests.cpp \
         tests/steadybreathingsettingstests.cpp \
         tests/oximetryeventstests.cpp \
-        tests/oximetryrecalctests.cpp
+        tests/oximetryrecalctests.cpp \
+        tests/themetests.cpp \
+        tests/comparisontests.cpp \
+        tests/welcomecardstests.cpp \
+        tests/imagetrimtests.cpp \
+        tests/profilepagetests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -956,7 +996,12 @@ test {
         tests/bmcusrsessionstests.h \
         tests/steadybreathingsettingstests.h \
         tests/oximetryeventstests.h \
-        tests/oximetryrecalctests.h
+        tests/oximetryrecalctests.h \
+        tests/themetests.h \
+        tests/comparisontests.h \
+        tests/welcomecardstests.h \
+        tests/imagetrimtests.h \
+        tests/profilepagetests.h
 }
 
 macx {
