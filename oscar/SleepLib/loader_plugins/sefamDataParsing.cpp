@@ -424,6 +424,29 @@ bool parseSettings(const LogRecord &rec, Settings &out)
     return false;
 }
 
+/*! \brief Decode a two-digit BCD value held in a 16-bit word.
+    \return The value, or -1 if the word holds anything but two decimal digits. */
+static int fromBcd(quint16 word)
+{
+    const int high = word >> 4;
+    const int low  = word & 0x0F;
+    return (high > 9 || low > 9) ? -1 : high * 10 + low;
+}
+
+/*! \brief Build an archive block's start time from its BCD words.
+    \return The local time, or an invalid QDateTime if the words hold no real date. */
+static QDateTime archiveStartFromBcd(quint16 day, quint16 month, quint16 year,
+                                     quint16 hour, quint16 minute, quint16 second)
+{
+    const int yy = fromBcd(year);
+    if (yy < 0) { return QDateTime(); }
+
+    // QDate and QTime reject -1 as well as an impossible date or time.
+    const QDate date(2000 + yy, fromBcd(month), fromBcd(day));
+    const QTime time(fromBcd(hour), fromBcd(minute), fromBcd(second));
+    return (date.isValid() && time.isValid()) ? QDateTime(date, time) : QDateTime();
+}
+
 bool readMemoryImage(const QString &path, QVector<SessionSummary> &out)
 {
     out.clear();
@@ -518,6 +541,9 @@ bool readMemoryImage(const QString &path, QVector<SessionSummary> &out)
 
         SessionSummary s;
         s.minutes              = minutes;
+        s.start                = archiveStartFromBcd(be16(off + 1 * 2), be16(off + 2 * 2),
+                                                     be16(off + 3 * 2), be16(off + 4 * 2),
+                                                     be16(off + 5 * 2), be16(off + 6 * 2));
         s.obstructiveApneas    = be16(off + 13 * 2);
         s.centralApneas        = be16(off + 14 * 2);
         s.obstructiveHypopneas = be16(off + 15 * 2);
@@ -577,6 +603,7 @@ bool readMemoryImage(const QString &path, QVector<SessionSummary> &out)
         for (int m = 0; m < minutes; ++m, rec += kArchiveMinuteLength) {
             MinuteRecord &r = s.minuteData[m];
             r.meanPressure = byteAt(rec);
+            r.totalLeak    = byteAt(rec + 1);
 
             // Byte 2 is four independent two-bit counters, one per event type,
             // so a minute holding two of the same kind is not lost. Reading the
@@ -603,6 +630,28 @@ bool readMemoryImage(const QString &path, QVector<SessionSummary> &out)
                  << Qt::hex << start;
     }
     return !out.isEmpty();
+}
+
+QVector<int> findArchiveOnlySessions(const QVector<SessionSummary> &archive,
+                                     const QDateTime &oldestDirStart,
+                                     const QSet<qint64> &knownStartSecs)
+{
+    QVector<int> chosen;
+    if (!oldestDirStart.isValid()) { return chosen; }
+
+    for (int i = 0; i < archive.size(); ++i) {
+        const QDateTime &start = archive.at(i).start;
+        if (!start.isValid() || start < oldestDirStart) { continue; }
+
+        const qint64 secs = start.toSecsSinceEpoch();
+        bool known = false;
+        for (int delta = -kArchiveStartToleranceSeconds;
+             delta <= kArchiveStartToleranceSeconds && !known; ++delta) {
+            known = knownStartSecs.contains(secs + delta);
+        }
+        if (!known) { chosen.append(i); }
+    }
+    return chosen;
 }
 
 bool readSession(const QString &dirPath, SessionData &out, QString &error)

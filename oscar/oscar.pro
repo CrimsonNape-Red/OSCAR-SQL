@@ -905,6 +905,7 @@ test {
 
     SOURCES += \
         tests/apextests.cpp \
+        tests/sefamtests.cpp \
         tests/prs1tests.cpp \
         tests/rawdatatests.cpp \
         tests/resmedtests.cpp \
@@ -936,6 +937,7 @@ test {
     HEADERS += \
         tests/AutoTest.h \
         tests/apextests.h \
+        tests/sefamtests.h \
         tests/prs1tests.h \
         tests/rawdatatests.h \
         tests/resmedtests.h \

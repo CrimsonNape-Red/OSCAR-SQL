@@ -739,6 +739,171 @@ static void setPressureMode(Session *session, bool fixed, float prescribed,
     }
 }
 
+/*! \brief Publish the settings an archive block records for its own session.
+
+    Per-session settings, not carried forward: each archive block records the
+    settings that were in force for its own session, so a card whose settings
+    changed mid-history reports each session correctly. The log-based path in Open()
+    cannot do that.
+
+    The block carries the mask leak, and the circuit and CC+ level packed into one
+    field. It does NOT carry the humidifier: on this model that setting exists only
+    in the file the vendor software writes, so an S.Box session reports no humidifier
+    level at all. */
+static void applyArchiveSettings(Session *session,
+                                 const SefamParsing::SessionSummary &summary)
+{
+    setPressureMode(session, summary.fixedPressure, summary.prescribedPressure,
+                    summary.minPressure, summary.maxPressure);
+    if (summary.rampMinutes > 0) {
+        session->settings[CPAP_RampTime]     = summary.rampMinutes;
+        session->settings[CPAP_RampPressure] = summary.rampPressure;
+    }
+    if (summary.maskLeak >= 0) {
+        session->settings[SEFAM_MaskLeakSet] = summary.maskLeak;
+    }
+    if (summary.patientCircuit > 0) {
+        session->settings[SEFAM_Circuit] = summary.patientCircuit;
+    }
+    if (summary.comfortLevel >= 0) {
+        session->settings[SEFAM_ComfortLevel] = summary.comfortLevel;
+    }
+}
+
+/*! \brief Add a session's events from its archive block, for cards with no log.
+    \param session  Session to add to.
+    \param summary  The session's archive block.
+    \param startMs  Session start.
+    \param endMs    Session end; minutes at or past it are ignored.
+    \param label    Names the session in a warning. */
+static void addArchiveEvents(Session *session, const SefamParsing::SessionSummary &summary,
+                             qint64 startMs, qint64 endMs, const QString &label)
+{
+    EventList *oa    = session->AddEventList(CPAP_Obstructive, EVL_Event);
+    EventList *ca    = session->AddEventList(CPAP_ClearAirway, EVL_Event);
+    // OH/CH lists are created on the first event, as in the log path (GitLab #261).
+    EventList *oh    = nullptr;
+    EventList *ch    = nullptr;
+    EventList *snore = session->AddEventList(CPAP_VSnore,      EVL_Event);
+    EventList *fl    = session->AddEventList(CPAP_FlowLimit,   EVL_Event);
+
+    // Resolution is one minute and the card records no durations, so
+    // events are spread evenly across the minute they fall in. A lone
+    // event therefore lands at its midpoint, which is where the
+    // manufacturer's own waveform display draws it; two land on the
+    // quarters. Spreading rather than stacking keeps events of the same
+    // kind in one minute from sharing a timestamp and drawing as one.
+    const auto place = [](EventList *list, qint64 minuteStartMs, int count) {
+        for (int k = 0; k < count; ++k) {
+            const qint64 when = minuteStartMs
+                              + (60000LL * (2 * k + 1)) / (2 * count);
+            list->AddEvent(when, 0);
+        }
+    };
+
+    int oaTotal = 0, caTotal = 0, ohTotal = 0, chTotal = 0, snoreTotal = 0, flTotal = 0;
+    for (int m = 0; m < summary.minuteData.size(); ++m) {
+        const qint64 minuteMs = startMs + static_cast<qint64>(m) * 60000LL;
+        if (minuteMs >= endMs) { break; }
+        const SefamParsing::MinuteRecord &r = summary.minuteData.at(m);
+
+        place(oa,    minuteMs, r.obstructiveApnea);
+        place(ca,    minuteMs, r.centralApnea);
+        // The minute record counts the two hypopnea kinds separately, so each
+        // goes to its own channel — the same choice the log-based path makes.
+        if (r.obstructiveHypopnea) {
+            if (!oh) oh = session->AddEventList(CPAP_ObstructiveHypopnea, EVL_Event);
+            place(oh, minuteMs, r.obstructiveHypopnea);
+        }
+        if (r.centralHypopnea) {
+            if (!ch) ch = session->AddEventList(CPAP_CentralHypopnea, EVL_Event);
+            place(ch, minuteMs, r.centralHypopnea);
+        }
+        place(snore, minuteMs, r.snore);
+        place(fl,    minuteMs, r.flowLimitation);
+
+        oaTotal    += r.obstructiveApnea;
+        caTotal    += r.centralApnea;
+        ohTotal    += r.obstructiveHypopnea;
+        chTotal    += r.centralHypopnea;
+        snoreTotal += r.snore;
+        flTotal    += r.flowLimitation;
+    }
+
+    // The block header states the same totals independently. They agreed
+    // on every block of both sample cards, so a disagreement means the
+    // block was matched to the wrong session or decoded wrongly, and it
+    // should be visible rather than quietly imported.
+    if (oaTotal != summary.obstructiveApneas
+        || caTotal != summary.centralApneas
+        || ohTotal != summary.obstructiveHypopneas
+        || chTotal != summary.centralHypopneas
+        || snoreTotal != summary.snores
+        || flTotal != summary.flowLimitations) {
+        qWarning() << "Sefam:" << label << "archive minutes disagree with the"
+                   << "block totals — OA" << oaTotal
+                   << summary.obstructiveApneas << "CA" << caTotal
+                   << summary.centralApneas
+                   << "OH" << ohTotal << summary.obstructiveHypopneas
+                   << "CH" << chTotal << summary.centralHypopneas
+                   << "snore" << snoreTotal << summary.snores
+                   << "FL" << flTotal << summary.flowLimitations;
+    }
+}
+
+void SefamLoader::populateArchiveSession(Session *session,
+                                         const SefamParsing::SessionSummary &summary)
+{
+    constexpr int kMinuteMs = 60000;
+
+    // The device counts every minute a session touches, so this can run up to a
+    // minute long. It agrees with the operating time the block itself records.
+    const int    minutes = summary.minuteData.size();
+    const qint64 startMs = summary.start.toMSecsSinceEpoch();
+    const qint64 endMs   = startMs + static_cast<qint64>(minutes) * kMinuteMs;
+    session->really_set_first(startMs);
+    session->really_set_last(endMs);
+
+    if (summary.settingsValid) { applyArchiveSettings(session, summary); }
+
+    // Blower-off time gets the same threshold as a recorded session's pressure
+    // channel, applied to each minute's mean. Across 317 recorded sessions on two
+    // machines the usage this gives is within about 0.6 minutes of the usage worked
+    // out from that channel, on average, where counting every minute is out by 0.7
+    // and 5.3.
+    const int threshold = static_cast<int>(kBlowerOffPressure * 10.0f);
+
+    QVector<qint16> pressure(minutes), leak(minutes);
+    QVector<bool>   pressureOk(minutes), leakOk(minutes);
+    QVector<QPair<qint64, qint64>> offSpans;
+    for (int m = 0; m < minutes; ++m) {
+        const SefamParsing::MinuteRecord &r = summary.minuteData.at(m);
+        const bool stopped = r.meanPressure == SefamParsing::kInvalidSample
+                          || r.meanPressure < threshold;
+        if (stopped) {
+            const qint64 from = static_cast<qint64>(m) * kMinuteMs;
+            if (!offSpans.isEmpty() && offSpans.last().second == from) {
+                offSpans.last().second = from + kMinuteMs;
+            } else {
+                offSpans.append(qMakePair(from, from + kMinuteMs));
+            }
+        }
+        pressure[m]   = static_cast<qint16>(r.meanPressure);
+        leak[m]       = static_cast<qint16>(r.totalLeak);
+        pressureOk[m] = !stopped;
+        leakOk[m]     = !stopped && r.totalLeak != SefamParsing::kInvalidSample;
+    }
+    addMaskSlices(session, startMs, endMs, offSpans);
+
+    // Same channels and gains as a recorded session. A flow trace, and with it the
+    // mask pressure and every value derived from breaths, is simply absent.
+    importWaveform(session, pressure, pressureOk, CPAP_Pressure, 0.1f, kMinuteMs, startMs);
+    importWaveform(session, leak, leakOk, CPAP_LeakTotal, 0.6f, kMinuteMs, startMs);
+
+    addArchiveEvents(session, summary, startMs, endMs,
+                     summary.start.toString(Qt::ISODate));
+}
+
 int SefamLoader::Open(const QString &path)
 {
     Q_ASSERT(m_ctx);
@@ -848,6 +1013,27 @@ int SefamLoader::Open(const QString &path)
         }
     }
 
+    // Finish a populated session: its summaries, then handing it to the machine.
+    // AddSession() refuses a duplicate, a zero start time, or a session older
+    // than the profile's ignore-older-sessions cutoff, and takes no ownership
+    // when it does; it has already logged why. Counting it as imported would
+    // misreport the run, and dropping the pointer would leak the session.
+    const auto commitSession = [&](Session *session, qint64 spanMs) {
+        session->UpdateSummaries();
+        const qint64 usageMs = static_cast<qint64>(session->hours() * 3600000.0);
+        if (!mach->AddSession(session)) {
+            delete session;
+            ++skipped;
+            return;
+        }
+        totalSpanMs  += spanMs;
+        totalUsageMs += usageMs;
+        ++imported;
+    };
+
+    QDateTime oldestDirStart;     // Sets the range findArchiveOnlySessions() works in
+    bool sawLog = false;
+
     for (const QString &d : dirs) {
         if (isAborted()) { break; }
         emit setProgressValue(++progress);
@@ -860,6 +1046,10 @@ int SefamLoader::Open(const QString &path)
             ++skipped;
             continue;
         }
+        if (!oldestDirStart.isValid() || data.header.localStart < oldestDirStart) {
+            oldestDirStart = data.header.localStart;
+        }
+        if (!data.log.isEmpty()) { sawLog = true; }
 
         const SessionID sid = data.header.utcEpoch != 0
                             ? static_cast<SessionID>(data.header.utcEpoch)
@@ -887,30 +1077,7 @@ int SefamLoader::Open(const QString &path)
         }
 
         if (summary && summary->settingsValid) {
-            // Per-session settings, not carried forward: each archive block
-            // records the settings that were in force for its own session, so
-            // a card whose settings changed mid-history reports each session
-            // correctly. The log-based path below cannot do that.
-            setPressureMode(session, summary->fixedPressure,
-                            summary->prescribedPressure,
-                            summary->minPressure, summary->maxPressure);
-            if (summary->rampMinutes > 0) {
-                session->settings[CPAP_RampTime]     = summary->rampMinutes;
-                session->settings[CPAP_RampPressure] = summary->rampPressure;
-            }
-            // The block carries the mask leak, and the circuit and CC+ level
-            // packed into one field. It does NOT carry the humidifier: on this
-            // model that setting exists only in the file the vendor software
-            // writes, so an S.Box session reports no humidifier level at all.
-            if (summary->maskLeak >= 0) {
-                session->settings[SEFAM_MaskLeakSet] = summary->maskLeak;
-            }
-            if (summary->patientCircuit > 0) {
-                session->settings[SEFAM_Circuit] = summary->patientCircuit;
-            }
-            if (summary->comfortLevel >= 0) {
-                session->settings[SEFAM_ComfortLevel] = summary->comfortLevel;
-            }
+            applyArchiveSettings(session, *summary);
         } else if (lastKnown.valid) {
             setPressureMode(session, lastKnown.fixedPressure,
                             lastKnown.prescribedPressure,
@@ -1099,77 +1266,7 @@ int SefamLoader::Open(const QString &path)
 
         // Events from the memory-image archive, for cards that carry no log.
         if (summary) {
-            EventList *oa    = session->AddEventList(CPAP_Obstructive, EVL_Event);
-            EventList *ca    = session->AddEventList(CPAP_ClearAirway, EVL_Event);
-            // OH/CH lists are created on the first event, as in the log path (GitLab #261).
-            EventList *oh    = nullptr;
-            EventList *ch    = nullptr;
-            EventList *snore = session->AddEventList(CPAP_VSnore,      EVL_Event);
-            EventList *fl    = session->AddEventList(CPAP_FlowLimit,   EVL_Event);
-
-            // Resolution is one minute and the card records no durations, so
-            // events are spread evenly across the minute they fall in. A lone
-            // event therefore lands at its midpoint, which is where the
-            // manufacturer's own waveform display draws it; two land on the
-            // quarters. Spreading rather than stacking keeps events of the same
-            // kind in one minute from sharing a timestamp and drawing as one.
-            const auto place = [](EventList *list, qint64 minuteStartMs,
-                                  int count) {
-                for (int k = 0; k < count; ++k) {
-                    const qint64 when = minuteStartMs
-                                      + (60000LL * (2 * k + 1)) / (2 * count);
-                    list->AddEvent(when, 0);
-                }
-            };
-
-            int oaTotal = 0, caTotal = 0, ohTotal = 0, chTotal = 0, snoreTotal = 0, flTotal = 0;
-            for (int m = 0; m < summary->minuteData.size(); ++m) {
-                const qint64 minuteMs = startMs + static_cast<qint64>(m) * 60000LL;
-                if (minuteMs >= endMs) { break; }
-                const SefamParsing::MinuteRecord &r = summary->minuteData.at(m);
-
-                place(oa,    minuteMs, r.obstructiveApnea);
-                place(ca,    minuteMs, r.centralApnea);
-                // The minute record counts the two hypopnea kinds separately, so each
-                // goes to its own channel — the same choice the log-based path makes.
-                if (r.obstructiveHypopnea) {
-                    if (!oh) oh = session->AddEventList(CPAP_ObstructiveHypopnea, EVL_Event);
-                    place(oh, minuteMs, r.obstructiveHypopnea);
-                }
-                if (r.centralHypopnea) {
-                    if (!ch) ch = session->AddEventList(CPAP_CentralHypopnea, EVL_Event);
-                    place(ch, minuteMs, r.centralHypopnea);
-                }
-                place(snore, minuteMs, r.snore);
-                place(fl,    minuteMs, r.flowLimitation);
-
-                oaTotal    += r.obstructiveApnea;
-                caTotal    += r.centralApnea;
-                ohTotal    += r.obstructiveHypopnea;
-                chTotal    += r.centralHypopnea;
-                snoreTotal += r.snore;
-                flTotal    += r.flowLimitation;
-            }
-
-            // The block header states the same totals independently. They agreed
-            // on every block of both sample cards, so a disagreement means the
-            // block was matched to the wrong session or decoded wrongly, and it
-            // should be visible rather than quietly imported.
-            if (oaTotal != summary->obstructiveApneas
-                || caTotal != summary->centralApneas
-                || ohTotal != summary->obstructiveHypopneas
-                || chTotal != summary->centralHypopneas
-                || snoreTotal != summary->snores
-                || flTotal != summary->flowLimitations) {
-                qWarning() << "Sefam:" << d << "archive minutes disagree with the"
-                           << "block totals — OA" << oaTotal
-                           << summary->obstructiveApneas << "CA" << caTotal
-                           << summary->centralApneas
-                           << "OH" << ohTotal << summary->obstructiveHypopneas
-                           << "CH" << chTotal << summary->centralHypopneas
-                           << "snore" << snoreTotal << summary->snores
-                           << "FL" << flTotal << summary->flowLimitations;
-            }
+            addArchiveEvents(session, *summary, startMs, endMs, d);
         }
 
         if (session->eventlist.isEmpty()) {
@@ -1179,21 +1276,37 @@ int SefamLoader::Open(const QString &path)
             continue;
         }
 
-        session->UpdateSummaries();
-        const qint64 usageMs = static_cast<qint64>(session->hours() * 3600000.0);
+        commitSession(session, endMs - startMs);
+    }
 
-        // AddSession() refuses a duplicate, a zero start time, or a session older
-        // than the profile's ignore-older-sessions cutoff, and takes no ownership
-        // when it does; it has already logged why. Counting it as imported would
-        // misreport the run, and dropping the pointer would leak the session.
-        if (!mach->AddSession(session)) {
-            delete session;
-            ++skipped;
-            continue;
+    // Sessions the device archived whose data never reached a readable directory.
+    // Without this they are simply missing, though the vendor software shows them.
+    // Gated on the card having no logs, because this archive belongs to the log-less
+    // S.Box, and on the archive having matched at least one directory, which shows
+    // that it describes these sessions.
+    if (!isAborted() && !sawLog && !archiveForDir.isEmpty()) {
+        QSet<qint64> knownStartSecs;
+        for (auto it = mach->sessionlist.constBegin(); it != mach->sessionlist.constEnd(); ++it) {
+            knownStartSecs.insert(static_cast<qint64>(it.key()));
         }
-        totalSpanMs  += endMs - startMs;
-        totalUsageMs += usageMs;
-        ++imported;
+
+        const QVector<int> archiveOnly =
+            SefamParsing::findArchiveOnlySessions(archive, oldestDirStart, knownStartSecs);
+        for (int index : archiveOnly) {
+            if (isAborted()) { break; }
+            const SefamParsing::SessionSummary &summary = archive.at(index);
+
+            // The same ID a directory would give this session: an S.Box header
+            // carries no UTC epoch, so a directory uses its local start time too.
+            Session *session = new Session(mach,
+                static_cast<SessionID>(summary.start.toSecsSinceEpoch()));
+            session->SetChanged(true);
+            populateArchiveSession(session, summary);
+
+            qDebug() << "Sefam: importing session" << summary.start.toString(Qt::ISODate)
+                     << "from the archive alone —" << summary.minutes << "minutes, no flow";
+            commitSession(session, static_cast<qint64>(summary.minutes) * 60000LL);
+        }
     }
 
     mach->Save();

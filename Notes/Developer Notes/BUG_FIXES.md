@@ -7761,6 +7761,31 @@ MSVC, whose builds had no "Compiler:" line; GCC-only flags no longer reach `cl` 
 configs (`memdebug` failed with D8021). Removed `WINVER=0x0501`, which targeted Windows XP, and `-ldbghelp`; nothing
 used them. The installer now removes the MinGW runtime DLLs left by earlier installs and requires Windows 10 1809.
 
+## 2026-11-07 - S.Box: sessions with no data folder on the card were missing (GitLab #373)
+
+**Files:** `oscar/SleepLib/loader_plugins/sefam_loader.cpp`, `sefam_loader.h`, `sefamDataParsing.cpp`,
+`sefamDataParsing.h`, `oscar/tests/sefamtests.cpp`, `sefamtests.h` (new), `oscar/oscar.pro`,
+`Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md`
+
+**Symptom:** The first of two sessions in a night didn't appear in OSCAR, though Sefam Analyze showed it.
+Purging the day and importing again gave the same result.
+
+**Root cause:** The card has no usable data for that session: `DATA_256` was absent from a copy of the card, and
+the import log reported `"missing or empty .INI"` for it. The session exists only in the `.RAM` session archive,
+which is where Sefam Analyze gets it. Why the data is missing is not known; a card fault is one possibility.
+
+**Fix:** After reading the session folders, an S.Box import now adds archive sessions that start within the card's
+date range and have no existing session within 10 s. Each gets its settings, events and one-minute pressure and
+total leak, with no flow. Decoding this needed the block's BCD start time (words 1 to 6) and per-minute leak (byte 1).
+
+**Non-obvious:**
+- These are deliberately not summary-only sessions. `Day::summaryOnly()` is true if any one session on a day is,
+  which would downgrade a recorded session sharing the day. Sefam Analyze also shows both kinds as one night.
+- Selection uses start times, not the existing minute-count match, which stops at the first session it cannot
+  place and would then report every older block as having no folder.
+- Older archive sessions, 957 on this card, are not imported: some may already exist from another card's import,
+  and matching them against those has not been designed.
+
 ## 2026-11-07 - Purge Range of Days: crash partway through the range on macOS (GitLab #375)
 
 **Files:** `oscar/mainwindow.cpp` (`on_actionPurgeRangeOfDays_triggered()`), `oscar/daily.cpp`, `oscar/daily.h`
