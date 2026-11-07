@@ -2758,6 +2758,17 @@ void Daily::clearJournalNotesEditor()
     ui->JournalNotes->clear();
 }
 
+void Daily::releaseDayData()
+{
+    // SessionBar keeps raw Session pointers and reads them when painting. The graph layers
+    // read the day through m_day (gFlagsGroup's and gSessionBarLayer's own session lists are
+    // only read while m_day is set), so clearing the day stops them too.
+    sessionbar->clear();
+    GraphView->setDay(nullptr);
+    snapGV->setDay(nullptr);
+    lastcpapday = nullptr;
+}
+
 /*! \brief Returns true if the journal session has no user-visible content.
  *  LastUpdated is intentionally excluded — it is not user-authored data.
  *  Bookmarks with an empty list count as absent. */

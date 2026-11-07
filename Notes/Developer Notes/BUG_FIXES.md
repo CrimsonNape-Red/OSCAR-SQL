@@ -7760,3 +7760,27 @@ Also for MSVC: linker stack set to 2 MB, matching MinGW (MSVC's default is 1 MB)
 MSVC, whose builds had no "Compiler:" line; GCC-only flags no longer reach `cl` in the `crash` and `memdebug`
 configs (`memdebug` failed with D8021). Removed `WINVER=0x0501`, which targeted Windows XP, and `-ldbghelp`; nothing
 used them. The installer now removes the MinGW runtime DLLs left by earlier installs and requires Windows 10 1809.
+
+## 2026-11-07 - Purge Range of Days: crash partway through the range on macOS (GitLab #375)
+
+**Files:** `oscar/mainwindow.cpp` (`on_actionPurgeRangeOfDays_triggered()`), `oscar/daily.cpp`, `oscar/daily.h`
+
+**Symptom:** Data > Advanced > Purge Range of Days crashed OSCAR, usually, on macOS 26. After a restart the first
+days of the range were gone and the rest remained. Purging one day at a time always worked.
+
+**Root cause:** The range loop destroys sessions and runs the event loop between days, for the progress dialog and
+Cancel. Daily is not reloaded until the loop ends, so if the viewed day is in the range, `SessionBar` and the graph
+layers still refer to its destroyed sessions, and a repaint during the loop reads them. The single-day purge has no
+event loop between destroying sessions and queuing the reload, so it is not exposed.
+
+A repaint is likely once the progress dialog takes activation: `QWidget::event()` calls `update()` on every visible
+child on `WindowDeactivate` if the palette's Active and Inactive groups differ. Which platforms that applies to, and
+whether it explains the crash always following the third day, was not verified. No crash log was available.
+
+**Fix:** New `Daily::releaseDayData()` clears the session bar and the graph views' day before the loop. The page is
+reloaded at the end as before, and now also on the "no data found" path, which previously needed no reload.
+
+**Non-obvious:**
+- Overview does not need the same treatment. `gSummaryChart::daylist` keeps the purged `Day` objects, but
+  `Profile::unlinkDay()` does not delete them, and purged sessions have been removed from them.
+- The crash was not reproduced and the fix was not run on macOS. Confirmation needs a macOS run.

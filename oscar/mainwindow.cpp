@@ -2641,6 +2641,10 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
     const QDate viewDate = daily->getDate();
     daily->Unload(viewDate);
 
+    // The loop below runs the event loop for the progress dialog and Cancel, so the main window
+    // can repaint between days. Daily must not be left pointing at sessions destroyed by then.
+    daily->releaseDayData();
+
     QProgressDialog progress(tr("Purging data..."), tr("Cancel"), 0, numDays, this);
     progress.setWindowModality(Qt::WindowModal);
     progress.setMinimumDuration(0);
@@ -2665,6 +2669,7 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
     progress.setValue(numDays);
 
     if (purgedDates.isEmpty()) {
+        daily->LoadDate(viewDate);  // nothing changed, but releaseDayData() emptied the page
         staticQMessageBox::information(this,
             tr("Purge Range of Days"),
             tr("No data was found in the selected date range."),

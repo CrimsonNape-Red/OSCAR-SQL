@@ -136,6 +136,14 @@ public:
     void clearLastDay();
     void clearJournalNotesEditor();
 
+    /*! \fn releaseDayData()
+        \brief Drops every pointer the Daily page holds into the displayed day's sessions.
+
+        Call before destroying sessions in a loop that runs the event loop. The page repaints
+        empty until the next LoadDate(), which the caller must make.
+        */
+    void releaseDayData();
+
     /*! \fn updateCalendarDays(const QList<QDate> &dates)
         \brief Refreshes the calendar appearance for each of the supplied dates.
         \param dates Dates whose data changed outside the normal load/unload cycle
