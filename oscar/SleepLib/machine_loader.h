@@ -23,12 +23,6 @@
 #include "zlib.h"
 #endif
 
-#ifdef UNITTEST_MODE
-#include <sstream>  // include first so the #define below can't leak into libstdc++
-#define private public
-#define protected public
-#endif
-
 class MachineLoader;    // forward
 class ImportContext;
 
@@ -43,6 +37,9 @@ const QString genericPixmapPath = ":/icons/mask.png";
 class MachineLoader: public QObject
 {
     Q_OBJECT
+#ifdef UNITTEST_MODE
+    friend class PRS1Tests;
+#endif
  public:
     MachineLoader();
     virtual ~MachineLoader();

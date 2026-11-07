@@ -12,12 +12,6 @@
 #include "SleepLib/session.h"
 #include "SleepLib/machine_loader.h"
 
-#if defined(UNITTEST_MODE) || defined(UNITTEST_MODE_PRS1)
-#include <sstream>  // include first so the #define below can't leak into libstdc++
-#define private public
-#define protected public
-#endif
-
 //********************************************************************************************
 /// IMPORTANT!!!
 //********************************************************************************************
@@ -50,6 +44,9 @@ class PRS1Loader;
  *  \brief Contains the functions to parse a single session... multithreaded */
 class PRS1Import:public ImportTask
 {
+#ifdef UNITTEST_MODE
+    friend class PRS1Tests;
+#endif
 public:
     PRS1Import(PRS1Loader * l, SessionID s, int base): loader(l), sessionid(s), m_sessionid_base(base) {
         summary = nullptr;
@@ -153,6 +150,9 @@ protected:
 class PRS1Loader : public CPAPLoader
 {
     Q_OBJECT
+#ifdef UNITTEST_MODE
+    friend class PRS1Tests;
+#endif
   public:
     PRS1Loader();
     virtual ~PRS1Loader();

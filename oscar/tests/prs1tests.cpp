@@ -27,7 +27,6 @@
 #endif
 
 static PRS1Loader* s_loader = nullptr;
-static void iterateTestCards(const QString & root, void (*action)(const QString &));
 static QString prs1OutputPath(const QString & inpath, const QString & serial, const QString & basename, const QString & suffix);
 static QString prs1OutputPath(const QString & inpath, const QString & serial, int session, const QString & suffix);
 
@@ -99,7 +98,7 @@ void PRS1Tests::testMachineSupport()
 // ====================================================================================================
 
 
-void parseAndEmitSessionYaml(const QString & path)
+void PRS1Tests::parseAndEmitSessionYaml(const QString & path)
 {
     qDebug() << path;
 
@@ -292,7 +291,7 @@ void ChunkToYaml(QTextStream & out, PRS1DataChunk* chunk, bool ok)
     out << '\n';
 }
 
-void parseAndEmitChunkYaml(const QString & path)
+void PRS1Tests::parseAndEmitChunkYaml(const QString & path)
 {
     bool FV = false;  // set this to true to emit family/familyVersion for this path
     qDebug() << path;
@@ -451,7 +450,7 @@ QString prs1OutputPath(const QString & inpath, const QString & serial, const QSt
     return outdir.path() + QDir::separator() + filename;
 }
 
-void iterateTestCards(const QString & root, void (*action)(const QString &))
+void PRS1Tests::iterateTestCards(const QString & root, void (*action)(const QString &))
 {
     QDir dir(root);
     dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);

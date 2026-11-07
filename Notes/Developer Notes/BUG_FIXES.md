@@ -7736,3 +7736,27 @@ popups kept drawing in the old font until the graph views were re-created. Save 
 the `AnyStyle` style hint set at startup. A new `ApplyGraphFontPreferences()` assigns the
 fonts in place from the `Fonts_*` preferences; `InitGraphGlobals()` and `Save()` both use it,
 so held pointers stay valid and follow the change.
+
+## 2026-11-06 - Windows: nightly builds lacked Bluetooth; unit tests did not build with MSVC (#374)
+
+**Files:** `Building/Windows/nightly-build.bat`, `buildall-msvc.bat`, `oscar/tests/prs1tests.cpp`,
+`prs1tests.h`, `csvoximetrytests.cpp`, `oscar/daily.h`, `oscar/SleepLib/event.h`, `importcontext.h`,
+`machine_loader.h`, `session.h`, `loader_plugins/prisma_loader.h`, `prismavent_loader.h`,
+`prs1_loader.h`, `vrem_loader.h`; removed `Building/Windows/buildall-515.bat`, `deploy-515.bat`
+
+`nightly-build.bat` still called the MinGW `buildall-qt6.bat`, so nightly builds had no Bluetooth;
+it now calls `buildall-msvc.bat`, which defaults to Qt 6.12.0.
+
+The unit tests had two MSVC-only failures. `"\xFEFF"` in a `QStringLiteral` is a compile error
+(C7744), so it is now `"\uFEFF"`. Six headers used `#define private public` and
+`#define protected public` under `UNITTEST_MODE`, which GCC and Clang tolerate because their name
+mangling ignores access level. MSVC's includes it, so every library or project symbol seen through
+the macros got a different name and the link failed with hundreds of LNK2001 errors. The macros are
+gone. The classes the tests reach into declare `friend class <test class>` under `UNITTEST_MODE`,
+and the PRS1 test helpers became private static members of `PRS1Tests` so that those declarations
+cover them.
+
+Also for MSVC: linker stack set to 2 MB, matching MinGW (MSVC's default is 1 MB); `getCompilerVersion()` reports
+MSVC, whose builds had no "Compiler:" line; GCC-only flags no longer reach `cl` in the `crash` and `memdebug`
+configs (`memdebug` failed with D8021). Removed `WINVER=0x0501`, which targeted Windows XP, and `-ldbghelp`; nothing
+used them. The installer now removes the MinGW runtime DLLs left by earlier installs and requires Windows 10 1809.

@@ -57,6 +57,9 @@ public:
     */
 class Session
 {
+#ifdef UNITTEST_MODE
+    friend class PRS1Tests;
+#endif
  public:
     /*! \fn Session(Machine *,SessionID);
         \brief Create a session object belonging to device, with supplied SessionID

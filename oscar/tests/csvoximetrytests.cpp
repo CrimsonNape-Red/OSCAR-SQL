@@ -39,7 +39,7 @@ void CsvOximetryTests::testPlainRows()
 void CsvOximetryTests::testHeaderInAnyOrder()
 {
     const Result r = parse(QStringLiteral(
-        "\xFEFFPulse Rate (bpm);Oxygen Level (%);Timestamp\r\n"
+        "﻿Pulse Rate (bpm);Oxygen Level (%);Timestamp\r\n"
         "58;97;2026-11-02T02:24:12\r\n"
         "59;96;2026-11-02T02:24:16\r\n"));
     QVERIFY2(r.ok(), qPrintable(r.error));

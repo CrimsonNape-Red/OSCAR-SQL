@@ -54,6 +54,9 @@ class Daily : public QWidget
     Q_OBJECT
 
 friend class Journal;
+#ifdef UNITTEST_MODE
+friend class EventsTabTests;
+#endif
 public:
     /*! \fn Daily()
         \brief Constructs a Daily object
