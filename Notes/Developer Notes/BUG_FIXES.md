@@ -4,6 +4,85 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-04 - Tooltip colors: startup prompts missed, defined three times, no system option (GitLab #371)
+
+**Files:** `oscar/tooltipcolors.cpp`, `tooltipcolors.h` (new), `oscar/main.cpp`, `mainwindow.cpp`,
+`mainwindow.h`, `preferencesdialog.cpp`, `preferencesdialog.ui`, `Graphs/gGraphView.cpp`,
+`SleepLib/appsettings.cpp`, `appsettings.h`, `oscar/oscar.pro`
+
+**Symptom:** Prompts shown before `MainWindow` exists kept the platform's tooltips. The fixed black on
+yellow also overrode dark and high contrast themes, with no way to turn it off.
+
+**Root cause:** The colors were applied in `MainWindow`'s constructor, and were defined separately in
+`gToolTip::paint`, the tooltip palette and the Windows style-sheet rule.
+
+**Fix:** `ToolTipColors` now owns the colors and the Windows application style sheet. `main()` applies them
+right after creating the `QApplication`, and again once the preferences are loaded. New option
+Preferences > Appearance > "Use system tooltip colors", off by default, takes effect on OK.
+
+**Non-obvious:**
+- `QToolTip::palette()` isn't what native Windows styles paint. `QWindowsVistaStyle::polish` replaces a
+  tooltip's palette with the application's, so with Qt 6.10.2 and 6.12.0 on a light system the palette says
+  `#ffffe1` while windows11 paints `#f3f3f3` and windowsvista `#f9f9f9`. The graphs' tooltips get the system
+  color by having the style paint a panel off screen.
+- OSCAR forces the Light color scheme, and Qt then reports only light tooltip colors. The system's dark
+  colors are read just before that, and forced on the tooltips like OSCAR's own.
+
+**Limits:** Dark mode is read once at startup, as no public Qt API reports it while Light is forced, so
+switching it needs a restart of OSCAR. Border and padding still differ by platform (#371 item 2).
+
+## 2026-11-04 - prismaCR: model unrecognized, AcSV pressures wrong, settings dropped (GitLab #369)
+
+**Files:** `oscar/SleepLib/loader_plugins/prisma_loader.cpp`, `prisma_loader.h`,
+`oscar/tests/prismalinetests.cpp`, `prismalinetests.h`, `oscar/oscar.pro`
+
+**Symptom:** A prismaCR card (DeviceType 13, firmware 5.07.0002, AcSV) was named "Unknown
+Model" and raised the untested-device warning. For settings of EEPAP 6-10, PDIFF 4-6 and IPAP
+max 13.5, the Daily page showed "EPAP 4 PS 4-6" and the Welcome page said EPAP was fixed at 4.
+Every session stored "Mode partially supported, please send sample data". Bi softPAP, autoF,
+F min, Ti/T and tube type were missing from the settings.
+
+**Root cause:** DeviceType 13 was not in `s_PrismaTestedModels`. AcSV was mapped to fixed-EPAP
+`MODE_ASV`, although it titrates EPAP between limits (commanded EPAP ran 4-9.25 in one night).
+The AcSV case never stored Bi softPAP, and parameters 1156-1158 were not read. In all LINE
+modes, the tube type check tested for the Smart parameter id (21), which LINE cards don't have,
+instead of the LINE id (1091).
+
+**Fix:** Added the model and mapped AcSV to `MODE_ASV_VARIABLE_EPAP`, with `CPAP_EPAPLo` from
+parameter 1201. The derived `CPAP_EPAP` and `CPAP_IPAP` settings are no longer stored for AcSV,
+and the warning is no longer written. Added `Prisma_AutoF`, `Prisma_FMin` and `Prisma_TiT`; F min
+and Ti/T are skipped when written as -1 (autoF on). Tube type now tests the LINE id.
+
+**Limits:** `prisma_data_version` is unchanged, so existing AcSV sessions keep the old mode and
+warning until Rebuild CPAP Data. prismaTS reports confirm the settings for both of the card's
+groups, including autoF 0 = Off and 3 = On. Those reports don't show the EPAP floor, which is
+confirmed by commanded pressures.
+
+**Follow-up (#370):** Named autoF 3 as On, and imported events 113, 171, 241, 305 and 330, which
+prismaTS therapy protocols identify by time and duration. softSTART goes to `CPAP_Ramp`, and
+Disconnection and SEL share the prisma VENT channels. 113 (hypopnea with very high leakage) has
+its own channel outside AHI, because counting it along with apneas during movement gave AHI 3.56
+on a night prismaTS reports as 3; the VENT loader still sends it to `CPAP_Hypopnea`. softSTART
+and Disconnection rows under a second long are skipped. Existing sessions pick up the events
+after Rebuild CPAP Data.
+
+---
+
+## 2026-11-04 - Destroy Profile button enabled with no profile selected (GitLab #368)
+
+**Files:** `oscar/profileselector.cpp`
+
+**Symptom:** On the Profile tab, Destroy Profile was always enabled, even with no profile
+selected; clicking it then did nothing. Open Profile and Edit Profile were disabled.
+
+**Root cause:** Only Open and Edit were ever enabled or disabled; Destroy was left out.
+
+**Fix:** Destroy is disabled at startup and whenever the list is rebuilt, and enabled when a
+row is selected. It needs only a selected row (not a loaded profile), because it also
+removes profiles whose folder is missing.
+
+---
+
 ## 2026-11-03 - Lumis 150 device image has a white background (GitLab #367)
 
 **Files:** `oscar/icons/lumis150.png`
@@ -7657,3 +7736,76 @@ popups kept drawing in the old font until the graph views were re-created. Save 
 the `AnyStyle` style hint set at startup. A new `ApplyGraphFontPreferences()` assigns the
 fonts in place from the `Fonts_*` preferences; `InitGraphGlobals()` and `Save()` both use it,
 so held pointers stay valid and follow the change.
+
+## 2026-11-06 - Windows: nightly builds lacked Bluetooth; unit tests did not build with MSVC (#374)
+
+**Files:** `Building/Windows/nightly-build.bat`, `buildall-msvc.bat`, `oscar/tests/prs1tests.cpp`,
+`prs1tests.h`, `csvoximetrytests.cpp`, `oscar/daily.h`, `oscar/SleepLib/event.h`, `importcontext.h`,
+`machine_loader.h`, `session.h`, `loader_plugins/prisma_loader.h`, `prismavent_loader.h`,
+`prs1_loader.h`, `vrem_loader.h`; removed `Building/Windows/buildall-515.bat`, `deploy-515.bat`
+
+`nightly-build.bat` still called the MinGW `buildall-qt6.bat`, so nightly builds had no Bluetooth;
+it now calls `buildall-msvc.bat`, which defaults to Qt 6.12.0.
+
+The unit tests had two MSVC-only failures. `"\xFEFF"` in a `QStringLiteral` is a compile error
+(C7744), so it is now `"\uFEFF"`. Six headers used `#define private public` and
+`#define protected public` under `UNITTEST_MODE`, which GCC and Clang tolerate because their name
+mangling ignores access level. MSVC's includes it, so every library or project symbol seen through
+the macros got a different name and the link failed with hundreds of LNK2001 errors. The macros are
+gone. The classes the tests reach into declare `friend class <test class>` under `UNITTEST_MODE`,
+and the PRS1 test helpers became private static members of `PRS1Tests` so that those declarations
+cover them.
+
+Also for MSVC: linker stack set to 2 MB, matching MinGW (MSVC's default is 1 MB); `getCompilerVersion()` reports
+MSVC, whose builds had no "Compiler:" line; GCC-only flags no longer reach `cl` in the `crash` and `memdebug`
+configs (`memdebug` failed with D8021). Removed `WINVER=0x0501`, which targeted Windows XP, and `-ldbghelp`; nothing
+used them. The installer now removes the MinGW runtime DLLs left by earlier installs and requires Windows 10 1809.
+
+## 2026-11-07 - S.Box: sessions with no data folder on the card were missing (GitLab #373)
+
+**Files:** `oscar/SleepLib/loader_plugins/sefam_loader.cpp`, `sefam_loader.h`, `sefamDataParsing.cpp`,
+`sefamDataParsing.h`, `oscar/tests/sefamtests.cpp`, `sefamtests.h` (new), `oscar/oscar.pro`,
+`Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md`
+
+**Symptom:** The first of two sessions in a night didn't appear in OSCAR, though Sefam Analyze showed it.
+Purging the day and importing again gave the same result.
+
+**Root cause:** The card has no usable data for that session: `DATA_256` was absent from a copy of the card, and
+the import log reported `"missing or empty .INI"` for it. The session exists only in the `.RAM` session archive,
+which is where Sefam Analyze gets it. Why the data is missing is not known; a card fault is one possibility.
+
+**Fix:** After reading the session folders, an S.Box import now adds archive sessions that start within the card's
+date range and have no existing session within 10 s. Each gets its settings, events and one-minute pressure and
+total leak, with no flow. Decoding this needed the block's BCD start time (words 1 to 6) and per-minute leak (byte 1).
+
+**Non-obvious:**
+- These are deliberately not summary-only sessions. `Day::summaryOnly()` is true if any one session on a day is,
+  which would downgrade a recorded session sharing the day. Sefam Analyze also shows both kinds as one night.
+- Selection uses start times, not the existing minute-count match, which stops at the first session it cannot
+  place and would then report every older block as having no folder.
+- Older archive sessions, 957 on this card, are not imported: some may already exist from another card's import,
+  and matching them against those has not been designed.
+
+## 2026-11-07 - Purge Range of Days: crash partway through the range on macOS (GitLab #375)
+
+**Files:** `oscar/mainwindow.cpp` (`on_actionPurgeRangeOfDays_triggered()`), `oscar/daily.cpp`, `oscar/daily.h`
+
+**Symptom:** Data > Advanced > Purge Range of Days crashed OSCAR, usually, on macOS 26. After a restart the first
+days of the range were gone and the rest remained. Purging one day at a time always worked.
+
+**Root cause:** The range loop destroys sessions and runs the event loop between days, for the progress dialog and
+Cancel. Daily is not reloaded until the loop ends, so if the viewed day is in the range, `SessionBar` and the graph
+layers still refer to its destroyed sessions, and a repaint during the loop reads them. The single-day purge has no
+event loop between destroying sessions and queuing the reload, so it is not exposed.
+
+A repaint is likely once the progress dialog takes activation: `QWidget::event()` calls `update()` on every visible
+child on `WindowDeactivate` if the palette's Active and Inactive groups differ. Which platforms that applies to, and
+whether it explains the crash always following the third day, was not verified. No crash log was available.
+
+**Fix:** New `Daily::releaseDayData()` clears the session bar and the graph views' day before the loop. The page is
+reloaded at the end as before, and now also on the "no data found" path, which previously needed no reload.
+
+**Non-obvious:**
+- Overview does not need the same treatment. `gSummaryChart::daylist` keeps the purged `Day` objects, but
+  `Profile::unlinkDay()` does not delete them, and purged sessions have been removed from them.
+- The crash was not reproduced and the fix was not run on macOS. Confirmation needs a macOS run.

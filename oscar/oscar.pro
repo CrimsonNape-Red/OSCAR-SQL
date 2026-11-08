@@ -75,8 +75,8 @@ CONFIG += rtti
     CONFIG -= release  # Ensure release mode is disabled
 
     # Debugging Symbols
-    QMAKE_CXXFLAGS += -g3  # Most comprehensive debugging symbols
-    QMAKE_CXXFLAGS += -ggdb  # GDB-specific debug information
+    !msvc: QMAKE_CXXFLAGS += -g3  # Most comprehensive debugging symbols
+    !msvc: QMAKE_CXXFLAGS += -ggdb  # GDB-specific debug information
 
     # Optimization Level
     #QMAKE_CXXFLAGS_DEBUG += -O0  # Disable optimizations completely
@@ -181,10 +181,8 @@ macx  {
     LIBS            += -lX11 -lz -lGLU
     DEFINES         += _TTY_POSIX_
 } else:win32 {
-    DEFINES          += WINVER=0x0501 # needed for mingw to pull in appropriate dbt business...probably a better way to do this
     LIBS             += -lsetupapi
     LIBS             += -lhid      # Viatom USB cable (HID)
-    LIBS             += -ldbghelp # needed for call stack with names rather than addresses
 
     INCLUDEPATH += $$PWD
     INCLUDEPATH += $$[QT_INSTALL_PREFIX]/../src/qtbase/src/3rdparty/zlib
@@ -198,6 +196,8 @@ macx  {
 
     if (*-msvc*) {
         DEFINES += NOMINMAX   # keep windows.h from defining min() and max() macros
+        # Same stack as a MinGW build: MSVC's default reserve is 1 MB, MinGW's 2 MB.
+        QMAKE_LFLAGS += /STACK:2097152
         CONFIG += precompile_header
         PRECOMPILED_HEADER = pch.h
         HEADERS += pch.h
@@ -350,6 +350,7 @@ SOURCES += \
     speedcheck.cpp \
     staticQMessageBox.cpp \
     statistics.cpp \
+    tooltipcolors.cpp \
     translation.cpp \
     treecheckdelegate.cpp \
     version.cpp \
@@ -635,6 +636,7 @@ HEADERS  += \
     rawdata.h \
     translation.h \
     statistics.h \
+    tooltipcolors.h \
     oximeterimport.h \
     SleepLib/deviceconnection.h \
     SleepLib/xmlreplay.h \
@@ -817,9 +819,11 @@ if (false) {
 message("CXXFLAGS post-mods $$QMAKE_CXXFLAGS ")
 message("CXXFLAGS_WARN_ON $$QMAKE_CXXFLAGS_WARN_ON")
 
-lessThan(QT_MAJOR_VERSION,5)|lessThan(QT_MINOR_VERSION,9) {
-    QMAKE_CFLAGS += -Wno-error=strict-aliasing
-    QMAKE_CXXFLAGS += -Wno-error=strict-aliasing
+!msvc {
+    lessThan(QT_MAJOR_VERSION,5)|lessThan(QT_MINOR_VERSION,9) {
+        QMAKE_CFLAGS += -Wno-error=strict-aliasing
+        QMAKE_CXXFLAGS += -Wno-error=strict-aliasing
+    }
 }
 
 # Create a debug GUI build by adding "CONFIG+=memdebug" to your qmake command
@@ -827,8 +831,8 @@ memdebug {
     CONFIG += debug
     ## there is an error in qt. qlist.h uses an implicitly defined operator=
     ## allow this for debug
-    QMAKE_CFLAGS += -Wno-error=deprecated-copy
-    QMAKE_CXXFLAGS += -Wno-error=deprecated-copy
+    !msvc: QMAKE_CFLAGS += -Wno-error=deprecated-copy
+    !msvc: QMAKE_CXXFLAGS += -Wno-error=deprecated-copy
     !win32 {  # add memory checking on Linux and macOS debug builds
         QMAKE_CFLAGS += -g -Werror -fsanitize=address -fno-omit-frame-pointer -fno-common -fsanitize-address-use-after-scope
         lessThan(QT_MAJOR_VERSION,5)|lessThan(QT_MINOR_VERSION,9) {
@@ -901,6 +905,7 @@ test {
 
     SOURCES += \
         tests/apextests.cpp \
+        tests/sefamtests.cpp \
         tests/prs1tests.cpp \
         tests/rawdatatests.cpp \
         tests/resmedtests.cpp \
@@ -921,6 +926,7 @@ test {
         tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp \
         tests/prismaventtests.cpp \
+        tests/prismalinetests.cpp \
         tests/respiratoryeventstests.cpp \
         tests/bmcsessionendstests.cpp \
         tests/bmcusrsessionstests.cpp \
@@ -931,6 +937,7 @@ test {
     HEADERS += \
         tests/AutoTest.h \
         tests/apextests.h \
+        tests/sefamtests.h \
         tests/prs1tests.h \
         tests/rawdatatests.h \
         tests/resmedtests.h \
@@ -951,6 +958,7 @@ test {
         tests/portablemodetests.h \
         tests/sessionsplittests.h \
         tests/prismaventtests.h \
+        tests/prismalinetests.h \
         tests/respiratoryeventstests.h \
         tests/bmcsessionendstests.h \
         tests/bmcusrsessionstests.h \

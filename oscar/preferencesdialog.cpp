@@ -26,6 +26,7 @@
 
 #include "preferencesdialog.h"
 #include "treecheckdelegate.h"
+#include "tooltipcolors.h"
 #include "version.h"
 
 #include <Graphs/gGraphView.h>
@@ -237,15 +238,18 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->eventFlagSessionBar->setChecked(profile->appearance->eventFlagSessionBar());
     ui->disableDailyGraphTitles->setChecked(AppSetting->disableDailyGraphTitles());
     ui->useFusionTheme->setChecked(AppSetting->useFusionTheme());
+    ui->useSystemTooltipColors->setChecked(AppSetting->useSystemTooltipColors());
 
 #if defined(STEADY_BREATHING)
-    // In Clinical Mode steadyBreathing() already reports SB_INACTIVE, so nothing is written here
-    ui->steadyBreathing->setChecked(profile->cpap->steadyBreathing()!=SB_OFF);
-    if (profile->cpap->clinicalMode()) {
-        ui->steadyBreathing->setCheckable(false);
-        ui->steadyBreathing->setTitle(tr("Must enable Permissive Mode (see Clinical Tab)"));
-        ui->steadyBreathing->setDisabled(true);
-    }
+    // The user's stored choice; steadyBreathing() reports SB_INACTIVE (not SB_OFF) in Clinical Mode
+    m_steadyBreathingChoice = profile->cpap->steadyBreathing()!=SB_OFF;
+    m_steadyBreathingTitle = ui->steadyBreathing->title();
+    ui->steadyBreathing->setChecked(m_steadyBreathingChoice);
+    updateSteadyBreathingForMode(profile->cpap->clinicalMode());
+    // Unlock or lock the Steady Breathing box as soon as the operating mode is picked on the
+    // Clinical tab, so the user doesn't have to close Preferences and reopen it first.
+    connect(ui->clinicalMode, &QRadioButton::toggled,
+            this, &PreferencesDialog::updateSteadyBreathingForMode);
 #if defined(STEADY_BREATHING_ENHANCED_TESTING)
     // Ui MUST BE MANUALLY ENABLED. was commented out
     ui->steadyBreathingDuration->setValue( profile->cpap->steadyBreathingDuration());
@@ -938,10 +942,11 @@ bool PreferencesDialog::Save()
 
 #if defined(STEADY_BREATHING)
     // The group box is not checkable in Clinical Mode, and isChecked() is then always false,
-    // so keep the stored choice rather than turning it off.
+    // so save the remembered choice rather than turning it off.
     if (ui->steadyBreathing->isCheckable()) {
-        profile->cpap->setSteadyBreathing(ui->steadyBreathing->isChecked() ? SB_ACTIVE : SB_OFF);
+        m_steadyBreathingChoice = ui->steadyBreathing->isChecked();
     }
+    profile->cpap->setSteadyBreathing(m_steadyBreathingChoice ? SB_ACTIVE : SB_OFF);
     bool steadyBreathingGraphDIsplayChanged = steadyBreathingWasActive != (profile->cpap->steadyBreathing()==SB_ACTIVE);
 
 #if defined(STEADY_BREATHING_ENHANCED_TESTING)
@@ -958,6 +963,11 @@ bool PreferencesDialog::Save()
     }
 
     AppSetting->setGraphTooltips(ui->graphTooltips->isChecked());
+
+    if (ui->useSystemTooltipColors->isChecked() != AppSetting->useSystemTooltipColors()) {
+        AppSetting->setUseSystemTooltipColors(ui->useSystemTooltipColors->isChecked());
+        ToolTipColors::apply();
+    }
 
     AppSetting->setAntiAliasing(ui->useAntiAliasing->isChecked());
     AppSetting->setUsePixmapCaching(ui->usePixmapCaching->isChecked());
@@ -1104,7 +1114,6 @@ bool PreferencesDialog::Save()
     profile->resetOxiChannelPref();
 
 #if defined(STEADY_BREATHING)
-    ui->steadyBreathing->setDisabled(profile->cpap->clinicalMode());
     // A clinical mode change reloads the profile below; don't reload it twice
     if (steadyBreathingGraphDIsplayChanged && !clicicalModeChanged) {
         mainwin->reloadProfile();
@@ -1325,6 +1334,26 @@ void PreferencesDialog::on_resetChannelDefaults_clicked()
         InitChanInfo();
     }
 }
+
+#if defined(STEADY_BREATHING)
+void PreferencesDialog::updateSteadyBreathingForMode(bool clinical)
+{
+    if (clinical) {
+        // Remember what the user picked in Permissive Mode before the box stops being checkable
+        if (ui->steadyBreathing->isCheckable()) {
+            m_steadyBreathingChoice = ui->steadyBreathing->isChecked();
+        }
+        ui->steadyBreathing->setCheckable(false);
+        ui->steadyBreathing->setTitle(tr("Must enable Permissive Mode (see Clinical Tab)"));
+        ui->steadyBreathing->setDisabled(true);
+    } else {
+        ui->steadyBreathing->setEnabled(true);
+        ui->steadyBreathing->setTitle(m_steadyBreathingTitle);
+        ui->steadyBreathing->setCheckable(true);
+        ui->steadyBreathing->setChecked(m_steadyBreathingChoice);
+    }
+}
+#endif
 
 #if defined(STEADY_BREATHING_ENHANCED_TESTING)
 void PreferencesDialog::on_resetSteadyBreathingDefaults_clicked()

@@ -15,6 +15,8 @@
 
 [Setup]
 SetupLogging=yes
+; Windows 10 1809, the oldest version Qt 6.12 supports.
+MinVersion=10.0.17763
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
@@ -106,6 +108,11 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Type: files; Name: "{app}\Html\release_notes*.html"
 Type: files; Name: "{app}\Html\credits*.html"
 Type: files; Name: "{app}\Html\about*.html"
+; C++ runtime of earlier MinGW builds, which an MSVC build would otherwise leave behind.
+; This runs before [Files], so a MinGW build's own copies are still installed.
+Type: files; Name: "{app}\libgcc_s_seh-1.dll"
+Type: files; Name: "{app}\libstdc++-6.dll"
+Type: files; Name: "{app}\libwinpthread-1.dll"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"

@@ -54,6 +54,9 @@ class Daily : public QWidget
     Q_OBJECT
 
 friend class Journal;
+#ifdef UNITTEST_MODE
+friend class EventsTabTests;
+#endif
 public:
     /*! \fn Daily()
         \brief Constructs a Daily object
@@ -132,6 +135,14 @@ public:
 
     void clearLastDay();
     void clearJournalNotesEditor();
+
+    /*! \fn releaseDayData()
+        \brief Drops every pointer the Daily page holds into the displayed day's sessions.
+
+        Call before destroying sessions in a loop that runs the event loop. The page repaints
+        empty until the next LoadDate(), which the caller must make.
+        */
+    void releaseDayData();
 
     /*! \fn updateCalendarDays(const QList<QDate> &dates)
         \brief Refreshes the calendar appearance for each of the supplied dates.
@@ -421,6 +432,13 @@ private:
     double user_height_cm;
 #endif
     constexpr static double zeroD = 0.0001 ;
+
+    /*! \brief The calendar hint's journal line: "Journal: weight 80.0 kg, feeling 7.0/10, notes, Bookmarks: 2".
+     *  \param journalDay The day's journal (MT_JOURNAL), not null.
+     *  \param bookmarks  Number of bookmarks on the day.
+     */
+    static QString calendarJournalLine(Day *journalDay, int bookmarks);
+
     bool BookmarksChanged;
 
     SaveGraphLayoutSettings* saveGraphLayoutSettings=nullptr;

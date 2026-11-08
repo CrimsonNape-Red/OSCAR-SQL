@@ -52,6 +52,7 @@
 #include "Graphs/gFlagsLine.h"
 #include "SleepLib/profiles.h"
 #include "overview.h"
+#include "tooltipcolors.h"
 #include "database/database_manager.h"
 #include "database/graph_layouts_repository.h"
 #include "database/profile_repository.h"
@@ -237,10 +238,10 @@ void gToolTip::paint(QPainter &painter)     //actually paints it.
     if (!m_visible) { return; }
     QRect a_rect=calculateRect(painter);
 
-    QBrush brush(QColor(255, 255, 128, 230));
+    QBrush brush(ToolTipColors::graphBackground());
     brush.setStyle(Qt::SolidPattern);
     painter.setBrush(brush);
-    painter.setPen(QColor(0, 0, 0, 255));
+    painter.setPen(ToolTipColors::graphText());
 
     painter.drawRoundedRect(a_rect, 5, 5);
     painter.setBrush(Qt::black);

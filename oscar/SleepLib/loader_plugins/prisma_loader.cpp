@@ -46,13 +46,17 @@
 //********************************************************************************************
 
 // parameters
-ChannelID Prisma_Mode = 0, Prisma_SoftPAP = 0, Prisma_BiSoft = 0, Prisma_PSoft = 0, Prisma_PSoft_Min = 0, Prisma_AutoStart = 0, Prisma_Softstart_Time = 0, Prisma_Softstart_TimeMax = 0, Prisma_Softstart_Pressure = 0, Prisma_TubeType = 0, Prisma_PMaxOA = 0, Prisma_HumidifierLevel = 0;
+ChannelID Prisma_Mode = 0, Prisma_SoftPAP = 0, Prisma_BiSoft = 0, Prisma_PSoft = 0, Prisma_PSoft_Min = 0, Prisma_AutoStart = 0, Prisma_Softstart_Time = 0, Prisma_Softstart_TimeMax = 0, Prisma_Softstart_Pressure = 0, Prisma_TubeType = 0, Prisma_PMaxOA = 0, Prisma_HumidifierLevel = 0, Prisma_AutoF = 0, Prisma_FMin = 0, Prisma_TiT = 0;
 
 // waveforms
 ChannelID Prisma_ObstructLevel = 0, Prisma_rMVFluctuation = 0, Prisma_rRMV= 0, Prisma_PressureMeasured = 0, Prisma_FlowFull = 0, Prisma_EEPAP = 0;
 
 // events
 ChannelID Prisma_Artifact = 0, Prisma_CriticalLeak = 0, Prisma_DeepSleep = 0, Prisma_TimedBreath = 0, Prisma_HumidifierEmpty = 0;
+ChannelID Prisma_LeakAlarm = 0, Prisma_HypopneaLeak = 0;
+
+// Registered by the prisma VENT loader, which writes the same event ids.
+extern ChannelID PrismaVent_Disconnect, PrismaVent_SEL;
 
 // epoch events
 // The device evaluates 2 minute long epochs, and catagorizes them based on the events that occur during that epoch.
@@ -264,7 +268,7 @@ void PrismaImport::run()
             session->settings[Prisma_Softstart_Pressure] = parameters[PRISMA_LINE_SOFT_START_PRESS] / 100.0;
             session->settings[Prisma_Softstart_Time] = parameters[PRISMA_LINE_SOFT_START_TIME];
             session->settings[Prisma_AutoStart] = parameters[PRISMA_LINE_AUTOSTART];
-            if (parameters.contains(PRISMA_SMART_TUBE_TYPE)) {
+            if (parameters.contains(PRISMA_LINE_TUBE_TYPE)) {
                 session->settings[Prisma_TubeType] = parameters[PRISMA_LINE_TUBE_TYPE] / 10.0;
             }
             // Indicate partial support
@@ -296,7 +300,7 @@ void PrismaImport::run()
                 session->settings[Prisma_Softstart_Pressure] = parameters[PRISMA_LINE_SOFT_START_PRESS] / 100.0;
                 session->settings[Prisma_Softstart_Time] = parameters[PRISMA_LINE_SOFT_START_TIME];
                 session->settings[Prisma_AutoStart] = parameters[PRISMA_LINE_AUTOSTART];
-                if (parameters.contains(PRISMA_SMART_TUBE_TYPE)) {
+                if (parameters.contains(PRISMA_LINE_TUBE_TYPE)) {
                     session->settings[Prisma_TubeType] = parameters[PRISMA_LINE_TUBE_TYPE] / 10.0;
                 }
             break;
@@ -314,25 +318,36 @@ void PrismaImport::run()
             break;
 
             case PRISMA_MODE_ACSV:
-                // TODO AXT: its possible that based on PDIFF setting we should choose between MODE_ASV
-                // and MODE_ASV_VARIABLE_EPAP here
-                session->settings[CPAP_Mode] = (int)MODE_ASV;
+                // AcSV titrates the expiratory pressure between limits, so it isn't fixed-EPAP ASV.
+                // Outside softSTART, commanded EPAP stays at or above PRISMA_LINE_EPAP and commanded
+                // EEPAP within the EEPAP limits (prismaCR card, two sets of settings).
+                session->settings[CPAP_Mode] = (int)MODE_ASV_VARIABLE_EPAP;
                 session->settings[Prisma_Mode] = (int)PRISMA_COMBINED_MODE_ACSV;
+                if (parameters.contains(PRISMA_LINE_EXTRA_OBSTRUCTION_PROTECTION)) {
+                    session->settings[Prisma_BiSoft] = parameters[PRISMA_LINE_EXTRA_OBSTRUCTION_PROTECTION];
+                }
                 session->settings[CPAP_EEPAPLo] = parameters[PRISMA_LINE_EEPAP_MIN] / 100.0;
                 session->settings[CPAP_EEPAPHi] = parameters[PRISMA_LINE_EEPAP_MAX] / 100.0;
-                session->settings[CPAP_EPAP] = parameters[PRISMA_LINE_EPAP] / 100.0;
-                session->settings[CPAP_IPAP] = parameters[PRISMA_LINE_IPAP] / 100.0;
+                session->settings[CPAP_EPAPLo] = parameters[PRISMA_LINE_EPAP] / 100.0;
                 session->settings[CPAP_IPAPHi] = parameters[PRISMA_LINE_IPAP_MAX] / 100.0;
+                if (parameters.contains(PRISMA_LINE_AUTO_F)) {
+                    session->settings[Prisma_AutoF] = parameters[PRISMA_LINE_AUTO_F];
+                }
+                // Written as -1 when autoF sets the rate, so there is no value to show.
+                if (parameters.value(PRISMA_LINE_F_MIN, -1) >= 0) {
+                    session->settings[Prisma_FMin] = parameters[PRISMA_LINE_F_MIN];
+                }
+                if (parameters.value(PRISMA_LINE_TI_T, -1) >= 0) {
+                    session->settings[Prisma_TiT] = parameters[PRISMA_LINE_TI_T];
+                }
                 session->settings[CPAP_PSMin] = parameters[PRISMA_LINE_PDIFF_NORM] / 100.0;
                 session->settings[CPAP_PSMax] = parameters[PRISMA_LINE_PDIFF_MAX] / 100.0;
                 session->settings[Prisma_Softstart_Time] = parameters[PRISMA_LINE_SOFT_START_TIME];
                 session->settings[Prisma_Softstart_Pressure] = parameters[PRISMA_LINE_SOFT_START_PRESS] / 100.0;
                 session->settings[Prisma_AutoStart] = parameters[PRISMA_LINE_AUTOSTART];
-                if (parameters.contains(PRISMA_SMART_TUBE_TYPE)) {
+                if (parameters.contains(PRISMA_LINE_TUBE_TYPE)) {
                     session->settings[Prisma_TubeType] = parameters[PRISMA_LINE_TUBE_TYPE] / 10.0;
                 }
-                // Indicate partial support
-                session->settings[Prisma_Warning] = 2;
             break;
 
             case PRISMA_MODE_APAP:
@@ -354,7 +369,7 @@ void PrismaImport::run()
                 session->settings[Prisma_SoftPAP] = parameters[PRISMA_LINE_SOFT_PAP_LEVEL];
                 session->settings[Prisma_Softstart_Time] = parameters[PRISMA_LINE_SOFT_START_TIME];
                 session->settings[Prisma_Softstart_Pressure] = parameters[PRISMA_LINE_SOFT_START_PRESS] / 100.0;
-                if (parameters.contains(PRISMA_SMART_TUBE_TYPE)) {
+                if (parameters.contains(PRISMA_LINE_TUBE_TYPE)) {
                     session->settings[Prisma_TubeType] = parameters[PRISMA_LINE_TUBE_TYPE] / 10.0;
                 }
             break;
@@ -368,7 +383,7 @@ void PrismaImport::run()
             session->settings[Prisma_SoftPAP] = parameters[PRISMA_LINE_SOFT_PAP_LEVEL];
             session->settings[Prisma_Softstart_Time] = parameters[PRISMA_LINE_SOFT_START_TIME];
             session->settings[Prisma_Softstart_Pressure] = parameters[PRISMA_LINE_SOFT_START_PRESS] / 100.0;
-            if (parameters.contains(PRISMA_SMART_TUBE_TYPE)) {
+            if (parameters.contains(PRISMA_LINE_TUBE_TYPE)) {
                 session->settings[Prisma_TubeType] = parameters[PRISMA_LINE_TUBE_TYPE] / 10.0;
             }
             break;
@@ -444,6 +459,13 @@ void PrismaImport::run()
     AddEvents(Prisma_eS, PRISMA_EVENT_EPOCH_SNORE);
     AddEvents(Prisma_DeepSleep, PRISMA_EVENT_EPOCH_DEEPSLEEP);
     AddEvents(Prisma_TimedBreath, PRISMA_EVENT_TIMED_BREATH);
+    AddEvents(CPAP_Ramp, PRISMA_EVENT_SOFTSTART);
+    AddEvents(PrismaVent_Disconnect, PRISMA_EVENT_DISCONNECTION);
+    AddEvents(PrismaVent_SEL, PRISMA_EVENT_SEL);
+    AddEvents(Prisma_LeakAlarm, PRISMA_EVENT_LEAKAGE_ALARM);
+    // A separate channel keeps these out of AHI. On one reported night, prismaTS's AHI
+    // ruled out counting them along with the apneas during movement already in CPAP_Apnea.
+    AddEvents(Prisma_HypopneaLeak, PRISMA_EVENT_HYPOPNEA_LEAKAGE);
 
     // Humidifier empty detection (Smart Aqua Control / WL water empty state).
     // Each span runs from the transition to PRISMA_HUMID_EMPTY until the next transition to
@@ -517,10 +539,16 @@ void PrismaImport::AddEvents(ChannelID channel, QList<Prisma_Event_Type> eventTy
     for (auto eventType : eventTypes) {
         QList<PrismaEvent> events = eventFile->getEvents(eventType);
         for (auto event: events) {
+            // Cards also write softSTART and Disconnection rows under a second long, mostly with
+            // no duration at all. Durations are whole seconds here, so these aren't spans.
+            if (event.duration() == 0 && (channel == CPAP_Ramp || channel == PrismaVent_Disconnect)) {
+                continue;
+            }
             if (eventList == nullptr) {
                 eventList = session->AddEventList(channel, EVL_Event, 1.0, 0.0, 0.0, 0.0, 0.0, true);
             }
-            eventList ->AddEvent(startdate + event.endTime(), event.duration(), event.strength());
+            // EventStoreType is 16-bit, and a disconnection can run for as long as the machine does.
+            eventList ->AddEvent(startdate + event.endTime(), qMin(event.duration(), 32767), event.strength());
         }
     }
     // Every channel keeps an (empty) list so it appears in the events list from the first
@@ -589,6 +617,7 @@ static const PrismaTestedModel s_PrismaTestedModels[] = {
     // The LINE models are identified by the decimal DeviceType string in device.xml;
     // the hex ids above come from the Firefly platform's JSON "devid" field instead.
     { "10"  , "prisma20A" },
+    { "13"  , "prismaCR" },
     { "22"  , "prisma25S" },
     { "23"  , "prisma25ST" },
     { "", ""}
@@ -1134,6 +1163,7 @@ void PrismaLoader::initChannels()
         QObject::tr("Warning"),
         "", LOOKUP, Qt::green));
     chan->addOption(1, "Mode is not supported yet, please send sample data.");
+    // No longer written, but AcSV sessions imported by earlier versions still hold this value.
     chan->addOption(2, "Mode partially supported, please send sample data.");
 
 
@@ -1264,6 +1294,43 @@ void PrismaLoader::initChannels()
         QObject::tr("HE"),
         STR_UNIT_Percentage, DEFAULT, QColor("gold")));
 
+    // prismaTS shows 0 as Off and 3 as On. Other values haven't been seen and show as plain numbers.
+    channel.add(GRP_CPAP, chan = new Channel(Prisma_AutoF=0xe450, SETTING,  MT_CPAP,  SESSION,
+        "Prisma_AutoF",
+        QObject::tr("autoF"),
+        QObject::tr("Automatic setting of the backup breathing frequency"),
+        QObject::tr("autoF"),
+        "", LOOKUP, Qt::green));
+    chan->addOption(0, STR_TR_Off);
+    chan->addOption(3, STR_TR_On);
+
+    channel.add(GRP_CPAP, new Channel(Prisma_FMin=0xe451, SETTING,  MT_CPAP,  SESSION,
+        "Prisma_FMin",
+        QObject::tr("F min"),
+        QObject::tr("Backup breathing frequency"),
+        QObject::tr("F min"),
+        STR_UNIT_BreathsPerMinute, INTEGER, Qt::green));
+
+    channel.add(GRP_CPAP, new Channel(Prisma_TiT=0xe452, SETTING,  MT_CPAP,  SESSION,
+        "Prisma_TiT",
+        QObject::tr("Ti/T set"),
+        QObject::tr("Inspiration time as a share of the breath cycle for backup breaths"),
+        QObject::tr("Ti/T set"),
+        STR_UNIT_Percentage, INTEGER, Qt::green));
+
+    channel.add(GRP_CPAP, new Channel(Prisma_LeakAlarm=0xe453, SPAN,  MT_CPAP,  SESSION,
+        "Prisma_LeakAlarm",
+        QObject::tr("Leakage alarm"),
+        QObject::tr("The device's leakage alarm was active"),
+        QObject::tr("LA"),
+        STR_UNIT_EventsPerHour, DEFAULT, QColor("indianred")));
+
+    channel.add(GRP_CPAP, new Channel(Prisma_HypopneaLeak=0xe454, FLAG,  MT_CPAP,  SESSION,
+        "Prisma_HypopneaLeak",
+        QObject::tr("Hypopnea with high leakage"),
+        QObject::tr("Hypopnea scored during very high leakage. Not counted in AHI."),
+        QObject::tr("HL"),
+        STR_UNIT_EventsPerHour, DEFAULT, QColor("sienna")));
 }
 
 bool PrismaLoader::initialized = false;

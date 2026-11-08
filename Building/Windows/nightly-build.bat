@@ -13,7 +13,7 @@ setlocal enabledelayedexpansion
 set DROPBOX_DIR=C:\Users\Guy\Dropbox\OSCAR Files
 set REPO_DIR=C:\OSCAR\OSCAR-code
 set BUILD_DIR=C:\OSCAR\OSCAR-code\Building\Windows
-set BUILD_SCRIPT=buildall-qt6.bat
+set BUILD_SCRIPT=buildall-msvc.bat
 set INSTALLER_DIR=C:\OSCAR\OSCAR-code\build-oscar-win_64_bit\Installer
 set LOG_FILE=C:\OSCAR\nightly-build.log
 set NOTIFY_SCRIPT=%~dp0nightly-notify.ps1

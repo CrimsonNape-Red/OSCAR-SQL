@@ -97,6 +97,7 @@
 #include <QProgressDialog>
 #include <QThread>
 #include <QEventLoop>
+#include <QPalette>
 #include <functional>
 #include "purgerangedaysdialog.h"
 #include "exports/report_exporter.h"
@@ -124,6 +125,7 @@
 #include "statistics.h"
 #include "zip.h"
 #include "speedcheck.h"
+#include "tooltipcolors.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,4,0)
 #include <QOpenGLFunctions>
@@ -148,15 +150,12 @@ MainWindow::MainWindow(QWidget *parent) :
             });
     }
 
-    // Qt 6 on Windows 11 renders menu bar items and combo box drop-down items
-    // with excessive vertical padding. Constrain to match earlier Qt versions.
+    // Qt 6 on Windows 11 renders menu bar items with excessive vertical padding.
+    // Constrain to match earlier Qt versions. (Combo box items: see ToolTipColors::apply().)
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0) && defined(Q_OS_WIN)
     ui->menubar->setStyleSheet(
         "QMenuBar { padding: 0px; }"
         "QMenuBar::item { padding: 2px 8px 1px 8px; }"
-    );
-    qApp->setStyleSheet(
-        "QComboBox QAbstractItemView::item { padding: 0px 0px; margin: 0px; }"
     );
 #endif
 
@@ -447,6 +446,16 @@ void MainWindow::showEvent(QShowEvent *event)
         });
     }
 #endif
+}
+
+void MainWindow::changeEvent(QEvent *event)
+{
+    if (event->type() == QEvent::ThemeChange) {
+        // Qt has reset the tooltips to the theme's palette. Set their colors again once the
+        // change has been handled.
+        QTimer::singleShot(0, this, [] { ToolTipColors::apply(); });
+    }
+    QMainWindow::changeEvent(event);
 }
 
 void MainWindow::closeEvent(QCloseEvent * event)
@@ -777,10 +786,15 @@ bool MainWindow::OpenProfile(QString profileName)
         return false;
     }
 
-    if (!p_profile->LastDay(MT_CPAP).isValid() ) { // quick test if new profile or not.
-        // Override default value of clinicalMode if new profile.
-        // Allows permissiveMode (not clinicalMode) to be the default value for existing profiles.
-        p_profile->cpap->setClinicalMode(true);
+    if (!(*p_profile)[STR_PREF_ClinicalModeDefaultSet].toBool()) {
+        if (!p_profile->LastDay(MT_CPAP).isValid() ) { // quick test if new profile or not.
+            // Override default value of clinicalMode if new profile.
+            // Allows permissiveMode (not clinicalMode) to be the default value for existing profiles.
+            p_profile->cpap->setClinicalMode(true);
+        }
+        // Apply the default only once, so a mode the user picks before importing any data
+        // (e.g. Permissive Mode, to turn on Steady Breathing) isn't reset on the next reload.
+        p_profile->Set(STR_PREF_ClinicalModeDefaultSet, true);
     }
     m_clinicalMode = p_profile->cpap->clinicalMode();
 
@@ -2627,6 +2641,10 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
     const QDate viewDate = daily->getDate();
     daily->Unload(viewDate);
 
+    // The loop below runs the event loop for the progress dialog and Cancel, so the main window
+    // can repaint between days. Daily must not be left pointing at sessions destroyed by then.
+    daily->releaseDayData();
+
     QProgressDialog progress(tr("Purging data..."), tr("Cancel"), 0, numDays, this);
     progress.setWindowModality(Qt::WindowModal);
     progress.setMinimumDuration(0);
@@ -2651,6 +2669,7 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
     progress.setValue(numDays);
 
     if (purgedDates.isEmpty()) {
+        daily->LoadDate(viewDate);  // nothing changed, but releaseDayData() emptied the page
         staticQMessageBox::information(this,
             tr("Purge Range of Days"),
             tr("No data was found in the selected date range."),

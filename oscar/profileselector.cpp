@@ -117,6 +117,7 @@ ProfileSelector::ProfileSelector(QWidget *parent) :
         connect(sm, SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_selectionChanged(QModelIndex,QModelIndex)));
     ui->buttonEditProfile->setEnabled(false);
     ui->buttonOpenProfile->setEnabled(false);
+    ui->buttonDestroyProfile->setEnabled(false);
 
     connect(ui->profileView->horizontalHeader(), &QHeaderView::sortIndicatorChanged,
             this, &ProfileSelector::onSortIndicatorChanged);
@@ -364,6 +365,7 @@ void ProfileSelector::updateProfileList()
     ui->diskSpaceInfo->setVisible(false);
     ui->buttonOpenProfile->setEnabled(false);
     ui->buttonEditProfile->setEnabled(false);
+    ui->buttonDestroyProfile->setEnabled(false);
 
     proxy = new MySortFilterProxyModel2(this);
     proxy->setSourceModel(model);
@@ -807,4 +809,7 @@ void ProfileSelector::on_selectionChanged(const QModelIndex &index, const QModel
     }
     ui->buttonOpenProfile->setEnabled(enabled);
     ui->buttonEditProfile->setEnabled(enabled);
+    // Destroy also works for a row whose profile folder is missing (it removes the
+    // database entry), so it only needs a selected row.
+    ui->buttonDestroyProfile->setEnabled(index.isValid());
 }

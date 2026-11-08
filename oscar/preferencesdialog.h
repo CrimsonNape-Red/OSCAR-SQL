@@ -113,6 +113,12 @@ private:
     void showSpO2Baseline(SpO2BaselineMethod method, int window, int percentile, int manual);
     //! \brief Enable the rolling window and manual value only for the method that uses them
     void updateSpO2BaselineControls();
+#if defined(STEADY_BREATHING)
+    //! \brief Lock the Steady Breathing box in Clinical Mode, unlock it in Permissive Mode
+    void updateSteadyBreathingForMode(bool clinical);
+    bool m_steadyBreathingChoice = false;   //!< the user's on/off choice, kept while the box is locked
+    QString m_steadyBreathingTitle;         //!< the box's own title, restored when unlocked
+#endif
 
     QHash<MachineType, QStandardItem *> toplevel;
     QHash<MachineType, QStandardItem *> machlevel;
