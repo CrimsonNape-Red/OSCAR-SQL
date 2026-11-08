@@ -11,6 +11,7 @@
 #include "../SleepLib/machine_loader.h"
 #include <QTemporaryDir>
 #include <QRandomGenerator>
+#include <tuple>
 #if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
     #define QTHEX     Qt::hex
     #define QTDEC     Qt::dec
@@ -125,6 +126,133 @@ void ResmedTests::testGzipNonAsciiPath()
     QCOMPARE(gzDur.start, plainDur.start);
     QCOMPARE(gzDur.end, plainDur.end);
     QCOMPARE(gzDur.end - gzDur.start, quint32(600));
+}
+
+
+// ====================================================================================================
+// GitLab #363: ResMed writes events into EVE.edf up to a minute after the session's waveform
+// files stop, and counts them in its own indices. OSCAR dropped them because they fell outside
+// the session's [first, last] range.
+
+void ResmedTests::testEveGraceEnd()
+{
+    const qint64 last = 1000000000LL;
+    const qint64 grace = ResmedLoader::EVE_GRACE_AFTER_END_MS;
+    using Spans = QList<QPair<qint64, qint64>>;
+
+    // Alone on the day: events up to a minute after the end belong to the session.
+    QCOMPARE(ResmedLoader::eventGraceEnd(last, Spans()), last + grace);
+
+    // A session that ended earlier has no effect.
+    QCOMPARE(ResmedLoader::eventGraceEnd(last, Spans{ { last - 7200000, last - 3600000 } }), last + grace);
+
+    // The next session starting inside the minute ends the grace just before its start.
+    QCOMPARE(ResmedLoader::eventGraceEnd(last, Spans{ { last + 20000, last + 3600000 } }), last + 19999);
+
+    // A session starting after the minute has no effect.
+    QCOMPARE(ResmedLoader::eventGraceEnd(last, Spans{ { last + grace + 1, last + 3600000 } }), last + grace);
+
+    // Another session still running at this one's end: no grace at all.
+    QCOMPARE(ResmedLoader::eventGraceEnd(last, Spans{ { last - 60000, last + 60000 } }), last);
+
+    // A session without waveform data has no end to extend.
+    QCOMPARE(ResmedLoader::eventGraceEnd(0, Spans()), qint64(0));
+}
+
+/*! \brief Write a minimal ResMed-style EVE.edf holding the given annotations
+ *
+ * One "EDF Annotations" signal and one data record, as ResMed writes them. Each entry of
+ * \a events is (offset in seconds, duration in seconds, text).
+ */
+static QByteArray makeEveEdf(const QString & startDateTime,
+                             const QList<std::tuple<int, int, QString>> & events)
+{
+    QByteArray tal("+0\x14\x14\x00", 5);    // record time-keeping annotation
+    for (const auto & ev : events) {
+        tal += QString("+%1\x15%2\x14%3\x14").arg(std::get<0>(ev)).arg(std::get<1>(ev))
+                   .arg(std::get<2>(ev)).toLatin1();
+        tal += '\0';
+    }
+    if (tal.size() % 2) tal += '\0';
+    const int samples = tal.size() / 2;
+
+    auto field = [](const QString & s, int width) { return s.leftJustified(width, ' ', true).toLatin1(); };
+    QByteArray edf;
+    edf += field("0", 8);
+    edf += field("X X X X", 80);
+    edf += field("Startdate 31-OCT-2026 X X X", 80);
+    edf += field(startDateTime, 16);          // dd.MM.yyHH.mm.ss
+    edf += field("512", 8);
+    edf += field("EDF+C", 44);
+    edf += field("1", 8);                     // one data record
+    edf += field("0", 8);                     // annotation-only record
+    edf += field("1", 4);                     // one signal
+    edf += field("EDF Annotations", 16);
+    edf += field("", 80);
+    edf += field("", 8);
+    edf += field("-1", 8);
+    edf += field("1", 8);
+    edf += field("-32768", 8);
+    edf += field("32767", 8);
+    edf += field("", 80);
+    edf += field(QString::number(samples), 8);
+    edf += field("", 32);
+    edf += tal;
+    return edf;
+}
+
+void ResmedTests::testEveEventPastSessionEnd()
+{
+    // matchSignal() needs the ResMed annotation names, which initChannels() registers
+    // (only once: registering the channels twice logs duplicate-channel errors).
+    if (!schema::channel.names.contains("RMS9_Mode")) {
+        s_loader->initChannels();
+    }
+
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    const QString path = tmp.path() + "/20261031_232742_EVE.edf";
+
+    // The night from #363: waveforms 23:27:47 for 7800 s; the only event, an obstructive
+    // apnea, is logged 7822 s after the EVE start, 19 s after the waveforms stop. A second
+    // event 120 s after the waveforms stop is beyond the grace and stays excluded.
+    const QString startText = "31.10.2623.27.44";
+    QFile f(path);
+    QVERIFY(f.open(QFile::WriteOnly));
+    f.write(makeEveEdf(startText, { { 7822, 11, "Obstructive Apnea" },
+                                    { 7923, 0, "Hypopnea" } }));
+    f.close();
+
+    const qint64 eveStart = QDateTime(QDate(2026, 10, 31), QTime(23, 27, 44), EDFInfo::localNoDST)
+                                .toMSecsSinceEpoch();
+    const qint64 first = eveStart + 3000;
+    const qint64 last = first + 7800000;
+    const qint64 oaTime = eveStart + 7822000;
+
+    CPAP mach(p_profile, 363);
+
+    // Without a grace end (the old behaviour), the event past the end is dropped.
+    {
+        Session sess(&mach, SessionID(first / 1000));
+        sess.really_set_first(first);
+        sess.really_set_last(last);
+        QVERIFY(s_loader->LoadEVE(&sess, path));
+        QCOMPARE(sess.count(CPAP_Obstructive), EventDataType(0));
+        QCOMPARE(sess.realLast(), last);
+    }
+
+    // With the grace end, the apnea is kept and the session now ends at it; the hypopnea
+    // two minutes past the end is still excluded.
+    {
+        Session sess(&mach, SessionID(first / 1000));
+        sess.really_set_first(first);
+        sess.really_set_last(last);
+        const qint64 graceEnd = ResmedLoader::eventGraceEnd(last, {});
+        QVERIFY(s_loader->LoadEVE(&sess, path, graceEnd));
+        QCOMPARE(sess.count(CPAP_Obstructive), EventDataType(1));
+        QCOMPARE(sess.count(CPAP_Hypopnea), EventDataType(0));
+        QCOMPARE(sess.realLast(), oaTime);
+    }
 }
 
 

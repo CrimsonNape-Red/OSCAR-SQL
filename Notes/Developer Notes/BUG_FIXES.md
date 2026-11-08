@@ -4,6 +4,38 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-07 - ResMed: events logged just after the waveforms stop are dropped (GitLab #363)
+
+**Files:** `oscar/SleepLib/loader_plugins/resmed_loader.cpp`, `resmed_loader.h`, `oscar/tests/resmedtests.cpp`,
+`resmedtests.h`
+
+**Symptom:** OSCAR showed AHI 0.00 where the AirSense 10's own report showed 0.4. OSCAR 1.7.x behaves the
+same way.
+
+**Root cause:** `LoadEVE` kept only events inside the session's `[first, last]` range, and a ResMed session
+ends with its last waveform sample. The device writes some events into EVE.edf after the waveform files stop
+(the last breaths before mask-off) and counts them in its own indices. In the #363 night, the only event,
+an obstructive apnea, was 19 s past the waveform end.
+
+**Fix:** An event up to 60 s past the session's waveform end now belongs to that session, and the session's
+end moves to it. `ResmedLoader::eventGraceEnd()` stops the grace 1 ms before another of the day's sessions
+starts, and gives none when another session is still running, so no event goes to two sessions. Each
+kept event is written to the debug log (`LoadEVE: ... session end moved to it (#363)`).
+
+**Non-obvious:**
+- Across 1,287 test-card nights, 83 (6.4%) had such an event, all under 60 s past the end (none between
+  60 s and 10 min). On every night checked against STR.edf (78), the device's indices count them.
+- Moving the session's end matters: without it the kept event lies past `Day::last()`, so the flags graph
+  doesn't draw it and `calcAHIGraph` never counts it.
+- With the session ending on the event, the event sits exactly on the Event Flags graph's right edge, under
+  the outline, and is hard to see there. Drawing it one pixel inside didn't help (the row backgrounds stop one
+  pixel short of the border, so a light-blue line on white can't be seen). Padding the graph's range by 0.5%
+  of the day made it visible but was left out; it is visible on the Flow Rate graph and in the event list.
+- The STR mask-off time can't be the limit: it is whole minutes, and the #363 event is 6 s after it.
+- Nights already imported change only when re-imported; the loader version was not bumped.
+
+---
+
 ## 2026-11-04 - Tooltip colors: startup prompts missed, defined three times, no system option (GitLab #371)
 
 **Files:** `oscar/tooltipcolors.cpp`, `tooltipcolors.h` (new), `oscar/main.cpp`, `mainwindow.cpp`,

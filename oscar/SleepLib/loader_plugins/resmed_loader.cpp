@@ -3059,10 +3059,19 @@ void ResDayTask::run()
         }       // end for each edf file in the sessionGroup
 
         // Turns out there is only one or sometimes two EVE's per day, and they store data for the whole day
-        // So we have to extract Annotations data and apply it for all sessions
+        // So we have to extract Annotations data and apply it for all sessions.
+        // Events up to a minute past this session's waveforms belong to it too (#363), as long
+        // as they don't reach into another of the day's sessions.
+        QList<QPair<qint64, qint64>> otherSessions;
+        for (const auto & other : overlaps) {
+            if ((&other != &ovr) && (other.filemap.size() > 0)) {
+                otherSessions.append({ qint64(other.start) * 1000L, qint64(other.end) * 1000L });
+            }
+        }
+        const qint64 graceEnd = ResmedLoader::eventGraceEnd(sess->realLast(), otherSessions);
         for (auto eit=EVElist.begin(), eveend=EVElist.end(); eit != eveend; ++eit) {
             const QString & fullpath = resday->files[eit.value()];
-            loader->LoadEVE(ovr.sess, fullpath);
+            loader->LoadEVE(ovr.sess, fullpath, graceEnd);
         }
         for (auto eit=CSLlist.begin(), cslend=CSLlist.end(); eit != cslend; ++eit) {
             const QString & fullpath = resday->files[eit.value()];
@@ -3327,7 +3336,25 @@ bool ResmedLoader::LoadCSL(Session *sess, const QString & path)
     return true;
 }
 
-bool ResmedLoader::LoadEVE(Session *sess, const QString & path)
+qint64 ResmedLoader::eventGraceEnd(qint64 sessLastMs, const QList<QPair<qint64, qint64>> & otherSessionsMs)
+{
+    if (sessLastMs <= 0) {
+        return 0;
+    }
+    qint64 graceEnd = sessLastMs + EVE_GRACE_AFTER_END_MS;
+    for (const auto & other : otherSessionsMs) {
+        if (other.second <= sessLastMs) {
+            continue;                       // ended before this session did
+        }
+        if (other.first <= sessLastMs) {
+            return sessLastMs;              // still running when this session ends
+        }
+        graceEnd = qMin(graceEnd, other.first - 1);
+    }
+    return graceEnd;
+}
+
+bool ResmedLoader::LoadEVE(Session *sess, const QString & path, qint64 graceEndMs)
 {
     QElapsedTimer time;
     time.start();
@@ -3352,9 +3379,31 @@ bool ResmedLoader::LoadEVE(Session *sess, const QString & path)
 //    if (!repairEDFStartFromSession(edf, sess, path))
 
     // Notes: Event records have useless duration record.
-    // Do not update session start / end times because they are needed to determine if events belong in this session or not...
+    // Do not update session start / end times from the EVE header because they are needed to
+    // determine if events belong in this session or not; only a kept late event moves the end.
 
     EventList *OA = nullptr, *HY = nullptr, *CA = nullptr, *UA = nullptr, *RE = nullptr;
+
+    // An event belongs to this session if it lies inside it, or (#363) if it was logged
+    // after the waveforms stopped but no later than graceEndMs. The device counts those
+    // in its own indices; keeping one moves the session's end to it, so the event is
+    // drawn on the graphs and included in the AHI graph like any other. Each such stretch
+    // is logged so these rare cases can be found later.
+    auto belongs = [sess, graceEndMs, &filename](qint64 tt, const QString & what) {
+        if (sess->checkInside(tt)) {
+            return true;
+        }
+        const qint64 oldLast = sess->realLast();
+        if ((tt > oldLast) && (tt <= graceEndMs)) {
+            sess->updateLast(tt);
+            qDebug().noquote() << "LoadEVE:" << filename << "session" << sess->session()
+                               << "kept" << what << "at" << QDateTime::fromMSecsSinceEpoch(tt).toString(Qt::ISODate)
+                               << QString("%1 s past the session end; session end moved to it (#363)")
+                                      .arg((tt - oldLast) / 1000.0, 0, 'f', 1);
+            return true;
+        }
+        return false;
+    };
 
     // Allow for empty sessions..
 
@@ -3370,25 +3419,25 @@ bool ResmedLoader::LoadEVE(Session *sess, const QString & path)
 
             if ( ! anno->text.isEmpty()) {
                 if (matchSignal(CPAP_Obstructive, anno->text)) {
-                    if (sess->checkInside(tt))
+                    if (belongs(tt, anno->text))
                         OA->AddEvent(tt, anno->duration);
                 } else if (matchSignal(CPAP_Hypopnea, anno->text)) {
-                    if (sess->checkInside(tt))
+                    if (belongs(tt, anno->text))
                         HY->AddEvent(tt, anno->duration); // Hyponeas may not have any duration!
                 } else if (matchSignal(CPAP_Apnea, anno->text)) {
-                    if (sess->checkInside(tt))
+                    if (belongs(tt, anno->text))
                         UA->AddEvent(tt, anno->duration);
                 } else if (matchSignal(CPAP_RERA, anno->text)) {
                     // Not all devices have it, so only create it when necessary..
                     if ( ! RE)
                         RE = sess->AddEventList(CPAP_RERA, EVL_Event);
-                    if (sess->checkInside(tt))
+                    if (belongs(tt, anno->text))
                         RE->AddEvent(tt, anno->duration);
                 } else if (matchSignal(CPAP_ClearAirway, anno->text)) {
                     // Not all devices have it, so only create it when necessary..
                     if ( ! CA)
                         CA = sess->AddEventList(CPAP_ClearAirway, EVL_Event);
-                    if (sess->checkInside(tt))
+                    if (belongs(tt, anno->text))
                         CA->AddEvent(tt, anno->duration);
                 } else if (anno->text == "SpO2 Desaturation") {    // Used in 28509
                         continue;                               // ignored for now

@@ -101,9 +101,28 @@ class ResmedLoader : public CPAPLoader
     void ToTimeDelta(Session *sess, ResMedEDFInfo &edf, EDFSignal &es, ChannelID code, long recs,
                      qint64 duration, EventDataType min = 0, EventDataType max = 0, bool square = false);
 
+    //! \brief How long after a session's last waveform sample an EVE event still belongs to it.
+    //!
+    //! ResMed devices write events to EVE.edf up to a minute after the waveform files stop
+    //! (the last breaths before mask-off) and count them in their own indices (#363).
+    static constexpr qint64 EVE_GRACE_AFTER_END_MS = 60000;
+
+    //! \brief Latest event time that may be attributed to a session ending at \a sessLastMs.
+    //!
+    //! Normally \a sessLastMs + EVE_GRACE_AFTER_END_MS, but never reaching another session of
+    //! the same day: ends 1 ms before the next session's start, and gives no grace at all
+    //! when another session is still running at \a sessLastMs.
+    //! \param sessLastMs      End of the session's waveform data (ms since epoch); 0 if none
+    //! \param otherSessionsMs (start, end) in ms of the day's other sessions
+    //! \return The grace end in ms, or \a sessLastMs / 0 when no grace applies
+    static qint64 eventGraceEnd(qint64 sessLastMs, const QList<QPair<qint64, qint64>> & otherSessionsMs);
+
     //! \brief Parse the EVE Event annotation data, and save to Session * sess
     //! This contains all Hypopnea, Obstructive Apnea, Central and Apnea codes
-    bool LoadEVE(Session *sess, const QString & path);
+    //! \param graceEndMs Events after the session's end but no later than this are kept too,
+    //!                   and the session's end is moved to them (see eventGraceEnd()).
+    //!                   0 keeps only events inside the session.
+    bool LoadEVE(Session *sess, const QString & path, qint64 graceEndMs = 0);
 
     //! \brief Parse the CSL Event annotation data, and save to Session * sess
     //! This contains Cheyne Stokes Respiration flagging on the AirSense 10
