@@ -75,7 +75,7 @@ OSCAR recognises an F&P card by its `FPHCARE/ICON` folder.
 [[idx:Löwenstein]] [[idx:Weinmann]]
 | Series | Models |
 |---|---|
-| prisma | prisma SMART, prisma LINE (such as prisma20A, prisma25S, prisma25ST) |
+| prisma | prisma SMART, prisma LINE (such as prisma20A, prisma25S, prisma25ST), prismaCR |
 | prisma VENT | prisma VENT30, VENT30-C, VENT40, VENT40-C, VENT50, VENT50-C |
 | Weinmann SOMNO | SOMNObalance, SOMNObalance e, SOMNOcomfort, SOMNOcomfort 2, SOMNOcomfort 2e, SOMNOcompact, SOMNOcompact e, SOMNOset, SOMNOsmart, SOMNOsmart 2, SOMNOsoft, SOMNOsoft 2, SOMNOsoft 2e |
 

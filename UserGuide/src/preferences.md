@@ -139,7 +139,7 @@ Cumulative Indices
 ### Steady Breathing
 
 [[idx:Steady Breathing]]
-*Experimental; Permissive Mode must be enabled.* Steady Breathing (SB) is calculated from flow rate. When enabled, OSCAR creates an SB waveform and SPAN events from your CPAP flow data. It works only for data imported (or re-imported) while it is enabled.
+*Experimental; Permissive Mode must be enabled.* Steady Breathing (SB) is calculated from flow rate. When enabled, OSCAR creates an SB waveform and SPAN events from your CPAP flow data. It works only for data imported (or re-imported) while it is enabled. To avoid a rebuild later, choose Permissive Mode on the [Clinical tab](#clinical-tab) and turn on Steady Breathing before your first import. The option becomes available as soon as you pick Permissive Mode.
 
 ### Settings for Events Tab
 
@@ -322,6 +322,9 @@ Disable daily graph titles
 
 Use Fusion theme (OSCAR will restart)
 :   Uses Qt's Fusion style instead of your system's, for the same look on every platform.
+
+Use system tooltip colors
+:   Shows tooltips, including those on graphs, in your system's colours instead of OSCAR's black on yellow. Follows high contrast themes, and dark mode if it was on when OSCAR started.
 
 ### Statistics
 

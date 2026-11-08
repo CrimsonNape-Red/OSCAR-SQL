@@ -25,7 +25,19 @@ At the top of the left sidebar:
 | ◀ / ▶ | Go to the previous or next day. With *Skip over Empty Days* turned on in [Preferences](preferences.md#other-visual-settings), these jump over days with no data. |
 | Calendar button | Shows or hides the calendar (also *View → Daily Calendar*, <kbd>F9</kbd>). |
 | Most-recent button | Goes to the most recent day with data. |
-| Calendar | Click a date to show it. Days with data are highlighted, and the colour shows whether the day met your [compliance](preferences.md#clinical-tab) target. |
+| Calendar | Click a date to show it. Days with data are highlighted to show what the day holds. Hover over a day to see what data it has and what its styling means. |
+
+The calendar marks each day like this:
+
+| Style | Meaning |
+|---|---|
+| Red date | CPAP plus oximetry or movement data |
+| Blue date | CPAP only |
+| Green date | Oximetry only |
+| Underlined | Journal entry |
+| Italic | Bookmarks |
+| Shaded background | Sleep stages |
+| Line above the date | Sleep position |
 
 *View → Daily Sidebar* (<kbd>F8</kbd>) hides or shows the whole left sidebar to give the graphs more room.
 
