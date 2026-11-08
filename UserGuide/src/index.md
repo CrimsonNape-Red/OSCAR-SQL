@@ -7,7 +7,7 @@ index: OSCAR!what it is; OSCAR 2!what's new; Medical disclaimer
 
 <p class="lead">OSCAR, the Open Source CPAP Analysis Reporter, is free software for Windows, macOS and Linux. It reads the data your CPAP, bilevel or ASV machine records, together with data from pulse oximeters and some sleep trackers, and shows it as graphs and statistics you can study night by night.</p>
 
-This guide explains how to install OSCAR 2, bring your data into it, and use each view, menu and setting. Every option is described where it appears.
+This manual explains how to install OSCAR 2, bring your data into it, and use each view, menu and setting. Every option is described where it appears.
 
 ## What OSCAR does {.noindex}
 
@@ -41,7 +41,7 @@ OSCAR 2 replaces OSCAR 1.x. It looks and works much like OSCAR 1.7, but stores e
 
 OSCAR 2 keeps its data in its own folder, `OSCAR20_Data`, separate from the `OSCAR_Data` folder OSCAR 1.x uses. Both versions can be installed side by side. Keep OSCAR 1.x until you are happy with OSCAR 2.
 
-## How to use this guide {.noindex}
+## How to use this manual {.noindex}
 
 - **New to OSCAR?** Read the pages under *Getting started* in order: [Installing OSCAR 2](installing.md), [Profiles](profiles.md) and [Importing CPAP data](importing-cpap.md).
 - **Looking for an option or a menu item?** Use the **Search** box at the top of every page, or the A–Z [Index](genindex.html).

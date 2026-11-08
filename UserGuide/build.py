@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the OSCAR 2 Guide: turns the Markdown pages in src/ into a static HTML site in html/.
+"""Build the OSCAR 2 Reference Manual: turns the Markdown pages in src/ into a static HTML site in html/.
 
 Usage:  python3 build.py            (writes html/)
         python3 build.py --out DIR  (writes DIR instead)
@@ -45,7 +45,7 @@ HERE = Path(__file__).resolve().parent
 SRC = HERE / "src"
 ASSETS = HERE / "assets"
 
-GUIDE_TITLE = "OSCAR 2 Guide"
+GUIDE_TITLE = "OSCAR 2 Reference Manual"
 
 
 def slugify(value, separator="-"):
@@ -274,7 +274,7 @@ def build(out):
         return ", ".join(f'<a href="{u}">{html.escape(t)}</a>' for t, u in refs)
 
     body = ["<h1>Index</h1>",
-            '<p class="lead">Every topic in the guide, A to Z. Type in the box to narrow the list.</p>',
+            '<p class="lead">Every topic in the manual, A to Z. Type in the box to narrow the list.</p>',
             '<input type="search" id="index-filter" class="index-filter" placeholder="Filter the index" aria-label="Filter the index">',
             '<p class="letter-bar">' + " ".join(f'<a href="#letter-{slugify(l) or "sym"}">{l}</a>' for l in letters) + "</p>"]
     for letter, terms in letters.items():
@@ -291,7 +291,7 @@ def build(out):
     render("genindex.html", "Index", "\n".join(body))
 
     render("search.html", "Search", '<h1>Search</h1>\n<form class="search-page-form" action="search.html">'
-           '<input type="search" name="q" id="search-page-input" placeholder="Search the guide" aria-label="Search the guide">'
+           '<input type="search" name="q" id="search-page-input" placeholder="Search the manual" aria-label="Search the manual">'
            '<button type="submit">Search</button></form>\n<div id="search-results" aria-live="polite"></div>')
 
     print(f"Built {len(pages)} pages, {len(grouped)} index terms, {len(search_docs)} search sections into {out}")

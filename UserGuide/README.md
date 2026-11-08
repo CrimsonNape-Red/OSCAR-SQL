@@ -1,6 +1,6 @@
-# OSCAR 2 Guide
+# OSCAR 2 Reference Manual
 
-The user's guide for OSCAR 2, written in Markdown and built into a static HTML site
+The reference manual for OSCAR 2, written in Markdown and built into a static HTML site
 with a contents sidebar, an A–Z index and full-text search.
 
 ## Building
