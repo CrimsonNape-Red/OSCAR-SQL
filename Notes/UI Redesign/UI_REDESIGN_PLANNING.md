@@ -219,6 +219,13 @@ of the work carries over to later screens.
   a rounded card with compact rows and an "Open" tag on the open profile. Unlike the Welcome
   page this edits the existing `profileselector.*` files (a restyle, not a new page), so
   master fixes to them may conflict. Mockup: Profile Tab Redesign (published canvas).
+- 2026-11-08: Statistics page works in dark mode (branch `statistics-page`), layout unchanged.
+  The report is still built in its light colours, which printing uses as they are; for the
+  screen in dark mode `statisticsstyle.*` swaps those fills for theme colours (sub-headings
+  clearly stronger than the tinted rows) and darkens the records box. The main tab widget's
+  fixed white palette was removed from `mainwindow.ui`: Qt restores a widget's original
+  palette whenever the application stylesheet changes, so it could not be overridden at run
+  time. Tabs keep the native Windows 11 look.
 - For testers to judge: is the new page better than the old one, and which card colouring
   (Plain, By group, By status) works best.
 - Still to check: macOS painting speed with the card shadows (#235), Linux, HiDPI, and
