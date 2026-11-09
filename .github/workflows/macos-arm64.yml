@@ -37,29 +37,29 @@ jobs:
       - name: Bundle Qt and ad-hoc sign
         working-directory: build
         run: |
-          "$QT_BIN/macdeployqt" OSCAR.app
+          "$QT_BIN/macdeployqt" OSCAR20.app
           # Apple Silicon won't run unsigned code, and macdeployqt invalidates the linker's signature.
-          codesign --force --deep --sign - OSCAR.app
+          codesign --force --deep --sign - OSCAR20.app
 
       - name: Check the app
         working-directory: build
         run: |
           set -x
-          [ "$(lipo -archs OSCAR.app/Contents/MacOS/OSCAR)" = arm64 ]
-          codesign --verify --deep --strict OSCAR.app
+          [ "$(lipo -archs OSCAR20.app/Contents/MacOS/OSCAR20)" = arm64 ]
+          codesign --verify --deep --strict OSCAR20.app
           # Packages must have Bluetooth, and macOS kills the app without the usage text.
-          test -d OSCAR.app/Contents/Frameworks/QtBluetooth.framework
-          /usr/libexec/PlistBuddy -c "Print NSBluetoothAlwaysUsageDescription" OSCAR.app/Contents/Info.plist
+          test -d OSCAR20.app/Contents/Frameworks/QtBluetooth.framework
+          /usr/libexec/PlistBuddy -c "Print NSBluetoothAlwaysUsageDescription" OSCAR20.app/Contents/Info.plist
           # Everything must come from the bundle, not from this runner's Qt.
-          ! otool -L OSCAR.app/Contents/MacOS/OSCAR | grep -F "$RUNNER_TEMP"
+          ! otool -L OSCAR20.app/Contents/MacOS/OSCAR20 | grep -F "$RUNNER_TEMP"
 
       - name: Make the .dmg
         working-directory: build
         run: |
-          VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleGetInfoString" OSCAR.app/Contents/Info.plist)
+          VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleGetInfoString" OSCAR20.app/Contents/Info.plist)
           DMG="OSCAR-$VERSION-$(git rev-parse --short HEAD)-arm64.dmg"
           mkdir Staging
-          ditto OSCAR.app Staging/OSCAR.app
+          ditto OSCAR20.app Staging/OSCAR20.app
           ditto ../Building/MacOS/README.rtfd Staging/README.rtfd
           ln -s /Applications Staging/Applications
           # hdiutil sometimes fails with "Resource busy" on hosted runners.
