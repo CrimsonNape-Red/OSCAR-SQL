@@ -1,0 +1,79 @@
+# Builds OSCAR for Apple Silicon Macs and keeps the .dmg as a downloadable artifact.
+# The app is ad-hoc signed only, so testers must approve it in Privacy & Security.
+name: macOS ARM build
+
+on:
+  push:
+    branches: [mac-arm-build]
+  workflow_dispatch:
+
+env:
+  QT_VERSION: "6.12.0"
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # update_gitinfo.sh reads the branch and revision
+
+      - name: Install Qt
+        run: |
+          python3 -m venv "$RUNNER_TEMP/aqt"
+          "$RUNNER_TEMP/aqt/bin/pip" install aqtinstall==3.3.0
+          "$RUNNER_TEMP/aqt/bin/aqt" install-qt mac desktop "$QT_VERSION" clang_64 \
+              -m qtconnectivity qtserialport --outputdir "$RUNNER_TEMP/Qt"
+          echo "QT_BIN=$RUNNER_TEMP/Qt/$QT_VERSION/macos/bin" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          "$QT_BIN/qmake" ../oscar/oscar.pro -spec macx-clang CONFIG+=release QMAKE_APPLE_DEVICE_ARCHS=arm64
+          make -j"$(sysctl -n hw.logicalcpu)"
+
+      - name: Bundle Qt and ad-hoc sign
+        working-directory: build
+        run: |
+          "$QT_BIN/macdeployqt" OSCAR.app
+          # Apple Silicon won't run unsigned code, and macdeployqt invalidates the linker's signature.
+          codesign --force --deep --sign - OSCAR.app
+
+      - name: Check the app
+        working-directory: build
+        run: |
+          set -x
+          [ "$(lipo -archs OSCAR.app/Contents/MacOS/OSCAR)" = arm64 ]
+          codesign --verify --deep --strict OSCAR.app
+          # Packages must have Bluetooth, and macOS kills the app without the usage text.
+          test -d OSCAR.app/Contents/Frameworks/QtBluetooth.framework
+          /usr/libexec/PlistBuddy -c "Print NSBluetoothAlwaysUsageDescription" OSCAR.app/Contents/Info.plist
+          # Everything must come from the bundle, not from this runner's Qt.
+          ! otool -L OSCAR.app/Contents/MacOS/OSCAR | grep -F "$RUNNER_TEMP"
+
+      - name: Make the .dmg
+        working-directory: build
+        run: |
+          VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleGetInfoString" OSCAR.app/Contents/Info.plist)
+          DMG="OSCAR-$VERSION-$(git rev-parse --short HEAD)-arm64.dmg"
+          mkdir Staging
+          ditto OSCAR.app Staging/OSCAR.app
+          ditto ../Building/MacOS/README.rtfd Staging/README.rtfd
+          ln -s /Applications Staging/Applications
+          # hdiutil sometimes fails with "Resource busy" on hosted runners.
+          for attempt in 1 2 3 4 5; do
+            hdiutil create -srcfolder Staging -volname "OSCAR $VERSION Installer" \
+                -fs HFS+ -format UDZO -imagekey zlib-level=9 -ov "$DMG" && break
+            [ "$attempt" = 5 ] && exit 1
+            sleep 15
+          done
+          echo "DMG=build/$DMG" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OSCAR-macOS-arm64
+          path: ${{ env.DMG }}
+          if-no-files-found: error
+          compression-level: 0   # a .dmg is already compressed
