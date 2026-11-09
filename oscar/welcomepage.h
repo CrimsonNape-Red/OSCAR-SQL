@@ -48,6 +48,8 @@ public:
 protected:
     //! \brief Re-flows the grids when the scroll area's viewport changes width
     bool eventFilter(QObject *watched, QEvent *event) override;
+    //! \brief Puts keyboard focus on the Import tile each time the page is opened
+    void showEvent(QShowEvent *event) override;
 
 private:
     QWidget *buildHeader();
@@ -65,6 +67,10 @@ private:
 
     //! \brief Re-flows the grids for the current width (only when a column count changes)
     void relayout(bool force = false);
+
+    /*! \brief Sets the Tab order: the tiles, then the rebuilt sections' controls top to bottom.
+        Rebuilt widgets would otherwise join the end of the window's Tab chain. */
+    void updateTabOrder();
 
     QScrollArea *m_scroll;
     QVBoxLayout *m_column;          //!< Page sections, top to bottom

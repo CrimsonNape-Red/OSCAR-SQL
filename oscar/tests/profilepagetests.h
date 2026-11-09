@@ -16,6 +16,7 @@ private slots:
     void testStyleSheetHasNoFixedColours();
     void testNewIconsDraw();
     void testTableHeaderIsShaded();
+    void testEnterActivatesButtons();
     void testCommandButtonWidthLetsSubtitleWrap();
 };
 DECLARE_TEST(ProfilePageTests)

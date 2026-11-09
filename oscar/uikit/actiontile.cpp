@@ -9,10 +9,12 @@
 #include "actiontile.h"
 
 #include <QEnterEvent>
+#include <QKeyEvent>
 #include <QFontMetrics>
 #include <QPainter>
 #include <QPainterPath>
 
+#include "buttonkeys.h"
 #include "theme.h"
 
 namespace UiKit {
@@ -96,6 +98,15 @@ void ActionTile::leaveEvent(QEvent *event)
     m_hover = false;
     update();
     QAbstractButton::leaveEvent(event);
+}
+
+void ActionTile::keyPressEvent(QKeyEvent *event)
+{
+    if (isActivateKey(*event)) {
+        animateClick();     // shows the pressed state briefly, then clicks
+        return;
+    }
+    QAbstractButton::keyPressEvent(event);
 }
 
 void ActionTile::changeEvent(QEvent *event)

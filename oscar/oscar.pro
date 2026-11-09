@@ -680,6 +680,7 @@ HEADERS  += \
     uikit/comparison.h \
     uikit/formatting.h \
     uikit/actiontile.h \
+    uikit/buttonkeys.h \
     uikit/eventbar.h \
     uikit/label.h \
     uikit/lineicons.h \
