@@ -479,6 +479,11 @@ public slots:
     void reloadProfile();
 
 private:
+    /*! \brief Shows the Statistics page and records box in the current light or dark palette.
+        Does nothing if the palette is unchanged since the last call. */
+    void applyStatisticsTheme();
+    QString m_statsHtml;            //!< Statistics report as built, in the printed colours
+    QString m_statsThemeKey;        //!< Palette colours applyStatisticsTheme() last used
     QString getMainWindowTitle();
     void importCPAPBackups();
 

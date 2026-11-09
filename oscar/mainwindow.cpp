@@ -37,6 +37,8 @@
 #include <QCalendarWidget>
 #include <QDialogButtonBox>
 #include <QTextBrowser>
+#include <QGuiApplication>
+#include <QScrollBar>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QClipboard>
@@ -84,6 +86,7 @@
 
 #include "mainwindow.h"
 #include "welcomepage.h"
+#include "statisticsstyle.h"
 #include "importhandover.h"
 #include "ui_mainwindow.h"
 #include "devicetimecorrectiondialog.h"
@@ -140,6 +143,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    applyStatisticsTheme();     // the records box's colours; the report follows when it is built
 
 
     {
@@ -455,6 +459,10 @@ void MainWindow::changeEvent(QEvent *event)
         // Qt has reset the tooltips to the theme's palette. Set their colors again once the
         // change has been handled.
         QTimer::singleShot(0, this, [] { ToolTipColors::apply(); });
+    }
+    if (event->type() == QEvent::ThemeChange || event->type() == QEvent::ApplicationPaletteChange
+        || event->type() == QEvent::PaletteChange) {
+        applyStatisticsTheme();
     }
     QMainWindow::changeEvent(event);
 }
@@ -1770,7 +1778,25 @@ void MainWindow::setRecBoxHTML(QString html)
 
 void MainWindow::setStatsHTML(QString html)
 {
-    ui->statisticsView->setHtml(html);
+    m_statsHtml = html;
+    ui->statisticsView->setHtml(StatisticsStyle::screenHtml(m_statsHtml, QGuiApplication::palette()));
+}
+
+void MainWindow::applyStatisticsTheme()
+{
+    const QPalette palette = QGuiApplication::palette();
+    const QString key = palette.color(QPalette::Base).name() + palette.color(QPalette::Text).name()
+                        + palette.color(QPalette::Highlight).name();
+    if (key == m_statsThemeKey) return;
+    m_statsThemeKey = key;
+
+    ui->recordsBox->setStyleSheet(StatisticsStyle::recordsBoxStyleSheet(palette));
+    if (m_statsHtml.isEmpty()) return;
+    // Re-show the report in the new colours where the user was reading it
+    QScrollBar *bar = ui->statisticsView->verticalScrollBar();
+    const int position = bar->value();
+    ui->statisticsView->setHtml(StatisticsStyle::screenHtml(m_statsHtml, palette));
+    bar->setValue(position);
 }
 
 

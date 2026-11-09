@@ -344,6 +344,7 @@ SOURCES += \
     preferencesdialog.cpp \
     profileselector.cpp \
     profileselectorstyle.cpp \
+    statisticsstyle.cpp \
     rawdata.cpp \
     reports.cpp \
     saveGraphLayoutSettings.cpp \
@@ -670,6 +671,7 @@ HEADERS  += \
     SleepLib/loader_plugins/cms50f37_loader.h \
     profileselector.h \
     profileselectorstyle.h \
+    statisticsstyle.h \
     SleepLib/appsettings.h \
     SleepLib/loader_plugins/edfparser.h \
     aboutdialog.h \
@@ -970,7 +972,8 @@ test {
         tests/comparisontests.cpp \
         tests/welcomecardstests.cpp \
         tests/imagetrimtests.cpp \
-        tests/profilepagetests.cpp
+        tests/profilepagetests.cpp \
+        tests/statisticsstyletests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -1006,7 +1009,8 @@ test {
         tests/comparisontests.h \
         tests/welcomecardstests.h \
         tests/imagetrimtests.h \
-        tests/profilepagetests.h
+        tests/profilepagetests.h \
+        tests/statisticsstyletests.h
 }
 
 macx {
