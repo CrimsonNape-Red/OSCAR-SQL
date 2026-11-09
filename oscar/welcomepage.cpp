@@ -19,6 +19,7 @@
 #include <QResizeEvent>
 #include <QScrollArea>
 #include <QScrollBar>
+#include <QShowEvent>
 #include <QTimer>
 #include <QVBoxLayout>
 #include <cmath>
@@ -138,6 +139,7 @@ WelcomePage::WelcomePage(QWidget *parent)
     m_scroll->setFrameShape(QFrame::NoFrame);
     m_scroll->setWidgetResizable(true);
     m_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_scroll->setFocusPolicy(Qt::NoFocus);  // Tab goes straight to the tiles, not to an unmarked scroll area
     m_scroll->viewport()->installEventFilter(this);
     outer->addWidget(m_scroll);
 
@@ -201,7 +203,6 @@ QWidget *WelcomePage::buildTiles()
     m_tileGrid->setSpacing(Theme::TileGap);
 
     auto *import = new ActionTile(LineIcon::Import, tr("Import CPAP data"), tr("Read your device's SD card"), box);
-    import->setPrimary(true);
     connect(import, &QAbstractButton::clicked, this, [] { mainwin->JumpImport(); });
 
     auto *oxi = new ActionTile(LineIcon::Oximetry, tr("Oximetry wizard"), tr("Import pulse oximeter data"), box);
@@ -542,8 +543,31 @@ void WelcomePage::refreshPage()
 
     // Above the trailing stretch
     m_column->insertWidget(m_column->count() - 1, m_dynamic);
+    updateTabOrder();
     relayout(true);
     QTimer::singleShot(0, this, [this, scroll] { m_scroll->verticalScrollBar()->setValue(scroll); });
+}
+
+void WelcomePage::updateTabOrder()
+{
+    QList<QWidget *> chain(m_tiles.cbegin(), m_tiles.cend());
+    if (m_dynamic) {
+        for (QWidget *w : m_dynamic->findChildren<QWidget *>()) {
+            if (w->focusPolicy() & Qt::TabFocus) chain.append(w);
+        }
+    }
+    for (int i = 1; i < chain.size(); ++i) {
+        QWidget::setTabOrder(chain[i - 1], chain[i]);
+    }
+}
+
+void WelcomePage::showEvent(QShowEvent *event)
+{
+    WelcomePageBase::showEvent(event);
+    // Not when the window is merely restored, so focus the user moved elsewhere stays put
+    if (!event->spontaneous() && !m_tiles.isEmpty()) {
+        m_tiles.first()->setFocus(Qt::OtherFocusReason);
+    }
 }
 
 void WelcomePage::relayout(bool force)

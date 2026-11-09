@@ -9,10 +9,12 @@
 #include "commandbutton.h"
 
 #include <QEnterEvent>
+#include <QKeyEvent>
 #include <QFontMetrics>
 #include <QPainter>
 #include <QtMath>
 
+#include "buttonkeys.h"
 #include "theme.h"
 
 namespace UiKit {
@@ -126,6 +128,16 @@ void CommandButton::leaveEvent(QEvent *event)
     m_hover = false;
     update();
     QPushButton::leaveEvent(event);
+}
+
+void CommandButton::keyPressEvent(QKeyEvent *event)
+{
+    // QPushButton clicks on Enter only as a dialog's default button
+    if (isActivateKey(*event)) {
+        animateClick();     // shows the pressed state briefly, then clicks
+        return;
+    }
+    QPushButton::keyPressEvent(event);
 }
 
 void CommandButton::changeEvent(QEvent *event)

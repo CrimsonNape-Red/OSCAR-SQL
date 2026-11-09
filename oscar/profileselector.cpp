@@ -100,7 +100,7 @@ ProfileSelector::ProfileSelector(QWidget *parent) :
     using UiKit::CommandButton;
     using UiKit::LineIcon;
     ui->buttonOpenProfile->setup(LineIcon::FolderOpen, tr("Open Profile"),
-                                 tr("Load the selected profile's data"), CommandButton::Kind::Primary);
+                                 tr("Load the selected profile's data"));
     ui->buttonEditProfile->setup(LineIcon::Edit, tr("Edit Profile"),
                                  tr("Change personal, device and doctor details"));
     ui->buttonNewProfile->setup(LineIcon::UserAdd, tr("New Profile"),

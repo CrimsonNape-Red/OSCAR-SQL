@@ -9,8 +9,10 @@
 #include "iconbutton.h"
 
 #include <QEnterEvent>
+#include <QKeyEvent>
 #include <QPainter>
 
+#include "buttonkeys.h"
 #include "theme.h"
 
 namespace UiKit {
@@ -61,6 +63,15 @@ void IconButton::leaveEvent(QEvent *event)
     m_hover = false;
     update();
     QAbstractButton::leaveEvent(event);
+}
+
+void IconButton::keyPressEvent(QKeyEvent *event)
+{
+    if (isActivateKey(*event)) {
+        animateClick();     // shows the pressed state briefly, then clicks
+        return;
+    }
+    QAbstractButton::keyPressEvent(event);
 }
 
 void IconButton::paintEvent(QPaintEvent *)

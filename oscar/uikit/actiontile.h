@@ -42,6 +42,8 @@ protected:
     void paintEvent(QPaintEvent *event) override;
     void enterEvent(QEnterEvent *event) override;
     void leaveEvent(QEvent *event) override;
+    //! \brief Enter clicks the tile, as Space does
+    void keyPressEvent(QKeyEvent *event) override;
     void changeEvent(QEvent *event) override;
 
 private:

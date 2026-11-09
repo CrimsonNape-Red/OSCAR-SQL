@@ -11,11 +11,13 @@
 
 #include "profilepagetests.h"
 #include "profileselectorstyle.h"
+#include "uikit/buttonkeys.h"
 #include "uikit/commandbutton.h"
 #include "uikit/lineicons.h"
 #include "uikit/theme.h"
 
 #include <QImage>
+#include <QKeyEvent>
 #include <QPainter>
 #include <QPalette>
 
@@ -89,6 +91,18 @@ void ProfilePageTests::testTableHeaderIsShaded()
     const QString sheet = ProfileSelectorStyle::styleSheet(palette);
     QVERIFY(sheet.contains("QHeaderView::section { background: " + shade));
     QVERIFY(sheet.contains("QTableCornerButton::section { background: " + shade));
+}
+
+void ProfilePageTests::testEnterActivatesButtons()
+{
+    auto press = [](int key, bool autoRepeat = false) {
+        return QKeyEvent(QEvent::KeyPress, key, Qt::NoModifier, QString(), autoRepeat);
+    };
+    QVERIFY(UiKit::isActivateKey(press(Qt::Key_Return)));
+    QVERIFY(UiKit::isActivateKey(press(Qt::Key_Enter)));        // keypad Enter
+    QVERIFY(!UiKit::isActivateKey(press(Qt::Key_Return, true))); // held down: one click only
+    QVERIFY(!UiKit::isActivateKey(press(Qt::Key_Space)));       // Qt's buttons handle Space
+    QVERIFY(!UiKit::isActivateKey(press(Qt::Key_Tab)));
 }
 
 void ProfilePageTests::testCommandButtonWidthLetsSubtitleWrap()

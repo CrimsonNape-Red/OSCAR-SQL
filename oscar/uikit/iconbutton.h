@@ -41,6 +41,8 @@ protected:
     void paintEvent(QPaintEvent *event) override;
     void enterEvent(QEnterEvent *event) override;
     void leaveEvent(QEvent *event) override;
+    //! \brief Enter clicks the button, as Space does
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     LineIcon m_icon = LineIcon::None;
