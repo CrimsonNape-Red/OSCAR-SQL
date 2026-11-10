@@ -449,8 +449,9 @@ void gXAxisDay::paint(QPainter &painter, gGraph &graph, const QRegion &region)
 
     // The day under the mouse and days with a details popup always get a bold label; ordinary
     // labels near them are left out so they don't overlap.
-    const QDate &hover = graph.hoverDate();
-    const QSet<QDate> &pins = graph.pinnedDates();
+    // Printed graphs show neither: the mouse and the popups belong to the screen
+    const QDate hover = graph.printing() ? QDate() : graph.hoverDate();
+    const QSet<QDate> pins = graph.printing() ? QSet<QDate>() : graph.pinnedDates();
     m_boldFont = *defaultfont;
     m_boldFont.setBold(true);
     const float spacing = x + 8 * graph.printScaleX();
