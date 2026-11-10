@@ -22,6 +22,7 @@
 
 #include "gYAxis.h"
 #include "graphtheme.h"
+#include "overviewbars.h"
 
 extern MainWindow * mainwin;
 
@@ -126,6 +127,12 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
     int days = ceil(double(m_maxx - m_minx) / 86400000.0);
 
     float barw = float(rect.width()) / float(days);
+    // Each day's slot holds a bar and a gap; wide bars are shaded cylinders
+    const OverviewBars::BarGeometry geo = OverviewBars::barGeometry(barw);
+    const bool flatOnly = graph.printing() && AppSetting->monochromePrinting();
+    graph.setHoverDate(QDate());
+    QRectF hlSlot;
+    int hlIdx = -1;
 
     QDateTime splittime;
 
@@ -164,10 +171,6 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
     QPoint mouse = graph.graphView()->currentMousePos();
 
     if (daylist.size() == 0) return;
-
-    QVector<QRectF> outlines;
-    int size = idx_end - idx;
-    outlines.reserve(size * 5);
 
     auto it2 = it;
 
@@ -303,16 +306,14 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
 
         QRectF rec2(lastx1, rect.top(), barw, rect.height());
         if (rec2.contains(mouse)) {
-            QColor col2(255,0,0,64);
-            painter.fillRect(rec2, QBrush(col2));
+            hlSlot = rec2;
+            hlIdx = idx;
         }
 
         if (cit != cache.end()) {
             QVector<SummaryChartSlice> & slices = cit.value();
 
             customCalc(day, slices);
-
-            QLinearGradient gradient(lastx1, rect.bottom(), lastx1+barw, rect.bottom());
 
             for (const auto & slice : slices) {
                 float s1 = slice.value - miny;
@@ -321,28 +322,11 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
                 float y1 = (s1 * ymult);
                 float y2 = (s2 * ymult);
 
-                QColor col = GraphTheme::ink(slice.color);
+                const QColor col = GraphTheme::ink(slice.color);
 
-                QRectF rec(lastx1, rect.bottom() - y1 - y2, barw, y2);
-                rec = rec.intersected(rect);
-
-                if (rec.contains(mouse)) {
-                    col = Qt::yellow;
-                    graph.ToolTip(slice.name, mouse.x() + 20, mouse.y(), TT_AlignBottomLeft);
-
-                }
-
-                if (barw > 8) {
-                    gradient.setColorAt(0,col);
-                    gradient.setColorAt(1,GraphTheme::barShade(col, 2.0));
-                    painter.fillRect(rec, QBrush(gradient));
-                    outlines.append(rec);
-                } else if (barw > 3) {
-                    painter.fillRect(rec, QBrush(GraphTheme::barShade(col,1.25)));
-                    outlines.append(rec);
-                } else {
-                    painter.fillRect(rec, QBrush(col));
-                }
+                // Each session is a piece of its own, with its own rounded top
+                const QRectF rec = QRectF(lastx1 + geo.offset, rect.bottom() - y1 - y2, geo.width, y2).intersected(rect);
+                OverviewBars::paintSegment(painter, rec, col, true, geo.cylinder && !flatOnly);
 
             }
         }
@@ -351,8 +335,10 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
         lastx1 = x1;
     } while (++idx <= idx_end);
 
-    painter.setPen(QPen(GraphTheme::ink(Qt::black),1));
-    painter.drawRects(outlines);
+    m_detailsRect = QRectF();
+    if (hlIdx >= 0) {
+        paintHoverMarker(painter, graph, rect, hlSlot, dayindex.key(hlIdx), hlIdx, true);
+    }
     afterDraw(painter, graph, rect);
 }
 

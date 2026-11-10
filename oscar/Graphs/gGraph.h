@@ -12,8 +12,10 @@
 
 //#define DEBUG_LAYOUT
 
+#include <QDate>
 #include <QFont>
 #include <QObject>
+#include <QSet>
 #include <QPixmap>
 #include <QResizeEvent>
 #include <QString>
@@ -344,6 +346,21 @@ class gGraph : public QObject
 
     inline bool printing() const { return m_printing; }
 
+    //! \brief Sets the day under the mouse on an Overview graph (invalid = none); its date label is bold
+    void setHoverDate(const QDate &date) { m_hoverDate = date; }
+    //! \brief The day under the mouse on an Overview graph, or an invalid date
+    const QDate &hoverDate() const { return m_hoverDate; }
+    //! \brief Sets the days that have a details popup open; their date labels are marked
+    void setPinnedDates(const QSet<QDate> &dates) { m_pinnedDates = dates; }
+    //! \brief The days that have a details popup open
+    const QSet<QDate> &pinnedDates() const { return m_pinnedDates; }
+
+    /*! \brief Draws the title as a strip of colour \a color (light-mode colour; translated for
+        dark mode when drawn). An invalid colour keeps the plain rotated title. */
+    void setTitleColor(const QColor &color) { m_titleColor = color; }
+    //! \brief The title strip's colour, or an invalid colour for a plain title
+    const QColor &titleColor() const { return m_titleColor; }
+
     void mouseDoubleClickYAxis(QMouseEvent *event);
 
   protected:
@@ -408,6 +425,9 @@ class gGraph : public QObject
     bool m_showTitle;
     bool m_printing;
     bool m_pinned;
+    QDate m_hoverDate;              //!< Day under the mouse (Overview), invalid if none
+    QSet<QDate> m_pinnedDates;      //!< Days with a details popup open (Overview)
+    QColor m_titleColor;            //!< Title strip colour; invalid for a plain title
     //! \brief Cached font for vertical title; shrunk when title is too long for the graph height
     QFont m_titleFont;
     ZoomyScaling m_zoomY;

@@ -204,8 +204,13 @@ public:
         layer->dayindex = dayindex;
         layer->daylist = daylist;
     }
+    //! \brief Colour of the Details button
+    static inline const QColor DetailsAccent = QColor(0x6D, 0x4B, 0xC9);
+
 signals:
     void summaryChartEmpty(gSummaryChart*,qint64,qint64,bool);
+    //! \brief The Details button was clicked for \a date (index \a idx in the chart's day list)
+    void detailsRequested(gSummaryChart *chart, QDate date, int idx);
 
 protected:
     //! \brief Key was pressed that effects this layer
@@ -219,6 +224,17 @@ protected:
 
     //! \brief Mouse Button was released over this area. (jumps to daily view here)
     virtual bool mouseReleaseEvent(QMouseEvent *event, gGraph *graph);
+
+    /*! \brief Marks the day under the mouse: a faint line through \a slot, and a Details button
+        at the top of \a plot when the day has data. Nothing is drawn when printing. */
+    void paintHoverMarker(QPainter &painter, gGraph &graph, const QRectF &plot, const QRectF &slot,
+                          const QDate &date, int idx, bool hasData);
+    //! \brief True for a plain left click on the Details button
+    bool isDetailsClick(QMouseEvent *event) const;
+    QRectF m_detailsRect;       //!< Details button as last drawn; empty when not shown
+    QDate m_detailsDate;        //!< Day the Details button belongs to
+    int m_detailsIdx = -1;      //!< That day's index in daylist
+    QDate m_lastHoverDate;      //!< Day under the mouse at the last paint, to tell when it changes
 
     QString durationInHoursToHhMmSs(double duration);
     QString durationInMinutesToHhMmSs(double duration);
