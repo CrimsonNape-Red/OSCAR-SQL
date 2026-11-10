@@ -30,6 +30,9 @@ public:
     virtual void afterDraw(QPainter &, gGraph &, QRectF);
     virtual void populate(Day *day, int idx);
     virtual QString tooltipData(Day * day, int);
+    virtual QList<DetailRow> detailRows(Day *day, int idx) override;
+    virtual QString detailHeadline(Day *day, int idx) override;
+    virtual QString detailSubtitle(Day *day, int idx) override;
 
     virtual Layer * Clone() {
         gTTIAChart * sc = new gTTIAChart();

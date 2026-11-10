@@ -25,6 +25,9 @@
 
 #include "SleepLib/profiles.h"
 #include "overview.h"
+#include "overviewdetailspopup.h"
+
+#include <QScopedValueRollback>
 #include "ui_overview.h"
 #include "combocheckdelegate.h"
 #include "common_gui.h"
@@ -262,6 +265,10 @@ void Overview::on_summaryChartEmpty(gSummaryChart*sc,qint64 firstI,qint64 lastI,
 
 // Create all the graphs for the Overview page
 void Overview::CreateAllGraphs() {
+    // The graphs are about to be replaced, and the popups belong to them
+    closeDetailPopups();
+    m_chartGraphs.clear();
+
     ///////////////////////////////////////////////////////////////////////////////
     // Add all the graphs
     // Process is to createGraph() to make the graph object, then add a layer
@@ -285,26 +292,31 @@ void Overview::CreateAllGraphs() {
     AHI->AddLayer(ahi);
     // Each graph's title strip takes its main channel's colour, or its bars' colour
     AHI->setTitleColor(schema::channel[ahicode].defaultColor());
+    watchDetails(ahi, AHI);
 
     UC = createGraph(STR_GRAPH_Usage, tr("Usage"), tr("Usage\n(hours)"));
     uc = new gUsageChart();
     UC->AddLayer(uc);
     UC->setTitleColor(uc->mainColor());
+    watchDetails(uc, UC);
 
     STG = createGraph("New Session", tr("Session Times"), tr("Session Times"),  YT_Time);
     stg = new gSessionTimesChart();
     STG->AddLayer(stg);
     STG->setTitleColor(stg->mainColor());
+    watchDetails(stg, STG);
 
     PR = createGraph("Pressure Settings", STR_TR_Pressure, STR_TR_Pressure + "\n(" + STR_UNIT_CMH2O + ")");
     pres = new gPressureChart();
     PR->AddLayer(pres);
     PR->setTitleColor(schema::channel[CPAP_Pressure].defaultColor());
+    watchDetails(pres, PR);
 
     TTIA = createGraph("TTIA", tr("Total Time in Apnea"), tr("Total Time in Apnea\n(Minutes)"));
     ttia = new gTTIAChart();
     TTIA->AddLayer(ttia);
     TTIA->setTitleColor(ttia->mainColor());
+    watchDetails(ttia, TTIA);
 
     // Add graphs for all channels that have been marked in Preferences Dialog as wanting a graph
     QHash<ChannelID, schema::Channel *>::iterator chit;
@@ -354,6 +366,7 @@ void Overview::CreateAllGraphs() {
             }
             if (sc!= nullptr) {
                 sc ->reCalculate();
+                watchDetails(sc, G);
             }
         } // if showInOverview()
     } // for chit
@@ -446,6 +459,85 @@ gGraph *Overview::createGraph(QString code, QString name, QString units, YTicker
     return g;
 }
 
+void Overview::watchDetails(gSummaryChart *chart, gGraph *graph)
+{
+    m_chartGraphs.insert(chart, graph);
+    connect(chart, &gSummaryChart::detailsRequested, this, &Overview::openDetails, Qt::UniqueConnection);
+}
+
+void Overview::openDetails(gSummaryChart *chart, QDate date, int idx)
+{
+    QPointer<gGraph> graph = m_chartGraphs.value(chart);
+    Day *day = chart->dayAt(idx);
+    if (!graph || !day) return;
+
+    QString headline = chart->detailHeadline(day, idx);
+    if (headline.isEmpty()) headline = graph->title();
+    const QString title = QLocale().toString(date, "ddd ") + QLocale().toString(date, QLocale::ShortFormat)
+                          + QStringLiteral("  \u00b7  ") + headline;
+    auto *popup = new OverviewDetailsPopup(this, title, chart->detailSubtitle(day, idx), graph->titleColor(),
+                                           chart->detailRows(day, idx));
+
+    // Below and to the right of the Details button, stepped clear of any popup already there
+    QPoint pos = GraphView->mapTo(this, chart->detailsButtonRect().bottomLeft().toPoint()) + QPoint(0, 8);
+    for (bool moved = true; moved;) {
+        moved = false;
+        for (const auto &other : std::as_const(m_detailPopups)) {
+            if (other && (other->pos() - pos).manhattanLength() < 20) {
+                pos += QPoint(24, 24);
+                moved = true;
+            }
+        }
+    }
+    pos.setX(qBound(0, pos.x(), qMax(0, width() - popup->width())));
+    pos.setY(qBound(0, pos.y(), qMax(0, height() - popup->height())));
+    popup->move(pos);
+    popup->show();
+    popup->raise();
+    popup->setFocus();
+    m_detailPopups.append(popup);
+
+    // The day's date stays marked on its graph while its popup is open
+    graph->setPinnedDates(graph->pinnedDates() + QSet<QDate>{date});
+    QPointer<OverviewDetailsPopup> guard(popup);
+    connect(popup, &OverviewDetailsPopup::closed, this, [this, graph, date, guard]() {
+        m_detailPopups.removeAll(guard);
+        if (!graph) return;
+        bool stillOpen = false;     // another popup for the same day on the same graph
+        for (const auto &other : std::as_const(m_detailPopups)) {
+            if (other && other->property("graph").value<QObject *>() == graph.data()
+                && other->property("date").toDate() == date) stillOpen = true;
+        }
+        if (!stillOpen) {
+            QSet<QDate> pins = graph->pinnedDates();
+            pins.remove(date);
+            graph->setPinnedDates(pins);
+            GraphView->redraw();
+        }
+    });
+    popup->setProperty("graph", QVariant::fromValue<QObject *>(graph.data()));
+    popup->setProperty("date", date);
+    GraphView->redraw();
+}
+
+void Overview::closeDetailPopups()
+{
+    const auto popups = m_detailPopups;
+    m_detailPopups.clear();
+    for (const auto &popup : popups) {
+        if (popup) popup->close();
+    }
+    for (auto it = m_chartGraphs.begin(); it != m_chartGraphs.end(); ++it) {
+        if (it.value()) it.value()->setPinnedDates({});
+    }
+}
+
+void Overview::hideEvent(QHideEvent *event)
+{
+    closeDetailPopups();
+    QWidget::hideEvent(event);
+}
+
 void Overview::on_LineCursorUpdate(double time)
 {
     if (time > 1) {
@@ -472,6 +564,9 @@ void Overview::ReloadGraphs()
     GraphView->setDay(nullptr);
     updateCube();
 
+    // A reload keeps the same range (it follows a light/dark switch, a journal edit or an
+    // import), so the details popups stay open
+    const QScopedValueRollback<bool> keep(m_keepDetailPopups, true);
     on_rangeCombo_activated(ui->rangeCombo->currentIndex());
 }
 
@@ -660,6 +755,7 @@ void Overview::dateEnd_currentPageChanged(int year, int month)
 
 void Overview::on_dateEnd_dateChanged(const QDate &date)
 {
+    if (!m_keepDetailPopups) closeDetailPopups();
 	if (date<uiStartDate) {
 		dateErrorDisplay->error(false,date);
 		return;
@@ -676,6 +772,7 @@ void Overview::on_dateEnd_dateChanged(const QDate &date)
 
 void Overview::on_dateStart_dateChanged(const QDate &date)
 {
+    if (!m_keepDetailPopups) closeDetailPopups();
 	if (date>uiEndDate) {
 		// change date back to last date.
 		dateErrorDisplay->error(true,date);
@@ -715,6 +812,7 @@ void Overview::ResetGraphOrder(int type)
 // Process new range selection from combo button
 void Overview::on_rangeCombo_activated(int index)
 {
+    if (!m_keepDetailPopups) closeDetailPopups();
     // Exclude Journal in calculating the last day
     QDate end = p_profile->LastDay(MT_CPAP);
     end = max(end, p_profile->LastDay(MT_OXIMETER));

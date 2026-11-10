@@ -108,6 +108,34 @@ void gSessionTimesChart::afterDraw(QPainter & /*painter */, gGraph &graph, QRect
     graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
 }
 
+QList<DetailRow> gSessionTimesChart::detailRows(Day *, int idx)
+{
+    QList<DetailRow> rows;
+    // This chart fills its day cache while drawing; a day that was clicked has been drawn
+    if (!cache.contains(idx)) return rows;
+    const QDateTime splitAt(dayindex.key(idx), split);
+    for (const auto &s : cache[idx]) {
+        const QDateTime start = splitAt.addSecs(qint64(s.value * 3600.0));
+        const QDateTime end = start.addSecs(qint64(s.height * 3600.0));
+        const bool maskOff = (s.color == QColor(Qt::black));
+        rows.append({ durationInHoursToHhMmSs(s.height), maskOff ? QObject::tr("Mask off") : QObject::tr("Mask on"),
+                      QObject::tr("%1 to %2").arg(QLocale().toString(start.time(), QLocale::ShortFormat),
+                                                  QLocale().toString(end.time(), QLocale::ShortFormat)),
+                      s.color, s.height });
+    }
+    return rows;
+}
+
+QString gSessionTimesChart::detailHeadline(Day *, int)
+{
+    return QObject::tr("Session Times");
+}
+
+QString gSessionTimesChart::detailSubtitle(Day *, int)
+{
+    return QString();
+}
+
 void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &region)
 {
     QRectF rect = region.boundingRect();
@@ -338,6 +366,8 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
     m_detailsRect = QRectF();
     if (hlIdx >= 0) {
         paintHoverMarker(painter, graph, rect, hlSlot, dayindex.key(hlIdx), hlIdx, true);
+    } else {
+        clearHover(graph);
     }
     afterDraw(painter, graph, rect);
 }

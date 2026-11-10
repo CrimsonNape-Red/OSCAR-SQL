@@ -171,6 +171,47 @@ void gAHIChart::populate(Day *day, int idx)
         slices.append(SummaryChartSlice(&calc, c, c  / hours, chan->label(), calc.color));
     }
 }
+//! \brief The label of the index the profile uses: RDI includes RERA
+static const QString &indexLabel()
+{
+    return p_profile->general->calculateRDI() ? STR_TR_RDI : STR_TR_AHI;
+}
+
+QList<DetailRow> gAHIChart::detailRows(Day *day, int idx)
+{
+    QList<DetailRow> rows;
+    const float hours = day->hours(m_machtype);
+    if (hours <= 0) return rows;
+    const auto &slices = slicesFor(day, idx);
+    float total = 0;
+    for (const auto &s : slices) total += s.value;
+    for (int i = slices.size() - 1; i >= 0; --i) {
+        const auto &s = slices.at(i);
+        schema::Channel &chan = schema::channel[s.calc->code];
+        const int share = total > 0 ? qRound(s.value / total * 100) : 0;
+        rows.append({ QObject::tr("%1 /h").arg(s.value / hours, 0, 'f', 2),
+                      chan.fullname().contains(chan.label()) ? chan.fullname()
+                                                             : QString("%1 (%2)").arg(chan.fullname(), chan.label()),
+                      QObject::tr("%1 events · %2% of %3").arg(qRound(s.value)).arg(share).arg(indexLabel()),
+                      s.color, s.height });
+    }
+    return rows;
+}
+
+QString gAHIChart::detailHeadline(Day *day, int idx)
+{
+    const float hours = day->hours(m_machtype);
+    if (hours <= 0) return QString();
+    float total = 0;
+    for (const auto &s : slicesFor(day, idx)) total += s.value;
+    return QString("%1 %2").arg(indexLabel()).arg(total / hours, 0, 'f', 2);
+}
+
+QString gAHIChart::detailSubtitle(Day *day, int)
+{
+    return QObject::tr("Events per hour, over %1 of use").arg(durationInHoursToHhMmSs(day->hours(m_machtype)));
+}
+
 QString gAHIChart::tooltipData(Day *day, int idx)
 {
     QVector<SummaryChartSlice> & slices = cache[idx];

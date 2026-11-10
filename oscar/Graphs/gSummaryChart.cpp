@@ -153,6 +153,15 @@ bool gSummaryChart::isDetailsClick(QMouseEvent *event) const
            && m_detailsRect.contains(event->position());
 }
 
+void gSummaryChart::clearHover(gGraph &graph)
+{
+    // As with a new day under the mouse, the date axis needs one more frame to drop the bold label
+    if (m_lastHoverDate.isValid()) {
+        m_lastHoverDate = QDate();
+        graph.graphView()->timedRedraw(0);
+    }
+}
+
 void gSummaryChart::paintHoverMarker(QPainter &painter, gGraph &graph, const QRectF &plot, const QRectF &slot,
                                      const QDate &date, int idx, bool hasData)
 {
@@ -384,6 +393,36 @@ void gSummaryChart::afterDraw(QPainter &painter, gGraph &graph, QRectF rect)
 
 
 
+}
+
+const QVector<SummaryChartSlice> &gSummaryChart::slicesFor(Day *day, int idx)
+{
+    if (!cache.contains(idx)) {
+        day->OpenSummary();
+        populate(day, idx);
+    }
+    return cache[idx];
+}
+
+QList<DetailRow> gSummaryChart::detailRows(Day *day, int idx)
+{
+    QList<DetailRow> rows;
+    const auto &slices = slicesFor(day, idx);
+    for (int i = slices.size() - 1; i >= 0; --i) {
+        const auto &s = slices.at(i);
+        rows.append({ QString::number(s.value, 'f', 2), s.name.trimmed(), QString(), s.color, s.height });
+    }
+    return rows;
+}
+
+QString gSummaryChart::detailHeadline(Day *, int)
+{
+    return QString();
+}
+
+QString gSummaryChart::detailSubtitle(Day *, int)
+{
+    return QString();
 }
 
 QString gSummaryChart::tooltipData(Day *, int idx)
@@ -687,6 +726,8 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     m_detailsRect = QRectF();
     if (hl) {
         paintHoverMarker(painter, graph, rect, hl_rect, hl_date, hl_idx, hl_day != nullptr);
+    } else {
+        clearHover(graph);
     }
     try {
         afterDraw(painter, graph, rect);

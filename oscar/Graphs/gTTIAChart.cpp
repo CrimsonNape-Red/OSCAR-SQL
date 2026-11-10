@@ -79,6 +79,24 @@ void gTTIAChart::populate(Day *day, int idx)
     slices.append(SummaryChartSlice(&calcitems[0], ttia / 60.0, ttia / 60.0, QObject::tr("\nTTIA: %1").arg(durationInSecondsToHhMmSs(ttia)), QColor(255,147,150)));
 }
 
+QList<DetailRow> gTTIAChart::detailRows(Day *day, int idx)
+{
+    const auto &slices = slicesFor(day, idx);
+    if (slices.isEmpty()) return {};
+    const auto &s = slices.first();
+    return { { durationInMinutesToHhMmSs(s.value), QObject::tr("Total time in apnea"), QString(), s.color, s.height } };
+}
+
+QString gTTIAChart::detailHeadline(Day *, int)
+{
+    return QObject::tr("Total Time in Apnea");
+}
+
+QString gTTIAChart::detailSubtitle(Day *, int)
+{
+    return QString();
+}
+
 QString gTTIAChart::tooltipData(Day *, int idx)
 {
     QVector<SummaryChartSlice> & slices = cache[idx];

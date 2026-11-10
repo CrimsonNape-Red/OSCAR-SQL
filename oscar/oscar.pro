@@ -353,6 +353,7 @@ SOURCES += \
     staticQMessageBox.cpp \
     statistics.cpp \
     tooltipcolors.cpp \
+    overviewdetailspopup.cpp \
     colorscheme.cpp \
     translation.cpp \
     treecheckdelegate.cpp \
@@ -660,6 +661,7 @@ HEADERS  += \
     translation.h \
     statistics.h \
     tooltipcolors.h \
+    overviewdetailspopup.h \
     colorscheme.h \
     oximeterimport.h \
     SleepLib/deviceconnection.h \

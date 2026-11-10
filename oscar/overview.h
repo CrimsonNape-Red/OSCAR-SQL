@@ -31,6 +31,7 @@
 #include <QRegularExpression>
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QPointer>
 class SaveGraphLayoutSettings;
 
 namespace Ui {
@@ -39,6 +40,7 @@ class Overview;
 
 class Report;
 class Overview;
+class OverviewDetailsPopup;
 
 class DateErrorDisplay:QObject {
 	Q_OBJECT
@@ -149,8 +151,23 @@ class Overview : public QWidget
     void on_layout_clicked();
     void on_graphHelp_clicked();
 
+  protected:
+    //! \brief Leaving the Overview tab closes the details popups
+    void hideEvent(QHideEvent *event) override;
+
   private:
     void CreateAllGraphs();
+
+    //! \brief Connects \a chart's Details button, and remembers \a graph as the graph it is on
+    void watchDetails(gSummaryChart *chart, gGraph *graph);
+    //! \brief Opens a details popup for \a chart's bar on \a date (index \a idx in its day list)
+    void openDetails(gSummaryChart *chart, QDate date, int idx);
+    //! \brief Closes every details popup
+    void closeDetailPopups();
+
+    QList<QPointer<OverviewDetailsPopup>> m_detailPopups;   //!< Open details popups
+    QHash<gSummaryChart *, QPointer<gGraph>> m_chartGraphs;    //!< Graph each summary chart is on
+    bool m_keepDetailPopups = false;    //!< Set while reloading, when range changes must not close popups
     void timedUpdateOverview(int ms=0);
 
     Ui::Overview *ui;

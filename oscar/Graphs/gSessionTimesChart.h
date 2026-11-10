@@ -56,6 +56,9 @@ public:
     void CloneInto(gSessionTimesChart * layer) {
         layer->split = split;
     }
+    virtual QList<DetailRow> detailRows(Day *day, int idx) override;
+    virtual QString detailHeadline(Day *day, int idx) override;
+    virtual QString detailSubtitle(Day *day, int idx) override;
     QTime split;
     int num_slices;
     int num_days;
