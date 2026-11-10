@@ -20,6 +20,8 @@
 #include <QMutex>
 #include <QSemaphore>
 
+#include <functional>
+
 #include <QHash>
 #include <QSet>
 #include <QVector>
@@ -102,7 +104,9 @@ class Machine
     bool SaveSession(Session *sess);
 
     //! \brief Deletes the crud out of all device data in the SleepLib database
-    bool Purge(int secret);
+    //! \brief Deletes all of this device's data. onSessionPurged, if set, is called with the
+    //!        number of sessions removed so far, for progress reporting.
+    bool Purge(int secret, const std::function<void(int)> &onSessionPurged = nullptr);
 
     //! \brief Unlink a session from any device related indexes
     bool unlinkSession(Session * sess);

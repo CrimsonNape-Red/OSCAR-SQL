@@ -2510,6 +2510,30 @@ void MainWindow::on_actionPurgeCurrentDayAll_triggered()
     this->purgeDay(MT_JOURNAL);
 }
 
+// Changes the step shown by a purge's progress dialog. A max of 0 shows a busy bar.
+// Repaints only the dialog: after sessions are destroyed the main window must not paint until
+// its views have been reloaded, so this deliberately does not run the event loop.
+static void setPurgeProgressStep(ProgressDialog &progress, const QString &message, int max = 0)
+{
+    progress.setMessage(message);
+    progress.setProgressMax(max);
+    progress.setProgressValue(0);
+    progress.layout()->activate();
+    progress.repaint();
+}
+
+// Shows a purge's progress dialog. Call before any session is destroyed: this runs the event
+// loop so that the dialog appears.
+static void openPurgeProgress(ProgressDialog &progress, const QString &message, int max = 0)
+{
+    progress.setWindowTitle(MainWindow::tr("Purging Data"));
+    QPixmap icon = QPixmap(":/icons/logo-md.png").scaled(64, 64);
+    progress.setPixmap(icon);
+    progress.open();
+    setPurgeProgressStep(progress, message, max);
+    QApplication::processEvents();
+}
+
 // Destroy sessions for a single day matching type. Returns true if any sessions were purged.
 // Special handling: MT_JOURNAL == All data. MT_UNKNOWN == All except journal.
 // Does not touch the UI; callers handle unload/reload.
@@ -2570,6 +2594,10 @@ void MainWindow::purgeDay(MachineType type)
         return;
     QDate date = daily->getDate();
     qDebug() << "Purging data from" << date;
+
+    ProgressDialog progress(this);
+    openPurgeProgress(progress, tr("Purging data for %1...").arg(QLocale().toString(date, QLocale::ShortFormat)));
+
     daily->Unload(date);
 
     if (!purgeDayData(date, type))
@@ -2677,20 +2705,29 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
         return;
     }
 
+    // The first dialog closed when its bar filled; the work below can take as long again.
+    ProgressDialog refreshProgress(this);
+    openPurgeProgress(refreshProgress, tr("Updating daily summaries..."), purgedDates.size());
+
     // Recalculate daily summaries for all affected dates
     {
         ProfileRepository profileRepo;
         ProfileData profileData = profileRepo.findByUsername(p_profile->user->userName());
         if (profileData.id > 0) {
             DailySummaryRepository summaryRepo;
+            int summariesDone = 0;
             for (const QDate &d : purgedDates) {
                 Day *day = p_profile->GetDay(d, MT_UNKNOWN);
                 bool recalculated = day && summaryRepo.calculateAndStoreFromDay(day, profileData.id);
                 if (!recalculated)
                     summaryRepo.invalidateDate(profileData.id, d);
+                refreshProgress.setProgressValue(++summariesDone);
+                QApplication::processEvents();
             }
         }
     }
+
+    setPurgeProgressStep(refreshProgress, tr("Refreshing the display..."));
 
     if (type == MT_JOURNAL)
         daily->clearJournalNotesEditor();
@@ -2927,11 +2964,26 @@ void MainWindow::on_actionPurgeMachine(QAction *action)
 
 void MainWindow::purgeMachine(Machine * mach)
 {
+    ProgressDialog progress(this);
+    openPurgeProgress(progress, tr("Purging data for %1 %2...").arg(mach->brand(), mach->model()),
+                      mach->sessionlist.size());
+
     // detect backups
     daily->Unload(daily->getDate());
 
+    // The progress callback below runs the event loop, so the main window can repaint while
+    // sessions are being destroyed. Daily must not be left pointing at them.
+    daily->releaseDayData();
+
+    const auto onSessionPurged = [&progress](int sessionsPurged) {
+        progress.setProgressValue(sessionsPurged);
+        QApplication::processEvents();
+    };
+
     // Technicially the above won't sessions under short session limit.. Using Purge to clean up the rest.
-    if (mach->Purge(3478216)) {
+    if (mach->Purge(3478216, onSessionPurged)) {
+        setPurgeProgressStep(progress, tr("Updating daily summaries..."));
+
         const QDate firstDay = mach->FirstDay();
         const QDate lastDay = mach->LastDay();
         mach->sessionlist.clear();
@@ -2969,7 +3021,10 @@ void MainWindow::purgeMachine(Machine * mach)
 
         PopulatePurgeMenu();
         p_profile->StoreMachines();
+        setPurgeProgressStep(progress, tr("Refreshing the display..."));
     } else {
+        progress.allowClose();
+        progress.close();
         staticQMessageBox::warning(this, STR_MessageBox_Error,
             tr("A file permission error caused the purge process to fail; you will have to delete the following folder manually:") +
             "\n\n" + QDir::toNativeSeparators(mach->getDataPath()), QMessageBox::Ok, QMessageBox::Ok);
@@ -4252,6 +4307,9 @@ void MainWindow::on_actionPurgeCurrentDaysOximetry_triggered()
             QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No) {
             return;
         }
+
+        ProgressDialog progress(this);
+        openPurgeProgress(progress, tr("Purging oximetry data..."));
 
         QList<Session *> sessionlist=day->getSessions(MT_OXIMETER);
 
