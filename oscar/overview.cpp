@@ -534,7 +534,8 @@ void Overview::closeDetailPopups()
 
 void Overview::hideEvent(QHideEvent *event)
 {
-    closeDetailPopups();
+    // Leaving the tab closes the popups; minimising OSCAR (a spontaneous hide) keeps them
+    if (!event->spontaneous()) closeDetailPopups();
     QWidget::hideEvent(event);
 }
 
