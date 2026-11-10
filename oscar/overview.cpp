@@ -283,22 +283,28 @@ void Overview::CreateAllGraphs() {
 
     ahi = new gAHIChart();
     AHI->AddLayer(ahi);
+    // Each graph's title strip takes its main channel's colour, or its bars' colour
+    AHI->setTitleColor(schema::channel[ahicode].defaultColor());
 
     UC = createGraph(STR_GRAPH_Usage, tr("Usage"), tr("Usage\n(hours)"));
     uc = new gUsageChart();
     UC->AddLayer(uc);
+    UC->setTitleColor(uc->mainColor());
 
     STG = createGraph("New Session", tr("Session Times"), tr("Session Times"),  YT_Time);
     stg = new gSessionTimesChart();
     STG->AddLayer(stg);
+    STG->setTitleColor(stg->mainColor());
 
     PR = createGraph("Pressure Settings", STR_TR_Pressure, STR_TR_Pressure + "\n(" + STR_UNIT_CMH2O + ")");
     pres = new gPressureChart();
     PR->AddLayer(pres);
+    PR->setTitleColor(schema::channel[CPAP_Pressure].defaultColor());
 
     TTIA = createGraph("TTIA", tr("Total Time in Apnea"), tr("Total Time in Apnea\n(Minutes)"));
     ttia = new gTTIAChart();
     TTIA->AddLayer(ttia);
+    TTIA->setTitleColor(ttia->mainColor());
 
     // Add graphs for all channels that have been marked in Preferences Dialog as wanting a graph
     QHash<ChannelID, schema::Channel *>::iterator chit;
@@ -319,6 +325,7 @@ void Overview::CreateAllGraphs() {
 
             if (name.length() > 16) name = chan->label();
             gGraph *G = createGraph(chan->code(), name, chan->description());
+            G->setTitleColor(chan->defaultColor());
             gSummaryChart * sc = nullptr;
             if ((chan->type() == schema::FLAG) || (chan->type() == schema::MINOR_FLAG)) {
                 sc = new gSummaryChart(chan->code(), chan->machtype()); // gts was MT_CPAP
@@ -359,18 +366,21 @@ void Overview::CreateAllGraphs() {
     weight->setMachineType(MT_JOURNAL);
     weight->addSlice(Journal_Weight, QColor("black"), ST_SETAVG);
     WEIGHT->AddLayer(weight);
+    WEIGHT->setTitleColor(schema::channel[Journal_Weight].defaultColor());
 
     BMI = createGraph(STR_GRAPH_BMI, STR_TR_BMI, tr("Body\nMass\nIndex"));
     bmi = new gOverviewGraph("BMI", GT_LINE);
     bmi->setMachineType(MT_JOURNAL);
     bmi->addSlice(Journal_BMI, QColor("black"), ST_SETAVG);
     BMI->AddLayer(bmi);
+    BMI->setTitleColor(schema::channel[Journal_BMI].defaultColor());
 
     ZOMBIE = createGraph(STR_GRAPH_Zombie, STR_TR_Zombie, tr("How you felt\n(1-10)"));
     zombie = new gOverviewGraph("Feeling", GT_LINE);
     zombie->setMachineType(MT_JOURNAL);
     zombie->addSlice(Journal_ZombieMeter, QColor("black"), ST_SETAVG);
     ZOMBIE->AddLayer(zombie);
+    ZOMBIE->setTitleColor(schema::channel[Journal_ZombieMeter].defaultColor());
     #endif
 
     connectgSummaryCharts();

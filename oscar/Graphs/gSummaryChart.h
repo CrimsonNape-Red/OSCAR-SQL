@@ -177,6 +177,8 @@ public:
     }
 
     virtual int addCalc(ChannelID code, SummaryType type, QColor color);
+    //! \brief The colour of the chart's first calculation, which its bars use; invalid if none
+    QColor mainColor() const { return calcitems.isEmpty() ? QColor() : calcitems.at(0).color; }
     virtual int addCalc(ChannelID code, SummaryType type);
 
     virtual Layer * Clone() {
