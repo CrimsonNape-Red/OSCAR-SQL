@@ -23,6 +23,7 @@
 #include "Graphs/gGraphView.h"
 #include "SleepLib/profiles.h"
 #include "Graphs/gLineOverlay.h"
+#include "Graphs/graphtheme.h"
 
 #define EXTRA_ASSERTS 1
 
@@ -456,7 +457,7 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     if (rect.contains(w.graphView()->currentMousePos())) {
 
-        painter.fillRect(rect, QBrush(QColor(255,255,245,128)));
+        painter.fillRect(rect, QBrush(GraphTheme::fill(QColor(255,255,245,128))));
     }
 
 
@@ -496,7 +497,7 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
     int minz, maxz;
 
     // Draw bounding box
-    painter.setPen(QColor(Qt::black));
+    painter.setPen(GraphTheme::ink(Qt::black));
     painter.drawRect(rect);
 
     width--;
@@ -544,7 +545,7 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
                 }
 
                 dot.visible = true;
-                QColor color = chan.calc[dot.type].color;
+                QColor color = GraphTheme::ink(chan.calc[dot.type].color);
                 color.setAlpha(200);
                 painter.setPen(QPen(QBrush(color), lineThickness, Qt::DotLine));
                 EventDataType y=top + height + 1 - ((dot.value - miny) * ymult);
@@ -865,7 +866,7 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
                     if (w.printing() && AppSetting->monochromePrinting()) {
                         painter.setPen(QPen(Qt::black, lineThickness + 0.5));
                     } else {
-                        painter.setPen(QPen(chan.defaultColor(), lineThickness));
+                        painter.setPen(QPen(GraphTheme::ink(chan.defaultColor()), lineThickness));
                     }
                     painter.drawLines(lines);
                     w.graphView()->lines_drawn_this_frame += lines.count();
@@ -958,7 +959,7 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
                     if (w.printing() && AppSetting->monochromePrinting()) {
                         painter.setPen(QPen(Qt::black, lineThickness + 0.5));
                     } else {
-                        painter.setPen(QPen(chan.defaultColor(), lineThickness));
+                        painter.setPen(QPen(GraphTheme::ink(chan.defaultColor()), lineThickness));
                     }
                     painter.drawLines(lines);
                     w.graphView()->lines_drawn_this_frame+=lines.count();
@@ -983,13 +984,13 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
             rec.moveRight(legendx);
             legendx -= rec.width();
             painter.setClipping(false);
-            painter.setPen(Qt::black);
+            painter.setPen(GraphTheme::ink(Qt::black));
             painter.drawText(rec, Qt::AlignBottom | Qt::AlignRight, text);
 
             float ps = 2.0 * ratioY;
             ps = qMax(ps, 1.0f);
 
-            painter.setPen(QPen(chan.defaultColor(), ps));
+            painter.setPen(QPen(GraphTheme::ink(chan.defaultColor()), ps));
             int linewidth = (10 * ratioX);
             int yp = rec.top()+(rec.height()/2);
             painter.drawLine(QLineF(rec.left()-linewidth, yp+0.001f , rec.left()-(2 * ratioX), yp));
@@ -1015,10 +1016,10 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
         rec = painter.boundingRect(rec, Qt::AlignBottom | Qt::AlignLeft, text);
         rec.moveRight(legendx);
         legendx -= rec.width();
-        painter.setPen(Qt::black);
+        painter.setPen(GraphTheme::ink(Qt::black));
         painter.drawText(rec, Qt::AlignBottom | Qt::AlignRight, text);
 
-        QColor color = chan.calc[dot.type].color;
+        QColor color = GraphTheme::ink(chan.calc[dot.type].color);
         color.setAlpha(200);
         float ps = 2.0 * ratioY;
         ps = qMax(ps, 1.0f);

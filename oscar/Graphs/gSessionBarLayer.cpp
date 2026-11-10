@@ -9,6 +9,7 @@
 #include "gSessionBarLayer.h"
 #include "gGraph.h"
 #include "SleepLib/profiles.h"
+#include "Graphs/graphtheme.h"
 
 gSessionBarLayer::gSessionBarLayer()
     : Layer(NoChannel)
@@ -53,6 +54,6 @@ void gSessionBarLayer::paint(QPainter &painter, gGraph &w, const QRegion &region
         if (x2 < left || x1 > left + width) continue;
         x1 = qMax(x1, static_cast<double>(left));
         x2 = qMin(x2, static_cast<double>(left + width));
-        painter.fillRect(QRectF(x1, top, x2 - x1, barHeight), Qt::gray);
+        painter.fillRect(QRectF(x1, top, x2 - x1, barHeight), GraphTheme::ink(Qt::gray));
     }
 }

@@ -20,6 +20,7 @@
 #include "Graphs/gGraph.h"
 #include "Graphs/gGraphView.h"
 #include "SleepLib/profiles.h"
+#include "Graphs/graphtheme.h"
 
 #include <QFontMetrics>
 
@@ -126,9 +127,9 @@ void gXGrid::paint(QPainter &painter, gGraph &w, const QRegion &region)
     int alpha = AppSetting->gridLineOpacity();
     m_major_color.setAlpha(alpha);
     m_minor_color.setAlpha(alpha);
-    painter.setPen(QPen(m_major_color,1));
+    painter.setPen(QPen(GraphTheme::ink(m_major_color),1));
     painter.drawLines(majorlines);
-    painter.setPen(QPen(m_minor_color,1));
+    painter.setPen(QPen(GraphTheme::ink(m_minor_color),1));
     painter.drawLines(minorlines);
     w.graphView()->lines_drawn_this_frame += majorlines.size() + minorlines.size();
 }
@@ -270,7 +271,7 @@ void gYAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
                 ticks.append(QLineF(left + width - shorttick/2, g, left + width, g));
             }
         }
-        painter.setPen(Qt::black);
+        painter.setPen(GraphTheme::ink(Qt::black));
         painter.drawLines(ticks);
         w.graphView()->lines_drawn_this_frame += ticks.size();
 

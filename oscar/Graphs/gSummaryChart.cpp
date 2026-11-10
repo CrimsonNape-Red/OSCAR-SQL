@@ -21,6 +21,7 @@
 #include "gSummaryChart.h"
 
 #include "gYAxis.h"
+#include "graphtheme.h"
 
 extern MainWindow * mainwin;
 
@@ -424,7 +425,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
 
     rect.translate(0.0f, 0.001f);
 
-    painter.setPen(QColor(Qt::black));
+    painter.setPen(GraphTheme::ink(Qt::black));
     painter.drawRect(rect);
 
     rect.moveBottom(rect.bottom()+1);
@@ -609,7 +610,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
                 val = slice.height;
                 y1 = ((lastval-miny) * ymult);
                 y2 = (val * ymult);
-                QColor color = slice.color;
+                QColor color = GraphTheme::ink(slice.color);
 
                 QRectF rec = QRectF(lastx1, rect.bottom() - y1, barw, -y2).intersected(rect);
 
@@ -624,11 +625,11 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
                     painter.fillRect(rec, QBrush(color));
                 } else if (barw > 8) {
                     gradient.setColorAt(0,color);
-                    gradient.setColorAt(1,brighten(color, 2.0));
+                    gradient.setColorAt(1,GraphTheme::barShade(color, 2.0));
                     painter.fillRect(rec, QBrush(gradient));
                     outlines.append(rec);
                 } else {
-                    painter.fillRect(rec, brighten(color, 1.25));
+                    painter.fillRect(rec, GraphTheme::barShade(color, 1.25));
                     outlines.append(rec);
                 }
 
@@ -639,7 +640,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
         lastx1 = x1;
         it++;
     } while (++idx <= idx_end);
-    painter.setPen(QPen(Qt::black,1));
+    painter.setPen(QPen(GraphTheme::ink(Qt::black),1));
     painter.drawRects(outlines);
 
     if (hl) {

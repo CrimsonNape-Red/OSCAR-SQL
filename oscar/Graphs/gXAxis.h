@@ -93,6 +93,7 @@ class gXAxis: public Layer
     float tz_hours;
 
     QImage m_image;
+    bool m_imageDark = false;   //!< Whether m_image was drawn in dark-mode colours
 
     bool m_roundDays;
 };

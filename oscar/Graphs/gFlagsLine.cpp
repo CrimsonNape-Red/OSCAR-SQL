@@ -17,6 +17,7 @@
 #include "SleepLib/profiles.h"
 #include "gFlagsLine.h"
 #include "gYAxis.h"
+#include "graphtheme.h"
 
 gLabelArea::gLabelArea(Layer * layer)
     : gSpacer(20)
@@ -230,7 +231,7 @@ void gFlagsGroup::paint(QPainter &painter, gGraph &g, const QRegion &region)
             }
         }
 
-        painter.fillRect(left, floor(linetop), width-1, ceil(m_barh), QBrush(barcol));
+        painter.fillRect(left, floor(linetop), width-1, ceil(m_barh), QBrush(GraphTheme::fill(barcol)));
 
         // Paint the actual flags
         QRect rect(left, linetop, width, m_barh);
@@ -250,11 +251,11 @@ void gFlagsGroup::paint(QPainter &painter, gGraph &g, const QRegion &region)
             if (x2 < left || x1 > left + width) continue;
             x1 = qMax(x1, double(left));
             x2 = qMin(x2, double(left + width));
-            painter.fillRect(QRectF(x1, top, x2 - x1, sessionBarHeight()), Qt::gray);
+            painter.fillRect(QRectF(x1, top, x2 - x1, sessionBarHeight()), GraphTheme::ink(Qt::gray));
         }
     }
 
-    painter.setPen(COLOR_Outline);
+    painter.setPen(GraphTheme::ink(COLOR_Outline));
     painter.drawRect(outline);
 
     if (AppSetting->lineCursorMode()) {
@@ -271,7 +272,7 @@ void gFlagsGroup::paint(QPainter &painter, gGraph &g, const QRegion &region)
 
         QString txt = QObject::tr("Database Outdated\nPlease Rebuild CPAP Data");
         painter.setFont(*bigfont);
-        painter.setPen(QPen(QColor(0,0,0,32)));
+        painter.setPen(QPen(GraphTheme::ink(QColor(0,0,0,32))));
         painter.drawText(region.boundingRect(), Qt::AlignCenter | Qt::AlignVCenter, txt);
     }
 }
@@ -372,7 +373,7 @@ void gFlagsLine::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     QVector<QLine> vlines;
 
-    QColor color=schema::channel[m_code].defaultColor();
+    QColor color = GraphTheme::ink(schema::channel[m_code].defaultColor());
     if (w.printing() && AppSetting->monochromePrinting()) {
         color = Qt::black;
     }

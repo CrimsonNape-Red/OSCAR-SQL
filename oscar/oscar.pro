@@ -353,6 +353,7 @@ SOURCES += \
     staticQMessageBox.cpp \
     statistics.cpp \
     tooltipcolors.cpp \
+    colorscheme.cpp \
     translation.cpp \
     treecheckdelegate.cpp \
     version.cpp \
@@ -381,6 +382,7 @@ SOURCES += \
     Graphs/gFooBar.cpp \
     Graphs/gGraph.cpp \
     Graphs/gGraphView.cpp \
+    Graphs/graphtheme.cpp \
     Graphs/glcommon.cpp \
     Graphs/gLineChart.cpp \
     Graphs/gLineOverlay.cpp \
@@ -572,6 +574,7 @@ HEADERS  += \
     Graphs/gFooBar.h \
     Graphs/gGraph.h \
     Graphs/gGraphView.h \
+    Graphs/graphtheme.h \
     Graphs/glcommon.h \
     Graphs/gLineChart.h \
     Graphs/gLineOverlay.h \
@@ -655,6 +658,7 @@ HEADERS  += \
     translation.h \
     statistics.h \
     tooltipcolors.h \
+    colorscheme.h \
     oximeterimport.h \
     SleepLib/deviceconnection.h \
     SleepLib/xmlreplay.h \

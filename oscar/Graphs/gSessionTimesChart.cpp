@@ -21,6 +21,7 @@
 #include "gSessionTimesChart.h"
 
 #include "gYAxis.h"
+#include "graphtheme.h"
 
 extern MainWindow * mainwin;
 
@@ -110,7 +111,7 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
 {
     QRectF rect = region.boundingRect();
 
-    painter.setPen(QColor(Qt::black));
+    painter.setPen(GraphTheme::ink(Qt::black));
     painter.drawRect(rect);
 
     m_minx = graph.min_x;
@@ -320,7 +321,7 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
                 float y1 = (s1 * ymult);
                 float y2 = (s2 * ymult);
 
-                QColor col = slice.color;
+                QColor col = GraphTheme::ink(slice.color);
 
                 QRectF rec(lastx1, rect.bottom() - y1 - y2, barw, y2);
                 rec = rec.intersected(rect);
@@ -333,11 +334,11 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
 
                 if (barw > 8) {
                     gradient.setColorAt(0,col);
-                    gradient.setColorAt(1,brighten(col, 2.0));
+                    gradient.setColorAt(1,GraphTheme::barShade(col, 2.0));
                     painter.fillRect(rec, QBrush(gradient));
                     outlines.append(rec);
                 } else if (barw > 3) {
-                    painter.fillRect(rec, QBrush(brighten(col,1.25)));
+                    painter.fillRect(rec, QBrush(GraphTheme::barShade(col,1.25)));
                     outlines.append(rec);
                 } else {
                     painter.fillRect(rec, QBrush(col));
@@ -350,7 +351,7 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
         lastx1 = x1;
     } while (++idx <= idx_end);
 
-    painter.setPen(QPen(Qt::black,1));
+    painter.setPen(QPen(GraphTheme::ink(Qt::black),1));
     painter.drawRects(outlines);
     afterDraw(painter, graph, rect);
 }

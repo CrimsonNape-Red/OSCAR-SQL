@@ -50,6 +50,7 @@
 #include "translation.h"
 #include "speedcheck.h"
 #include "tooltipcolors.h"
+#include "colorscheme.h"
 #include "SleepLib/common.h"
 #include "SleepLib/portablemode.h"
 #include "SleepLib/deviceconnection.h"
@@ -1541,6 +1542,7 @@ int main(int argc, char *argv[]) {
     if (AppSetting->useFusionTheme()) {
         QApplication::setStyle(QStyleFactory::create("Fusion"));
     }
+    ColorScheme::apply();    // light, dark or the system's; may switch to Fusion on older Qt
     ToolTipColors::apply();  // now from the preference, and for the final widget style
 
     QString language = settings.value(LangSetting, "").toString();

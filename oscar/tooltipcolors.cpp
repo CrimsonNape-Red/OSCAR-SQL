@@ -91,7 +91,7 @@ void captureSystemScheme()
 #endif
 }
 
-void apply()
+void apply(bool restyle)
 {
     // A palette that isn't the one we set is one Qt has just reset to the theme's.
     const QPalette current = QToolTip::palette();
@@ -132,6 +132,12 @@ void apply()
     if (forced) {
         styleSheet += QStringLiteral("QToolTip { color: %1; background-color: %2; border: 1px solid %1; padding: 2px; }")
                           .arg(text.name(), background.name());
+    }
+    // While an application style sheet is set, Qt doesn't pass a new palette from a light/dark
+    // switch on to the widgets: they keep the old one. Setting the style sheet afresh restyles
+    // every widget from the current palette.
+    if (restyle && !qApp->styleSheet().isEmpty()) {
+        qApp->setStyleSheet(QString());
     }
     if (qApp->styleSheet() != styleSheet) {
         qApp->setStyleSheet(styleSheet);  // repolishes every widget, so only when it has changed

@@ -21,6 +21,7 @@
 #include "Graphs/gGraphView.h"
 #include "Graphs/layer.h"
 #include "SleepLib/profiles.h"
+#include "Graphs/graphtheme.h"
 
 extern MainWindow *mainwin;
 
@@ -387,12 +388,12 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
 
     if (m_snapshot) {
         QLinearGradient linearGrad(QPointF(100, 100), QPointF(width / 2, 100));
-        linearGrad.setColorAt(0, QColor(255, 150, 150,40));
-        linearGrad.setColorAt(1, QColor(255,255,255,20));
+        linearGrad.setColorAt(0, GraphTheme::fill(QColor(255, 150, 150,40)));
+        linearGrad.setColorAt(1, GraphTheme::fill(QColor(255,255,255,20)));
 
         painter.fillRect(m_rect, QBrush(linearGrad));
         painter.setFont(*defaultfont);
-        painter.setPen(QColor(0,0,0,255));
+        painter.setPen(GraphTheme::ink(QColor(0,0,0,255)));
 
         QString t = name().section(";", -1);
 
@@ -480,7 +481,7 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
 
     if (isPinned()) {
         // Fill the background on pinned graphs
-        painter.fillRect(originX + left, originY + top, width - right, height - bottom - top, QBrush(QColor(Qt::white)));
+        painter.fillRect(originX + left, originY + top, width - right, height - bottom - top, QBrush(GraphTheme::background()));
     }
 
     for (const auto & layer : m_layers) {
@@ -527,6 +528,7 @@ QPixmap gGraph::renderPixmap(int w, int h, bool printing)
 
 
     m_printing = printing;
+    GraphTheme::PrintScope printScope(printing);  // printed graphs keep their light colours
 
     if (printing) {
         fa.setPixelSize(28);
@@ -550,7 +552,7 @@ QPixmap gGraph::renderPixmap(int w, int h, bool printing)
     graphView()->setUsePixmapCache(false);
     AppSetting->setUsePixmapCaching(false);
     QPainter painter(&pm);
-    painter.fillRect(0,0,w,h,QBrush(QColor(Qt::white)));
+    painter.fillRect(0,0,w,h,QBrush(GraphTheme::background()));
     QRegion region(0,0,w,h);
     paint(painter, region);
     DrawTextQue(painter);

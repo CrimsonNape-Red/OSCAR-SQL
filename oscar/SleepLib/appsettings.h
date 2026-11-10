@@ -67,6 +67,7 @@ const QString STR_AS_GraphTooltips = "GraphTooltips";
 const QString STR_AS_UseFusionTheme = "UseFusionTheme";
 const QString STR_AS_UseNewWelcome = "UseNewWelcome";
 const QString STR_AS_WelcomeCardColour = "WelcomeCardColour";
+const QString STR_AS_ColorScheme = "ColorScheme";
 const QString STR_AS_UseSystemTooltipColors = "UseSystemTooltipColors";
 const QString STR_AS_LineThickness = "LineThickness";
 const QString STR_AS_GridLineOpacity = "GridLineOpacity";
@@ -108,6 +109,13 @@ enum WelcomeCardColour {
     WCC_Plain = 0,      //!< No card tint
     WCC_ByGroup = 1,    //!< Tint shows the kind of number (breathing, mask, usage)
     WCC_ByStatus = 2    //!< Green or red when the night is better or worse than both averages
+};
+
+//! \brief Light or dark colours for the whole application. The values match Qt::ColorScheme.
+enum ColorSchemeChoice {
+    CSC_System = 0,     //!< Follow the operating system's light or dark setting
+    CSC_Light = 1,      //!< Always light
+    CSC_Dark = 2        //!< Always dark
 };
 
 
@@ -185,6 +193,10 @@ public:
   //! \brief How the redesigned Welcome page colours its metric cards
   WelcomeCardColour welcomeCardColour() const {
       return WelcomeCardColour(getPref(STR_AS_WelcomeCardColour).toInt());
+  }
+  //! \brief Whether the application is light, dark, or follows the operating system
+  ColorSchemeChoice colorScheme() const {
+      return ColorSchemeChoice(getPref(STR_AS_ColorScheme).toInt());
   }
   //! \brief Whether tooltips use the system's colors instead of OSCAR's black on yellow
   inline bool useSystemTooltipColors() const { return m_useSystemTooltipColors; }
@@ -270,6 +282,8 @@ public:
   void setUseNewWelcome(bool b) { setPref(STR_AS_UseNewWelcome, b); }
   //! \brief Sets how the redesigned Welcome page colours its metric cards
   void setWelcomeCardColour(WelcomeCardColour c) { setPref(STR_AS_WelcomeCardColour, int(c)); }
+  //! \brief Sets whether the application is light, dark, or follows the operating system
+  void setColorScheme(ColorSchemeChoice c) { setPref(STR_AS_ColorScheme, int(c)); }
   //! \brief Sets whether tooltips use the system's colors. ToolTipColors::apply() puts it into effect.
   void setUseSystemTooltipColors(bool b) { setPref(STR_AS_UseSystemTooltipColors, m_useSystemTooltipColors=b); }
   //! \brief Sets the type of overlay flags (which are displayed over the Flow Waveform)

@@ -80,6 +80,7 @@ extern QStatusBar *qstatusbar;
 
 
 class Daily;
+class QAbstractButton;
 class Report;
 class Overview;
 
@@ -484,6 +485,24 @@ private:
     void applyStatisticsTheme();
     QString m_statsHtml;            //!< Statistics report as built, in the printed colours
     QString m_statsThemeKey;        //!< Palette colours applyStatisticsTheme() last used
+
+    /*! \brief Adds the moon/sun button at the right end of the main tabs (Qt 6.8+ only;
+        older Qt can't switch the colour scheme while OSCAR runs) */
+    void setupColorSchemeButton();
+    //! \brief Shows a moon in light mode and a sun in dark mode, with a matching tooltip
+    void updateColorSchemeButton();
+    //! \brief Switches between light and dark, and saves the choice
+    void toggleColorScheme();
+    QAbstractButton *m_colorSchemeButton = nullptr;     //!< Moon/sun button; null on older Qt
+
+    //! \brief The application palette's main colours as one string, to tell when they change
+    static QString paletteKey();
+    /*! \brief After a switch between light and dark, rebuilds what takes its colours when it is
+        built: the redesigned Welcome page, and Daily's left panel. Does nothing if the palette
+        is unchanged since the last call. */
+    void applyPageThemes();
+    QString m_pageThemeKey;         //!< Palette colours the pages were last built in
+
     QString getMainWindowTitle();
     void importCPAPBackups();
 
