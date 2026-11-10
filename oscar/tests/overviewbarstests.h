@@ -9,7 +9,7 @@
 #include "tests/AutoTest.h"
 
 /*! \class OverviewBarsTests
-    \brief Bar placement within a day's slot, the cylinder shading and strip text colour */
+    \brief Bar placement within a day's slot, the bar shading and strip text colour */
 class OverviewBarsTests : public QObject
 {
     Q_OBJECT
@@ -17,7 +17,9 @@ private slots:
     void testGeometryWideSlot();
     void testGeometrySmallSlotKeepsOnePixelGap();
     void testGeometryNarrowSlot();
-    void testCylinderGradientStops();
+    void testBarGradientStops();
+    void testPlainFillLighterAboveThreePixels();
+    void testTopIsFlatWithRoundedCorners();
     void testContrastingText();
 };
 DECLARE_TEST(OverviewBarsTests)

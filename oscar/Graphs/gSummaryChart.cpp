@@ -588,7 +588,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
 
 //            dc++;
     float barw = float(rect.width()) / float(days);
-    // Each day's slot holds a bar and a gap; wide bars are shaded cylinders
+    // Each day's slot holds a bar and a gap; wide bars are shaded
     const OverviewBars::BarGeometry geo = OverviewBars::barGeometry(barw);
     const bool flatOnly = graph.printing() && AppSetting->monochromePrinting();
     graph.setHoverDate(QDate());
@@ -699,7 +699,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
             QVector<SummaryChartSlice> & list = cit.value();
             customCalc(day, list);
 
-            // The topmost part with any height gets the cylinder's rounded cap
+            // The topmost part with any height gets the rounded top corners
             int topSlice = -1;
             for (int s = 0; s < list.size(); ++s) {
                 if (list.at(s).height > 0) topSlice = s;
@@ -713,7 +713,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
                 const QColor color = GraphTheme::ink(slice.color);
 
                 const QRectF rec = QRectF(lastx1 + geo.offset, rect.bottom() - y1 - y2, geo.width, y2).intersected(rect);
-                OverviewBars::paintSegment(painter, rec, color, s == topSlice, geo.cylinder && !flatOnly);
+                OverviewBars::paintSegment(painter, rec, color, s == topSlice, geo.shaded && !flatOnly);
 
                 lastval += val;
             }

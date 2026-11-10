@@ -155,7 +155,7 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
     int days = ceil(double(m_maxx - m_minx) / 86400000.0);
 
     float barw = float(rect.width()) / float(days);
-    // Each day's slot holds a bar and a gap; wide bars are shaded cylinders
+    // Each day's slot holds a bar and a gap; wide bars are shaded
     const OverviewBars::BarGeometry geo = OverviewBars::barGeometry(barw);
     const bool flatOnly = graph.printing() && AppSetting->monochromePrinting();
     graph.setHoverDate(QDate());
@@ -354,7 +354,7 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
 
                 // Each session is a piece of its own, with its own rounded top
                 const QRectF rec = QRectF(lastx1 + geo.offset, rect.bottom() - y1 - y2, geo.width, y2).intersected(rect);
-                OverviewBars::paintSegment(painter, rec, col, true, geo.cylinder && !flatOnly);
+                OverviewBars::paintSegment(painter, rec, col, true, geo.shaded && !flatOnly);
 
             }
         }

@@ -42,17 +42,17 @@ period. It does that well today. Two things fall short:
 
 ### Bars
 
-- **Style:** each part of a stacked bar is a cylinder segment: a horizontal gradient that is
-  darker at both edges with a soft highlight just left of centre. The top segment has a rounded
-  cap. The highlight is subdued (agreed after one revision; the canvas's "Details" artboard holds
-  the agreed values: edges 40-45% towards black, body 8% towards black, highlight 22% towards
-  white).
+- **Style:** each part of a stacked bar keeps OSCAR 2.1.0's shading: bars over 8 px run from the
+  channel colour at the left edge to twice as bright at the right (`brighten(c, 2.0)`); bars of
+  4-8 px are a plain fill 25% brighter; narrower bars use the channel colour. The top segment is
+  flat with 3 px rounded corners. (Revised after the first build: the cylinder shading looked
+  darker than 2.1.0 and its domed top was not wanted.)
 - **All bar graphs** get the same treatment: AHI, Usage, Session Times, Pressure, Total Time in
   Apnea, and every per-channel summary graph.
 - **Colours** are the existing channel and calculation colours (including Preferences choices),
   translated for dark mode by `GraphTheme::ink()` as now.
 - **Gaps:** each day has a slot; the bar fills most of it and the rest is a gap between days. Bar
-  and gap shrink together as the date range grows. Keep a gap of at least 1 px for as long as
+  and gap shrink together as the date range grows; the gap is 15% of the slot. Keep a gap of at least 1 px for as long as
   there is room for it; only when there is not does the gap disappear.
 - **Narrow bars:** once bars are too narrow for the shading to show, draw them as plain flat
   fills. This keeps long ranges (many visible days) at today's speed.

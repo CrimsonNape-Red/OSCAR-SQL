@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "overviewbars.h"
+#include "glcommon.h"
 
 #include <QPainter>
 #include <QPainterPath>
@@ -16,17 +17,10 @@ namespace OverviewBars {
 
 namespace {
 
-constexpr double kGapShare = 0.3;       //!< Share of a day's slot left as a gap between days
+constexpr double kGapShare = 0.15;      //!< Share of a day's slot left as a gap between days
 constexpr double kMinGapSlot = 3.0;     //!< Narrowest slot that still gets a (1 px) gap
-constexpr double kMinCylinder = 8.0;    //!< Narrowest bar drawn as a cylinder (as today's gradient bars)
-constexpr double kCapHeight = 6.0;      //!< Height of a cylinder's rounded top
-
-//! \brief Moves \a c a fraction \a t (0-1) of the way towards \a to
-QColor mix(const QColor &c, const QColor &to, double t)
-{
-    auto ch = [t](int a, int b) { return qRound(a + (b - a) * t); };
-    return QColor(ch(c.red(), to.red()), ch(c.green(), to.green()), ch(c.blue(), to.blue()), c.alpha());
-}
+constexpr double kMinShaded = 8.0;      //!< Narrowest bar shaded left to right (as in OSCAR 2.1.0)
+constexpr double kCornerRadius = 3.0;   //!< Radius of the two top corners of a shaded bar
 
 double toLinear(double v) { return v <= 0.04045 ? v / 12.92 : std::pow((v + 0.055) / 1.055, 2.4); }
 
@@ -41,39 +35,37 @@ BarGeometry barGeometry(double slotWidth)
 {
     const double gap = slotWidth >= kMinGapSlot ? qMax(1.0, double(qRound(slotWidth * kGapShare))) : 0.0;
     const double width = slotWidth - gap;
-    return { gap / 2.0, width, width >= kMinCylinder };
+    return { gap / 2.0, width, width >= kMinShaded };
 }
 
-QLinearGradient cylinderGradient(const QColor &c, double left, double width)
+QLinearGradient barGradient(const QColor &c, double left, double width)
 {
-    const QColor black(Qt::black), white(Qt::white);
     QLinearGradient g(left, 0, left + width, 0);
-    g.setColorAt(0.0, mix(c, black, 0.40));
-    g.setColorAt(0.28, mix(c, black, 0.08));
-    g.setColorAt(0.45, mix(c, white, 0.22));
-    g.setColorAt(0.62, mix(c, black, 0.08));
-    g.setColorAt(1.0, mix(c, black, 0.45));
+    g.setColorAt(0.0, c);
+    g.setColorAt(1.0, brighten(c, 2.0f));
     return g;
 }
 
-void paintSegment(QPainter &p, const QRectF &r, const QColor &c, bool top, bool cylinder)
+void paintSegment(QPainter &p, const QRectF &r, const QColor &c, bool top, bool shaded)
 {
     if (r.isEmpty()) return;
-    if (!cylinder) {
-        p.fillRect(r, c);
+    if (!shaded) {
+        p.fillRect(r, r.width() > 3.0 ? brighten(c, 1.25f) : c);
         return;
     }
-    const QBrush brush(cylinderGradient(c, r.left(), r.width()));
-    const double cap = qMin(kCapHeight, r.height() / 2.0);
-    if (!top || cap < 1.0) {
+    const QBrush brush(barGradient(c, r.left(), r.width()));
+    const double radius = qMin(kCornerRadius, qMin(r.width() / 4.0, r.height() / 2.0));
+    if (!top || radius < 1.0) {
         p.fillRect(r, brush);
         return;
     }
-    // Rounded top: an elliptical arc across the full width, straight sides and bottom
+    // Flat top with slightly rounded corners, straight sides and bottom
     QPainterPath path;
     path.moveTo(r.left(), r.bottom());
-    path.lineTo(r.left(), r.top() + cap);
-    path.arcTo(QRectF(r.left(), r.top(), r.width(), 2 * cap), 180, -180);
+    path.lineTo(r.left(), r.top() + radius);
+    path.arcTo(QRectF(r.left(), r.top(), 2 * radius, 2 * radius), 180, -90);
+    path.lineTo(r.right() - radius, r.top());
+    path.arcTo(QRectF(r.right() - 2 * radius, r.top(), 2 * radius, 2 * radius), 90, -90);
     path.lineTo(r.right(), r.bottom());
     path.closeSubpath();
     p.save();

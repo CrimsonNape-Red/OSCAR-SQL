@@ -2,7 +2,8 @@
  *
  * Covers where a bar sits in its day's slot as the date range grows (the gap between days
  * shrinks with the bar, stays at least a pixel while there is room, then disappears), the
- * colour stops of the cylinder shading, and the text colour on a title strip.
+ * colour stops of the bar shading, the lighter plain fill, the flat top with rounded corners, and the text colour
+ * on a title strip.
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -13,14 +14,17 @@
 #include "overviewbarstests.h"
 #include "Graphs/overviewbars.h"
 
+#include <QImage>
+#include <QPainter>
+
 using namespace OverviewBars;
 
 void OverviewBarsTests::testGeometryWideSlot()
 {
     const BarGeometry g = barGeometry(84);
-    QCOMPARE(g.width, 59.0);
-    QCOMPARE(g.offset, (84.0 - 59.0) / 2.0);
-    QVERIFY(g.cylinder);
+    QCOMPARE(g.width, 71.0);                    // gap is 15% of the slot
+    QCOMPARE(g.offset, (84.0 - 71.0) / 2.0);
+    QVERIFY(g.shaded);
 }
 
 void OverviewBarsTests::testGeometrySmallSlotKeepsOnePixelGap()
@@ -28,7 +32,7 @@ void OverviewBarsTests::testGeometrySmallSlotKeepsOnePixelGap()
     const BarGeometry g = barGeometry(4);
     QCOMPARE(g.width, 3.0);
     QCOMPARE(4.0 - g.width, 1.0);
-    QVERIFY(!g.cylinder);
+    QVERIFY(!g.shaded);
 }
 
 void OverviewBarsTests::testGeometryNarrowSlot()
@@ -36,26 +40,53 @@ void OverviewBarsTests::testGeometryNarrowSlot()
     const BarGeometry g = barGeometry(2.5);
     QCOMPARE(g.width, 2.5);
     QCOMPARE(g.offset, 0.0);
-    QVERIFY(!g.cylinder);
+    QVERIFY(!g.shaded);
 }
 
-void OverviewBarsTests::testCylinderGradientStops()
+void OverviewBarsTests::testBarGradientStops()
 {
-    const QLinearGradient grad = cylinderGradient(QColor(0x40, 0x80, 0xff), 10, 50);
+    // As in OSCAR 2.1.0: the channel colour on the left, twice as bright on the right
+    const QLinearGradient grad = barGradient(QColor(0x20, 0x60, 0x90), 10, 50);
     const QGradientStops stops = grad.stops();
-    QCOMPARE(stops.size(), 5);
+    QCOMPARE(stops.size(), 2);
     QCOMPARE(stops.at(0).first, 0.0);
-    QCOMPARE(stops.at(0).second, QColor(38, 77, 153));      // 40% towards black
-    QCOMPARE(stops.at(1).first, 0.28);
-    QCOMPARE(stops.at(1).second, QColor(59, 118, 235));     // 8% towards black
-    QCOMPARE(stops.at(2).first, 0.45);
-    QCOMPARE(stops.at(2).second, QColor(106, 156, 255));    // 22% towards white
-    QCOMPARE(stops.at(3).first, 0.62);
-    QCOMPARE(stops.at(3).second, QColor(59, 118, 235));
-    QCOMPARE(stops.at(4).first, 1.0);
-    QCOMPARE(stops.at(4).second, QColor(35, 70, 140));      // 45% towards black
+    QCOMPARE(stops.at(0).second, QColor(0x20, 0x60, 0x90));
+    QCOMPARE(stops.at(1).first, 1.0);
+    QCOMPARE(stops.at(1).second, QColor(128, 192, 255));    // each channel at least 64, doubled
     QCOMPARE(grad.start(), QPointF(10, 0));
     QCOMPARE(grad.finalStop(), QPointF(60, 0));
+}
+
+void OverviewBarsTests::testPlainFillLighterAboveThreePixels()
+{
+    QImage img(10, 10, QImage::Format_ARGB32);
+    img.fill(Qt::transparent);
+    {
+        QPainter p(&img);
+        paintSegment(p, QRectF(0, 0, 6, 10), QColor(0x20, 0x60, 0x90), true, false);
+        paintSegment(p, QRectF(7, 0, 3, 10), QColor(0x20, 0x60, 0x90), true, false);
+    }
+    QCOMPARE(QColor(img.pixel(3, 5)), QColor(80, 120, 180));     // 25% brighter, as 2.1.0
+    QCOMPARE(QColor(img.pixel(8, 5)), QColor(0x20, 0x60, 0x90)); // 3 px or less: channel colour
+}
+
+void OverviewBarsTests::testTopIsFlatWithRoundedCorners()
+{
+    // A 40 px wide bar top painted onto a clear image
+    QImage img(40, 40, QImage::Format_ARGB32);
+    img.fill(Qt::transparent);
+    {
+        QPainter p(&img);
+        paintSegment(p, QRectF(0, 0, 40, 40), QColor(0x40, 0x80, 0xff), true, true);
+    }
+    auto painted = [&img](int x, int y) { return qAlpha(img.pixel(x, y)) > 128; };
+    QVERIFY(!painted(0, 0));            // rounded corner
+    QVERIFY(!painted(39, 0));
+    QVERIFY(painted(5, 0));             // flat across the top beyond the corner, not domed
+    QVERIFY(painted(34, 0));
+    QVERIFY(painted(20, 0));
+    QVERIFY(painted(0, 10));            // straight sides below the corner
+    QVERIFY(painted(39, 10));
 }
 
 void OverviewBarsTests::testContrastingText()
