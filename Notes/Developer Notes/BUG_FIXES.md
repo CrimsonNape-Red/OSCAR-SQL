@@ -4,6 +4,36 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-10 - BMC P5 B20A Plus registered as tested; leak scale and firmware version corrected
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp` (`Open()`),
+`oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`G3xLeakScaleTenthsPerRawUnit()`,
+`ParseMachineInfo()`)
+
+**Symptom:** Importing a P5 B20A Plus card showed the "untested model" and "untested firmware"
+dialogs. Leak read about 60% high, and the reported firmware was older than the device's.
+
+**Validation (48 nights, parser run against the whole card, no warnings):** waveform durations
+match the device's nightly totals, and median pressures match the IT block. The IT block holds
+per-hour indices for each event type (see `BMC_G3X_IDX_File_Layout.md`). Counts from the `.evt`
+file reproduce them within rounding on nearly every night; two nights (2026-10-07, 2026-10-16)
+differ by a few percent and the device omits OH/CH on 2026-10-11 to 2026-10-13. Inspiratory
+volume integrated from the flow waveform runs 3-12% above minute ventilation on every night.
+
+**Fixes:**
+
+- Added `P5-1.02.` and the IDX fallback `P5-1.SC.00.` to the known firmware, and `P5 B20A Plus`
+  to the known models.
+- `G3xLeakScaleTenthsPerRawUnit()` applied the G3 factor of 0.16 to the P5. It now uses 0.10, as
+  on the E5, confirmed by the device's own nightly leak statistics (see
+  `Notes/loaders/G3X/leak_field_analysis.md`).
+- `ParseMachineInfo()` took the first version token in the `.log`, which is the oldest version
+  on a device updated since its log began (reported `P5-1.02.04.01`, device runs
+  `P5-1.02.05.10`). It now scans the whole log and reports the newest. This also applies to G3
+  devices: one updated from 2.11 to 2.12 now resolves to leak field 0x568 by firmware version.
+
+---
+
 ## 2026-11-09 - ResMed: re-importing the last day drops a session imported from another SD card (GitLab #376)
 
 **Files:** `oscar/SleepLib/loader_plugins/resmed_loader.cpp`, `resmed_loader.h`, `oscar/tests/resmedtests.cpp`,

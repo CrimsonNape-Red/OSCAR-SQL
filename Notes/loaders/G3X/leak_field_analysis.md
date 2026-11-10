@@ -8,6 +8,17 @@
 
 ---
 
+## Update 2026-11-10 — P5 B20A Plus: 0x52A is live, scale confirmed at 0.10
+
+**P5 B20A Plus**, firmware `P5-1.02.05.10`. Its 0x52A field is populated (53% of probed
+packets non-zero), so the probe selects it. The IDX IT block stores the device's own
+nightly leak statistics, which tracks this field at r = 0.999 and gives the scale directly,
+with no PAP-Link readout needed. Median implied scale over 38 nights with mean leak of at
+least 1 L/min: **0.0998** (mean, IT `0x92`), **0.0988** (95th percentile, IT `0x94`),
+**0.1011** (median, IT `0x96`). OSCAR now uses 0.10 for the P5 as well as the E5.
+
+---
+
 ## Update 2026-07-29 — E5 B25A Plus: 0x52A is live, this analysis does not apply
 
 A third machine is now available: **E5 B25A Plus**, firmware `E5-1.02.05.02`. It is a
