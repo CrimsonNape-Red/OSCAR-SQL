@@ -32,6 +32,7 @@
 #include <QEventLoop>
 #include <QRegularExpression>
 #include <QStyleHints>
+#include <QStyle>
 #include <QStyleFactory>
 #include <QElapsedTimer>
 #include <QLockFile>
@@ -957,6 +958,18 @@ int main(int argc, char *argv[]) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     // setColorScheme() is Qt 6.8+; older Qt follows the system scheme
     mainapp.styleHints()->setColorScheme(Qt::ColorScheme::Light);
+#ifdef Q_OS_LINUX
+    // On Linux, Qt 6.5+ also takes its colors from the desktop's GTK theme. Some themes (e.g. Mint-L)
+    // give lists and panels the window's own color and gray text, so OSCAR's cards and tables lose
+    // their edges. Use Fusion's standard light colors, as older Qt did, whatever the desktop theme.
+    {
+        QStyle *fusion = QStyleFactory::create(QStringLiteral("Fusion"));
+        if (fusion) {
+            QApplication::setPalette(fusion->standardPalette());
+            delete fusion;
+        }
+    }
+#endif
 #endif
     QStringList args = mainapp.arguments();
 
