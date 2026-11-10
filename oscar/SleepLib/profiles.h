@@ -444,6 +444,7 @@ const QString STR_PREF_SpO2BaselineMigrated = "SpO2BaselineMigrated";  ///< swit
 const QString STR_PREF_ResMedOximetryRebuild = "ResMedOximetryRebuildPending";
 #if defined(STEADY_BREATHING)
 const QString STR_PREF_SteadyBreathingPerProfile = "SteadyBreathingPerProfile";  ///< moved from app-wide settings
+const QString STR_PREF_ClinicalModeDefaultSet = "ClinicalModeDefaultSet";  ///< new-profile Clinical Mode default applied
 #endif
 
 //Apperance Settings

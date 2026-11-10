@@ -24,12 +24,6 @@
 
 class QDir;
 
-#ifdef UNITTEST_MODE
-#include <sstream>  // include first so the #define below can't leak into libstdc++
-#define private public
-#define protected public
-#endif
-
 //********************************************************************************************
 /// IMPORTANT!!!
 //********************************************************************************************
@@ -150,6 +144,9 @@ QList<RespEvent> parseRespEvents(const QByteArray & xml);
 class PrismaVentLoader : public CPAPLoader
 {
     Q_OBJECT
+#ifdef UNITTEST_MODE
+    friend class PrismaVentTests;
+#endif
     static bool initialized;
 
 public:

@@ -21,6 +21,13 @@ private slots:
     void testChunksToYaml();
     void testSessionsToYaml();
     void cleanupTestCase();
+
+private:
+    // Members rather than free functions, so that the friend declarations for PRS1Tests
+    // in the loader classes cover them.
+    static void parseAndEmitSessionYaml(const QString & path);
+    static void parseAndEmitChunkYaml(const QString & path);
+    static void iterateTestCards(const QString & root, void (*action)(const QString &));
 };
 
 DECLARE_TEST(PRS1Tests)

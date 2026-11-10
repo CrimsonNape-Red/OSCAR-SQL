@@ -25,6 +25,7 @@
 #include <QByteArray>
 #include <QDateTime>
 #include <QHash>
+#include <QSet>
 #include <QString>
 #include <QVector>
 
@@ -234,6 +235,13 @@ constexpr quint16 kArchiveMarker = 0xFEA1;
 struct MinuteRecord
 {
     quint8 meanPressure = 0;   //!< Mean mask pressure this minute, tenths of a cmH2O.
+
+    /*! Total leak this minute, in the raw units of the LK channel (0.6 L/min each).
+        Compared with the mean of LK over the same minute on 314 sessions from two
+        machines: median correlation 0.87 and 0.96, and a session's mean differs by
+        about one raw unit, so this is the same quantity on the same scale. */
+    quint8 totalLeak = 0;
+
     quint8 obstructiveApnea = 0;
     quint8 centralApnea = 0;
     quint8 obstructiveHypopnea = 0;
@@ -258,6 +266,12 @@ struct MinuteRecord
 struct SessionSummary
 {
     int minutes = 0;                    //!< floor(recordCount * 10 / 60) + 1.
+
+    /*! Session start, in the device's local time, from BCD words 1 to 6 (day, month,
+        year, hour, minute, second). Invalid when those words hold no real date. It
+        agrees with the .INI start on 619 of 621 directories across three cards, and
+        the other two differ by 4 s. */
+    QDateTime start;
 
     int obstructiveApneas = 0;
     int centralApneas = 0;
@@ -305,6 +319,30 @@ struct SessionSummary
     own start no oldest block can be told apart, and the image is rejected
     rather than read in an arbitrary order. */
 bool readMemoryImage(const QString &path, QVector<SessionSummary> &out);
+
+/*! \brief How far apart, in seconds, a session and its archive block may start.
+
+    The two clocks differ by 4 s on 2 of 621 directories examined and agree exactly
+    on the rest. Sessions never start this close together. */
+constexpr int kArchiveStartToleranceSeconds = 10;
+
+/*! \brief Choose the archive sessions that need importing from the archive alone.
+    \param archive        The archive, from readMemoryImage().
+    \param oldestDirStart Start of the oldest session directory on the card.
+    \param knownStartSecs Start times, in seconds since the epoch, of sessions that
+                          already exist. S.Box session IDs are exactly this.
+    \return Indices into \a archive, oldest first.
+
+    An archive block with no session is one the device recorded but whose data never
+    reached a readable directory. Selection goes by start time rather than by the
+    minute-count match used for events, because that match stops at the first
+    session it cannot place and would then report every older block as unmatched.
+
+    Blocks older than the card's oldest directory are left out: on a used card they
+    run back years, to sessions that may already exist under another card's import. */
+QVector<int> findArchiveOnlySessions(const QVector<SessionSummary> &archive,
+                                     const QDateTime &oldestDirStart,
+                                     const QSet<qint64> &knownStartSecs);
 
 /*! \struct SessionData
     \brief Everything decoded from one DATA_nnn directory. */

@@ -4,6 +4,70 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-09 - ResMed: re-importing the last day drops a session imported from another SD card (GitLab #376)
+
+**Files:** `oscar/SleepLib/loader_plugins/resmed_loader.cpp`, `resmed_loader.h`, `oscar/tests/resmedtests.cpp`,
+`resmedtests.h`
+
+**Symptom:** A user swaps SD cards each time a card is removed. After a two-session night (session 1 on
+card A, imported in the morning; session 2 on card B), importing card B left the day with session 2 only.
+
+**Root cause:** Each import re-reads the last stored day. When `checkSummaryDay()` expects more sessions than
+are stored (max of STR.edf mask-on/off pairs and EDF session groups), it purged every stored session of the
+day and re-imported the day from the files being imported. Card B holds only session 2's files, so session 1
+was not re-created. The purge used `Day::removeSession()`, which leaves the database rows, so session 1
+probably reappeared after a restart while the day's cached summary still reflected session 2 only.
+
+**Fix:** Only the stored sessions that a new waveform file (EVE/CSL excluded) overlaps in time are replaced
+(`ResmedLoader::sessionsOverlappedByFiles()`); the others are kept. Replaced sessions are removed with
+`Session::Destroy()`, which deletes their database rows too.
+
+**Non-obvious:**
+- A session's files are never split between two cards, so a stored session that no new file overlaps came
+  from another card.
+- Matching is by time overlap, not session ID: the ID is the STR mask-on time when a pair contains the file,
+  otherwise the earliest EDF start, so the same session can get a different ID on a second import.
+- An STR pair whose files are on the other card creates nothing: `ResDayTask::run()` skips groups without
+  files, and makes summary-only sessions only on days with no EDF files at all.
+- Not addressed: the count check still decides whether the day is re-imported at all, so a session that grew
+  since the last import (same session count) is not refreshed; that was already the case before. The
+  original #376 report (a day earlier than `LastDay()` is never re-read) needs a debug log. Two different
+  CPAP devices on one day is #377.
+
+---
+
+## 2026-11-07 - ResMed: events logged just after the waveforms stop are dropped (GitLab #363)
+
+**Files:** `oscar/SleepLib/loader_plugins/resmed_loader.cpp`, `resmed_loader.h`, `oscar/tests/resmedtests.cpp`,
+`resmedtests.h`
+
+**Symptom:** OSCAR showed AHI 0.00 where the AirSense 10's own report showed 0.4. OSCAR 1.7.x behaves the
+same way.
+
+**Root cause:** `LoadEVE` kept only events inside the session's `[first, last]` range, and a ResMed session
+ends with its last waveform sample. The device writes some events into EVE.edf after the waveform files stop
+(the last breaths before mask-off) and counts them in its own indices. In the #363 night, the only event,
+an obstructive apnea, was 19 s past the waveform end.
+
+**Fix:** An event up to 60 s past the session's waveform end now belongs to that session, and the session's
+end moves to it. `ResmedLoader::eventGraceEnd()` stops the grace 1 ms before another of the day's sessions
+starts, and gives none when another session is still running, so no event goes to two sessions. Each
+kept event is written to the debug log (`LoadEVE: ... session end moved to it (#363)`).
+
+**Non-obvious:**
+- Across 1,287 test-card nights, 83 (6.4%) had such an event, all under 60 s past the end (none between
+  60 s and 10 min). On every night checked against STR.edf (78), the device's indices count them.
+- Moving the session's end matters: without it the kept event lies past `Day::last()`, so the flags graph
+  doesn't draw it and `calcAHIGraph` never counts it.
+- With the session ending on the event, the event sits exactly on the Event Flags graph's right edge, under
+  the outline, and is hard to see there. Drawing it one pixel inside didn't help (the row backgrounds stop one
+  pixel short of the border, so a light-blue line on white can't be seen). Padding the graph's range by 0.5%
+  of the day made it visible but was left out; it is visible on the Flow Rate graph and in the event list.
+- The STR mask-off time can't be the limit: it is whole minutes, and the #363 event is 6 s after it.
+- Nights already imported change only when re-imported; the loader version was not bumped.
+
+---
+
 ## 2026-11-04 - Tooltip colors: startup prompts missed, defined three times, no system option (GitLab #371)
 
 **Files:** `oscar/tooltipcolors.cpp`, `tooltipcolors.h` (new), `oscar/main.cpp`, `mainwindow.cpp`,
@@ -7736,3 +7800,76 @@ popups kept drawing in the old font until the graph views were re-created. Save 
 the `AnyStyle` style hint set at startup. A new `ApplyGraphFontPreferences()` assigns the
 fonts in place from the `Fonts_*` preferences; `InitGraphGlobals()` and `Save()` both use it,
 so held pointers stay valid and follow the change.
+
+## 2026-11-06 - Windows: nightly builds lacked Bluetooth; unit tests did not build with MSVC (#374)
+
+**Files:** `Building/Windows/nightly-build.bat`, `buildall-msvc.bat`, `oscar/tests/prs1tests.cpp`,
+`prs1tests.h`, `csvoximetrytests.cpp`, `oscar/daily.h`, `oscar/SleepLib/event.h`, `importcontext.h`,
+`machine_loader.h`, `session.h`, `loader_plugins/prisma_loader.h`, `prismavent_loader.h`,
+`prs1_loader.h`, `vrem_loader.h`; removed `Building/Windows/buildall-515.bat`, `deploy-515.bat`
+
+`nightly-build.bat` still called the MinGW `buildall-qt6.bat`, so nightly builds had no Bluetooth;
+it now calls `buildall-msvc.bat`, which defaults to Qt 6.12.0.
+
+The unit tests had two MSVC-only failures. `"\xFEFF"` in a `QStringLiteral` is a compile error
+(C7744), so it is now `"\uFEFF"`. Six headers used `#define private public` and
+`#define protected public` under `UNITTEST_MODE`, which GCC and Clang tolerate because their name
+mangling ignores access level. MSVC's includes it, so every library or project symbol seen through
+the macros got a different name and the link failed with hundreds of LNK2001 errors. The macros are
+gone. The classes the tests reach into declare `friend class <test class>` under `UNITTEST_MODE`,
+and the PRS1 test helpers became private static members of `PRS1Tests` so that those declarations
+cover them.
+
+Also for MSVC: linker stack set to 2 MB, matching MinGW (MSVC's default is 1 MB); `getCompilerVersion()` reports
+MSVC, whose builds had no "Compiler:" line; GCC-only flags no longer reach `cl` in the `crash` and `memdebug`
+configs (`memdebug` failed with D8021). Removed `WINVER=0x0501`, which targeted Windows XP, and `-ldbghelp`; nothing
+used them. The installer now removes the MinGW runtime DLLs left by earlier installs and requires Windows 10 1809.
+
+## 2026-11-07 - S.Box: sessions with no data folder on the card were missing (GitLab #373)
+
+**Files:** `oscar/SleepLib/loader_plugins/sefam_loader.cpp`, `sefam_loader.h`, `sefamDataParsing.cpp`,
+`sefamDataParsing.h`, `oscar/tests/sefamtests.cpp`, `sefamtests.h` (new), `oscar/oscar.pro`,
+`Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md`
+
+**Symptom:** The first of two sessions in a night didn't appear in OSCAR, though Sefam Analyze showed it.
+Purging the day and importing again gave the same result.
+
+**Root cause:** The card has no usable data for that session: `DATA_256` was absent from a copy of the card, and
+the import log reported `"missing or empty .INI"` for it. The session exists only in the `.RAM` session archive,
+which is where Sefam Analyze gets it. Why the data is missing is not known; a card fault is one possibility.
+
+**Fix:** After reading the session folders, an S.Box import now adds archive sessions that start within the card's
+date range and have no existing session within 10 s. Each gets its settings, events and one-minute pressure and
+total leak, with no flow. Decoding this needed the block's BCD start time (words 1 to 6) and per-minute leak (byte 1).
+
+**Non-obvious:**
+- These are deliberately not summary-only sessions. `Day::summaryOnly()` is true if any one session on a day is,
+  which would downgrade a recorded session sharing the day. Sefam Analyze also shows both kinds as one night.
+- Selection uses start times, not the existing minute-count match, which stops at the first session it cannot
+  place and would then report every older block as having no folder.
+- Older archive sessions, 957 on this card, are not imported: some may already exist from another card's import,
+  and matching them against those has not been designed.
+
+## 2026-11-07 - Purge Range of Days: crash partway through the range on macOS (GitLab #375)
+
+**Files:** `oscar/mainwindow.cpp` (`on_actionPurgeRangeOfDays_triggered()`), `oscar/daily.cpp`, `oscar/daily.h`
+
+**Symptom:** Data > Advanced > Purge Range of Days crashed OSCAR, usually, on macOS 26. After a restart the first
+days of the range were gone and the rest remained. Purging one day at a time always worked.
+
+**Root cause:** The range loop destroys sessions and runs the event loop between days, for the progress dialog and
+Cancel. Daily is not reloaded until the loop ends, so if the viewed day is in the range, `SessionBar` and the graph
+layers still refer to its destroyed sessions, and a repaint during the loop reads them. The single-day purge has no
+event loop between destroying sessions and queuing the reload, so it is not exposed.
+
+A repaint is likely once the progress dialog takes activation: `QWidget::event()` calls `update()` on every visible
+child on `WindowDeactivate` if the palette's Active and Inactive groups differ. Which platforms that applies to, and
+whether it explains the crash always following the third day, was not verified. No crash log was available.
+
+**Fix:** New `Daily::releaseDayData()` clears the session bar and the graph views' day before the loop. The page is
+reloaded at the end as before, and now also on the "no data found" path, which previously needed no reload.
+
+**Non-obvious:**
+- Overview does not need the same treatment. `gSummaryChart::daylist` keeps the purged `Day` objects, but
+  `Profile::unlinkDay()` does not delete them, and purged sessions have been removed from them.
+- The crash was not reproduced and the fix was not run on macOS. Confirmation needs a macOS run.

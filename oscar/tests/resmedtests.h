@@ -20,6 +20,9 @@ private slots:
     void initTestCase();
     void testSessionsToYaml();
     void testGzipNonAsciiPath();
+    void testEveGraceEnd();
+    void testEveEventPastSessionEnd();
+    void testSessionsOverlappedByFiles();
     void cleanupTestCase();
 };
 

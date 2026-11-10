@@ -795,10 +795,15 @@ bool MainWindow::OpenProfile(QString profileName)
         return false;
     }
 
-    if (!p_profile->LastDay(MT_CPAP).isValid() ) { // quick test if new profile or not.
-        // Override default value of clinicalMode if new profile.
-        // Allows permissiveMode (not clinicalMode) to be the default value for existing profiles.
-        p_profile->cpap->setClinicalMode(true);
+    if (!(*p_profile)[STR_PREF_ClinicalModeDefaultSet].toBool()) {
+        if (!p_profile->LastDay(MT_CPAP).isValid() ) { // quick test if new profile or not.
+            // Override default value of clinicalMode if new profile.
+            // Allows permissiveMode (not clinicalMode) to be the default value for existing profiles.
+            p_profile->cpap->setClinicalMode(true);
+        }
+        // Apply the default only once, so a mode the user picks before importing any data
+        // (e.g. Permissive Mode, to turn on Steady Breathing) isn't reset on the next reload.
+        p_profile->Set(STR_PREF_ClinicalModeDefaultSet, true);
     }
     m_clinicalMode = p_profile->cpap->clinicalMode();
 
@@ -2697,6 +2702,10 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
     const QDate viewDate = daily->getDate();
     daily->Unload(viewDate);
 
+    // The loop below runs the event loop for the progress dialog and Cancel, so the main window
+    // can repaint between days. Daily must not be left pointing at sessions destroyed by then.
+    daily->releaseDayData();
+
     QProgressDialog progress(tr("Purging data..."), tr("Cancel"), 0, numDays, this);
     progress.setWindowModality(Qt::WindowModal);
     progress.setMinimumDuration(0);
@@ -2721,6 +2730,7 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
     progress.setValue(numDays);
 
     if (purgedDates.isEmpty()) {
+        daily->LoadDate(viewDate);  // nothing changed, but releaseDayData() emptied the page
         staticQMessageBox::information(this,
             tr("Purge Range of Days"),
             tr("No data was found in the selected date range."),

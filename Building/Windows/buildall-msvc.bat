@@ -6,7 +6,7 @@ setlocal
 ::: have the USB cables but no Bluetooth).
 :::
 ::: Usage: buildall-msvc.bat [qtVersion] [qtPath] [installerSuffix]
-:::     qtVersion  defaults to 6.10.2
+:::     qtVersion  defaults to 6.12.0
 :::     qtPath     defaults to C:\Qt   (the folder that holds <qtVersion>\msvc2022_64)
 :::     installerSuffix is appended to the installer and ZIP names, e.g. -BLE
 :::
@@ -15,7 +15,7 @@ setlocal
 :::     Qt <qtVersion> MSVC 2022 64-bit, with Qt 5 Compatibility, Qt Serial Port and Qt Connectivity
 :::     Git for Windows, Inno Setup 6 (see deploy.bat)
 set qtVersion=%1
-if "%1" == "" set qtVersion=6.10.2
+if "%1" == "" set qtVersion=6.12.0
 set qtPath=%2
 if "%2" == "" set qtPath=C:\Qt
 set suffix=%3

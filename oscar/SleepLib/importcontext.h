@@ -15,6 +15,9 @@
 class ImportContext : public QObject
 {
     Q_OBJECT
+#ifdef UNITTEST_MODE
+    friend class PRS1Tests;
+#endif
 public:
     ImportContext();
     virtual ~ImportContext();

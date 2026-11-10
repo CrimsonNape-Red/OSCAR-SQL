@@ -15,6 +15,8 @@
 #include "SleepLib/machine.h"
 #include "SleepLib/machine_loader.h"
 
+namespace SefamParsing { struct SessionSummary; }
+
 //! Bump when a format change requires reimporting existing SEFAM data.
 const int sefam_data_version = 1;
 
@@ -97,6 +99,19 @@ class SefamLoader : public CPAPLoader
     //! Copy the card to the machine's backup folder, honouring the user preference.
     bool backupData(Machine *mach, const QString &path);
 
+    /*! \brief Fill a session from an archive block alone, for when it has no directory.
+        \param session Empty session to populate.
+        \param summary The block. Its start time must be valid.
+
+        Gives the session its times, settings, events and one-minute pressure and
+        total leak traces. There is no flow, because only a session directory holds
+        it. The session is deliberately not marked summary-only: Day::summaryOnly() is
+        true if any one session on a day is, which would downgrade a recorded session
+        sharing the day, and this session's events are the same archive records a
+        recorded S.Box session gets its events from. */
+    static void populateArchiveSession(Session *session,
+                                       const SefamParsing::SessionSummary &summary);
+
   protected:
     bool rebuild_from_backups = false;
     bool create_backups = true;
@@ -125,9 +140,9 @@ class SefamLoader : public CPAPLoader
         FlowParser::openFlow() apply gain alone and ignore the offset entirely.
         Baking any offset into the stored value keeps graphs and statistics
         in agreement. */
-    void importWaveform(Session *session, const QVector<qint16> &values,
-                        const QVector<bool> &valid, ChannelID chan,
-                        EventDataType gain, int rateMs, qint64 startMs);
+    static void importWaveform(Session *session, const QVector<qint16> &values,
+                               const QVector<bool> &valid, ChannelID chan,
+                               EventDataType gain, int rateMs, qint64 startMs);
 };
 
 #endif  // SEFAM_LOADER_H

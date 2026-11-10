@@ -43,8 +43,11 @@ vendor report for one of them came from *Sefam Analyze*.
 
 ### Matching sessions to archive blocks
 
-A block carries no timestamp, so it is matched to a directory by minute count,
-walking both lists newest-first. The count a directory should have is
+A block does carry its start time (see "Sessions with no directory" below), which
+was not known when this matching was written. It still matches a block to a
+directory by minute count, walking both lists newest-first, and that matching
+gave the correct block on all 621 directories checked against the start times.
+The count a directory should have is
 
 ```
 minutes = floor(recordCount * 10 / 60) + 1
@@ -763,6 +766,52 @@ between block deltas and elapsed time varies by more than an order of magnitude
 between consecutive pairs. Matching therefore rests on order plus duration,
 which is workable but is the weakest link in the whole decode.
 
+**Correction: words 1–6 are the block's start time**, found while investigating
+GitLab #373. They are BCD day, month, year, hour, minute and second. Words 7–8
+are the operating time and words 9–10 the usage time, each as plain hours and
+minutes. The start agrees with the `.INI` on 619 of 621 directories across three
+cards, and the other two differ by 4 s and are the same sessions.
+
+### Sessions with no directory
+
+A block with no directory is a session the device recorded but whose data did not
+reach a readable `DATA_n`. There are two kinds on the card in #373:
+
+- **A slot number used, no data.** `DATA_255` is followed by `DATA_257`, and the
+  block between them has no directory. Why the data is missing is not known.
+- **No slot number used.** Two long sessions on one night fall between consecutive
+  slots. Why is not known either; a card out of the machine would look like this.
+
+The vendor software lists these sessions from the archive. Run on a copy of the
+card, it gives figures matching the block and no flow in its Profile view, and it
+omits the `HD` tag on a night made up only of them.
+
+The loader imports them too, as ordinary sessions, not summary-only ones:
+`Day::summaryOnly()` is true if any one session on a day is, which would downgrade
+a recorded session sharing the day. A session gets its settings, events and
+one-minute pressure and total leak, and has no flow or anything derived from it.
+Its events are as good as a recorded session's, because on this model those come
+from the same archive records.
+
+- **Which blocks:** those starting at or after the card's oldest directory, with no
+  existing session within 10 s. The card in #373 has four. Selection goes by start
+  time, because the minute-count match stops at the first session it cannot place.
+- **Older blocks are not imported:** that card has 957 of them, running back about
+  17 months before its oldest directory. Some may already exist under another card's
+  import, and matching them against those has not been designed. Bringing them in
+  remains possible.
+- **Session ID:** the local start time, exactly what a directory on this model gets.
+- **Usage:** minutes with a mean pressure under 2.0 cmH₂O, the recorded-session
+  threshold, count as blower-off. On 317 recorded sessions from two machines the
+  resulting usage is within about 0.6 minutes on average of the usage worked out from
+  `PRE`, where counting every minute is out by 0.7 and 5.3.
+
+On the night in #373 the imported session gives AHI 0.71 against the vendor's 0.7,
+and the whole night gives AHI 2.30, mean pressure 10.84 and maximum 13.3 against the
+vendor's 2.3, 10.8 and 13.3. OSCAR's derived unintentional leak is 10.1 L/min for
+that session and 9.4 for the recorded session after it, against the vendor's 3. That
+difference comes from OSCAR's own leak calculation and also affects recorded sessions.
+
 ### Per-minute records — 6 bytes
 
 **Every event type is placed to the minute.** Byte 2 is four independent 2-bit
@@ -772,7 +821,7 @@ flag in bit 7.
 | byte | bits | meaning |
 |---|---|---|
 | 0 | all | mean mask pressure ×10 for that minute |
-| 1 | all | continuous, present every minute — unidentified, leak-like |
+| 1 | all | total leak, in the raw units of `LK` (0.6 L/min each) |
 | 2 | 0–1 | obstructive apnoeas this minute (0–3) |
 | 2 | 2–3 | central apnoeas this minute |
 | 2 | 4–5 | obstructive hypopnoeas this minute |
@@ -789,6 +838,7 @@ Evidence, over **every block on both cards — 470 in total, zero mismatches**:
 | byte 3 & 0x0f | sum vs header word 18 | **470/470 exact** |
 | byte 4 & 0x7f | sum vs header word 17 | **470/470 exact** |
 | byte 0 | vs minute means of `PRE` | r = 0.9996 and 0.9988, mean error 0.05 cmH₂O |
+| byte 1 | vs minute means of `LK`, 314 sessions on two machines | median r = 0.87 and 0.96; a session's mean differs by about one raw unit |
 
 Mask bit 7 off byte 3 before summing: reading it raw fails on 105 of 467 blocks
 on card A, which is exactly how this was nearly missed — the first six blocks

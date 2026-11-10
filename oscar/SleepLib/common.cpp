@@ -276,13 +276,15 @@ QString getGraphicsEngine()
 QString getCompilerVersion()
 {
     #ifdef __clang_version__
-        return QString("clang++:%1").arg(__clang_version__);
+        return QString("clang++: %1").arg(__clang_version__);
     #elif defined(__MINGW64__)
-        return QString("MINGW64:%1").arg(__VERSION__);
+        return QString("MINGW64: %1").arg(__VERSION__);
     #elif defined(__MINGW32__)
-        return QString("MINGW32:%1").arg(__VERSION__);
+        return QString("MINGW32: %1").arg(__VERSION__);
     #elif defined (__GNUG__) or defined (__GNUC__)
-        return QString("GNU C++:%1").arg(__VERSION__);
+        return QString("GNU C++: %1").arg(__VERSION__);
+    #elif defined(_MSC_FULL_VER)
+        return QString("MSVC: %1").arg(_MSC_FULL_VER);
     #else
         return QString();
     #endif
