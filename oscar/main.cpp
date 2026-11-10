@@ -953,6 +953,9 @@ int main(int argc, char *argv[]) {
     QGuiApplication::setApplicationDisplayName(getAppName() + " 2");
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     ToolTipColors::captureSystemScheme();  // Qt hides the system's dark mode once Light is forced
+#endif
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    // setColorScheme() is Qt 6.8+; older Qt follows the system scheme
     mainapp.styleHints()->setColorScheme(Qt::ColorScheme::Light);
 #endif
     QStringList args = mainapp.arguments();

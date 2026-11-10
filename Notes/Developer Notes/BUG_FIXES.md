@@ -7873,3 +7873,22 @@ reloaded at the end as before, and now also on the "no data found" path, which p
 - Overview does not need the same treatment. `gSummaryChart::daylist` keeps the purged `Day` objects, but
   `Profile::unlinkDay()` does not delete them, and purged sessions have been removed from them.
 - The crash was not reproduced and the fix was not run on macOS. Confirmation needs a macOS run.
+
+## 2026-11-09 - Build fails with Qt 6.5-6.7: setColorScheme() needs Qt 6.8 (GitLab #378)
+
+**Files:** `oscar/main.cpp`, `oscar/profileselector.cpp` (comment only)
+
+**Symptom:** Building with Qt 6.5, 6.6 or 6.7 stops with an error in `main.cpp`: `QStyleHints` has no member
+`setColorScheme`.
+
+**Root cause:** The call that forces the Light colour scheme was guarded with `QT_VERSION_CHECK(6, 5, 0)`. Qt 6.5
+added only the read-only `colorScheme()`; `setColorScheme()` and `unsetColorScheme()` arrived in Qt 6.8 (listed
+under "New in Qt 6.8" in the Qt documentation).
+
+**Fix:** The `setColorScheme()` call has its own Qt 6.8 guard. `ToolTipColors::captureSystemScheme()`, which only
+reads `colorScheme()`, keeps the 6.5 guard.
+
+**Non-obvious:**
+- Builds on Qt 6.5-6.7 now follow the system scheme instead of forcing Light, as builds on Qt before 6.5 already
+  did. In system dark mode those builds show OSCAR's light-only pages with dark widgets.
+- Not compiled against Qt 6.5-6.7 here (none installed); the Qt 6.12 build is unchanged.

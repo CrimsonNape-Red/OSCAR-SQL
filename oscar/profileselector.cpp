@@ -81,7 +81,7 @@ ProfileSelector::ProfileSelector(QWidget *parent) :
 
     // Force light appearance so the profile selector is legible in system dark mode.
     // QPalette changes are ignored by native Windows style renderers, so use QSS instead.
-    // Qt::setColorScheme() (Qt 6.5+) is unavailable on the minimum supported versions.
+    // QStyleHints::setColorScheme() (Qt 6.8+) is unavailable on the minimum supported versions.
     setAutoFillBackground(true);
     QPalette p;
     p.setColor(QPalette::Window, Qt::white);
