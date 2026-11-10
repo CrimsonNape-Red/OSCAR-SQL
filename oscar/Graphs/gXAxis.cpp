@@ -22,6 +22,7 @@
 #include "Graphs/glcommon.h"
 #include "Graphs/gGraph.h"
 #include "Graphs/gGraphView.h"
+#include "Graphs/graphtheme.h"
 
 #define FIX_FOR_DATE_MISMATCH
 
@@ -109,7 +110,9 @@ void gXAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     bool usepixmap = AppSetting->usePixmapCaching(); // Whether or not to use pixmap caching
 
-    if (!usepixmap || (usepixmap && w.invalidate_xAxisImage)) {
+    // The cached labels are redrawn after a switch between light and dark, too
+    if (!usepixmap || (usepixmap && (w.invalidate_xAxisImage || m_imageDark != GraphTheme::dark()))) {
+        m_imageDark = GraphTheme::dark();
         // Redraw graph xaxis labels and ticks either to pixmap or directly to screen
 
         if (usepixmap) {
@@ -117,7 +120,7 @@ void gXAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
             m_image = QImage(width + 22, height + 4, QImage::Format_ARGB32_Premultiplied);
             m_image.fill(Qt::transparent);
             painter2.begin(&m_image);
-            painter2.setPen(Qt::black);
+            painter2.setPen(GraphTheme::ink(Qt::black));
             painter2.setFont(*defaultfont);
         }
 
@@ -244,7 +247,7 @@ void gXAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
             aligned_start += step;
         }
 
-        painter.setPen(QColor(Qt::black));
+        painter.setPen(GraphTheme::ink(Qt::black));
 
         int num_minor_ticks;
 
@@ -461,7 +464,7 @@ void gXAxisDay::paint(QPainter &painter, gGraph &graph, const QRegion &region)
         lastx = lastx + barw;
         date = date.addDays(1);
     }
-    painter.setPen(QPen(Qt::black,1));
+    painter.setPen(QPen(GraphTheme::ink(Qt::black),1));
     painter.drawLines(lines);
 
 }

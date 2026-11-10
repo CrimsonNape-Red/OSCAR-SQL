@@ -35,6 +35,7 @@ AppWideSetting::AppWideSetting(Preferences *pref) : PrefSettings(pref)
     m_useFusionTheme = initPref(STR_AS_UseFusionTheme, false).toBool();
     initPref(STR_AS_UseNewWelcome, true);
     initPref(STR_AS_WelcomeCardColour, int(WCC_Plain));
+    initPref(STR_AS_ColorScheme, int(CSC_System));
     m_useSystemTooltipColors = initPref(STR_AS_UseSystemTooltipColors, false).toBool();
     m_usePixmapCaching = initPref(STR_AS_UsePixmapCaching, false).toBool();
     m_odt = (OverlayDisplayType)initPref(STR_AS_OverlayType, (int)ODT_Bars).toInt();

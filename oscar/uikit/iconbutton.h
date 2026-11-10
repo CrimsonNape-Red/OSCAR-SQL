@@ -35,6 +35,13 @@ public:
     //! \brief Changes the icon
     void setLineIcon(LineIcon icon);
 
+    /*! \brief Draws no box on hover or press, only a change of icon colour; for buttons that
+        sit in a bar, such as the main tab bar */
+    void setFrameless(bool frameless);
+
+    //! \brief Sets the side of the square button; the icon keeps its size unless the button is too small for it
+    void setSide(int side);
+
     QSize sizeHint() const override;
 
 protected:
@@ -47,6 +54,8 @@ protected:
 private:
     LineIcon m_icon = LineIcon::None;
     bool m_hover = false;
+    bool m_frameless = false;
+    int m_side;                 //!< Side of the button
 };
 
 } // namespace UiKit

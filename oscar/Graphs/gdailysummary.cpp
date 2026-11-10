@@ -13,6 +13,7 @@
 #include "Graphs/gGraph.h"
 #include "Graphs/gGraphView.h"
 #include "SleepLib/profiles.h"
+#include "Graphs/graphtheme.h"
 
 gDailySummary::gDailySummary() : Layer(NoChannel)
 {
@@ -269,6 +270,7 @@ void gDailySummary::paint(QPainter &painter, gGraph &w, const QRegion &region)
     ffont.setBold(true);
     painter.setFont(ffont);
 
+    painter.setPen(GraphTheme::ink(Qt::black));     // on the graph background, not in a box
     painter.drawText(rect3, Qt::AlignCenter, machinfo);
 
     painter.setFont(*defaultfont);
@@ -282,7 +284,7 @@ void gDailySummary::paint(QPainter &painter, gGraph &w, const QRegion &region)
         rect1 = painter.boundingRect(rect1, Qt::AlignTop | Qt::AlignLeft, txt);
         rect1.setWidth(maxwidth);
         rect1.setHeight(rect1.height() * 1.25);
-        painter.setPen(Qt::black);
+        painter.setPen(GraphTheme::ink(Qt::black));
         painter.drawText(rect1, Qt::AlignCenter, txt);
         ypos += rect1.height();
     }
@@ -325,7 +327,7 @@ void gDailySummary::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
 
     QRect flag_outline(column -5, row -5, (flag_value_width + flag_label_width + 20 + 4) + 10, (hpl * vis) + 10);
-    painter.setPen(QPen(Qt::gray, 1));
+    painter.setPen(QPen(GraphTheme::ink(Qt::gray), 1));
     painter.drawRoundedRect(flag_outline, 5, 5);
 
     font.setBold(false);
@@ -383,7 +385,7 @@ void gDailySummary::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
         // Setup the shiny radial gradient
         float len = 360.0 / float(pie_total) * float(data);
-        QColor col = schema::channel[pie_chan[i]].defaultColor();
+        QColor col = GraphTheme::ink(schema::channel[pie_chan[i]].defaultColor());
 
         painter.setPen(QPen(col, 0));
         QRadialGradient gradient(pierect.center(), float(pierect.width()) / 2.0, pierect.center());

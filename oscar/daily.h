@@ -114,6 +114,10 @@ public:
         */
     QDate getDate() { return previous_date; }
 
+    /*! \brief Gives the calendar and the date button light or dark colours to match the colour
+        scheme, and reformats the days shown. Call after a switch between light and dark. */
+    void applyTheme();
+
     /*! \fn UnitsChanged()
         \brief Called by Profile editor when measurement units are changed
         */
@@ -326,6 +330,10 @@ protected:
     virtual void showEvent(QShowEvent *);
 
 private:
+    QString m_calendarStyleSheet;   //!< The calendar's style sheet from the form, in light colours
+    QString m_calButtonStyleSheet;  //!< The date button's style sheet from the form, in light colours
+    //! \brief Sets the calendar's weekend text to the weekday colour for the current mode
+    void applyWeekendFormat();
     double  calculateBMI(double weight_kg, double height_cm);
     void set_JournalZombie(QDate&, int);
     void set_JournalWeightValue(QDate&, double kgs);

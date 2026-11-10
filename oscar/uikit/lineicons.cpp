@@ -247,9 +247,34 @@ QPainterPath clearIcon()
     return p;
 }
 
+//! \brief Crescent moon: a disc with an offset disc cut out of its upper right
+QPainterPath moonIcon()
+{
+    QPainterPath disc;
+    disc.addEllipse(QPointF(12, 12), 8, 8);
+    QPainterPath bite;
+    bite.addEllipse(QPointF(17, 7.5), 7, 7);
+    return disc.subtracted(bite);
+}
+
+//! \brief Sun: a small disc with eight rays
+QPainterPath sunIcon()
+{
+    QPainterPath p;
+    p.addEllipse(QPointF(12, 12), 4, 4);
+    for (int i = 0; i < 8; ++i) {
+        const double a = qDegreesToRadians(45.0 * i);
+        line(p, 12 + 6.5 * std::cos(a), 12 + 6.5 * std::sin(a),
+             12 + 9 * std::cos(a), 12 + 9 * std::sin(a));
+    }
+    return p;
+}
+
 QPainterPath iconPath(LineIcon icon)
 {
     switch (icon) {
+    case LineIcon::Moon: return moonIcon();
+    case LineIcon::Sun: return sunIcon();
     case LineIcon::Clear: return clearIcon();
     case LineIcon::FolderOpen: return folderOpenIcon();
     case LineIcon::Edit: return editIcon();

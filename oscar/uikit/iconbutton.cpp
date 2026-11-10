@@ -37,7 +37,20 @@ IconButton::IconButton(QWidget *parent)
     setCursor(Qt::PointingHandCursor);
     setFocusPolicy(Qt::TabFocus);   // keyboard users get a focus ring; mouse clicks don't leave one
     setAttribute(Qt::WA_Hover);
-    setFixedSize(kSize, kSize);
+    setSide(kSize);
+}
+
+void IconButton::setFrameless(bool frameless)
+{
+    m_frameless = frameless;
+    update();
+}
+
+void IconButton::setSide(int side)
+{
+    m_side = side;
+    setFixedSize(side, side);
+    updateGeometry();
 }
 
 void IconButton::setLineIcon(LineIcon icon)
@@ -48,7 +61,7 @@ void IconButton::setLineIcon(LineIcon icon)
 
 QSize IconButton::sizeHint() const
 {
-    return QSize(kSize, kSize);
+    return QSize(m_side, m_side);
 }
 
 void IconButton::enterEvent(QEnterEvent *event)
@@ -87,7 +100,7 @@ void IconButton::paintEvent(QPaintEvent *)
 
     // Background only on hover or press, so the button stays quiet beside a legend
     QRectF box = QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5);
-    if (pressed || hover) {
+    if ((pressed || hover) && !m_frameless) {
         p.setPen(QPen(Theme::color(hover ? Role::Accent : Role::Line), 1));
         p.setBrush(Theme::color(pressed ? Role::AccentSoft : Role::Surface));
         p.drawRoundedRect(box, Theme::SmallRadius, Theme::SmallRadius);
@@ -98,7 +111,8 @@ void IconButton::paintEvent(QPaintEvent *)
         p.drawRoundedRect(box.adjusted(1.5, 1.5, -1.5, -1.5), Theme::SmallRadius - 1, Theme::SmallRadius - 1);
     }
 
-    const double inset = (kSize - kIconSize) / 2.0;
+    const double iconSide = qMin(double(kIconSize), m_side - 4.0);    // a small button keeps a full-size icon
+    const double inset = (m_side - iconSide) / 2.0;
     QRectF iconRect = QRectF(rect()).adjusted(inset, inset, -inset, -inset);
     if (pressed) iconRect.translate(0, 1);     // the icon sinks a pixel while pressed
     paintLineIcon(p, m_icon, iconRect, Theme::color(hover || pressed ? Role::AccentInk : Role::Ink2));

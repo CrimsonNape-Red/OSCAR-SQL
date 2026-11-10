@@ -10,6 +10,7 @@
 #include <math.h>
 #include "SleepLib/profiles.h"
 #include "gLineOverlay.h"
+#include "graphtheme.h"
 
 gLineOverlayBar::gLineOverlayBar(ChannelID code, QColor color, QString label, FlagType flt)
     : Layer(code), m_flag_color(color), m_label(label), m_flt(flt), m_odt(ODT_TopAndBottom)
@@ -61,7 +62,9 @@ void gLineOverlayBar::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     m_count = 0;
     m_sum = 0;
-    m_flag_color = schema::channel[m_code].defaultColor();
+    // Spans shade an area, like a background; flags and dots are drawn like lines
+    m_flag_color = (m_flt == FT_Span) ? GraphTheme::fill(schema::channel[m_code].defaultColor())
+                                      : GraphTheme::ink(schema::channel[m_code].defaultColor());
 
 
     if (m_flt == FT_Span) {

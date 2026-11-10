@@ -41,6 +41,7 @@
 #include <QScrollBar>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QTabBar>
 #include <QClipboard>
 #include <QStandardPaths>
 #include <QDesktopServices>
@@ -130,6 +131,9 @@
 #include "zip.h"
 #include "speedcheck.h"
 #include "tooltipcolors.h"
+#include "colorscheme.h"
+#include "uikit/iconbutton.h"
+#include "uikit/theme.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,4,0)
 #include <QOpenGLFunctions>
@@ -338,6 +342,7 @@ void MainWindow::SetupGUI(bool batchMode)
     // Start with the new Profile Tab
     ui->tabWidget->setCurrentWidget(profileSelector);   // setting this to daily shows the cube during loading..
     ui->tabWidget->setTabEnabled(1, false);             // this should be the Statistics tab
+    setupColorSchemeButton();
 
     // toolbox is the right sidebar that contain the Navigation, bookmark , and Records tabs.
     // Navigation has offset 0
@@ -458,11 +463,15 @@ void MainWindow::changeEvent(QEvent *event)
     if (event->type() == QEvent::ThemeChange) {
         // Qt has reset the tooltips to the theme's palette. Set their colors again once the
         // change has been handled.
-        QTimer::singleShot(0, this, [] { ToolTipColors::apply(); });
+        QTimer::singleShot(0, this, [this] {
+            ToolTipColors::apply(true);
+            applyPageThemes();
+        });
     }
     if (event->type() == QEvent::ThemeChange || event->type() == QEvent::ApplicationPaletteChange
         || event->type() == QEvent::PaletteChange) {
         applyStatisticsTheme();
+        updateColorSchemeButton();
     }
     QMainWindow::changeEvent(event);
 }
@@ -1785,6 +1794,74 @@ void MainWindow::setStatsHTML(QString html)
 {
     m_statsHtml = html;
     ui->statisticsView->setHtml(StatisticsStyle::screenHtml(m_statsHtml, QGuiApplication::palette()));
+}
+
+QString MainWindow::paletteKey()
+{
+    const QPalette palette = QGuiApplication::palette();
+    return palette.color(QPalette::Window).name() + palette.color(QPalette::Base).name()
+           + palette.color(QPalette::Text).name() + palette.color(QPalette::Highlight).name();
+}
+
+void MainWindow::applyPageThemes()
+{
+    const QString key = paletteKey();
+    if (key == m_pageThemeKey) return;
+    m_pageThemeKey = key;
+    // The redesigned page's components take their colours when they are built
+    if (dynamic_cast<WelcomePage *>(welcome)) {
+        rebuildWelcomePage();
+    }
+    if (daily) {
+        daily->applyTheme();    // calendar and date button
+        // Daily's left panel is HTML with the text colour written in when the day is loaded
+        if (p_profile && daily->getDate().isValid()) {
+            daily->LoadDate(daily->getDate());
+        }
+    }
+}
+
+void MainWindow::setupColorSchemeButton()
+{
+    m_pageThemeKey = paletteKey();      // pages are built in the current colours
+
+    if (!ColorScheme::canSwitchLive()) return;     // Preferences > Appearance only, with a restart
+
+    // QTabWidget caps a corner widget at the tab bar's height and aligns it to the bottom, so
+    // size the button to fit inside the bar. A little space keeps it off the window edge.
+    auto *corner = new QWidget(ui->tabWidget);
+    auto *layout = new QHBoxLayout(corner);
+    layout->setContentsMargins(0, 0, 6, 0);
+    auto *button = new UiKit::IconButton(corner);
+    button->setFrameless(true);
+    button->setSide(qMax(20, ui->tabWidget->tabBar()->sizeHint().height() - 2));
+    layout->addWidget(button, 0, Qt::AlignVCenter);
+    ui->tabWidget->setCornerWidget(corner, Qt::TopRightCorner);
+    corner->show();     // a corner widget set after the tab widget is shown starts hidden
+
+    m_colorSchemeButton = button;
+    connect(button, &QAbstractButton::clicked, this, &MainWindow::toggleColorScheme);
+    updateColorSchemeButton();
+}
+
+void MainWindow::updateColorSchemeButton()
+{
+    auto *button = qobject_cast<UiKit::IconButton *>(m_colorSchemeButton);
+    if (!button) return;
+    const bool dark = Theme::isDark(QGuiApplication::palette());
+    button->setLineIcon(dark ? UiKit::LineIcon::Sun : UiKit::LineIcon::Moon);
+    const QString tip = dark ? tr("Switch to light mode") : tr("Switch to dark mode");
+    button->setToolTip(tip);
+    button->setAccessibleName(tip);
+}
+
+void MainWindow::toggleColorScheme()
+{
+    const bool dark = Theme::isDark(QGuiApplication::palette());
+    AppSetting->setColorScheme(dark ? CSC_Light : CSC_Dark);
+    p_pref->Save();             // keep the choice even if OSCAR doesn't close normally
+    ColorScheme::apply();
+    updateColorSchemeButton();  // also comes with the palette change, but not on every platform
 }
 
 void MainWindow::applyStatisticsTheme()

@@ -56,6 +56,7 @@
 #include "database/database_manager.h"
 #include "database/graph_layouts_repository.h"
 #include "database/profile_repository.h"
+#include "graphtheme.h"
 extern bool openOk;
 
 
@@ -829,7 +830,7 @@ void gGraphView::DrawTextQue(QPainter &painter)
     for (const TextQue & q : m_textque) {
         // can do antialiased text via texture cache fine on mac
         // Just draw the fonts..
-        painter.setPen(QColor(q.color));
+        painter.setPen(GraphTheme::ink(q.color));
         painter.setFont(*q.font);
 
         if (q.angle == 0) {
@@ -858,7 +859,7 @@ void gGraphView::DrawTextQue(QPainter &painter)
     for (const TextQueRect & q : m_textqueRect) {
         // Just draw the fonts..
 
-        painter.setPen(QColor(q.color));
+        painter.setPen(GraphTheme::ink(q.color));
         painter.setFont(*q.font);
 
         if (q.angle == 0) {
@@ -904,7 +905,8 @@ void gGraphView::DrawTextQueCached(QPainter &painter)
         // Generate the pixmap cache "key"
         size = (q.font == defaultfont) ? fonta : (q.font==mediumfont) ? fontb : (q.font == bigfont) ? fontc : q.font->pointSize();
 
-        hstr = z__cacheStr.arg(q.text).arg(q.color.name()).arg(size);
+        const QColor textColor = GraphTheme::ink(q.color);
+        hstr = z__cacheStr.arg(q.text).arg(textColor.name(QColor::HexArgb)).arg(size);
 
         if (!QPixmapCache::find(hstr, &pm)) {
 
@@ -921,7 +923,7 @@ void gGraphView::DrawTextQueCached(QPainter &painter)
 
             QPainter imgpainter(&pm);
 
-            imgpainter.setPen(q.color);
+            imgpainter.setPen(textColor);
             imgpainter.setFont(*q.font);
 
             imgpainter.setRenderHint(QPainter::TextAntialiasing, q.antialias);
@@ -960,7 +962,8 @@ void gGraphView::DrawTextQueCached(QPainter &painter)
 
         size = (q.font == defaultfont) ? fonta : (q.font==mediumfont) ? fontb : (q.font == bigfont) ? fontc : q.font->pointSize();
 
-        hstr = z__cacheStr.arg(q.text).arg(q.color.name()).arg(size);
+        const QColor textColor = GraphTheme::ink(q.color);
+        hstr = z__cacheStr.arg(q.text).arg(textColor.name(QColor::HexArgb)).arg(size);
 
         if (!QPixmapCache::find(hstr, &pm)) {
 
@@ -973,7 +976,7 @@ void gGraphView::DrawTextQueCached(QPainter &painter)
 
             QPainter imgpainter(&pm);
 
-            imgpainter.setPen(q.color);
+            imgpainter.setPen(textColor);
             imgpainter.setFont(*q.font);
             imgpainter.setRenderHint(QPainter::TextAntialiasing, true);
             imgpainter.drawText(QRect(0,0, w, h), q.flags, q.text);
@@ -1319,11 +1322,11 @@ bool gGraphView::renderGraphs(QPainter &painter)
             if ((m_graphs.size() > 1) && m_showsplitter) {
                 // draw the splitter handle
 
-                painter.setPen(QColor(220, 220, 220, 255));
+                painter.setPen(GraphTheme::ink(QColor(220, 220, 220, 255)));
                 painter.drawLine(0, py + h, w, py + h);
-                painter.setPen(QColor(158,158,158,255));
+                painter.setPen(GraphTheme::ink(QColor(158,158,158,255)));
                 painter.drawLine(0, py + h + 1, w, py + h + 1);
-                painter.setPen(QColor(240, 240, 240, 255));
+                painter.setPen(GraphTheme::ink(QColor(240, 240, 240, 255)));
                 painter.drawLine(0, py + h + 2, w, py + h + 2);
 
             }
@@ -1344,8 +1347,8 @@ bool gGraphView::renderGraphs(QPainter &painter)
 
         // Draw a gradient behind pinned graphs
         QLinearGradient linearGrad(QPointF(100, 100), QPointF(width() / 2, 100));
-        linearGrad.setColorAt(0, QColor(216, 216, 255));
-        linearGrad.setColorAt(1, Qt::white);
+        linearGrad.setColorAt(0, GraphTheme::fill(QColor(216, 216, 255)));
+        linearGrad.setColorAt(1, GraphTheme::background());
 
         painter.fillRect(0, 0, width(), pinned_height, QBrush(linearGrad));
     }
@@ -1375,11 +1378,11 @@ bool gGraphView::renderGraphs(QPainter &painter)
 
             if ((m_graphs.size() > 1) && m_showsplitter) {
                 // draw the splitter handle
-                painter.setPen(QColor(220, 220, 220, 255));
+                painter.setPen(GraphTheme::ink(QColor(220, 220, 220, 255)));
                 painter.drawLine(0, py + h, w, py + h);
-                painter.setPen(QColor(128, 128, 128, 255));
+                painter.setPen(GraphTheme::ink(QColor(128, 128, 128, 255)));
                 painter.drawLine(0, py + h + 1, w, py + h + 1);
-                painter.setPen(QColor(190, 190, 190, 255));
+                painter.setPen(GraphTheme::ink(QColor(190, 190, 190, 255)));
                 painter.drawLine(0, py + h + 2, w, py + h + 2);
             }
 
@@ -1452,7 +1455,7 @@ QPixmap gGraphView::renderToRasterPixmap()
     const qreal dpr = devicePixelRatioF();
     QPixmap pixmap((QSizeF(width(), height()) * dpr).toSize());
     pixmap.setDevicePixelRatio(dpr);
-    pixmap.fill(Qt::white);
+    pixmap.fill(GraphTheme::background());
 
     QPainter painter(&pixmap);
     paintView(painter);
@@ -1476,7 +1479,7 @@ bool gGraphView::paintView(QPainter &painter)
 
 
     QRect bgrect(0, 0, width(), height());
-    painter.fillRect(bgrect,QBrush(QColor(255,255,255)));
+    painter.fillRect(bgrect, QBrush(GraphTheme::background()));
 
     bool graphs_drawn = true;
 
@@ -1515,7 +1518,7 @@ bool gGraphView::paintView(QPainter &painter)
         }
 ***/
 
-        QColor col = Qt::black;
+        QColor col = GraphTheme::ink(Qt::black);
         painter.setPen(col);
 
         QRectF rec(0,0,width(),0);

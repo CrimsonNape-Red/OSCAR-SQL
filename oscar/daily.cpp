@@ -10,6 +10,7 @@
 
 #include <QTextCharFormat>
 #include <QPalette>
+#include <QApplication>
 #include <QTimeZone>
 #include <QTextBlock>
 #include <QColorDialog>
@@ -50,6 +51,7 @@
 #include "database/session_repository.h"
 
 #include "Graphs/gLineOverlay.h"
+#include "Graphs/graphtheme.h"
 #include "Graphs/gFlagsLine.h"
 #include "Graphs/gSleepStageChart.h"
 #include "Graphs/gSessionBarLayer.h"
@@ -180,6 +182,9 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     PERF_TIMER_SCOPE("Daily::Daily");
     qDebug() << "Daily::Daily(): Creating new Daily object";
     ui->setupUi(this);
+    m_calendarStyleSheet = ui->calendar->styleSheet();
+    m_calButtonStyleSheet = ui->calButton->styleSheet();
+    applyTheme();
 
     ui->JournalNotesBold->setShortcut(QKeySequence::Bold);
     ui->JournalNotesItalic->setShortcut(QKeySequence::Italic);
@@ -546,10 +551,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     layout->layout();
 
-    QTextCharFormat format = ui->calendar->weekdayTextFormat(Qt::Saturday);
-    format.setForeground(QBrush(COLOR_Black, Qt::SolidPattern));
-    ui->calendar->setWeekdayTextFormat(Qt::Saturday, format);
-    ui->calendar->setWeekdayTextFormat(Qt::Sunday, format);
+    applyWeekendFormat();
 
     Qt::DayOfWeek dow=firstDayOfWeekFromLocale();
 
@@ -791,6 +793,35 @@ void Daily::showSpaceHogs()
     if (AppSetting->showPieChart()) {
         webView->setHtml(getLeftSidebar(true));
     }
+}
+
+void Daily::applyTheme()
+{
+    // The form's style sheets are in light colours. In dark mode the backgrounds are darkened and
+    // the text lightened, as on the graphs; the colours marking each day's data keep their hue.
+    auto withBackgrounds = [](QString sheet) {
+        sheet.replace("background-color: #e0e0e0", "background-color: " + GraphTheme::fill(QColor(0xe0, 0xe0, 0xe0)).name());
+        sheet.replace("background-color: white", "background-color: " + GraphTheme::fill(Qt::white).name());
+        sheet.replace("background: white", "background: " + GraphTheme::fill(Qt::white).name());
+        sheet.replace("color: black", "color: " + GraphTheme::ink(Qt::black).name());
+        sheet.replace("color: #808080", "color: " + GraphTheme::ink(QColor(0x80, 0x80, 0x80)).name());
+        return sheet;
+    };
+    ui->calendar->setStyleSheet(withBackgrounds(m_calendarStyleSheet));
+    ui->calButton->setStyleSheet(withBackgrounds(m_calButtonStyleSheet));
+    applyWeekendFormat();
+    if (p_profile) {    // the days' text colours are set when each day is formatted
+        on_calendar_currentPageChanged(ui->calendar->yearShown(), ui->calendar->monthShown());
+    }
+}
+
+void Daily::applyWeekendFormat()
+{
+    // Weekends in the same colour as weekdays (QCalendarWidget makes them red by default)
+    QTextCharFormat format = ui->calendar->weekdayTextFormat(Qt::Saturday);
+    format.setForeground(QBrush(GraphTheme::ink(COLOR_Black), Qt::SolidPattern));
+    ui->calendar->setWeekdayTextFormat(Qt::Saturday, format);
+    ui->calendar->setWeekdayTextFormat(Qt::Sunday, format);
 }
 
 void Daily::on_calendar_currentPageChanged(int year, int month)
@@ -1131,15 +1162,15 @@ void Daily::UpdateCalendarDay(QDate date)
 
     if (hascpap) {
         if (hasoxi) {
-            charAttr.setForeground(QBrush(COLOR_Red, Qt::SolidPattern)); // CPAP + Oxi
+            charAttr.setForeground(QBrush(GraphTheme::ink(COLOR_Red), Qt::SolidPattern)); // CPAP + Oxi
             legend << (hasOxiData ? tr("red = CPAP and oximetry") : tr("red = CPAP and movement data"));
         } else {
-            charAttr.setForeground(QBrush(COLOR_Blue, Qt::SolidPattern)); // CPAP, no Oxi
+            charAttr.setForeground(QBrush(GraphTheme::ink(COLOR_Blue), Qt::SolidPattern)); // CPAP, no Oxi
             legend << tr("blue = CPAP");
         }
         charAttr.setFontWeight(QFont::Black);        // Make everything a little darker
     } else if (hasoxi) {
-        charAttr.setForeground(QBrush(COLOR_DarkGreen, Qt::SolidPattern)); // Oxi, no CPAP
+        charAttr.setForeground(QBrush(GraphTheme::ink(COLOR_DarkGreen), Qt::SolidPattern)); // Oxi, no CPAP
         charAttr.setFontWeight(QFont::Black);        // Make everything a little darker
         legend << tr("green = oximetry");
     }
@@ -1155,7 +1186,7 @@ void Daily::UpdateCalendarDay(QDate date)
     }
 
     if (hasstage) {
-        charAttr.setBackground(QBrush(COLOR_BlanchedAlmond, Qt::SolidPattern)); // has staging (pale, low-glare tint; #341)
+        charAttr.setBackground(QBrush(GraphTheme::fill(COLOR_BlanchedAlmond), Qt::SolidPattern)); // has staging (pale, low-glare tint; #341)
         legend << tr("shaded background = sleep stages");
     }
 
@@ -1868,8 +1899,8 @@ QString Daily::getStatisticsInfo(Day * day)
             int m = ttia / 60 % 60;
             int s = ttia % 60;
             if (ttia > 0) {
-                html+="<tr><td colspan=3 align='left' bgcolor='white'><b>"+tr("Total time in apnea") +
-                       QString("</b></td><td colspan=2 bgcolor='white'>%1</td></tr>").arg(QString::asprintf("%02i:%02i:%02i",h,m,s));
+                html+="<tr><td colspan=3 align='left'><b>"+tr("Total time in apnea") +
+                       QString("</b></td><td colspan=2>%1</td></tr>").arg(QString::asprintf("%02i:%02i:%02i",h,m,s));
             }
 
         }
@@ -1878,23 +1909,23 @@ QString Daily::getStatisticsInfo(Day * day)
         if (p_profile->cpap->showLeakRedline()) {
             float rlt = day->timeAboveThreshold(CPAP_Leak, p_profile->cpap->leakRedline()) / 60.0;
             float pc = (hours > 0) ? 100.0 / hours * rlt : 0;
-            html+="<tr><td colspan=3 align='left' bgcolor='white'><b>"+tr("Time over leak redline")+
-                    QString("</b></td><td colspan=2 bgcolor='white'>%1%</td></tr>").arg(pc, 0, 'f', 3);
+            html+="<tr><td colspan=3 align='left'><b>"+tr("Time over leak redline")+
+                    QString("</b></td><td colspan=2>%1%</td></tr>").arg(pc, 0, 'f', 3);
         }
         int l = day->sum(CPAP_Ramp);
 
         if (l > 0) {
-            html+="<tr><td colspan=3 align='left' bgcolor='white'>"+tr("Total ramp time")+
-                    QString("</td><td colspan=2 bgcolor='white'>%1:%2:%3</td></tr>").arg(l / 3600, 2, 10, QChar('0')).arg((l / 60) % 60, 2, 10, QChar('0')).arg(l % 60, 2, 10, QChar('0'));
+            html+="<tr><td colspan=3 align='left'>"+tr("Total ramp time")+
+                    QString("</td><td colspan=2>%1:%2:%3</td></tr>").arg(l / 3600, 2, 10, QChar('0')).arg((l / 60) % 60, 2, 10, QChar('0')).arg(l % 60, 2, 10, QChar('0'));
             float v = (hours - (float(l) / 3600.0));
             int q = v * 3600.0;
-            html+="<tr><td colspan=3 align='left' bgcolor='white'>"+tr("Time outside of ramp")+
-                    QString("</td><td colspan=2 bgcolor='white'>%1:%2:%3</td></tr>").arg(q / 3600, 2, 10, QChar('0')).arg((q / 60) % 60, 2, 10, QChar('0')).arg(q % 60, 2, 10, QChar('0'));
+            html+="<tr><td colspan=3 align='left'>"+tr("Time outside of ramp")+
+                    QString("</td><td colspan=2>%1:%2:%3</td></tr>").arg(q / 3600, 2, 10, QChar('0')).arg((q / 60) % 60, 2, 10, QChar('0')).arg(q % 60, 2, 10, QChar('0'));
 
 
             // Not sure if i was trying to be funny, and left on my replication of Devilbiss's bug here...  :P
 
-//            html+="<tr><td colspan=3 align='left' bgcolor='white'>"+tr("AHI excluding ramp")+
+//            html+="<tr><td colspan=3 align='left'>"+tr("AHI excluding ramp")+
         }
 
     }
@@ -2220,14 +2251,15 @@ void Daily::htmlLsbSectionHeader (QString&html , const QString& name,LEFT_SIDEBA
             #endif
             "</td>"
             "<td align=centered;>"
-                "<a href='leftsidebarenable=%3' style='text-decoration:none;color:black'>"
+                "<a href='leftsidebarenable=%3' style='text-decoration:none;color:%4'>"
                    "<b>%1</b></a>"
             "</td>"
             "</table>\n"
             )
             .arg(name)
             .arg(on ? "on" : "off")
-            .arg(checkBox);
+            .arg(checkBox)
+            .arg(QApplication::palette().color(QPalette::Text).name());
 }
 
 QString Daily::getPieChart (float values, Day * day) {
