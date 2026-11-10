@@ -22,6 +22,7 @@ private slots:
     void testGzipNonAsciiPath();
     void testEveGraceEnd();
     void testEveEventPastSessionEnd();
+    void testSessionsOverlappedByFiles();
     void cleanupTestCase();
 };
 

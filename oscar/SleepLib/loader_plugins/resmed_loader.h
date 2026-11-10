@@ -117,6 +117,18 @@ class ResmedLoader : public CPAPLoader
     //! \return The grace end in ms, or \a sessLastMs / 0 when no grace applies
     static qint64 eventGraceEnd(qint64 sessLastMs, const QList<QPair<qint64, qint64>> & otherSessionsMs);
 
+    //! \brief Which of a day's existing sessions are replaced by the files now being imported (#376).
+    //!
+    //! When a day is re-imported because the card shows more sessions than are stored, only
+    //! the stored sessions that a new waveform file overlaps in time are replaced (they may
+    //! have grown since the last import). The others stay: their files may be on another
+    //! card, e.g. when the user swaps SD cards between the halves of a night.
+    //! \param existingMs (first, last) in ms of the day's stored sessions from this device
+    //! \param filesMs    (start, end) in ms of the new waveform files (EVE/CSL excluded)
+    //! \return Indices into \a existingMs of the sessions to replace, in ascending order
+    static QList<int> sessionsOverlappedByFiles(const QList<QPair<qint64, qint64>> & existingMs,
+                                                const QList<QPair<qint64, qint64>> & filesMs);
+
     //! \brief Parse the EVE Event annotation data, and save to Session * sess
     //! This contains all Hypopnea, Obstructive Apnea, Central and Apnea codes
     //! \param graceEndMs Events after the session's end but no later than this are kept too,

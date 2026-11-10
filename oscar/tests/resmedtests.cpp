@@ -159,6 +159,39 @@ void ResmedTests::testEveGraceEnd()
     QCOMPARE(ResmedLoader::eventGraceEnd(0, Spans()), qint64(0));
 }
 
+// ====================================================================================================
+// GitLab #376: re-importing a day purged every stored session, so a session imported from
+// another SD card (cards swapped between the halves of a night) was lost. Only the stored
+// sessions that the new files overlap may be replaced.
+
+void ResmedTests::testSessionsOverlappedByFiles()
+{
+    const qint64 h = 3600000;
+    const qint64 t0 = 1000000000000LL;
+    using Spans = QList<QPair<qint64, qint64>>;
+    using Indices = QList<int>;
+
+    // Card swap: first session stored, the new card holds only a later session -> keep it.
+    QCOMPARE(ResmedLoader::sessionsOverlappedByFiles(Spans{ { t0, t0 + 4*h } },
+                                                     Spans{ { t0 + 5*h, t0 + 7*h } }), Indices());
+
+    // Same card, session grew since the last import -> replace it.
+    QCOMPARE(ResmedLoader::sessionsOverlappedByFiles(Spans{ { t0, t0 + 2*h } },
+                                                     Spans{ { t0, t0 + 4*h } }), Indices{ 0 });
+
+    // Two stored sessions, the new files cover only the second.
+    QCOMPARE(ResmedLoader::sessionsOverlappedByFiles(Spans{ { t0, t0 + 2*h }, { t0 + 3*h, t0 + 4*h } },
+                                                     Spans{ { t0 + 3*h, t0 + 5*h }, { t0 + 6*h, t0 + 7*h } }),
+             Indices{ 1 });
+
+    // A file starting exactly where a stored session ends doesn't overlap it.
+    QCOMPARE(ResmedLoader::sessionsOverlappedByFiles(Spans{ { t0, t0 + 2*h } },
+                                                     Spans{ { t0 + 2*h, t0 + 3*h } }), Indices());
+
+    // No new waveform files -> nothing replaced.
+    QCOMPARE(ResmedLoader::sessionsOverlappedByFiles(Spans{ { t0, t0 + 2*h } }, Spans()), Indices());
+}
+
 /*! \brief Write a minimal ResMed-style EVE.edf holding the given annotations
  *
  * One "EDF Annotations" signal and one data record, as ResMed writes them. Each entry of

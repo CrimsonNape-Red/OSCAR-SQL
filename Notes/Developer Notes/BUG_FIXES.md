@@ -4,6 +4,38 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-09 - ResMed: re-importing the last day drops a session imported from another SD card (GitLab #376)
+
+**Files:** `oscar/SleepLib/loader_plugins/resmed_loader.cpp`, `resmed_loader.h`, `oscar/tests/resmedtests.cpp`,
+`resmedtests.h`
+
+**Symptom:** A user swaps SD cards each time a card is removed. After a two-session night (session 1 on
+card A, imported in the morning; session 2 on card B), importing card B left the day with session 2 only.
+
+**Root cause:** Each import re-reads the last stored day. When `checkSummaryDay()` expects more sessions than
+are stored (max of STR.edf mask-on/off pairs and EDF session groups), it purged every stored session of the
+day and re-imported the day from the files being imported. Card B holds only session 2's files, so session 1
+was not re-created. The purge used `Day::removeSession()`, which leaves the database rows, so session 1
+probably reappeared after a restart while the day's cached summary still reflected session 2 only.
+
+**Fix:** Only the stored sessions that a new waveform file (EVE/CSL excluded) overlaps in time are replaced
+(`ResmedLoader::sessionsOverlappedByFiles()`); the others are kept. Replaced sessions are removed with
+`Session::Destroy()`, which deletes their database rows too.
+
+**Non-obvious:**
+- A session's files are never split between two cards, so a stored session that no new file overlaps came
+  from another card.
+- Matching is by time overlap, not session ID: the ID is the STR mask-on time when a pair contains the file,
+  otherwise the earliest EDF start, so the same session can get a different ID on a second import.
+- An STR pair whose files are on the other card creates nothing: `ResDayTask::run()` skips groups without
+  files, and makes summary-only sessions only on days with no EDF files at all.
+- Not addressed: the count check still decides whether the day is re-imported at all, so a session that grew
+  since the last import (same session count) is not refreshed; that was already the case before. The
+  original #376 report (a day earlier than `LastDay()` is never re-read) needs a debug log. Two different
+  CPAP devices on one day is #377.
+
+---
+
 ## 2026-11-07 - ResMed: events logged just after the waveforms stop are dropped (GitLab #363)
 
 **Files:** `oscar/SleepLib/loader_plugins/resmed_loader.cpp`, `resmed_loader.h`, `oscar/tests/resmedtests.cpp`,

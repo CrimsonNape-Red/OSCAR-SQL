@@ -1017,6 +1017,7 @@ ResMedEDFInfo * fetchSTRandVerify( QString filename, QString serialNumber)
 }
 
 void StoreSettings(Session * sess, STRRecord & R);  // forward
+EDFduration getEDFDuration(const QString & filename);   // forward
 void ResmedLoader::checkSummaryDay( ResMedDay & resday, QDate date, Machine * mach )
 {
     Day * day = p_profile->FindDay(date, MT_CPAP);
@@ -1101,11 +1102,32 @@ void ResmedLoader::checkSummaryDay( ResMedDay & resday, QDate date, Machine * ma
 #endif
                 return;
             }
-            qDebug() << "Maskevent count/2 (modified)" << numPairs << "is greater than the existing MT_CPAP session count" << sessions.length();
-            qDebug().noquote() << "Purging and re-importing" << day->date().toString();
-            for (auto & sess : sessions) {
-                day->removeSession(sess);
-                delete sess;
+            qDebug() << "Expected session count" << expectedSessions << "is greater than the existing MT_CPAP session count" << sessions.length();
+
+            // Replace only the stored sessions that the new files overlap; keep the rest.
+            // A session's files are never split between two cards, so a stored session the
+            // new files don't touch was imported from another card and its files aren't
+            // here: purging it would lose it (#376).
+            QList<QPair<qint64, qint64>> existingMs;
+            for (const auto & sess : sessions)
+                existingMs.append({ sess->first(), sess->last() });
+            QList<QPair<qint64, qint64>> filesMs;
+            for (auto it = resday.files.begin(); it != resday.files.end(); ++it) {
+                EDFType type = lookupEDFType(it.key());
+                if (type == EDF_EVE || type == EDF_CSL)
+                    continue;
+                EDFduration dur = getEDFDuration(it.value());
+                if (dur.start != dur.end)
+                    filesMs.append({ qint64(dur.start) * 1000L, qint64(dur.end) * 1000L });
+            }
+            const QList<int> replaced = sessionsOverlappedByFiles(existingMs, filesMs);
+            qDebug().noquote() << "Re-importing" << date.toString() << "- replacing" << replaced.size()
+                               << "of" << sessions.length() << "stored sessions";
+            // Destroy() deletes the session's database rows as well; Day::removeSession()
+            // would leave them to reappear on the next load.
+            for (int i : replaced) {
+                sessions[i]->Destroy();
+                delete sessions[i];
             }
         }
     }
@@ -3352,6 +3374,23 @@ qint64 ResmedLoader::eventGraceEnd(qint64 sessLastMs, const QList<QPair<qint64, 
         graceEnd = qMin(graceEnd, other.first - 1);
     }
     return graceEnd;
+}
+
+QList<int> ResmedLoader::sessionsOverlappedByFiles(const QList<QPair<qint64, qint64>> & existingMs,
+                                                   const QList<QPair<qint64, qint64>> & filesMs)
+{
+    QList<int> overlapped;
+    for (int i = 0; i < existingMs.size(); ++i) {
+        const auto & sess = existingMs[i];
+        for (const auto & file : filesMs) {
+            // Spans that merely touch (one ends where the other starts) don't overlap
+            if ((file.first < sess.second) && (sess.first < file.second)) {
+                overlapped.append(i);
+                break;
+            }
+        }
+    }
+    return overlapped;
 }
 
 bool ResmedLoader::LoadEVE(Session *sess, const QString & path, qint64 graceEndMs)
