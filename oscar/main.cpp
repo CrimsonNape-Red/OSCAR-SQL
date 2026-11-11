@@ -923,6 +923,13 @@ int main(int argc, char *argv[]) {
         oscarCrashed = true;
     }
     if (oscarCrashed) {
+        // A crash in the launch right after MainWindow switched itself off the Software
+        // engine (because Software could not draw) means OpenGL cannot run here either.
+        // Remember that, or the two engines would take turns failing on every launch.
+        if (settings.value(GFXSoftwareFallbackSetting).toBool()) {
+            settings.setValue(GFXOpenGLUnusableSetting, true);
+            settings.remove(GFXSoftwareFallbackSetting);
+        }
         settings.setValue(GFXEngineSetting, (unsigned int)GFX_Software);
         forcedEngine = "Software Engine forced by previous crash";
         settings.remove(GFXCrashSentinelSetting);
@@ -1213,6 +1220,10 @@ int main(int argc, char *argv[]) {
         qWarning().noquote() << "Insufficient OpenGL support (" + getOpenGLVersionString()
                                 + "); switching to the software graphics engine";
         setCurrentGFXEngine(GFX_Software);
+        // Stops MainWindow switching back to OpenGL if Software cannot draw either (#362).
+        settings.setValue(GFXOpenGLUnusableSetting, true);
+        settings.remove(GFXSoftwareFallbackSetting);
+        settings.sync();
         QMessageBox::warning(nullptr, STR_MessageBox_Warning,
                              QObject::tr("Your graphics hardware does not support the version of OpenGL that OSCAR needs.") + "\n\n" +
                              QObject::tr("OSCAR will restart using a slower but more compatible method of drawing."),

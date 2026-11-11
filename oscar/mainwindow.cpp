@@ -953,6 +953,67 @@ void MainWindow::TestWindowsOpenGL()
     delete gl;
 #endif
 }
+
+bool MainWindow::fallBackIfSoftwareEngineCannotDraw()
+{
+#ifdef BROKEN_OPENGL_BUILD
+    return false;   // no OpenGL to fall back to
+#else
+    QSettings settings;
+    // The engine actually in use: the setting may have been changed since launch.
+    const bool software = QCoreApplication::testAttribute(Qt::AA_UseSoftwareOpenGL);
+
+    if (!windowDrawingFailed()) {
+        // This engine draws here. If it is OpenGL, whatever an earlier launch concluded
+        // about OpenGL (e.g. a driver that was being replaced at the time) no longer holds.
+        if (!software)
+            settings.remove(GFXOpenGLUnusableSetting);
+        settings.remove(GFXSoftwareFallbackSetting);
+        return false;
+    }
+
+    if (!software) {
+        qWarning() << "The OpenGL graphics engine could not draw the main window";
+        return false;
+    }
+
+    if (settings.value(GFXOpenGLUnusableSetting).toBool()) {
+        qWarning() << "The Software graphics engine cannot draw the main window, and OpenGL"
+                      " has already failed on this computer";
+        QMessageBox::warning(this, STR_MessageBox_Warning,
+            tr("OSCAR cannot draw its window with either of its graphics engines on this computer.") + "\n\n" +
+            tr("Please update your graphics driver, then start OSCAR while holding down the Shift key."),
+            QMessageBox::Ok);
+        return false;
+    }
+
+    qWarning() << "The Software graphics engine cannot draw the main window; switching to OpenGL";
+    setCurrentGFXEngine(GFX_OpenGL);
+    settings.setValue(GFXSoftwareFallbackSetting, true);
+    settings.sync();
+
+    // The message box is a separate window without OpenGL content, so it draws even
+    // though the main window cannot.
+    QMessageBox::warning(this, STR_MessageBox_Warning,
+        tr("OSCAR could not draw its window using the software graphics engine.") + "\n\n" +
+        tr("OSCAR will restart using your graphics card's OpenGL driver."),
+        QMessageBox::Ok);
+
+    // Keep the original command line (e.g. --datadir, --profile) except the arguments
+    // the restart adds itself and --legacy, which would select Software again.
+    const QStringList portableArgs = PortableMode::restartArguments();
+    const QStringList original = QCoreApplication::arguments();
+    QStringList extraArgs;
+    for (int i = 1; i < original.size(); i++) {
+        const QString &arg = original.at(i);
+        if (arg == "-p" || arg.compare("--legacy", Qt::CaseInsensitive) == 0 || portableArgs.contains(arg))
+            continue;
+        extraArgs << arg;
+    }
+    restartWithArguments(extraArgs);
+    return true;
+#endif
+}
 #endif
 
 
@@ -970,6 +1031,9 @@ void MainWindow::Startup()
     // is data rather than graphics and must not be blamed on the graphics engine.
     QApplication::processEvents();
     disarmGraphicsCrashSentinel();
+
+    if (fallBackIfSoftwareEngineCannotDraw())
+        return;
 #endif
 
     for (auto & loader : GetLoaders()) {
@@ -2405,6 +2469,14 @@ void MainWindow::reloadProfile()
 
 void MainWindow::RestartApplication(QString cmdline)
 {
+    QStringList extraArgs;
+    if (!cmdline.isEmpty())
+        extraArgs << cmdline;
+    restartWithArguments(extraArgs);
+}
+
+void MainWindow::restartWithArguments(const QStringList &extraArgs)
+{
     qDebug() << "Restarting OSCAR";
 
     // closeEvent() won't fire when we exit via QApplication::exit() + ::exit(0).
@@ -2442,10 +2514,7 @@ void MainWindow::RestartApplication(QString cmdline)
     args << "--args"; // OSCAR binary options after this
     args << "-p"; // -p starts with 1 second delay, to give this process time to save..
     args << PortableMode::restartArguments();
-
-
-
-    if (!cmdline.isEmpty()) { args << cmdline; }
+    args << extraArgs;
 
     if (QProcess::startDetached("/usr/bin/open", args)) {
         QApplication::instance()->exit();
@@ -2464,10 +2533,7 @@ void MainWindow::RestartApplication(QString cmdline)
     QStringList args;
     args << "-p";
     args << PortableMode::restartArguments();
-
-
-    if (!cmdline.isEmpty()) { args << cmdline; }
-
+    args << extraArgs;
 
     if (QProcess::startDetached(apppath, args)) {
         QApplication::instance()->exit();

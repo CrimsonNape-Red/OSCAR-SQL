@@ -36,6 +36,7 @@
 #include <QStandardPaths>
 #include <QMenuBar>
 #include <QDirIterator>
+#include <atomic>
 
 #include "SleepLib/common.h"
 #include "SleepLib/portablemode.h"
@@ -256,6 +257,21 @@ void disarmGraphicsCrashSentinel()
     settings.sync();
 }
 #endif
+
+//! \brief Set by noteGraphicsWarning(); atomic because Qt may warn from any thread.
+static std::atomic<bool> s_windowDrawingFailed { false };
+
+void noteGraphicsWarning(const QString &msg)
+{
+    // Text of the qWarning() in Qt's qbackingstorerhisupport.cpp (checked in Qt 6.10 and 6.12).
+    if (msg.contains(QLatin1String("Failed to create QRhi for QBackingStoreRhiSupport")))
+        s_windowDrawingFailed = true;
+}
+
+bool windowDrawingFailed()
+{
+    return s_windowDrawingFailed;
+}
 
 // Obtains graphic engine as a string
 // This works on Windows.  Don't know about other platforms.

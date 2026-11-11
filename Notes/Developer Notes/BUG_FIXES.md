@@ -4,6 +4,36 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-11 - Windows: all-white main window when the Software graphics engine cannot draw (GitLab #362)
+
+**Files:** `oscar/mainwindow.cpp`, `mainwindow.h` (`Startup()`, `fallBackIfSoftwareEngineCannotDraw()`,
+`restartWithArguments()`), `oscar/main.cpp`, `oscar/logger.cpp`, `oscar/SleepLib/common.cpp`, `common.h`
+
+**Symptom:** Only the title bar showed; the rest of the window stayed white. OSCAR otherwise ran and closed
+normally. Reinstalling did not help, because the graphics engine choice is kept in the registry. Holding Shift
+at launch (which toggles the engine) fixed it. Two reports, both on Intel HD/UHD 630 graphics.
+
+**Root cause:** Both users were on the Software engine (Mesa `opengl32sw.dll`), which on these PCs could not
+create the OpenGL context that draws a window holding a QOpenGLWidget. Qt logs `wglCreateContextAttribsARB()
+failed` and `Failed to create QRhi for QBackingStoreRhiSupport`, and nothing in the window is drawn. Neither
+user chose Software; OSCAR's own one-way switches (crash sentinel, OpenGL < 2.0 check, both from #277) can
+select it, and nothing ever switched back. Which switch fired for these users was not determined.
+
+**Fix:** The log message handler watches for Qt's `Failed to create QRhi for QBackingStoreRhiSupport` warning.
+`Startup()`, once the window has been painted, checks it: on the Software engine OSCAR switches to OpenGL,
+says so, and restarts with its original arguments (minus `--legacy`). If OpenGL is already known to be
+unusable on the PC, it tells the user to update the graphics driver instead of restarting.
+
+**Non-obvious:**
+- A probe cannot detect this. In the reporter's log, OSCAR's startup OpenGL probe created a Software context
+  successfully moments before every window context failed, through the same Qt code path (a dummy window).
+  Qt's warning is the only reliable signal.
+- Loop guards: `OpenGLUnusable` is set by the OpenGL < 2.0 switch, and by a crash in the launch right after a
+  fallback (`SoftwareEngineFallback` still set when the sentinel fires). It is cleared when OpenGL draws.
+  Without them, a PC where neither engine works would switch engines on every launch.
+
+---
+
 ## 2026-11-10 - BMC P5 B20A Plus registered as tested; leak scale and firmware version corrected
 
 **Files:** `oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp` (`Open()`),
