@@ -63,6 +63,12 @@ static const int DEVICE_ORDER[] = { OXI_VIATOM, OXI_EMAY, OXI_CMS50F37, OXI_CMS5
 //! The name given to the last CSV oximeter, offered again next time.
 static const QString PREF_CsvDeviceName = QStringLiteral("CsvOximetryDeviceName");
 
+//! The profile setting that remembers the connection method last chosen for an oximeter type.
+static QString methodPref(int type)
+{
+    return QStringLiteral("OximetryMethod%1").arg(type);
+}
+
 //! Oximeters whose recordings carry their own start time and are downloaded in the
 //! import panel (over Bluetooth, or a Viatom/Wellue cable).
 static bool downloadsInPanel(int type)
@@ -662,7 +668,9 @@ QWidget *OximeterImport::buildMethodPage()
     layout->addWidget(m_deviceHelp);
     layout->addStretch();
 
-    connect(m_methods, &QButtonGroup::idClicked, this, [this]() {
+    connect(m_methods, &QButtonGroup::idClicked, this, [this](int id) {
+        // Remembered at once for this oximeter, so the next import starts on it.
+        (*p_profile)[methodPref(oximeterType())] = id;
         m_serialSyncClock->setVisible(oximeterType() == OXI_CMS50F37 && method() == SerialMethod);
         updateStepBar();
         updateFooter();
@@ -748,9 +756,17 @@ void OximeterImport::refreshMethods()
         break;
     }
 
-    // Keep a usable choice: the cable if it is there, else Bluetooth, else files.
+    // The method last used with this oximeter, if this build and computer still offer it.
+    // (Hidden options are set with setVisible(false); isHidden() works before the page shows.)
+    if (p_profile->contains(methodPref(type))) {
+        QAbstractButton *saved = m_methods->button((*p_profile)[methodPref(type)].toInt());
+        if (saved && !saved->isHidden() && saved->isEnabled()) {
+            saved->setChecked(true);
+        }
+    }
+    // Otherwise keep a usable choice: the cable if it is there, else Bluetooth, else files.
     QAbstractButton *checked = m_methods->checkedButton();
-    if (!checked || !checked->isVisible() || !checked->isEnabled()) {
+    if (!checked || checked->isHidden() || !checked->isEnabled()) {
         QPushButton *pick = emay ? (bleOk ? m_bluetoothOption : m_filesOption)
                           : !viatom ? m_filesOption
                           : cable ? m_usbOption
@@ -758,6 +774,7 @@ void OximeterImport::refreshMethods()
                           : usbOk ? m_usbOption : m_filesOption;
         pick->setChecked(true);
     }
+    m_serialSyncClock->setVisible(type == OXI_CMS50F37 && method() == SerialMethod);
 }
 
 // ----------------------------------------------------------------------------------------

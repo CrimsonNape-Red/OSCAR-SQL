@@ -43,6 +43,8 @@ using namespace ViatomBle;
 
 static const QString PREF_ImportAsFilesArrive = QStringLiteral("ViatomBleImportAsFilesArrive");
 static const QString PREF_SetClock = QStringLiteral("ViatomBleSetClock");
+//! The Bluetooth oximeter last connected to, selected again when a search finds it.
+static const QString PREF_LastDevice = QStringLiteral("ViatomBleLastDevice");
 
 //! A profile setting that defaults to on.
 static bool profileFlag(const QString &key)
@@ -331,9 +333,15 @@ int ViatomImportPanel::bluetoothCount() const
 }
 
 #ifdef OSCAR_HAVE_BLUETOOTH
+//! A device's Bluetooth address, or on macOS (which hides addresses) its UUID.
+static QString bluetoothId(const QBluetoothDeviceInfo &info)
+{
+    return info.address().isNull() ? info.deviceUuid().toString() : info.address().toString();
+}
+
 QString ViatomImportPanel::deviceLabel(const QBluetoothDeviceInfo &info) const
 {
-    const QString id = info.address().isNull() ? info.deviceUuid().toString() : info.address().toString();
+    const QString id = bluetoothId(info);
     QString label = QStringLiteral("%1   %2").arg(info.name().isEmpty() ? tr("(unnamed)") : info.name(), id);
     if (info.rssi() != 0) {
         label += tr("   signal %1 dBm").arg(info.rssi());
@@ -372,6 +380,7 @@ void ViatomImportPanel::startScan()
 void ViatomImportPanel::listUsbPorts()
 {
     m_usbPorts.clear();
+    m_lastUsedSelected = false;
 #ifdef OSCAR_HAVE_BLUETOOTH
     m_devices.clear();
 #endif
@@ -479,6 +488,11 @@ void ViatomImportPanel::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFa
     if (!isSupported(family)) {
         text += tr(": not supported yet");
     }
+    const bool lastUsed = isSupported(family) && p_profile && p_profile->contains(PREF_LastDevice)
+                       && (*p_profile)[PREF_LastDevice].toString() == bluetoothId(info);
+    if (lastUsed) {
+        text += tr("   (used last time)");
+    }
     QListWidgetItem *item = nullptr;
     if (row < 0) {
         // Devices of the brand chosen in the wizard go above the others.
@@ -510,9 +524,13 @@ void ViatomImportPanel::onDeviceFound(const QBluetoothDeviceInfo &info, DeviceFa
         item->setToolTip(tr("This oximeter uses Contec's Bluetooth protocol, which OSCAR can't download "
                             "from yet."));
     }
+    // The oximeter used last time is selected when it turns up, and stays selected.
     QListWidgetItem *current = m_deviceList->currentItem();
-    if (!current || !(current->flags() & Qt::ItemIsEnabled)
-            || (m_preferred.contains(family) && isSupported(family) && row < 0
+    if (lastUsed && !m_lastUsedSelected) {
+        m_deviceList->setCurrentItem(item);
+        m_lastUsedSelected = true;
+    } else if (!current || !(current->flags() & Qt::ItemIsEnabled)
+            || (!m_lastUsedSelected && m_preferred.contains(family) && isSupported(family) && row < 0
                 && m_deviceList->row(current) > m_deviceList->row(item))) {
         if (item->flags() & Qt::ItemIsEnabled) {
             m_deviceList->setCurrentItem(item);
@@ -572,6 +590,7 @@ void ViatomImportPanel::connectToSelected()
     const bool usb = row < m_usbPorts.size();
     m_warning->setVisible(false);   // a new connection starts afresh
     m_info = DeviceInfo();
+    m_connectingId.clear();
     UsbLink *usbLink = nullptr;
 #ifdef OSCAR_HAVE_BLUETOOTH
     Device *device = nullptr;
@@ -591,6 +610,7 @@ void ViatomImportPanel::connectToSelected()
     } else {
 #ifdef OSCAR_HAVE_BLUETOOTH
         info = m_devices.at(row - m_usbPorts.size());
+        m_connectingId = bluetoothId(info);   // remembered once the connection works
         family = m_families.at(row - m_usbPorts.size());
         if (!isSupported(family)) {
             return;
@@ -664,6 +684,9 @@ void ViatomImportPanel::connectToSelected()
 
 void ViatomImportPanel::onDeviceReady()
 {
+    if (!m_connectingId.isEmpty() && p_profile) {
+        (*p_profile)[PREF_LastDevice] = m_connectingId;
+    }
     m_status->setText(tr("Connected. Reading the list of recordings..."));
     m_downloader->requestInfo();
 }
