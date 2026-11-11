@@ -844,13 +844,14 @@ static bool handOverImportsOrWaitForLock(QLockFile &lockFile, const QString &pro
 
 #ifdef Q_OS_WIN
 /*! \class GraphicsCrashSentinelGuard
-    \brief Scope guard around the part of startup that uses OpenGL.
+    \brief Scope guard around a part of startup that uses OpenGL.
 
     Arming on construction and disarming on destruction means every normal exit from
-    main() clears the sentinel, including the early returns taken when the user cancels
-    a startup dialog, while a crash - which never runs destructors - leaves it set for
-    the next launch to find. MainWindow::Startup() disarms it explicitly as soon as the
-    window has been drawn, so a crash later in the session is not blamed on graphics.
+    the guarded scope clears the sentinel, while a crash - which never runs destructors -
+    leaves it set for the next launch to find. main() uses two: one around the OpenGL
+    version probe, and one from SetupGUI() onwards. MainWindow::Startup() disarms the
+    second explicitly as soon as the window has been drawn, so a crash later in the
+    session is not blamed on graphics.
     */
 class GraphicsCrashSentinelGuard
 {
@@ -1182,29 +1183,33 @@ int main(int argc, char *argv[]) {
 
     initializeStrings(); // This must be called AFTER translator is installed, but before mainwindow is setup
 
-#ifdef Q_OS_WIN
-    // Arm the sentinel before the first use of OpenGL. Everything from here until the
-    // window has been drawn touches it: the version probe below, prepOpenGL() in
-    // MainWindow::SetupGUI(), and TestWindowsOpenGL() at the top of Startup(), which
-    // disarms it again. If any of that kills the process, the next launch finds the flag
-    // and reverts to the software engine; without this the crash simply repeats on every
-    // launch, leaving the user no way in (GitLab #277).
-    GraphicsCrashSentinelGuard graphicsCrashSentinel;
-#endif
-
     mainwin = new MainWindow;
+
+    float glVersion = 0;
+    {
+#ifdef Q_OS_WIN
+        // The graphics crash sentinel is armed only around the steps that use OpenGL: this
+        // version probe (its first use is inside makeBuildInfo()), and later the building and
+        // first paint of the main window. If either kills the process, the next launch finds
+        // the flag and reverts to the software engine; without this the crash simply repeats
+        // on every launch, leaving the user no way in (GitLab #277). The dialogs and database
+        // work in between are left out, so a crash or End Task there is not blamed on the
+        // graphics driver (GitLab #362).
+        GraphicsCrashSentinelGuard graphicsProbeSentinel;
+#endif
 
 // Moved buildInfo calls to after translation is available as makeBuildInfo includes tr() calls
 
-    QStringList info = makeBuildInfo(forcedEngine);
-    for (int i = 0; i < info.size(); ++i) {
-        qDebug().noquote() << info.at(i);
-    }
+        QStringList info = makeBuildInfo(forcedEngine);
+        for (int i = 0; i < info.size(); ++i) {
+            qDebug().noquote() << info.at(i);
+        }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////
-    // OpenGL Detection
-    ////////////////////////////////////////////////////////////////////////////////////////////
-    float glVersion = getOpenGLVersion();
+        ////////////////////////////////////////////////////////////////////////////////////////
+        // OpenGL Detection
+        ////////////////////////////////////////////////////////////////////////////////////////
+        glVersion = getOpenGLVersion();
+    }
     qDebug().noquote() << "OpenGL version:" << getOpenGLVersionString();
 
 #ifdef BROKEN_OPENGL_BUILD
@@ -1820,6 +1825,13 @@ int main(int argc, char *argv[]) {
     if (check_updates) {
         mainwin->CheckForUpdates(false);
     }
+#endif
+
+#ifdef Q_OS_WIN
+    // Second graphics step: prepOpenGL() in SetupGUI(), the window's first paint, and
+    // TestWindowsOpenGL() at the top of MainWindow::Startup(), which disarms the sentinel
+    // once the window has been drawn. See graphicsProbeSentinel above.
+    GraphicsCrashSentinelGuard graphicsWindowSentinel;
 #endif
 
     sc.restart(400,"SetupGUI");

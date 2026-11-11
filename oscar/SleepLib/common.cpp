@@ -238,11 +238,11 @@ float getOpenGLVersion()
 }
 
 #ifdef Q_OS_WIN
-// The sentinel marks the window between the first use of OpenGL and the moment OSCAR
-// has drawn its window. A crash anywhere in that window leaves the flag set, because
-// nothing clears it and sync() has already written it to the registry; main() then
-// falls back to the software engine on the next launch. Every normal exit clears it,
-// so a leftover flag always means "the last run died while drawing".
+// The sentinel is set only while startup uses OpenGL: the version probe, and from
+// building the main window until it has been drawn. A crash in either leaves the flag
+// set, because nothing clears it and sync() has already written it to the registry;
+// main() then falls back to the software engine on the next launch. Every normal exit
+// clears it, so a leftover flag always means "the last run died while drawing".
 void armGraphicsCrashSentinel()
 {
     QSettings settings;

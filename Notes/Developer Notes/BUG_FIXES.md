@@ -4,6 +4,26 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-11 - Windows: non-graphics startup failures switched OSCAR to the Software engine (GitLab #362)
+
+**Files:** `oscar/main.cpp`, `oscar/SleepLib/common.cpp`
+
+**Symptom:** OSCAR could switch itself permanently to the Software graphics engine, with the message about a
+graphics-hardware incompatibility, after a startup that died for reasons unrelated to graphics.
+
+**Root cause:** The #277 crash sentinel was armed from `new MainWindow` until `MainWindow::Startup()`. That span
+includes the data-folder dialogs, opening the database, the schema-upgrade prompt, the integrity check after
+an unclean shutdown, and the update check. A crash, End Task, or Windows restart during any of them left the
+sentinel set, and the next launch blamed the graphics driver.
+
+**Fix:** Two guards now cover only the steps that use OpenGL: one around the version probe (first used inside
+`makeBuildInfo()`), and one from `SetupGUI()` until `Startup()` disarms it after the window is drawn.
+
+**Non-obvious:** A launch that exits through the OpenGL < 2.0 check never reaches the second guard, so that
+path cannot leave the sentinel set either.
+
+---
+
 ## 2026-11-11 - Windows: all-white main window when the Software graphics engine cannot draw (GitLab #362)
 
 **Files:** `oscar/mainwindow.cpp`, `mainwindow.h` (`Startup()`, `fallBackIfSoftwareEngineCannotDraw()`,
