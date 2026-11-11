@@ -7922,3 +7922,21 @@ reads `colorScheme()`, keeps the 6.5 guard.
 - Builds on Qt 6.5-6.7 now follow the system scheme instead of forcing Light, as builds on Qt before 6.5 already
   did. In system dark mode those builds show OSCAR's light-only pages with dark widgets.
 - Not compiled against Qt 6.5-6.7 here (none installed); the Qt 6.12 build is unchanged.
+
+## 2026-11-10 - Purge selected day: Daily could repaint destroyed sessions (GitLab #375)
+
+**Files:** `oscar/mainwindow.cpp` (`MainWindow::purgeDay()`)
+
+**Symptom:** None reported. Found while checking the progress dialogs added to the purges in `c0c0012f`.
+
+**Root cause:** The single-day purge now opens a progress dialog. As with the range purge (#375), the activation
+change can repaint the main window. The repaint can come after the sessions are destroyed and before Daily's queued
+reload runs, and Daily still pointed at those sessions.
+
+**Fix:** `purgeDay()` calls `Daily::releaseDayData()` after `Unload()`, and reloads the page when nothing was purged.
+
+**Non-obvious:**
+- The reporter's logs for #375 confirm the range case: in all three crashes, the viewed day was the first day of the
+  range and the log stopped after three purged days. All three range purges that completed had the viewed day outside
+  the range or at its end. All the logs were from 2.1.1, which predates the range fix.
+- The oximetry purge does not need this: the session bar and the graph layers checked hold only CPAP sessions.

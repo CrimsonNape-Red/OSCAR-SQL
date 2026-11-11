@@ -2600,8 +2600,14 @@ void MainWindow::purgeDay(MachineType type)
 
     daily->Unload(date);
 
-    if (!purgeDayData(date, type))
+    // Opening and closing the progress dialog can make the main window repaint, possibly before
+    // the queued reload below runs. Daily must not be left pointing at the destroyed sessions.
+    daily->releaseDayData();
+
+    if (!purgeDayData(date, type)) {
+        daily->LoadDate(date);  // nothing changed, but releaseDayData() emptied the page
         return;
+    }
 
     Day *day = p_profile->GetDay(date, MT_UNKNOWN);
     {
