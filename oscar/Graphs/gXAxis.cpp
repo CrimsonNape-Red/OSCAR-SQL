@@ -447,6 +447,28 @@ void gXAxisDay::paint(QPainter &painter, gGraph &graph, const QRegion &region)
     GetTextExtent(fd, x, y);
     float xpos = (barw / 2.0) - (float(x) / 2.0);
 
+    // The day under the mouse and days with a details popup always get a bold label; ordinary
+    // labels near them are left out so they don't overlap.
+    // Printed graphs show neither: the mouse and the popups belong to the screen
+    const QDate hover = graph.printing() ? QDate() : graph.hoverDate();
+    const QSet<QDate> pins = graph.printing() ? QSet<QDate>() : graph.pinnedDates();
+    m_boldFont = *defaultfont;
+    m_boldFont.setBold(true);
+    const float spacing = x + 8 * graph.printScaleX();
+    QVector<float> markedX;
+    {
+        QDate d = date;
+        for (int i = 0; i < days; i++, d = d.addDays(1)) {
+            if (d == hover || pins.contains(d)) markedX.append(left + i * barw + xpos);
+        }
+    }
+    auto nearMarked = [&markedX, spacing](float px) {
+        for (float m : markedX) {
+            if (qAbs(m - px) < spacing) return true;
+        }
+        return false;
+    };
+
     float lastxpos = 0;
     QVector<QLineF> lines;
     for (int i=0; i < days; i++) {
@@ -456,7 +478,16 @@ void gXAxisDay::paint(QPainter &painter, gGraph &graph, const QRegion &region)
         QString tmpstr = QString(dayFirst?"%2 %1":"%1 %2").arg(months[date.month() - 1]).arg(date.day(), 2, 10, QChar('0'));
 
         float x1 = lastx + xpos;
-        if (x1 > (lastxpos + x + 8*graph.printScaleX())) {
+        const bool pinned = pins.contains(date);
+        if (date == hover || pinned) {
+            graph.renderText(tmpstr, x1, y1 + y + 8, 0, Qt::black, &m_boldFont);
+            if (pinned) {
+                const QColor mark = graph.titleColor().isValid() ? graph.titleColor() : QColor(0x6D, 0x4B, 0xC9);
+                painter.fillRect(QRectF(x1, y1 + y + 11, x, 2), GraphTheme::ink(mark));
+            }
+            lastxpos = x1;
+            lines.append(QLineF(lastx+barw/2, top, lastx+barw/2, top+6));
+        } else if (x1 > (lastxpos + spacing) && !nearMarked(x1)) {
             graph.renderText(tmpstr, x1, y1 + y + 8);
             lastxpos = x1;
             lines.append(QLineF(lastx+barw/2, top, lastx+barw/2, top+6));

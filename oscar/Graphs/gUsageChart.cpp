@@ -24,6 +24,27 @@
 extern MainWindow * mainwin;
 
 
+QList<DetailRow> gUsageChart::detailRows(Day *day, int idx)
+{
+    const auto &slices = slicesFor(day, idx);
+    if (slices.isEmpty()) return {};
+    const double hours = day->hours(m_machtype);
+    const float target = p_profile->cpap->complianceHours();
+    const QString note = hours < target ? QObject::tr("Below the %1-hour compliance target").arg(target)
+                                        : QObject::tr("Meets the %1-hour compliance target").arg(target);
+    return { { durationInHoursToHhMmSs(hours), QObject::tr("Hours of use"), note, slices.first().color, slices.first().height } };
+}
+
+QString gUsageChart::detailHeadline(Day *, int)
+{
+    return QObject::tr("Usage");
+}
+
+QString gUsageChart::detailSubtitle(Day *, int)
+{
+    return QString();
+}
+
 QString gUsageChart::tooltipData(Day * day, int)
 {
     return QObject::tr("\nLength: %1").arg(durationInHoursToHhMmSs(day->hours(m_machtype)));

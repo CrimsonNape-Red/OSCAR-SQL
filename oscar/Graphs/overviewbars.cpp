@@ -1,0 +1,86 @@
+/* Overview bars
+ *
+ * Copyright (c) 2026 The OSCAR Team
+ *
+ * This file is subject to the terms and conditions of the GNU General Public
+ * License. See the file COPYING in the main directory of the source code
+ * for more details. */
+
+#include "overviewbars.h"
+#include "glcommon.h"
+
+#include <QPainter>
+#include <QPainterPath>
+#include <cmath>
+
+namespace OverviewBars {
+
+namespace {
+
+constexpr double kGapShare = 0.15;      //!< Share of a day's slot left as a gap between days
+constexpr double kMinGapSlot = 3.0;     //!< Narrowest slot that still gets a (1 px) gap
+constexpr double kMinShaded = 8.0;      //!< Narrowest bar shaded left to right (as in OSCAR 2.1.0)
+constexpr double kCornerRadius = 3.0;   //!< Radius of the two top corners of a shaded bar
+
+double toLinear(double v) { return v <= 0.04045 ? v / 12.92 : std::pow((v + 0.055) / 1.055, 2.4); }
+
+double luminance(const QColor &c)
+{
+    return 0.2126 * toLinear(c.redF()) + 0.7152 * toLinear(c.greenF()) + 0.0722 * toLinear(c.blueF());
+}
+
+} // namespace
+
+BarGeometry barGeometry(double slotWidth)
+{
+    const double gap = slotWidth >= kMinGapSlot ? qMax(1.0, double(qRound(slotWidth * kGapShare))) : 0.0;
+    const double width = slotWidth - gap;
+    return { gap / 2.0, width, width >= kMinShaded };
+}
+
+QLinearGradient barGradient(const QColor &c, double left, double width)
+{
+    QLinearGradient g(left, 0, left + width, 0);
+    g.setColorAt(0.0, c);
+    g.setColorAt(1.0, brighten(c, 2.0f));
+    return g;
+}
+
+void paintSegment(QPainter &p, const QRectF &r, const QColor &c, bool top, bool shaded)
+{
+    if (r.isEmpty()) return;
+    if (!shaded) {
+        p.fillRect(r, r.width() > 3.0 ? brighten(c, 1.25f) : c);
+        return;
+    }
+    const QBrush brush(barGradient(c, r.left(), r.width()));
+    const double radius = qMin(kCornerRadius, qMin(r.width() / 4.0, r.height() / 2.0));
+    if (!top || radius < 1.0) {
+        p.fillRect(r, brush);
+        return;
+    }
+    // Flat top with slightly rounded corners, straight sides and bottom
+    QPainterPath path;
+    path.moveTo(r.left(), r.bottom());
+    path.lineTo(r.left(), r.top() + radius);
+    path.arcTo(QRectF(r.left(), r.top(), 2 * radius, 2 * radius), 180, -90);
+    path.lineTo(r.right() - radius, r.top());
+    path.arcTo(QRectF(r.right() - 2 * radius, r.top(), 2 * radius, 2 * radius), 90, -90);
+    path.lineTo(r.right(), r.bottom());
+    path.closeSubpath();
+    p.save();
+    p.setRenderHint(QPainter::Antialiasing, true);
+    p.setPen(Qt::NoPen);
+    p.fillPath(path, brush);
+    p.restore();
+}
+
+QColor contrastingText(const QColor &background)
+{
+    const double l = luminance(background);
+    const double onWhite = 1.05 / (l + 0.05);
+    const double onBlack = (l + 0.05) / 0.05;
+    return onWhite >= onBlack ? QColor(Qt::white) : QColor(Qt::black);
+}
+
+} // namespace OverviewBars

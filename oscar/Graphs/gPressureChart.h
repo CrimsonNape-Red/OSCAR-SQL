@@ -45,6 +45,10 @@ public:
 
     virtual int addCalc(ChannelID code, SummaryType type);
 
+    virtual QList<DetailRow> detailRows(Day *day, int idx) override;
+    virtual QString detailHeadline(Day *day, int idx) override;
+    virtual QString detailSubtitle(Day *day, int idx) override;
+
 protected:
     SummaryCalcItem* getCalc(ChannelID code, SummaryType type = ST_SETMAX);
     QString channelRange(ChannelID code, const QString & label);

@@ -465,6 +465,11 @@ void MainWindow::changeEvent(QEvent *event)
         // change has been handled.
         QTimer::singleShot(0, this, [this] {
             ToolTipColors::apply(true);
+            // Restyling resets the menus, labels and buttons to the system's own (smaller) fonts:
+            // Qt reloads them from the platform theme when the application style changes. Put
+            // OSCAR's font back before anything is drawn, or the menu bar shrinks for a moment.
+            setApplicationFont();
+            if (layout()) layout()->activate();     // the menu bar's height, now rather than after a paint
             applyPageThemes();
         });
     }

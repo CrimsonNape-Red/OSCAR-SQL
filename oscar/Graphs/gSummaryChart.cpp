@@ -22,6 +22,7 @@
 
 #include "gYAxis.h"
 #include "graphtheme.h"
+#include "overviewbars.h"
 
 extern MainWindow * mainwin;
 
@@ -141,13 +142,81 @@ bool gSummaryChart::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
 
 bool gSummaryChart::mousePressEvent(QMouseEvent *event, gGraph *graph)
 {
-    Q_UNUSED(event)
     Q_UNUSED(graph)
-    return false;
+    return isDetailsClick(event);
+}
+
+bool gSummaryChart::isDetailsClick(QMouseEvent *event) const
+{
+    return event->button() == Qt::LeftButton
+           && !(event->modifiers() & (Qt::ShiftModifier | Qt::ControlModifier | Qt::AltModifier))
+           && m_detailsRect.contains(event->position());
+}
+
+void gSummaryChart::clearHover(gGraph &graph)
+{
+    // As with a new day under the mouse, the date axis needs one more frame to drop the bold label
+    if (m_lastHoverDate.isValid()) {
+        m_lastHoverDate = QDate();
+        graph.graphView()->timedRedraw(0);
+    }
+}
+
+void gSummaryChart::paintHoverMarker(QPainter &painter, gGraph &graph, const QRectF &plot, const QRectF &slot,
+                                     const QDate &date, int idx, bool hasData)
+{
+    m_detailsRect = QRectF();
+    if (graph.printing()) return;
+    // The date axis is drawn before the bars, so a new day under the mouse needs one more frame
+    // for its label to turn bold
+    if (date != m_lastHoverDate) {
+        m_lastHoverDate = date;
+        graph.graphView()->timedRedraw(0);
+    }
+    graph.setHoverDate(date);
+
+    // A faint line through the middle of the day
+    const double x = std::floor(slot.center().x()) + 0.5;
+    painter.setPen(QPen(GraphTheme::ink(QColor(0, 0, 0, 110)), 1));
+    painter.drawLine(QPointF(x, plot.top()), QPointF(x, plot.bottom()));
+    if (!hasData) return;
+
+    // The Details button at the top of the day
+    const QString text = tr("Details");
+    QFont font = *defaultfont;
+    font.setBold(true);
+    const QFontMetricsF fm(font);
+    const double h = fm.height() + 6;
+    const double w = fm.horizontalAdvance(text) + 30;
+    QRectF r(x - w / 2, plot.top() + 2, w, h);
+    if (r.left() < plot.left()) r.moveLeft(plot.left());
+    if (r.right() > plot.right()) r.moveRight(plot.right());
+
+    painter.save();
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(DetailsAccent);
+    painter.drawRoundedRect(r, h / 2, h / 2);
+    painter.setPen(QPen(Qt::white, 1.6, Qt::SolidLine, Qt::RoundCap));
+    const double ix = r.left() + 10, iy = r.center().y();
+    painter.drawLine(QPointF(ix, iy - 3.5), QPointF(ix + 8, iy - 3.5));
+    painter.drawLine(QPointF(ix, iy), QPointF(ix + 8, iy));
+    painter.drawLine(QPointF(ix, iy + 3.5), QPointF(ix + 5, iy + 3.5));
+    painter.setFont(font);
+    painter.drawText(QRectF(ix + 12, r.top(), r.right() - ix - 12, r.height()), Qt::AlignVCenter | Qt::AlignLeft, text);
+    painter.restore();
+
+    m_detailsRect = r;
+    m_detailsDate = date;
+    m_detailsIdx = idx;
 }
 
 bool gSummaryChart::mouseReleaseEvent(QMouseEvent *event, gGraph *graph)
 {
+    if (isDetailsClick(event)) {
+        emit detailsRequested(this, m_detailsDate, m_detailsIdx);
+        return true;
+    }
     if (!(event->modifiers() & Qt::ShiftModifier)) return false;
 
     #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -326,6 +395,36 @@ void gSummaryChart::afterDraw(QPainter &painter, gGraph &graph, QRectF rect)
 
 }
 
+const QVector<SummaryChartSlice> &gSummaryChart::slicesFor(Day *day, int idx)
+{
+    if (!cache.contains(idx)) {
+        day->OpenSummary();
+        populate(day, idx);
+    }
+    return cache[idx];
+}
+
+QList<DetailRow> gSummaryChart::detailRows(Day *day, int idx)
+{
+    QList<DetailRow> rows;
+    const auto &slices = slicesFor(day, idx);
+    for (int i = slices.size() - 1; i >= 0; --i) {
+        const auto &s = slices.at(i);
+        rows.append({ QString::number(s.value, 'f', 2), s.name.trimmed(), QString(), s.color, s.height });
+    }
+    return rows;
+}
+
+QString gSummaryChart::detailHeadline(Day *, int)
+{
+    return QString();
+}
+
+QString gSummaryChart::detailSubtitle(Day *, int)
+{
+    return QString();
+}
+
 QString gSummaryChart::tooltipData(Day *, int idx)
 {
     QString txt;
@@ -489,12 +588,11 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
 
 //            dc++;
     float barw = float(rect.width()) / float(days);
+    // Each day's slot holds a bar and a gap; wide bars are shaded
+    const OverviewBars::BarGeometry geo = OverviewBars::barGeometry(barw);
+    const bool flatOnly = graph.printing() && AppSetting->monochromePrinting();
+    graph.setHoverDate(QDate());
 
-    QString hl2_text = "";
-
-    QVector<QRectF> outlines;
-    int size = idx_end - idx;
-    outlines.reserve(size * expected_slices);
 
     // Virtual call to setup any custom graph stuff
     preCalc();
@@ -575,9 +673,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
         float x1 = lastx1 + barw;
 
         day->OpenSummary();
-        QRectF hl2_rect;
 
-        bool hlday = false;
         QRectF rec2(lastx1, rect.top(), barw, rect.height());
         if (rec2.contains(mouse)) {
             hl_rect = rec2;
@@ -586,7 +682,6 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
             hl_idx = idx;
 
             hl = true;
-            hlday = true;
         }
 
         auto cit = cache.find(idx);
@@ -604,34 +699,21 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
             QVector<SummaryChartSlice> & list = cit.value();
             customCalc(day, list);
 
-            QLinearGradient gradient(lastx1, 0, lastx1 + barw, 0); //rect.bottom(), barw, rect.bottom());
+            // The topmost part with any height gets the rounded top corners
+            int topSlice = -1;
+            for (int s = 0; s < list.size(); ++s) {
+                if (list.at(s).height > 0) topSlice = s;
+            }
 
-            for (const auto & slice : list) {
+            for (int s = 0; s < list.size(); ++s) {
+                const auto & slice = list.at(s);
                 val = slice.height;
                 y1 = ((lastval-miny) * ymult);
                 y2 = (val * ymult);
-                QColor color = GraphTheme::ink(slice.color);
+                const QColor color = GraphTheme::ink(slice.color);
 
-                QRectF rec = QRectF(lastx1, rect.bottom() - y1, barw, -y2).intersected(rect);
-
-                if (hlday) {
-                    if (rec.contains(mouse.x(), mouse.y())) {
-                        color = Qt::yellow;
-                        hl2_rect = rec;
-                    }
-                }
-
-                if (barw <= 3) {
-                    painter.fillRect(rec, QBrush(color));
-                } else if (barw > 8) {
-                    gradient.setColorAt(0,color);
-                    gradient.setColorAt(1,GraphTheme::barShade(color, 2.0));
-                    painter.fillRect(rec, QBrush(gradient));
-                    outlines.append(rec);
-                } else {
-                    painter.fillRect(rec, GraphTheme::barShade(color, 1.25));
-                    outlines.append(rec);
-                }
+                const QRectF rec = QRectF(lastx1 + geo.offset, rect.bottom() - y1 - y2, geo.width, y2).intersected(rect);
+                OverviewBars::paintSegment(painter, rec, color, s == topSlice, geo.shaded && !flatOnly);
 
                 lastval += val;
             }
@@ -640,25 +722,12 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
         lastx1 = x1;
         it++;
     } while (++idx <= idx_end);
-    painter.setPen(QPen(GraphTheme::ink(Qt::black),1));
-    painter.drawRects(outlines);
 
+    m_detailsRect = QRectF();
     if (hl) {
-        QColor col2(255,0,0,64);
-        painter.fillRect(hl_rect, QBrush(col2));
-
-        QString txt = hl_date.toString(QLocale::system().dateFormat(QLocale::ShortFormat))+" ";
-        if (hl_day) {
-            // grab extra tooltip data
-            txt += tooltipData(hl_day, hl_idx);
-            if (!hl2_text.isEmpty()) {
-                QColor col = Qt::yellow;
-                col.setAlpha(255);
-                txt += hl2_text;
-            }
-        }
-
-        graph.ToolTip(txt, mouse.x() + 20, mouse.y(), TT_AlignBottomLeft);
+        paintHoverMarker(painter, graph, rect, hl_rect, hl_date, hl_idx, hl_day != nullptr);
+    } else {
+        clearHover(graph);
     }
     try {
         afterDraw(painter, graph, rect);

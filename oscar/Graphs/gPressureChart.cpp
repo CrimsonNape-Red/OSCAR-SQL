@@ -212,6 +212,37 @@ void gPressureChart::addObservedIPAPMax(const QString & label)
 }
 
 
+QList<DetailRow> gPressureChart::detailRows(Day *day, int idx)
+{
+    QList<DetailRow> rows;
+    const auto &slices = slicesFor(day, idx);
+    const double percentile = p_profile->general->prefCalcPercentile();
+    for (int i = slices.size() - 1; i >= 0; --i) {
+        const auto &s = slices.at(i);
+        QString note;
+        switch (s.calc ? s.calc->type : ST_CNT) {
+        case ST_SETMIN: note = QObject::tr("Lowest pressure"); break;
+        case ST_SETMAX: note = QObject::tr("Highest pressure"); break;
+        case ST_MID:    note = QObject::tr("The middle of the night's pressures"); break;
+        case ST_90P:    note = QObject::tr("At or below this %1% of the time").arg(percentile); break;
+        default: break;
+        }
+        rows.append({ QString("%1 %2").arg(s.value, 0, 'f', 1).arg(STR_UNIT_CMH2O), s.name.trimmed(), note,
+                      s.color, s.height });
+    }
+    return rows;
+}
+
+QString gPressureChart::detailHeadline(Day *day, int)
+{
+    return day->getCPAPModeStr();
+}
+
+QString gPressureChart::detailSubtitle(Day *day, int)
+{
+    return day->getPressureSettings();
+}
+
 void gPressureChart::populate(Day * day, int idx)
 {
     CPAPMode mode =  (CPAPMode)(int)qRound(day->settings_wavg(CPAP_Mode));
