@@ -3282,12 +3282,12 @@ Follows high contrast themes, and dark mode if it was on when OSCAR started.</st
                     </widget>
                    </item>
                    <item>
-                    <widget class="QCheckBox" name="useNewWelcome">
+                    <widget class="QCheckBox" name="useNewPages">
                      <property name="toolTip">
-                      <string>Show the redesigned Welcome page. Untick to go back to the original page.</string>
+                      <string>Show the redesigned Welcome and Overview pages. Untick to go back to the original pages.</string>
                      </property>
                      <property name="text">
-                      <string>Use the new Welcome page</string>
+                      <string>Use the redesigned pages</string>
                      </property>
                     </widget>
                    </item>

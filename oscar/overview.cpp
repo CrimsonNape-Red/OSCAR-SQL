@@ -132,6 +132,8 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     // Create the GraphView Object
     ///////////////////////////////////////////////////////////////////////////////
     GraphView = new gGraphView(ui->graphArea, m_shared, this);
+    // The redesigned page draws its graphs as cards; the original page keeps the 2.1 look
+    GraphView->setLook(AppSetting->useNewPages() ? GraphLook::Card : GraphLook::Classic);
     GraphView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     GraphView->setEmptyText(STR_Empty_NoData);

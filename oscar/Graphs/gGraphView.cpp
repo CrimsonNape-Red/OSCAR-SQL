@@ -523,6 +523,7 @@ void gGraphView::popoutGraph()
         //////// End resize dock to hold new widget
 
         gGraphView * gv = new gGraphView(newDockWidget, this);
+        gv->setLook(m_look);    // a popped-out graph keeps the look of the page it came from
         newDockWidget->setWidget(gv);
         gv->setMouseTracking(true);
         gv->setDay(this->day());

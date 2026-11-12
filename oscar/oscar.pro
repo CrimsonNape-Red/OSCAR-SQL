@@ -578,6 +578,7 @@ HEADERS  += \
     Graphs/gGraphView.h \
     Graphs/graphtheme.h \
     Graphs/overviewbars.h \
+    Graphs/graphlook.h \
     Graphs/glcommon.h \
     Graphs/gLineChart.h \
     Graphs/gLineOverlay.h \

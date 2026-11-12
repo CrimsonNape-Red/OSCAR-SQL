@@ -43,6 +43,7 @@
 #endif
 #include <Graphs/gGraph.h>
 #include <Graphs/glcommon.h>
+#include <Graphs/graphlook.h>
 #include <SleepLib/day.h>
 
 
@@ -355,6 +356,15 @@ class gGraphView
 
     //! \brief Add gGraph g to this gGraphView, in the requested graph-linkage group
     void addGraph(gGraph *g, short group = 0);
+
+    //! \brief Sets how this view frames its graphs. Set it before graphs are added.
+    void setLook(GraphLook look) { m_look = look; }
+
+    //! \brief How this view frames its graphs (Classic unless set otherwise)
+    GraphLook look() const { return m_look; }
+
+    //! \brief True when graphs are drawn as outlined cards with a header
+    bool cardLook() const { return m_look == GraphLook::Card; }
 
     //! \brief The width of the vertical text Title area for all graphs
     static const int titleWidth = 30;
@@ -748,6 +758,7 @@ class gGraphView
     QWidget * caller;
 
     bool m_showAuthorMessage;
+    GraphLook m_look = GraphLook::Classic;  //!< How graphs are framed (see setLook())
 
   signals:
     void updateCurrentTime(double);

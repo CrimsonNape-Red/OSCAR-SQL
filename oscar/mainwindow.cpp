@@ -2029,7 +2029,7 @@ void MainWindow::on_action_Advanced_Graph_Order_triggered()
 
 WelcomePageBase *MainWindow::createWelcomePage()
 {
-    if (AppSetting->useNewWelcome()) {
+    if (AppSetting->useNewPages()) {
         return new WelcomePage(ui->tabWidget);
     }
     return new Welcome(ui->tabWidget);
@@ -2053,6 +2053,26 @@ void MainWindow::rebuildWelcomePage()
     welcome->refreshPage();
 }
 
+void MainWindow::rebuildOverviewPage()
+{
+    if (!overview || !daily) return;
+    int index = ui->tabWidget->indexOf(overview);
+    if (index < 0) return;
+    const bool wasCurrent = (ui->tabWidget->currentWidget() == overview);
+
+    // Remove the old page from the tab first so the tab widget never shows a deleted page.
+    // Deleting it saves its graph layout, which the new page then loads.
+    ui->tabWidget->removeTab(index);
+    delete overview;
+
+    overview = new Overview(ui->tabWidget, daily->graphView());
+    ui->tabWidget->insertTab(index, overview, STR_TR_Overview);
+    if (wasCurrent) {
+        ui->tabWidget->setCurrentWidget(overview);
+    }
+    overview->ReloadGraphs();
+}
+
 void MainWindow::on_action_Preferences_triggered()
 {
     if (!p_profile) {
@@ -2063,7 +2083,7 @@ void MainWindow::on_action_Preferences_triggered()
     PreferencesDialog pd(this, p_profile);
     prefdialog = &pd;
 
-    const bool oldNewWelcome = AppSetting->useNewWelcome();
+    const bool oldNewPages = AppSetting->useNewPages();
     const WelcomeCardColour oldCardColour = AppSetting->welcomeCardColour();
 
     if (pd.exec() == PreferencesDialog::Accepted) {
@@ -2071,9 +2091,12 @@ void MainWindow::on_action_Preferences_triggered()
 
         setApplicationFont();
 
-        if (welcome && (oldNewWelcome != AppSetting->useNewWelcome()
-                        || oldCardColour != AppSetting->welcomeCardColour())) {
+        const bool pagesChanged = (oldNewPages != AppSetting->useNewPages());
+        if (welcome && (pagesChanged || oldCardColour != AppSetting->welcomeCardColour())) {
             rebuildWelcomePage();
+        }
+        if (pagesChanged) {
+            rebuildOverviewPage();
         }
 
 

@@ -534,6 +534,9 @@ private:
     //! \brief Replaces the Welcome tab's page after the Preferences choice changes
     void rebuildWelcomePage();
 
+    //! \brief Replaces the Overview tab with a new one, after the old/new pages setting changes
+    void rebuildOverviewPage();
+
     Ui::MainWindow *ui;
     Daily *daily;
     Overview *overview;

@@ -272,9 +272,9 @@ Apnea return none.
   widgets into the bar; the date edits show only for Custom).
 
 - [ ] Step 1: Build the bar: a segmented strip of buttons "1 week", "2 weeks", "1 month",
-  "2 months", "3 months", "6 months", "1 year", "Everything", "Custom…" mapped to `rangeCombo`
-  indices 0–7 and, for Custom, the Snapshot index (custom range starting from the dates on
-  screen); the dates and "N nights"; a reset-view icon button; then, right-aligned, the adopted
+  "2 months", "3 months", "6 months", "1 year", "Everything", "Custom…", "Snapshot" mapped
+  one-to-one to `rangeCombo` indices 0–9, so Custom keeps its saved dates and Snapshot sets the
+  custom range to the dates on screen, exactly as the combo does today; the dates and "N nights"; a reset-view icon button; then, right-aligned, the adopted
   graphs combo (it keeps its "N of M Graphs" text), a layout icon button and a help button.
   Styled with `Theme`; restyles on palette change; wraps to two rows when narrow.
 - [ ] Step 2: `Overview` (Card look): hide `ui->frame`, put the toolbar at the top of the page

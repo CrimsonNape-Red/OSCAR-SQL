@@ -81,10 +81,11 @@ Each item is a call made while drawing the mockup, to be settled in review.
 3. **Statistics shown.** Proposed, as in the team mockup: average AHI (or RDI), average usage,
    nights at or above the compliance hours, median leak, 95% pressure. Built from the Welcome
    page's metric card and its better/worse/neutral colours. A fixed set in the first version.
-4. **Range buttons.** Proposed: all of today's ranges with shorter labels (1 week, 2 weeks,
-   1 month, 2 months, 3 months, 6 months, 1 year, Everything, Custom). Custom shows the start and
-   end date fields and starts from the dates on screen, which is what Snapshot does today, so
-   Snapshot is not a separate button. The "reset view to the selected range" button stays.
+4. **Range buttons.** All of today's ranges with shorter labels (1 week, 2 weeks, 1 month,
+   2 months, 3 months, 6 months, 1 year, Everything, Custom, Snapshot). Custom shows the start
+   and end date fields and goes back to the dates last saved for it (confirmed: Custom must keep
+   the saved dates). Snapshot stays a separate button and, as today, sets the custom range to the
+   dates on screen. The "reset view to the selected range" button stays.
 5. **Graph header.** Proposed: title, unit, then the summary text each graph already draws
    ("2 low usage, 0 no usage, out of 30 days"), then the dotted-line names, then the menu
    button. Dragging the header re-orders; double-click still pins.

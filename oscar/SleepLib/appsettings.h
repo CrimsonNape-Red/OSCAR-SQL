@@ -188,8 +188,9 @@ public:
   inline bool graphTooltips() const { return m_graphTooltips; }
   //! \brief Whether to use the Fusion theme instead of the platform-native theme
   inline bool useFusionTheme() const { return m_useFusionTheme; }
-  //! \brief Whether to show the redesigned Welcome page instead of the original one
-  bool useNewWelcome() const { return getPref(STR_AS_UseNewWelcome).toBool(); }
+  //! \brief Whether to show the redesigned pages (Welcome, Overview) instead of the original ones.
+  //!        Stored under the Welcome page's original key so that earlier choices carry over.
+  bool useNewPages() const { return getPref(STR_AS_UseNewWelcome).toBool(); }
   //! \brief How the redesigned Welcome page colours its metric cards
   WelcomeCardColour welcomeCardColour() const {
       return WelcomeCardColour(getPref(STR_AS_WelcomeCardColour).toInt());
@@ -278,8 +279,8 @@ public:
   void setGraphTooltips(bool b) { setPref(STR_AS_GraphTooltips, m_graphTooltips=b); }
   //! \brief Sets whether to use the Fusion theme instead of the platform-native theme
   void setUseFusionTheme(bool b) { setPref(STR_AS_UseFusionTheme, m_useFusionTheme=b); }
-  //! \brief Sets whether to show the redesigned Welcome page
-  void setUseNewWelcome(bool b) { setPref(STR_AS_UseNewWelcome, b); }
+  //! \brief Sets whether to show the redesigned pages (Welcome, Overview)
+  void setUseNewPages(bool b) { setPref(STR_AS_UseNewWelcome, b); }
   //! \brief Sets how the redesigned Welcome page colours its metric cards
   void setWelcomeCardColour(WelcomeCardColour c) { setPref(STR_AS_WelcomeCardColour, int(c)); }
   //! \brief Sets whether the application is light, dark, or follows the operating system
