@@ -571,7 +571,8 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
         idx_end = ite.value();
     }
 
-    QPoint mouse = graph.graphView()->currentMousePos();
+    // Nothing is under the mouse on a printed page
+    QPoint mouse = graph.printing() ? QPoint(-1, -1) : graph.graphView()->currentMousePos();
 
     nousedays = 0;
     totaldays = 0;
@@ -588,10 +589,15 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
 
 //            dc++;
     float barw = float(rect.width()) / float(days);
-    // Each day's slot holds a bar and a gap; wide bars are shaded
-    const OverviewBars::BarGeometry geo = OverviewBars::barGeometry(barw);
+    // The original (2.1) look has touching, outlined bars, a yellow and red hover highlight and a
+    // numbers tooltip. The card look has a gap beside each bar, a hover line and a Details button.
+    const bool classic = !graph.graphView()->cardLook();
+    const OverviewBars::BarGeometry geo = classic ? OverviewBars::classicBarGeometry(barw)
+                                                  : OverviewBars::barGeometry(barw);
     const bool flatOnly = graph.printing() && AppSetting->monochromePrinting();
     graph.setHoverDate(QDate());
+    QVector<QRectF> outlines;       // classic look only
+    if (classic) outlines.reserve((idx_end - idx) * expected_slices);
 
 
     // Virtual call to setup any custom graph stuff
@@ -674,6 +680,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
 
         day->OpenSummary();
 
+        bool hlday = false;
         QRectF rec2(lastx1, rect.top(), barw, rect.height());
         if (rec2.contains(mouse)) {
             hl_rect = rec2;
@@ -682,6 +689,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
             hl_idx = idx;
 
             hl = true;
+            hlday = true;
         }
 
         auto cit = cache.find(idx);
@@ -710,10 +718,17 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
                 val = slice.height;
                 y1 = ((lastval-miny) * ymult);
                 y2 = (val * ymult);
-                const QColor color = GraphTheme::ink(slice.color);
+                QColor color = GraphTheme::ink(slice.color);
 
                 const QRectF rec = QRectF(lastx1 + geo.offset, rect.bottom() - y1 - y2, geo.width, y2).intersected(rect);
-                OverviewBars::paintSegment(painter, rec, color, s == topSlice, geo.shaded && !flatOnly);
+                if (classic) {
+                    // The part of the bar under the mouse turns yellow
+                    if (hlday && rec.contains(mouse.x(), mouse.y())) color = Qt::yellow;
+                    OverviewBars::paintClassicSegment(painter, rec, color, barw);
+                    if (barw > 3) outlines.append(rec);
+                } else {
+                    OverviewBars::paintSegment(painter, rec, color, s == topSlice, geo.shaded && !flatOnly);
+                }
 
                 lastval += val;
             }
@@ -724,7 +739,17 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     } while (++idx <= idx_end);
 
     m_detailsRect = QRectF();
-    if (hl) {
+    if (classic) {
+        painter.setPen(QPen(GraphTheme::ink(Qt::black), 1));
+        painter.drawRects(outlines);
+        if (hl) {
+            // The day under the mouse is washed red and its numbers shown in a tooltip
+            painter.fillRect(hl_rect, QBrush(QColor(255, 0, 0, 64)));
+            QString txt = hl_date.toString(QLocale::system().dateFormat(QLocale::ShortFormat)) + " ";
+            if (hl_day) txt += tooltipData(hl_day, hl_idx);
+            graph.ToolTip(txt, mouse.x() + 20, mouse.y(), TT_AlignBottomLeft);
+        }
+    } else if (hl) {
         paintHoverMarker(painter, graph, rect, hl_rect, hl_date, hl_idx, hl_day != nullptr);
     } else {
         clearHover(graph);

@@ -51,6 +51,11 @@ number of days immediately before; the comparison is left off when there is no e
   for now.
 - A popped-out graph has the same design and abilities. Its menu has Close in place of Pop out.
 
+**One figure, one calculation.** A dotted line and the statistics box for the same quantity show
+the same number, recalculated over the dates visible in the graphs (for example the 95% pressure
+across all those nights). Never an average of nightly averages or of nightly percentiles, which is
+too hard to interpret.
+
 **Date axis.** The page has one shared date axis, fixed below the graphs; the graphs no longer
 each draw their own. All graphs move through time together, so one axis is enough, and it saves
 height on screen and in screenshots posted to forums. A popped-out graph draws its own date axis.
@@ -70,8 +75,7 @@ Each item is a call made while drawing the mockup, to be settled in review.
    Median and Min for most channels (no Min for AHI, RDI, Snore and Flow Limitation), plus the
    upper threshold on Leak and thresholds on Pulse and SpO2. Proposed mapping:
    - Graphs of a channel Daily also graphs (Pressure, Leak, AHI and the other per-channel
-     graphs): the same list, with each line at the figure for the dates shown, which is the
-     figure the graph's summary text already reports.
+     graphs): the same list, with each line at the figure recalculated over the dates shown.
    - Usage: Daily has no such graph. Average hours of use is a valid line here (confirmed).
      Proposed as well: the profile's compliance hours.
    - Session Times (bars interrupted by mask-off time) and Total Time in Apnea: no lines.

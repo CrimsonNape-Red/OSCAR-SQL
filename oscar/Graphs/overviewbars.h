@@ -50,6 +50,19 @@ QLinearGradient barGradient(const QColor &c, double left, double width);
            \a c when the bar is more than 3 pixels wide (as in OSCAR 2.1.0) */
 void paintSegment(QPainter &p, const QRectF &r, const QColor &c, bool top, bool shaded);
 
+/*! \brief Places a bar the way OSCAR 2.1 did: it fills the whole slot, so bars touch
+
+    \a shaded is true once the slot is wider than 8 pixels. */
+BarGeometry classicBarGeometry(double slotWidth);
+
+/*! \brief Draws one part of a bar as OSCAR 2.1 did, with a square top
+
+    Bars wider than 8 pixels are shaded from \a c at the left to GraphTheme::barShade(c, 2.0) at
+    the right; bars of more than 3 pixels are a plain fill of barShade(c, 1.25); narrower bars are
+    filled with \a c.
+    \param barWidth The width of the whole bar (the day's slot), which picks the fill */
+void paintClassicSegment(QPainter &p, const QRectF &r, const QColor &c, double barWidth);
+
 //! \brief White or black, whichever reads better on \a background
 QColor contrastingText(const QColor &background);
 

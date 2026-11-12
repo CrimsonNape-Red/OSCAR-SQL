@@ -355,10 +355,10 @@ class gGraph : public QObject
     //! \brief The days that have a details popup open
     const QSet<QDate> &pinnedDates() const { return m_pinnedDates; }
 
-    /*! \brief Draws the title as a strip of colour \a color (light-mode colour; translated for
-        dark mode when drawn). An invalid colour keeps the plain rotated title. */
+    /*! \brief Sets the colour that stands for this graph (a light-mode colour). It is not drawn on
+        the graph itself; the graph's Details popups use it for their header. */
     void setTitleColor(const QColor &color) { m_titleColor = color; }
-    //! \brief The title strip's colour, or an invalid colour for a plain title
+    //! \brief The colour that stands for this graph, or an invalid colour if none was set
     const QColor &titleColor() const { return m_titleColor; }
 
     void mouseDoubleClickYAxis(QMouseEvent *event);
@@ -427,7 +427,7 @@ class gGraph : public QObject
     bool m_pinned;
     QDate m_hoverDate;              //!< Day under the mouse (Overview), invalid if none
     QSet<QDate> m_pinnedDates;      //!< Days with a details popup open (Overview)
-    QColor m_titleColor;            //!< Title strip colour; invalid for a plain title
+    QColor m_titleColor;            //!< The colour that stands for this graph (its Details popups use it)
     //! \brief Cached font for vertical title; shrunk when title is too long for the graph height
     QFont m_titleFont;
     ZoomyScaling m_zoomY;

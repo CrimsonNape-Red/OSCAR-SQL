@@ -8,6 +8,7 @@
 
 #include "overviewbars.h"
 #include "glcommon.h"
+#include "graphtheme.h"
 
 #include <QPainter>
 #include <QPainterPath>
@@ -36,6 +37,26 @@ BarGeometry barGeometry(double slotWidth)
     const double gap = slotWidth >= kMinGapSlot ? qMax(1.0, double(qRound(slotWidth * kGapShare))) : 0.0;
     const double width = slotWidth - gap;
     return { gap / 2.0, width, width >= kMinShaded };
+}
+
+BarGeometry classicBarGeometry(double slotWidth)
+{
+    return { 0.0, slotWidth, slotWidth > kMinShaded };
+}
+
+void paintClassicSegment(QPainter &p, const QRectF &r, const QColor &c, double barWidth)
+{
+    if (r.isEmpty()) return;
+    if (barWidth <= 3.0) {
+        p.fillRect(r, c);
+    } else if (barWidth > kMinShaded) {
+        QLinearGradient g(r.left(), 0, r.left() + barWidth, 0);
+        g.setColorAt(0.0, c);
+        g.setColorAt(1.0, GraphTheme::barShade(c, 2.0f));
+        p.fillRect(r, QBrush(g));
+    } else {
+        p.fillRect(r, GraphTheme::barShade(c, 1.25f));
+    }
 }
 
 QLinearGradient barGradient(const QColor &c, double left, double width)

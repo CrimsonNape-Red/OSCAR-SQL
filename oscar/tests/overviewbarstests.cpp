@@ -95,3 +95,30 @@ void OverviewBarsTests::testContrastingText()
     QCOMPARE(contrastingText(QColor(Qt::black)), QColor(Qt::white));
     QCOMPARE(contrastingText(QColor("#6D4BC9")), QColor(Qt::white));
 }
+
+void OverviewBarsTests::testClassicGeometryHasNoGap()
+{
+    // The original (2.1) look: bars touch, and are shaded once wider than 8 pixels
+    const BarGeometry wide = classicBarGeometry(84);
+    QCOMPARE(wide.offset, 0.0);
+    QCOMPARE(wide.width, 84.0);
+    QVERIFY(wide.shaded);
+    const BarGeometry narrow = classicBarGeometry(6);
+    QCOMPARE(narrow.width, 6.0);
+    QVERIFY(!narrow.shaded);
+}
+
+void OverviewBarsTests::testClassicSegmentSquareTop()
+{
+    QImage img(40, 40, QImage::Format_ARGB32);
+    img.fill(Qt::transparent);
+    {
+        QPainter p(&img);
+        paintClassicSegment(p, QRectF(0, 0, 40, 40), QColor(0x40, 0x80, 0xff), 40);
+    }
+    QVERIFY(qAlpha(img.pixel(0, 0)) > 128);     // square corners, no rounding
+    QVERIFY(qAlpha(img.pixel(39, 0)) > 128);
+    // The slice colour at the left edge, brightening to the right
+    QVERIFY(qAbs(qRed(img.pixel(0, 20)) - 0x40) <= 3);
+    QVERIFY(qRed(img.pixel(39, 20)) > 0x70);
+}

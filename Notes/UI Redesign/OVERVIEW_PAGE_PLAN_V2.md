@@ -204,9 +204,11 @@ Reference for the 2.1 behaviour: `git show f4f133fb:oscar/Graphs/gSummaryChart.c
 
 Which lines (spec, Proposed 1): a chart whose channel Daily graphs offers Daily's set for that
 channel (`gLineChart::SetDay`'s rules: Max; percentile and middle; Min except AHI, RDI, Snore,
-Flow Limitation; upper threshold on Leak; thresholds on Pulse and SpO2), each at the figure the
-chart's summary text reports (`calc.min`, `calc.mid()`, percentile calc's `mid()`, `calc.max`),
-with label and colour from `schema::channel[code].calc[type]` and default from its `enabled`.
+Flow Limitation; upper threshold on Leak; thresholds on Pulse and SpO2), each recalculated over
+the visible dates with the profile's range functions (`calcMin`, `calcPercentile(code, 0.5)` or
+`calcWavg` per the middle-calculation preference, `calcPercentile(code, prefCalcPercentile)`,
+`calcMax`), the same calls the statistics row uses, so a line and its box agree; never an
+average of nightly figures. With label and colour from `schema::channel[code].calc[type]` and default from its `enabled`.
 AHI: Max, percentile and middle of the nightly index. Usage: the middle value labelled as the
 profile's middle calculation (Median / Average) and "Compliance" at
 `p_profile->cpap->complianceHours()`, the latter on by default. Session Times and Total Time in

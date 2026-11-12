@@ -22,7 +22,6 @@
 #include "Graphs/layer.h"
 #include "SleepLib/profiles.h"
 #include "Graphs/graphtheme.h"
-#include "Graphs/overviewbars.h"
 
 extern MainWindow *mainwin;
 
@@ -381,21 +380,7 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         y = yh;
         title_x = float(yh);
 
-        if (m_titleColor.isValid()) {
-            // A coloured strip with the title across it, drawn here rather than through the text
-            // queue, whose dark-mode translation would recolour the white or black text
-            const QColor strip = GraphTheme::ink(m_titleColor);
-            const QRectF r(marginLeft(), originY, graphView()->titleWidth * printScaleX(), height);
-            painter.fillRect(r, strip);
-            painter.save();
-            painter.setPen(OverviewBars::contrastingText(strip));
-            painter.translate(r.center());
-            painter.rotate(-90);
-            painter.drawText(QRectF(-height / 2.0, -r.width() / 2.0, height, r.width()), Qt::AlignCenter, txt);
-            painter.restore();
-        } else {
-            graphView()->AddTextQue(txt, marginLeft() + title_x + 8*printScaleX(), originY + height / 2 - y / 2, 90, Qt::black, &m_titleFont);
-        }
+        graphView()->AddTextQue(txt, marginLeft() + title_x + 8*printScaleX(), originY + height / 2 - y / 2, 90, Qt::black, &m_titleFont);
 
         left += graphView()->titleWidth*printScaleX();
     } else { left = 0; }

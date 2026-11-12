@@ -21,5 +21,7 @@ private slots:
     void testPlainFillLighterAboveThreePixels();
     void testTopIsFlatWithRoundedCorners();
     void testContrastingText();
+    void testClassicGeometryHasNoGap();
+    void testClassicSegmentSquareTop();
 };
 DECLARE_TEST(OverviewBarsTests)
