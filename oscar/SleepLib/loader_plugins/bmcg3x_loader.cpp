@@ -167,6 +167,9 @@ int BmcG3xLoader::Open(const QString& dirpath)
     QString backupPath = mach->getBackupPath();
     if (QDir::cleanPath(dirpath) == QDir::cleanPath(backupPath)) {
         qDebug() << "BmcG3xLoader::Open: input is the backup directory, skipping backup creation";
+    } else if (!p_profile->session->backupCardData()) {
+        // User turned off "Create SD Card Backups during Import"; leave any existing backup as is.
+        qDebug() << "BmcG3xLoader::Open: SD card backups disabled in preferences, skipping backup creation";
     } else {
         emit updateMessage(QObject::tr("Creating data backup..."));
         QCoreApplication::processEvents();

@@ -4,6 +4,24 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-11 - BMC loaders ignored the "Create SD Card Backups during Import" preference (GitLab #381)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmc_loader.cpp`, `bmcg3x_loader.cpp`
+
+**Symptom:** Importing a BMC or BMC G3X card always copied the card into the device's backup folder, even with
+the backup option turned off in Preferences.
+
+**Root cause:** `BmcLoader::Open()` and `BmcG3xLoader::Open()` skipped the backup only when the import folder
+was the backup folder itself; neither checked `backupCardData()`.
+
+**Fix:** Both now skip the backup step when `p_profile->session->backupCardData()` is false.
+
+**Non-obvious:** With the option off, an existing backup is left untouched rather than cleared. The
+wipe-and-replace of the backup folder when the option is on was kept: BMC data files are fixed-name ring
+buffers, so merging an older backup with a newer card would mix inconsistent files.
+
+---
+
 ## 2026-11-11 - Windows: non-graphics startup failures switched OSCAR to the Software engine (GitLab #362)
 
 **Files:** `oscar/main.cpp`, `oscar/SleepLib/common.cpp`
