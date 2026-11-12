@@ -27,6 +27,7 @@
 #include "SleepLib/importcontext.h"
 #include "prisma_loader.h"
 #include "SleepLib/session.h"
+#include "SleepLib/profiles.h"
 #include "SleepLib/calcs.h"
 #include "rawdata.h"
 
@@ -717,12 +718,13 @@ int PrismaLoader::Open(const QString & path)
     emit updateMessage(QObject::tr("Getting Ready..."));
     QCoreApplication::processEvents();
 
-    emit updateMessage(QObject::tr("Backing Up Files..."));
-    QCoreApplication::processEvents();
-
-
+    // Back up the card unless the user turned off "Create SD Card Backups during Import"
+    // or we are rebuilding from the backup folder itself.
     QString backupPath = context()->GetBackupPath() + selectedPath.section("/", -1);
-    if (QDir::cleanPath(selectedPath).compare(QDir::cleanPath(backupPath)) != 0) {
+    if (QDir::cleanPath(selectedPath).compare(QDir::cleanPath(backupPath)) != 0
+            && p_profile->session->backupCardData()) {
+        emit updateMessage(QObject::tr("Backing Up Files..."));
+        QCoreApplication::processEvents();
         copyPath(selectedPath, backupPath);
     }
 

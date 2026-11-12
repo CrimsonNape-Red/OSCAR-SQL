@@ -4,6 +4,26 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-11 - IntelliPAP DV5, Prisma and vREM loaders ignored the SD card backup preference (GitLab #382)
+
+**Files:** `oscar/SleepLib/loader_plugins/intellipap_loader.cpp`, `prisma_loader.cpp`, `vrem_loader.cpp`
+
+**Symptom:** Same as #381: these loaders copied the card into the backup folder on every import, even with
+"Create SD Card Backups during Import" turned off.
+
+**Root cause:** Each skipped the backup only when the import folder was the backup folder itself; none checked
+`backupCardData()`.
+
+**Fix:** Each now skips the backup step when `p_profile->session->backupCardData()` is false. Prisma shows its
+"Backing Up Files..." message only when it actually backs up, and vREM no longer creates the backup folder
+when the option is off. The IntelliPAP DV6 path (`backup6()`) already honored the option.
+
+**Non-obvious:** PRS1 has the same fault but was deliberately left unchanged. ResMed still always backs up
+`STR.edf` and `STR_Backup` on purpose: its settings history is read from the STR files in the backup folder,
+and ResMed cards prune old data.
+
+---
+
 ## 2026-11-11 - BMC loaders ignored the "Create SD Card Backups during Import" preference (GitLab #381)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmc_loader.cpp`, `bmcg3x_loader.cpp`
