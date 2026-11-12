@@ -4,6 +4,23 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-12 - ResMed AirCurve VAuto in BiLevel-S showed the VAuto PS setting (GitLab #383)
+
+**Files:** `oscar/SleepLib/loader_plugins/resmed_loader.cpp`
+
+**Symptom:** Device Settings for an AirCurve 10 VAuto running BiLevel-S listed a Pressure Support value,
+although BiLevel-S has only fixed IPAP and EPAP settings.
+
+**Root cause:** AirCurve STR files record every mode's settings each day. `CPAP_PS` maps to `S.VA.PS`
+(the VAuto PS setting), which was read regardless of mode and stored in the `MODE_BILEVEL_FIXED` branch of
+`StoreSettings`. The value can differ from IPAP − EPAP when the VAuto PS was not changed with the BiLevel
+pressures.
+
+**Fix:** `S.VA.PS` is no longer read when the mode is `MODE_BILEVEL_FIXED`. Existing sessions keep the old
+value until the data is re-imported; the loader version was not changed.
+
+---
+
 ## 2026-11-11 - IntelliPAP DV5, Prisma and vREM loaders ignored the SD card backup preference (GitLab #382)
 
 **Files:** `oscar/SleepLib/loader_plugins/intellipap_loader.cpp`, `prisma_loader.cpp`, `vrem_loader.cpp`
