@@ -115,7 +115,7 @@ void gUsageChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
 
         QString txt = QObject::tr("%1 low usage, %2 no usage, out of %3 days (%4% compliant.) Length: %5 / %6 / %7").
                 arg(incompdays).arg(nousedays).arg(totaldays).arg(comp,0,'f',1).arg(durationInHoursToHhMmSs(calc.min)).arg(durationInHoursToHhMmSs(mid)).arg(durationInHoursToHhMmSs(calc.max));
-        graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
+        if (!graph.headerSummary(txt)) graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
     }
 }
 

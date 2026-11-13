@@ -126,7 +126,7 @@ void gPressureChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
     }
 
     QString txt = presstr.join(" ");
-    graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
+    if (!graph.headerSummary(txt)) graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
 
 }
 

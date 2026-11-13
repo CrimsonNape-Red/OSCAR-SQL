@@ -149,7 +149,7 @@ void gAHIChart::afterDraw(QPainter & /*painter */, gGraph &graph, QRectF rect)
         if (!skip) txtlist.append(QString("%1 %2 / %3 / %4").arg(chan.label()).arg(calcitems[i].min, 0, 'f', 2).arg(mid, 0, 'f', 2).arg(calcitems[i].max, 0, 'f', 2));
     }
     QString txt = txtlist.join(", ");
-    graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
+    if (!graph.headerSummary(txt)) graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
 }
 
 void gAHIChart::populate(Day *day, int idx)

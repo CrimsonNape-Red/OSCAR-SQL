@@ -44,6 +44,7 @@
 #include <Graphs/gGraph.h>
 #include <Graphs/glcommon.h>
 #include <Graphs/graphlook.h>
+#include <Graphs/graphcard.h>
 #include <SleepLib/day.h>
 
 
@@ -371,6 +372,25 @@ class gGraphView
 
     //! \brief The splitter is drawn inside this gap
     static const int graphSpacer = 4;
+
+    //! \brief Width of the column at the left of each graph: the rotated title, or a card's padding
+    int titleW() const { return cardLook() ? GraphCard::Padding : titleWidth; }
+
+    //! \brief Space between one graph and the next
+    int graphGap() const { return cardLook() ? GraphCard::Gap : graphSpacer; }
+
+    /*! \brief True when a point is on a graph's title: where a drag re-orders graphs, a
+        double-click pins and a right-click opens the graph's menu
+
+        Classic: the column at the left (\a x within titleWidth + \a slack). Card: the header
+        band along the top (\a yInGraph, measured from the graph's top edge). */
+    bool onTitle(int x, int yInGraph, int slack = 0) const {
+        return cardLook() ? yInGraph < GraphCard::TopPadding + GraphCard::HeaderHeight
+                          : x < titleWidth + slack;
+    }
+
+    //! \brief The colour behind the graphs: the page colour between cards, else the graph background
+    QColor viewBackground() const;
 
     bool contains(QString name) {
         for (int i=0; i<m_graphs.size(); ++i) {

@@ -384,6 +384,7 @@ void gSummaryChart::afterDraw(QPainter &painter, gGraph &graph, QRectF rect)
         str = QObject::tr("%1 (%2 day): ").arg(chan.fullname()).arg(totaldays);
     }
     str += " "+strlist.join(", ");
+    if (graph.headerSummary(str)) return;
 
     QRectF rec(rect.left(), rect.top(), 0,0);
     painter.setFont(*defaultfont);

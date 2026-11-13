@@ -22,6 +22,8 @@
 #include "Graphs/layer.h"
 #include "SleepLib/profiles.h"
 #include "Graphs/graphtheme.h"
+#include "Graphs/graphcard.h"
+#include "uikit/theme.h"
 
 extern MainWindow *mainwin;
 
@@ -339,6 +341,18 @@ void gGraph::renderText(QString text, QRectF rect, quint32 flags, float angle, Q
 }
 
 
+bool gGraph::headerSummary(const QString &text)
+{
+    if (!m_cardPainted) return false;
+    const QFontMetrics fm(*defaultfont);
+    const QString shown = GraphCard::elideSummary(text, [&fm](const QString &s) { return fm.horizontalAdvance(s); },
+                                                  m_headerText.width());
+    if (!shown.isEmpty()) {
+        renderText(shown, QRectF(m_headerText), Qt::AlignLeft | Qt::AlignVCenter, 0, QColor(90, 90, 90));
+    }
+    return true;
+}
+
 void gGraph::paint(QPainter &painter, const QRegion &region)
 {
     m_rect = region.boundingRect();
@@ -359,7 +373,48 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
     //int x;
     int y;
 
-    if (m_showTitle) {
+    // Card look: an outlined card with the title in a header along the top, instead of a
+    // rotated title in a column at the left. Printed pages keep the Classic layout.
+    const bool card = m_graphview->cardLook() && !printing();
+    const int cardTop = GraphCard::TopPadding + GraphCard::HeaderHeight;
+    const int cardBottom = GraphCard::Padding / 2;
+    m_cardPainted = card;
+    m_headerText = QRect();
+
+    if (card) {
+        painter.save();
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.setPen(QPen(Theme::color(Theme::Role::Line), 1));
+        painter.setBrush(GraphTheme::background());
+        painter.drawRoundedRect(QRectF(m_rect).adjusted(0.5, 0.5, -0.5, -0.5), GraphCard::Radius, GraphCard::Radius);
+
+        const QRect header = GraphCard::headerRect(m_rect);
+        int x = header.left() + (isPinned() ? 14 : 0);      // the pin icon sits at the far left
+
+        QFont titleFont = *defaultfont;
+        titleFont.setBold(true);
+        painter.setFont(titleFont);
+        painter.setPen(GraphTheme::ink(Qt::black));
+        painter.drawText(QRect(x, header.top(), header.right() - x, header.height()), Qt::AlignLeft | Qt::AlignVCenter, title());
+        x += QFontMetrics(titleFont).horizontalAdvance(title()) + 8;
+
+        const QString unitText = GraphCard::headerUnits(title(), units());
+        if (!unitText.isEmpty()) {
+            painter.setFont(*defaultfont);
+            painter.setPen(GraphTheme::ink(QColor(120, 120, 120)));
+            painter.drawText(QRect(x, header.top(), header.right() - x, header.height()), Qt::AlignLeft | Qt::AlignVCenter, unitText);
+            x += QFontMetrics(*defaultfont).horizontalAdvance(unitText) + 8;
+        }
+        painter.restore();
+
+        x += 8;
+        m_headerText = QRect(x, header.top(), GraphCard::menuButtonRect(m_rect).left() - 8 - x, header.height());
+
+        left += GraphCard::Padding;
+        right += GraphCard::Padding;
+        top = cardTop;
+        bottom += cardBottom;
+    } else if (m_showTitle) {
         int title_x, yh;
 
         // Start with mediumfont; shrink if the title (rotated 90°) is taller than the graph.
@@ -458,6 +513,10 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
 
     bottom = marginBottom() * printScaleY();
     top = marginTop();
+    if (card) {
+        top = cardTop;
+        bottom += cardBottom;
+    }
 
     for (const auto & layer : m_layers) {
         if (!layer->visible()) { continue; }
@@ -1147,7 +1206,7 @@ void gGraph::wheelEvent(QWheelEvent *event)
         return;
     }
 
-    int x = wheelEventPos( event).x() - m_graphview->titleWidth; //(left+m_marginleft);
+    int x = wheelEventPos( event).x() - m_graphview->titleW(); //(left+m_marginleft);
 
     // A standard mouse notch is 120 units and zooms one step, exactly as before.
     // Trackpads and high-resolution wheels send many smaller deltas; accumulate

@@ -105,7 +105,7 @@ void gSessionTimesChart::afterDraw(QPainter & /*painter */, gGraph &graph, QRect
             .arg(calc1.min, 0, 'f', 2).arg(mid1, 0, 'f', 2).arg(calc1.max, 0, 'f', 2)
             .arg(durationInHoursToHhMmSs(calc.min)).arg(durationInHoursToHhMmSs(mid)).arg(durationInHoursToHhMmSs(calc.max))
             .arg(durationInHoursToHhMmSs(calc2.min)).arg(durationInHoursToHhMmSs(midlongest)).arg(durationInHoursToHhMmSs(calc2.max));
-    graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
+    if (!graph.headerSummary(txt)) graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
 }
 
 QList<DetailRow> gSessionTimesChart::detailRows(Day *, int idx)

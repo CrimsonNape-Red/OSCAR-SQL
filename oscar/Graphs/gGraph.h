@@ -358,6 +358,15 @@ class gGraph : public QObject
     /*! \brief Sets the colour that stands for this graph (a light-mode colour). It is not drawn on
         the graph itself; the graph's Details popups use it for their header. */
     void setTitleColor(const QColor &color) { m_titleColor = color; }
+
+    /*! \brief Card look: the free part of the header, between the title and the menu button,
+        where layers put their summary text. Set by paint(); empty in the Classic look. */
+    QRect headerTextRect() const { return m_headerText; }
+
+    /*! \brief Card look: shows \a text in the header, cut short with an ellipsis if it doesn't
+        fit, and returns true. Returns false in the Classic look, where the caller draws the
+        text above the plot as before. */
+    bool headerSummary(const QString &text);
     //! \brief The colour that stands for this graph, or an invalid colour if none was set
     const QColor &titleColor() const { return m_titleColor; }
 
@@ -433,6 +442,8 @@ class gGraph : public QObject
     ZoomyScaling m_zoomY;
     bool m_block_select;
     QRect m_rect;
+    QRect m_headerText;             //!< See headerTextRect()
+    bool m_cardPainted = false;     //!< The last paint() drew this graph as a card
     int m_defaultLayerMinHeight;
 
     qint64 m_selectedDuration;
