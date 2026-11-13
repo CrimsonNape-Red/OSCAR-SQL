@@ -4,6 +4,141 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-12 - ResMed AirCurve VAuto in BiLevel-S showed the VAuto PS setting (GitLab #383)
+
+**Files:** `oscar/SleepLib/loader_plugins/resmed_loader.cpp`
+
+**Symptom:** Device Settings for an AirCurve 10 VAuto running BiLevel-S listed a Pressure Support value,
+although BiLevel-S has only fixed IPAP and EPAP settings.
+
+**Root cause:** AirCurve STR files record every mode's settings each day. `CPAP_PS` maps to `S.VA.PS`
+(the VAuto PS setting), which was read regardless of mode and stored in the `MODE_BILEVEL_FIXED` branch of
+`StoreSettings`. The value can differ from IPAP − EPAP when the VAuto PS was not changed with the BiLevel
+pressures.
+
+**Fix:** `S.VA.PS` is no longer read when the mode is `MODE_BILEVEL_FIXED`. Existing sessions keep the old
+value until the data is re-imported; the loader version was not changed.
+
+---
+
+## 2026-11-11 - IntelliPAP DV5, Prisma and vREM loaders ignored the SD card backup preference (GitLab #382)
+
+**Files:** `oscar/SleepLib/loader_plugins/intellipap_loader.cpp`, `prisma_loader.cpp`, `vrem_loader.cpp`
+
+**Symptom:** Same as #381: these loaders copied the card into the backup folder on every import, even with
+"Create SD Card Backups during Import" turned off.
+
+**Root cause:** Each skipped the backup only when the import folder was the backup folder itself; none checked
+`backupCardData()`.
+
+**Fix:** Each now skips the backup step when `p_profile->session->backupCardData()` is false. Prisma shows its
+"Backing Up Files..." message only when it actually backs up, and vREM no longer creates the backup folder
+when the option is off. The IntelliPAP DV6 path (`backup6()`) already honored the option.
+
+**Non-obvious:** PRS1 has the same fault but was deliberately left unchanged. ResMed still always backs up
+`STR.edf` and `STR_Backup` on purpose: its settings history is read from the STR files in the backup folder,
+and ResMed cards prune old data.
+
+---
+
+## 2026-11-11 - BMC loaders ignored the "Create SD Card Backups during Import" preference (GitLab #381)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmc_loader.cpp`, `bmcg3x_loader.cpp`
+
+**Symptom:** Importing a BMC or BMC G3X card always copied the card into the device's backup folder, even with
+the backup option turned off in Preferences.
+
+**Root cause:** `BmcLoader::Open()` and `BmcG3xLoader::Open()` skipped the backup only when the import folder
+was the backup folder itself; neither checked `backupCardData()`.
+
+**Fix:** Both now skip the backup step when `p_profile->session->backupCardData()` is false.
+
+**Non-obvious:** With the option off, an existing backup is left untouched rather than cleared. The
+wipe-and-replace of the backup folder when the option is on was kept: BMC data files are fixed-name ring
+buffers, so merging an older backup with a newer card would mix inconsistent files.
+
+---
+
+## 2026-11-11 - Windows: non-graphics startup failures switched OSCAR to the Software engine (GitLab #362)
+
+**Files:** `oscar/main.cpp`, `oscar/SleepLib/common.cpp`
+
+**Symptom:** OSCAR could switch itself permanently to the Software graphics engine, with the message about a
+graphics-hardware incompatibility, after a startup that died for reasons unrelated to graphics.
+
+**Root cause:** The #277 crash sentinel was armed from `new MainWindow` until `MainWindow::Startup()`. That span
+includes the data-folder dialogs, opening the database, the schema-upgrade prompt, the integrity check after
+an unclean shutdown, and the update check. A crash, End Task, or Windows restart during any of them left the
+sentinel set, and the next launch blamed the graphics driver.
+
+**Fix:** Two guards now cover only the steps that use OpenGL: one around the version probe (first used inside
+`makeBuildInfo()`), and one from `SetupGUI()` until `Startup()` disarms it after the window is drawn.
+
+**Non-obvious:** A launch that exits through the OpenGL < 2.0 check never reaches the second guard, so that
+path cannot leave the sentinel set either.
+
+---
+
+## 2026-11-11 - Windows: all-white main window when the Software graphics engine cannot draw (GitLab #362)
+
+**Files:** `oscar/mainwindow.cpp`, `mainwindow.h` (`Startup()`, `fallBackIfSoftwareEngineCannotDraw()`,
+`restartWithArguments()`), `oscar/main.cpp`, `oscar/logger.cpp`, `oscar/SleepLib/common.cpp`, `common.h`
+
+**Symptom:** Only the title bar showed; the rest of the window stayed white. OSCAR otherwise ran and closed
+normally. Reinstalling did not help, because the graphics engine choice is kept in the registry. Holding Shift
+at launch (which toggles the engine) fixed it. Two reports, both on Intel HD/UHD 630 graphics.
+
+**Root cause:** Both users were on the Software engine (Mesa `opengl32sw.dll`), which on these PCs could not
+create the OpenGL context that draws a window holding a QOpenGLWidget. Qt logs `wglCreateContextAttribsARB()
+failed` and `Failed to create QRhi for QBackingStoreRhiSupport`, and nothing in the window is drawn. Neither
+user chose Software; OSCAR's own one-way switches (crash sentinel, OpenGL < 2.0 check, both from #277) can
+select it, and nothing ever switched back. Which switch fired for these users was not determined.
+
+**Fix:** The log message handler watches for Qt's `Failed to create QRhi for QBackingStoreRhiSupport` warning.
+`Startup()`, once the window has been painted, checks it: on the Software engine OSCAR switches to OpenGL,
+says so, and restarts with its original arguments (minus `--legacy`). If OpenGL is already known to be
+unusable on the PC, it tells the user to update the graphics driver instead of restarting.
+
+**Non-obvious:**
+- A probe cannot detect this. In the reporter's log, OSCAR's startup OpenGL probe created a Software context
+  successfully moments before every window context failed, through the same Qt code path (a dummy window).
+  Qt's warning is the only reliable signal.
+- Loop guards: `OpenGLUnusable` is set by the OpenGL < 2.0 switch, and by a crash in the launch right after a
+  fallback (`SoftwareEngineFallback` still set when the sentinel fires). It is cleared when OpenGL draws.
+  Without them, a PC where neither engine works would switch engines on every launch.
+
+---
+
+## 2026-11-10 - BMC P5 B20A Plus registered as tested; leak scale and firmware version corrected
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp` (`Open()`),
+`oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`G3xLeakScaleTenthsPerRawUnit()`,
+`ParseMachineInfo()`)
+
+**Symptom:** Importing a P5 B20A Plus card showed the "untested model" and "untested firmware"
+dialogs. Leak read about 60% high, and the reported firmware was older than the device's.
+
+**Validation (48 nights, parser run against the whole card, no warnings):** waveform durations
+match the device's nightly totals, and median pressures match the IT block. The IT block holds
+per-hour indices for each event type (see `BMC_G3X_IDX_File_Layout.md`). Counts from the `.evt`
+file reproduce them within rounding on nearly every night; two nights (2026-10-07, 2026-10-16)
+differ by a few percent and the device omits OH/CH on 2026-10-11 to 2026-10-13. Inspiratory
+volume integrated from the flow waveform runs 3-12% above minute ventilation on every night.
+
+**Fixes:**
+
+- Added `P5-1.02.` and the IDX fallback `P5-1.SC.00.` to the known firmware, and `P5 B20A Plus`
+  to the known models.
+- `G3xLeakScaleTenthsPerRawUnit()` applied the G3 factor of 0.16 to the P5. It now uses 0.10, as
+  on the E5, confirmed by the device's own nightly leak statistics (see
+  `Notes/loaders/G3X/leak_field_analysis.md`).
+- `ParseMachineInfo()` took the first version token in the `.log`, which is the oldest version
+  on a device updated since its log began (reported `P5-1.02.04.01`, device runs
+  `P5-1.02.05.10`). It now scans the whole log and reports the newest. This also applies to G3
+  devices: one updated from 2.11 to 2.12 now resolves to leak field 0x568 by firmware version.
+
+---
+
 ## 2026-11-09 - ResMed: re-importing the last day drops a session imported from another SD card (GitLab #376)
 
 **Files:** `oscar/SleepLib/loader_plugins/resmed_loader.cpp`, `resmed_loader.h`, `oscar/tests/resmedtests.cpp`,
@@ -7873,3 +8008,58 @@ reloaded at the end as before, and now also on the "no data found" path, which p
 - Overview does not need the same treatment. `gSummaryChart::daylist` keeps the purged `Day` objects, but
   `Profile::unlinkDay()` does not delete them, and purged sessions have been removed from them.
 - The crash was not reproduced and the fix was not run on macOS. Confirmation needs a macOS run.
+
+## 2026-11-09 - Build fails with Qt 6.5-6.7: setColorScheme() needs Qt 6.8 (GitLab #378)
+
+**Files:** `oscar/main.cpp`, `oscar/profileselector.cpp` (comment only)
+
+**Symptom:** Building with Qt 6.5, 6.6 or 6.7 stops with an error in `main.cpp`: `QStyleHints` has no member
+`setColorScheme`.
+
+**Root cause:** The call that forces the Light colour scheme was guarded with `QT_VERSION_CHECK(6, 5, 0)`. Qt 6.5
+added only the read-only `colorScheme()`; `setColorScheme()` and `unsetColorScheme()` arrived in Qt 6.8 (listed
+under "New in Qt 6.8" in the Qt documentation).
+
+**Fix:** The `setColorScheme()` call has its own Qt 6.8 guard. `ToolTipColors::captureSystemScheme()`, which only
+reads `colorScheme()`, keeps the 6.5 guard.
+
+**Non-obvious:**
+- Builds on Qt 6.5-6.7 now follow the system scheme instead of forcing Light, as builds on Qt before 6.5 already
+  did. In system dark mode those builds show OSCAR's light-only pages with dark widgets.
+- Not compiled against Qt 6.5-6.7 here (none installed); the Qt 6.12 build is unchanged.
+
+## 2026-11-10 - Purge selected day: Daily could repaint destroyed sessions (GitLab #375)
+
+**Files:** `oscar/mainwindow.cpp` (`MainWindow::purgeDay()`)
+
+**Symptom:** None reported. Found while checking the progress dialogs added to the purges in `c0c0012f`.
+
+**Root cause:** The single-day purge now opens a progress dialog. As with the range purge (#375), the activation
+change can repaint the main window. The repaint can come after the sessions are destroyed and before Daily's queued
+reload runs, and Daily still pointed at those sessions.
+
+**Fix:** `purgeDay()` calls `Daily::releaseDayData()` after `Unload()`, and reloads the page when nothing was purged.
+
+**Non-obvious:**
+- The reporter's logs for #375 confirm the range case: in all three crashes, the viewed day was the first day of the
+  range and the log stopped after three purged days. All three range purges that completed had the viewed day outside
+  the range or at its end. All the logs were from 2.1.1, which predates the range fix.
+- The oximetry purge does not need this: the session bar and the graph layers checked hold only CPAP sessions.
+
+## 2026-11-12 - Opening a profile: generic CPAP picture shown briefly at the end (GitLab #385)
+
+**Files:** `oscar/SleepLib/machine.cpp` (`Machine::Load()`), `oscar/SleepLib/progressdialog.h`
+
+**Symptom:** While a profile opened, the progress window showed the CPAP device's picture, then for a moment at the
+end the generic CPAP picture.
+
+**Root cause:** `Machine::Load()` sets the progress window's picture for every device. A device whose loader has no
+picture for its series (an oximeter, for example) gets the generic one from `MachineLoader::getPixmap()`, and it
+loads after the CPAP device.
+
+**Fix:** `Machine::Load()` uses the generic picture only when the window shows no picture yet
+(`ProgressDialog::hasPixmap()`).
+
+**Non-obvious:**
+- The Journal device has no loader, so it never set a picture; only devices with a loader but no series picture did.
+- Checked by reading the code; the window closes too quickly to capture.

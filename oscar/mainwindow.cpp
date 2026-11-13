@@ -976,6 +976,67 @@ void MainWindow::TestWindowsOpenGL()
     delete gl;
 #endif
 }
+
+bool MainWindow::fallBackIfSoftwareEngineCannotDraw()
+{
+#ifdef BROKEN_OPENGL_BUILD
+    return false;   // no OpenGL to fall back to
+#else
+    QSettings settings;
+    // The engine actually in use: the setting may have been changed since launch.
+    const bool software = QCoreApplication::testAttribute(Qt::AA_UseSoftwareOpenGL);
+
+    if (!windowDrawingFailed()) {
+        // This engine draws here. If it is OpenGL, whatever an earlier launch concluded
+        // about OpenGL (e.g. a driver that was being replaced at the time) no longer holds.
+        if (!software)
+            settings.remove(GFXOpenGLUnusableSetting);
+        settings.remove(GFXSoftwareFallbackSetting);
+        return false;
+    }
+
+    if (!software) {
+        qWarning() << "The OpenGL graphics engine could not draw the main window";
+        return false;
+    }
+
+    if (settings.value(GFXOpenGLUnusableSetting).toBool()) {
+        qWarning() << "The Software graphics engine cannot draw the main window, and OpenGL"
+                      " has already failed on this computer";
+        QMessageBox::warning(this, STR_MessageBox_Warning,
+            tr("OSCAR cannot draw its window with either of its graphics engines on this computer.") + "\n\n" +
+            tr("Please update your graphics driver, then start OSCAR while holding down the Shift key."),
+            QMessageBox::Ok);
+        return false;
+    }
+
+    qWarning() << "The Software graphics engine cannot draw the main window; switching to OpenGL";
+    setCurrentGFXEngine(GFX_OpenGL);
+    settings.setValue(GFXSoftwareFallbackSetting, true);
+    settings.sync();
+
+    // The message box is a separate window without OpenGL content, so it draws even
+    // though the main window cannot.
+    QMessageBox::warning(this, STR_MessageBox_Warning,
+        tr("OSCAR could not draw its window using the software graphics engine.") + "\n\n" +
+        tr("OSCAR will restart using your graphics card's OpenGL driver."),
+        QMessageBox::Ok);
+
+    // Keep the original command line (e.g. --datadir, --profile) except the arguments
+    // the restart adds itself and --legacy, which would select Software again.
+    const QStringList portableArgs = PortableMode::restartArguments();
+    const QStringList original = QCoreApplication::arguments();
+    QStringList extraArgs;
+    for (int i = 1; i < original.size(); i++) {
+        const QString &arg = original.at(i);
+        if (arg == "-p" || arg.compare("--legacy", Qt::CaseInsensitive) == 0 || portableArgs.contains(arg))
+            continue;
+        extraArgs << arg;
+    }
+    restartWithArguments(extraArgs);
+    return true;
+#endif
+}
 #endif
 
 
@@ -993,6 +1054,9 @@ void MainWindow::Startup()
     // is data rather than graphics and must not be blamed on the graphics engine.
     QApplication::processEvents();
     disarmGraphicsCrashSentinel();
+
+    if (fallBackIfSoftwareEngineCannotDraw())
+        return;
 #endif
 
     for (auto & loader : GetLoaders()) {
@@ -2603,6 +2667,14 @@ void MainWindow::reloadProfile()
 
 void MainWindow::RestartApplication(QString cmdline)
 {
+    QStringList extraArgs;
+    if (!cmdline.isEmpty())
+        extraArgs << cmdline;
+    restartWithArguments(extraArgs);
+}
+
+void MainWindow::restartWithArguments(const QStringList &extraArgs)
+{
     qDebug() << "Restarting OSCAR";
 
     // closeEvent() won't fire when we exit via QApplication::exit() + ::exit(0).
@@ -2640,10 +2712,7 @@ void MainWindow::RestartApplication(QString cmdline)
     args << "--args"; // OSCAR binary options after this
     args << "-p"; // -p starts with 1 second delay, to give this process time to save..
     args << PortableMode::restartArguments();
-
-
-
-    if (!cmdline.isEmpty()) { args << cmdline; }
+    args << extraArgs;
 
     if (QProcess::startDetached("/usr/bin/open", args)) {
         QApplication::instance()->exit();
@@ -2662,10 +2731,7 @@ void MainWindow::RestartApplication(QString cmdline)
     QStringList args;
     args << "-p";
     args << PortableMode::restartArguments();
-
-
-    if (!cmdline.isEmpty()) { args << cmdline; }
-
+    args << extraArgs;
 
     if (QProcess::startDetached(apppath, args)) {
         QApplication::instance()->exit();
@@ -2706,6 +2772,30 @@ void MainWindow::on_actionPurgeCurrentDayAllExceptNotes_triggered()
 void MainWindow::on_actionPurgeCurrentDayAll_triggered()
 {
     this->purgeDay(MT_JOURNAL);
+}
+
+// Changes the step shown by a purge's progress dialog. A max of 0 shows a busy bar.
+// Repaints only the dialog: after sessions are destroyed the main window must not paint until
+// its views have been reloaded, so this deliberately does not run the event loop.
+static void setPurgeProgressStep(ProgressDialog &progress, const QString &message, int max = 0)
+{
+    progress.setMessage(message);
+    progress.setProgressMax(max);
+    progress.setProgressValue(0);
+    progress.layout()->activate();
+    progress.repaint();
+}
+
+// Shows a purge's progress dialog. Call before any session is destroyed: this runs the event
+// loop so that the dialog appears.
+static void openPurgeProgress(ProgressDialog &progress, const QString &message, int max = 0)
+{
+    progress.setWindowTitle(MainWindow::tr("Purging Data"));
+    QPixmap icon = QPixmap(":/icons/logo-md.png").scaled(64, 64);
+    progress.setPixmap(icon);
+    progress.open();
+    setPurgeProgressStep(progress, message, max);
+    QApplication::processEvents();
 }
 
 // Destroy sessions for a single day matching type. Returns true if any sessions were purged.
@@ -2768,10 +2858,20 @@ void MainWindow::purgeDay(MachineType type)
         return;
     QDate date = daily->getDate();
     qDebug() << "Purging data from" << date;
+
+    ProgressDialog progress(this);
+    openPurgeProgress(progress, tr("Purging data for %1...").arg(QLocale().toString(date, QLocale::ShortFormat)));
+
     daily->Unload(date);
 
-    if (!purgeDayData(date, type))
+    // Opening and closing the progress dialog can make the main window repaint, possibly before
+    // the queued reload below runs. Daily must not be left pointing at the destroyed sessions.
+    daily->releaseDayData();
+
+    if (!purgeDayData(date, type)) {
+        daily->LoadDate(date);  // nothing changed, but releaseDayData() emptied the page
         return;
+    }
 
     Day *day = p_profile->GetDay(date, MT_UNKNOWN);
     {
@@ -2875,20 +2975,29 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
         return;
     }
 
+    // The first dialog closed when its bar filled; the work below can take as long again.
+    ProgressDialog refreshProgress(this);
+    openPurgeProgress(refreshProgress, tr("Updating daily summaries..."), purgedDates.size());
+
     // Recalculate daily summaries for all affected dates
     {
         ProfileRepository profileRepo;
         ProfileData profileData = profileRepo.findByUsername(p_profile->user->userName());
         if (profileData.id > 0) {
             DailySummaryRepository summaryRepo;
+            int summariesDone = 0;
             for (const QDate &d : purgedDates) {
                 Day *day = p_profile->GetDay(d, MT_UNKNOWN);
                 bool recalculated = day && summaryRepo.calculateAndStoreFromDay(day, profileData.id);
                 if (!recalculated)
                     summaryRepo.invalidateDate(profileData.id, d);
+                refreshProgress.setProgressValue(++summariesDone);
+                QApplication::processEvents();
             }
         }
     }
+
+    setPurgeProgressStep(refreshProgress, tr("Refreshing the display..."));
 
     if (type == MT_JOURNAL)
         daily->clearJournalNotesEditor();
@@ -3125,11 +3234,26 @@ void MainWindow::on_actionPurgeMachine(QAction *action)
 
 void MainWindow::purgeMachine(Machine * mach)
 {
+    ProgressDialog progress(this);
+    openPurgeProgress(progress, tr("Purging data for %1 %2...").arg(mach->brand(), mach->model()),
+                      mach->sessionlist.size());
+
     // detect backups
     daily->Unload(daily->getDate());
 
+    // The progress callback below runs the event loop, so the main window can repaint while
+    // sessions are being destroyed. Daily must not be left pointing at them.
+    daily->releaseDayData();
+
+    const auto onSessionPurged = [&progress](int sessionsPurged) {
+        progress.setProgressValue(sessionsPurged);
+        QApplication::processEvents();
+    };
+
     // Technicially the above won't sessions under short session limit.. Using Purge to clean up the rest.
-    if (mach->Purge(3478216)) {
+    if (mach->Purge(3478216, onSessionPurged)) {
+        setPurgeProgressStep(progress, tr("Updating daily summaries..."));
+
         const QDate firstDay = mach->FirstDay();
         const QDate lastDay = mach->LastDay();
         mach->sessionlist.clear();
@@ -3167,7 +3291,10 @@ void MainWindow::purgeMachine(Machine * mach)
 
         PopulatePurgeMenu();
         p_profile->StoreMachines();
+        setPurgeProgressStep(progress, tr("Refreshing the display..."));
     } else {
+        progress.allowClose();
+        progress.close();
         staticQMessageBox::warning(this, STR_MessageBox_Error,
             tr("A file permission error caused the purge process to fail; you will have to delete the following folder manually:") +
             "\n\n" + QDir::toNativeSeparators(mach->getDataPath()), QMessageBox::Ok, QMessageBox::Ok);
@@ -4450,6 +4577,9 @@ void MainWindow::on_actionPurgeCurrentDaysOximetry_triggered()
             QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No) {
             return;
         }
+
+        ProgressDialog progress(this);
+        openPurgeProgress(progress, tr("Purging oximetry data..."));
 
         QList<Session *> sessionlist=day->getSessions(MT_OXIMETER);
 

@@ -271,7 +271,25 @@ class MainWindow : public QMainWindow
 #ifdef Q_OS_WIN
    //! \brief Called on Windows to see whether the current OpenGL driver will cause the application to crash
     void TestWindowsOpenGL();
+
+    /*! \brief Switches to OpenGL and restarts if the Software engine could not draw the window.
+     *
+     * On some PCs (Intel HD/UHD 630 in GitLab #362) the Software engine cannot create the
+     * context that draws the main window, which then stays white. Called from Startup()
+     * once the window has been painted. Does not switch when OpenGL is already known to be
+     * unusable here (GFXOpenGLUnusableSetting); it tells the user to update the graphics
+     * driver instead.
+     * \return true if OSCAR is restarting, so Startup() must stop.
+     */
+    bool fallBackIfSoftwareEngineCannotDraw();
 #endif
+
+    /*! \brief Restarts OSCAR with the given arguments added to the standard restart arguments.
+     *
+     * Saves the window geometry, closes the profile and marks a clean shutdown first.
+     * Shows a message instead if the new process cannot be started.
+     */
+    void restartWithArguments(const QStringList &extraArgs);
 
     //! \brief Called after a timeout to initiate loading of all summary data for this profile
     void Startup();

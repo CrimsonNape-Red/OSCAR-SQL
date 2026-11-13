@@ -1898,7 +1898,11 @@ bool ResmedLoader::ProcessSTRfiles(Machine *mach, QMap<QDate, STRFile> & STRmap,
             if ((sig = str.lookupSignal(CPAP_IPAPLo))) {
                 R.min_ipap = EventDataType(sig->dataArray[rec]) * sig->gain + sig->offset;
             }
-            if ((sig = str.lookupSignal(CPAP_PS))) {
+            // S.VA.PS is the VAuto-mode pressure support setting. AirCurve STR files record it
+            // every day regardless of the active mode, so in BiLevel-S/T (fixed IPAP/EPAP, no PS
+            // setting) it is a stale value from the inactive mode and must not be reported.
+            if ((sig = str.lookupSignal(CPAP_PS))
+                && !((R.mode == MODE_BILEVEL_FIXED) && (sig->label == "S.VA.PS"))) {
                 R.ps = EventDataType(sig->dataArray[rec]) * sig->gain + sig->offset;
             }
 

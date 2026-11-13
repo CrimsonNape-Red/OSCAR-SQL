@@ -9,6 +9,7 @@
 
 #include "logger.h"
 #include "SleepLib/preferences.h"
+#include "SleepLib/common.h"
 #include "version.h"
 #include <QDir>
 #include <QSemaphore>
@@ -27,6 +28,10 @@ static QSemaphore s_LoggerStarted;
 void MyOutputHandler(QtMsgType type, const QMessageLogContext &context, const QString &msgtxt)
 {
     Q_UNUSED(context)
+
+    // Before anything else, so a warning is seen whether or not the log thread is running.
+    if (type == QtWarningMsg)
+        noteGraphicsWarning(msgtxt);
 
     if (!logger) {
         fprintf(stderr, "Pre/Post: %s\n", msgtxt.toLocal8Bit().constData());

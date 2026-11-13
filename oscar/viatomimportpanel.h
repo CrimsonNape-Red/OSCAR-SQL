@@ -148,6 +148,8 @@ class ViatomImportPanel : public QWidget
     QCheckBox *m_setClock = nullptr;
     QList<ViatomBle::Usb::Port> m_usbPorts;      // listed first, then m_devices
     bool m_autoRescanned = false;                // a search that found nothing was repeated once
+    bool m_lastUsedSelected = false;             // this search found the oximeter used last time
+    QString m_connectingId;                      // the Bluetooth device being connected to
     QTimer *m_usbWatch = nullptr;                // waits for a cable after startWithUsb() found none
 #ifdef OSCAR_HAVE_BLUETOOTH
     QList<QBluetoothDeviceInfo> m_devices;

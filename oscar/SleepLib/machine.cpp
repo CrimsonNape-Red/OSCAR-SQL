@@ -453,7 +453,7 @@ bool Machine::unlinkSession(Session * sess)
 }
 
 // This functions purpose is murder and mayhem... It deletes all of a devices data.
-bool Machine::Purge(int secret)
+bool Machine::Purge(int secret, const std::function<void(int)> &onSessionPurged)
 {
     // Boring api key to stop this function getting called by accident :)
     if (secret != 3478216) { return false; }
@@ -497,6 +497,10 @@ bool Machine::Purge(int secret)
         }
 
         delete sess;
+
+        if (onSessionPurged) {
+            onSessionPurged(i + 1);
+        }
     }
     // Make sure there aren't any dangling references to this device
     for (auto & d : days) {

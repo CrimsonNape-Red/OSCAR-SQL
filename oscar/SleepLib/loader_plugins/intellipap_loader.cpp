@@ -243,7 +243,10 @@ int IntellipapLoader::OpenDV5(const QString & path)
     QString backupPath = mach->getBackupPath();
     QString copypath = path;
 
-    if (QDir::cleanPath(path).compare(QDir::cleanPath(backupPath)) != 0) {
+    // Back up the card unless the user turned off "Create SD Card Backups during Import"
+    // or we are rebuilding from the backup folder itself.
+    if (QDir::cleanPath(path).compare(QDir::cleanPath(backupPath)) != 0
+            && p_profile->session->backupCardData()) {
         copyPath(path, backupPath);
     }
 

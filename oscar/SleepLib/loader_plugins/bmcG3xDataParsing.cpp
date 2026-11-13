@@ -27,6 +27,7 @@
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include <QTextStream>
+#include <QVersionNumber>
 #include <QDebug>
 
 #include <algorithm>
@@ -340,7 +341,7 @@ bool IsReasonablePressureHundredths(int pressureHundredths)
 /// L/min and applies a display gain of 0.1, hence 1.6 rather than 0.16.
 constexpr double kG3xLeakScaleDefaultTenths = 1.6;
 
-/// @brief Leak scale for the E5 platform, in tenths of L/min per raw unit
+/// @brief Leak scale for the E5 and P5 platforms, in tenths of L/min per raw unit
 ///        (raw × 0.10 = L/min).
 ///
 /// The G3-derived 0.16 overstates leak on the E5 by roughly 60%.  Derived from a PAP-Link
@@ -361,6 +362,11 @@ constexpr double kG3xLeakScaleDefaultTenths = 1.6;
 ///
 /// **Confidence: medium** — one card, one night, one PAP-Link readout.  A second E5 sample
 /// would settle whether 0.10 is exact or merely close.
+///
+/// The P5 platform uses the same factor, and there it is **confirmed**: a P5 B20A Plus card
+/// stores the device's own nightly leak statistics in the IDX (IT block +0x92 mean, +0x94
+/// 95th percentile, +0x96 median, in tenths of L/min).  Over the 38 nights with a mean of at
+/// least 1 L/min, those imply median scales of 0.0998, 0.0988 and 0.1011.
 constexpr double kG3xLeakScaleE5Tenths = 1.0;
 
 /// @brief Returns the leak scale factor for @p firmwareVersion: raw → tenths of L/min.
@@ -377,7 +383,8 @@ double G3xLeakScaleTenthsPerRawUnit(const QString& firmwareVersion)
         return envScale * 10.0;
     }
     // Platform is the token before the first '-' in the version string ("E5-1.02.05.02").
-    if (firmwareVersion.startsWith(QLatin1String("E5"), Qt::CaseInsensitive)) {
+    if (firmwareVersion.startsWith(QLatin1String("E5"), Qt::CaseInsensitive) ||
+        firmwareVersion.startsWith(QLatin1String("P5"), Qt::CaseInsensitive)) {
         return kG3xLeakScaleE5Tenths;
     }
     return kG3xLeakScaleDefaultTenths;
@@ -1898,7 +1905,8 @@ bool BmcG3xData::ResolveIdxFile()
 ///   0x0100 (16 bytes) — product name (e.g. "G3 A20"); the human-readable model
 ///   0x0345 (20 bytes) — internal SC firmware build string (e.g. "G3-2.SC.72.01")
 ///
-/// .log file (first 64 KB scanned for a "<platform>-<major>.<n>.<n>.<n>" version token):
+/// .log file (whole file scanned for "<platform>-<major>.<n>.<n>.<n>" version tokens; the
+/// newest one wins, since the log keeps the versions from before a firmware update):
 ///   User-facing firmware version, e.g. "G3-2.11.02.33", "G3-2.12.54.13", "E5-1.02.05.02".
 ///   This matches what PAP-Link and the device display report to the user.
 ///   The byte offset varies by device: ~0x0420 in small log files (G3 A20, SC.72/SC.74),
@@ -1926,22 +1934,30 @@ void BmcG3xData::ParseMachineInfo(const QByteArray& idxBytes)
     //
     // The byte offset varies by device and log-file size: ~0x0420 in small log files
     // (G3 A20), ~0x1420 in larger ring-buffer log files (G3 B20A), and 0x1620 on the
-    // E5 B25A Plus sample — close enough to the old 6 KB limit to be fragile, so scan
-    // 64 KB.  Verified on the G3 A20 and E5 B25A Plus reference cards: the version token
-    // is the only text in the entire log matching this pattern, so the wider scan cannot
-    // pick up a false positive.
+    // E5 B25A Plus sample.  The token is written repeatedly, so a device updated
+    // since its log began carries more than one version: a P5 B20A Plus card holds
+    // P5-1.02.04.01 at 0x1220 and P5-1.02.05.10 from 0x8820 onwards.  Scan the whole log
+    // and report the newest version.  Verified on the G3 A20, E5 B25A Plus and P5 B20A Plus
+    // reference cards: version tokens are the only text in the log matching this pattern.
     const QString logFilePath = fileBasePath + ".log";
     QFile logFile(logFilePath);
     if (logFile.open(QIODevice::ReadOnly)) {
-        const QByteArray logData = logFile.read(65536);
+        const QByteArray logData = logFile.readAll();
         logFile.close();
         // <letter><alphanumeric> '-' <digits> then at least two dot-separated numeric groups.
         static const QRegularExpression kLogVersionPattern(
             QStringLiteral("[A-Za-z][A-Za-z0-9]-[0-9]+(?:\\.[0-9]+){2,}"));
-        const QRegularExpressionMatch match =
-            kLogVersionPattern.match(QString::fromLatin1(logData));
-        if (match.hasMatch()) {
-            machineInfo.FirmwareVersion = match.captured(0);
+        QVersionNumber newestVersion;
+        QRegularExpressionMatchIterator matches =
+            kLogVersionPattern.globalMatch(QString::fromLatin1(logData));
+        while (matches.hasNext()) {
+            const QString token = matches.next().captured(0);
+            const QVersionNumber version =
+                QVersionNumber::fromString(token.mid(token.indexOf('-') + 1));
+            if (version > newestVersion) {
+                newestVersion = version;
+                machineInfo.FirmwareVersion = token;
+            }
         }
     }
     if (machineInfo.FirmwareVersion.isEmpty()) {

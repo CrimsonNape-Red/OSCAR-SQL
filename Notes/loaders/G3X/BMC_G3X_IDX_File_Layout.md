@@ -108,6 +108,19 @@ Offsets below are relative to the start of the IT sub-record (i.e., record + 0x8
 > `bmcG3xDataParsing.cpp` but only ever printed inside a `BMCDEBUG` block. OSCAR
 > derives the indices it displays from the imported events, not from these fields.
 
+> **P5 platform (2026-11-10):** the same `0xBC`–`0xD2` fields are also meaningless on a
+> P5 B20A Plus card (`0xBC` is 1000 every night), but the nightly statistics are present
+> elsewhere in the IT block. Verified over 48 nights against that card's `.evt` events and
+> waveforms. These offsets are not yet checked on G3 or E5 cards.
+>
+> | IT Offset | Field | Unit |
+> |-----------|-------|------|
+> | 0x50 / 0x52 / 0x54 | Central / obstructive / unclassified hypopnea index | events/hour × 10; `0xFFFF` = not reported |
+> | 0x5A / 0x5C / 0x5E | Obstructive / central / unclassified apnea index | events/hour × 10 |
+> | 0x64 | AHI | events/hour × 10 |
+> | 0x66 | RERA index | events/hour × 10 |
+> | 0x90 / 0x92 / 0x94 / 0x96 | Leak maximum / mean / 95th percentile / median | L/min × 10 |
+
 ---
 
 ### I/E Ratio distribution summary at record `0x140`–`0x147`

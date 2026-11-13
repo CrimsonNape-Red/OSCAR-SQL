@@ -244,17 +244,20 @@ int VREMLoader::Open(const QString & selectedPath)
         machine->Save();
         finishAddingSessions();
     }
-    QString backupPath = context()->GetBackupPath() + path.section("/", -1)+"/";
-    QDir backupDir(QFileInfo(backupPath).path());
-    if (!backupDir.exists()) {
-        if (!backupDir.mkpath(backupDir.path())) {
-            qWarning() << "Failed to create backup directory: " << backupDir.path();
-            return 0;
+    // Back up the card unless the user turned off "Create SD Card Backups during Import".
+    if (p_profile->session->backupCardData()) {
+        QString backupPath = context()->GetBackupPath() + path.section("/", -1)+"/";
+        QDir backupDir(QFileInfo(backupPath).path());
+        if (!backupDir.exists()) {
+            if (!backupDir.mkpath(backupDir.path())) {
+                qWarning() << "Failed to create backup directory: " << backupDir.path();
+                return 0;
+            }
         }
-    }
 
-    if (QDir::cleanPath(path).compare(QDir::cleanPath(backupPath)) != 0) {
-        copyPath(path, backupPath);
+        if (QDir::cleanPath(path).compare(QDir::cleanPath(backupPath)) != 0) {
+            copyPath(path, backupPath);
+        }
     }
     if (task == 0) { return -1; }
     return task;

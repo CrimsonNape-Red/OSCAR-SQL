@@ -32,6 +32,15 @@ extern QString GFXEngineNames[MaxGFXEngine+1]; // Set by initializeStrings()
 //! \brief Settings key of the graphics crash sentinel. See armGraphicsCrashSentinel().
 const QString GFXCrashSentinelSetting = "OpenGLCompatibilityCheck";
 
+//! \brief Settings key: desktop OpenGL has proved unusable on this computer (driver below
+//! OpenGL 2.0, or a crash straight after a switch to it), so OSCAR must not switch to it
+//! on its own. Cleared as soon as OpenGL draws the window. See GitLab #362.
+const QString GFXOpenGLUnusableSetting = "OpenGLUnusable";
+
+//! \brief Settings key: OSCAR has just switched itself from the Software engine to OpenGL
+//! because Software could not draw. Cleared once a launch draws its window.
+const QString GFXSoftwareFallbackSetting = "SoftwareEngineFallback";
+
 const QString CSTR_GFX_OpenGL = "OpenGL";
 const QString CSTR_GFX_BrokenGL = "LegacyGFX";
 const QString CSTR_GFX_None = "None";
@@ -66,6 +75,19 @@ void armGraphicsCrashSentinel();
 //! or on any normal exit from main().
 void disarmGraphicsCrashSentinel();
 #endif
+
+/*! \brief Inspects a Qt warning for a sign that a window could not be drawn.
+ *
+ * Called by the log message handler for every warning. A top-level window holding a
+ * QOpenGLWidget is drawn through an OpenGL context; when Qt cannot create that context it
+ * warns "Failed to create QRhi for QBackingStoreRhiSupport" and the window stays blank
+ * (all white on Windows). Matching the warning is the only reliable test: the same
+ * context creation can succeed in an earlier probe and fail moments later for the window.
+ */
+void noteGraphicsWarning(const QString &msg);
+
+//! \brief True once Qt has reported that it could not draw a window. See noteGraphicsWarning().
+bool windowDrawingFailed();
 
 QStringList makeBuildInfo(QString forcedEngine);
 QStringList getBuildInfo();
