@@ -367,6 +367,9 @@ class gGraph : public QObject
         fit, and returns true. Returns false in the Classic look, where the caller draws the
         text above the plot as before. */
     bool headerSummary(const QString &text);
+
+    //! \brief Card look: takes \a width pixels off the right of headerTextRect() (for a legend)
+    void reserveHeaderRight(int width) { m_headerText.setWidth(qMax(0, m_headerText.width() - width)); }
     //! \brief The colour that stands for this graph, or an invalid colour if none was set
     const QColor &titleColor() const { return m_titleColor; }
 

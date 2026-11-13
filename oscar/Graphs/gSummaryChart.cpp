@@ -23,6 +23,7 @@
 #include "gYAxis.h"
 #include "graphtheme.h"
 #include "overviewbars.h"
+#include "rangefigures.h"
 
 extern MainWindow * mainwin;
 
@@ -67,9 +68,113 @@ gSummaryChart::~gSummaryChart()
 {
 }
 
+QVector<SummaryLine> gSummaryChart::lines()
+{
+    if (!m_visStart.isValid() || !p_profile) return {};
+    const QString key = QString("%1|%2|%3|%4|%5").arg(m_visStart.toJulianDay()).arg(m_visEnd.toJulianDay())
+            .arg(p_profile->general->prefCalcMiddle()).arg(p_profile->general->prefCalcPercentile())
+            .arg(p_profile->general->calculateRDI());
+    if (key != m_lineCacheKey) {
+        m_lineCache = calcLines(m_visStart, m_visEnd);
+        m_lineCacheKey = key;
+    }
+    QVector<SummaryLine> out = m_lineCache;
+    if (m_lineMaskSet) {
+        for (SummaryLine &line : out) line.enabled = (m_lineMask & (1u << line.id)) != 0;
+    }
+    return out;
+}
+
+void gSummaryChart::setLineEnabled(int id, bool on)
+{
+    quint32 mask = 0;
+    const QVector<SummaryLine> current = lines();
+    for (const SummaryLine &line : current) {
+        if (line.enabled) mask |= 1u << line.id;
+    }
+    if (on) mask |= 1u << id; else mask &= ~(1u << id);
+    m_lineMask = mask;
+    m_lineMaskSet = true;
+}
+
+QVector<SummaryLine> gSummaryChart::calcLines(const QDate &start, const QDate &end)
+{
+    QVector<SummaryLine> out;
+    if (calcitems.isEmpty()) return out;
+    const SummaryCalcItem &first = calcitems.at(0);
+    const ChannelID code = first.code;
+    if (code == NoChannel) return out;
+
+    if (first.type == ST_CPH) {
+        // An event graph: the events per hour over the whole range
+        out.append({ SL_Middle, QObject::tr("Average"), RangeFigures::eventsPerHour(code, m_machtype, start, end),
+                     first.color.darker(150), false });
+        return out;
+    }
+    if (first.type != ST_MIN) return out;
+
+    // A waveform graph offers the lines its Daily graph does
+    schema::Channel &chan = schema::channel[code];
+    const auto add = [&out, &chan](int id, ChannelCalcType type, double value) {
+        out.append({ id, chan.calc[type].label(), value, chan.calc[type].color, chan.calc[type].enabled });
+    };
+    add(SL_Max, Calc_Max, p_profile->calcMax(code, m_machtype, start, end));
+    add(SL_Perc, Calc_Perc, RangeFigures::percentile(code, m_machtype, start, end));
+    add(SL_Middle, Calc_Middle, RangeFigures::middle(code, m_machtype, start, end));
+    if ((code != CPAP_Snore) && (code != CPAP_FlowLimit) && (code != CPAP_RDI) && (code != CPAP_AHI)) {
+        add(SL_Min, Calc_Min, p_profile->calcMin(code, m_machtype, start, end));
+    }
+    if (code == CPAP_Leak) {
+        add(SL_Threshold, Calc_UpperThresh, p_profile->cpap->leakRedline());
+    }
+    return out;
+}
+
+void gSummaryChart::paintLines(QPainter &painter, gGraph &graph, const QRectF &plot, float miny, float ymult)
+{
+    const QRect header = graph.headerTextRect();
+    if (header.isEmpty() || graph.printing()) return;       // Card look on screen only
+
+    const QVector<SummaryLine> all = lines();
+    const QFontMetrics fm(*defaultfont);
+    const int sample = 16;      // length of the legend's piece of line
+    int right = header.right();
+
+    painter.save();
+    painter.setFont(*defaultfont);
+    for (const SummaryLine &line : all) {
+        if (!line.enabled) continue;
+        QColor color = GraphTheme::ink(line.color);
+        color.setAlpha(200);
+        const QPen pen(QBrush(color), 2, Qt::DotLine);      // as the Daily graphs draw theirs
+
+        const double y = plot.bottom() - (line.value - miny) * ymult;
+        if (y >= plot.top() && y <= plot.bottom()) {
+            painter.setPen(pen);
+            painter.drawLine(QLineF(plot.left(), y, plot.right(), y));
+        }
+
+        // Legend, filled in from the right; lines that don't fit are still drawn on the plot
+        const QString text = QString("%1 %2").arg(line.label).arg(line.value, 0, 'f', 2);
+        const int textWidth = fm.horizontalAdvance(text);
+        const int width = sample + 4 + textWidth + 12;
+        if (right - width < header.left() + 40) continue;
+        painter.setPen(GraphTheme::ink(QColor(60, 60, 60)));
+        painter.drawText(QRect(right - textWidth, header.top(), textWidth, header.height()),
+                         Qt::AlignLeft | Qt::AlignVCenter, text);
+        painter.setPen(pen);
+        const double sampleY = header.center().y() + 1.5;
+        painter.drawLine(QLineF(right - textWidth - 4 - sample, sampleY, right - textWidth - 4, sampleY));
+        right -= width;
+    }
+    painter.restore();
+    graph.reserveHeaderRight(header.right() - right);
+}
+
 void gSummaryChart::SetDay(Day *unused_day)
 {
     cache.clear();
+    m_lineCacheKey.clear();
 
     Q_UNUSED(unused_day)
     Layer::SetDay(nullptr);
@@ -540,7 +645,8 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     QDate enddate = enddate2.date();
 
     int days = ceil(double(m_maxx - m_minx) / 86400000.0);
-
+    m_visStart = date;
+    m_visEnd = date.addDays(qMax(days, 1) - 1);
 
     auto it = dayindex.find(date);
     idx_start = 0;
@@ -738,6 +844,8 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
         lastx1 = x1;
         it++;
     } while (++idx <= idx_end);
+
+    paintLines(painter, graph, rect, miny, ymult);
 
     m_detailsRect = QRectF();
     if (classic) {

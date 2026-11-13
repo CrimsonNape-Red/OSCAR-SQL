@@ -386,6 +386,8 @@ SOURCES += \
     Graphs/graphtheme.cpp \
     Graphs/overviewbars.cpp \
     Graphs/graphcard.cpp \
+    Graphs/summarylines.cpp \
+    Graphs/rangefigures.cpp \
     Graphs/glcommon.cpp \
     Graphs/gLineChart.cpp \
     Graphs/gLineOverlay.cpp \
@@ -581,6 +583,8 @@ HEADERS  += \
     Graphs/overviewbars.h \
     Graphs/graphlook.h \
     Graphs/graphcard.h \
+    Graphs/summarylines.h \
+    Graphs/rangefigures.h \
     Graphs/glcommon.h \
     Graphs/gLineChart.h \
     Graphs/gLineOverlay.h \
@@ -989,7 +993,8 @@ test {
         tests/profilepagetests.cpp \
         tests/statisticsstyletests.cpp \
         tests/overviewbarstests.cpp \
-        tests/graphcardtests.cpp
+        tests/graphcardtests.cpp \
+        tests/summarylinestests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -1029,7 +1034,8 @@ test {
         tests/profilepagetests.h \
         tests/statisticsstyletests.h \
         tests/overviewbarstests.h \
-        tests/graphcardtests.h
+        tests/graphcardtests.h \
+        tests/summarylinestests.h
 }
 
 macx {

@@ -813,6 +813,8 @@ public:
     GraphLook m_look = GraphLook::Classic;  //!< How graphs are framed (see setLook())
 
   signals:
+    //! \brief The user switched a summary chart's dotted line on or off
+    void summaryLinesChanged();
     void updateCurrentTime(double);
     void updateRange(double,double);
     void GraphsChanged();

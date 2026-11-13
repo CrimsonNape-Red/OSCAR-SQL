@@ -39,6 +39,7 @@
 #include "Graphs/gAHIChart.h"
 #include "Graphs/gUsageChart.h"
 #include "Graphs/gTTIAChart.h"
+#include "Graphs/summarylines.h"
 #include "cprogressbar.h"
 #include "saveGraphLayoutSettings.h"
 
@@ -192,6 +193,7 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     connect(GraphView, SIGNAL(updateCurrentTime(double)), this, SLOT(on_LineCursorUpdate(double)));
     connect(GraphView, SIGNAL(updateRange(double,double)), this, SLOT(on_RangeUpdate(double,double)));
     connect(GraphView, SIGNAL(GraphsChanged()), this, SLOT(updateGraphCombo()));
+    connect(GraphView, &gGraphView::summaryLinesChanged, this, &Overview::saveDottedLines);
     connect(GraphView, SIGNAL(XBoundsChanged(qint64 ,qint64)), this, SLOT(on_XBoundsChanged(qint64 ,qint64)));
     saveGraphLayoutSettings=nullptr;
 }
@@ -399,6 +401,37 @@ void Overview::CreateAllGraphs() {
     #endif
 
     connectgSummaryCharts();
+    loadDottedLines();
+}
+
+//! \brief Profile preference holding the dotted lines; also listed in PreferencesRepository::saveUserSettings()
+static const QString kDottedLinesPref = QStringLiteral("OverviewDottedLines");
+
+void Overview::loadDottedLines()
+{
+    if (!p_profile || !p_profile->general) return;
+    Preferences *pref = p_profile->general->m_pref;
+    if (!pref->contains(kDottedLinesPref)) return;
+    const QHash<QString, quint32> masks = SummaryLines::decode((*pref)[kDottedLinesPref].toString());
+    for (int i = 0; i < GraphView->size(); ++i) {
+        gGraph *graph = (*GraphView)[i];
+        gSummaryChart *chart = dynamic_cast<gSummaryChart *>(GraphView->findLayer(graph, LT_Overview));
+        if (chart && masks.contains(graph->name())) chart->setLineMask(masks.value(graph->name()));
+    }
+}
+
+void Overview::saveDottedLines()
+{
+    if (!p_profile || !p_profile->general) return;
+    QHash<QString, quint32> masks;
+    for (int i = 0; i < GraphView->size(); ++i) {
+        gGraph *graph = (*GraphView)[i];
+        if (graph->isSnapshot()) continue;
+        gSummaryChart *chart = dynamic_cast<gSummaryChart *>(GraphView->findLayer(graph, LT_Overview));
+        if (chart && chart->hasLineMask()) masks.insert(graph->name(), chart->lineMask());
+    }
+    p_profile->general->setPref(kDottedLinesPref, SummaryLines::encode(masks));
+    p_profile->saveExtendedDataToDatabase();
 }
 
 

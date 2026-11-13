@@ -14,6 +14,7 @@
 #include "SleepLib/profiles.h"
 #include "Graphs/gGraphView.h"
 #include "SleepLib/appsettings.h"
+#include "Graphs/summarylines.h"
 
 
 struct TimeSpan
@@ -195,7 +196,24 @@ public:
 
     virtual void dataChanged() {
         cache.clear();
+        m_lineCacheKey.clear();
     }
+
+    /*! \brief The dotted lines this chart offers, with their values for the dates last painted
+        and whether each is switched on. Empty before the first paint and for charts with none. */
+    QVector<SummaryLine> lines();
+    //! \brief Switches the line with SummaryLineId \a id on or off
+    void setLineEnabled(int id, bool on);
+    //! \brief True once the user (or a saved preference) has chosen this chart's lines
+    bool hasLineMask() const { return m_lineMaskSet; }
+    //! \brief The chosen lines: bit n is set when the line with SummaryLineId n is on
+    quint32 lineMask() const { return m_lineMask; }
+    //! \brief Restores a saved choice of lines
+    void setLineMask(quint32 mask) { m_lineMask = mask; m_lineMaskSet = true; }
+    //! \brief First date drawn at the last paint
+    QDate visibleStart() const { return m_visStart; }
+    //! \brief Last date drawn at the last paint
+    QDate visibleEnd() const { return m_visEnd; }
 
     virtual int addCalc(ChannelID code, SummaryType type, QColor color);
     //! \brief The colour of the chart's first calculation, which its bars use; invalid if none
@@ -226,6 +244,8 @@ public:
         layer->cache.clear();
         layer->dayindex = dayindex;
         layer->daylist = daylist;
+        layer->m_lineMask = m_lineMask;
+        layer->m_lineMaskSet = m_lineMaskSet;
     }
     //! \brief Colour of the Details button
     static inline const QColor DetailsAccent = QColor(0x6D, 0x4B, 0xC9);
@@ -256,6 +276,17 @@ protected:
     void clearHover(gGraph &graph);
     //! \brief True for a plain left click on the Details button
     bool isDetailsClick(QMouseEvent *event) const;
+    /*! \brief The lines this chart offers between \a start and \a end, each with its default
+        on/off state. Values come from RangeFigures or the profile's range functions, calculated
+        over the whole range: never an average of nightly figures. */
+    virtual QVector<SummaryLine> calcLines(const QDate &start, const QDate &end);
+    //! \brief Card look: draws the enabled lines across \a plot and their legend in the header
+    void paintLines(QPainter &painter, gGraph &graph, const QRectF &plot, float miny, float ymult);
+    QDate m_visStart, m_visEnd;         //!< Dates drawn at the last paint
+    QVector<SummaryLine> m_lineCache;   //!< calcLines() result for m_lineCacheKey
+    QString m_lineCacheKey;             //!< Dates and preferences m_lineCache was calculated for
+    quint32 m_lineMask = 0;             //!< See lineMask()
+    bool m_lineMaskSet = false;         //!< False while the lines' own defaults apply
     QRectF m_detailsRect;       //!< Details button as last drawn; empty when not shown
     QDate m_detailsDate;        //!< Day the Details button belongs to
     int m_detailsIdx = -1;      //!< That day's index in daylist

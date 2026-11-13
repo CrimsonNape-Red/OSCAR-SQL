@@ -18,6 +18,7 @@
 #include "SleepLib/profiles.h"
 #include "SleepLib/machine_common.h"
 #include "gUsageChart.h"
+#include "rangefigures.h"
 
 #include "gYAxis.h"
 
@@ -120,3 +121,11 @@ void gUsageChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
 }
 
 #endif
+
+QVector<SummaryLine> gUsageChart::calcLines(const QDate &start, const QDate &end)
+{
+    QVector<SummaryLine> out;
+    out.append({ SL_Middle, QObject::tr("Average"), RangeFigures::usageAverage(start, end), QColor(0, 70, 190), false });
+    out.append({ SL_Compliance, QObject::tr("Compliance"), p_profile->cpap->complianceHours(), QColor(200, 50, 50), true });
+    return out;
+}

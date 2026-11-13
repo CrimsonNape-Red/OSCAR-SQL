@@ -18,6 +18,7 @@
 #include "SleepLib/profiles.h"
 #include "SleepLib/machine_common.h"
 #include "gAHIChart.h"
+#include "rangefigures.h"
 
 #include "gYAxis.h"
 
@@ -231,4 +232,11 @@ QString gAHIChart::tooltipData(Day *day, int idx)
     return QString("\n%1: %2").arg(indexLabel).arg(float(total) / hour,0,'f',2)+txt;
 }
 
-
+QVector<SummaryLine> gAHIChart::calcLines(const QDate &start, const QDate &end)
+{
+    // The index for the whole range: all its events over all its hours
+    QVector<SummaryLine> out;
+    out.append({ SL_Middle, p_profile->general->calculateRDI() ? STR_TR_RDI : STR_TR_AHI,
+                 RangeFigures::ahi(start, end), QColor(120, 40, 160), false });
+    return out;
+}

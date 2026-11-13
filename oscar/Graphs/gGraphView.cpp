@@ -2558,6 +2558,27 @@ void gGraphView::populateMenu(gGraph * graph)
         cpap_menu->clear();
         cpap_menu->menuAction()->setVisible(false);
     }
+
+    if (stg && cardLook()) {
+        // An Overview graph's dotted lines, each with its value for the dates on screen
+        lines_menu->clear();
+        const QVector<SummaryLine> lines = stg->lines();
+        for (const SummaryLine &line : lines) {
+            QWidgetAction * widget = new QWidgetAction(context_menu);
+            QCheckBox *chbox = new QCheckBox(QString("%1  (%2)").arg(line.label).arg(line.value, 0, 'f', 2), context_menu);
+            chbox->setMouseTracking(true);
+            chbox->setChecked(line.enabled);
+            widget->setDefaultWidget(chbox);
+            const int id = line.id;
+            connect(chbox, &QCheckBox::toggled, this, [this, stg, id](bool on) {
+                stg->setLineEnabled(id, on);
+                emit summaryLinesChanged();
+                timedRedraw(0);
+            });
+            lines_menu->addAction(widget);
+        }
+        lines_menu->menuAction()->setVisible(!lines.isEmpty());
+    }
 }
 
 void gGraphView::onSnapshotGraphToggle()

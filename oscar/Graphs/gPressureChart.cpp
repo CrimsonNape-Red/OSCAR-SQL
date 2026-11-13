@@ -11,6 +11,7 @@
 #include <test_macros.h>
 
 #include "gPressureChart.h"
+#include "rangefigures.h"
 
 gPressureChart::gPressureChart()
     : gSummaryChart("Pressure", MT_CPAP)
@@ -334,4 +335,16 @@ void gPressureChart::populate(Day * day, int idx)
         addObservedIPAPMax(QObject::tr("Peak Pressure"));
     }
     sortSlices();
+}
+
+QVector<SummaryLine> gPressureChart::calcLines(const QDate &start, const QDate &end)
+{
+    QVector<SummaryLine> out;
+    const ChannelID code = RangeFigures::pressureChannel(start, end);
+    if (code == NoChannel) return out;
+    out.append({ SL_Perc, RangeFigures::percentileLabel(), RangeFigures::percentile(code, MT_CPAP, start, end),
+                 QColor(190, 40, 40), false });
+    out.append({ SL_Middle, RangeFigures::middleLabel(), RangeFigures::middle(code, MT_CPAP, start, end),
+                 QColor(60, 60, 60), false });
+    return out;
 }

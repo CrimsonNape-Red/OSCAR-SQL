@@ -158,6 +158,11 @@ class Overview : public QWidget
   private:
     void CreateAllGraphs();
 
+    //! \brief Applies the profile's saved choice of dotted lines to the graphs
+    void loadDottedLines();
+    //! \brief Saves each graph's choice of dotted lines in the profile preferences
+    void saveDottedLines();
+
     //! \brief Connects \a chart's Details button, and remembers \a graph as the graph it is on
     void watchDetails(gSummaryChart *chart, gGraph *graph);
     //! \brief Opens a details popup for \a chart's bar on \a date (index \a idx in its day list)
