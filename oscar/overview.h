@@ -42,6 +42,7 @@ class Overview;
 class Report;
 class Overview;
 class OverviewDetailsPopup;
+class OverviewStatsRow;
 
 class DateErrorDisplay:QObject {
 	Q_OBJECT
@@ -167,6 +168,7 @@ class Overview : public QWidget
     //! \brief Colours the range strip from the theme (again after a light/dark switch)
     void styleRangeStrip();
     QWidget *m_rangeStrip = nullptr;            //!< The strip of range buttons; null on the original page
+    OverviewStatsRow *m_statsRow = nullptr;     //!< Figures for the dates on screen; null on the original page
     QButtonGroup *m_rangeButtons = nullptr;     //!< Its buttons, numbered as the range drop-down's items
 
     //! \brief Applies the profile's saved choice of dotted lines to the graphs

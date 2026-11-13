@@ -41,6 +41,8 @@
 #include "Graphs/gTTIAChart.h"
 #include "Graphs/summarylines.h"
 #include "uikit/theme.h"
+#include "overviewstats.h"
+#include <QTimeZone>
 #include <QToolButton>
 #include "cprogressbar.h"
 #include "saveGraphLayoutSettings.h"
@@ -412,6 +414,10 @@ void Overview::buildRangeStrip()
     // The selection bar goes above the graphs
     ui->verticalLayout->removeWidget(ui->frame);
     ui->verticalLayout->insertWidget(0, ui->frame);
+
+    // Under it, the figures for the dates on screen
+    m_statsRow = new OverviewStatsRow(this);
+    ui->verticalLayout->insertWidget(1, m_statsRow);
 
     // The strip stands in for the range drop-down, which stays (hidden) as the page's record of
     // the chosen range. The hovered date is shown in bold on the date axis instead of in a label.
@@ -796,6 +802,14 @@ void Overview::on_XBoundsChanged(qint64 start,qint64 end)
 {
     displayStartDate = convertTimeToDate(start);
     displayEndDate = convertTimeToDate(end);
+
+    if (m_statsRow) {
+        // The dates the graphs draw for these bounds (as gSummaryChart::paint works them out),
+        // so the figures and the graphs' dotted lines cover the same days
+        const QDate first = QDateTime::fromMSecsSinceEpoch(start, QTimeZone::systemTimeZone()).date();
+        const int days = qMax(1, int(std::ceil(double(end - start) / 86400000.0)));
+        m_statsRow->setRange(first, first.addDays(days - 1));
+    }
 
     bool largerRange=false;
     if (displayStartDate>maxRangeEndDate || minRangeStartDate>displayEndDate) {
