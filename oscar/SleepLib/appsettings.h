@@ -68,6 +68,7 @@ const QString STR_AS_UseFusionTheme = "UseFusionTheme";
 const QString STR_AS_UseNewWelcome = "UseNewWelcome";
 const QString STR_AS_WelcomeCardColour = "WelcomeCardColour";
 const QString STR_AS_ColorScheme = "ColorScheme";
+const QString STR_AS_ModernColorScheme = "ModernColorScheme";
 const QString STR_AS_UseSystemTooltipColors = "UseSystemTooltipColors";
 const QString STR_AS_LineThickness = "LineThickness";
 const QString STR_AS_GridLineOpacity = "GridLineOpacity";
@@ -199,6 +200,9 @@ public:
   ColorSchemeChoice colorScheme() const {
       return ColorSchemeChoice(getPref(STR_AS_ColorScheme).toInt());
   }
+  /*! \brief The colour scheme in use when the pages were last switched from Modern to Classic
+      (a ColorSchemeChoice), to go back to with the Modern pages; -1 if there is none */
+  int modernColorScheme() const { return getPref(STR_AS_ModernColorScheme).toInt(); }
   //! \brief Whether tooltips use the system's colors instead of OSCAR's black on yellow
   inline bool useSystemTooltipColors() const { return m_useSystemTooltipColors; }
   inline int  alternatingColorsCombo() { return m_alternatingColorsCombo;}
@@ -285,6 +289,8 @@ public:
   void setWelcomeCardColour(WelcomeCardColour c) { setPref(STR_AS_WelcomeCardColour, int(c)); }
   //! \brief Sets whether the application is light, dark, or follows the operating system
   void setColorScheme(ColorSchemeChoice c) { setPref(STR_AS_ColorScheme, int(c)); }
+  //! \brief Sets the colour scheme to go back to with the Modern pages (see modernColorScheme())
+  void setModernColorScheme(int c) { setPref(STR_AS_ModernColorScheme, c); }
   //! \brief Sets whether tooltips use the system's colors. ToolTipColors::apply() puts it into effect.
   void setUseSystemTooltipColors(bool b) { setPref(STR_AS_UseSystemTooltipColors, m_useSystemTooltipColors=b); }
   //! \brief Sets the type of overlay flags (which are displayed over the Flow Waveform)

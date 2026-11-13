@@ -301,6 +301,30 @@ void gSummaryChart::showHoverTip(gGraph &graph, const QString &text, const QPoin
     }
 }
 
+bool gSummaryChart::hoverEmptyDay(QPainter &painter, gGraph &graph, const QRectF &plot, const QPoint &mouse,
+                                  const QDate &first, double slotWidth)
+{
+    if (graph.printing() || slotWidth <= 0 || !plot.contains(mouse)) return false;
+    const int slotNumber = int((mouse.x() - plot.left()) / slotWidth);
+    const QRectF slot(plot.left() + slotNumber * slotWidth, plot.top(), slotWidth, plot.height());
+    const QDate date = first.addDays(slotNumber);
+    paintHoverMarker(painter, graph, plot, slot, date, -1, false);
+    showHoverTip(graph, date.toString(QLocale::system().dateFormat(QLocale::ShortFormat)), mouse, plot);
+    return true;
+}
+
+void gSummaryChart::paintFrame(QPainter &painter, gGraph &graph, const QRectF &plot)
+{
+    if (graph.graphView()->cardLook() && !graph.printing()) {
+        painter.setPen(GraphTheme::axis());
+        painter.drawLine(plot.topLeft(), plot.bottomLeft());
+        painter.drawLine(plot.bottomLeft(), plot.bottomRight());
+    } else {
+        painter.setPen(GraphTheme::ink(Qt::black));
+        painter.drawRect(plot);
+    }
+}
+
 void gSummaryChart::clearHover(gGraph &graph)
 {
     // As with a new day under the mouse, the date axis needs one more frame to drop the bold label
@@ -676,8 +700,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
 
     rect.translate(0.0f, 0.001f);
 
-    painter.setPen(GraphTheme::ink(Qt::black));
-    painter.drawRect(rect);
+    paintFrame(painter, graph, rect);
 
     rect.moveBottom(rect.bottom()+1);
 
@@ -693,6 +716,14 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     int days = ceil(double(m_maxx - m_minx) / 86400000.0);
     m_visStart = date;
     m_visEnd = date.addDays(qMax(days, 1) - 1);
+
+    // Card look, and nothing drawn under the mouse: the day still shows its date
+    const QDate chartStart = date;
+    const auto emptyHover = [&]() {
+        if (!graph.graphView()->cardLook() || graph.printing()) return false;
+        return hoverEmptyDay(painter, graph, rect, graph.graphView()->currentMousePos(), chartStart,
+                             double(rect.width()) / qMax(days, 1));
+    };
 
     auto it = dayindex.find(date);
     idx_start = 0;
@@ -715,8 +746,11 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     if (enddate > lastday) {  // enddate = last date of chart; lastday = last date of data
         numDaysAfter = lastday.daysTo(enddate);
     }
-    if (numDaysAfter > days)        // Nothing to do if this data is off the left edge of the chart
+    if (numDaysAfter > days) {      // Nothing to do if this data is off the left edge of the chart
+        graph.setHoverDate(QDate());
+        if (!emptyHover()) clearHover(graph);
         return;
+    }
 
     auto ite = dayindex.find(enddate);
     idx_end = daylist.size()-1;
@@ -736,8 +770,11 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     int hl_idx = -1;
     bool hl = false;
 
-    if ((daylist.size() == 0) || (it == dayindex.end()))
+    if ((daylist.size() == 0) || (it == dayindex.end())) {
+        graph.setHoverDate(QDate());
+        if (!emptyHover()) clearHover(graph);
         return;
+    }
 
 
 //            dc++;
@@ -901,7 +938,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
         if (hl) painter.fillRect(hl_rect, QBrush(QColor(255, 0, 0, 64)));
     } else if (hl) {
         paintHoverMarker(painter, graph, rect, hl_rect, hl_date, hl_idx, hl_day != nullptr);
-    } else {
+    } else if (!emptyHover()) {
         clearHover(graph);
     }
     if (hl) {

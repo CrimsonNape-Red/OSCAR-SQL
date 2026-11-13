@@ -278,6 +278,16 @@ protected:
                           const QDate &date, int idx, bool hasData);
     //! \brief Called when no day is under the mouse: redraws once so the date label stops being bold
     void clearHover(gGraph &graph);
+    /*! \brief Card look: marks the day under the mouse when nothing was drawn for it, and shows
+        its date alone in the tooltip, so the tooltip does not keep the last bar's figures
+        \param first The date of the leftmost day slot of \a plot
+        \param slotWidth Width of one day's slot
+        \returns false when the mouse is not over \a plot, or the page is being printed */
+    bool hoverEmptyDay(QPainter &painter, gGraph &graph, const QRectF &plot, const QPoint &mouse,
+                       const QDate &first, double slotWidth);
+    /*! \brief Draws the plot's frame: a black rectangle in the 2.1 look and on paper; in the card
+        look only the left and bottom axis lines, in grey */
+    void paintFrame(QPainter &painter, gGraph &graph, const QRectF &plot);
     //! \brief True for a plain left click on the Details button
     bool isDetailsClick(QMouseEvent *event) const;
     /*! \brief The lines this chart offers between \a start and \a end, each with its default

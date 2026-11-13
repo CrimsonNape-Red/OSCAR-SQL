@@ -390,7 +390,7 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         painter.drawRoundedRect(QRectF(m_rect).adjusted(0.5, 0.5, -0.5, -0.5), GraphCard::Radius, GraphCard::Radius);
 
         const QRect header = GraphCard::headerRect(m_rect);
-        int x = header.left() + (isPinned() ? 16 : 0);      // the pin icon sits at the far left
+        int x = header.left() + (isPinned() ? 24 : 0);      // the pin icon sits at the far left
         // Text stops short of the menu button, however narrow the card (a popped-out graph can
         // be made very narrow)
         const int textRight = GraphCard::menuButtonRect(m_rect).left() - 8;
@@ -595,11 +595,12 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
 
     if (isPinned() && !printing()) {
         if (card) {
-            // A small pin at the left of the header, in the space the title leaves for it
+            // A pin at the left of the header, in the space the title leaves for it, as large
+            // as the header band allows
             const QRect header = GraphCard::headerRect(m_rect);
             painter.save();
             painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-            painter.drawPixmap(QRect(header.left() - 6, header.center().y() - 10, 20, 20), m_graphview->pin_icon);
+            painter.drawPixmap(QRect(header.left() - 8, header.center().y() - 15, 30, 30), m_graphview->pin_icon);
             painter.restore();
         } else {
             painter.drawPixmap(-5, originY-10, m_graphview->pin_icon);

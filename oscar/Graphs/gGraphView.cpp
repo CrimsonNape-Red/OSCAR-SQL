@@ -48,6 +48,7 @@
 #include "Graphs/gOverviewGraph.h"
 #endif
 #include "Graphs/gSummaryChart.h"
+#include "Graphs/gSessionTimesChart.h"
 #include "Graphs/gYAxis.h"
 #include "Graphs/gFlagsLine.h"
 #include "SleepLib/profiles.h"
@@ -2368,10 +2369,12 @@ void gGraphView::populateMenu(gGraph * graph)
     gSummaryChart * stg = dynamic_cast<gSummaryChart *>(findLayer(graph,LT_Overview));
 
     limits_menu->clear();
+    // Card look: Session Times has no scale to override (its axis is the time of day)
+    const bool fixedScale = cardLook() && dynamic_cast<gSessionTimesChart *>(stg);
     #ifndef REMOVE_FITNESS
-    if (lc || sc || stg )
+    if ((lc || sc || stg) && !fixedScale)
     #else
-    if (lc || stg )
+    if ((lc || stg) && !fixedScale)
     #endif
     {
         QWidgetAction * widget = new QWidgetAction(this);
@@ -2599,6 +2602,16 @@ void gGraphView::populateMenu(gGraph * graph)
             QCheckBox *chbox = new QCheckBox(QString("%1  (%2)").arg(line.label, value), context_menu);
             chbox->setMouseTracking(true);
             chbox->setChecked(line.enabled);
+            // A sample of the line, in its colour
+            QPixmap sample(24, 12);
+            sample.fill(Qt::transparent);
+            {
+                QPainter samplePainter(&sample);
+                samplePainter.setPen(QPen(QBrush(GraphTheme::ink(line.color)), 3, Qt::DotLine));
+                samplePainter.drawLine(1, 6, 23, 6);
+            }
+            chbox->setIcon(QIcon(sample));
+            chbox->setIconSize(sample.size());
             widget->setDefaultWidget(chbox);
             const int id = line.id;
             connect(chbox, &QCheckBox::toggled, this, [this, stg, id](bool on) {

@@ -1830,22 +1830,66 @@ void MainWindow::setupColorSchemeButton()
 {
     m_pageThemeKey = paletteKey();      // pages are built in the current colours
 
-    if (!ColorScheme::canSwitchLive()) return;     // Preferences > Appearance only, with a restart
-
     // QTabWidget caps a corner widget at the tab bar's height and aligns it to the bottom, so
-    // size the button to fit inside the bar. A little space keeps it off the window edge.
+    // size the buttons to fit inside the bar. A little space keeps them off the window edge.
     auto *corner = new QWidget(ui->tabWidget);
     auto *layout = new QHBoxLayout(corner);
     layout->setContentsMargins(0, 0, 6, 0);
-    auto *button = new UiKit::IconButton(corner);
-    button->setFrameless(true);
-    button->setSide(qMax(20, ui->tabWidget->tabBar()->sizeHint().height() - 2));
-    layout->addWidget(button, 0, Qt::AlignVCenter);
+    layout->setSpacing(4);
+    const int side = qMax(20, ui->tabWidget->tabBar()->sizeHint().height() - 2);
+
+    auto *look = new UiKit::IconButton(corner);
+    look->setFrameless(true);
+    look->setSide(side);
+    layout->addWidget(look, 0, Qt::AlignVCenter);
+    m_pageLookButton = look;
+    connect(look, &QAbstractButton::clicked, this, &MainWindow::togglePageLook);
+
+    if (ColorScheme::canSwitchLive()) {     // otherwise Preferences > Appearance only, with a restart
+        auto *button = new UiKit::IconButton(corner);
+        button->setFrameless(true);
+        button->setSide(side);
+        layout->addWidget(button, 0, Qt::AlignVCenter);
+        m_colorSchemeButton = button;
+        connect(button, &QAbstractButton::clicked, this, &MainWindow::toggleColorScheme);
+    }
     ui->tabWidget->setCornerWidget(corner, Qt::TopRightCorner);
     corner->show();     // a corner widget set after the tab widget is shown starts hidden
 
-    m_colorSchemeButton = button;
-    connect(button, &QAbstractButton::clicked, this, &MainWindow::toggleColorScheme);
+    updatePageLookButton();
+    updateColorSchemeButton();
+}
+
+void MainWindow::updatePageLookButton()
+{
+    auto *button = qobject_cast<UiKit::IconButton *>(m_pageLookButton);
+    if (!button) return;
+    const bool modern = AppSetting->useNewPages();
+    button->setLineIcon(modern ? UiKit::LineIcon::ClassicLook : UiKit::LineIcon::ModernLook);
+    const QString tip = modern ? tr("Switch to the Classic pages") : tr("Switch to the Modern pages");
+    button->setToolTip(tip);
+    button->setAccessibleName(tip);
+}
+
+void MainWindow::togglePageLook()
+{
+    const bool modern = AppSetting->useNewPages();
+    const bool live = ColorScheme::canSwitchLive();
+    if (live) {
+        if (modern) {
+            // The Classic pages are made for light colours. Keep the present choice for the way back.
+            AppSetting->setModernColorScheme(int(AppSetting->colorScheme()));
+            AppSetting->setColorScheme(CSC_Light);
+        } else if (AppSetting->modernColorScheme() >= 0) {
+            AppSetting->setColorScheme(ColorSchemeChoice(AppSetting->modernColorScheme()));
+        }
+    }
+    AppSetting->setUseNewPages(!modern);
+    p_pref->Save();             // keep the choice even if OSCAR doesn't close normally
+    if (live) ColorScheme::apply();
+    if (welcome) rebuildWelcomePage();
+    rebuildOverviewPage();
+    updatePageLookButton();
     updateColorSchemeButton();
 }
 
@@ -2097,6 +2141,7 @@ void MainWindow::on_action_Preferences_triggered()
         }
         if (pagesChanged) {
             rebuildOverviewPage();
+            updatePageLookButton();
         }
 
 

@@ -53,10 +53,15 @@ QColor darkBarColour(const QColor &c);
 
 /*! \brief Draws one part of a bar in \a r
 
+    In light mode a bar at least 4 pixels wide has a one-pixel black line up its sides and
+    across its top (as in OSCAR 2.1.0); in dark mode, where it would not show, there is none.
+
     \param top The top part of the bar, whose top corners are rounded when \a shaded is true
+    \param closed The outline also runs along the bottom: for a piece that stands on nothing
+           (a session in Session Times). Otherwise the bottom is left to the part below, or the axis.
     \param shaded Shaded left to right; false for a plain fill, which is 25% brighter than
            \a c when the bar is more than 3 pixels wide (as in OSCAR 2.1.0) */
-void paintSegment(QPainter &p, const QRectF &r, const QColor &c, bool top, bool shaded);
+void paintSegment(QPainter &p, const QRectF &r, const QColor &c, bool top, bool shaded, bool closed = false);
 
 /*! \brief Places a bar the way OSCAR 2.1 did: it fills the whole slot, so bars touch
 

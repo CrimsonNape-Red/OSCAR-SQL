@@ -20,6 +20,9 @@ private slots:
     void testBarGradientStops();
     void testDarkBarColourIsMuted();
     void testDarkGradientDoesNotGlare();
+    void testDarkGreyBarsStayReadable();
+    void testLightBarHasThinBlackOutline();
+    void testClosedOutlineRunsAlongBottom();
     void testPlainFillLighterAboveThreePixels();
     void testTopIsFlatWithRoundedCorners();
     void testContrastingText();

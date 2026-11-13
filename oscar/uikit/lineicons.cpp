@@ -270,9 +270,43 @@ QPainterPath sunIcon()
     return p;
 }
 
+//! \brief Modern look: a four-pointed sparkle with a small one beside it
+QPainterPath modernLookIcon()
+{
+    QPainterPath p;
+    const QPointF c(10.5, 13.5);
+    const double r = 8.0, in = 2.2;     // tip distance, and how far the sides stay from the centre
+    p.moveTo(c.x(), c.y() - r);
+    p.quadTo(c.x() + in, c.y() - in, c.x() + r, c.y());
+    p.quadTo(c.x() + in, c.y() + in, c.x(), c.y() + r);
+    p.quadTo(c.x() - in, c.y() + in, c.x() - r, c.y());
+    p.quadTo(c.x() - in, c.y() - in, c.x(), c.y() - r);
+    line(p, 19.5, 2.5, 19.5, 7.5);
+    line(p, 17, 5, 22, 5);
+    return p;
+}
+
+//! \brief Classic look: a clock face inside an arrow that turns back
+QPainterPath classicLookIcon()
+{
+    QPainterPath p;
+    const QRectF circle(3.5, 3.5, 17, 17);
+    p.arcMoveTo(circle, 200);
+    p.arcTo(circle, 200, 295);
+    p.moveTo(2.5, 4.5);
+    p.lineTo(2.5, 9.5);
+    p.lineTo(7.5, 9.5);
+    p.moveTo(12, 8);
+    p.lineTo(12, 12.5);
+    p.lineTo(15, 14.5);
+    return p;
+}
+
 QPainterPath iconPath(LineIcon icon)
 {
     switch (icon) {
+    case LineIcon::ModernLook: return modernLookIcon();
+    case LineIcon::ClassicLook: return classicLookIcon();
     case LineIcon::Moon: return moonIcon();
     case LineIcon::Sun: return sunIcon();
     case LineIcon::Clear: return clearIcon();

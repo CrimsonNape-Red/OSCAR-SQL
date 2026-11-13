@@ -60,7 +60,7 @@ void OverviewBarsTests::testBarGradientStops()
 void OverviewBarsTests::testDarkBarColourIsMuted()
 {
     // On a dark background pale colours glare, so they are brought down to a medium shade
-    QVERIFY(darkBarColour(QColor(Qt::white)).lightnessF() <= 0.5f);
+    QVERIFY(darkBarColour(QColor(Qt::white)).lightnessF() <= 0.8f);
     QVERIFY(darkBarColour(QColor(0xE0, 0xF0, 0xFF)).lightnessF() <= 0.5f);
     // A colour keeps its hue, and is never made brighter
     const QColor blue(0x40, 0x80, 0xff);
@@ -85,6 +85,53 @@ void OverviewBarsTests::testDarkGradientDoesNotGlare()
     QCOMPARE(stops.at(0).second, darkBarColour(QColor(0x40, 0x80, 0xff)));
     QVERIFY(stops.at(1).second.lightnessF() > stops.at(0).second.lightnessF());
     QVERIFY(stops.at(1).second.lightnessF() <= 0.6f);
+}
+
+void OverviewBarsTests::testDarkGreyBarsStayReadable()
+{
+    // A grey has no colour to set it off from the dark background, so it is kept well above it
+    // (these are what GraphTheme::ink() makes of the Large Leak and Flow Limitation greys)
+    const QColor low = darkBarColour(QColor(0x3c, 0x3c, 0x3c));
+    const QColor mid = darkBarColour(QColor(0x86, 0x86, 0x86));
+    QVERIFY(low.lightnessF() >= 0.4f);
+    QVERIFY(mid.lightnessF() > low.lightnessF() + 0.05f);   // shades of grey stay distinct
+    QVERIFY(mid.lightnessF() <= 0.8f);
+    QCOMPARE(low.hslSaturationF(), 0.0f);                   // and stay grey
+}
+
+void OverviewBarsTests::testLightBarHasThinBlackOutline()
+{
+    // Light mode: a one-pixel black line up the sides and across the top, as in OSCAR 2.1.0
+    QImage img(60, 40, QImage::Format_ARGB32);
+    img.fill(Qt::white);
+    {
+        QPainter p(&img);
+        paintSegment(p, QRectF(0, 0, 40, 40), QColor(0x40, 0x80, 0xff), false, true);
+        paintSegment(p, QRectF(50, 0, 3, 40), QColor(0x40, 0x80, 0xff), false, true);   // too narrow for one
+    }
+    auto black = [&img](int x, int y) { return qGray(img.pixel(x, y)) < 40; };
+    QVERIFY(black(0, 20));
+    QVERIFY(black(39, 20));
+    QVERIFY(black(20, 0));
+    QVERIFY(!black(1, 20));             // one pixel only
+    QVERIFY(!black(20, 20));
+    QVERIFY(!black(20, 39));            // no line along the bottom: the next part's top, or the axis, is there
+    QVERIFY(!black(50, 20));
+}
+
+void OverviewBarsTests::testClosedOutlineRunsAlongBottom()
+{
+    // A piece that stands on nothing (a session) is outlined all round
+    QImage img(40, 40, QImage::Format_ARGB32);
+    img.fill(Qt::white);
+    {
+        QPainter p(&img);
+        paintSegment(p, QRectF(0, 0, 40, 30), QColor(0x40, 0x80, 0xff), true, true, true);
+    }
+    auto black = [&img](int x, int y) { return qGray(img.pixel(x, y)) < 40; };
+    QVERIFY(black(20, 29));
+    QVERIFY(!black(20, 28));
+    QVERIFY(black(0, 15));
 }
 
 void OverviewBarsTests::testPlainFillLighterAboveThreePixels()

@@ -451,7 +451,7 @@ void Overview::buildRangeStrip()
     // The drop-down's ranges by item number, less the two- and six-month ones
     const QVector<QPair<int, QString>> ranges = {
         { 0, tr("1 week") }, { 1, tr("2 weeks") }, { 2, tr("1 month") }, { 4, tr("3 months") },
-        { 6, tr("1 year") }, { 7, tr("Everything") }, { 8, tr("Custom") }, { 9, tr("Snapshot") } };
+        { 6, tr("1 year") }, { 7, tr("All") }, { 8, tr("Custom") }, { 9, tr("Snapshot") } };
     // The same ranges as named when the window is too narrow for the full names
     const QStringList shortNames = { tr("1W"), tr("2W"), tr("1M"), tr("3M"), tr("1Y"), tr("All"), tr("Custom"), tr("Snapshot") };
     int rangeNumber = -1;
@@ -515,6 +515,12 @@ void Overview::buildRangeStrip()
     // the widths measured for the bar hold
     ui->graphCombo->setMinimumWidth(170);
     ui->frame->installEventFilter(this);
+
+    // The Tab key goes along the bar from left to right
+    QList<QWidget *> tabOrder;
+    for (QAbstractButton *button : m_rangeButtons->buttons()) tabOrder.append(button);
+    tabOrder << ui->dateStart << ui->dateEnd << ui->zoomButton << ui->graphCombo << ui->layout << ui->graphHelp;
+    for (int i = 1; i < tabOrder.size(); ++i) QWidget::setTabOrder(tabOrder.at(i - 1), tabOrder.at(i));
 }
 
 void Overview::setStripCompact(bool compact)
@@ -954,7 +960,7 @@ void Overview::on_XBoundsChanged(qint64 start,qint64 end)
         const QDate first = QDateTime::fromMSecsSinceEpoch(start, QTimeZone::systemTimeZone()).date();
         const int days = qMax(1, int(std::ceil(double(end - start) / 86400000.0)));
         m_statsRow->setRange(first, first.addDays(days - 1));
-        if (m_daysLabel) m_daysLabel->setText(days == 1 ? tr("1 day") : tr("%1 days").arg(days));
+        if (m_daysLabel) m_daysLabel->setText(days == 1 ? tr("1 night") : tr("%1 nights").arg(days));
     }
 
     bool largerRange=false;
