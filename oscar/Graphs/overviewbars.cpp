@@ -27,6 +27,9 @@ constexpr float kDarkCompress = 0.40f;  //!< How much more a light colour loses:
 constexpr float kDarkSaturation = 0.8f; //!< Share of a bar colour's saturation kept in dark mode
 constexpr int kDarkShade = 122;         //!< Far end of a bar's shading in dark mode (QColor::lighter)
 constexpr float kDarkGreyLift = 0.28f;  //!< Lightness added to a grey in dark mode; less the more colour there is
+constexpr float kDarkWarmLift = 0.13f;  //!< Lightness added to orange in dark mode, where it would turn brown
+constexpr float kWarmHue = 45.0f;       //!< Hue (degrees) that gets all of kDarkWarmLift
+constexpr float kWarmSpread = 30.0f;    //!< Degrees either side of kWarmHue over which the lift fades out
 constexpr double kMinOutlined = 4.0;    //!< Narrowest bar outlined in light mode
 
 double toLinear(double v) { return v <= 0.04045 ? v / 12.92 : std::pow((v + 0.055) / 1.055, 2.4); }
@@ -80,7 +83,10 @@ QColor darkBarColour(const QColor &c)
     // Lightness is compressed, not capped, so that shades of one colour stay distinct. A grey
     // has no colour to set it off from the dark background, so it is lifted clear of it.
     const float grey = (1.0f - s) * (1.0f - s) * (1.0f - s);
-    const float lightness = qMin(1.0f, l * (kDarkLightness - kDarkCompress * l) + kDarkGreyLift * grey);
+    // Orange and yellow turn brown when darkened as far as the other colours, so they keep more light
+    const float warm = h < 0.0f ? 0.0f : qMax(0.0f, 1.0f - qAbs(h * 360.0f - kWarmHue) / kWarmSpread) * s;
+    const float lightness = qMin(1.0f, l * (kDarkLightness - kDarkCompress * l) + kDarkGreyLift * grey
+                                       + kDarkWarmLift * warm);
     return QColor::fromHslF(h, s * kDarkSaturation, lightness, a);
 }
 

@@ -1873,24 +1873,11 @@ void MainWindow::updatePageLookButton()
 
 void MainWindow::togglePageLook()
 {
-    const bool modern = AppSetting->useNewPages();
-    const bool live = ColorScheme::canSwitchLive();
-    if (live) {
-        if (modern) {
-            // The Classic pages are made for light colours. Keep the present choice for the way back.
-            AppSetting->setModernColorScheme(int(AppSetting->colorScheme()));
-            AppSetting->setColorScheme(CSC_Light);
-        } else if (AppSetting->modernColorScheme() >= 0) {
-            AppSetting->setColorScheme(ColorSchemeChoice(AppSetting->modernColorScheme()));
-        }
-    }
-    AppSetting->setUseNewPages(!modern);
+    AppSetting->setUseNewPages(!AppSetting->useNewPages());
     p_pref->Save();             // keep the choice even if OSCAR doesn't close normally
-    if (live) ColorScheme::apply();
     if (welcome) rebuildWelcomePage();
     rebuildOverviewPage();
     updatePageLookButton();
-    updateColorSchemeButton();
 }
 
 void MainWindow::updateColorSchemeButton()

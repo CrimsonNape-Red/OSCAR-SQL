@@ -99,6 +99,20 @@ void OverviewBarsTests::testDarkGreyBarsStayReadable()
     QCOMPARE(low.hslSaturationF(), 0.0f);                   // and stay grey
 }
 
+void OverviewBarsTests::testDarkOrangeStaysAmber()
+{
+    // Orange and yellow turn brown when darkened like the other colours, so they keep more light
+    const QColor orange("orange");
+    const QColor amber = darkBarColour(orange);
+    QVERIFY(qAbs(amber.hslHue() - orange.hslHue()) <= 2);
+    QVERIFY(amber.lightnessF() >= 0.42f);
+    QVERIFY(amber.lightnessF() <= 0.5f);        // still no brighter than the original
+    // Its lighter shade (the pressure chart's 95% part) stays distinct
+    QVERIFY(darkBarColour(QColor(255, 200, 110)).lightnessF() > amber.lightnessF() + 0.03f);
+    // Colours away from orange are untouched: blue stays as dark as before
+    QVERIFY(darkBarColour(QColor(0x40, 0x80, 0xff)).lightnessF() < 0.40f);
+}
+
 void OverviewBarsTests::testLightBarHasThinBlackOutline()
 {
     // Light mode: a one-pixel black line up the sides and across the top, as in OSCAR 2.1.0

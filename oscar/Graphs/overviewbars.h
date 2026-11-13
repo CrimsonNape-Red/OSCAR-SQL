@@ -48,7 +48,8 @@ QLinearGradient barGradient(const QColor &c, double left, double width);
 QLinearGradient barGradient(const QColor &c, double left, double width, bool dark);
 
 /*! \brief A bar colour for dark mode: \a c with the same hue, less saturated, and no lighter
-    than a medium shade. Pale colours, made for a white background, are brought down the most. */
+    than a medium shade. Pale colours, made for a white background, are brought down the most.
+    Greys are lifted clear of the background, and orange keeps enough light to stay amber. */
 QColor darkBarColour(const QColor &c);
 
 /*! \brief Draws one part of a bar in \a r

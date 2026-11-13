@@ -496,9 +496,7 @@ private:
     QAbstractButton *m_colorSchemeButton = nullptr;     //!< Moon/sun button; null on older Qt
     //! \brief Shows the look the button switches to (Classic or Modern pages), with a matching tooltip
     void updatePageLookButton();
-    /*! \brief Switches between the Classic (2.1) and Modern (redesigned) pages. Going to Classic
-        also goes to light colours, which those pages are made for; coming back to Modern
-        restores the colour scheme that was in use before. */
+    //! \brief Switches between the Classic (2.1) and Modern (redesigned) pages, and saves the choice
     void togglePageLook();
     QAbstractButton *m_pageLookButton = nullptr;        //!< Classic/Modern button, left of the moon/sun
 

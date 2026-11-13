@@ -21,6 +21,7 @@ private slots:
     void testDarkBarColourIsMuted();
     void testDarkGradientDoesNotGlare();
     void testDarkGreyBarsStayReadable();
+    void testDarkOrangeStaysAmber();
     void testLightBarHasThinBlackOutline();
     void testClosedOutlineRunsAlongBottom();
     void testPlainFillLighterAboveThreePixels();
