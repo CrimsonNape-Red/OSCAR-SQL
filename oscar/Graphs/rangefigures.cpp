@@ -30,6 +30,19 @@ double ahi(const QDate &start, const QDate &end)
     return events / hours;
 }
 
+bool ahiAvailable(const QDate &start, const QDate &end)
+{
+    if (!p_profile) return false;
+    if (ahi(start, end) > 0) return true;
+    const QList<Machine *> machines = p_profile->GetMachines(MT_CPAP);
+    for (Machine *machine : machines) {
+        for (const ChannelID code : ahiChannels) {
+            if (machine->hasChannel(code)) return true;
+        }
+    }
+    return false;
+}
+
 int daysUsed(const QDate &start, const QDate &end)
 {
     return p_profile ? p_profile->countDays(MT_CPAP, start, end) : 0;

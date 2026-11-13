@@ -25,6 +25,11 @@ namespace RangeFigures {
 //! \brief AHI (or RDI when the profile is set to show RDI): events divided by hours of use
 double ahi(const QDate &start, const QDate &end);
 
+/*! \brief True when ahi() is a figure to show: the range has events, or one of the profile's
+    CPAP devices records them. A device that records none (a summary-only basic model) has no
+    AHI, which is not the same as an AHI of zero. */
+bool ahiAvailable(const QDate &start, const QDate &end);
+
 //! \brief Hours of use divided by the number of days the device was used
 double usageAverage(const QDate &start, const QDate &end);
 

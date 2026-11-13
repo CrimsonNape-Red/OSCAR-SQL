@@ -240,7 +240,7 @@ QVector<SummaryLine> gAHIChart::calcLines(const QDate &start, const QDate &end, 
     SummaryLine line{ SL_Middle, p_profile->general->calculateRDI() ? STR_TR_RDI : STR_TR_AHI, 0,
                       QColor(120, 40, 160), false };
     if (wanted & (1u << SL_Middle)) {
-        line.available = RangeFigures::daysUsed(start, end) > 0;
+        line.available = RangeFigures::daysUsed(start, end) > 0 && RangeFigures::ahiAvailable(start, end);
         if (line.available) line.value = RangeFigures::ahi(start, end);
     }
     out.append(line);

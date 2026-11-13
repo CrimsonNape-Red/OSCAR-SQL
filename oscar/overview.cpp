@@ -470,7 +470,7 @@ void Overview::buildRangeStrip()
         button->setCheckable(true);
         button->setFocusPolicy(Qt::TabFocus);
         // Wide enough for the bold text of the chosen range, so choosing one moves nothing
-        button->setMinimumWidth(boldMetrics.horizontalAdvance(range.second) + 20);
+        button->setMinimumWidth(boldMetrics.horizontalAdvance(range.second) + 14);
         m_rangeButtons->addButton(button, range.first);
         row->addWidget(button);
     }
@@ -511,6 +511,9 @@ void Overview::buildRangeStrip()
     connect(ui->rangeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, sync);
     sync(ui->rangeCombo->currentIndex());
     styleRangeStrip();
+    // A steady width for the graphs drop-down, whose own changes with the text it shows, so
+    // the widths measured for the bar hold
+    ui->graphCombo->setMinimumWidth(170);
     ui->frame->installEventFilter(this);
 }
 
@@ -524,7 +527,7 @@ void Overview::setStripCompact(bool compact)
     for (QAbstractButton *button : m_rangeButtons->buttons()) {
         const QString text = button->property(compact ? "shortText" : "fullText").toString();
         button->setText(text);
-        button->setMinimumWidth(metrics.horizontalAdvance(text) + (compact ? 12 : 20));
+        button->setMinimumWidth(metrics.horizontalAdvance(text) + (compact ? 12 : 14));
     }
     if (m_daysLabel) m_daysLabel->setVisible(!compact);
     // The bar's layout keeps the strip's old size until told the strip has changed
@@ -534,11 +537,15 @@ void Overview::setStripCompact(bool compact)
 
 bool Overview::eventFilter(QObject *watched, QEvent *event)
 {
-    if (watched == ui->frame && event->type() == QEvent::Resize && m_rangeStrip) {
+    const bool sized = event->type() == QEvent::Resize || event->type() == QEvent::Show;
+    // Only once the bar is on screen: before that its buttons do not have their final font and
+    // style, and the widths measured below would be wrong
+    if (watched == ui->frame && sized && m_rangeStrip && ui->frame->isVisible()) {
         if (m_stripFullWidth == 0) {
-            // Once, when first laid out: the width the full names need, and the width the short
-            // ones need, which becomes the narrowest the selection bar can be
+            // The width the full names need, and the width the short ones need, which becomes
+            // the narrowest the selection bar can be
             for (QWidget *child : ui->frame->findChildren<QWidget *>()) child->ensurePolished();
+            setStripCompact(false);
             ui->horizontalLayout->invalidate();
             m_stripFullWidth = ui->horizontalLayout->minimumSize().width();
             setStripCompact(true);
@@ -596,6 +603,13 @@ void Overview::styleRangeStrip()
 void Overview::changeEvent(QEvent *event)
 {
     QWidget::changeEvent(event);
+    if (event->type() == QEvent::FontChange && m_rangeStrip) {
+        // A new font size changes the widths the selection bar needs: measure them again
+        m_stripFullWidth = 0;
+        ui->frame->setMinimumWidth(0);
+        QEvent resize(QEvent::Resize);
+        eventFilter(ui->frame, &resize);
+    }
     if (event->type() == QEvent::PaletteChange) {
         styleRangeStrip();
         if (m_dateAxis) m_dateAxis->update();

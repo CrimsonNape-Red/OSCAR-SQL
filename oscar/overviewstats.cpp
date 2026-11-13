@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "overviewstats.h"
+#include <QGuiApplication>
 
 #include <QApplication>
 #include <QPainter>
@@ -82,7 +83,8 @@ QVector<Stat> compute(const Range &shown)
 
     add(p_profile->general->calculateRDI() ? STR_TR_RDI : STR_TR_AHI,
         RangeFigures::ahi(shown.start, shown.end), RangeFigures::ahi(before.start, before.end),
-        2, QObject::tr("events/hour"), UiKit::Better::Lower);
+        2, QObject::tr("events/hour"), UiKit::Better::Lower,
+        RangeFigures::ahiAvailable(shown.start, shown.end), RangeFigures::ahiAvailable(before.start, before.end));
 
     add(QObject::tr("Average usage"),
         RangeFigures::usageAverage(shown.start, shown.end), RangeFigures::usageAverage(before.start, before.end),
@@ -126,8 +128,16 @@ OverviewStatsRow::OverviewStatsRow(QWidget *parent)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     m_timer.setSingleShot(true);
-    m_timer.setInterval(150);
-    connect(&m_timer, &QTimer::timeout, this, &OverviewStatsRow::recompute);
+    m_timer.setInterval(250);
+    connect(&m_timer, &QTimer::timeout, this, [this] {
+        // Not while the graphs are being dragged: the figures wait until the mouse is let go,
+        // so each step of the drag redraws the graphs only
+        if (QGuiApplication::mouseButtons() != Qt::NoButton) {
+            m_timer.start();
+            return;
+        }
+        recompute();
+    });
 }
 
 void OverviewStatsRow::setRange(const QDate &start, const QDate &end)
