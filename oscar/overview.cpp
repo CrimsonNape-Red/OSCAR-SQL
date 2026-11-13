@@ -452,14 +452,21 @@ void Overview::buildRangeStrip()
     const QVector<QPair<int, QString>> ranges = {
         { 0, tr("1 week") }, { 1, tr("2 weeks") }, { 2, tr("1 month") }, { 4, tr("3 months") },
         { 6, tr("1 year") }, { 7, tr("Everything") }, { 8, tr("Custom") }, { 9, tr("Snapshot") } };
+    // The same ranges as named when the window is too narrow for the full names
+    const QStringList shortNames = { tr("1W"), tr("2W"), tr("1M"), tr("3M"), tr("1Y"), tr("All"), tr("Custom"), tr("Snapshot") };
+    int rangeNumber = -1;
     QFont bold = font();
     bold.setBold(true);
     const QFontMetrics boldMetrics(bold);
     for (const auto &range : ranges) {
+        ++rangeNumber;
         if (range.first >= ui->rangeCombo->count()) continue;
         QToolButton *button = new QToolButton(m_rangeStrip);
         button->setText(range.second);
-        button->setToolTip(ui->rangeCombo->itemText(range.first));
+        button->setProperty("fullText", range.second);
+        button->setProperty("shortText", shortNames.at(rangeNumber));
+        button->setToolTip(range.first == 9 ? tr("Keep the dates now shown as the Custom range")
+                                            : ui->rangeCombo->itemText(range.first));
         button->setCheckable(true);
         button->setFocusPolicy(Qt::TabFocus);
         // Wide enough for the bold text of the chosen range, so choosing one moves nothing
@@ -504,6 +511,43 @@ void Overview::buildRangeStrip()
     connect(ui->rangeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, sync);
     sync(ui->rangeCombo->currentIndex());
     styleRangeStrip();
+    ui->frame->installEventFilter(this);
+}
+
+void Overview::setStripCompact(bool compact)
+{
+    if (!m_rangeButtons || compact == m_stripCompact) return;
+    m_stripCompact = compact;
+    QFont bold = font();
+    bold.setBold(true);
+    const QFontMetrics metrics(bold);
+    for (QAbstractButton *button : m_rangeButtons->buttons()) {
+        const QString text = button->property(compact ? "shortText" : "fullText").toString();
+        button->setText(text);
+        button->setMinimumWidth(metrics.horizontalAdvance(text) + (compact ? 12 : 20));
+    }
+    if (m_daysLabel) m_daysLabel->setVisible(!compact);
+    // The bar's layout keeps the strip's old size until told the strip has changed
+    m_rangeStrip->layout()->invalidate();
+    m_rangeStrip->updateGeometry();
+}
+
+bool Overview::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched == ui->frame && event->type() == QEvent::Resize && m_rangeStrip) {
+        if (m_stripFullWidth == 0) {
+            // Once, when first laid out: the width the full names need, and the width the short
+            // ones need, which becomes the narrowest the selection bar can be
+            for (QWidget *child : ui->frame->findChildren<QWidget *>()) child->ensurePolished();
+            ui->horizontalLayout->invalidate();
+            m_stripFullWidth = ui->horizontalLayout->minimumSize().width();
+            setStripCompact(true);
+            ui->horizontalLayout->invalidate();
+            ui->frame->setMinimumWidth(ui->horizontalLayout->minimumSize().width());
+        }
+        setStripCompact(ui->frame->width() < m_stripFullWidth);
+    }
+    return QWidget::eventFilter(watched, event);
 }
 
 //! \brief Two stacked boxes, for the button that saves and restores the graph layout
@@ -753,6 +797,11 @@ void Overview::ReloadGraphs()
 {
     GraphView->setDay(nullptr);
     updateCube();
+
+    // With no data there are no figures or dates to show, so their rows give up their space
+    const bool hasData = p_profile && p_profile->FirstDay().isValid();
+    if (m_statsRow) m_statsRow->setVisible(hasData);
+    if (m_dateAxis) m_dateAxis->setVisible(hasData);
 
     // A reload keeps the same range (it follows a light/dark switch, a journal edit or an
     // import), so the details popups stay open

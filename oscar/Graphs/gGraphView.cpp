@@ -641,7 +641,16 @@ bool gGraphView::isPopout() const
 
 void gGraphView::closePopout()
 {
-    if (QDockWidget *holder = qobject_cast<QDockWidget *>(parentWidget())) holder->close();
+    QDockWidget *holder = qobject_cast<QDockWidget *>(parentWidget());
+    if (!holder) return;
+    holder->close();
+    // The last graph to go takes the popout window with it, rather than leaving it empty
+    if (dock) {
+        for (QDockWidget *other : dock->findChildren<QDockWidget *>()) {
+            if (other->isVisible()) return;
+        }
+        dock->close();
+    }
 }
 
 bool gGraphView::onMenuButton(gGraph *g, int x, int y) const

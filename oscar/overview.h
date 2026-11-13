@@ -160,6 +160,8 @@ class Overview : public QWidget
     void changeEvent(QEvent *event) override;
     //! \brief Leaving the Overview tab closes the details popups
     void hideEvent(QHideEvent *event) override;
+    //! \brief Switches the selection bar between full and short range names as its width changes
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
   private:
     void CreateAllGraphs();
@@ -175,6 +177,11 @@ class Overview : public QWidget
     QWidget *m_rangeStrip = nullptr;            //!< The strip of range buttons; null on the original page
     OverviewStatsRow *m_statsRow = nullptr;     //!< Figures for the dates on screen; null on the original page
     QButtonGroup *m_rangeButtons = nullptr;     //!< Its buttons, numbered as the range drop-down's items
+    /*! \brief Narrow window: short range names ("1W") and no count of days, so the selection bar
+        does not set a wide minimum width for the whole window */
+    void setStripCompact(bool compact);
+    bool m_stripCompact = false;                //!< The selection bar is showing short range names
+    int m_stripFullWidth = 0;                   //!< Narrowest selection bar that fits the full names; 0 until measured
 
     //! \brief Applies the profile's saved choice of dotted lines to the graphs
     void loadDottedLines();
