@@ -751,8 +751,11 @@ bool Machine::Load(ProgressDialog *progress)
 #ifndef UNITTEST_MODE
     // Add loader pixmap to progress
     // Note: not used during test due to non-QGuiApplication quirks
+    // A device with no picture of its own (an oximeter, say) gets the generic one only when
+    // nothing is shown yet, so it does not replace the picture of a device loaded before it
     QPixmap image = getPixmap();
-    if (!image.isNull()) {
+    const bool generic = getPixmapPath() == genericPixmapPath;
+    if (!image.isNull() && !(generic && progress->hasPixmap())) {
         image = image.scaled(64,64);
         progress->setPixmap(image);
     }
