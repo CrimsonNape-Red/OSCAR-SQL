@@ -368,6 +368,9 @@ class gGraph : public QObject
         text above the plot as before. */
     bool headerSummary(const QString &text);
 
+    //! \brief Where the last paint() put the plot (the centre layers), in the view's coordinates
+    QRect plotRect() const { return m_plotRect; }
+
     //! \brief Card look: takes \a width pixels off the right of headerTextRect() (for a legend)
     void reserveHeaderRight(int width) { m_headerText.setWidth(qMax(0, m_headerText.width() - width)); }
     //! \brief The colour that stands for this graph, or an invalid colour if none was set
@@ -446,6 +449,7 @@ class gGraph : public QObject
     bool m_block_select;
     QRect m_rect;
     QRect m_headerText;             //!< See headerTextRect()
+    QRect m_plotRect;               //!< See plotRect()
     bool m_cardPainted = false;     //!< The last paint() drew this graph as a card
     int m_defaultLayerMinHeight;
 

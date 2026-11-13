@@ -13,6 +13,7 @@
 #include <cmath>
 
 #include "Graphs/rangefigures.h"
+#include "Graphs/graphtheme.h"
 #include "SleepLib/common.h"
 #include "SleepLib/profiles.h"
 #include "SleepLib/schema.h"
@@ -167,7 +168,7 @@ void OverviewStatsRow::paintEvent(QPaintEvent *)
     for (int i = 0; i < count; ++i) {
         const OverviewStats::Stat &stat = m_stats.at(i);
         const QRectF tile(kMargin + i * (tileWidth + kMargin), kMargin / 2.0, tileWidth, kTileHeight);
-        painter.setPen(QPen(Theme::color(Theme::Role::Line), 1));
+        painter.setPen(QPen(GraphTheme::outline(), 1));
         painter.setBrush(Theme::color(Theme::Role::Surface));
         painter.drawRoundedRect(tile.adjusted(0.5, 0.5, -0.5, -0.5), 10, 10);
 

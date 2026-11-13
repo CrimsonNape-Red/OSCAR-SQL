@@ -23,6 +23,7 @@
 #include "SleepLib/profiles.h"
 #include "Graphs/graphtheme.h"
 #include "Graphs/graphcard.h"
+#include "Graphs/gXAxis.h"
 #include "uikit/theme.h"
 
 extern MainWindow *mainwin;
@@ -384,7 +385,7 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
     if (card) {
         painter.save();
         painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setPen(QPen(Theme::color(Theme::Role::Line), 1));
+        painter.setPen(QPen(GraphTheme::outline(), 1));
         painter.setBrush(GraphTheme::background());
         painter.drawRoundedRect(QRectF(m_rect).adjusted(0.5, 0.5, -0.5, -0.5), GraphCard::Radius, GraphCard::Radius);
 
@@ -483,9 +484,15 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
 #endif
     int tmp;
 
+    // Where the page has one date axis for all its graphs, a graph leaves its own out.
+    // Printed graphs always draw theirs.
+    const bool sharedAxis = m_graphview->sharedXAxis() && !printing();
+    const auto leftOut = [sharedAxis](Layer *layer) {
+        return sharedAxis && dynamic_cast<gXAxisDay *>(layer) != nullptr;
+    };
 
     for (const auto & layer : m_layers) {
-        if (!layer->visible()) { continue; }
+        if (!layer->visible() || leftOut(layer)) { continue; }
 
         tmp = layer->minimumHeight();// * m_graphview->printScaleY();
 
@@ -532,7 +539,7 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
     }
 
     for (const auto & layer : m_layers) {
-        if (!layer->visible()) { continue; }
+        if (!layer->visible() || leftOut(layer)) { continue; }
 
         tmp = layer->minimumHeight();
 
@@ -562,6 +569,7 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         if (layer->position() == LayerCenter) {
             QRect rect(originX + left, originY + top, width - left - right, height - top - bottom);
             layer->m_rect = rect;
+            m_plotRect = rect;
             layer->paint(painter, *this, QRegion(rect));
         }
     }

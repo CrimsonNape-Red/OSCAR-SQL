@@ -115,6 +115,7 @@ QList<DetailRow> gSessionTimesChart::detailRows(Day *, int idx)
     if (!cache.contains(idx)) return rows;
     const QDateTime splitAt(dayindex.key(idx), split);
     for (const auto &s : cache[idx]) {
+        if (s.height == 0) continue;
         const QDateTime start = splitAt.addSecs(qint64(s.value * 3600.0));
         const QDateTime end = start.addSecs(qint64(s.height * 3600.0));
         const bool maskOff = (s.color == QColor(Qt::black));
@@ -367,7 +368,9 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
                     OverviewBars::paintClassicSegment(painter, rec, col, barw);
                     if (barw > 3) outlines.append(rec);
                 } else {
-                    // Each session is a piece of its own, with its own rounded top
+                    // Each session is a piece of its own, with its own rounded top; the one
+                    // under the mouse names itself in a tooltip
+                    if (rec.contains(mouse)) graph.ToolTip(slice.name, mouse.x() + 20, mouse.y(), TT_AlignBottomLeft);
                     OverviewBars::paintSegment(painter, rec, col, true, geo.shaded && !flatOnly);
                 }
 

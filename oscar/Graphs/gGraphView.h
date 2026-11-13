@@ -367,6 +367,13 @@ class gGraphView
     //! \brief True when graphs are drawn as outlined cards with a header
     bool cardLook() const { return m_look == GraphLook::Card; }
 
+    /*! \brief Says the page draws one date axis for all the graphs (see OverviewDateAxis), so
+        the graphs leave their own out. Printed graphs still draw theirs. */
+    void setSharedXAxis(bool shared) { m_sharedXAxis = shared; }
+
+    //! \brief True when the graphs leave their date axis to the page
+    bool sharedXAxis() const { return m_sharedXAxis; }
+
     //! \brief The width of the vertical text Title area for all graphs
     static const int titleWidth = 30;
 
@@ -811,8 +818,11 @@ public:
 
     bool m_showAuthorMessage;
     GraphLook m_look = GraphLook::Classic;  //!< How graphs are framed (see setLook())
+    bool m_sharedXAxis = false;             //!< See setSharedXAxis()
 
   signals:
+    //! \brief The view has just drawn itself
+    void painted();
     //! \brief The user switched a summary chart's dotted line on or off
     void summaryLinesChanged();
     void updateCurrentTime(double);

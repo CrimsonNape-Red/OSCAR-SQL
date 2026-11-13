@@ -43,6 +43,8 @@ class Report;
 class Overview;
 class OverviewDetailsPopup;
 class OverviewStatsRow;
+class OverviewDateAxis;
+class QLabel;
 
 class DateErrorDisplay:QObject {
 	Q_OBJECT
@@ -162,11 +164,14 @@ class Overview : public QWidget
   private:
     void CreateAllGraphs();
 
-    /*! \brief Redesigned page: moves the selection bar to the top of the page and replaces the
-        range drop-down with a strip of buttons, one per range, in the drop-down's order */
+    /*! \brief Redesigned page: moves the selection bar to the top of the page, replaces the
+        range drop-down with a strip of buttons, and adds the statistics row and the one date
+        axis below the graphs */
     void buildRangeStrip();
-    //! \brief Colours the range strip from the theme (again after a light/dark switch)
+    //! \brief Colours the selection bar from the theme (again after a light/dark switch)
     void styleRangeStrip();
+    OverviewDateAxis *m_dateAxis = nullptr;     //!< The one date axis under the graphs; null on the original page
+    QLabel *m_daysLabel = nullptr;              //!< Number of days on screen, beside the dates; null on the original page
     QWidget *m_rangeStrip = nullptr;            //!< The strip of range buttons; null on the original page
     OverviewStatsRow *m_statsRow = nullptr;     //!< Figures for the dates on screen; null on the original page
     QButtonGroup *m_rangeButtons = nullptr;     //!< Its buttons, numbered as the range drop-down's items

@@ -516,6 +516,7 @@ QList<DetailRow> gSummaryChart::detailRows(Day *day, int idx)
     const auto &slices = slicesFor(day, idx);
     for (int i = slices.size() - 1; i >= 0; --i) {
         const auto &s = slices.at(i);
+        if (s.value == 0) continue;     // only the parts that have something to show
         rows.append({ QString::number(s.value, 'f', 2), s.name.trimmed(), QString(), s.color, s.height });
     }
     return rows;
@@ -851,17 +852,20 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     if (classic) {
         painter.setPen(QPen(GraphTheme::ink(Qt::black), 1));
         painter.drawRects(outlines);
-        if (hl) {
-            // The day under the mouse is washed red and its numbers shown in a tooltip
-            painter.fillRect(hl_rect, QBrush(QColor(255, 0, 0, 64)));
-            QString txt = hl_date.toString(QLocale::system().dateFormat(QLocale::ShortFormat)) + " ";
-            if (hl_day) txt += tooltipData(hl_day, hl_idx);
-            graph.ToolTip(txt, mouse.x() + 20, mouse.y(), TT_AlignBottomLeft);
-        }
+        // The day under the mouse is washed red
+        if (hl) painter.fillRect(hl_rect, QBrush(QColor(255, 0, 0, 64)));
     } else if (hl) {
         paintHoverMarker(painter, graph, rect, hl_rect, hl_date, hl_idx, hl_day != nullptr);
     } else {
         clearHover(graph);
+    }
+    if (hl) {
+        // In both looks the day's date and numbers are shown in a tooltip. In the card look it
+        // starts below the Details button, so the button stays free to click.
+        QString txt = hl_date.toString(QLocale::system().dateFormat(QLocale::ShortFormat)) + " ";
+        if (hl_day) txt += tooltipData(hl_day, hl_idx);
+        const int tipY = m_detailsRect.isValid() ? qMax(mouse.y(), int(m_detailsRect.bottom()) + 4) : mouse.y();
+        graph.ToolTip(txt, mouse.x() + 20, tipY, TT_AlignBottomLeft);
     }
     try {
         afterDraw(painter, graph, rect);

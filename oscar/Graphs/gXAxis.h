@@ -122,6 +122,9 @@ class gXAxisDay: public Layer
     //! \brief Returns the minimum height needed to fit
     virtual int minimumHeight();
 
+    //! \brief The text of a date label: short month name and day, in the user's order
+    static QString labelText(const QDate &date);
+
     QFont m_boldFont;   //!< Font for the marked date labels; kept until the text queue is drawn
 
     virtual Layer * Clone() {

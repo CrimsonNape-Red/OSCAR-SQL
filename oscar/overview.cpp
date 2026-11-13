@@ -42,6 +42,9 @@
 #include "Graphs/summarylines.h"
 #include "uikit/theme.h"
 #include "overviewstats.h"
+#include "overviewdateaxis.h"
+#include "Graphs/graphtheme.h"
+#include <QPainter>
 #include <QTimeZone>
 #include <QToolButton>
 #include "cprogressbar.h"
@@ -121,7 +124,8 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     QFrame *border = new QFrame(ui->graphArea);
 
     framelayout->setContentsMargins(1, 1, 1, 1);
-    border->setFrameShape(QFrame::StyledPanel);
+    // The redesigned page's graphs are cards on the page itself, with no frame around them all
+    border->setFrameShape(AppSetting->useNewPages() ? QFrame::NoFrame : QFrame::StyledPanel);
     framelayout->addWidget(border,1);
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -139,6 +143,7 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     GraphView = new gGraphView(ui->graphArea, m_shared, this);
     // The redesigned page draws its graphs as cards; the original page keeps the 2.1 look
     GraphView->setLook(AppSetting->useNewPages() ? GraphLook::Card : GraphLook::Classic);
+    GraphView->setSharedXAxis(AppSetting->useNewPages());
     GraphView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     GraphView->setEmptyText(STR_Empty_NoData);
@@ -411,74 +416,146 @@ void Overview::CreateAllGraphs() {
 
 void Overview::buildRangeStrip()
 {
-    // The selection bar goes above the graphs
+    // The selection bar goes above the graphs, with no frame of its own
     ui->verticalLayout->removeWidget(ui->frame);
     ui->verticalLayout->insertWidget(0, ui->frame);
+    ui->frame->setFrameShape(QFrame::NoFrame);
+    ui->horizontalLayout->setSpacing(8);
+    ui->horizontalLayout->setContentsMargins(8, 6, 8, 2);
 
     // Under it, the figures for the dates on screen
     m_statsRow = new OverviewStatsRow(this);
     ui->verticalLayout->insertWidget(1, m_statsRow);
+
+    // One date axis for all the graphs, fixed below them so it stays in view
+    m_dateAxis = new OverviewDateAxis(GraphView, this);
+    ui->verticalLayout->insertWidget(ui->verticalLayout->indexOf(ui->graphArea) + 1, m_dateAxis);
 
     // The strip stands in for the range drop-down, which stays (hidden) as the page's record of
     // the chosen range. The hovered date is shown in bold on the date axis instead of in a label.
     ui->label_3->hide();
     ui->rangeCombo->hide();
     ui->dateStartLabel->hide();
-    ui->dateEndLabel->hide();
+    ui->dateEndLabel->setText(QString(QChar(0x2013)));      // a dash between the two dates
     dateLabel->hide();
+    ui->dateLayout->addStretch(1);
 
     m_rangeStrip = new QWidget(ui->frame);
+    m_rangeStrip->setObjectName("rangeStrip");
+    m_rangeStrip->setAttribute(Qt::WA_StyledBackground);
     QHBoxLayout *row = new QHBoxLayout(m_rangeStrip);
-    row->setContentsMargins(0, 0, 0, 0);
-    row->setSpacing(0);
+    row->setContentsMargins(3, 3, 3, 3);
+    row->setSpacing(2);
     m_rangeButtons = new QButtonGroup(this);
     m_rangeButtons->setExclusive(true);
-    // Short forms of the drop-down's items, in the same order
-    const QStringList labels = { tr("1W"), tr("2W"), tr("1M"), tr("2M"), tr("3M"), tr("6M"), tr("1Y"),
-                                 tr("All"), tr("Custom"), tr("Snapshot") };
-    const int count = qMin(labels.size(), ui->rangeCombo->count());
-    for (int i = 0; i < count; ++i) {
+    // The drop-down's ranges by item number, less the two- and six-month ones
+    const QVector<QPair<int, QString>> ranges = {
+        { 0, tr("1 week") }, { 1, tr("2 weeks") }, { 2, tr("1 month") }, { 4, tr("3 months") },
+        { 6, tr("1 year") }, { 7, tr("Everything") }, { 8, tr("Custom") }, { 9, tr("Snapshot") } };
+    QFont bold = font();
+    bold.setBold(true);
+    const QFontMetrics boldMetrics(bold);
+    for (const auto &range : ranges) {
+        if (range.first >= ui->rangeCombo->count()) continue;
         QToolButton *button = new QToolButton(m_rangeStrip);
-        button->setText(labels.at(i));
-        button->setToolTip(ui->rangeCombo->itemText(i));
+        button->setText(range.second);
+        button->setToolTip(ui->rangeCombo->itemText(range.first));
         button->setCheckable(true);
         button->setFocusPolicy(Qt::TabFocus);
-        if (i == 0) button->setObjectName("first");
-        if (i == count - 1) button->setObjectName("last");
-        m_rangeButtons->addButton(button, i);
+        // Wide enough for the bold text of the chosen range, so choosing one moves nothing
+        button->setMinimumWidth(boldMetrics.horizontalAdvance(range.second) + 20);
+        m_rangeButtons->addButton(button, range.first);
         row->addWidget(button);
     }
     ui->horizontalLayout->insertWidget(0, m_rangeStrip);
+
+    // The number of days on screen, after the dates
+    m_daysLabel = new QLabel(ui->frame);
+    ui->horizontalLayout->insertWidget(ui->horizontalLayout->indexOf(ui->zoomButton), m_daysLabel);
+
+    // At the right: the graphs drop-down, then Layout and Hint as small square buttons that
+    // name themselves in a tooltip
+    ui->horizontalLayout->removeWidget(ui->graphCombo);
+    ui->horizontalLayout->insertWidget(ui->horizontalLayout->indexOf(ui->graphHelp), ui->graphCombo);
+    ui->horizontalLayout->removeWidget(ui->graphHelp);
+    ui->horizontalLayout->addWidget(ui->graphHelp);
+    ui->graphHelp->setText(QStringLiteral("?"));
+    ui->graphHelp->setIcon(QIcon());
+    ui->layout->setText(QString());
+    ui->layout->setIconSize(QSize(16, 16));
+    for (QAbstractButton *button : std::initializer_list<QAbstractButton *>{ ui->zoomButton, ui->layout, ui->graphHelp }) {
+        button->setFixedSize(30, 30);
+    }
 
     connect(m_rangeButtons, &QButtonGroup::idClicked, this, [this](int index) {
         ui->rangeCombo->setCurrentIndex(index);
         on_rangeCombo_activated(index);
     });
     const auto sync = [this](int index) {
-        if (QAbstractButton *button = m_rangeButtons->button(index)) button->setChecked(true);
+        if (QAbstractButton *button = m_rangeButtons->button(index)) {
+            button->setChecked(true);
+        } else if (QAbstractButton *checked = m_rangeButtons->checkedButton()) {
+            // A range kept from the original page that has no button here
+            m_rangeButtons->setExclusive(false);
+            checked->setChecked(false);
+            m_rangeButtons->setExclusive(true);
+        }
     };
     connect(ui->rangeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, sync);
     sync(ui->rangeCombo->currentIndex());
     styleRangeStrip();
 }
 
+//! \brief Two stacked boxes, for the button that saves and restores the graph layout
+static QIcon layoutIcon(const QColor &colour, qreal scale)
+{
+    QPixmap pixmap(QSize(16, 16) * scale);
+    pixmap.setDevicePixelRatio(scale);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setPen(QPen(colour, 1.5));
+    painter.drawRoundedRect(QRectF(2, 2.25, 12, 4.5), 1, 1);
+    painter.drawRoundedRect(QRectF(2, 9.25, 12, 4.5), 1, 1);
+    return QIcon(pixmap);
+}
+
 void Overview::styleRangeStrip()
 {
     if (!m_rangeStrip) return;
+    // The strip is a trough a little darker (lighter in dark mode) than the page; the chosen
+    // range is a raised pill in it
+    const QColor page = Theme::color(Theme::Role::Page);
+    const QColor trough = Theme::isDark(palette()) ? page.lighter(135) : page.darker(107);
     m_rangeStrip->setStyleSheet(QString(
-        "QToolButton { border: 1px solid %1; border-left: none; padding: 4px 9px; background: %2; color: %3; }"
-        "QToolButton#first { border-left: 1px solid %1; border-top-left-radius: 6px; border-bottom-left-radius: 6px; }"
-        "QToolButton#last { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }"
-        "QToolButton:hover:!checked { background: %4; }"
-        "QToolButton:checked { background: %5; color: %6; border-color: %5; }")
-        .arg(Theme::css(Theme::Role::Line), Theme::css(Theme::Role::Surface), Theme::css(Theme::Role::Ink),
-             Theme::css(Theme::Role::AccentSoft), Theme::css(Theme::Role::Accent), Theme::css(Theme::Role::OnAccent)));
+        "#rangeStrip { background: %1; border-radius: 9px; }"
+        "QToolButton { border: none; border-radius: 7px; padding: 4px 6px; background: transparent; color: %2; }"
+        "QToolButton:hover:!checked { color: %3; }"
+        "QToolButton:checked { background: %4; color: %3; font-weight: bold; }")
+        .arg(Theme::css(trough), Theme::css(Theme::Role::Ink2), Theme::css(Theme::Role::Ink),
+             Theme::css(Theme::Role::Surface)));
+
+    const QString box = QString(
+        "QPushButton, QToolButton { border: 1px solid %1; border-radius: 8px; background: %2; color: %3;"
+        " font-weight: bold; padding: 0; }"
+        "QPushButton:hover, QToolButton:hover { border-color: %4; }"
+        "QPushButton:pressed, QToolButton:pressed { background: %5; }")
+        .arg(Theme::css(GraphTheme::outline()), Theme::css(Theme::Role::Surface), Theme::css(Theme::Role::Ink),
+             Theme::css(Theme::Role::Accent), Theme::css(Theme::Role::AccentSoft));
+    ui->zoomButton->setStyleSheet(box);
+    ui->layout->setStyleSheet(box);
+    ui->graphHelp->setStyleSheet(box);
+    ui->layout->setIcon(layoutIcon(Theme::color(Theme::Role::Ink), devicePixelRatioF()));
+    if (m_daysLabel) m_daysLabel->setStyleSheet(QString("color: %1;").arg(Theme::css(Theme::Role::Ink2)));
 }
 
 void Overview::changeEvent(QEvent *event)
 {
     QWidget::changeEvent(event);
-    if (event->type() == QEvent::PaletteChange) styleRangeStrip();
+    if (event->type() == QEvent::PaletteChange) {
+        styleRangeStrip();
+        if (m_dateAxis) m_dateAxis->update();
+    }
 }
 
 //! \brief Profile preference holding the dotted lines; also listed in PreferencesRepository::saveUserSettings()
@@ -809,6 +886,7 @@ void Overview::on_XBoundsChanged(qint64 start,qint64 end)
         const QDate first = QDateTime::fromMSecsSinceEpoch(start, QTimeZone::systemTimeZone()).date();
         const int days = qMax(1, int(std::ceil(double(end - start) / 86400000.0)));
         m_statsRow->setRange(first, first.addDays(days - 1));
+        if (m_daysLabel) m_daysLabel->setText(days == 1 ? tr("1 day") : tr("%1 days").arg(days));
     }
 
     bool largerRange=false;

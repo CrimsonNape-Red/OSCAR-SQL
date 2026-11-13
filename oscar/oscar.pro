@@ -389,6 +389,8 @@ SOURCES += \
     Graphs/summarylines.cpp \
     Graphs/rangefigures.cpp \
     overviewstats.cpp \
+    overviewdateaxis.cpp \
+    Graphs/daylabels.cpp \
     Graphs/glcommon.cpp \
     Graphs/gLineChart.cpp \
     Graphs/gLineOverlay.cpp \
@@ -587,6 +589,8 @@ HEADERS  += \
     Graphs/summarylines.h \
     Graphs/rangefigures.h \
     overviewstats.h \
+    overviewdateaxis.h \
+    Graphs/daylabels.h \
     Graphs/glcommon.h \
     Graphs/gLineChart.h \
     Graphs/gLineOverlay.h \
@@ -997,7 +1001,8 @@ test {
         tests/overviewbarstests.cpp \
         tests/graphcardtests.cpp \
         tests/summarylinestests.cpp \
-        tests/overviewstatstests.cpp
+        tests/overviewstatstests.cpp \
+        tests/daylabelstests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -1039,7 +1044,8 @@ test {
         tests/overviewbarstests.h \
         tests/graphcardtests.h \
         tests/summarylinestests.h \
-        tests/overviewstatstests.h
+        tests/overviewstatstests.h \
+        tests/daylabelstests.h
 }
 
 macx {

@@ -188,6 +188,7 @@ QList<DetailRow> gAHIChart::detailRows(Day *day, int idx)
     for (const auto &s : slices) total += s.value;
     for (int i = slices.size() - 1; i >= 0; --i) {
         const auto &s = slices.at(i);
+        if (s.value == 0) continue;     // only the events that happened
         schema::Channel &chan = schema::channel[s.calc->code];
         const int share = total > 0 ? qRound(s.value / total * 100) : 0;
         rows.append({ QObject::tr("%1 /h").arg(s.value / hours, 0, 'f', 2),

@@ -1671,6 +1671,7 @@ bool gGraphView::paintView(QPainter &painter)
 
     m_tooltip->paint(painter);
     m_parent_tooltip->paint(painter,width(), height() );
+    emit painted();
 
 #ifdef DEBUG_EFFICIENCY
     const int rs = 20;

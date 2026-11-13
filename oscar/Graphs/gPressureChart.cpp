@@ -220,6 +220,7 @@ QList<DetailRow> gPressureChart::detailRows(Day *day, int idx)
     const double percentile = p_profile->general->prefCalcPercentile();
     for (int i = slices.size() - 1; i >= 0; --i) {
         const auto &s = slices.at(i);
+        if (s.value == 0) continue;     // a setting the device doesn't report
         QString note;
         switch (s.calc ? s.calc->type : ST_CNT) {
         case ST_SETMIN: note = QObject::tr("Lowest pressure"); break;
