@@ -338,14 +338,24 @@ void gPressureChart::populate(Day * day, int idx)
     sortSlices();
 }
 
-QVector<SummaryLine> gPressureChart::calcLines(const QDate &start, const QDate &end)
+QVector<SummaryLine> gPressureChart::calcLines(const QDate &start, const QDate &end, quint32 wanted)
 {
+    // Both lines are always offered; one is available when the range has the data its figure needs
     QVector<SummaryLine> out;
-    const ChannelID code = RangeFigures::pressureChannel(start, end);
-    if (code == NoChannel) return out;
-    out.append({ SL_Perc, RangeFigures::percentileLabel(), RangeFigures::percentile(code, MT_CPAP, start, end),
-                 QColor(190, 40, 40), false });
-    out.append({ SL_Middle, RangeFigures::middleLabel(), RangeFigures::middle(code, MT_CPAP, start, end),
-                 QColor(60, 60, 60), false });
+    SummaryLine perc{ SL_Perc, RangeFigures::percentileLabel(), 0, QColor(190, 40, 40), false };
+    SummaryLine middle{ SL_Middle, RangeFigures::middleLabel(), 0, QColor(60, 60, 60), false };
+    if (wanted & ((1u << SL_Perc) | (1u << SL_Middle))) {
+        const ChannelID code = RangeFigures::pressureChannel(start, end);
+        if (wanted & (1u << SL_Perc)) {
+            perc.available = code != NoChannel && RangeFigures::hasDetail(code, MT_CPAP, start, end);
+            if (perc.available) perc.value = RangeFigures::percentile(code, MT_CPAP, start, end);
+        }
+        if (wanted & (1u << SL_Middle)) {
+            middle.available = code != NoChannel && RangeFigures::middleAvailable(code, MT_CPAP, start, end);
+            if (middle.available) middle.value = RangeFigures::middle(code, MT_CPAP, start, end);
+        }
+    }
+    out.append(perc);
+    out.append(middle);
     return out;
 }

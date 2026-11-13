@@ -233,11 +233,16 @@ QString gAHIChart::tooltipData(Day *day, int idx)
     return QString("\n%1: %2").arg(indexLabel).arg(float(total) / hour,0,'f',2)+txt;
 }
 
-QVector<SummaryLine> gAHIChart::calcLines(const QDate &start, const QDate &end)
+QVector<SummaryLine> gAHIChart::calcLines(const QDate &start, const QDate &end, quint32 wanted)
 {
     // The index for the whole range: all its events over all its hours
     QVector<SummaryLine> out;
-    out.append({ SL_Middle, p_profile->general->calculateRDI() ? STR_TR_RDI : STR_TR_AHI,
-                 RangeFigures::ahi(start, end), QColor(120, 40, 160), false });
+    SummaryLine line{ SL_Middle, p_profile->general->calculateRDI() ? STR_TR_RDI : STR_TR_AHI, 0,
+                      QColor(120, 40, 160), false };
+    if (wanted & (1u << SL_Middle)) {
+        line.available = RangeFigures::daysUsed(start, end) > 0;
+        if (line.available) line.value = RangeFigures::ahi(start, end);
+    }
+    out.append(line);
     return out;
 }

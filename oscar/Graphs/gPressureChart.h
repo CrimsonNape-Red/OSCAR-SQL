@@ -34,7 +34,7 @@ public:
          }
     }
     virtual void afterDraw(QPainter &, gGraph &, QRectF);
-    virtual QVector<SummaryLine> calcLines(const QDate &start, const QDate &end) override;
+    virtual QVector<SummaryLine> calcLines(const QDate &start, const QDate &end, quint32 wanted) override;
 
     virtual void populate(Day * day, int idx);
 

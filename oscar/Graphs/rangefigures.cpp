@@ -10,6 +10,8 @@
 
 #include "SleepLib/common.h"
 #include "SleepLib/profiles.h"
+#include "SleepLib/day.h"
+#include "SleepLib/session.h"
 
 namespace RangeFigures {
 
@@ -41,8 +43,11 @@ double usageAverage(const QDate &start, const QDate &end)
 
 double compliancePercent(const QDate &start, const QDate &end)
 {
-    const int days = daysUsed(start, end);
-    return days > 0 ? 100.0 * p_profile->countCompliantDays(MT_CPAP, start, end) / days : 0;
+    // Compliance is use above the threshold over a period, so a day without use counts against
+    // it: the divisor is every day in the range, as in the Usage graph's header
+    if (!p_profile || !start.isValid() || !end.isValid() || end < start) return 0;
+    const qint64 days = start.daysTo(end) + 1;
+    return 100.0 * p_profile->countCompliantDays(MT_CPAP, start, end) / days;
 }
 
 double eventsPerHour(ChannelID code, MachineType mt, const QDate &start, const QDate &end)
@@ -66,6 +71,31 @@ double percentile(ChannelID code, MachineType mt, const QDate &start, const QDat
 {
     if (!p_profile) return 0;
     return p_profile->calcPercentile(code, p_profile->general->prefCalcPercentile() / 100.0, mt, start, end);
+}
+
+bool hasDetail(ChannelID code, MachineType mt, const QDate &start, const QDate &end)
+{
+    if (!p_profile || !start.isValid() || !end.isValid()) return false;
+    for (QDate date = start; date <= end; date = date.addDays(1)) {
+        Day *day = p_profile->GetGoodDay(date, mt);
+        if (!day || day->summaryOnly()) continue;
+        for (Session *sess : day->sessions) {
+            if (sess->enabled() && sess->m_valuesummary.contains(code)) return true;
+        }
+    }
+    return false;
+}
+
+bool hasData(ChannelID code, MachineType mt, const QDate &start, const QDate &end)
+{
+    if (!p_profile || !start.isValid() || !end.isValid()) return false;
+    return p_profile->calcMax(code, mt, start, end) > 0 || hasDetail(code, mt, start, end);
+}
+
+bool middleAvailable(ChannelID code, MachineType mt, const QDate &start, const QDate &end)
+{
+    if (!p_profile) return false;
+    return p_profile->general->prefCalcMiddle() == 0 ? hasDetail(code, mt, start, end) : hasData(code, mt, start, end);
 }
 
 QString middleLabel()

@@ -63,7 +63,7 @@ QVector<Stat> compute(const Range &shown)
 
     // One figure: its value now and before, how to show it and which direction is better
     const auto add = [&](const QString &title, double now, double was, int decimals, const QString &unit,
-                         UiKit::Better better, bool available = true) {
+                         UiKit::Better better, bool available = true, bool wasAvailable = true) {
         Stat stat;
         stat.title = title;
         stat.unit = unit;
@@ -72,7 +72,7 @@ QVector<Stat> compute(const Range &shown)
             stat.unit.clear();
         } else {
             stat.value = QString::number(now, 'f', decimals);
-            if (hasBefore) {
+            if (hasBefore && wasAvailable) {
                 stat.change = changeText(now, was, decimals);
                 stat.verdict = verdict(now, was, better, decimals);
             }
@@ -91,19 +91,24 @@ QVector<Stat> compute(const Range &shown)
     const int compliant = days > 0 ? p_profile->countCompliantDays(MT_CPAP, shown.start, shown.end) : 0;
     add(QObject::tr("Compliance"),
         RangeFigures::compliancePercent(shown.start, shown.end), RangeFigures::compliancePercent(before.start, before.end),
-        1, QObject::tr("% (%1 of %2 nights)").arg(compliant).arg(days), UiKit::Better::Higher);
+        1, QObject::tr("% (%1 of %2 days)").arg(compliant).arg(shown.start.daysTo(shown.end) + 1), UiKit::Better::Higher);
 
     add(QObject::tr("Leak rate (%1)").arg(RangeFigures::middleLabel()),
         RangeFigures::middle(CPAP_Leak, MT_CPAP, shown.start, shown.end),
         RangeFigures::middle(CPAP_Leak, MT_CPAP, before.start, before.end),
-        2, schema::channel[CPAP_Leak].units(), UiKit::Better::Lower);
+        2, schema::channel[CPAP_Leak].units(), UiKit::Better::Lower,
+        RangeFigures::middleAvailable(CPAP_Leak, MT_CPAP, shown.start, shown.end),
+        RangeFigures::middleAvailable(CPAP_Leak, MT_CPAP, before.start, before.end));
 
-    const ChannelID pressure = RangeFigures::pressureChannel(shown.start, shown.end);
+    // A percentile needs detailed data: a range of summary-only days has no figure, not a zero
+    ChannelID pressure = RangeFigures::pressureChannel(shown.start, shown.end);
+    if (pressure != NoChannel && !RangeFigures::hasDetail(pressure, MT_CPAP, shown.start, shown.end)) pressure = NoChannel;
     add(QObject::tr("Pressure (%1)").arg(RangeFigures::percentileLabel()),
         pressure == NoChannel ? 0 : RangeFigures::percentile(pressure, MT_CPAP, shown.start, shown.end),
         pressure == NoChannel ? 0 : RangeFigures::percentile(pressure, MT_CPAP, before.start, before.end),
         2, pressure == NoChannel ? QString() : schema::channel[pressure].units(), UiKit::Better::Neutral,
-        pressure != NoChannel);
+        pressure != NoChannel,
+        pressure != NoChannel && RangeFigures::hasDetail(pressure, MT_CPAP, before.start, before.end));
 
     return stats;
 }
@@ -131,6 +136,12 @@ void OverviewStatsRow::setRange(const QDate &start, const QDate &end)
     m_timer.start();
 }
 
+void OverviewStatsRow::refresh()
+{
+    if (m_range.start.isValid()) m_timer.start();
+}
+
+//! \brief Works the figures out for the dates last given to setRange() and redraws the row
 void OverviewStatsRow::recompute()
 {
     m_stats = OverviewStats::compute(m_range);

@@ -14,6 +14,7 @@
 #include <QLabel>
 #include <QDateTime>
 #include <QTimeZone>
+#include <functional>
 
 #include "mainwindow.h"
 #include "SleepLib/profiles.h"
@@ -68,20 +69,32 @@ gSummaryChart::~gSummaryChart()
 {
 }
 
-QVector<SummaryLine> gSummaryChart::lines()
+QVector<SummaryLine> gSummaryChart::lines(bool allValues)
 {
     if (!m_visStart.isValid() || !p_profile) return {};
     const QString key = QString("%1|%2|%3|%4|%5").arg(m_visStart.toJulianDay()).arg(m_visEnd.toJulianDay())
             .arg(p_profile->general->prefCalcMiddle()).arg(p_profile->general->prefCalcPercentile())
             .arg(p_profile->general->calculateRDI());
     if (key != m_lineCacheKey) {
-        m_lineCache = calcLines(m_visStart, m_visEnd);
+        m_lineCache = calcLines(m_visStart, m_visEnd, 0);       // names and defaults only
+        m_lineHave = 0;
         m_lineCacheKey = key;
     }
-    QVector<SummaryLine> out = m_lineCache;
-    if (m_lineMaskSet) {
-        for (SummaryLine &line : out) line.enabled = (m_lineMask & (1u << line.id)) != 0;
+    const auto isOn = [this](const SummaryLine &line) {
+        return m_lineMaskSet ? (m_lineMask & (1u << line.id)) != 0 : line.enabled;
+    };
+    // This runs at every paint, and a value is a pass over the range's sessions, so only the
+    // values needed are worked out, once for each set of dates
+    quint32 wanted = 0;
+    for (const SummaryLine &line : m_lineCache) {
+        if (allValues || isOn(line)) wanted |= 1u << line.id;
     }
+    if (wanted & ~m_lineHave) {
+        m_lineHave |= wanted;
+        m_lineCache = calcLines(m_visStart, m_visEnd, m_lineHave);
+    }
+    QVector<SummaryLine> out = m_lineCache;
+    for (SummaryLine &line : out) line.enabled = isOn(line);
     return out;
 }
 
@@ -97,35 +110,50 @@ void gSummaryChart::setLineEnabled(int id, bool on)
     m_lineMaskSet = true;
 }
 
-QVector<SummaryLine> gSummaryChart::calcLines(const QDate &start, const QDate &end)
+QVector<SummaryLine> gSummaryChart::calcLines(const QDate &start, const QDate &end, quint32 wanted)
 {
     QVector<SummaryLine> out;
     if (calcitems.isEmpty()) return out;
     const SummaryCalcItem &first = calcitems.at(0);
     const ChannelID code = first.code;
     if (code == NoChannel) return out;
+    const auto want = [wanted](int id) { return (wanted & (1u << id)) != 0; };
 
     if (first.type == ST_CPH) {
         // An event graph: the events per hour over the whole range
-        out.append({ SL_Middle, QObject::tr("Average"), RangeFigures::eventsPerHour(code, m_machtype, start, end),
-                     first.color.darker(150), false });
+        SummaryLine line{ SL_Middle, QObject::tr("Average"), 0, first.color.darker(150), false };
+        if (want(SL_Middle)) {
+            line.available = p_profile->calcHours(m_machtype, start, end) > 0;
+            if (line.available) line.value = RangeFigures::eventsPerHour(code, m_machtype, start, end);
+        }
+        out.append(line);
         return out;
     }
     if (first.type != ST_MIN) return out;
 
-    // A waveform graph offers the lines its Daily graph does
+    // A waveform graph offers the lines its Daily graph does. A line whose figure cannot be
+    // worked out from the range's data (a percentile of summary-only days) is not available.
     schema::Channel &chan = schema::channel[code];
-    const auto add = [&out, &chan](int id, ChannelCalcType type, double value) {
-        out.append({ id, chan.calc[type].label(), value, chan.calc[type].color, chan.calc[type].enabled });
+    const auto add = [&](int id, ChannelCalcType type, bool hasFigure, const std::function<double()> &value) {
+        SummaryLine line{ id, chan.calc[type].label(), 0, chan.calc[type].color, chan.calc[type].enabled };
+        if (want(id)) {
+            line.available = hasFigure;
+            if (hasFigure) line.value = value();
+        }
+        out.append(line);
     };
-    add(SL_Max, Calc_Max, p_profile->calcMax(code, m_machtype, start, end));
-    add(SL_Perc, Calc_Perc, RangeFigures::percentile(code, m_machtype, start, end));
-    add(SL_Middle, Calc_Middle, RangeFigures::middle(code, m_machtype, start, end));
+    const bool anyStat = want(SL_Max) || want(SL_Perc) || want(SL_Middle) || want(SL_Min);
+    const bool detail = anyStat && RangeFigures::hasDetail(code, m_machtype, start, end);
+    const bool data = detail || (anyStat && RangeFigures::hasData(code, m_machtype, start, end));
+    const bool middle = p_profile->general->prefCalcMiddle() == 0 ? detail : data;
+    add(SL_Max, Calc_Max, data, [&] { return p_profile->calcMax(code, m_machtype, start, end); });
+    add(SL_Perc, Calc_Perc, detail, [&] { return RangeFigures::percentile(code, m_machtype, start, end); });
+    add(SL_Middle, Calc_Middle, middle, [&] { return RangeFigures::middle(code, m_machtype, start, end); });
     if ((code != CPAP_Snore) && (code != CPAP_FlowLimit) && (code != CPAP_RDI) && (code != CPAP_AHI)) {
-        add(SL_Min, Calc_Min, p_profile->calcMin(code, m_machtype, start, end));
+        add(SL_Min, Calc_Min, data, [&] { return p_profile->calcMin(code, m_machtype, start, end); });
     }
     if (code == CPAP_Leak) {
-        add(SL_Threshold, Calc_UpperThresh, p_profile->cpap->leakRedline());
+        add(SL_Threshold, Calc_UpperThresh, true, [] { return p_profile->cpap->leakRedline(); });
     }
     return out;
 }
@@ -143,7 +171,7 @@ void gSummaryChart::paintLines(QPainter &painter, gGraph &graph, const QRectF &p
     painter.save();
     painter.setFont(*defaultfont);
     for (const SummaryLine &line : all) {
-        if (!line.enabled) continue;
+        if (!line.enabled || !line.available) continue;
         QColor color = GraphTheme::ink(line.color);
         color.setAlpha(200);
         const QPen pen(QBrush(color), 2, Qt::DotLine);      // as the Daily graphs draw theirs
@@ -714,7 +742,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     float barw = float(rect.width()) / float(days);
     // The original (2.1) look has touching, outlined bars, a yellow and red hover highlight and a
     // numbers tooltip. The card look has a gap beside each bar, a hover line and a Details button.
-    const bool classic = !graph.graphView()->cardLook();
+    const bool classic = !graph.graphView()->cardLook() || graph.printing();   // print is always the 2.1 look
     const OverviewBars::BarGeometry geo = classic ? OverviewBars::classicBarGeometry(barw)
                                                   : OverviewBars::barGeometry(barw);
     const bool flatOnly = graph.printing() && AppSetting->monochromePrinting();

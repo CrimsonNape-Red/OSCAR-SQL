@@ -659,6 +659,7 @@ void Overview::RebuildGraphs(bool reset)
     // Load after resetLayout so user-adjusted heights are not overwritten by defaults.
     GraphView->LoadSettings("Overview");
     settingsLoaded = true;
+    if (m_statsRow) m_statsRow->refresh();      // preferences the figures depend on may have changed
 }
 
 // Create an overview graph, adding it to the overview gGraphView object
@@ -800,7 +801,11 @@ void Overview::ReloadGraphs()
 
     // With no data there are no figures or dates to show, so their rows give up their space
     const bool hasData = p_profile && p_profile->FirstDay().isValid();
-    if (m_statsRow) m_statsRow->setVisible(hasData);
+    if (m_statsRow) {
+        m_statsRow->setVisible(hasData);
+        // The dates may be the same as before, but the data or a preference may not be
+        m_statsRow->refresh();
+    }
     if (m_dateAxis) m_dateAxis->setVisible(hasData);
 
     // A reload keeps the same range (it follows a light/dark switch, a journal edit or an

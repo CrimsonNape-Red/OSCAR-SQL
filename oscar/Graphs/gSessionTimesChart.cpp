@@ -157,7 +157,7 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
 
     float barw = float(rect.width()) / float(days);
     // The original (2.1) look and the card look differ as in gSummaryChart::paint()
-    const bool classic = !graph.graphView()->cardLook();
+    const bool classic = !graph.graphView()->cardLook() || graph.printing();   // print is always the 2.1 look
     const OverviewBars::BarGeometry geo = classic ? OverviewBars::classicBarGeometry(barw)
                                                   : OverviewBars::barGeometry(barw);
     QVector<QRectF> outlines;       // classic look only

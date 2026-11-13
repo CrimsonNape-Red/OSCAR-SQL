@@ -31,7 +31,7 @@ double usageAverage(const QDate &start, const QDate &end);
 //! \brief Days the device was used
 int daysUsed(const QDate &start, const QDate &end);
 
-//! \brief Percentage of the days used that met the compliance hours; 0 when no days
+//! \brief Percentage of all the days in the range that met the compliance hours; days without use count against it
 double compliancePercent(const QDate &start, const QDate &end);
 
 //! \brief Events of \a code per hour of use
@@ -48,6 +48,17 @@ QString middleLabel();
 
 //! \brief Name of the upper percentile, e.g. "95%"
 QString percentileLabel();
+
+/*! \brief True when a day in the range has detailed data for \a code, which a percentile or
+    median needs. Days with summary data only (and disabled sessions) do not count. */
+bool hasDetail(ChannelID code, MachineType mt, const QDate &start, const QDate &end);
+
+//! \brief True when the range has any data for \a code, detailed or summary only
+bool hasData(ChannelID code, MachineType mt, const QDate &start, const QDate &end);
+
+/*! \brief True when middle() has data to work from: detailed data for a median, any data for
+    an average. When false, middle() returns 0, which is not a figure to show. */
+bool middleAvailable(ChannelID code, MachineType mt, const QDate &start, const QDate &end);
 
 //! \brief The pressure channel with data in the range (Pressure, else IPAP), or NoChannel
 ChannelID pressureChannel(const QDate &start, const QDate &end);

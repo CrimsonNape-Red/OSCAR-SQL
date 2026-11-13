@@ -28,6 +28,7 @@ struct SummaryLine {
     double value = 0;       //!< Where the line sits, in the graph's own units
     QColor color;           //!< Light-mode colour (translated for dark mode when drawn)
     bool enabled = false;   //!< Whether the line is drawn
+    bool available = true;  //!< False when the dates on screen have no data to work the value out from
 };
 
 /*! \namespace SummaryLines

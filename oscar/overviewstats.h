@@ -70,6 +70,10 @@ public:
         that dragging or zooming the graphs stays smooth. */
     void setRange(const QDate &start, const QDate &end);
 
+    /*! \brief Recalculates the figures for the same dates, a moment later: the data or a
+        preference they depend on has changed */
+    void refresh();
+
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 

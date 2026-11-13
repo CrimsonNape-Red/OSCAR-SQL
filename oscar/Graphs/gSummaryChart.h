@@ -199,9 +199,13 @@ public:
         m_lineCacheKey.clear();
     }
 
-    /*! \brief The dotted lines this chart offers, with their values for the dates last painted
-        and whether each is switched on. Empty before the first paint and for charts with none. */
-    QVector<SummaryLine> lines();
+    /*! \brief The dotted lines this chart offers and whether each is switched on. Empty before
+        the first paint and for charts with none.
+
+        Values are for the dates last painted. They take a pass over every session in the range
+        to work out, so only the lines that are switched on have theirs filled in, unless
+        \a allValues is true (for the menu, which shows every line's value). */
+    QVector<SummaryLine> lines(bool allValues = false);
     //! \brief Switches the line with SummaryLineId \a id on or off
     void setLineEnabled(int id, bool on);
     //! \brief True once the user (or a saved preference) has chosen this chart's lines
@@ -278,13 +282,17 @@ protected:
     bool isDetailsClick(QMouseEvent *event) const;
     /*! \brief The lines this chart offers between \a start and \a end, each with its default
         on/off state. Values come from RangeFigures or the profile's range functions, calculated
-        over the whole range: never an average of nightly figures. */
-    virtual QVector<SummaryLine> calcLines(const QDate &start, const QDate &end);
+        over the whole range: never an average of nightly figures.
+
+        \param wanted Bit n set: work out the value of the line with SummaryLineId n. The other
+               lines are returned with their names and defaults only, which costs nothing. */
+    virtual QVector<SummaryLine> calcLines(const QDate &start, const QDate &end, quint32 wanted);
     //! \brief Card look: draws the enabled lines across \a plot and their legend in the header
     void paintLines(QPainter &painter, gGraph &graph, const QRectF &plot, float miny, float ymult);
     QDate m_visStart, m_visEnd;         //!< Dates drawn at the last paint
     QVector<SummaryLine> m_lineCache;   //!< calcLines() result for m_lineCacheKey
     QString m_lineCacheKey;             //!< Dates and preferences m_lineCache was calculated for
+    quint32 m_lineHave = 0;             //!< Lines whose values m_lineCache holds (bits as lineMask())
     quint32 m_lineMask = 0;             //!< See lineMask()
     bool m_lineMaskSet = false;         //!< False while the lines' own defaults apply
     QRectF m_detailsRect;       //!< Details button as last drawn; empty when not shown

@@ -122,10 +122,15 @@ void gUsageChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
 
 #endif
 
-QVector<SummaryLine> gUsageChart::calcLines(const QDate &start, const QDate &end)
+QVector<SummaryLine> gUsageChart::calcLines(const QDate &start, const QDate &end, quint32 wanted)
 {
     QVector<SummaryLine> out;
-    out.append({ SL_Middle, QObject::tr("Average"), RangeFigures::usageAverage(start, end), QColor(0, 70, 190), false });
+    SummaryLine average{ SL_Middle, QObject::tr("Average"), 0, QColor(0, 70, 190), false };
+    if (wanted & (1u << SL_Middle)) {
+        average.available = RangeFigures::daysUsed(start, end) > 0;
+        if (average.available) average.value = RangeFigures::usageAverage(start, end);
+    }
+    out.append(average);
     out.append({ SL_Compliance, QObject::tr("Compliance"), p_profile->cpap->complianceHours(), QColor(200, 50, 50), true });
     return out;
 }

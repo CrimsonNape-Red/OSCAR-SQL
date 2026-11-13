@@ -2572,10 +2572,12 @@ void gGraphView::populateMenu(gGraph * graph)
     if (stg && cardLook()) {
         // An Overview graph's dotted lines, each with its value for the dates on screen
         lines_menu->clear();
-        const QVector<SummaryLine> lines = stg->lines();
+        const QVector<SummaryLine> lines = stg->lines(true);     // the menu shows every line's value
         for (const SummaryLine &line : lines) {
             QWidgetAction * widget = new QWidgetAction(context_menu);
-            QCheckBox *chbox = new QCheckBox(QString("%1  (%2)").arg(line.label).arg(line.value, 0, 'f', 2), context_menu);
+            // A dash for a line the dates on screen have no figure for
+            const QString value = line.available ? QString::number(line.value, 'f', 2) : QString(QChar(0x2014));
+            QCheckBox *chbox = new QCheckBox(QString("%1  (%2)").arg(line.label, value), context_menu);
             chbox->setMouseTracking(true);
             chbox->setChecked(line.enabled);
             widget->setDefaultWidget(chbox);
