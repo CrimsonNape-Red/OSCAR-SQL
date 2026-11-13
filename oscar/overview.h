@@ -32,6 +32,7 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QPointer>
+#include <QButtonGroup>
 class SaveGraphLayoutSettings;
 
 namespace Ui {
@@ -152,11 +153,21 @@ class Overview : public QWidget
     void on_graphHelp_clicked();
 
   protected:
+    //! \brief Restyles the range strip when the colour scheme changes
+    void changeEvent(QEvent *event) override;
     //! \brief Leaving the Overview tab closes the details popups
     void hideEvent(QHideEvent *event) override;
 
   private:
     void CreateAllGraphs();
+
+    /*! \brief Redesigned page: moves the selection bar to the top of the page and replaces the
+        range drop-down with a strip of buttons, one per range, in the drop-down's order */
+    void buildRangeStrip();
+    //! \brief Colours the range strip from the theme (again after a light/dark switch)
+    void styleRangeStrip();
+    QWidget *m_rangeStrip = nullptr;            //!< The strip of range buttons; null on the original page
+    QButtonGroup *m_rangeButtons = nullptr;     //!< Its buttons, numbered as the range drop-down's items
 
     //! \brief Applies the profile's saved choice of dotted lines to the graphs
     void loadDottedLines();

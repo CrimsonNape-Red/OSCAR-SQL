@@ -40,6 +40,8 @@
 #include "Graphs/gUsageChart.h"
 #include "Graphs/gTTIAChart.h"
 #include "Graphs/summarylines.h"
+#include "uikit/theme.h"
+#include <QToolButton>
 #include "cprogressbar.h"
 #include "saveGraphLayoutSettings.h"
 
@@ -173,6 +175,7 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     RebuildGraphs(false);
 
     ui->rangeCombo->setCurrentIndex(p_profile->general->lastOverviewRange());
+    if (AppSetting->useNewPages()) buildRangeStrip();
 
     icon_on = new QIcon(":/icons/session-on.png");
     icon_off = new QIcon(":/icons/session-off.png");
@@ -402,6 +405,74 @@ void Overview::CreateAllGraphs() {
 
     connectgSummaryCharts();
     loadDottedLines();
+}
+
+void Overview::buildRangeStrip()
+{
+    // The selection bar goes above the graphs
+    ui->verticalLayout->removeWidget(ui->frame);
+    ui->verticalLayout->insertWidget(0, ui->frame);
+
+    // The strip stands in for the range drop-down, which stays (hidden) as the page's record of
+    // the chosen range. The hovered date is shown in bold on the date axis instead of in a label.
+    ui->label_3->hide();
+    ui->rangeCombo->hide();
+    ui->dateStartLabel->hide();
+    ui->dateEndLabel->hide();
+    dateLabel->hide();
+
+    m_rangeStrip = new QWidget(ui->frame);
+    QHBoxLayout *row = new QHBoxLayout(m_rangeStrip);
+    row->setContentsMargins(0, 0, 0, 0);
+    row->setSpacing(0);
+    m_rangeButtons = new QButtonGroup(this);
+    m_rangeButtons->setExclusive(true);
+    // Short forms of the drop-down's items, in the same order
+    const QStringList labels = { tr("1W"), tr("2W"), tr("1M"), tr("2M"), tr("3M"), tr("6M"), tr("1Y"),
+                                 tr("All"), tr("Custom"), tr("Snapshot") };
+    const int count = qMin(labels.size(), ui->rangeCombo->count());
+    for (int i = 0; i < count; ++i) {
+        QToolButton *button = new QToolButton(m_rangeStrip);
+        button->setText(labels.at(i));
+        button->setToolTip(ui->rangeCombo->itemText(i));
+        button->setCheckable(true);
+        button->setFocusPolicy(Qt::TabFocus);
+        if (i == 0) button->setObjectName("first");
+        if (i == count - 1) button->setObjectName("last");
+        m_rangeButtons->addButton(button, i);
+        row->addWidget(button);
+    }
+    ui->horizontalLayout->insertWidget(0, m_rangeStrip);
+
+    connect(m_rangeButtons, &QButtonGroup::idClicked, this, [this](int index) {
+        ui->rangeCombo->setCurrentIndex(index);
+        on_rangeCombo_activated(index);
+    });
+    const auto sync = [this](int index) {
+        if (QAbstractButton *button = m_rangeButtons->button(index)) button->setChecked(true);
+    };
+    connect(ui->rangeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, sync);
+    sync(ui->rangeCombo->currentIndex());
+    styleRangeStrip();
+}
+
+void Overview::styleRangeStrip()
+{
+    if (!m_rangeStrip) return;
+    m_rangeStrip->setStyleSheet(QString(
+        "QToolButton { border: 1px solid %1; border-left: none; padding: 4px 9px; background: %2; color: %3; }"
+        "QToolButton#first { border-left: 1px solid %1; border-top-left-radius: 6px; border-bottom-left-radius: 6px; }"
+        "QToolButton#last { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }"
+        "QToolButton:hover:!checked { background: %4; }"
+        "QToolButton:checked { background: %5; color: %6; border-color: %5; }")
+        .arg(Theme::css(Theme::Role::Line), Theme::css(Theme::Role::Surface), Theme::css(Theme::Role::Ink),
+             Theme::css(Theme::Role::AccentSoft), Theme::css(Theme::Role::Accent), Theme::css(Theme::Role::OnAccent)));
+}
+
+void Overview::changeEvent(QEvent *event)
+{
+    QWidget::changeEvent(event);
+    if (event->type() == QEvent::PaletteChange) styleRangeStrip();
 }
 
 //! \brief Profile preference holding the dotted lines; also listed in PreferencesRepository::saveUserSettings()
