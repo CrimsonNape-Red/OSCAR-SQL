@@ -288,6 +288,11 @@ protected:
     quint32 m_lineMask = 0;             //!< See lineMask()
     bool m_lineMaskSet = false;         //!< False while the lines' own defaults apply
     QRectF m_detailsRect;       //!< Details button as last drawn; empty when not shown
+
+    /*! \brief Shows the hover tooltip \a text. With no Details button it goes beside the mouse,
+        as in OSCAR 2.1; with one it goes beside the button, on the side with more room in
+        \a plot, so the button is never covered. */
+    void showHoverTip(gGraph &graph, const QString &text, const QPoint &mouse, const QRectF &plot);
     QDate m_detailsDate;        //!< Day the Details button belongs to
     int m_detailsIdx = -1;      //!< That day's index in daylist
     QDate m_lastHoverDate;      //!< Day under the mouse at the last paint, to tell when it changes

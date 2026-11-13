@@ -57,6 +57,36 @@ void OverviewBarsTests::testBarGradientStops()
     QCOMPARE(grad.finalStop(), QPointF(60, 0));
 }
 
+void OverviewBarsTests::testDarkBarColourIsMuted()
+{
+    // On a dark background pale colours glare, so they are brought down to a medium shade
+    QVERIFY(darkBarColour(QColor(Qt::white)).lightnessF() <= 0.5f);
+    QVERIFY(darkBarColour(QColor(0xE0, 0xF0, 0xFF)).lightnessF() <= 0.5f);
+    // A colour keeps its hue, and is never made brighter
+    const QColor blue(0x40, 0x80, 0xff);
+    const QColor muted = darkBarColour(blue);
+    QVERIFY(qAbs(muted.hslHue() - blue.hslHue()) <= 2);
+    QVERIFY(muted.lightnessF() <= blue.lightnessF());
+    QVERIFY(muted.hslSaturationF() < blue.hslSaturationF());
+    const QColor navy(0x20, 0x30, 0x60);
+    QVERIFY(darkBarColour(navy).lightnessF() <= navy.lightnessF() + 0.001f);
+    // Shades of one colour stay distinct
+    QVERIFY(darkBarColour(QColor(0xFF, 0xA0, 0xA0)).lightnessF() > darkBarColour(QColor(0xFF, 0x00, 0x00)).lightnessF() + 0.05f);
+    // Transparency is kept
+    QCOMPARE(darkBarColour(QColor(0x40, 0x80, 0xff, 100)).alpha(), 100);
+}
+
+void OverviewBarsTests::testDarkGradientDoesNotGlare()
+{
+    // In dark mode the shading starts from the muted colour and brightens only a little
+    const QLinearGradient grad = barGradient(QColor(0x40, 0x80, 0xff), 10, 50, true);
+    const QGradientStops stops = grad.stops();
+    QCOMPARE(stops.size(), 2);
+    QCOMPARE(stops.at(0).second, darkBarColour(QColor(0x40, 0x80, 0xff)));
+    QVERIFY(stops.at(1).second.lightnessF() > stops.at(0).second.lightnessF());
+    QVERIFY(stops.at(1).second.lightnessF() <= 0.6f);
+}
+
 void OverviewBarsTests::testPlainFillLighterAboveThreePixels()
 {
     QImage img(10, 10, QImage::Format_ARGB32);

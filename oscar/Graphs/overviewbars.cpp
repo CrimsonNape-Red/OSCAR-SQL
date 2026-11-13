@@ -22,6 +22,10 @@ constexpr double kGapShare = 0.15;      //!< Share of a day's slot left as a gap
 constexpr double kMinGapSlot = 3.0;     //!< Narrowest slot that still gets a (1 px) gap
 constexpr double kMinShaded = 8.0;      //!< Narrowest bar shaded left to right (as in OSCAR 2.1.0)
 constexpr double kCornerRadius = 3.0;   //!< Radius of the two top corners of a shaded bar
+constexpr float kDarkLightness = 0.88f; //!< Share of a dark colour's lightness kept in dark mode (HSL)
+constexpr float kDarkCompress = 0.40f;  //!< How much more a light colour loses: white ends at 0.48
+constexpr float kDarkSaturation = 0.8f; //!< Share of a bar colour's saturation kept in dark mode
+constexpr int kDarkShade = 122;         //!< Far end of a bar's shading in dark mode (QColor::lighter)
 
 double toLinear(double v) { return v <= 0.04045 ? v / 12.92 : std::pow((v + 0.055) / 1.055, 2.4); }
 
@@ -67,14 +71,34 @@ QLinearGradient barGradient(const QColor &c, double left, double width)
     return g;
 }
 
+QColor darkBarColour(const QColor &c)
+{
+    float h, s, l, a;
+    c.getHslF(&h, &s, &l, &a);
+    // Lightness is compressed, not capped, so that shades of one colour stay distinct
+    return QColor::fromHslF(h, s * kDarkSaturation, l * (kDarkLightness - kDarkCompress * l), a);
+}
+
+QLinearGradient barGradient(const QColor &c, double left, double width, bool dark)
+{
+    if (!dark) return barGradient(c, left, width);
+    const QColor base = darkBarColour(c);
+    QLinearGradient g(left, 0, left + width, 0);
+    g.setColorAt(0.0, base);
+    g.setColorAt(1.0, base.lighter(kDarkShade));
+    return g;
+}
+
 void paintSegment(QPainter &p, const QRectF &r, const QColor &c, bool top, bool shaded)
 {
     if (r.isEmpty()) return;
+    const bool dark = GraphTheme::dark();
     if (!shaded) {
-        p.fillRect(r, r.width() > 3.0 ? brighten(c, 1.25f) : c);
+        if (dark) p.fillRect(r, darkBarColour(c));
+        else p.fillRect(r, r.width() > 3.0 ? brighten(c, 1.25f) : c);
         return;
     }
-    const QBrush brush(barGradient(c, r.left(), r.width()));
+    const QBrush brush(barGradient(c, r.left(), r.width(), dark));
     const double radius = qMin(kCornerRadius, qMin(r.width() / 4.0, r.height() / 2.0));
     if (!top || radius < 1.0) {
         p.fillRect(r, brush);

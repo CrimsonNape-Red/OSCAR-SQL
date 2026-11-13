@@ -370,7 +370,7 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
                 } else {
                     // Each session is a piece of its own, with its own rounded top; the one
                     // under the mouse names itself in a tooltip
-                    if (rec.contains(mouse)) graph.ToolTip(slice.name, mouse.x() + 20, mouse.y(), TT_AlignBottomLeft);
+                    if (rec.contains(mouse)) showHoverTip(graph, slice.name, mouse, rect);
                     OverviewBars::paintSegment(painter, rec, col, true, geo.shaded && !flatOnly);
                 }
 

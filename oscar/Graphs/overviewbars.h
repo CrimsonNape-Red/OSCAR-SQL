@@ -43,6 +43,14 @@ BarGeometry barGeometry(double slotWidth);
     (see brighten()) at the right edge. */
 QLinearGradient barGradient(const QColor &c, double left, double width);
 
+/*! \brief The same shading for dark mode when \a dark is true: from darkBarColour(\a c) to a
+    slightly lighter shade of it, as bars brightening towards white glare on a dark background */
+QLinearGradient barGradient(const QColor &c, double left, double width, bool dark);
+
+/*! \brief A bar colour for dark mode: \a c with the same hue, less saturated, and no lighter
+    than a medium shade. Pale colours, made for a white background, are brought down the most. */
+QColor darkBarColour(const QColor &c);
+
 /*! \brief Draws one part of a bar in \a r
 
     \param top The top part of the bar, whose top corners are rounded when \a shaded is true

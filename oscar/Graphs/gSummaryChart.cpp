@@ -258,6 +258,21 @@ bool gSummaryChart::isDetailsClick(QMouseEvent *event) const
            && m_detailsRect.contains(event->position());
 }
 
+void gSummaryChart::showHoverTip(gGraph &graph, const QString &text, const QPoint &mouse, const QRectF &plot)
+{
+    if (!m_detailsRect.isValid()) {
+        graph.ToolTip(text, mouse.x() + 20, mouse.y(), TT_AlignBottomLeft);
+        return;
+    }
+    // The tooltip's bottom edge follows the mouse, but stays below the top of the button
+    const int y = qMax(mouse.y(), int(m_detailsRect.bottom()) + 4);
+    if (m_detailsRect.center().x() > plot.center().x()) {
+        graph.ToolTip(text, int(m_detailsRect.left()) - 6, y, TT_AlignBottomRight);
+    } else {
+        graph.ToolTip(text, int(m_detailsRect.right()) + 6, y, TT_AlignBottomLeft);
+    }
+}
+
 void gSummaryChart::clearHover(gGraph &graph)
 {
     // As with a new day under the mouse, the date axis needs one more frame to drop the bold label
@@ -860,12 +875,10 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
         clearHover(graph);
     }
     if (hl) {
-        // In both looks the day's date and numbers are shown in a tooltip. In the card look it
-        // starts below the Details button, so the button stays free to click.
+        // In both looks the day's date and numbers are shown in a tooltip
         QString txt = hl_date.toString(QLocale::system().dateFormat(QLocale::ShortFormat)) + " ";
         if (hl_day) txt += tooltipData(hl_day, hl_idx);
-        const int tipY = m_detailsRect.isValid() ? qMax(mouse.y(), int(m_detailsRect.bottom()) + 4) : mouse.y();
-        graph.ToolTip(txt, mouse.x() + 20, tipY, TT_AlignBottomLeft);
+        showHoverTip(graph, txt, mouse, rect);
     }
     try {
         afterDraw(painter, graph, rect);

@@ -18,6 +18,8 @@ private slots:
     void testGeometrySmallSlotKeepsOnePixelGap();
     void testGeometryNarrowSlot();
     void testBarGradientStops();
+    void testDarkBarColourIsMuted();
+    void testDarkGradientDoesNotGlare();
     void testPlainFillLighterAboveThreePixels();
     void testTopIsFlatWithRoundedCorners();
     void testContrastingText();
