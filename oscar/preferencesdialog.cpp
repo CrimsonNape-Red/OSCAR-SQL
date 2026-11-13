@@ -245,12 +245,12 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
              "The moon or sun button at the right end of the tabs also switches between Light and Dark.")
         : tr("Follow system: light or dark as set in your operating system. Light or Dark: always that.\n"
              "OSCAR will restart when you click OK."));
-    ui->useNewWelcome->setChecked(AppSetting->useNewWelcome());
+    ui->useNewPages->setChecked(AppSetting->useNewPages());
     ui->welcomeCardColour->setCurrentIndex(int(AppSetting->welcomeCardColour()));
-    ui->welcomeCardColour->setEnabled(AppSetting->useNewWelcome());
-    ui->welcomeCardColourLabel->setEnabled(AppSetting->useNewWelcome());
-    connect(ui->useNewWelcome, &QCheckBox::toggled, ui->welcomeCardColour, &QWidget::setEnabled);
-    connect(ui->useNewWelcome, &QCheckBox::toggled, ui->welcomeCardColourLabel, &QWidget::setEnabled);
+    ui->welcomeCardColour->setEnabled(AppSetting->useNewPages());
+    ui->welcomeCardColourLabel->setEnabled(AppSetting->useNewPages());
+    connect(ui->useNewPages, &QCheckBox::toggled, ui->welcomeCardColour, &QWidget::setEnabled);
+    connect(ui->useNewPages, &QCheckBox::toggled, ui->welcomeCardColourLabel, &QWidget::setEnabled);
     ui->useSystemTooltipColors->setChecked(AppSetting->useSystemTooltipColors());
 
 #if defined(STEADY_BREATHING)
@@ -954,8 +954,8 @@ bool PreferencesDialog::Save()
             needs_restart = true;   // older Qt applies the scheme only at startup
         }
     }
-    // MainWindow rebuilds the Welcome tab when either of these changes.
-    AppSetting->setUseNewWelcome(ui->useNewWelcome->isChecked());
+    // MainWindow rebuilds the Welcome and Overview tabs when these change.
+    AppSetting->setUseNewPages(ui->useNewPages->isChecked());
     AppSetting->setWelcomeCardColour(WelcomeCardColour(ui->welcomeCardColour->currentIndex()));
 
     bool clicicalModeChanged = profile->cpap->clinicalMode() != ui->clinicalMode->isChecked() ;

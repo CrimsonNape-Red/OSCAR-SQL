@@ -40,6 +40,16 @@ QColor ink(const QColor &light);
 //! \brief The graphs' background colour in the current mode (white in light mode)
 QColor background();
 
+//! \brief The card look's axis grey as used on a white background (the units in a card's header)
+const QColor kAxisGrey(120, 120, 120);
+
+//! \brief The card look's colour for axis lines, ticks and labels: kAxisGrey, or its dark-mode match
+QColor axis();
+
+/*! \brief The outline of a graph card or statistics tile. In dark mode the palette's border
+    colour can be as dark as the card itself, so a grey that shows on it is used instead. */
+QColor outline();
+
 /*! \brief The far end of a bar's shading: brighten(\a color, \a factor) in light mode, and a
     correspondingly darker shade in dark mode, where bars fading to white would glare */
 QColor barShade(const QColor &color, float factor);

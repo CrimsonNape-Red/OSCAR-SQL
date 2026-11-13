@@ -355,10 +355,25 @@ class gGraph : public QObject
     //! \brief The days that have a details popup open
     const QSet<QDate> &pinnedDates() const { return m_pinnedDates; }
 
-    /*! \brief Draws the title as a strip of colour \a color (light-mode colour; translated for
-        dark mode when drawn). An invalid colour keeps the plain rotated title. */
+    /*! \brief Sets the colour that stands for this graph (a light-mode colour). It is not drawn on
+        the graph itself; the graph's Details popups use it for their header. */
     void setTitleColor(const QColor &color) { m_titleColor = color; }
-    //! \brief The title strip's colour, or an invalid colour for a plain title
+
+    /*! \brief Card look: the free part of the header, between the title and the menu button,
+        where layers put their summary text. Set by paint(); empty in the Classic look. */
+    QRect headerTextRect() const { return m_headerText; }
+
+    /*! \brief Card look: shows \a text in the header, cut short with an ellipsis if it doesn't
+        fit, and returns true. Returns false in the Classic look, where the caller draws the
+        text above the plot as before. */
+    bool headerSummary(const QString &text);
+
+    //! \brief Where the last paint() put the plot (the centre layers), in the view's coordinates
+    QRect plotRect() const { return m_plotRect; }
+
+    //! \brief Card look: takes \a width pixels off the right of headerTextRect() (for a legend)
+    void reserveHeaderRight(int width) { m_headerText.setWidth(qMax(0, m_headerText.width() - width)); }
+    //! \brief The colour that stands for this graph, or an invalid colour if none was set
     const QColor &titleColor() const { return m_titleColor; }
 
     void mouseDoubleClickYAxis(QMouseEvent *event);
@@ -427,12 +442,15 @@ class gGraph : public QObject
     bool m_pinned;
     QDate m_hoverDate;              //!< Day under the mouse (Overview), invalid if none
     QSet<QDate> m_pinnedDates;      //!< Days with a details popup open (Overview)
-    QColor m_titleColor;            //!< Title strip colour; invalid for a plain title
+    QColor m_titleColor;            //!< The colour that stands for this graph (its Details popups use it)
     //! \brief Cached font for vertical title; shrunk when title is too long for the graph height
     QFont m_titleFont;
     ZoomyScaling m_zoomY;
     bool m_block_select;
     QRect m_rect;
+    QRect m_headerText;             //!< See headerTextRect()
+    QRect m_plotRect;               //!< See plotRect()
+    bool m_cardPainted = false;     //!< The last paint() drew this graph as a card
     int m_defaultLayerMinHeight;
 
     qint64 m_selectedDuration;

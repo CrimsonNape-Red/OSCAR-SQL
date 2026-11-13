@@ -39,6 +39,14 @@
 #include "Graphs/gAHIChart.h"
 #include "Graphs/gUsageChart.h"
 #include "Graphs/gTTIAChart.h"
+#include "Graphs/summarylines.h"
+#include "uikit/theme.h"
+#include "overviewstats.h"
+#include "overviewdateaxis.h"
+#include "Graphs/graphtheme.h"
+#include <QPainter>
+#include <QTimeZone>
+#include <QToolButton>
 #include "cprogressbar.h"
 #include "saveGraphLayoutSettings.h"
 
@@ -116,7 +124,8 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     QFrame *border = new QFrame(ui->graphArea);
 
     framelayout->setContentsMargins(1, 1, 1, 1);
-    border->setFrameShape(QFrame::StyledPanel);
+    // The redesigned page's graphs are cards on the page itself, with no frame around them all
+    border->setFrameShape(AppSetting->useNewPages() ? QFrame::NoFrame : QFrame::StyledPanel);
     framelayout->addWidget(border,1);
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -132,6 +141,9 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     // Create the GraphView Object
     ///////////////////////////////////////////////////////////////////////////////
     GraphView = new gGraphView(ui->graphArea, m_shared, this);
+    // The redesigned page draws its graphs as cards; the original page keeps the 2.1 look
+    GraphView->setLook(AppSetting->useNewPages() ? GraphLook::Card : GraphLook::Classic);
+    GraphView->setSharedXAxis(AppSetting->useNewPages());
     GraphView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     GraphView->setEmptyText(STR_Empty_NoData);
@@ -170,6 +182,7 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     RebuildGraphs(false);
 
     ui->rangeCombo->setCurrentIndex(p_profile->general->lastOverviewRange());
+    if (AppSetting->useNewPages()) buildRangeStrip();
 
     icon_on = new QIcon(":/icons/session-on.png");
     icon_off = new QIcon(":/icons/session-off.png");
@@ -190,6 +203,7 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     connect(GraphView, SIGNAL(updateCurrentTime(double)), this, SLOT(on_LineCursorUpdate(double)));
     connect(GraphView, SIGNAL(updateRange(double,double)), this, SLOT(on_RangeUpdate(double,double)));
     connect(GraphView, SIGNAL(GraphsChanged()), this, SLOT(updateGraphCombo()));
+    connect(GraphView, &gGraphView::summaryLinesChanged, this, &Overview::saveDottedLines);
     connect(GraphView, SIGNAL(XBoundsChanged(qint64 ,qint64)), this, SLOT(on_XBoundsChanged(qint64 ,qint64)));
     saveGraphLayoutSettings=nullptr;
 }
@@ -397,6 +411,245 @@ void Overview::CreateAllGraphs() {
     #endif
 
     connectgSummaryCharts();
+    loadDottedLines();
+}
+
+void Overview::buildRangeStrip()
+{
+    // The selection bar goes above the graphs, with no frame of its own
+    ui->verticalLayout->removeWidget(ui->frame);
+    ui->verticalLayout->insertWidget(0, ui->frame);
+    ui->frame->setFrameShape(QFrame::NoFrame);
+    ui->horizontalLayout->setSpacing(8);
+    ui->horizontalLayout->setContentsMargins(8, 6, 8, 2);
+
+    // Under it, the figures for the dates on screen
+    m_statsRow = new OverviewStatsRow(this);
+    ui->verticalLayout->insertWidget(1, m_statsRow);
+
+    // One date axis for all the graphs, fixed below them so it stays in view
+    m_dateAxis = new OverviewDateAxis(GraphView, this);
+    ui->verticalLayout->insertWidget(ui->verticalLayout->indexOf(ui->graphArea) + 1, m_dateAxis);
+
+    // The strip stands in for the range drop-down, which stays (hidden) as the page's record of
+    // the chosen range. The hovered date is shown in bold on the date axis instead of in a label.
+    ui->label_3->hide();
+    ui->rangeCombo->hide();
+    ui->dateStartLabel->hide();
+    ui->dateEndLabel->setText(QString(QChar(0x2013)));      // a dash between the two dates
+    dateLabel->hide();
+    ui->dateLayout->addStretch(1);
+
+    m_rangeStrip = new QWidget(ui->frame);
+    m_rangeStrip->setObjectName("rangeStrip");
+    m_rangeStrip->setAttribute(Qt::WA_StyledBackground);
+    QHBoxLayout *row = new QHBoxLayout(m_rangeStrip);
+    row->setContentsMargins(3, 3, 3, 3);
+    row->setSpacing(2);
+    m_rangeButtons = new QButtonGroup(this);
+    m_rangeButtons->setExclusive(true);
+    // The drop-down's ranges by item number, less the two- and six-month ones
+    const QVector<QPair<int, QString>> ranges = {
+        { 0, tr("1 week") }, { 1, tr("2 weeks") }, { 2, tr("1 month") }, { 4, tr("3 months") },
+        { 6, tr("1 year") }, { 7, tr("All") }, { 8, tr("Custom") }, { 9, tr("Snapshot") } };
+    // The same ranges as named when the window is too narrow for the full names
+    const QStringList shortNames = { tr("1W"), tr("2W"), tr("1M"), tr("3M"), tr("1Y"), tr("All"), tr("Custom"), tr("Snapshot") };
+    int rangeNumber = -1;
+    QFont bold = font();
+    bold.setBold(true);
+    const QFontMetrics boldMetrics(bold);
+    for (const auto &range : ranges) {
+        ++rangeNumber;
+        if (range.first >= ui->rangeCombo->count()) continue;
+        QToolButton *button = new QToolButton(m_rangeStrip);
+        button->setText(range.second);
+        button->setProperty("fullText", range.second);
+        button->setProperty("shortText", shortNames.at(rangeNumber));
+        button->setToolTip(range.first == 9 ? tr("Keep the dates now shown as the Custom range")
+                                            : ui->rangeCombo->itemText(range.first));
+        button->setCheckable(true);
+        button->setFocusPolicy(Qt::TabFocus);
+        // Wide enough for the bold text of the chosen range, so choosing one moves nothing
+        button->setMinimumWidth(boldMetrics.horizontalAdvance(range.second) + 14);
+        m_rangeButtons->addButton(button, range.first);
+        row->addWidget(button);
+    }
+    ui->horizontalLayout->insertWidget(0, m_rangeStrip);
+
+    // The number of days on screen, after the dates
+    m_daysLabel = new QLabel(ui->frame);
+    ui->horizontalLayout->insertWidget(ui->horizontalLayout->indexOf(ui->zoomButton), m_daysLabel);
+
+    // At the right: the graphs drop-down, then Layout and Hint as small square buttons that
+    // name themselves in a tooltip
+    ui->horizontalLayout->removeWidget(ui->graphCombo);
+    ui->horizontalLayout->insertWidget(ui->horizontalLayout->indexOf(ui->graphHelp), ui->graphCombo);
+    ui->horizontalLayout->removeWidget(ui->graphHelp);
+    ui->horizontalLayout->addWidget(ui->graphHelp);
+    ui->graphHelp->setText(QStringLiteral("?"));
+    ui->graphHelp->setIcon(QIcon());
+    ui->layout->setText(QString());
+    ui->layout->setIconSize(QSize(16, 16));
+    for (QAbstractButton *button : std::initializer_list<QAbstractButton *>{ ui->zoomButton, ui->layout, ui->graphHelp }) {
+        button->setFixedSize(30, 30);
+    }
+
+    connect(m_rangeButtons, &QButtonGroup::idClicked, this, [this](int index) {
+        ui->rangeCombo->setCurrentIndex(index);
+        on_rangeCombo_activated(index);
+    });
+    const auto sync = [this](int index) {
+        if (QAbstractButton *button = m_rangeButtons->button(index)) {
+            button->setChecked(true);
+        } else if (QAbstractButton *checked = m_rangeButtons->checkedButton()) {
+            // A range kept from the original page that has no button here
+            m_rangeButtons->setExclusive(false);
+            checked->setChecked(false);
+            m_rangeButtons->setExclusive(true);
+        }
+    };
+    connect(ui->rangeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, sync);
+    sync(ui->rangeCombo->currentIndex());
+    styleRangeStrip();
+    // A steady width for the graphs drop-down, whose own changes with the text it shows, so
+    // the widths measured for the bar hold
+    ui->graphCombo->setMinimumWidth(170);
+    ui->frame->installEventFilter(this);
+
+    // The Tab key goes along the bar from left to right
+    QList<QWidget *> tabOrder;
+    for (QAbstractButton *button : m_rangeButtons->buttons()) tabOrder.append(button);
+    tabOrder << ui->dateStart << ui->dateEnd << ui->zoomButton << ui->graphCombo << ui->layout << ui->graphHelp;
+    for (int i = 1; i < tabOrder.size(); ++i) QWidget::setTabOrder(tabOrder.at(i - 1), tabOrder.at(i));
+}
+
+void Overview::setStripCompact(bool compact)
+{
+    if (!m_rangeButtons || compact == m_stripCompact) return;
+    m_stripCompact = compact;
+    QFont bold = font();
+    bold.setBold(true);
+    const QFontMetrics metrics(bold);
+    for (QAbstractButton *button : m_rangeButtons->buttons()) {
+        const QString text = button->property(compact ? "shortText" : "fullText").toString();
+        button->setText(text);
+        button->setMinimumWidth(metrics.horizontalAdvance(text) + (compact ? 12 : 14));
+    }
+    if (m_daysLabel) m_daysLabel->setVisible(!compact);
+    // The bar's layout keeps the strip's old size until told the strip has changed
+    m_rangeStrip->layout()->invalidate();
+    m_rangeStrip->updateGeometry();
+}
+
+bool Overview::eventFilter(QObject *watched, QEvent *event)
+{
+    const bool sized = event->type() == QEvent::Resize || event->type() == QEvent::Show;
+    // Only once the bar is on screen: before that its buttons do not have their final font and
+    // style, and the widths measured below would be wrong
+    if (watched == ui->frame && sized && m_rangeStrip && ui->frame->isVisible()) {
+        if (m_stripFullWidth == 0) {
+            // The width the full names need, and the width the short ones need, which becomes
+            // the narrowest the selection bar can be
+            for (QWidget *child : ui->frame->findChildren<QWidget *>()) child->ensurePolished();
+            setStripCompact(false);
+            ui->horizontalLayout->invalidate();
+            m_stripFullWidth = ui->horizontalLayout->minimumSize().width();
+            setStripCompact(true);
+            ui->horizontalLayout->invalidate();
+            ui->frame->setMinimumWidth(ui->horizontalLayout->minimumSize().width());
+        }
+        setStripCompact(ui->frame->width() < m_stripFullWidth);
+    }
+    return QWidget::eventFilter(watched, event);
+}
+
+//! \brief Two stacked boxes, for the button that saves and restores the graph layout
+static QIcon layoutIcon(const QColor &colour, qreal scale)
+{
+    QPixmap pixmap(QSize(16, 16) * scale);
+    pixmap.setDevicePixelRatio(scale);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setPen(QPen(colour, 1.5));
+    painter.drawRoundedRect(QRectF(2, 2.25, 12, 4.5), 1, 1);
+    painter.drawRoundedRect(QRectF(2, 9.25, 12, 4.5), 1, 1);
+    return QIcon(pixmap);
+}
+
+void Overview::styleRangeStrip()
+{
+    if (!m_rangeStrip) return;
+    // The strip is a trough a little darker (lighter in dark mode) than the page; the chosen
+    // range is a raised pill in it
+    const QColor page = Theme::color(Theme::Role::Page);
+    const QColor trough = Theme::isDark(palette()) ? page.lighter(135) : page.darker(107);
+    m_rangeStrip->setStyleSheet(QString(
+        "#rangeStrip { background: %1; border-radius: 9px; }"
+        "QToolButton { border: none; border-radius: 7px; padding: 4px 6px; background: transparent; color: %2; }"
+        "QToolButton:hover:!checked { color: %3; }"
+        "QToolButton:checked { background: %4; color: %3; font-weight: bold; }")
+        .arg(Theme::css(trough), Theme::css(Theme::Role::Ink2), Theme::css(Theme::Role::Ink),
+             Theme::css(Theme::Role::Surface)));
+
+    const QString box = QString(
+        "QPushButton, QToolButton { border: 1px solid %1; border-radius: 8px; background: %2; color: %3;"
+        " font-weight: bold; padding: 0; }"
+        "QPushButton:hover, QToolButton:hover { border-color: %4; }"
+        "QPushButton:pressed, QToolButton:pressed { background: %5; }")
+        .arg(Theme::css(GraphTheme::outline()), Theme::css(Theme::Role::Surface), Theme::css(Theme::Role::Ink),
+             Theme::css(Theme::Role::Accent), Theme::css(Theme::Role::AccentSoft));
+    ui->zoomButton->setStyleSheet(box);
+    ui->layout->setStyleSheet(box);
+    ui->graphHelp->setStyleSheet(box);
+    ui->layout->setIcon(layoutIcon(Theme::color(Theme::Role::Ink), devicePixelRatioF()));
+    if (m_daysLabel) m_daysLabel->setStyleSheet(QString("color: %1;").arg(Theme::css(Theme::Role::Ink2)));
+}
+
+void Overview::changeEvent(QEvent *event)
+{
+    QWidget::changeEvent(event);
+    if (event->type() == QEvent::FontChange && m_rangeStrip) {
+        // A new font size changes the widths the selection bar needs: measure them again
+        m_stripFullWidth = 0;
+        ui->frame->setMinimumWidth(0);
+        QEvent resize(QEvent::Resize);
+        eventFilter(ui->frame, &resize);
+    }
+    if (event->type() == QEvent::PaletteChange) {
+        styleRangeStrip();
+        if (m_dateAxis) m_dateAxis->update();
+    }
+}
+
+//! \brief Profile preference holding the dotted lines; also listed in PreferencesRepository::saveUserSettings()
+static const QString kDottedLinesPref = QStringLiteral("OverviewDottedLines");
+
+void Overview::loadDottedLines()
+{
+    if (!p_profile || !p_profile->general) return;
+    Preferences *pref = p_profile->general->m_pref;
+    if (!pref->contains(kDottedLinesPref)) return;
+    const QHash<QString, quint32> masks = SummaryLines::decode((*pref)[kDottedLinesPref].toString());
+    for (int i = 0; i < GraphView->size(); ++i) {
+        gGraph *graph = (*GraphView)[i];
+        gSummaryChart *chart = dynamic_cast<gSummaryChart *>(GraphView->findLayer(graph, LT_Overview));
+        if (chart && masks.contains(graph->name())) chart->setLineMask(masks.value(graph->name()));
+    }
+}
+
+void Overview::saveDottedLines()
+{
+    if (!p_profile || !p_profile->general) return;
+    QHash<QString, quint32> masks;
+    for (int i = 0; i < GraphView->size(); ++i) {
+        gGraph *graph = (*GraphView)[i];
+        if (graph->isSnapshot()) continue;
+        gSummaryChart *chart = dynamic_cast<gSummaryChart *>(GraphView->findLayer(graph, LT_Overview));
+        if (chart && chart->hasLineMask()) masks.insert(graph->name(), chart->lineMask());
+    }
+    p_profile->general->setPref(kDottedLinesPref, SummaryLines::encode(masks));
+    p_profile->saveExtendedDataToDatabase();
 }
 
 
@@ -426,6 +679,7 @@ void Overview::RebuildGraphs(bool reset)
     // Load after resetLayout so user-adjusted heights are not overwritten by defaults.
     GraphView->LoadSettings("Overview");
     settingsLoaded = true;
+    if (m_statsRow) m_statsRow->refresh();      // preferences the figures depend on may have changed
 }
 
 // Create an overview graph, adding it to the overview gGraphView object
@@ -565,6 +819,15 @@ void Overview::ReloadGraphs()
     GraphView->setDay(nullptr);
     updateCube();
 
+    // With no data there are no figures or dates to show, so their rows give up their space
+    const bool hasData = p_profile && p_profile->FirstDay().isValid();
+    if (m_statsRow) {
+        m_statsRow->setVisible(hasData);
+        // The dates may be the same as before, but the data or a preference may not be
+        m_statsRow->refresh();
+    }
+    if (m_dateAxis) m_dateAxis->setVisible(hasData);
+
     // A reload keeps the same range (it follows a light/dark switch, a journal edit or an
     // import), so the details popups stay open
     const QScopedValueRollback<bool> keep(m_keepDetailPopups, true);
@@ -690,6 +953,15 @@ void Overview::on_XBoundsChanged(qint64 start,qint64 end)
 {
     displayStartDate = convertTimeToDate(start);
     displayEndDate = convertTimeToDate(end);
+
+    if (m_statsRow) {
+        // The dates the graphs draw for these bounds (as gSummaryChart::paint works them out),
+        // so the figures and the graphs' dotted lines cover the same days
+        const QDate first = QDateTime::fromMSecsSinceEpoch(start, QTimeZone::systemTimeZone()).date();
+        const int days = qMax(1, int(std::ceil(double(end - start) / 86400000.0)));
+        m_statsRow->setRange(first, first.addDays(days - 1));
+        if (m_daysLabel) m_daysLabel->setText(days == 1 ? tr("1 night") : tr("%1 nights").arg(days));
+    }
 
     bool largerRange=false;
     if (displayStartDate>maxRangeEndDate || minRangeStartDate>displayEndDate) {

@@ -1830,23 +1830,54 @@ void MainWindow::setupColorSchemeButton()
 {
     m_pageThemeKey = paletteKey();      // pages are built in the current colours
 
-    if (!ColorScheme::canSwitchLive()) return;     // Preferences > Appearance only, with a restart
-
     // QTabWidget caps a corner widget at the tab bar's height and aligns it to the bottom, so
-    // size the button to fit inside the bar. A little space keeps it off the window edge.
+    // size the buttons to fit inside the bar. A little space keeps them off the window edge.
     auto *corner = new QWidget(ui->tabWidget);
     auto *layout = new QHBoxLayout(corner);
     layout->setContentsMargins(0, 0, 6, 0);
-    auto *button = new UiKit::IconButton(corner);
-    button->setFrameless(true);
-    button->setSide(qMax(20, ui->tabWidget->tabBar()->sizeHint().height() - 2));
-    layout->addWidget(button, 0, Qt::AlignVCenter);
+    layout->setSpacing(4);
+    const int side = qMax(20, ui->tabWidget->tabBar()->sizeHint().height() - 2);
+
+    auto *look = new UiKit::IconButton(corner);
+    look->setFrameless(true);
+    look->setSide(side);
+    layout->addWidget(look, 0, Qt::AlignVCenter);
+    m_pageLookButton = look;
+    connect(look, &QAbstractButton::clicked, this, &MainWindow::togglePageLook);
+
+    if (ColorScheme::canSwitchLive()) {     // otherwise Preferences > Appearance only, with a restart
+        auto *button = new UiKit::IconButton(corner);
+        button->setFrameless(true);
+        button->setSide(side);
+        layout->addWidget(button, 0, Qt::AlignVCenter);
+        m_colorSchemeButton = button;
+        connect(button, &QAbstractButton::clicked, this, &MainWindow::toggleColorScheme);
+    }
     ui->tabWidget->setCornerWidget(corner, Qt::TopRightCorner);
     corner->show();     // a corner widget set after the tab widget is shown starts hidden
 
-    m_colorSchemeButton = button;
-    connect(button, &QAbstractButton::clicked, this, &MainWindow::toggleColorScheme);
+    updatePageLookButton();
     updateColorSchemeButton();
+}
+
+void MainWindow::updatePageLookButton()
+{
+    auto *button = qobject_cast<UiKit::IconButton *>(m_pageLookButton);
+    if (!button) return;
+    const bool modern = AppSetting->useNewPages();
+    button->setLineIcon(modern ? UiKit::LineIcon::ClassicLook : UiKit::LineIcon::ModernLook);
+    const QString tip = modern ? tr("Switch to the Classic pages") : tr("Switch to the Modern pages");
+    button->setToolTip(tip);
+    button->setAccessibleName(tip);
+}
+
+void MainWindow::togglePageLook()
+{
+    AppSetting->setUseNewPages(!AppSetting->useNewPages());
+    p_pref->Save();             // keep the choice even if OSCAR doesn't close normally
+    if (welcome) rebuildWelcomePage();
+    rebuildOverviewPage();
+    updatePageLookButton();
 }
 
 void MainWindow::updateColorSchemeButton()
@@ -2029,7 +2060,7 @@ void MainWindow::on_action_Advanced_Graph_Order_triggered()
 
 WelcomePageBase *MainWindow::createWelcomePage()
 {
-    if (AppSetting->useNewWelcome()) {
+    if (AppSetting->useNewPages()) {
         return new WelcomePage(ui->tabWidget);
     }
     return new Welcome(ui->tabWidget);
@@ -2053,6 +2084,26 @@ void MainWindow::rebuildWelcomePage()
     welcome->refreshPage();
 }
 
+void MainWindow::rebuildOverviewPage()
+{
+    if (!overview || !daily) return;
+    int index = ui->tabWidget->indexOf(overview);
+    if (index < 0) return;
+    const bool wasCurrent = (ui->tabWidget->currentWidget() == overview);
+
+    // Remove the old page from the tab first so the tab widget never shows a deleted page.
+    // Deleting it saves its graph layout, which the new page then loads.
+    ui->tabWidget->removeTab(index);
+    delete overview;
+
+    overview = new Overview(ui->tabWidget, daily->graphView());
+    ui->tabWidget->insertTab(index, overview, STR_TR_Overview);
+    if (wasCurrent) {
+        ui->tabWidget->setCurrentWidget(overview);
+    }
+    overview->ReloadGraphs();
+}
+
 void MainWindow::on_action_Preferences_triggered()
 {
     if (!p_profile) {
@@ -2063,7 +2114,7 @@ void MainWindow::on_action_Preferences_triggered()
     PreferencesDialog pd(this, p_profile);
     prefdialog = &pd;
 
-    const bool oldNewWelcome = AppSetting->useNewWelcome();
+    const bool oldNewPages = AppSetting->useNewPages();
     const WelcomeCardColour oldCardColour = AppSetting->welcomeCardColour();
 
     if (pd.exec() == PreferencesDialog::Accepted) {
@@ -2071,9 +2122,13 @@ void MainWindow::on_action_Preferences_triggered()
 
         setApplicationFont();
 
-        if (welcome && (oldNewWelcome != AppSetting->useNewWelcome()
-                        || oldCardColour != AppSetting->welcomeCardColour())) {
+        const bool pagesChanged = (oldNewPages != AppSetting->useNewPages());
+        if (welcome && (pagesChanged || oldCardColour != AppSetting->welcomeCardColour())) {
             rebuildWelcomePage();
+        }
+        if (pagesChanged) {
+            rebuildOverviewPage();
+            updatePageLookButton();
         }
 
 

@@ -233,6 +233,8 @@ void gYAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
         }
 
         QVector<QLineF> ticks;
+        // Card look: the axis is a quiet grey, like the units in the card's header
+        const bool card = w.graphView()->cardLook() && !w.printing();
 
         QRect r2;
         float shorttick = 4.0 * w.printScaleX();
@@ -256,7 +258,7 @@ void gYAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
             if (h < top-0.002) { continue; }
 
-            w.renderText(fd, left + width - shorttick*2 - x, (h + (y / 2.0)), 0, m_text_color, defaultfont);
+            w.renderText(fd, left + width - shorttick*2 - x, (h + (y / 2.0)), 0, card ? GraphTheme::kAxisGrey : m_text_color, defaultfont);
 
             ticks.append(QLineF(left + width - shorttick, h, left + width, h));
 
@@ -271,7 +273,7 @@ void gYAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
                 ticks.append(QLineF(left + width - shorttick/2, g, left + width, g));
             }
         }
-        painter.setPen(GraphTheme::ink(Qt::black));
+        painter.setPen(card ? GraphTheme::axis() : GraphTheme::ink(Qt::black));
         painter.drawLines(ticks);
         w.graphView()->lines_drawn_this_frame += ticks.size();
 
@@ -300,7 +302,10 @@ bool gYAxis::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
 
 
     if (!graph->units().isEmpty()) {
-        graph->ToolTip(graph->unitsTooltip(), x+10, y+10, TT_AlignLeft);
+        // Card look (Overview): double clicking the axis changes nothing there, so the tooltip
+        // does not offer it
+        const QString tip = graph->graphView()->cardLook() ? graph->units() : graph->unitsTooltip();
+        graph->ToolTip(tip, x+10, y+10, TT_AlignLeft);
     }
 
     return false;

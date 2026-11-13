@@ -22,7 +22,9 @@
 #include "Graphs/layer.h"
 #include "SleepLib/profiles.h"
 #include "Graphs/graphtheme.h"
-#include "Graphs/overviewbars.h"
+#include "Graphs/graphcard.h"
+#include "Graphs/gXAxis.h"
+#include "uikit/theme.h"
 
 extern MainWindow *mainwin;
 
@@ -340,6 +342,18 @@ void gGraph::renderText(QString text, QRectF rect, quint32 flags, float angle, Q
 }
 
 
+bool gGraph::headerSummary(const QString &text)
+{
+    if (!m_cardPainted) return false;
+    const QFontMetrics fm(*defaultfont);
+    const QString shown = GraphCard::elideSummary(text, [&fm](const QString &s) { return fm.horizontalAdvance(s); },
+                                                  m_headerText.width());
+    if (!shown.isEmpty()) {
+        renderText(shown, QRectF(m_headerText), Qt::AlignLeft | Qt::AlignVCenter, 0, QColor(90, 90, 90));
+    }
+    return true;
+}
+
 void gGraph::paint(QPainter &painter, const QRegion &region)
 {
     m_rect = region.boundingRect();
@@ -360,7 +374,64 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
     //int x;
     int y;
 
-    if (m_showTitle) {
+    // Card look: an outlined card with the title in a header along the top, instead of a
+    // rotated title in a column at the left. Printed pages keep the Classic layout.
+    const bool card = m_graphview->cardLook() && !printing();
+    const int cardTop = GraphCard::TopPadding + GraphCard::HeaderHeight;
+    const int cardBottom = GraphCard::Padding / 2;
+    m_cardPainted = card;
+    m_headerText = QRect();
+
+    if (card) {
+        painter.save();
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.setPen(QPen(GraphTheme::outline(), 1));
+        painter.setBrush(GraphTheme::background());
+        painter.drawRoundedRect(QRectF(m_rect).adjusted(0.5, 0.5, -0.5, -0.5), GraphCard::Radius, GraphCard::Radius);
+
+        const QRect header = GraphCard::headerRect(m_rect);
+        int x = header.left() + (isPinned() ? 24 : 0);      // the pin icon sits at the far left
+        // Text stops short of the menu button, however narrow the card (a popped-out graph can
+        // be made very narrow)
+        const int textRight = GraphCard::menuButtonRect(m_rect).left() - 8;
+
+        QFont titleFont = *defaultfont;
+        titleFont.setBold(true);
+        painter.setFont(titleFont);
+        painter.setPen(GraphTheme::ink(Qt::black));
+        painter.drawText(QRect(x, header.top(), qMax(0, textRight - x), header.height()), Qt::AlignLeft | Qt::AlignVCenter, title());
+        x += QFontMetrics(titleFont).horizontalAdvance(title()) + 8;
+
+        const QString unitText = GraphCard::headerUnits(title(), units());
+        if (!unitText.isEmpty()) {
+            painter.setFont(*defaultfont);
+            painter.setPen(GraphTheme::ink(QColor(120, 120, 120)));
+            painter.drawText(QRect(x, header.top(), qMax(0, textRight - x), header.height()), Qt::AlignLeft | Qt::AlignVCenter, unitText);
+            x += QFontMetrics(*defaultfont).horizontalAdvance(unitText) + 8;
+        }
+
+        // The menu button at the right end of the header, highlighted under the mouse
+        const QRect button = GraphCard::menuButtonRect(m_rect);
+        if (button.contains(m_graphview->currentMousePos())) {
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(Theme::color(Theme::Role::AccentSoft));
+            painter.drawRoundedRect(button, 5, 5);
+        }
+        painter.setPen(QPen(GraphTheme::ink(QColor(90, 90, 90)), 1.6, Qt::SolidLine, Qt::RoundCap));
+        for (int i = -1; i <= 1; ++i) {
+            const qreal lineY = button.center().y() + 0.5 + i * 5;
+            painter.drawLine(QPointF(button.left() + 5, lineY), QPointF(button.right() - 4, lineY));
+        }
+        painter.restore();
+
+        x += 8;
+        m_headerText = QRect(x, header.top(), GraphCard::menuButtonRect(m_rect).left() - 8 - x, header.height());
+
+        left += GraphCard::Padding;
+        right += GraphCard::Padding;
+        top = cardTop;
+        bottom += cardBottom;
+    } else if (m_showTitle) {
         int title_x, yh;
 
         // Start with mediumfont; shrink if the title (rotated 90°) is taller than the graph.
@@ -381,21 +452,7 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         y = yh;
         title_x = float(yh);
 
-        if (m_titleColor.isValid()) {
-            // A coloured strip with the title across it, drawn here rather than through the text
-            // queue, whose dark-mode translation would recolour the white or black text
-            const QColor strip = GraphTheme::ink(m_titleColor);
-            const QRectF r(marginLeft(), originY, graphView()->titleWidth * printScaleX(), height);
-            painter.fillRect(r, strip);
-            painter.save();
-            painter.setPen(OverviewBars::contrastingText(strip));
-            painter.translate(r.center());
-            painter.rotate(-90);
-            painter.drawText(QRectF(-height / 2.0, -r.width() / 2.0, height, r.width()), Qt::AlignCenter, txt);
-            painter.restore();
-        } else {
-            graphView()->AddTextQue(txt, marginLeft() + title_x + 8*printScaleX(), originY + height / 2 - y / 2, 90, Qt::black, &m_titleFont);
-        }
+        graphView()->AddTextQue(txt, marginLeft() + title_x + 8*printScaleX(), originY + height / 2 - y / 2, 90, Qt::black, &m_titleFont);
 
         left += graphView()->titleWidth*printScaleX();
     } else { left = 0; }
@@ -430,9 +487,15 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
 #endif
     int tmp;
 
+    // Where the page has one date axis for all its graphs, a graph leaves its own out.
+    // Printed graphs always draw theirs.
+    const bool sharedAxis = m_graphview->sharedXAxis() && !printing();
+    const auto leftOut = [sharedAxis](Layer *layer) {
+        return sharedAxis && dynamic_cast<gXAxisDay *>(layer) != nullptr;
+    };
 
     for (const auto & layer : m_layers) {
-        if (!layer->visible()) { continue; }
+        if (!layer->visible() || leftOut(layer)) { continue; }
 
         tmp = layer->minimumHeight();// * m_graphview->printScaleY();
 
@@ -473,9 +536,13 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
 
     bottom = marginBottom() * printScaleY();
     top = marginTop();
+    if (card) {
+        top = cardTop;
+        bottom += cardBottom;
+    }
 
     for (const auto & layer : m_layers) {
-        if (!layer->visible()) { continue; }
+        if (!layer->visible() || leftOut(layer)) { continue; }
 
         tmp = layer->minimumHeight();
 
@@ -494,8 +561,9 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         }
     }
 
-    if (isPinned()) {
-        // Fill the background on pinned graphs
+    if (isPinned() && !card) {
+        // Fill the background on pinned graphs. A card has drawn its own, and this fill would
+        // cover the card's right outline.
         painter.fillRect(originX + left, originY + top, width - right, height - bottom - top, QBrush(GraphTheme::background()));
     }
 
@@ -505,6 +573,7 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         if (layer->position() == LayerCenter) {
             QRect rect(originX + left, originY + top, width - left - right, height - top - bottom);
             layer->m_rect = rect;
+            m_plotRect = rect;
             layer->paint(painter, *this, QRegion(rect));
         }
     }
@@ -525,7 +594,17 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
     }
 
     if (isPinned() && !printing()) {
-        painter.drawPixmap(-5, originY-10, m_graphview->pin_icon);
+        if (card) {
+            // A pin at the left of the header, in the space the title leaves for it, as large
+            // as the header band allows
+            const QRect header = GraphCard::headerRect(m_rect);
+            painter.save();
+            painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+            painter.drawPixmap(QRect(header.left() - 8, header.center().y() - 15, 30, 30), m_graphview->pin_icon);
+            painter.restore();
+        } else {
+            painter.drawPixmap(-5, originY-10, m_graphview->pin_icon);
+        }
     }
 
 }
@@ -1162,7 +1241,7 @@ void gGraph::wheelEvent(QWheelEvent *event)
         return;
     }
 
-    int x = wheelEventPos( event).x() - m_graphview->titleWidth; //(left+m_marginleft);
+    int x = wheelEventPos( event).x() - m_graphview->titleW(); //(left+m_marginleft);
 
     // A standard mouse notch is 120 units and zooms one step, exactly as before.
     // Trackpads and high-resolution wheels send many smaller deltas; accumulate

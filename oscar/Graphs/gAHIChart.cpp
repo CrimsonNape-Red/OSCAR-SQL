@@ -18,6 +18,7 @@
 #include "SleepLib/profiles.h"
 #include "SleepLib/machine_common.h"
 #include "gAHIChart.h"
+#include "rangefigures.h"
 
 #include "gYAxis.h"
 
@@ -149,7 +150,7 @@ void gAHIChart::afterDraw(QPainter & /*painter */, gGraph &graph, QRectF rect)
         if (!skip) txtlist.append(QString("%1 %2 / %3 / %4").arg(chan.label()).arg(calcitems[i].min, 0, 'f', 2).arg(mid, 0, 'f', 2).arg(calcitems[i].max, 0, 'f', 2));
     }
     QString txt = txtlist.join(", ");
-    graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
+    if (!graph.headerSummary(txt)) graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
 }
 
 void gAHIChart::populate(Day *day, int idx)
@@ -187,6 +188,7 @@ QList<DetailRow> gAHIChart::detailRows(Day *day, int idx)
     for (const auto &s : slices) total += s.value;
     for (int i = slices.size() - 1; i >= 0; --i) {
         const auto &s = slices.at(i);
+        if (s.value == 0) continue;     // only the events that happened
         schema::Channel &chan = schema::channel[s.calc->code];
         const int share = total > 0 ? qRound(s.value / total * 100) : 0;
         rows.append({ QObject::tr("%1 /h").arg(s.value / hours, 0, 'f', 2),
@@ -231,4 +233,16 @@ QString gAHIChart::tooltipData(Day *day, int idx)
     return QString("\n%1: %2").arg(indexLabel).arg(float(total) / hour,0,'f',2)+txt;
 }
 
-
+QVector<SummaryLine> gAHIChart::calcLines(const QDate &start, const QDate &end, quint32 wanted)
+{
+    // The index for the whole range: all its events over all its hours
+    QVector<SummaryLine> out;
+    SummaryLine line{ SL_Middle, p_profile->general->calculateRDI() ? STR_TR_RDI : STR_TR_AHI, 0,
+                      QColor(120, 40, 160), false };
+    if (wanted & (1u << SL_Middle)) {
+        line.available = RangeFigures::daysUsed(start, end) > 0 && RangeFigures::ahiAvailable(start, end);
+        if (line.available) line.value = RangeFigures::ahi(start, end);
+    }
+    out.append(line);
+    return out;
+}

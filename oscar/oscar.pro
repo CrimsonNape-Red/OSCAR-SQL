@@ -385,6 +385,12 @@ SOURCES += \
     Graphs/gGraphView.cpp \
     Graphs/graphtheme.cpp \
     Graphs/overviewbars.cpp \
+    Graphs/graphcard.cpp \
+    Graphs/summarylines.cpp \
+    Graphs/rangefigures.cpp \
+    overviewstats.cpp \
+    overviewdateaxis.cpp \
+    Graphs/daylabels.cpp \
     Graphs/glcommon.cpp \
     Graphs/gLineChart.cpp \
     Graphs/gLineOverlay.cpp \
@@ -578,6 +584,13 @@ HEADERS  += \
     Graphs/gGraphView.h \
     Graphs/graphtheme.h \
     Graphs/overviewbars.h \
+    Graphs/graphlook.h \
+    Graphs/graphcard.h \
+    Graphs/summarylines.h \
+    Graphs/rangefigures.h \
+    overviewstats.h \
+    overviewdateaxis.h \
+    Graphs/daylabels.h \
     Graphs/glcommon.h \
     Graphs/gLineChart.h \
     Graphs/gLineOverlay.h \
@@ -985,7 +998,11 @@ test {
         tests/imagetrimtests.cpp \
         tests/profilepagetests.cpp \
         tests/statisticsstyletests.cpp \
-        tests/overviewbarstests.cpp
+        tests/overviewbarstests.cpp \
+        tests/graphcardtests.cpp \
+        tests/summarylinestests.cpp \
+        tests/overviewstatstests.cpp \
+        tests/daylabelstests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -1024,7 +1041,11 @@ test {
         tests/imagetrimtests.h \
         tests/profilepagetests.h \
         tests/statisticsstyletests.h \
-        tests/overviewbarstests.h
+        tests/overviewbarstests.h \
+        tests/graphcardtests.h \
+        tests/summarylinestests.h \
+        tests/overviewstatstests.h \
+        tests/daylabelstests.h
 }
 
 macx {

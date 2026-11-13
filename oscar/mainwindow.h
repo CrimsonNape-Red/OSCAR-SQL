@@ -486,14 +486,19 @@ private:
     QString m_statsHtml;            //!< Statistics report as built, in the printed colours
     QString m_statsThemeKey;        //!< Palette colours applyStatisticsTheme() last used
 
-    /*! \brief Adds the moon/sun button at the right end of the main tabs (Qt 6.8+ only;
-        older Qt can't switch the colour scheme while OSCAR runs) */
+    /*! \brief Adds the Classic/Modern button and the moon/sun button at the right end of the main
+        tabs (moon/sun on Qt 6.8+ only; older Qt can't switch the colour scheme while OSCAR runs) */
     void setupColorSchemeButton();
     //! \brief Shows a moon in light mode and a sun in dark mode, with a matching tooltip
     void updateColorSchemeButton();
     //! \brief Switches between light and dark, and saves the choice
     void toggleColorScheme();
     QAbstractButton *m_colorSchemeButton = nullptr;     //!< Moon/sun button; null on older Qt
+    //! \brief Shows the look the button switches to (Classic or Modern pages), with a matching tooltip
+    void updatePageLookButton();
+    //! \brief Switches between the Classic (2.1) and Modern (redesigned) pages, and saves the choice
+    void togglePageLook();
+    QAbstractButton *m_pageLookButton = nullptr;        //!< Classic/Modern button, left of the moon/sun
 
     //! \brief The application palette's main colours as one string, to tell when they change
     static QString paletteKey();
@@ -533,6 +538,9 @@ private:
 
     //! \brief Replaces the Welcome tab's page after the Preferences choice changes
     void rebuildWelcomePage();
+
+    //! \brief Replaces the Overview tab with a new one, after the old/new pages setting changes
+    void rebuildOverviewPage();
 
     Ui::MainWindow *ui;
     Daily *daily;

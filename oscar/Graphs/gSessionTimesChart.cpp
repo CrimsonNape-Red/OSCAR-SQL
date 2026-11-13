@@ -105,7 +105,7 @@ void gSessionTimesChart::afterDraw(QPainter & /*painter */, gGraph &graph, QRect
             .arg(calc1.min, 0, 'f', 2).arg(mid1, 0, 'f', 2).arg(calc1.max, 0, 'f', 2)
             .arg(durationInHoursToHhMmSs(calc.min)).arg(durationInHoursToHhMmSs(mid)).arg(durationInHoursToHhMmSs(calc.max))
             .arg(durationInHoursToHhMmSs(calc2.min)).arg(durationInHoursToHhMmSs(midlongest)).arg(durationInHoursToHhMmSs(calc2.max));
-    graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
+    if (!graph.headerSummary(txt)) graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
 }
 
 QList<DetailRow> gSessionTimesChart::detailRows(Day *, int idx)
@@ -115,6 +115,7 @@ QList<DetailRow> gSessionTimesChart::detailRows(Day *, int idx)
     if (!cache.contains(idx)) return rows;
     const QDateTime splitAt(dayindex.key(idx), split);
     for (const auto &s : cache[idx]) {
+        if (s.height == 0) continue;
         const QDateTime start = splitAt.addSecs(qint64(s.value * 3600.0));
         const QDateTime end = start.addSecs(qint64(s.height * 3600.0));
         const bool maskOff = (s.color == QColor(Qt::black));
@@ -140,8 +141,7 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
 {
     QRectF rect = region.boundingRect();
 
-    painter.setPen(GraphTheme::ink(Qt::black));
-    painter.drawRect(rect);
+    paintFrame(painter, graph, rect);
 
     m_minx = graph.min_x;
     m_maxx = graph.max_x;
@@ -155,12 +155,24 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
     int days = ceil(double(m_maxx - m_minx) / 86400000.0);
 
     float barw = float(rect.width()) / float(days);
-    // Each day's slot holds a bar and a gap; wide bars are shaded
-    const OverviewBars::BarGeometry geo = OverviewBars::barGeometry(barw);
+    // The original (2.1) look and the card look differ as in gSummaryChart::paint()
+    const bool classic = !graph.graphView()->cardLook() || graph.printing();   // print is always the 2.1 look
+    const OverviewBars::BarGeometry geo = classic ? OverviewBars::classicBarGeometry(barw)
+                                                  : OverviewBars::barGeometry(barw);
+    QVector<QRectF> outlines;       // classic look only
     const bool flatOnly = graph.printing() && AppSetting->monochromePrinting();
     graph.setHoverDate(QDate());
     QRectF hlSlot;
     int hlIdx = -1;
+    bool tipShown = false;      // a session under the mouse has named itself
+
+    // Card look, and nothing drawn under the mouse: the day still shows its date
+    const QDate chartStart = date;
+    const auto emptyHover = [&]() {
+        if (classic) return false;
+        return hoverEmptyDay(painter, graph, rect, graph.graphView()->currentMousePos(), chartStart,
+                             double(rect.width()) / qMax(days, 1));
+    };
 
     QDateTime splittime;
 
@@ -184,8 +196,10 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
     if (enddate > lastday) {  // enddate = last date of chart; lastday = last date of data
         numDaysAfter = lastday.daysTo(enddate);
     }
-    if (numDaysAfter > days)        // Nothing to do if this data is off the left edge of the chart
+    if (numDaysAfter > days) {      // Nothing to do if this data is off the left edge of the chart
+        if (!emptyHover()) clearHover(graph);
         return;
+    }
 
     float lastx1 = rect.left();
     lastx1 += numDaysOffset * barw;
@@ -196,9 +210,13 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
         idx_end = ite.value();
     }
 
-    QPoint mouse = graph.graphView()->currentMousePos();
+    // Nothing is under the mouse on a printed page
+    QPoint mouse = graph.printing() ? QPoint(-1, -1) : graph.graphView()->currentMousePos();
 
-    if (daylist.size() == 0) return;
+    if (daylist.size() == 0) {
+        if (!emptyHover()) clearHover(graph);
+        return;
+    }
 
     auto it2 = it;
 
@@ -336,6 +354,7 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
         if (rec2.contains(mouse)) {
             hlSlot = rec2;
             hlIdx = idx;
+            if (classic) painter.fillRect(rec2, QBrush(QColor(255, 0, 0, 64)));
         }
 
         if (cit != cache.end()) {
@@ -350,11 +369,26 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
                 float y1 = (s1 * ymult);
                 float y2 = (s2 * ymult);
 
-                const QColor col = GraphTheme::ink(slice.color);
+                QColor col = GraphTheme::ink(slice.color);
 
-                // Each session is a piece of its own, with its own rounded top
                 const QRectF rec = QRectF(lastx1 + geo.offset, rect.bottom() - y1 - y2, geo.width, y2).intersected(rect);
-                OverviewBars::paintSegment(painter, rec, col, true, geo.shaded && !flatOnly);
+                if (classic) {
+                    // The session under the mouse turns yellow and names itself in a tooltip
+                    if (rec.contains(mouse)) {
+                        col = Qt::yellow;
+                        graph.ToolTip(slice.name, mouse.x() + 20, mouse.y(), TT_AlignBottomLeft);
+                    }
+                    OverviewBars::paintClassicSegment(painter, rec, col, barw);
+                    if (barw > 3) outlines.append(rec);
+                } else {
+                    // Each session is a piece of its own, with its own rounded top; the one
+                    // under the mouse names itself in a tooltip
+                    if (rec.contains(mouse)) {
+                        showHoverTip(graph, slice.name, mouse, rect);
+                        tipShown = true;
+                    }
+                    OverviewBars::paintSegment(painter, rec, col, true, geo.shaded && !flatOnly, true);
+                }
 
             }
         }
@@ -364,9 +398,15 @@ void gSessionTimesChart::paint(QPainter &painter, gGraph &graph, const QRegion &
     } while (++idx <= idx_end);
 
     m_detailsRect = QRectF();
-    if (hlIdx >= 0) {
-        paintHoverMarker(painter, graph, rect, hlSlot, dayindex.key(hlIdx), hlIdx, true);
-    } else {
+    if (classic) {
+        painter.setPen(QPen(GraphTheme::ink(Qt::black), 1));
+        painter.drawRects(outlines);
+    } else if (hlIdx >= 0) {
+        const QDate hlDate = dayindex.key(hlIdx);
+        paintHoverMarker(painter, graph, rect, hlSlot, hlDate, hlIdx, true);
+        // Between the day's sessions: the date alone, not the last session pointed at
+        if (!tipShown) showHoverTip(graph, hlDate.toString(QLocale::system().dateFormat(QLocale::ShortFormat)), mouse, rect);
+    } else if (!emptyHover()) {
         clearHover(graph);
     }
     afterDraw(painter, graph, rect);

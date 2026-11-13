@@ -31,7 +31,7 @@ class MetricCard;
 }
 
 /*! \class WelcomePage
-    \brief The redesigned Welcome page, shown when AppWideSetting::useNewWelcome() is set
+    \brief The redesigned Welcome page, shown when AppWideSetting::useNewPages() is set
 
     The header and tiles are built once. Everything that depends on the profile's data is
     rebuilt by refreshPage(). Tile, card and step grids re-flow with the page width. */

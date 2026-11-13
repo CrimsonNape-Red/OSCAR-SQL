@@ -18,8 +18,16 @@ private slots:
     void testGeometrySmallSlotKeepsOnePixelGap();
     void testGeometryNarrowSlot();
     void testBarGradientStops();
+    void testDarkBarColourIsMuted();
+    void testDarkGradientDoesNotGlare();
+    void testDarkGreyBarsStayReadable();
+    void testDarkOrangeStaysAmber();
+    void testLightBarHasThinBlackOutline();
+    void testClosedOutlineRunsAlongBottom();
     void testPlainFillLighterAboveThreePixels();
     void testTopIsFlatWithRoundedCorners();
     void testContrastingText();
+    void testClassicGeometryHasNoGap();
+    void testClassicSegmentSquareTop();
 };
 DECLARE_TEST(OverviewBarsTests)

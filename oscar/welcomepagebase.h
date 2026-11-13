@@ -17,7 +17,7 @@
 /*! \class WelcomePageBase
     \brief A page that can sit in MainWindow's Welcome tab
 
-    MainWindow creates the page chosen in Preferences (see AppWideSetting::useNewWelcome())
+    MainWindow creates the page chosen in Preferences (see AppWideSetting::useNewPages())
     and calls refreshPage() whenever the profile's data changes. */
 class WelcomePageBase : public QWidget
 {

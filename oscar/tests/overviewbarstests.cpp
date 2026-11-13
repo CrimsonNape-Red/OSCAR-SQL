@@ -57,6 +57,97 @@ void OverviewBarsTests::testBarGradientStops()
     QCOMPARE(grad.finalStop(), QPointF(60, 0));
 }
 
+void OverviewBarsTests::testDarkBarColourIsMuted()
+{
+    // On a dark background pale colours glare, so they are brought down to a medium shade
+    QVERIFY(darkBarColour(QColor(Qt::white)).lightnessF() <= 0.8f);
+    QVERIFY(darkBarColour(QColor(0xE0, 0xF0, 0xFF)).lightnessF() <= 0.5f);
+    // A colour keeps its hue, and is never made brighter
+    const QColor blue(0x40, 0x80, 0xff);
+    const QColor muted = darkBarColour(blue);
+    QVERIFY(qAbs(muted.hslHue() - blue.hslHue()) <= 2);
+    QVERIFY(muted.lightnessF() <= blue.lightnessF());
+    QVERIFY(muted.hslSaturationF() < blue.hslSaturationF());
+    const QColor navy(0x20, 0x30, 0x60);
+    QVERIFY(darkBarColour(navy).lightnessF() <= navy.lightnessF() + 0.001f);
+    // Shades of one colour stay distinct
+    QVERIFY(darkBarColour(QColor(0xFF, 0xA0, 0xA0)).lightnessF() > darkBarColour(QColor(0xFF, 0x00, 0x00)).lightnessF() + 0.05f);
+    // Transparency is kept
+    QCOMPARE(darkBarColour(QColor(0x40, 0x80, 0xff, 100)).alpha(), 100);
+}
+
+void OverviewBarsTests::testDarkGradientDoesNotGlare()
+{
+    // In dark mode the shading starts from the muted colour and brightens only a little
+    const QLinearGradient grad = barGradient(QColor(0x40, 0x80, 0xff), 10, 50, true);
+    const QGradientStops stops = grad.stops();
+    QCOMPARE(stops.size(), 2);
+    QCOMPARE(stops.at(0).second, darkBarColour(QColor(0x40, 0x80, 0xff)));
+    QVERIFY(stops.at(1).second.lightnessF() > stops.at(0).second.lightnessF());
+    QVERIFY(stops.at(1).second.lightnessF() <= 0.6f);
+}
+
+void OverviewBarsTests::testDarkGreyBarsStayReadable()
+{
+    // A grey has no colour to set it off from the dark background, so it is kept well above it
+    // (these are what GraphTheme::ink() makes of the Large Leak and Flow Limitation greys)
+    const QColor low = darkBarColour(QColor(0x3c, 0x3c, 0x3c));
+    const QColor mid = darkBarColour(QColor(0x86, 0x86, 0x86));
+    QVERIFY(low.lightnessF() >= 0.4f);
+    QVERIFY(mid.lightnessF() > low.lightnessF() + 0.05f);   // shades of grey stay distinct
+    QVERIFY(mid.lightnessF() <= 0.8f);
+    QCOMPARE(low.hslSaturationF(), 0.0f);                   // and stay grey
+}
+
+void OverviewBarsTests::testDarkOrangeStaysAmber()
+{
+    // Orange and yellow turn brown when darkened like the other colours, so they keep more light
+    const QColor orange("orange");
+    const QColor amber = darkBarColour(orange);
+    QVERIFY(qAbs(amber.hslHue() - orange.hslHue()) <= 2);
+    QVERIFY(amber.lightnessF() >= 0.42f);
+    QVERIFY(amber.lightnessF() <= 0.5f);        // still no brighter than the original
+    // Its lighter shade (the pressure chart's 95% part) stays distinct
+    QVERIFY(darkBarColour(QColor(255, 200, 110)).lightnessF() > amber.lightnessF() + 0.03f);
+    // Colours away from orange are untouched: blue stays as dark as before
+    QVERIFY(darkBarColour(QColor(0x40, 0x80, 0xff)).lightnessF() < 0.40f);
+}
+
+void OverviewBarsTests::testLightBarHasThinBlackOutline()
+{
+    // Light mode: a one-pixel black line up the sides and across the top, as in OSCAR 2.1.0
+    QImage img(60, 40, QImage::Format_ARGB32);
+    img.fill(Qt::white);
+    {
+        QPainter p(&img);
+        paintSegment(p, QRectF(0, 0, 40, 40), QColor(0x40, 0x80, 0xff), false, true);
+        paintSegment(p, QRectF(50, 0, 3, 40), QColor(0x40, 0x80, 0xff), false, true);   // too narrow for one
+    }
+    auto black = [&img](int x, int y) { return qGray(img.pixel(x, y)) < 40; };
+    QVERIFY(black(0, 20));
+    QVERIFY(black(39, 20));
+    QVERIFY(black(20, 0));
+    QVERIFY(!black(1, 20));             // one pixel only
+    QVERIFY(!black(20, 20));
+    QVERIFY(!black(20, 39));            // no line along the bottom: the next part's top, or the axis, is there
+    QVERIFY(!black(50, 20));
+}
+
+void OverviewBarsTests::testClosedOutlineRunsAlongBottom()
+{
+    // A piece that stands on nothing (a session) is outlined all round
+    QImage img(40, 40, QImage::Format_ARGB32);
+    img.fill(Qt::white);
+    {
+        QPainter p(&img);
+        paintSegment(p, QRectF(0, 0, 40, 30), QColor(0x40, 0x80, 0xff), true, true, true);
+    }
+    auto black = [&img](int x, int y) { return qGray(img.pixel(x, y)) < 40; };
+    QVERIFY(black(20, 29));
+    QVERIFY(!black(20, 28));
+    QVERIFY(black(0, 15));
+}
+
 void OverviewBarsTests::testPlainFillLighterAboveThreePixels()
 {
     QImage img(10, 10, QImage::Format_ARGB32);
@@ -94,4 +185,31 @@ void OverviewBarsTests::testContrastingText()
     QCOMPARE(contrastingText(QColor("#90EE90")), QColor(Qt::black));
     QCOMPARE(contrastingText(QColor(Qt::black)), QColor(Qt::white));
     QCOMPARE(contrastingText(QColor("#6D4BC9")), QColor(Qt::white));
+}
+
+void OverviewBarsTests::testClassicGeometryHasNoGap()
+{
+    // The original (2.1) look: bars touch, and are shaded once wider than 8 pixels
+    const BarGeometry wide = classicBarGeometry(84);
+    QCOMPARE(wide.offset, 0.0);
+    QCOMPARE(wide.width, 84.0);
+    QVERIFY(wide.shaded);
+    const BarGeometry narrow = classicBarGeometry(6);
+    QCOMPARE(narrow.width, 6.0);
+    QVERIFY(!narrow.shaded);
+}
+
+void OverviewBarsTests::testClassicSegmentSquareTop()
+{
+    QImage img(40, 40, QImage::Format_ARGB32);
+    img.fill(Qt::transparent);
+    {
+        QPainter p(&img);
+        paintClassicSegment(p, QRectF(0, 0, 40, 40), QColor(0x40, 0x80, 0xff), 40);
+    }
+    QVERIFY(qAlpha(img.pixel(0, 0)) > 128);     // square corners, no rounding
+    QVERIFY(qAlpha(img.pixel(39, 0)) > 128);
+    // The slice colour at the left edge, brightening to the right
+    QVERIFY(qAbs(qRed(img.pixel(0, 20)) - 0x40) <= 3);
+    QVERIFY(qRed(img.pixel(39, 20)) > 0x70);
 }

@@ -14,6 +14,7 @@
 #include "SleepLib/profiles.h"
 #include "Graphs/gGraphView.h"
 #include "SleepLib/appsettings.h"
+#include "Graphs/summarylines.h"
 
 
 struct TimeSpan
@@ -195,7 +196,28 @@ public:
 
     virtual void dataChanged() {
         cache.clear();
+        m_lineCacheKey.clear();
     }
+
+    /*! \brief The dotted lines this chart offers and whether each is switched on. Empty before
+        the first paint and for charts with none.
+
+        Values are for the dates last painted. They take a pass over every session in the range
+        to work out, so only the lines that are switched on have theirs filled in, unless
+        \a allValues is true (for the menu, which shows every line's value). */
+    QVector<SummaryLine> lines(bool allValues = false);
+    //! \brief Switches the line with SummaryLineId \a id on or off
+    void setLineEnabled(int id, bool on);
+    //! \brief True once the user (or a saved preference) has chosen this chart's lines
+    bool hasLineMask() const { return m_lineMaskSet; }
+    //! \brief The chosen lines: bit n is set when the line with SummaryLineId n is on
+    quint32 lineMask() const { return m_lineMask; }
+    //! \brief Restores a saved choice of lines
+    void setLineMask(quint32 mask) { m_lineMask = mask; m_lineMaskSet = true; }
+    //! \brief First date drawn at the last paint
+    QDate visibleStart() const { return m_visStart; }
+    //! \brief Last date drawn at the last paint
+    QDate visibleEnd() const { return m_visEnd; }
 
     virtual int addCalc(ChannelID code, SummaryType type, QColor color);
     //! \brief The colour of the chart's first calculation, which its bars use; invalid if none
@@ -226,6 +248,8 @@ public:
         layer->cache.clear();
         layer->dayindex = dayindex;
         layer->daylist = daylist;
+        layer->m_lineMask = m_lineMask;
+        layer->m_lineMaskSet = m_lineMaskSet;
     }
     //! \brief Colour of the Details button
     static inline const QColor DetailsAccent = QColor(0x6D, 0x4B, 0xC9);
@@ -254,9 +278,39 @@ protected:
                           const QDate &date, int idx, bool hasData);
     //! \brief Called when no day is under the mouse: redraws once so the date label stops being bold
     void clearHover(gGraph &graph);
+    /*! \brief Card look: marks the day under the mouse when nothing was drawn for it, and shows
+        its date alone in the tooltip, so the tooltip does not keep the last bar's figures
+        \param first The date of the leftmost day slot of \a plot
+        \param slotWidth Width of one day's slot
+        \returns false when the mouse is not over \a plot, or the page is being printed */
+    bool hoverEmptyDay(QPainter &painter, gGraph &graph, const QRectF &plot, const QPoint &mouse,
+                       const QDate &first, double slotWidth);
+    /*! \brief Draws the plot's frame: a black rectangle in the 2.1 look and on paper; in the card
+        look only the left and bottom axis lines, in grey */
+    void paintFrame(QPainter &painter, gGraph &graph, const QRectF &plot);
     //! \brief True for a plain left click on the Details button
     bool isDetailsClick(QMouseEvent *event) const;
+    /*! \brief The lines this chart offers between \a start and \a end, each with its default
+        on/off state. Values come from RangeFigures or the profile's range functions, calculated
+        over the whole range: never an average of nightly figures.
+
+        \param wanted Bit n set: work out the value of the line with SummaryLineId n. The other
+               lines are returned with their names and defaults only, which costs nothing. */
+    virtual QVector<SummaryLine> calcLines(const QDate &start, const QDate &end, quint32 wanted);
+    //! \brief Card look: draws the enabled lines across \a plot and their legend in the header
+    void paintLines(QPainter &painter, gGraph &graph, const QRectF &plot, float miny, float ymult);
+    QDate m_visStart, m_visEnd;         //!< Dates drawn at the last paint
+    QVector<SummaryLine> m_lineCache;   //!< calcLines() result for m_lineCacheKey
+    QString m_lineCacheKey;             //!< Dates and preferences m_lineCache was calculated for
+    quint32 m_lineHave = 0;             //!< Lines whose values m_lineCache holds (bits as lineMask())
+    quint32 m_lineMask = 0;             //!< See lineMask()
+    bool m_lineMaskSet = false;         //!< False while the lines' own defaults apply
     QRectF m_detailsRect;       //!< Details button as last drawn; empty when not shown
+
+    /*! \brief Shows the hover tooltip \a text. With no Details button it goes beside the mouse,
+        as in OSCAR 2.1; with one it goes beside the button, on the side with more room in
+        \a plot, so the button is never covered. */
+    void showHoverTip(gGraph &graph, const QString &text, const QPoint &mouse, const QRectF &plot);
     QDate m_detailsDate;        //!< Day the Details button belongs to
     int m_detailsIdx = -1;      //!< That day's index in daylist
     QDate m_lastHoverDate;      //!< Day under the mouse at the last paint, to tell when it changes

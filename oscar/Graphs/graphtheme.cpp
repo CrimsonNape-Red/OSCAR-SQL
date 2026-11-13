@@ -138,6 +138,16 @@ QColor background()
     return dark() ? kDarkBackground : QColor(Qt::white);
 }
 
+QColor axis()
+{
+    return ink(kAxisGrey);
+}
+
+QColor outline()
+{
+    return dark() ? QColor(0x58, 0x58, 0x58) : Theme::color(Theme::Role::Line);
+}
+
 QColor barShade(const QColor &color, float factor)
 {
     if (!dark()) return brighten(color, factor);

@@ -18,6 +18,7 @@
 #include "SleepLib/profiles.h"
 #include "SleepLib/machine_common.h"
 #include "gUsageChart.h"
+#include "rangefigures.h"
 
 #include "gYAxis.h"
 
@@ -115,8 +116,21 @@ void gUsageChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
 
         QString txt = QObject::tr("%1 low usage, %2 no usage, out of %3 days (%4% compliant.) Length: %5 / %6 / %7").
                 arg(incompdays).arg(nousedays).arg(totaldays).arg(comp,0,'f',1).arg(durationInHoursToHhMmSs(calc.min)).arg(durationInHoursToHhMmSs(mid)).arg(durationInHoursToHhMmSs(calc.max));
-        graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
+        if (!graph.headerSummary(txt)) graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
     }
 }
 
 #endif
+
+QVector<SummaryLine> gUsageChart::calcLines(const QDate &start, const QDate &end, quint32 wanted)
+{
+    QVector<SummaryLine> out;
+    SummaryLine average{ SL_Middle, QObject::tr("Average"), 0, QColor(0, 70, 190), false };
+    if (wanted & (1u << SL_Middle)) {
+        average.available = RangeFigures::daysUsed(start, end) > 0;
+        if (average.available) average.value = RangeFigures::usageAverage(start, end);
+    }
+    out.append(average);
+    out.append({ SL_Compliance, QObject::tr("Compliance"), p_profile->cpap->complianceHours(), QColor(200, 50, 50), true });
+    return out;
+}

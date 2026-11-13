@@ -32,6 +32,8 @@ public:
     void allowClose() { m_allowClose = true; }
 
     void setPixmap(QPixmap &pixmap) { imglabel->setPixmap(pixmap); }
+    //! \brief True once a picture has been set with setPixmap()
+    bool hasPixmap() const { return !imglabel->pixmap().isNull(); }
     QProgressBar * progress;
 public slots:
     void setMessage(QString msg);

@@ -23,6 +23,7 @@
 #include "Graphs/gGraph.h"
 #include "Graphs/gGraphView.h"
 #include "Graphs/graphtheme.h"
+#include "Graphs/daylabels.h"
 
 #define FIX_FOR_DATE_MISMATCH
 
@@ -406,94 +407,63 @@ int gXAxisDay::minimumHeight()
 #endif
 }
 
+QString gXAxisDay::labelText(const QDate &date)
+{
+    const QString months[] = {
+        QObject::tr("Jan"), QObject::tr("Feb"), QObject::tr("Mar"), QObject::tr("Apr"), QObject::tr("May"), QObject::tr("Jun"),
+        QObject::tr("Jul"), QObject::tr("Aug"), QObject::tr("Sep"), QObject::tr("Oct"), QObject::tr("Nov"), QObject::tr("Dec")
+    };
+    return QString(dayFirst?"%2 %1":"%1 %2").arg(months[date.month() - 1]).arg(date.day(), 2, 10, QChar('0'));
+}
+
 void gXAxisDay::paint(QPainter &painter, gGraph &graph, const QRegion &region)
 {
     float left = region.boundingRect().left();
     float top = region.boundingRect().top();
     float width = region.boundingRect().width();
 
-    QString months[] = {
-        QObject::tr("Jan"), QObject::tr("Feb"), QObject::tr("Mar"), QObject::tr("Apr"), QObject::tr("May"), QObject::tr("Jun"),
-        QObject::tr("Jul"), QObject::tr("Aug"), QObject::tr("Sep"), QObject::tr("Oct"), QObject::tr("Nov"), QObject::tr("Dec")
-    };
-    qint64 minx;
-    qint64 maxx;
-
-    minx = graph.min_x;
-    maxx = graph.max_x;
-
-    QDateTime date2 = QDateTime::fromMSecsSinceEpoch(minx, QTimeZone::systemTimeZone());
-
-
-    QDate date = date2.date();
-
-    int days = ceil(double(maxx - minx) / 86400000.0);
-
-    float barw = width / float(days);
-
-    qint64 xx = maxx - minx;
+    const qint64 minx = graph.min_x;
+    const qint64 maxx = graph.max_x;
 
     // shouldn't really be negative, but this is safer than an assert
-    if (xx <= 0) {
+    if (maxx - minx <= 0) {
         return;
     }
 
-
-    float lastx = left;
-    float y1 = top;
+    const QDate first = QDateTime::fromMSecsSinceEpoch(minx, QTimeZone::systemTimeZone()).date();
+    const int days = ceil(double(maxx - minx) / 86400000.0);
+    const float barw = width / float(days);
 
     QString fd = "Mjj 00";
     int x,y;
     GetTextExtent(fd, x, y);
-    float xpos = (barw / 2.0) - (float(x) / 2.0);
 
     // The day under the mouse and days with a details popup always get a bold label; ordinary
-    // labels near them are left out so they don't overlap.
+    // labels near them are left out so they don't overlap, and the rest keep their places.
     // Printed graphs show neither: the mouse and the popups belong to the screen
     const QDate hover = graph.printing() ? QDate() : graph.hoverDate();
     const QSet<QDate> pins = graph.printing() ? QSet<QDate>() : graph.pinnedDates();
     m_boldFont = *defaultfont;
     m_boldFont.setBold(true);
-    const float spacing = x + 8 * graph.printScaleX();
-    QVector<float> markedX;
-    {
-        QDate d = date;
-        for (int i = 0; i < days; i++, d = d.addDays(1)) {
-            if (d == hover || pins.contains(d)) markedX.append(left + i * barw + xpos);
-        }
-    }
-    auto nearMarked = [&markedX, spacing](float px) {
-        for (float m : markedX) {
-            if (qAbs(m - px) < spacing) return true;
-        }
-        return false;
-    };
+    // The original look and printed pages count the labels from the first day, as OSCAR 2.1 did
+    const bool fixedGrid = !graph.printing() && graph.graphView()->cardLook();
+    const auto labels = DayLabels::layout(first, days, barw, x, 8 * graph.printScaleX(), hover, pins, fixedGrid);
 
-    float lastxpos = 0;
     QVector<QLineF> lines;
-    for (int i=0; i < days; i++) {
-        if ((lastx + barw) > (left + width + 1))
-            break;
-
-        QString tmpstr = QString(dayFirst?"%2 %1":"%1 %2").arg(months[date.month() - 1]).arg(date.day(), 2, 10, QChar('0'));
-
-        float x1 = lastx + xpos;
-        const bool pinned = pins.contains(date);
-        if (date == hover || pinned) {
-            graph.renderText(tmpstr, x1, y1 + y + 8, 0, Qt::black, &m_boldFont);
-            if (pinned) {
-                const QColor mark = graph.titleColor().isValid() ? graph.titleColor() : QColor(0x6D, 0x4B, 0xC9);
-                painter.fillRect(QRectF(x1, y1 + y + 11, x, 2), GraphTheme::ink(mark));
-            }
-            lastxpos = x1;
-            lines.append(QLineF(lastx+barw/2, top, lastx+barw/2, top+6));
-        } else if (x1 > (lastxpos + spacing) && !nearMarked(x1)) {
-            graph.renderText(tmpstr, x1, y1 + y + 8);
-            lastxpos = x1;
-            lines.append(QLineF(lastx+barw/2, top, lastx+barw/2, top+6));
+    for (const DayLabels::Label &label : labels) {
+        const float x1 = left + label.x;
+        const QString text = labelText(label.date);
+        if (label.bold) {
+            graph.renderText(text, x1, top + y + 8, 0, Qt::black, &m_boldFont);
+        } else {
+            graph.renderText(text, x1, top + y + 8);
         }
-        lastx = lastx + barw;
-        date = date.addDays(1);
+        if (label.underlined) {
+            const QColor mark = graph.titleColor().isValid() ? graph.titleColor() : QColor(0x6D, 0x4B, 0xC9);
+            painter.fillRect(QRectF(x1, top + y + 11, x, 2), GraphTheme::ink(mark));
+        }
+        const float mid = x1 + x / 2.0f;    // the middle of the day
+        lines.append(QLineF(mid, top, mid, top + 6));
     }
     painter.setPen(QPen(GraphTheme::ink(Qt::black),1));
     painter.drawLines(lines);

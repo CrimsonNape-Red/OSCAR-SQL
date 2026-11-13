@@ -68,7 +68,7 @@ void gTTIAChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
         txtlist.append(QString("%1 %2 / %3 / %4").arg(QObject::tr("TTIA:")).arg(durationInMinutesToHhMmSs(calc.min)).arg(durationInMinutesToHhMmSs(mid)).arg(durationInMinutesToHhMmSs(calc.max)));
     }
     QString txt = txtlist.join(", ");
-    graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
+    if (!graph.headerSummary(txt)) graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
 }
 
 void gTTIAChart::populate(Day *day, int idx)
