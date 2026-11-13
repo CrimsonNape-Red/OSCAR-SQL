@@ -390,20 +390,23 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         painter.drawRoundedRect(QRectF(m_rect).adjusted(0.5, 0.5, -0.5, -0.5), GraphCard::Radius, GraphCard::Radius);
 
         const QRect header = GraphCard::headerRect(m_rect);
-        int x = header.left() + (isPinned() ? 14 : 0);      // the pin icon sits at the far left
+        int x = header.left() + (isPinned() ? 16 : 0);      // the pin icon sits at the far left
+        // Text stops short of the menu button, however narrow the card (a popped-out graph can
+        // be made very narrow)
+        const int textRight = GraphCard::menuButtonRect(m_rect).left() - 8;
 
         QFont titleFont = *defaultfont;
         titleFont.setBold(true);
         painter.setFont(titleFont);
         painter.setPen(GraphTheme::ink(Qt::black));
-        painter.drawText(QRect(x, header.top(), header.right() - x, header.height()), Qt::AlignLeft | Qt::AlignVCenter, title());
+        painter.drawText(QRect(x, header.top(), qMax(0, textRight - x), header.height()), Qt::AlignLeft | Qt::AlignVCenter, title());
         x += QFontMetrics(titleFont).horizontalAdvance(title()) + 8;
 
         const QString unitText = GraphCard::headerUnits(title(), units());
         if (!unitText.isEmpty()) {
             painter.setFont(*defaultfont);
             painter.setPen(GraphTheme::ink(QColor(120, 120, 120)));
-            painter.drawText(QRect(x, header.top(), header.right() - x, header.height()), Qt::AlignLeft | Qt::AlignVCenter, unitText);
+            painter.drawText(QRect(x, header.top(), qMax(0, textRight - x), header.height()), Qt::AlignLeft | Qt::AlignVCenter, unitText);
             x += QFontMetrics(*defaultfont).horizontalAdvance(unitText) + 8;
         }
 
@@ -558,8 +561,9 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         }
     }
 
-    if (isPinned()) {
-        // Fill the background on pinned graphs
+    if (isPinned() && !card) {
+        // Fill the background on pinned graphs. A card has drawn its own, and this fill would
+        // cover the card's right outline.
         painter.fillRect(originX + left, originY + top, width - right, height - bottom - top, QBrush(GraphTheme::background()));
     }
 
@@ -590,7 +594,16 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
     }
 
     if (isPinned() && !printing()) {
-        painter.drawPixmap(-5, originY-10, m_graphview->pin_icon);
+        if (card) {
+            // A small pin at the left of the header, in the space the title leaves for it
+            const QRect header = GraphCard::headerRect(m_rect);
+            painter.save();
+            painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+            painter.drawPixmap(QRect(header.left() - 6, header.center().y() - 10, 20, 20), m_graphview->pin_icon);
+            painter.restore();
+        } else {
+            painter.drawPixmap(-5, originY-10, m_graphview->pin_icon);
+        }
     }
 
 }

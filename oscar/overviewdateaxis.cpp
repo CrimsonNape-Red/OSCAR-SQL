@@ -56,7 +56,8 @@ OverviewDateAxis::State OverviewDateAxis::read() const
             state.left = mapFromGlobal(m_view->mapToGlobal(QPoint(plot.left(), 0))).x();
             state.width = plot.width();
         }
-        if (graph->hoverDate().isValid()) state.hover = graph->hoverDate();
+        // A graph scrolled out of view is not repainted, so it can still hold an old hover date
+        if (graph->hoverDate().isValid() && graph->rect().contains(m_view->currentMousePos())) state.hover = graph->hoverDate();
         state.pinned += graph->pinnedDates();
     }
     m_view->GetXBounds(state.minx, state.maxx);

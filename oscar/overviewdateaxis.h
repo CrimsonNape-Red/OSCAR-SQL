@@ -40,6 +40,7 @@ public slots:
     void refresh();
 
 protected:
+    //! \brief Draws the day labels for the state last read by refresh()
     void paintEvent(QPaintEvent *event) override;
 
 private:

@@ -358,6 +358,11 @@ void gGraphView::trashGraphs(bool destroy)
     }
     // Don't actually want to delete them here.. we are just borrowing the graphs
     m_graphs.clear();
+    // Nothing may keep pointing at a graph that is gone
+    m_menuGraph = nullptr;
+    m_menuHover = nullptr;
+    pin_graph = nullptr;
+    popout_graph = nullptr;
     m_graphsbyname.clear();
 }
 
@@ -498,6 +503,14 @@ void gGraphView::popoutGraph()
     int screenHeight = screenGeometry.height();
 
     if (popout_graph) {
+        // A graph that left its date axis to the page draws its own once popped out, so the
+        // popout is that much taller and the plot keeps its height
+        int popoutHeight = popout_graph->height();
+        if (sharedXAxis()) {
+            for (Layer *layer : popout_graph->m_layers) {
+                if (dynamic_cast<gXAxisDay *>(layer)) popoutHeight += layer->minimumHeight();
+            }
+        }
         // Create new dock if we don't have one already
         if (dock == nullptr) {
             dock = new MyDockWindow(mainwin->getDaily(), Qt::Window);
@@ -509,17 +522,17 @@ void gGraphView::popoutGraph()
         newDockWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         newDockWidget->setMouseTracking(true);
         int titleBarHeight = 30;
-        int newDockHeight = dock->height()+popout_graph->height()+titleBarHeight/*+2*/; // +2 for group box border
+        int newDockHeight = dock->height()+popoutHeight+titleBarHeight/*+2*/; // +2 for group box border
         qDebug() << "widget geometry" << newDockWidget->frameGeometry() << "title bar height" << titleBarHeight;
         if (newDockHeight > screenHeight) {
             QMessageBox::warning(nullptr, STR_MessageBox_Warning,
             QObject::tr("The popout window is full. You should capture the existing\npopout window, delete it, then pop out this graph again."));
             return;
         }
-        qDebug() << "dock height" << dock->height() << "popout graph height" << popout_graph->height();
+        qDebug() << "dock height" << dock->height() << "popout graph height" << popoutHeight;
         dock->resize(dock->width(), newDockHeight);
-        newDockWidget->setMinimumHeight(popout_graph->height()+titleBarHeight);
-        newDockWidget->resize(width(), popout_graph->height()+titleBarHeight);
+        newDockWidget->setMinimumHeight(popoutHeight+titleBarHeight);
+        newDockWidget->resize(width(), popoutHeight+titleBarHeight);
         qDebug() << "dock height resized to" << dock->height() << "widget resized to" << newDockWidget->height();
         //////// End resize dock to hold new widget
 
@@ -566,9 +579,9 @@ void gGraphView::popoutGraph()
         // end name construction and setting title
         /////////////////////
 
-        qDebug() << "original graph height is" << graph->height();
-        gGraph * newgraph = new gGraph(newname, nullptr, newtitle, graph->units(), graph->height(), graph->group());
-        newgraph->setHeight(graph->height());
+        qDebug() << "original graph height is" << popoutHeight;
+        gGraph * newgraph = new gGraph(newname, nullptr, newtitle, graph->units(), popoutHeight, graph->group());
+        newgraph->setHeight(popoutHeight);
 
         short group = 0;
         gv->m_graphs.insert(gv->m_graphs.indexOf(graph)+1, newgraph);
@@ -1833,6 +1846,12 @@ void gGraphView::leaveEvent(QEvent * event)
     // shown by whatever widget the mouse moves to next.
     if (m_tooltip->visible()) {
         m_tooltip->cancel();
+        timedRedraw(0);
+    }
+
+    // Card look: the hover line, Details button and menu-button highlight go with the mouse too
+    if (cardLook()) {
+        m_mouse = QPoint(-1, -1);
         timedRedraw(0);
     }
 

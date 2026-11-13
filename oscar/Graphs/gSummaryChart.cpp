@@ -328,6 +328,8 @@ void gSummaryChart::paintHoverMarker(QPainter &painter, gGraph &graph, const QRe
     painter.setPen(QPen(GraphTheme::ink(QColor(0, 0, 0, 110)), 1));
     painter.drawLine(QPointF(x, plot.top()), QPointF(x, plot.bottom()));
     if (!hasData) return;
+    // No button on a popped-out or cloned graph: the popup it opens belongs to the Overview page
+    if (graph.isSnapshot() || graph.graphView()->isPopout()) return;
 
     // The Details button at the top of the day
     const QString text = tr("Details");

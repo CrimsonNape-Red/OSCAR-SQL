@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "daylabels.h"
+#include <algorithm>
 
 #include <cmath>
 
@@ -26,14 +27,22 @@ QVector<Label> layout(const QDate &first, int days, double barWidth, double labe
     // Marked days first: the hovered day, then pinned days clear of it
     QVector<double> marked;
     if (inRange(hover)) marked.append(xOf(int(first.daysTo(hover))));
+    // In date order, so which of two close pinned days keeps its label does not depend on the
+    // order the set happens to list them in
+    QVector<QDate> pinnedDays(pinned.begin(), pinned.end());
+    std::sort(pinnedDays.begin(), pinnedDays.end());
     QVector<Label> pins;
-    for (const QDate &d : pinned) {
+    for (const QDate &d : pinnedDays) {
         if (!inRange(d) || d == hover) continue;
         const double x = xOf(int(first.daysTo(d)));
-        if (!marked.isEmpty() && std::abs(marked.first() - x) < spacing) continue;
+        bool clear = true;
+        for (double m : marked) {
+            if (std::abs(m - x) < spacing) { clear = false; break; }
+        }
+        if (!clear) continue;
         pins.append({ d, x, true, true });
+        marked.append(x);
     }
-    for (const Label &p : pins) marked.append(p.x);
     const auto nearMarked = [&](double x) {
         for (double m : marked) {
             if (std::abs(m - x) < spacing) return true;

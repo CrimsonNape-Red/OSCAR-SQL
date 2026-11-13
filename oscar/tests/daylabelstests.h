@@ -20,6 +20,7 @@ private slots:
     void testLabelsDoNotOverlap();
     void testHoverIsBoldAndNeighboursStayPut();
     void testPinnedIsUnderlined();
+    void testAdjacentPinsDoNotOverlap();
     void testSingleDay();
     void testGridFollowsDates();
 };

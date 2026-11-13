@@ -803,7 +803,9 @@ public:
     QAction * reset_action;                 //!< "Reset Graph Heights"
 
     // Card look menu (built on first use by arrangeCardMenu)
+    //! \brief Puts the menu's items in the card look's order, under its section headings (once)
     void arrangeCardMenu();
+    //! \brief A section heading for the card menu: a small bold label that cannot be chosen
     QAction * menuHeading(const QString &text);
     bool m_cardMenuBuilt = false;
     QAction * m_headDisplay = nullptr;

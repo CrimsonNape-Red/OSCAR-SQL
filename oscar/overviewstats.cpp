@@ -90,10 +90,14 @@ QVector<Stat> compute(const Range &shown)
         RangeFigures::usageAverage(shown.start, shown.end), RangeFigures::usageAverage(before.start, before.end),
         2, QObject::tr("hours/night"), UiKit::Better::Higher);
 
+    // Every day of a period counts for compliance, so a previous period that starts before the
+    // profile's first day would read low: it is not compared
+    const QDate firstDay = p_profile->FirstDay(MT_CPAP);
     const int compliant = days > 0 ? p_profile->countCompliantDays(MT_CPAP, shown.start, shown.end) : 0;
     add(QObject::tr("Compliance"),
         RangeFigures::compliancePercent(shown.start, shown.end), RangeFigures::compliancePercent(before.start, before.end),
-        1, QObject::tr("% (%1 of %2 days)").arg(compliant).arg(shown.start.daysTo(shown.end) + 1), UiKit::Better::Higher);
+        1, QObject::tr("% (%1 of %2 days)").arg(compliant).arg(shown.start.daysTo(shown.end) + 1), UiKit::Better::Higher,
+        true, firstDay.isValid() && before.start >= firstDay);
 
     add(QObject::tr("Leak rate (%1)").arg(RangeFigures::middleLabel()),
         RangeFigures::middle(CPAP_Leak, MT_CPAP, shown.start, shown.end),

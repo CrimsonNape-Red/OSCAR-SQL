@@ -72,6 +72,20 @@ void DayLabelsTests::testHoverIsBoldAndNeighboursStayPut()
     }
 }
 
+void DayLabelsTests::testAdjacentPinsDoNotOverlap()
+{
+    // Two pinned days too close for both labels: the earlier one keeps its label
+    const QDate pin(2026, 10, 28);
+    const QVector<Label> labels = DayLabels::layout(kFirst, 30, kBar, kText, kGap, QDate(), { pin, pin.addDays(1) });
+    QVERIFY(find(labels, pin));
+    QVERIFY(!find(labels, pin.addDays(1)));
+    for (int i = 0; i < labels.size(); ++i) {
+        for (int j = i + 1; j < labels.size(); ++j) {
+            QVERIFY(qAbs(labels.at(i).x - labels.at(j).x) >= kText);
+        }
+    }
+}
+
 void DayLabelsTests::testPinnedIsUnderlined()
 {
     const QDate pin(2026, 10, 28), hover(2026, 11, 3);
