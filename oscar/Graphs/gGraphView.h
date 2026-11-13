@@ -392,6 +392,24 @@ class gGraphView
     //! \brief The colour behind the graphs: the page colour between cards, else the graph background
     QColor viewBackground() const;
 
+    /*! \brief Opens the menu for graph \a g at \a globalPos
+
+        Classic look: the original menu. Card look: the same commands grouped under Display,
+        Y-axis and Overlays headings; in a popped-out graph Close replaces Pop out. */
+    void showGraphMenu(gGraph *g, const QPoint &globalPos);
+
+    //! \brief True when this view is a popped-out graph in its own window
+    bool isPopout() const;
+
+    //! \brief True when (\a x, \a y) is on the menu button of graph \a g (Card look only)
+    bool onMenuButton(gGraph *g, int x, int y) const;
+
+public slots:
+    //! \brief Closes this popped-out graph
+    void closePopout();
+
+public:
+
     bool contains(QString name) {
         for (int i=0; i<m_graphs.size(); ++i) {
             if (m_graphs[i]->name() == name) return true;
@@ -775,6 +793,20 @@ class gGraphView
     QAction * snap_action;
 
     QAction * zoom100_action;
+    QAction * reset_action;                 //!< "Reset Graph Heights"
+
+    // Card look menu (built on first use by arrangeCardMenu)
+    void arrangeCardMenu();
+    QAction * menuHeading(const QString &text);
+    bool m_cardMenuBuilt = false;
+    QAction * m_headDisplay = nullptr;
+    QAction * m_headYAxis = nullptr;
+    QAction * m_headOverlays = nullptr;
+    QAction * m_autoScale = nullptr;
+    QAction * m_defaultScale = nullptr;
+    QAction * m_closeAction = nullptr;
+    gGraph * m_menuGraph = nullptr;         //!< The graph the open menu belongs to
+    gGraph * m_menuHover = nullptr;         //!< The graph whose menu button is under the mouse
     QWidget * caller;
 
     bool m_showAuthorMessage;

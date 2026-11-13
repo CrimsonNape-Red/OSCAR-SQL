@@ -444,8 +444,8 @@ gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
     else
         zoom100_action->setToolTip(tr("Restore X-axis zoom to 100% to view entire day's data."));
 
-    QAction * action = context_menu->addAction(tr("Reset Graph Heights"), this, SLOT(resetLayout()));
-    action->setToolTip(tr("Resets all graphs to a uniform height."));
+    reset_action = context_menu->addAction(tr("Reset Graph Heights"), this, SLOT(resetLayout()));
+    reset_action->setToolTip(tr("Resets all graphs to a uniform height."));
 
     context_menu->addSeparator();
     limits_menu = context_menu->addMenu(tr("Y-Axis"));
@@ -632,6 +632,130 @@ void gGraphView::popoutGraph()
         this->activateWindow();
         this->raise();
     }
+}
+
+bool gGraphView::isPopout() const
+{
+    return qobject_cast<QDockWidget *>(parentWidget()) != nullptr;
+}
+
+void gGraphView::closePopout()
+{
+    if (QDockWidget *holder = qobject_cast<QDockWidget *>(parentWidget())) holder->close();
+}
+
+bool gGraphView::onMenuButton(gGraph *g, int x, int y) const
+{
+    return cardLook() && g && GraphCard::menuButtonRect(g->m_rect).contains(x, y);
+}
+
+QAction * gGraphView::menuHeading(const QString &text)
+{
+    // A section title that shows the same on every platform (QMenu::addSection's text is
+    // dropped by several styles)
+    QLabel *label = new QLabel(text.toUpper(), context_menu);
+    QFont font = QApplication::font();
+    font.setBold(true);
+    font.setPointSizeF(font.pointSizeF() * 0.85);
+    label->setFont(font);
+    label->setEnabled(false);
+    label->setContentsMargins(10, 6, 10, 2);
+    QWidgetAction *heading = new QWidgetAction(context_menu);
+    heading->setDefaultWidget(label);
+    heading->setEnabled(false);
+    return heading;
+}
+
+void gGraphView::arrangeCardMenu()
+{
+    if (m_cardMenuBuilt) return;
+    m_cardMenuBuilt = true;
+
+    // Take the Classic menu apart (its separators go) and put the same commands back in groups
+    const QList<QAction *> old = context_menu->actions();
+    for (QAction *action : old) {
+        context_menu->removeAction(action);
+        if (action->isSeparator()) action->deleteLater();
+    }
+
+    context_menu->addAction(m_headDisplay = menuHeading(tr("Display")));
+    context_menu->addAction(reset_action);
+    context_menu->addAction(pin_action);
+    context_menu->addAction(popout_action);
+    m_closeAction = context_menu->addAction(tr("Close"), this, SLOT(closePopout()));
+    context_menu->addAction(snap_action);
+    context_menu->addAction(zoom100_action);
+
+    context_menu->addAction(m_headYAxis = menuHeading(tr("Y-axis")));
+    m_autoScale = context_menu->addAction(tr("Auto scale"));
+    m_autoScale->setCheckable(true);
+    m_defaultScale = context_menu->addAction(tr("Default scale"));
+    m_defaultScale->setCheckable(true);
+    connect(m_autoScale, &QAction::triggered, this, [this] {
+        if (m_menuGraph) { m_menuGraph->setZoomY(ZS_AUTO_FIT); timedRedraw(0); }
+    });
+    connect(m_defaultScale, &QAction::triggered, this, [this] {
+        if (m_menuGraph) { m_menuGraph->setZoomY(ZS_DEFAULT); timedRedraw(0); }
+    });
+    limits_menu->setTitle(tr("Override scale..."));
+    context_menu->addMenu(limits_menu);
+
+    context_menu->addAction(m_headOverlays = menuHeading(tr("Overlays")));
+    context_menu->addMenu(plots_menu);
+    context_menu->addMenu(cpap_menu);
+    context_menu->addMenu(oximeter_menu);
+    context_menu->addMenu(lines_menu);
+}
+
+void gGraphView::showGraphMenu(gGraph *g, const QPoint &globalPos)
+{
+    if (!g) return;
+    setCursor(Qt::ArrowCursor);
+    pin_graph = g;
+    popout_graph = g;
+    m_menuGraph = g;
+    populateMenu(g);
+
+    if (cardLook()) {
+        arrangeCardMenu();
+        // Colours from the theme, so the menu reads in light and dark mode
+        const auto hex = [](Theme::Role role) { return Theme::color(role).name(); };
+        context_menu->setStyleSheet(QString(
+            "QMenu { background-color: %1; color: %2; border: 1px solid %3; }"
+            "QMenu::item { background-color: %1; color: %2; }"
+            "QMenu::item:selected { background-color: %4; color: %2; }"
+            "QMenu::item:disabled { color: %5; }"
+            "QMenu QLabel, QMenu QCheckBox { color: %2; background: transparent; }"
+            "QMenu QLabel:disabled { color: %5; }")
+            .arg(hex(Theme::Role::Surface), hex(Theme::Role::Ink), hex(Theme::Role::Line),
+                 hex(Theme::Role::AccentSoft), hex(Theme::Role::Ink3)));
+        const bool popout = isPopout();
+        reset_action->setText(tr("Reset graph heights"));
+        reset_action->setVisible(!popout);
+        pin_action->setText(g->isPinned() ? tr("Unpin") : tr("Pin"));
+        pin_action->setVisible(!popout);
+        popout_action->setText(tr("Pop out"));
+        popout_action->setVisible(!popout);
+        m_closeAction->setVisible(popout);
+        snap_action->setText(g->isSnapshot() ? tr("Remove clone") : tr("Clone"));
+        snap_action->setVisible(!popout);
+        zoom100_action->setText(tr("100% zoom"));
+
+        const bool scalable = limits_menu->menuAction()->isVisible();
+        m_headYAxis->setVisible(scalable);
+        m_autoScale->setVisible(scalable);
+        m_defaultScale->setVisible(scalable);
+        m_autoScale->setChecked(g->zoomY() == ZS_AUTO_FIT);
+        m_defaultScale->setChecked(g->zoomY() == ZS_DEFAULT);
+
+        m_headOverlays->setVisible(plots_menu->menuAction()->isVisible() || cpap_menu->menuAction()->isVisible()
+                                   || oximeter_menu->menuAction()->isVisible() || lines_menu->menuAction()->isVisible());
+    } else {
+        pin_action->setText(g->isPinned() ? QObject::tr("Unpin %1 Graph").arg(g->title())
+                                          : QObject::tr("Pin %1 Graph").arg(g->title()));
+        popout_action->setText(QObject::tr("Popout %1 Graph").arg(g->title()));
+    }
+    context_menu->popup(globalPos);
 }
 
 void gGraphView::togglePin()
@@ -1774,6 +1898,18 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
 
     m_mouse = QPoint(x, y);
 
+    if (cardLook()) {
+        // Repaint when the mouse moves on or off a menu button, so its highlight follows
+        gGraph *over = nullptr;
+        for (const auto & g : m_graphs) {
+            if (g->visible() && !g->isEmpty() && onMenuButton(g, x, y)) { over = g; break; }
+        }
+        if (over != m_menuHover) {
+            m_menuHover = over;
+            timedRedraw(0);
+        }
+    }
+
     if (m_sizer_dragging) { // Resize handle being dragged
         float my = y - m_sizer_point.y();
         float h = m_graphs[m_sizer_index]->height();
@@ -2699,7 +2835,9 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                 m_sizer_point.setY(y);
                 done = true;
             } else if ((y >= py) && (y < py + h)) {
-                if ((event->button() == Qt::LeftButton) && onTitle(x, y - py, 20)) {
+                if ((event->button() == Qt::LeftButton) && onMenuButton(g, x, y)) {
+                    showGraphMenu(g, mapToGlobal(GraphCard::menuButtonRect(g->m_rect).bottomLeft()));
+                } else if ((event->button() == Qt::LeftButton) && onTitle(x, y - py, 20)) {
                     // clicked on title to drag graph..
                     // Note: reorder has to be limited to pinned graphs.
                     m_graph_dragging = true;
@@ -2711,18 +2849,7 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                     m_sizer_point.setY(py); // point at top of graph..
                     this->setCursor(Qt::ClosedHandCursor);
                 } else if ((event->button() == Qt::RightButton) && onTitle(x, y - py, gYAxis::Margin)) {
-                    this->setCursor(Qt::ArrowCursor);
-                    pin_action->setText(QObject::tr("Unpin %1 Graph").arg(g->title()));
-                    pin_graph = g;
-                    popout_action->setText(QObject::tr("Popout %1 Graph").arg(g->title()));
-                    popout_graph = g;
-
-                    populateMenu(g);
-                    #if QT_VERSION < QT_VERSION_CHECK(6,0,0)
-                        context_menu->popup(event->globalPos());
-                    #else
-                        context_menu->popup(event->globalPosition().toPoint());
-                    #endif
+                    showGraphMenu(g, event->globalPosition().toPoint());
                 } else if (!g->blockSelect()) {
                     if (m_metaselect) {
                         if (m_selected_graph) {
@@ -2781,7 +2908,9 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                     m_sizer_point.setY(y);
                 } else if ((y >= py) && (y < py + h)) {
 
-                    if ((event->button() == Qt::LeftButton) && onTitle(x, y - py, 20)) { // clicked on title to drag graph..
+                    if ((event->button() == Qt::LeftButton) && onMenuButton(g, x, y)) {
+                    showGraphMenu(g, mapToGlobal(GraphCard::menuButtonRect(g->m_rect).bottomLeft()));
+                } else if ((event->button() == Qt::LeftButton) && onTitle(x, y - py, 20)) { // clicked on title to drag graph..
                         m_graph_dragging = true;
                         m_tooltip->cancel();
                         redraw();
@@ -2790,18 +2919,7 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                         m_sizer_point.setY(py); // point at top of graph..
                         this->setCursor(Qt::ClosedHandCursor);
                     } else if ((event->button() == Qt::RightButton) && onTitle(x, y - py, gYAxis::Margin)) {
-                        this->setCursor(Qt::ArrowCursor);
-                        popout_action->setText(QObject::tr("Popout %1 Graph").arg(g->title()));
-                        popout_graph = g;
-                        pin_action->setText(QObject::tr("Pin %1 Graph").arg(g->title()));
-                        pin_graph = g;
-                        populateMenu(g);
-
-                        #if QT_VERSION < QT_VERSION_CHECK(6,0,0)
-                            context_menu->popup(event->globalPos());
-                        #else
-                            context_menu->popup(event->globalPosition().toPoint());
-                        #endif
+                        showGraphMenu(g, event->globalPosition().toPoint());
                     } else if (!g->blockSelect()) {
                        if (m_metaselect) {
                             if (m_selected_graph) {

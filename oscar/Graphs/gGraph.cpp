@@ -405,6 +405,19 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
             painter.drawText(QRect(x, header.top(), header.right() - x, header.height()), Qt::AlignLeft | Qt::AlignVCenter, unitText);
             x += QFontMetrics(*defaultfont).horizontalAdvance(unitText) + 8;
         }
+
+        // The menu button at the right end of the header, highlighted under the mouse
+        const QRect button = GraphCard::menuButtonRect(m_rect);
+        if (button.contains(m_graphview->currentMousePos())) {
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(Theme::color(Theme::Role::AccentSoft));
+            painter.drawRoundedRect(button, 5, 5);
+        }
+        painter.setPen(QPen(GraphTheme::ink(QColor(90, 90, 90)), 1.6, Qt::SolidLine, Qt::RoundCap));
+        for (int i = -1; i <= 1; ++i) {
+            const qreal lineY = button.center().y() + 0.5 + i * 5;
+            painter.drawLine(QPointF(button.left() + 5, lineY), QPointF(button.right() - 4, lineY));
+        }
         painter.restore();
 
         x += 8;
