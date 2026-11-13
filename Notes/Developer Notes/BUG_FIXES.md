@@ -8045,3 +8045,21 @@ reload runs, and Daily still pointed at those sessions.
   range and the log stopped after three purged days. All three range purges that completed had the viewed day outside
   the range or at its end. All the logs were from 2.1.1, which predates the range fix.
 - The oximetry purge does not need this: the session bar and the graph layers checked hold only CPAP sessions.
+
+## 2026-11-12 - Opening a profile: generic CPAP picture shown briefly at the end (GitLab #385)
+
+**Files:** `oscar/SleepLib/machine.cpp` (`Machine::Load()`), `oscar/SleepLib/progressdialog.h`
+
+**Symptom:** While a profile opened, the progress window showed the CPAP device's picture, then for a moment at the
+end the generic CPAP picture.
+
+**Root cause:** `Machine::Load()` sets the progress window's picture for every device. A device whose loader has no
+picture for its series (an oximeter, for example) gets the generic one from `MachineLoader::getPixmap()`, and it
+loads after the CPAP device.
+
+**Fix:** `Machine::Load()` uses the generic picture only when the window shows no picture yet
+(`ProgressDialog::hasPixmap()`).
+
+**Non-obvious:**
+- The Journal device has no loader, so it never set a picture; only devices with a loader but no series picture did.
+- Checked by reading the code; the window closes too quickly to capture.
