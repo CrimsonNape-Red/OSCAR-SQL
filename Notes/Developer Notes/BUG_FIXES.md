@@ -4,6 +4,23 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-13 - Ctrl/Cmd+wheel trackpad zoom moved in chunks (#306 follow-up)
+
+**Files:** `oscar/Graphs/gGraph.cpp`, `gGraph.h`
+
+**Symptom:** After the 2026-10-19 fix, trackpad zoom ran at the right speed but in visible
+jumps of one full step, not following the fingers.
+
+**Root cause:** The accumulator held back sub-notch deltas until they added up to 120 units,
+then fired one whole 0.75 / 1.5 step.
+
+**Fix:** `gGraph::wheelEvent()` now zooms by `0.75^(delta/120)` in and `1.5^(-delta/120)`
+out, as suggested by the reporter. A standard 120-unit notch still gives exactly 0.75 / 1.5;
+smaller deltas zoom by their fraction of a notch. `m_wheelAccum` is removed. A single event
+of 240+ units now zooms two steps rather than one.
+
+---
+
 ## 2026-11-12 - ResMed AirCurve VAuto in BiLevel-S showed the VAuto PS setting (GitLab #383)
 
 **Files:** `oscar/SleepLib/loader_plugins/resmed_loader.cpp`
