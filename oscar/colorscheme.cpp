@@ -59,6 +59,25 @@ QPalette darkPalette()
     p.setColor(QPalette::Disabled, QPalette::Highlight, QColor(0x50, 0x50, 0x50));
     return p;
 }
+#else
+/*! \brief Gives light mode Fusion's standard light colours; dark mode keeps the desktop's own.
+
+    For Linux, where Qt takes its colours from the desktop's GTK theme. Some light themes
+    (e.g. Mint-L) give lists and panels the window's own colour and grey text, so OSCAR's cards
+    and tables lose their edges. Called again whenever the scheme in effect changes. */
+[[maybe_unused]] void applyLinuxLightPalette()
+{
+    QApplication::setPalette(QPalette());       // back to the desktop's colours, to judge and to keep when dark
+    const Qt::ColorScheme scheme = QGuiApplication::styleHints()->colorScheme();
+    const bool dark = scheme == Qt::ColorScheme::Dark
+                      || (scheme == Qt::ColorScheme::Unknown && Theme::isDark(QApplication::palette()));
+    if (dark) return;
+    QStyle *fusion = QStyleFactory::create(QStringLiteral("Fusion"));
+    if (fusion) {
+        QApplication::setPalette(fusion->standardPalette());
+        delete fusion;
+    }
+}
 #endif
 
 } // namespace
@@ -82,6 +101,16 @@ void apply()
     if (choice == CSC_Light) scheme = Qt::ColorScheme::Light;
     else if (choice == CSC_Dark) scheme = Qt::ColorScheme::Dark;
     QGuiApplication::styleHints()->setColorScheme(scheme);
+#ifdef Q_OS_LINUX
+    static bool watching = false;
+    if (!watching) {
+        // Also follows the desktop when it changes between light and dark while OSCAR is open
+        watching = true;
+        QObject::connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged,
+                         qApp, [](Qt::ColorScheme) { applyLinuxLightPalette(); });
+    }
+    applyLinuxLightPalette();
+#endif
     qDebug() << "Colour scheme: choice" << int(choice) << "in effect" << int(QGuiApplication::styleHints()->colorScheme());
 #else
     // Startup only. Leave the system's own colours alone when they already match the choice.
