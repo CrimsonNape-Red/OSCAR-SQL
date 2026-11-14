@@ -22,6 +22,7 @@ private slots:
     void testDarkGradientDoesNotGlare();
     void testDarkGreyBarsStayReadable();
     void testDarkOrangeStaysAmber();
+    void testOutlineColour();
     void testLightBarHasThinBlackOutline();
     void testClosedOutlineRunsAlongBottom();
     void testPlainFillLighterAboveThreePixels();

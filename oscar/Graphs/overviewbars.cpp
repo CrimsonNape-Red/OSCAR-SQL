@@ -25,12 +25,13 @@ constexpr double kCornerRadius = 3.0;   //!< Radius of the two top corners of a 
 constexpr float kDarkLightness = 0.88f; //!< Share of a dark colour's lightness kept in dark mode (HSL)
 constexpr float kDarkCompress = 0.40f;  //!< How much more a light colour loses: white ends at 0.48
 constexpr float kDarkSaturation = 0.8f; //!< Share of a bar colour's saturation kept in dark mode
-constexpr int kDarkShade = 122;         //!< Far end of a bar's shading in dark mode (QColor::lighter)
+constexpr float kDarkShade = 0.15f;     //!< Lightness (HSL) the far end of a bar's shading gains in dark mode
+constexpr int kDarkOutline = 0xD0;      //!< Grey of a bar's outline in dark mode: light, but short of a glaring white
 constexpr float kDarkGreyLift = 0.28f;  //!< Lightness added to a grey in dark mode; less the more colour there is
 constexpr float kDarkWarmLift = 0.13f;  //!< Lightness added to orange in dark mode, where it would turn brown
 constexpr float kWarmHue = 45.0f;       //!< Hue (degrees) that gets all of kDarkWarmLift
 constexpr float kWarmSpread = 30.0f;    //!< Degrees either side of kWarmHue over which the lift fades out
-constexpr double kMinOutlined = 4.0;    //!< Narrowest bar outlined in light mode
+constexpr double kMinOutlined = 4.0;    //!< Narrowest bar that gets an outline
 
 double toLinear(double v) { return v <= 0.04045 ? v / 12.92 : std::pow((v + 0.055) / 1.055, 2.4); }
 
@@ -96,17 +97,24 @@ QLinearGradient barGradient(const QColor &c, double left, double width, bool dar
     const QColor base = darkBarColour(c);
     QLinearGradient g(left, 0, left + width, 0);
     g.setColorAt(0.0, base);
-    g.setColorAt(1.0, base.lighter(kDarkShade));
+    float h, s, l, a;
+    base.getHslF(&h, &s, &l, &a);
+    g.setColorAt(1.0, QColor::fromHslF(h, s, qMin(1.0f, l + kDarkShade), a));
     return g;
+}
+
+QColor outlineColour(bool dark)
+{
+    return dark ? QColor(kDarkOutline, kDarkOutline, kDarkOutline) : QColor(Qt::black);
 }
 
 void paintSegment(QPainter &p, const QRectF &r, const QColor &c, bool top, bool shaded, bool closed)
 {
     if (r.isEmpty()) return;
     const bool dark = GraphTheme::dark();
-    // Light mode: a thin black line up the sides and across the top, as in OSCAR 2.1.0. On a
-    // dark background it would not show.
-    const bool outlined = !dark && r.width() >= kMinOutlined;
+    // A thin line up the sides and across the top: black in light mode, as in OSCAR 2.1.0, and
+    // a light grey in dark mode, where black would not show
+    const bool outlined = r.width() >= kMinOutlined;
     QBrush brush;
     if (shaded) brush = QBrush(barGradient(c, r.left(), r.width(), dark));
     else if (dark) brush = QBrush(darkBarColour(c));
@@ -145,7 +153,7 @@ void paintSegment(QPainter &p, const QRectF &r, const QColor &c, bool top, bool 
     p.setRenderHint(QPainter::Antialiasing, true);
     p.fillPath(filled, brush);
     if (outlined) {
-        p.setPen(QPen(Qt::black, 1));
+        p.setPen(QPen(outlineColour(dark), 1));
         p.setBrush(Qt::NoBrush);
         p.drawPath(closed ? filled : path);
     }

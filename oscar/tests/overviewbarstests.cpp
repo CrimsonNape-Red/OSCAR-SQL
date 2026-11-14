@@ -78,13 +78,15 @@ void OverviewBarsTests::testDarkBarColourIsMuted()
 
 void OverviewBarsTests::testDarkGradientDoesNotGlare()
 {
-    // In dark mode the shading starts from the muted colour and brightens only a little
+    // In dark mode the shading starts from the muted colour and brightens enough to be seen,
+    // without glaring
     const QLinearGradient grad = barGradient(QColor(0x40, 0x80, 0xff), 10, 50, true);
     const QGradientStops stops = grad.stops();
     QCOMPARE(stops.size(), 2);
     QCOMPARE(stops.at(0).second, darkBarColour(QColor(0x40, 0x80, 0xff)));
-    QVERIFY(stops.at(1).second.lightnessF() > stops.at(0).second.lightnessF());
+    QVERIFY(stops.at(1).second.lightnessF() >= stops.at(0).second.lightnessF() + 0.12f);
     QVERIFY(stops.at(1).second.lightnessF() <= 0.6f);
+    QVERIFY(qAbs(stops.at(1).second.hslHue() - stops.at(0).second.hslHue()) <= 2);
 }
 
 void OverviewBarsTests::testDarkGreyBarsStayReadable()
@@ -111,6 +113,16 @@ void OverviewBarsTests::testDarkOrangeStaysAmber()
     QVERIFY(darkBarColour(QColor(255, 200, 110)).lightnessF() > amber.lightnessF() + 0.03f);
     // Colours away from orange are untouched: blue stays as dark as before
     QVERIFY(darkBarColour(QColor(0x40, 0x80, 0xff)).lightnessF() < 0.40f);
+}
+
+void OverviewBarsTests::testOutlineColour()
+{
+    QCOMPARE(outlineColour(false), QColor(Qt::black));
+    // Dark mode: a very light grey, short of white so that it doesn't glare
+    const QColor c = outlineColour(true);
+    QCOMPARE(c.hslSaturationF(), 0.0f);
+    QVERIFY(c.lightnessF() >= 0.75f);
+    QVERIFY(c.lightnessF() <= 0.88f);
 }
 
 void OverviewBarsTests::testLightBarHasThinBlackOutline()

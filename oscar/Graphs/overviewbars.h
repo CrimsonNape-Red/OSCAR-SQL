@@ -52,6 +52,10 @@ QLinearGradient barGradient(const QColor &c, double left, double width, bool dar
     Greys are lifted clear of the background, and orange keeps enough light to stay amber. */
 QColor darkBarColour(const QColor &c);
 
+/*! \brief The colour of the thin line round a bar: black in light mode, and in dark mode a very
+    light grey, which shows on the dark background without the glare of white. */
+QColor outlineColour(bool dark);
+
 /*! \brief Draws one part of a bar in \a r
 
     In light mode a bar at least 4 pixels wide has a one-pixel black line up its sides and
