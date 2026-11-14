@@ -20,5 +20,7 @@ private slots:
     void testClassifyComplianceOnly();
     void testClassifySessionsOff();
     void testClassifyZeroHours();
+    void testCardBitsDefault();
+    void testCardBitsRoundTrip();
 };
 DECLARE_TEST(DailyDetailsTests)

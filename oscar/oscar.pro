@@ -369,6 +369,9 @@ SOURCES += \
     uikit/lineicons.cpp \
     uikit/metriccard.cpp \
     uikit/panel.cpp \
+    uikit/collapsiblecard.cpp \
+    uikit/callout.cpp \
+    uikit/toggleswitch.cpp \
     uikit/sectionheader.cpp \
     uikit/iconbutton.cpp \
     uikit/imagetrim.cpp \
@@ -717,6 +720,9 @@ HEADERS  += \
     uikit/lineicons.h \
     uikit/metriccard.h \
     uikit/panel.h \
+    uikit/collapsiblecard.h \
+    uikit/callout.h \
+    uikit/toggleswitch.h \
     uikit/sectionheader.h \
     uikit/iconbutton.h \
     uikit/imagetrim.h \

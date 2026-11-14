@@ -12,6 +12,7 @@
 
 #include "dailydetailstests.h"
 #include "dailydetails.h"
+#include "SleepLib/appsettings.h"
 
 using DailyDetails::DayKind;
 using DailyDetails::classify;
@@ -45,4 +46,30 @@ void DailyDetailsTests::testClassifySessionsOff()
 void DailyDetailsTests::testClassifyZeroHours()
 {
     QCOMPARE(classify(true, 0, 0, false, false), DayKind::ZeroHours);
+}
+
+void DailyDetailsTests::testCardBitsDefault()
+{
+    // Only the Device card starts open
+    const int bits = DefaultDailyCardsOpen;
+    QVERIFY(DailyDetails::cardOpen(bits, DC_Device));
+    QVERIFY(!DailyDetails::cardOpen(bits, DC_EventBreakdown));
+    QVERIFY(!DailyDetails::cardOpen(bits, DC_Oximeter));
+    QVERIFY(!DailyDetails::cardOpen(bits, DC_DeviceSettings));
+    QVERIFY(!DailyDetails::cardOpen(bits, DC_SessionInfo));
+}
+
+void DailyDetailsTests::testCardBitsRoundTrip()
+{
+    int bits = DefaultDailyCardsOpen;
+    bits = DailyDetails::setCardOpen(bits, DC_SessionInfo, true);
+    bits = DailyDetails::setCardOpen(bits, DC_Device, false);
+    QVERIFY(DailyDetails::cardOpen(bits, DC_SessionInfo));
+    QVERIFY(!DailyDetails::cardOpen(bits, DC_Device));
+    // The others are untouched
+    QVERIFY(!DailyDetails::cardOpen(bits, DC_EventBreakdown));
+    QVERIFY(!DailyDetails::cardOpen(bits, DC_Oximeter));
+    QVERIFY(!DailyDetails::cardOpen(bits, DC_DeviceSettings));
+    // Opening an open card changes nothing
+    QCOMPARE(DailyDetails::setCardOpen(bits, DC_SessionInfo, true), bits);
 }

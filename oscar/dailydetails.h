@@ -25,9 +25,22 @@
 class Day;
 class Session;
 
+/*! \brief The Modern Details tab's cards that can be closed; their open state is one bit each
+    in AppSettings::dailyCardsOpen() */
+enum DailyCard { DC_Device, DC_EventBreakdown, DC_Oximeter, DC_DeviceSettings, DC_SessionInfo };
+
 /*! \namespace DailyDetails
     \brief Collects what the Daily page's Details tab shows for a day */
 namespace DailyDetails {
+
+//! \brief True when \a card is open in the stored \a bits
+inline bool cardOpen(int bits, DailyCard card) { return (bits >> card) & 1; }
+
+//! \brief \a bits with \a card open or closed, the other cards unchanged
+inline int setCardOpen(int bits, DailyCard card, bool open)
+{
+    return open ? (bits | (1 << card)) : (bits & ~(1 << card));
+}
 
 //! \brief The kinds of day the Details tab draws differently
 enum class DayKind {

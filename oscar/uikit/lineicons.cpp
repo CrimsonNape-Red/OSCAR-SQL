@@ -238,6 +238,49 @@ QPainterPath deleteIcon()
     return p;
 }
 
+//! \brief A chevron pointing down: an open card
+QPainterPath chevronDownIcon()
+{
+    QPainterPath p;
+    p.moveTo(6, 9);
+    p.lineTo(12, 15);
+    p.lineTo(18, 9);
+    return p;
+}
+
+//! \brief A chevron pointing right: a closed card
+QPainterPath chevronRightIcon()
+{
+    QPainterPath p;
+    p.moveTo(9, 6);
+    p.lineTo(15, 12);
+    p.lineTo(9, 18);
+    return p;
+}
+
+//! \brief A circle with an "i": information
+QPainterPath infoIcon()
+{
+    QPainterPath p;
+    p.addEllipse(QPointF(12, 12), 9, 9);
+    line(p, 12, 11, 12, 17);
+    line(p, 12, 7.5, 12, 7.6);
+    return p;
+}
+
+//! \brief A triangle with an exclamation mark: a warning
+QPainterPath warningIcon()
+{
+    QPainterPath p;
+    p.moveTo(12, 3.5);
+    p.lineTo(21.5, 20);
+    p.lineTo(2.5, 20);
+    p.closeSubpath();
+    line(p, 12, 9.5, 12, 14);
+    line(p, 12, 17, 12, 17.1);
+    return p;
+}
+
 //! \brief A cross, for clearing a field
 QPainterPath clearIcon()
 {
@@ -310,6 +353,10 @@ QPainterPath iconPath(LineIcon icon)
     case LineIcon::Moon: return moonIcon();
     case LineIcon::Sun: return sunIcon();
     case LineIcon::Clear: return clearIcon();
+    case LineIcon::ChevronDown: return chevronDownIcon();
+    case LineIcon::ChevronRight: return chevronRightIcon();
+    case LineIcon::Info: return infoIcon();
+    case LineIcon::Warning: return warningIcon();
     case LineIcon::FolderOpen: return folderOpenIcon();
     case LineIcon::Edit: return editIcon();
     case LineIcon::UserAdd: return userAddIcon();
