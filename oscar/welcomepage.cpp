@@ -48,8 +48,6 @@ using Theme::Role;
 
 namespace {
 
-constexpr int kMaxContentWidth = 1400;   //!< Keeps lines readable on very wide windows
-
 //! \brief Columns for a grid at \a width, from (minimum width, columns) steps, widest first
 int columnsFor(int width, std::initializer_list<std::pair<int, int>> steps, int fallback)
 {
@@ -150,14 +148,11 @@ WelcomePage::WelcomePage(QWidget *parent)
     page->setPalette(pal);
     m_scroll->setWidget(page);
 
-    // Centre a column of at most kMaxContentWidth
+    // The content takes the whole width of the window, however wide
     auto *centre = new QHBoxLayout(page);
     centre->setContentsMargins(Theme::PagePadding, Theme::PagePadding, Theme::PagePadding, Theme::PagePadding + 8);
     auto *content = new QWidget(page);
-    content->setMaximumWidth(kMaxContentWidth);
-    centre->addStretch(0);
     centre->addWidget(content, 1);
-    centre->addStretch(0);
 
     m_column = new QVBoxLayout(content);
     m_column->setContentsMargins(0, 0, 0, 0);
