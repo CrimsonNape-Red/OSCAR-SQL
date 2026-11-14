@@ -45,6 +45,7 @@ class MainWindow;
 class DailySearchTab;
 class gFlagsGroup;
 class DailyTimeAxis;
+class DailyToolbar;
 
 
 /*! \class Daily
@@ -435,6 +436,8 @@ private:
     MyLabel * dateDisplay = nullptr;
     //! Modern: the time scale under the graphs, shared by all of them (null in Classic)
     DailyTimeAxis * m_timeAxis = nullptr;
+    //! Modern: the bar above the graphs with the device line and the drop-downs (null in Classic)
+    DailyToolbar * m_toolbar = nullptr;
 
     MyTextBrowser * webView;
     Day * lastcpapday;

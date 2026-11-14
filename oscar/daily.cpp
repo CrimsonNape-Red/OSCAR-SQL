@@ -64,6 +64,7 @@
 #include "Graphs/gdailysummary.h"
 #include "Graphs/MinutesAtPressure.h"
 #include "dailytimeaxis.h"
+#include "dailytoolbar.h"
 #include "uikit/theme.h"
 
 extern MainWindow * mainwin;
@@ -266,6 +267,14 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         const int at = ui->verticalLayout_3->indexOf(ui->graphMainArea) + 1;
         ui->verticalLayout_3->insertWidget(at, m_timeAxis);
         ui->verticalLayout_3->insertWidget(at + 1, dateDisplay);
+
+        // The top bar takes over the drop-downs and buttons of the bar under the graphs
+        m_toolbar = new DailyToolbar(ui->layoutWidget);
+        ui->verticalLayout_3->insertWidget(0, m_toolbar);
+        m_toolbar->adoptCombos(ui->eventsCombo, ui->graphCombo);
+        ui->frame->hide();
+        connect(m_toolbar, &DailyToolbar::layoutClicked, this, &Daily::on_layout_clicked);
+        connect(m_toolbar, &DailyToolbar::helpClicked, this, &Daily::on_graphHelp_clicked);
     }
 
     GraphView->setEmptyImage(QPixmap(":/icons/logo-md.png"));
@@ -2430,6 +2439,19 @@ void Daily::Load(QDate date)
     }
     else {
         qWarning() << "Daily::Load(): Warning: unable to load day" << date.toString(QLocale::system().dateFormat(QLocale::ShortFormat));
+    }
+
+    if (m_toolbar) {
+        // The top bar names the device, its mode and its pressures, so a screenshot shows them
+        if (cpap) {
+            const MachineInfo info = cpap->getInfo();
+            QString settings = day->getCPAPModeStr();
+            const QString pressure = convertHtmlToPlainText(day->getPressureSettings());
+            if (!pressure.isEmpty()) settings += QStringLiteral(" · ") + pressure;
+            m_toolbar->setDeviceLine((info.brand + " " + info.model).trimmed(), settings);
+        } else {
+            m_toolbar->setDeviceLine(QString(), QString());
+        }
     }
 
     PERF_TIMER_START("Daily::Load::Sessions");
