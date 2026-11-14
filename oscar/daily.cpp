@@ -55,6 +55,7 @@
 #include "Graphs/gFlagsLine.h"
 #include "Graphs/gSleepStageChart.h"
 #include "Graphs/gSessionBarLayer.h"
+#include "Graphs/gSessionGapLayer.h"
 #include "Graphs/gFooBar.h"
 #include "Graphs/gXAxis.h"
 #include "Graphs/gYAxis.h"
@@ -562,6 +563,19 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
         it.value()->AddLayer(new gYAxis(),LayerLeft,gYAxis::Margin);
         it.value()->AddLayer(new gXAxis(),LayerBottom,0,gXAxis::Margin);
+    }
+
+    if (m_modern) {
+        // Hatch the time between sessions on every graph of the night's time, beneath the
+        // data (first in the layer list). Not Time at Pressure, whose scale is pressure.
+        for (gGraph *g : std::as_const(graphlist)) {
+            const QVector<Layer *> &layers = g->layers();
+            const bool timeScale = std::any_of(layers.begin(), layers.end(),
+                                               [](Layer *l) { return dynamic_cast<gXAxis *>(l) != nullptr; });
+            if (!timeScale) continue;
+            g->AddLayer(new gSessionGapLayer());
+            g->layers().move(g->layers().size() - 1, 0);
+        }
     }
 
     if (p_profile->cpap->showLeakRedline()) {

@@ -380,6 +380,7 @@ SOURCES += \
     Graphs/gdailysummary.cpp \
     Graphs/gFlagsLine.cpp \
     Graphs/gSessionBarLayer.cpp \
+    Graphs/gSessionGapLayer.cpp \
     Graphs/gFooBar.cpp \
     Graphs/gGraph.cpp \
     Graphs/gGraphView.cpp \
@@ -580,6 +581,7 @@ HEADERS  += \
     VERSION \
     Graphs/gFlagsLine.h \
     Graphs/gSessionBarLayer.h \
+    Graphs/gSessionGapLayer.h \
     Graphs/gFooBar.h \
     Graphs/gGraph.h \
     Graphs/gGraphView.h \
@@ -1004,7 +1006,8 @@ test {
         tests/graphcardtests.cpp \
         tests/summarylinestests.cpp \
         tests/overviewstatstests.cpp \
-        tests/daylabelstests.cpp
+        tests/daylabelstests.cpp \
+        tests/sessiongaptests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -1047,7 +1050,8 @@ test {
         tests/graphcardtests.h \
         tests/summarylinestests.h \
         tests/overviewstatstests.h \
-        tests/daylabelstests.h
+        tests/daylabelstests.h \
+        tests/sessiongaptests.h
 }
 
 macx {
