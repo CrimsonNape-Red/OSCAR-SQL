@@ -393,6 +393,7 @@ SOURCES += \
     overviewdateaxis.cpp \
     dailytimeaxis.cpp \
     dailytoolbar.cpp \
+    dailydetails.cpp \
     Graphs/daylabels.cpp \
     Graphs/glcommon.cpp \
     Graphs/gLineChart.cpp \
@@ -596,6 +597,7 @@ HEADERS  += \
     overviewdateaxis.h \
     dailytimeaxis.h \
     dailytoolbar.h \
+    dailydetails.h \
     Graphs/daylabels.h \
     Graphs/glcommon.h \
     Graphs/gLineChart.h \
@@ -1009,7 +1011,8 @@ test {
         tests/summarylinestests.cpp \
         tests/overviewstatstests.cpp \
         tests/daylabelstests.cpp \
-        tests/sessiongaptests.cpp
+        tests/sessiongaptests.cpp \
+        tests/dailydetailstests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -1053,7 +1056,8 @@ test {
         tests/summarylinestests.h \
         tests/overviewstatstests.h \
         tests/daylabelstests.h \
-        tests/sessiongaptests.h
+        tests/sessiongaptests.h \
+        tests/dailydetailstests.h
 }
 
 macx {

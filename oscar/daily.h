@@ -399,7 +399,6 @@ private:
     QString getStatisticsInfo(Day *);
     QString getCPAPInformation(Day *);
     QString getOximeterInformation(Day *);
-    QString getViatomSummary(Day *, Machine *);
     QString getEventBreakdown(Day *);
     QString getPieChart(float values, Day *);
     QString getIndices(Day * day, QHash<ChannelID, EventDataType>& values );
