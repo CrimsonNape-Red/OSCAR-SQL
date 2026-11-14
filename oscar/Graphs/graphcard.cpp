@@ -43,10 +43,26 @@ QString elideSummary(const QString &text, const std::function<int(const QString 
 
 QString headerUnits(const QString &title, const QString &units)
 {
+    // Daily's captions put a description before the unit, which is in brackets on its own last
+    // line ("Flow Rate\nBreathing flow rate waveform\n(L/min)"): the header shows the unit only
+    const QString lastLine = units.section('\n', -1).trimmed();
+    if (units.contains('\n') && lastLine.startsWith('(') && lastLine.endsWith(')')) {
+        return lastLine.mid(1, lastLine.size() - 2).trimmed();
+    }
     QString text = units.simplified();
     if (text.startsWith(title, Qt::CaseInsensitive)) text = text.mid(title.size()).trimmed();
     if (text.startsWith('(') && text.endsWith(')')) text = text.mid(1, text.size() - 2).trimmed();
     return text;
+}
+
+HeaderSplit splitHeader(const QRect &headerText, int legendWidth, int minText)
+{
+    if (headerText.isEmpty()) return {};
+    const int legend = qBound(0, legendWidth, qMax(0, headerText.width() - minText));
+    HeaderSplit split;
+    split.text = QRect(headerText.left(), headerText.top(), headerText.width() - legend, headerText.height());
+    split.legend = QRect(headerText.left() + split.text.width(), headerText.top(), legend, headerText.height());
+    return split;
 }
 
 } // namespace GraphCard

@@ -720,6 +720,15 @@ void gGraphView::arrangeCardMenu()
     connect(m_defaultScale, &QAction::triggered, this, [this] {
         if (m_menuGraph) { m_menuGraph->setZoomY(ZS_DEFAULT); timedRedraw(0); }
     });
+    // The Daily line graphs' dynamic scale, which double-clicking the Y axis also switches
+    m_dynamicScale = context_menu->addAction(tr("Dynamic scale"));
+    m_dynamicScale->setCheckable(true);
+    connect(m_dynamicScale, &QAction::triggered, this, [this](bool on) {
+        if (m_menuGraph && m_menuGraph->isDynamicScalingEnabled()) {
+            m_menuGraph->dynamicScalingOn = on;
+            timedRedraw(0);
+        }
+    });
     limits_menu->setTitle(tr("Override scale..."));
     context_menu->addMenu(limits_menu);
 
@@ -770,6 +779,8 @@ void gGraphView::showGraphMenu(gGraph *g, const QPoint &globalPos)
         m_defaultScale->setVisible(scalable);
         m_autoScale->setChecked(g->zoomY() == ZS_AUTO_FIT);
         m_defaultScale->setChecked(g->zoomY() == ZS_DEFAULT);
+        m_dynamicScale->setVisible(scalable && g->isDynamicScalingEnabled());
+        m_dynamicScale->setChecked(g->dynamicScalingOn);
 
         m_headOverlays->setVisible(plots_menu->menuAction()->isVisible() || cpap_menu->menuAction()->isVisible()
                                    || oximeter_menu->menuAction()->isVisible() || lines_menu->menuAction()->isVisible());

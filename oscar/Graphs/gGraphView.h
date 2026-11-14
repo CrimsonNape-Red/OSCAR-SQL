@@ -813,6 +813,7 @@ public:
     QAction * m_headOverlays = nullptr;
     QAction * m_autoScale = nullptr;
     QAction * m_defaultScale = nullptr;
+    QAction * m_dynamicScale = nullptr;    //!< Card look: the Daily graphs' dynamic Y scale
     QAction * m_closeAction = nullptr;
     gGraph * m_menuGraph = nullptr;         //!< The graph the open menu belongs to
     gGraph * m_menuHover = nullptr;         //!< The graph whose menu button is under the mouse

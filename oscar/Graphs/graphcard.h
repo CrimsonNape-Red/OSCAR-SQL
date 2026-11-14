@@ -52,6 +52,19 @@ QString elideSummary(const QString &text, const std::function<int(const QString 
     ("Usage\n(hours)"). The header shows only what the title doesn't already say: "hours". */
 QString headerUnits(const QString &title, const QString &units);
 
+//! \brief The two parts of a header's free space: text at the left, a legend at the right
+struct HeaderSplit {
+    QRect text;     //!< Where the graph's summary or cursor text goes
+    QRect legend;   //!< Where the plot and dotted-line legend goes (empty when there is none)
+};
+
+/*! \brief Divides \a headerText (see gGraph::headerTextRect()) between text and a legend
+
+    The legend takes \a legendWidth pixels from the right. When that would leave the text less
+    than \a minText pixels, the legend is narrowed to what remains, and to nothing when even the
+    text's minimum doesn't fit. An empty \a headerText gives two empty rectangles. */
+HeaderSplit splitHeader(const QRect &headerText, int legendWidth, int minText);
+
 } // namespace GraphCard
 
 #endif // GRAPHCARD_H

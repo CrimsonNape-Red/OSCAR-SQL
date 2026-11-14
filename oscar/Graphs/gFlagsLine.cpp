@@ -216,7 +216,8 @@ void gFlagsGroup::paint(QPainter &painter, gGraph &g, const QRegion &region)
         arg(QObject::tr("Selection Length")).
         arg(QTime(0,0).addMSecs(seldur).toString("H:mm:ss.zzz")) ;
     #endif
-    g.renderText(text, left , top -5 );
+    // Card look: the text goes along the header; Classic: above the plot
+    if (!g.headerSummary(text)) g.renderText(text, left , top -5 );
 
     QColor barcol;
 
