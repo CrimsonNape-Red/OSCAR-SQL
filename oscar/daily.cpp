@@ -62,6 +62,8 @@
 #include "Graphs/gStatsLine.h"
 #include "Graphs/gdailysummary.h"
 #include "Graphs/MinutesAtPressure.h"
+#include "dailytimeaxis.h"
+#include "uikit/theme.h"
 
 extern MainWindow * mainwin;
 
@@ -206,13 +208,19 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     dateDisplay=new MyLabel(this);
     dateDisplay->setAlignment(Qt::AlignCenter);
-    QFont font = dateDisplay->font();
-    font.setPointSizeF(font.pointSizeF()*1.3F);
-    dateDisplay->setFont(font);
-    QPalette palette = dateDisplay->palette();
-    palette.setColor(QPalette::Base, Qt::blue);
-    dateDisplay->setPalette(palette);
-    ui->sessionBarLayout->addWidget(dateDisplay,1);
+    if (m_modern) {
+        // A slim status line under the time axis (placed below, once the graph view exists)
+        dateDisplay->setFixedHeight(QFontMetrics(dateDisplay->font()).height() + 6);
+        applyTheme();   // its text colour
+    } else {
+        QFont font = dateDisplay->font();
+        font.setPointSizeF(font.pointSizeF()*1.3F);
+        dateDisplay->setFont(font);
+        QPalette palette = dateDisplay->palette();
+        palette.setColor(QPalette::Base, Qt::blue);
+        dateDisplay->setPalette(palette);
+        ui->sessionBarLayout->addWidget(dateDisplay,1);
+    }
 
 //    const bool sessbar_under_graphs=false;
 //    } else {
@@ -249,7 +257,15 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     // Modern: the graphs are outlined cards, as on Modern Overview. Set before the graphs are
     // made. The pie chart's view (snapGV, below) keeps the Classic look: its image is shown
     // without a frame or title.
-    if (m_modern) GraphView->setLook(GraphLook::Card);
+    if (m_modern) {
+        GraphView->setLook(GraphLook::Card);
+        // One time axis under the graphs, outside their scrolling list, then the status line
+        GraphView->setSharedXAxis(true);
+        m_timeAxis = new DailyTimeAxis(GraphView, ui->layoutWidget);
+        const int at = ui->verticalLayout_3->indexOf(ui->graphMainArea) + 1;
+        ui->verticalLayout_3->insertWidget(at, m_timeAxis);
+        ui->verticalLayout_3->insertWidget(at + 1, dateDisplay);
+    }
 
     GraphView->setEmptyImage(QPixmap(":/icons/logo-md.png"));
     PERF_TIMER_STOP("Daily::Daily::Phase 3D");
@@ -815,6 +831,12 @@ void Daily::applyTheme()
     ui->calendar->setStyleSheet(withBackgrounds(m_calendarStyleSheet));
     ui->calButton->setStyleSheet(withBackgrounds(m_calButtonStyleSheet));
     applyWeekendFormat();
+    if (m_modern && dateDisplay) {
+        // The status line under the time axis, in the theme's secondary text colour
+        QPalette palette = dateDisplay->palette();
+        palette.setColor(QPalette::WindowText, Theme::color(Theme::Role::Ink2));
+        dateDisplay->setPalette(palette);
+    }
     if (p_profile) {    // the days' text colours are set when each day is formatted
         on_calendar_currentPageChanged(ui->calendar->yearShown(), ui->calendar->monthShown());
     }
@@ -2376,7 +2398,9 @@ void Daily::Load(QDate date)
 
     setApplicationFont();
 
-    dateDisplay->setText("<i>"+date.toString(QLocale::system().dateFormat(QLocale::ShortFormat))+"</i>");
+    const QString dateText = date.toString(QLocale::system().dateFormat(QLocale::ShortFormat));
+    // The status line draws plain text, so Modern leaves out the tags Classic shows
+    dateDisplay->setText(m_modern ? dateText : "<i>" + dateText + "</i>");
     previous_date=date;
 
     Day * day = p_profile->GetDay(date);

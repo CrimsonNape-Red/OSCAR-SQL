@@ -1177,8 +1177,9 @@ void MapPainter::drawMetaData(QPoint& last_mouse , QString& topBarLabel,Pressure
     }
 
     // DRAW top line status information
+    // (along the header in the card look)
     int topBarTop=boundingRect.top()-5;
-    graph.renderText(topBarLabel, boundingRect.left(),  topBarTop);
+    if (!graph.headerSummary(topBarLabel)) graph.renderText(topBarLabel, boundingRect.left(),  topBarTop);
 }
 
 // set the opacity and default color

@@ -509,7 +509,7 @@ void gGraphView::popoutGraph()
         int popoutHeight = popout_graph->height();
         if (sharedXAxis()) {
             for (Layer *layer : popout_graph->m_layers) {
-                if (dynamic_cast<gXAxisDay *>(layer)) popoutHeight += layer->minimumHeight();
+                if (popout_graph->leavesAxisToPage(layer)) popoutHeight += layer->minimumHeight();
             }
         }
         // Create new dock if we don't have one already

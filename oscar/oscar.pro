@@ -390,6 +390,7 @@ SOURCES += \
     Graphs/rangefigures.cpp \
     overviewstats.cpp \
     overviewdateaxis.cpp \
+    dailytimeaxis.cpp \
     Graphs/daylabels.cpp \
     Graphs/glcommon.cpp \
     Graphs/gLineChart.cpp \
@@ -590,6 +591,7 @@ HEADERS  += \
     Graphs/rangefigures.h \
     overviewstats.h \
     overviewdateaxis.h \
+    dailytimeaxis.h \
     Graphs/daylabels.h \
     Graphs/glcommon.h \
     Graphs/gLineChart.h \

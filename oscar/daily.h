@@ -44,6 +44,7 @@ namespace Ui {
 class MainWindow;
 class DailySearchTab;
 class gFlagsGroup;
+class DailyTimeAxis;
 
 
 /*! \class Daily
@@ -431,7 +432,9 @@ private:
     QIcon * icon_warning;
 
     SessionBar * sessionbar;
-    MyLabel * dateDisplay;
+    MyLabel * dateDisplay = nullptr;
+    //! Modern: the time scale under the graphs, shared by all of them (null in Classic)
+    DailyTimeAxis * m_timeAxis = nullptr;
 
     MyTextBrowser * webView;
     Day * lastcpapday;
