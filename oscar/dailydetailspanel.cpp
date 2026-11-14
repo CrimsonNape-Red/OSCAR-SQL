@@ -27,6 +27,8 @@
 #include "uikit/metriccard.h"
 #include "uikit/panel.h"
 #include "uikit/theme.h"
+#include "uikit/toggleswitch.h"
+#include "SleepLib/session.h"
 
 using namespace DailyDetails;
 using UiKit::Callout;
@@ -196,6 +198,15 @@ void DailyDetailsPanel::setPage(const Page &page)
                                         STR_MessageBox_PleaseNote + " " + classic("This day just contains summary data, only limited information is available."),
                                         body));
     }
+
+    // The cards that start closed, in the order of the Classic page's sections
+    if (page.kind == DayKind::Cpap && page.showPie && (!page.pie.isNull() || page.pieZero)) {
+        m_column->addWidget(eventBreakdownCard(page));
+    }
+    if (page.oximeter.present) m_column->addWidget(oximeterCard(page.oximeter));
+    if (page.settings.present) m_column->addWidget(settingsCard(page.settings));
+    if (page.kind != DayKind::NoData && !page.sessions.isEmpty()) m_column->addWidget(sessionsCard(page.sessions));
+
     m_column->addStretch(1);
 
     setWidget(body);    // deletes the previous cards
@@ -313,7 +324,7 @@ QWidget *DailyDetailsPanel::eventsCard(const QVector<EventRow> &events)
     return card;
 }
 
-QWidget *DailyDetailsPanel::statisticsCard(const Statistics &statistics)
+QWidget *DailyDetailsPanel::statisticsCard(const DailyDetails::Statistics &statistics)
 {
     QVBoxLayout *column = nullptr;
     auto *card = titledCard(classic("Statistics"), m_body, &column);
@@ -361,4 +372,141 @@ QWidget *DailyDetailsPanel::statisticsCard(const Statistics &statistics)
         column->addWidget(extras);
     }
     return card;
+}
+
+QWidget *DailyDetailsPanel::eventBreakdownCard(const Page &page)
+{
+    auto *content = new QWidget();
+    auto *column = new QVBoxLayout(content);
+    column->setContentsMargins(0, 0, 0, 4);
+    auto *image = new QLabel(content);
+    image->setAlignment(Qt::AlignCenter);
+    // The pie, or the "0.0" image when the device scores these events but recorded none
+    image->setPixmap(page.pie.isNull() ? QPixmap(":/docs/0.0.gif") : page.pie);
+    column->addWidget(image);
+    return collapsible(DC_EventBreakdown, classic("Event Breakdown"), content);
+}
+
+QWidget *DailyDetailsPanel::oximeterCard(const DailyDetails::Oximeter &oximeter)
+{
+    auto *content = new QWidget();
+    auto *grid = new QGridLayout(content);
+    grid->setContentsMargins(26, 0, 0, 2);
+    grid->setHorizontalSpacing(8);
+    grid->setVerticalSpacing(2);
+    int r = 0;
+    grid->addWidget(label(oximeter.heading, Theme::Role::Ink2, content, false, true), r++, 0, 1, 2);
+    for (const TextRow &row : oximeter.rows) {
+        switch (row.style) {
+        case TextRow::Pair: {
+            grid->addWidget(label(row.label, Theme::Role::Ink, content, false, true), r, 0);
+            QLabel *value = label(row.value, Theme::Role::Ink, content, true);
+            value->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+            grid->addWidget(value, r++, 1);
+            break;
+        }
+        case TextRow::Line:
+            grid->addWidget(label(row.label + ": " + row.value, Theme::Role::Ink, content, false, true), r++, 0, 1, 2);
+            break;
+        case TextRow::Subheading: {
+            QLabel *sub = label(row.label, Theme::Role::Ink2, content, false, true);
+            QFont italic = sub->font();
+            italic.setItalic(true);
+            sub->setFont(italic);
+            grid->addWidget(sub, r++, 0, 1, 2);
+            break;
+        }
+        }
+    }
+    if (!oximeter.note.isEmpty()) {
+        QLabel *note = label(oximeter.note, Theme::Role::Ink2, content, false, true);
+        QFont italic = note->font();
+        italic.setItalic(true);
+        note->setFont(italic);
+        grid->addWidget(note, r++, 0, 1, 2);
+    }
+    grid->setColumnStretch(0, 1);
+    return collapsible(DC_Oximeter, classic("Oximeter Information"), content);
+}
+
+QWidget *DailyDetailsPanel::settingsCard(const DailyDetails::Settings &settings)
+{
+    auto *content = new QWidget();
+    auto *column = new QVBoxLayout(content);
+    column->setContentsMargins(26, 0, 0, 2);
+    column->setSpacing(4);
+    if (settings.loaderMissing) {
+        column->addWidget(new Callout(Callout::Kind::Warning, classic("DEVICE SETTINGS ERROR"), QString(), content));
+    } else {
+        if (settings.assumed) {
+            // The Classic text has its "Please Note:" in bold HTML; the callout shows it plain
+            const QString note = QTextDocumentFragment::fromHtml(
+                classic("<b>Please Note:</b> All settings shown below are based on assumptions that nothing has changed since previous days.")).toPlainText();
+            column->addWidget(new Callout(Callout::Kind::Warning, QString(), note, content));
+        }
+        auto *table = new QWidget(content);
+        auto *grid = new QGridLayout(table);
+        grid->setContentsMargins(0, 0, 0, 0);
+        grid->setHorizontalSpacing(8);
+        grid->setVerticalSpacing(2);
+        int r = 0;
+        for (const TextRow &row : settings.rows) {
+            QLabel *name = label(row.label, Theme::Role::Ink2, table, false, true);
+            name->setToolTip(row.tooltip);
+            grid->addWidget(name, r, 0);
+            grid->addWidget(label(row.value, Theme::Role::Ink, table, false, true), r++, 1);
+        }
+        grid->setColumnStretch(0, 3);
+        grid->setColumnStretch(1, 2);
+        column->addWidget(table);
+    }
+    return collapsible(DC_DeviceSettings, classic("Device Settings"), content);
+}
+
+QWidget *DailyDetailsPanel::sessionsCard(const QVector<SessionGroup> &groups)
+{
+    auto *content = new QWidget();
+    auto *column = new QVBoxLayout(content);
+    column->setContentsMargins(4, 0, 0, 2);
+    column->setSpacing(6);
+    for (const SessionGroup &group : groups) {
+        QLabel *heading = label(group.heading, Theme::Role::Ink2, content, true);
+        column->addWidget(heading);
+        auto *table = new QWidget(content);
+        auto *grid = new QGridLayout(table);
+        grid->setContentsMargins(0, 0, 0, 0);
+        grid->setHorizontalSpacing(6);
+        grid->setVerticalSpacing(0);
+        const QStringList headings = { STR_TR_On, STR_TR_Date, STR_TR_Start, STR_TR_End, classic("Duration") };
+        for (int c = 0; c < headings.size(); ++c) grid->addWidget(label(headings[c], Theme::Role::Ink2, table), 0, c);
+        int r = 1;
+        for (const SessionRow &row : group.rows) {
+            if (!row.on) {
+                // A switched-off session: its two lines tinted, beneath the text (added first)
+                auto *tint = new QWidget(table);
+                tint->setAttribute(Qt::WA_StyledBackground);
+                tint->setStyleSheet(QString("background: %1; border-radius: 4px;").arg(Theme::css(Theme::Role::BadTint)));
+                grid->addWidget(tint, r, 0, 2, headings.size());
+            }
+            grid->addWidget(label(row.name, Theme::Role::Ink, table, false, true), r, 0, 1, headings.size());
+            auto *toggle = new UiKit::ToggleSwitch(table);
+            toggle->setChecked(row.on);
+            const QString tip = classic("Click to %1 this session.").arg(row.on ? classic("disable") : classic("enable"));
+            toggle->setToolTip(tip);
+            toggle->setAccessibleName(row.name);
+            Session *session = row.session;
+            connect(toggle, &QAbstractButton::clicked, this, [this, toggle, session] {
+                emit sessionToggled(session);
+                // Refused (Clinical Mode): the switch goes back to the session's state
+                if (session) toggle->setChecked(session->enabled());
+            });
+            grid->addWidget(toggle, r + 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+            const QStringList cells = { row.date, row.start, row.end, row.duration };
+            for (int c = 0; c < cells.size(); ++c) grid->addWidget(label(cells[c], Theme::Role::Ink, table), r + 1, c + 1);
+            r += 2;
+        }
+        grid->setColumnStretch(headings.size() - 1, 1);
+        column->addWidget(table);
+    }
+    return collapsible(DC_SessionInfo, classic("Session Information"), content);
 }

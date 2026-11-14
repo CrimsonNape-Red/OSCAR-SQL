@@ -62,6 +62,15 @@ private:
     //! \brief The Statistics table and the lines under it
     QWidget *statisticsCard(const DailyDetails::Statistics &statistics);
 
+    //! \brief Event Breakdown (collapsible): the pie, or the "0.0" image for a night without events
+    QWidget *eventBreakdownCard(const DailyDetails::Page &page);
+    //! \brief Oximeter Information (collapsible)
+    QWidget *oximeterCard(const DailyDetails::Oximeter &oximeter);
+    //! \brief Device Settings (collapsible)
+    QWidget *settingsCard(const DailyDetails::Settings &settings);
+    //! \brief Session Information (collapsible): each session with its on/off switch
+    QWidget *sessionsCard(const QVector<DailyDetails::SessionGroup> &groups);
+
     //! \brief Wraps \a content in a collapsible card whose state is stored as \a card
     QWidget *collapsible(DailyCard card, const QString &title, QWidget *content);
 

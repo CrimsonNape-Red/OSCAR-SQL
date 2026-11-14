@@ -43,6 +43,10 @@ class SessionBar : public QWidget
     void add(Session *sess, QColor col) { if (sess) { segments.push_back(SBSeg(sess, col)); } }
     void setSelectMode(bool b) { m_selectMode = b; }
     void setSelectColor(QColor col) { m_selectColor = col; }
+    /*! \brief Theme colours (Modern Daily): the outline and the "No Sessions Present" text in
+        the secondary text colour, a switched-off session filled with the "worse" tint and
+        outlined in its line colour, its text in the theme's text colour. Off by default. */
+    void setThemed(bool themed) { m_themed = themed; update(); }
     int count() { return segments.size(); }
     int selected() { return m_selectIDX; }
     Session * session(int idx);
@@ -63,6 +67,7 @@ class SessionBar : public QWidget
     QTimer timer;
     int m_selectIDX;
     bool m_selectMode;
+    bool m_themed = false;      //!< See setThemed()
     QColor m_selectColor;
 };
 //Q_DECLARE_METATYPE(SessionBar)

@@ -261,6 +261,8 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         connect(m_detailsPanel, &DailyDetailsPanel::cardToggled, this, [this] {
             AppSetting->setDailyCardsOpen(m_detailsPanel->cardsOpen());
         });
+        connect(m_detailsPanel, &DailyDetailsPanel::sessionToggled, this, &Daily::doToggleSession);
+        sessionbar->setThemed(true);
     }
 
     ui->tabWidget->insertTab(0, widget, QIcon(), tr("Details"));
@@ -1836,6 +1838,31 @@ void Daily::htmlLsbSectionHeader (QString&html , const QString& name,LEFT_SIDEBA
             .arg(QApplication::palette().color(QPalette::Text).name());
 }
 
+/*! \brief True when the day's device scores the events the breakdown pie shows (so a night
+    without any gets the "0.0" image), whether or not it recorded any today.
+
+    day->channelHasData() alone is not sufficient: a channel with a zero count and no event
+    list is never written to session_channels, so on an event-free day it reports false for
+    every AHI channel. The day's device is asked as well: Machine::m_availableChannels is the
+    union over every session, so a device that scores events on other days qualifies, while a
+    device that never reports them (a brick) does not. */
+static bool reportsBreakdownChannels(Day *day)
+{
+    Machine * cpap = day->machine(MT_CPAP);
+    auto reportsChannel = [&](ChannelID id) {
+        return day->channelHasData(id) || (cpap && cpap->hasChannel(id));
+    };
+
+    bool gotsome = false;
+    for (int i = 0; i < ahiChannels.size() && !gotsome; i++)
+        gotsome = reportsChannel(ahiChannels.at(i));
+
+    return gotsome
+           || reportsChannel(CPAP_RERA)
+           || reportsChannel(CPAP_FlowLimit)
+           || reportsChannel(CPAP_SensAwake);
+}
+
 QString Daily::getPieChart (float values, Day * day) {
     QString pieChartName = tr("Event Breakdown");
     QString html ;
@@ -1881,20 +1908,7 @@ QString Daily::getPieChart (float values, Day * day) {
         // whether it reports the channel at all -- Machine::m_availableChannels is the union
         // over every session, so a device that scores events on other days qualifies, while a
         // device that never reports them (a brick) still shows nothing.
-        Machine * cpap = day->machine(MT_CPAP);
-        auto reportsChannel = [&](ChannelID id) {
-            return day->channelHasData(id) || (cpap && cpap->hasChannel(id));
-        };
-
-        bool gotsome = false;
-        for (int i = 0; i < ahiChannels.size() && !gotsome; i++)
-            gotsome = reportsChannel(ahiChannels.at(i));
-
-        if (   gotsome
-               || reportsChannel(CPAP_RERA)
-               || reportsChannel(CPAP_FlowLimit)
-               || reportsChannel(CPAP_SensAwake)
-               ) {
+        if (reportsBreakdownChannels(day)) {
             html += "<tr><td align=center><img src=\"qrc:/docs/0.0.gif\"></td></tr>\n";
         }
     }
@@ -1943,6 +1957,14 @@ DailyDetails::Page Daily::detailsPage(Day *day, QDate date, bool brick, bool oth
     page.settings = DailyDetails::settings(day);
     page.sessions = DailyDetails::sessions(day);
     page.showPie = AppSetting->showPieChart();
+    if (page.showPie && page.kind == DailyDetails::DayKind::Cpap) {
+        if (DailyDetails::pieTotal(page.events) > 0) {
+            eventBreakdownPie()->setShowTitle(false);
+            page.pie = eventBreakdownPie()->renderPixmap(155, 155, false);
+        } else {
+            page.pieZero = reportsBreakdownChannels(day);
+        }
+    }
 
     if (page.headline.present) {
         // The index over the nights before this one, as the Welcome page compares it. Only the
