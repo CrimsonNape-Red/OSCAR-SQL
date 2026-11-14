@@ -181,6 +181,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 {
     PERF_TIMER_SCOPE("Daily::Daily");
     qDebug() << "Daily::Daily(): Creating new Daily object";
+    m_modern = AppSetting->useNewPages();
     ui->setupUi(this);
     m_calendarStyleSheet = ui->calendar->styleSheet();
     m_calButtonStyleSheet = ui->calButton->styleSheet();
@@ -245,6 +246,10 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     PERF_TIMER_START("Daily::Daily::Phase 3D");
     GraphView=new gGraphView(ui->graphFrame,shared);
     GraphView->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    // Modern: the graphs are outlined cards, as on Modern Overview. Set before the graphs are
+    // made. The pie chart's view (snapGV, below) keeps the Classic look: its image is shown
+    // without a frame or title.
+    if (m_modern) GraphView->setLook(GraphLook::Card);
 
     GraphView->setEmptyImage(QPixmap(":/icons/logo-md.png"));
     PERF_TIMER_STOP("Daily::Daily::Phase 3D");

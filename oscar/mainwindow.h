@@ -557,8 +557,14 @@ private:
     //! \brief Replaces the Welcome tab's page after the Preferences choice changes
     void rebuildWelcomePage();
 
-    //! \brief Replaces the Overview tab with a new one, after the old/new pages setting changes
-    void rebuildOverviewPage();
+    /*! \brief Replaces the Daily and Overview tabs with new ones, after the Classic/Modern
+     *         setting changes
+     *
+     *  Both pages read the setting when they are built, and Overview shares Daily's graph
+     *  view, so the two are rebuilt together. The day shown, the journal notes (saved first)
+     *  and the current tab are kept.
+     */
+    void rebuildDailyPage();
 
     Ui::MainWindow *ui;
     Daily *daily;

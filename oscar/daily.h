@@ -95,6 +95,11 @@ public:
         */
     gGraphView *graphView() { return GraphView; }
 
+    /*! \brief True when this page has the Modern look (graph cards, a fixed time axis, the
+        Details tab as cards). Read once from AppSetting->useNewPages() when the page is
+        built; MainWindow rebuilds the page when the setting changes. */
+    bool modern() const { return m_modern; }
+
     /*! \fn RedrawGraphs()
         \brief Calls updateGL on the main graphView area, redrawing the OpenGL area
         */
@@ -330,6 +335,7 @@ protected:
     virtual void showEvent(QShowEvent *);
 
 private:
+    bool m_modern = false;          //!< See modern()
     QString m_calendarStyleSheet;   //!< The calendar's style sheet from the form, in light colours
     QString m_calButtonStyleSheet;  //!< The date button's style sheet from the form, in light colours
     //! \brief Sets the calendar's weekend text to the weekday colour for the current mode
