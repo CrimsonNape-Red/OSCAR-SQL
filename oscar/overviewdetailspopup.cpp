@@ -30,6 +30,7 @@ constexpr int kWidth = 300;         //!< Popup width
 constexpr int kSwatchWidth = 56;    //!< Width of a part's swatch
 constexpr int kSwatchMin = 8;       //!< Smallest swatch height
 constexpr int kSwatchMax = 60;      //!< Swatch height of the largest part
+constexpr int kCloseSize = 20;      //!< Side of the close button, which sets the header's height
 
 double luminance(const QColor &c)
 {
@@ -67,7 +68,7 @@ protected:
     {
         QPainter p(this);
         const QRectF r((width() - kSwatchWidth) / 2.0, 0, kSwatchWidth, height());
-        OverviewBars::paintSegment(p, r, GraphTheme::ink(m_color), true, true);
+        OverviewBars::paintSegment(p, r, GraphTheme::ink(m_color), true, true, true);   // outlined all round: it stands alone
     }
 
 private:
@@ -95,7 +96,7 @@ OverviewDetailsPopup::OverviewDetailsPopup(QWidget *parent, const QString &title
     m_header->setAttribute(Qt::WA_StyledBackground, true);
     m_header->setCursor(Qt::SizeAllCursor);
     auto *head = new QHBoxLayout(m_header);
-    head->setContentsMargins(12, 6, 6, 6);
+    head->setContentsMargins(12, 3, 4, 3);
     m_title = new QLabel(title, m_header);
     m_title->setObjectName("popupTitle");
     m_title->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -109,6 +110,7 @@ OverviewDetailsPopup::OverviewDetailsPopup(QWidget *parent, const QString &title
     close->setToolTip(tr("Close"));
     close->setAccessibleName(tr("Close"));
     close->setCursor(Qt::PointingHandCursor);
+    close->setFixedSize(kCloseSize, kCloseSize);     // its natural size made the header taller than the title needs
     connect(close, &QToolButton::clicked, this, &QWidget::close);
     head->addWidget(close);
     outer->addWidget(m_header);
@@ -177,7 +179,7 @@ void OverviewDetailsPopup::applyStyle()
         "#OverviewDetailsPopup { background: %1; border: 1px solid %2; border-radius: 10px; }"
         "#popupHeader { background: %3; border-top-left-radius: 9px; border-top-right-radius: 9px; }"
         "#popupTitle { color: %4; }"
-        "#popupClose { color: %4; background: transparent; border: none; font-size: 16px; padding: 0 6px; }"
+        "#popupClose { color: %4; background: transparent; border: none; font-size: 16px; padding: 0; }"
         "#popupClose:hover { background: rgba(255,255,255,0.18); border-radius: 6px; }"
         "#popupSubtitle { color: %5; }"
         "#popupValue { color: %6; }")
