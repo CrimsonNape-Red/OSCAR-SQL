@@ -66,6 +66,8 @@
 #include "dailytimeaxis.h"
 #include "dailytoolbar.h"
 #include "dailydetails.h"
+#include "dailydetailspanel.h"
+#include "welcomemetrics.h"
 #include "uikit/theme.h"
 
 extern MainWindow * mainwin;
@@ -245,6 +247,21 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     layout2->insertWidget(0,webView, 1);
     layout2->insertWidget(1,sessionbar,0);
     // add the sessionbar after it.
+
+    if (m_modern) {
+        // Modern: the Details tab shows cards. The HTML page is still filled (hidden), since
+        // printed daily reports read it (GetDetailsText()).
+        m_detailsPanel = new DailyDetailsPanel(widget);
+        m_detailsPanel->setCardsOpen(AppSetting->dailyCardsOpen());
+        layout2->insertWidget(0, m_detailsPanel, 1);
+        webView->hide();
+        connect(m_detailsPanel, &DailyDetailsPanel::eventClicked, this, [this](ChannelID code) {
+            Link_clicked(QUrl(QString("event=%1").arg(code)));
+        });
+        connect(m_detailsPanel, &DailyDetailsPanel::cardToggled, this, [this] {
+            AppSetting->setDailyCardsOpen(m_detailsPanel->cardsOpen());
+        });
+    }
 
     ui->tabWidget->insertTab(0, widget, QIcon(), tr("Details"));
 
@@ -1908,6 +1925,43 @@ QString Daily::getLeftSidebar (bool honorPieChart) {
     return html;
 }
 
+DailyDetails::Page Daily::detailsPage(Day *day, QDate date, bool brick, bool otherDevices)
+{
+    DailyDetails::Page page;
+    page.date = date;
+    Machine *cpap = day ? day->machine(MT_CPAP) : nullptr;
+    page.kind = DailyDetails::classify(cpap != nullptr, cpap ? day->hours(MT_CPAP) : 0, day ? day->size() : 0,
+                                       brick, otherDevices);
+    if (!day) return page;
+
+    page.headline = DailyDetails::headline(day);
+    page.usage = DailyDetails::usage(day);
+    page.device = DailyDetails::device(day);
+    page.events = DailyDetails::events(day);
+    page.statistics = DailyDetails::statistics(day, GraphView->isEmpty());
+    page.oximeter = DailyDetails::oximeter(day);
+    page.settings = DailyDetails::settings(day);
+    page.sessions = DailyDetails::sessions(day);
+    page.showPie = AppSetting->showPieChart();
+
+    if (page.headline.present) {
+        // The index over the nights before this one, as the Welcome page compares it. Only the
+        // AHI card is computed.
+        QSet<QString> others;
+        for (const CardInfo &info : WelcomeMetrics::catalog()) {
+            if (info.id != MetricId::Ahi) others.insert(info.key);
+        }
+        for (const MetricData &m : WelcomeMetrics::cards(date, others)) {
+            if (m.id != MetricId::Ahi) continue;
+            page.avg7 = m.avg7;
+            page.avg30 = m.avg30;
+            page.nights7 = m.nights7;
+            page.nights30 = m.nights30;
+        }
+    }
+    return page;
+}
+
 QVariant MyTextBrowser::loadResource(int type, const QUrl &url)
 {
     if (type == QTextDocument::ImageResource && url.scheme().compare(QLatin1String("data"), Qt::CaseInsensitive) == 0) {
@@ -2168,6 +2222,10 @@ void Daily::Load(QDate date)
     // Note: Outputs to local file if debugging
     QString html = getLeftSidebar(true);
     webView->setHtml(html);
+
+    if (m_detailsPanel) {
+        m_detailsPanel->setPage(detailsPage(day, date, isBrick, oxi || posit));
+    }
     
 #if defined(DEBUG_DAILY_HTML) || defined(UNITTEST_MODE)
     QString name = GetAppData()+"/test.html";

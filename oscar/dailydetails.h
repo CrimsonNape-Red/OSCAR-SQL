@@ -15,7 +15,9 @@
 #define DAILYDETAILS_H
 
 #include <QColor>
+#include <QDate>
 #include <QDateTime>
+#include <QPixmap>
 #include <QPair>
 #include <QString>
 #include <QVector>
@@ -156,6 +158,25 @@ struct SessionGroup {
     MachineType type = MT_UNKNOWN;
     QString heading;            //!< "CPAP Sessions", "Oximetry Sessions", ...
     QVector<SessionRow> rows;
+};
+
+//! \brief Everything the Modern Details tab shows for a day
+struct Page {
+    QDate date;                 //!< The day shown
+    DayKind kind = DayKind::NoData;
+    Headline headline;
+    Usage usage;
+    Device device;
+    QVector<EventRow> events;
+    Statistics statistics;
+    Oximeter oximeter;
+    Settings settings;
+    QVector<SessionGroup> sessions;
+    bool showPie = false;       //!< The Event Breakdown card is wanted (preference)
+    QPixmap pie;                //!< The event breakdown pie, when the day has events to show
+    bool pieZero = false;       //!< The device scores these events but recorded none: show "0.0"
+    double avg7 = 0, avg30 = 0; //!< The index averaged over the 7 and 30 nights before the day
+    int nights7 = 0, nights30 = 0; //!< Nights with CPAP data in each window (0: no comparison)
 };
 
 //! \brief The index and its obstructive and central shares

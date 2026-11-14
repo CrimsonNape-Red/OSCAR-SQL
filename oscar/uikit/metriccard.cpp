@@ -240,6 +240,12 @@ void MetricCard::setExtraWidget(QWidget *widget)
     m_extra->addWidget(widget);
 }
 
+void MetricCard::setFooterWidget(QWidget *widget)
+{
+    widget->setParent(this);
+    static_cast<QVBoxLayout *>(layout())->addWidget(widget);
+}
+
 void MetricCard::setTint(Tint tint)
 {
     m_tint = tint;

@@ -53,6 +53,9 @@ public:
     //! \brief Places \a widget under the subtitle (e.g. an EventBar); the card takes ownership
     void setExtraWidget(QWidget *widget);
 
+    //! \brief Places \a widget at the bottom, under the comparisons; the card takes ownership
+    void setFooterWidget(QWidget *widget);
+
     void setTint(Tint tint);
 
 protected:

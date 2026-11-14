@@ -34,6 +34,7 @@
 #include "Graphs/gLineChart.h"
 #include "sessionbar.h"
 #include "mytextbrowser.h"
+#include "dailydetails.h"
 class SaveGraphLayoutSettings;
 
 
@@ -46,6 +47,7 @@ class DailySearchTab;
 class gFlagsGroup;
 class DailyTimeAxis;
 class DailyToolbar;
+class DailyDetailsPanel;
 
 
 /*! \class Daily
@@ -404,6 +406,13 @@ private:
     QString getIndices(Day * day, QHash<ChannelID, EventDataType>& values );
     QString getSleepTime(Day *);
     QString getLeftSidebar (bool honorPieChart);
+
+    /*! \brief What the Modern Details tab shows for \a day (null when the date has no data)
+        \param brick The CPAP device records only compliance data
+        \param otherDevices The day has an oximeter or a position sensor */
+    DailyDetails::Page detailsPage(Day *day, QDate date, bool brick, bool otherDevices);
+    //! Modern: the Details tab's cards (null in Classic)
+    DailyDetailsPanel *m_detailsPanel = nullptr;
 
     QHash<QString, gGraph *> graphlist;
 
