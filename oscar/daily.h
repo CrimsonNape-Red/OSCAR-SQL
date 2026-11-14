@@ -344,6 +344,8 @@ private:
     QString m_calButtonStyleSheet;  //!< The date button's style sheet from the form, in light colours
     //! \brief Sets the calendar's weekend text to the weekday colour for the current mode
     void applyWeekendFormat();
+    //! \brief Modern: the calendar card, the day bar and the tabs in theme colours (see applyTheme())
+    void applyModernStyles();
     double  calculateBMI(double weight_kg, double height_cm);
     void set_JournalZombie(QDate&, int);
     void set_JournalWeightValue(QDate&, double kgs);

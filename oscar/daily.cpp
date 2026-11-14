@@ -26,6 +26,7 @@
 #include <QLabel>
 #include <QMutexLocker>
 #include <QFile>
+#include <QToolButton>
 
 #include <algorithm>
 #include <cmath>
@@ -880,6 +881,54 @@ void Daily::applyTheme()
         palette.setColor(QPalette::WindowText, Theme::color(Theme::Role::Ink2));
         dateDisplay->setPalette(palette);
     }
+    if (m_modern) applyModernStyles();
+}
+
+void Daily::applyModernStyles()
+{
+    const QString surface = Theme::css(Theme::Role::Surface);
+    const QString line = Theme::css(Theme::Role::Line);
+    const QString ink = Theme::css(Theme::Role::Ink);
+    const QString ink2 = Theme::css(Theme::Role::Ink2);
+
+    // The selected day and today are outlined, so their own colour and shading stay readable
+    ui->calendar->setOutlineSelection(true);
+
+    // The calendar sits in a card
+    ui->calendarFrame->setFrameShape(QFrame::NoFrame);
+    ui->calendarFrame->setStyleSheet(QString("#calendarFrame { background: %1; border: 1px solid %2; border-radius: 10px; }")
+                                         .arg(surface, line));
+    ui->verticalLayout_5->setContentsMargins(6, 6, 6, 6);
+
+    // The day bar's buttons: no box until hovered or pressed
+    const QString dayButton = QString("QToolButton { background: transparent; border: none; border-radius: 6px; }"
+                                      "QToolButton:hover { background: %1; }"
+                                      "QToolButton:pressed { background: %2; }")
+                                  .arg(Theme::css(Theme::Role::Surface2), Theme::css(Theme::Role::AccentSoft));
+    for (QToolButton *button : { ui->prevDayButton, ui->nextDayButton, ui->todayButton }) {
+        button->setStyleSheet(dayButton);
+    }
+
+    // The tab bar, and the Events, Notes, Bookmarks and Search tabs: the card background and
+    // theme text colours only (their layout and controls are unchanged)
+    const QString pages = "#events, #notes, #bookmarkTab, #searchTab";
+    const auto inPages = [&](const QString &selector) {
+        QStringList out;
+        for (const QString &page : pages.split(", ")) out << page + " " + selector;
+        return out.join(", ");
+    };
+    ui->tabWidget->setStyleSheet(QString(
+        "QTabWidget::pane { border: 1px solid %2; border-radius: 6px; background: %1; top: -1px; }"
+        "QTabBar::tab { background: transparent; color: %4; padding: 4px 8px; border: none;"
+        " border-bottom: 2px solid transparent; }"
+        "QTabBar::tab:selected { color: %3; border-bottom: 2px solid %5; }"
+        "QTabBar::tab:hover:!selected { color: %3; }"
+        "%6 { background: %1; }"
+        "%7 { background: %1; color: %3; }"
+        "%8 { color: %3; }")
+        .arg(surface, line, ink, ink2, Theme::css(Theme::Role::Accent), pages,
+             inPages("QTreeWidget") + ", " + inPages("QTextEdit") + ", " + inPages("QTableWidget"),
+             inPages("QLabel")));
     if (p_profile) {    // the days' text colours are set when each day is formatted
         on_calendar_currentPageChanged(ui->calendar->yearShown(), ui->calendar->monthShown());
     }

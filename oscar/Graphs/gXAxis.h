@@ -40,7 +40,7 @@ class gXAxis: public Layer
 
     void setRoundDays(bool b) { m_roundDays = b; }
 
-    /*! rief With the cache off, the axis paints its ticks and labels straight onto the
+    /*! \brief With the cache off, the axis paints its ticks and labels straight onto the
         painter it is given every time, ignoring the pixmap caching preference and
         gGraph::invalidate_xAxisImage. For an axis drawn outside its graph (DailyTimeAxis),
         where the graph's text queue would not reach the painter. On by default. */
