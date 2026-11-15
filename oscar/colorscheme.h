@@ -16,11 +16,12 @@
     \brief Applies the user's light/dark choice (AppSetting->colorScheme()) to the application
 
     Qt 6.8 and later can change the colour scheme while OSCAR runs, so the choice takes effect at
-    once. Older Qt cannot, so there the choice is applied once at startup, with the Fusion style
-    and a light or dark palette, and changing it means restarting OSCAR. */
+    once. Older Qt cannot, so there the choice is applied with the Fusion style and a light or dark
+    palette: on Linux this is done again at once when the choice changes, elsewhere only at
+    startup, and changing it means restarting OSCAR. */
 namespace ColorScheme {
 
-//! \brief True when this build's Qt can change the colour scheme while OSCAR runs (Qt 6.8+)
+//! \brief True when the colour scheme can change while OSCAR runs (Qt 6.8+, or Linux with older Qt)
 bool canSwitchLive();
 
 /*! \brief Applies the saved choice to the application

@@ -10,6 +10,7 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QEvent>
 #include <QPalette>
 #include <QStyle>
 #include <QStyleFactory>
@@ -59,6 +60,19 @@ QPalette darkPalette()
     p.setColor(QPalette::Disabled, QPalette::Highlight, QColor(0x50, 0x50, 0x50));
     return p;
 }
+
+/*! \brief Tells every widget that the theme changed, as Qt 6.8+ does when the scheme changes
+
+    The pages rebuild in the new colours on QEvent::ThemeChange (see MainWindow::changeEvent()),
+    which a style and palette change alone doesn't send. */
+void sendThemeChange()
+{
+    const QWidgetList widgets = QApplication::allWidgets();
+    for (QWidget *widget : widgets) {
+        QEvent event(QEvent::ThemeChange);
+        QApplication::sendEvent(widget, &event);
+    }
+}
 #else
 /*! \brief Gives light mode Fusion's standard light colours; dark mode keeps the desktop's own.
 
@@ -85,7 +99,9 @@ QPalette darkPalette()
 bool canSwitchLive()
 {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
-    return true;
+    return true;        // Qt changes the scheme itself
+#elif defined(Q_OS_LINUX)
+    return true;        // older Qt: apply() swaps the Fusion style and palette while OSCAR runs
 #else
     return false;
 #endif
@@ -113,16 +129,35 @@ void apply()
 #endif
     qDebug() << "Colour scheme: choice" << int(choice) << "in effect" << int(QGuiApplication::styleHints()->colorScheme());
 #else
-    // Startup only. Leave the system's own colours alone when they already match the choice.
-    const bool systemDark = Theme::isDark(QApplication::palette());
+    // Qt can't change the scheme itself here, so OSCAR swaps the style and palette. The style
+    // and colours the system gave at startup are kept, to judge "dark" by and to go back to.
+    // Called again after startup only where canSwitchLive() says so (Linux).
+    static bool captured = false;
+    static QString systemStyle;
+    static bool systemDark = false;
+    static bool overridden = false;     // Fusion with OSCAR's own palette is in effect
+    if (!captured) {
+        captured = true;
+        systemStyle = QApplication::style()->name();    // after the Fusion preference
+        systemDark = Theme::isDark(QApplication::palette());
+    }
     const bool wantDark = choice == CSC_Dark || (choice == CSC_System && systemDark);
     if (choice == CSC_System || wantDark == systemDark) {
+        if (overridden) {
+            overridden = false;
+            QApplication::setStyle(QStyleFactory::create(systemStyle));
+            QApplication::setPalette(QPalette());   // back to the system's colours
+            sendThemeChange();
+        }
         qDebug() << "Colour scheme: following the system, dark =" << systemDark;
         return;
     }
     // Native styles ignore much of the palette, so use Fusion, which draws with it throughout.
+    const bool atStartup = !overridden && QApplication::allWidgets().isEmpty();
+    overridden = true;
     QApplication::setStyle(QStyleFactory::create("Fusion"));
     QApplication::setPalette(wantDark ? darkPalette() : QApplication::style()->standardPalette());
+    if (!atStartup) sendThemeChange();
     qDebug() << "Colour scheme: Fusion with a" << (wantDark ? "dark" : "light") << "palette";
 #endif
 }
