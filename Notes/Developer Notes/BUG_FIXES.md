@@ -4,6 +4,42 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-15 - Classic Daily page half light, half dark in dark mode on Linux (GitLab #392)
+
+**Files:** `oscar/daily.cpp` (`Daily::applyTheme()`), `oscar/daily.h`, `oscar/dailySearchTab.cpp`,
+`oscar/dailySearchTab.h`
+
+**Symptom:** On Linux, with the Classic pages in dark mode, the Daily page's left side from the tabs
+down was white with black text, and the Details section titles were invisible. Windows was unaffected.
+
+**Root cause:** `daily.ui` sets a fixed palette on the whole Daily form (white Base, Window and
+Button, black text). Child widgets normally inherit a parent's palette, but Qt skips that inheritance
+for widgets styled through a style sheet (`QWidgetPrivate::naturalWidgetPalette()`, the
+`WA_StyleSheet` test). OSCAR sets an application style sheet on Windows only
+(`ToolTipColors::apply()`), so there the white palette never reached the tabs and panels. On Linux it
+did.
+
+**Fix:** `Daily::applyTheme()` keeps the form's palette in light mode and clears it in dark mode, so
+the page takes the application's colours and follows a live switch. The Search tab's fixed light
+style sheets are translated for dark mode with `GraphTheme::fill()` and `ink()`
+(`setThemedStyleSheet()`), and `DailySearchTab::applyTheme()` reapplies them on a switch.
+
+**Non-obvious:**
+- macOS has no application style sheet either, so it should have shown the same fault. Not checked.
+- `Daily::sessionbar` is now initialised to `nullptr`: `applyTheme()` runs in the constructor before
+  the bar exists.
+- The session bar keeps its light-mode colours in dark mode on both the Classic and Modern pages, by
+  decision. A first version of the fix darkened them; that part was taken out.
+- The Search tab's translator recognises only `#rrggbb`, `white` and `black`, and inverts white text
+  to dark. It is not used for the calendar's style sheet, whose selection and hover colours must stay
+  as they are; `applyTheme()` replaces only the calendar's backgrounds and text colours.
+- `mainwindow.ui` also has fixed palettes, on the Right Sidebar (`toolBox`, `navPage`,
+  `bookmarksPage`, `frame_2`). All sit under the `toolBox` style sheet, so they are not expected to
+  differ between platforms.
+- Found by reading the code and the Qt 6.12 source; the Linux check is with the reporter.
+
+---
+
 ## 2026-11-15 - Modern Daily page: Statistics tooltips unreadable in Light mode (GitLab #391)
 
 **Files:** `oscar/dailydetailspanel.cpp` (`label()`)

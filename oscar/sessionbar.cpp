@@ -16,7 +16,6 @@
 #include <QDebug>
 
 #include "Graphs/glcommon.h"
-#include "Graphs/graphtheme.h"
 #include "sessionbar.h"
 
 SBSeg::SBSeg()
@@ -215,12 +214,7 @@ void SessionBar::paintEvent(QPaintEvent *)
 
     QRect rect(1, 1, width() - 2, height() - 2);
 
-    // Dark mode draws in theme colours on the Classic page too, with darker session colours:
-    // the light ones fade to near white
-    const bool dark = GraphTheme::dark();
-    const bool themed = m_themed || dark;
-
-    if (themed) painter.setPen(Theme::color(Theme::Role::Ink2));
+    if (m_themed) painter.setPen(Theme::color(Theme::Role::Ink2));
     painter.drawRect(rect);
 
     SegType mn = min();
@@ -258,15 +252,15 @@ void SessionBar::paintEvent(QPaintEvent *)
         if (seg.session->enabled()) {
             QLinearGradient linearGrad(QPointF(0, 0), QPointF(0, height() / 2));
             linearGrad.setSpread(QGradient::ReflectSpread);
-            QColor col = dark ? seg.color.darker(220) : seg.color;
+            QColor col = seg.color;
             if (m_selectMode && (cnt == m_selectIDX)) {
-            } else if (seg.highlight) { col = dark ? col.lighter(140) : brighten(col); }
+            } else if (seg.highlight) { col = brighten(col); }
 
             linearGrad.setColorAt(0, col);
-            linearGrad.setColorAt(1, GraphTheme::barShade(col, 2.0));
+            linearGrad.setColorAt(1, brighten(col));
             QBrush brush(linearGrad);
             painter.fillRect(segrect, brush);
-        } else if (themed) {
+        } else if (m_themed) {
             // A switched-off session, tinted rather than left empty
             painter.fillRect(segrect, Theme::color(Theme::Role::BadTint));
         } else {
@@ -280,14 +274,14 @@ void SessionBar::paintEvent(QPaintEvent *)
         QRect rect = painter.boundingRect(segrect, Qt::AlignCenter, msg);
 
         if (rect.width() < segrect.width()) {
-            painter.setPen((themed && (dark || !seg.session->enabled())) ? Theme::color(Theme::Role::Ink) : QColor(Qt::black));
+            painter.setPen((m_themed && !seg.session->enabled()) ? Theme::color(Theme::Role::Ink) : QColor(Qt::black));
             painter.drawText(segrect, Qt::AlignCenter, msg);
         }
 
 
         if (m_selectMode && (cnt == m_selectIDX)) {
             painter.setPen(QPen(m_selectColor, 3));
-        } else if (themed) {
+        } else if (m_themed) {
             painter.setPen(QPen(Theme::color(seg.session->enabled() ? Theme::Role::Ink2 : Theme::Role::BadLine), 1));
         } else {
             painter.setPen(QPen(Qt::black, 1));
@@ -299,7 +293,7 @@ void SessionBar::paintEvent(QPaintEvent *)
     if (!cnt) {
         QString msg = tr("No Sessions Present");
         QRect rct = painter.boundingRect(this->rect(), Qt::AlignCenter, msg);
-        painter.setPen(themed ? Theme::color(Theme::Role::Ink2) : QColor(Qt::black));
+        painter.setPen(m_themed ? Theme::color(Theme::Role::Ink2) : QColor(Qt::black));
         painter.drawText(rct, Qt::AlignCenter, msg);
     }
 }
