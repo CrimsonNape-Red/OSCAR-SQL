@@ -14,7 +14,7 @@
 #   3. Copy all files into the Dropbox Nightly folder under fixed names, overwriting the
 #      previous files in place so their Dropbox shared links keep working.
 #   4. Rewrite OSCAR-nightly-checksums.txt.
-#   5. Set the build date, build id and expiry date in the page, then commit and push.
+#   5. Set the build date and build id in the page, then commit and push.
 #
 # Only files whose fixed name already exists in the Nightly folder are replaced, because
 # only those have shared links in the page. A Linux package with a new name is reported
@@ -172,18 +172,17 @@ try {
 
     $en = [System.Globalization.CultureInfo]::GetCultureInfo('en-US')
     $today = Get-Date
-    $buildDate  = $today.ToString('MMMM d, yyyy', $en)
-    $expireDate = $today.AddMonths(2).ToString('MMMM d, yyyy', $en)
+    $buildDate = $today.ToString('MMMM d, yyyy', $en)
 
     $page = Join-Path $PageRepo 'public\index.html'
     $html = [System.IO.File]::ReadAllText($page, $utf8NoBom)
-    foreach ($pair in @(@('buildDate', $buildDate), @('buildId', $hash), @('expireDate', $expireDate))) {
+    foreach ($pair in @(@('buildDate', $buildDate), @('buildId', $hash))) {
         $pattern = '(<span id="' + $pair[0] + '">)[^<]*(</span>)'
         if ($html -notmatch $pattern) { Fail "Page has no <span id=`"$($pair[0])`">" }
         $html = [regex]::Replace($html, $pattern, '${1}' + $pair[1] + '${2}')
     }
     [System.IO.File]::WriteAllText($page, $html, $utf8NoBom)
-    Log "Page set to $buildDate, build $hash, expires $expireDate"
+    Log "Page set to $buildDate, build $hash"
 
     GitTry diff --quiet '--' public/index.html
     if ($LASTEXITCODE -eq 0) {
