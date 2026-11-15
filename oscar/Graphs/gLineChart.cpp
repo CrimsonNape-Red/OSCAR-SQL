@@ -509,7 +509,9 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
     // Card look (on screen): the cursor text and the legend go along the graph's header, laid
     // out together once both are known (see paintCardHeader()). Classic draws them above the
     // plot as it goes.
-    const bool cardHeader = !w.headerTextRect().isEmpty() && !w.printing();
+    // (In a card too narrow for any header text the rectangle is empty and nothing is drawn
+    // there; the Classic positions would land on the title and the menu button.)
+    const bool cardHeader = w.graphView()->cardLook() && !w.printing();
     QString headerText;
     QVector<HeaderLegendItem> legendItems;
 

@@ -171,18 +171,22 @@ void DailyDetailsPanel::setPage(const Page &page)
         column->addWidget(usageRow(page.usage, card));
         m_column->addWidget(card);
         if (page.device.present) m_column->addWidget(deviceCard(page.device));
+        // Figures from an oximeter or position sensor, as the Classic page shows them
+        if (!page.statistics.rows.isEmpty()) m_column->addWidget(statisticsCard(page.statistics));
         break;
     }
     case DayKind::SessionsOff:
         m_column->addWidget(new Callout(Callout::Kind::Warning, classic("Sessions exist for this day but are switched off."),
                                         QString(), body));
         // No device card: with no session on, there are no settings to show (as on Classic)
+        if (!page.statistics.rows.isEmpty()) m_column->addWidget(statisticsCard(page.statistics));
         break;
     case DayKind::ZeroHours:
         m_column->addWidget(new Callout(Callout::Kind::Info, classic("Impossibly short session"), QString(), body));
         break;
     case DayKind::NonCpapOnly:
         // Data from other devices without CPAP data is normal: no callout, only the cards
+        if (page.usage.present) m_column->addWidget(timesCard(page.usage));
         m_column->addWidget(statisticsCard(page.statistics));
         break;
     case DayKind::Cpap:
@@ -274,6 +278,16 @@ QWidget *DailyDetailsPanel::usageRow(const Usage &usage, QWidget *parent)
     }
     grid->setColumnStretch(cells.size() - 1, 1);
     return row;
+}
+
+QWidget *DailyDetailsPanel::timesCard(const Usage &usage)
+{
+    QVBoxLayout *column = nullptr;
+    auto *card = titledCard(QString(), m_body, &column);
+    column->addWidget(label(tr("Start \u2013 End"), Theme::Role::Ink2, card));
+    column->addWidget(label(usage.start.toString("HH:mm:ss") + QString::fromUtf8(" \u2013 ") + usage.end.toString("HH:mm:ss"),
+                            Theme::Role::Ink, card, true));
+    return card;
 }
 
 QWidget *DailyDetailsPanel::collapsible(DailyCard which, const QString &title, QWidget *content)
@@ -476,7 +490,8 @@ QWidget *DailyDetailsPanel::sessionsCard(const QVector<SessionGroup> &groups)
         grid->setContentsMargins(0, 0, 0, 0);
         grid->setHorizontalSpacing(6);
         grid->setVerticalSpacing(0);
-        const QStringList headings = { STR_TR_On, STR_TR_Date, STR_TR_Start, STR_TR_End, classic("Duration") };
+        // The date sits on the line with the session's name, so the table fits a narrow panel
+        const QStringList headings = { STR_TR_On, STR_TR_Start, STR_TR_End, classic("Duration") };
         for (int c = 0; c < headings.size(); ++c) grid->addWidget(label(headings[c], Theme::Role::Ink2, table), 0, c);
         int r = 1;
         for (const SessionRow &row : group.rows) {
@@ -487,7 +502,8 @@ QWidget *DailyDetailsPanel::sessionsCard(const QVector<SessionGroup> &groups)
                 tint->setStyleSheet(QString("background: %1; border-radius: 4px;").arg(Theme::css(Theme::Role::BadTint)));
                 grid->addWidget(tint, r, 0, 2, headings.size());
             }
-            grid->addWidget(label(row.name, Theme::Role::Ink, table, false, true), r, 0, 1, headings.size());
+            grid->addWidget(label(row.name + QString::fromUtf8(" \u00B7 ") + row.date, Theme::Role::Ink, table, false, true),
+                            r, 0, 1, headings.size());
             auto *toggle = new UiKit::ToggleSwitch(table);
             toggle->setChecked(row.on);
             const QString tip = classic("Click to %1 this session.").arg(row.on ? classic("disable") : classic("enable"));
@@ -500,7 +516,7 @@ QWidget *DailyDetailsPanel::sessionsCard(const QVector<SessionGroup> &groups)
                 if (session) toggle->setChecked(session->enabled());
             });
             grid->addWidget(toggle, r + 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
-            const QStringList cells = { row.date, row.start, row.end, row.duration };
+            const QStringList cells = { row.start, row.end, row.duration };
             for (int c = 0; c < cells.size(); ++c) grid->addWidget(label(cells[c], Theme::Role::Ink, table), r + 1, c + 1);
             r += 2;
         }

@@ -71,6 +71,9 @@ private:
     //! \brief Session Information (collapsible): each session with its on/off switch
     QWidget *sessionsCard(const QVector<DailyDetails::SessionGroup> &groups);
 
+    //! \brief The start and end of a day's recordings, for a day without CPAP data
+    QWidget *timesCard(const DailyDetails::Usage &usage);
+
     //! \brief Wraps \a content in a collapsible card whose state is stored as \a card
     QWidget *collapsible(DailyCard card, const QString &title, QWidget *content);
 

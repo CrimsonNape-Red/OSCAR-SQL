@@ -1999,7 +1999,10 @@ DailyDetails::Page Daily::detailsPage(Day *day, QDate date, bool brick, bool oth
     DailyDetails::Page page;
     page.date = date;
     Machine *cpap = day ? day->machine(MT_CPAP) : nullptr;
-    page.kind = DailyDetails::classify(cpap != nullptr, cpap ? day->hours(MT_CPAP) : 0, day ? day->size() : 0,
+    // Sessions count as "all off" only when none of the CPAP sessions is on: a session that is
+    // on but adds up to no time is an impossibly short one (Classic reports both as off)
+    const int offSessions = (cpap && !day->hasEnabledSessions(MT_CPAP)) ? day->size() : 0;
+    page.kind = DailyDetails::classify(cpap != nullptr, cpap ? day->hours(MT_CPAP) : 0, offSessions,
                                        brick, otherDevices);
     if (!day) return page;
 
@@ -2083,9 +2086,13 @@ void Daily::Load(QDate date)
         // The top bar names the device, its mode and its pressures, so a screenshot shows them
         if (cpap) {
             const MachineInfo info = cpap->getInfo();
-            QString settings = day->getCPAPModeStr();
-            const QString pressure = convertHtmlToPlainText(day->getPressureSettings());
-            if (!pressure.isEmpty()) settings += QStringLiteral(" · ") + pressure;
+            // With no session on there are no settings to show, only the device
+            QString settings;
+            if (day->hasEnabledSessions(MT_CPAP)) {
+                settings = day->getCPAPModeStr();
+                const QString pressure = convertHtmlToPlainText(day->getPressureSettings());
+                if (!pressure.isEmpty()) settings += QStringLiteral(" · ") + pressure;
+            }
             m_toolbar->setDeviceLine((info.brand + " " + info.model).trimmed(), settings);
         } else {
             m_toolbar->setDeviceLine(QString(), QString());
