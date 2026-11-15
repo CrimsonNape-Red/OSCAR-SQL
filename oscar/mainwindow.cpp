@@ -51,6 +51,10 @@
 #include <QStorageInfo>
 #include <QOperatingSystemVersion>
 #include <cmath>
+#include <algorithm>
+#include <array>
+#include <limits>
+#include <vector>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
   #include <QRandomGenerator>
 #endif
@@ -2381,6 +2385,207 @@ void MainWindow::on_action_Check_for_Updates_triggered()
     CheckForUpdates(true);
 }
 
+/*! \brief Reduces an image to 8-bit indexed with a palette chosen for that image.
+
+    Used by DelayedScreenshot() to save screenshots as PNG/8 (#390).
+
+    Qt's own conversion to Format_Indexed8 uses a fixed 6x6x6 colour cube once an image has
+    more than 256 colours, which shifts every colour to a multiple of 51 per channel - a dark
+    theme's near-black backgrounds come out visibly grey. This picks the palette from the
+    image instead:
+
+    1. Count the distinct colours. With 256 or fewer, Qt's conversion is already exact.
+    2. Split the colours into up to 256 boxes, each time dividing the box with the largest
+       weighted squared error at its mean along its worst channel.
+    3. Take each box's weighted mean as a palette entry and refine the palette with a few
+       k-means passes over the distinct colours.
+    4. Map every pixel to its colour's palette entry. No dithering, so flat areas stay flat
+       and compress well.
+
+    \param source Image in any format; alpha is ignored.
+    \return Format_Indexed8 image of the same size and device pixel ratio.
+ */
+static QImage quantizeToIndexed8(const QImage &source)
+{
+    const QImage rgb = source.convertToFormat(QImage::Format_RGB32);
+    const int width = rgb.width();
+    const int height = rgb.height();
+
+    // Distinct colours and how many pixels use each. Screenshots are mostly runs of one
+    // colour, so a run is counted with a single hash access.
+    QHash<QRgb, qint64> histogram;
+    for (int y = 0; y < height; ++y) {
+        const QRgb *line = reinterpret_cast<const QRgb *>(rgb.constScanLine(y));
+        int x = 0;
+        while (x < width) {
+            const QRgb value = line[x] | 0xff000000;
+            int run = 1;
+            while (x + run < width && (line[x + run] | 0xff000000) == value) {
+                ++run;
+            }
+            histogram[value] += run;
+            x += run;
+        }
+    }
+    if (histogram.size() <= 256) {
+        return rgb.convertToFormat(QImage::Format_Indexed8, Qt::ThresholdDither);
+    }
+
+    struct Entry {
+        int channel[3];     // red, green, blue
+        qint64 count;       // pixels of this colour
+    };
+    std::vector<Entry> entries;
+    entries.reserve(size_t(histogram.size()));
+    for (auto it = histogram.constBegin(); it != histogram.constEnd(); ++it) {
+        entries.push_back({ { qRed(it.key()), qGreen(it.key()), qBlue(it.key()) }, it.value() });
+    }
+
+    // A box is a range of entries. Its score is the weighted squared error along its worst
+    // channel; the split point is the weighted mean on that channel.
+    struct Box {
+        size_t begin;
+        size_t end;
+        int axis;
+        double mean;
+        double score;
+    };
+    auto measure = [&entries](size_t begin, size_t end) {
+        Box box{ begin, end, 0, 0.0, 0.0 };
+        double sum[3] = { 0.0, 0.0, 0.0 };
+        double sumSquares[3] = { 0.0, 0.0, 0.0 };
+        double total = 0.0;
+        for (size_t i = begin; i < end; ++i) {
+            const Entry &entry = entries[i];
+            total += double(entry.count);
+            for (int axis = 0; axis < 3; ++axis) {
+                const double weighted = double(entry.channel[axis]) * double(entry.count);
+                sum[axis] += weighted;
+                sumSquares[axis] += weighted * entry.channel[axis];
+            }
+        }
+        for (int axis = 0; axis < 3; ++axis) {
+            const double error = sumSquares[axis] - sum[axis] * sum[axis] / total;
+            if (error > box.score) {
+                box.score = error;
+                box.axis = axis;
+                box.mean = sum[axis] / total;
+            }
+        }
+        return box;
+    };
+
+    std::vector<Box> boxes;
+    boxes.push_back(measure(0, entries.size()));
+    while (boxes.size() < 256) {
+        auto worst = std::max_element(boxes.begin(), boxes.end(),
+                                      [](const Box &a, const Box &b) { return a.score < b.score; });
+        // Two colours one level apart give an error of at least 0.5; anything smaller is
+        // rounding noise from a box holding a single value on every channel.
+        if (worst->score < 0.25) {
+            break;
+        }
+        const Box box = *worst;
+        const auto middle = std::partition(entries.begin() + box.begin, entries.begin() + box.end,
+                                           [&box](const Entry &entry) {
+                                               return entry.channel[box.axis] <= box.mean;
+                                           });
+        const size_t split = size_t(middle - entries.begin());
+        if (split == box.begin || split == box.end) {
+            worst->score = 0.0;     // could not be divided; leave it alone
+            continue;
+        }
+        *worst = measure(box.begin, split);
+        boxes.push_back(measure(split, box.end));
+    }
+
+    // Starting palette: the weighted mean colour of each box.
+    const int paletteSize = int(boxes.size());
+    std::vector<std::array<double, 3>> palette(size_t(paletteSize), { 0.0, 0.0, 0.0 });
+    for (int p = 0; p < paletteSize; ++p) {
+        double total = 0.0;
+        for (size_t i = boxes[p].begin; i < boxes[p].end; ++i) {
+            total += double(entries[i].count);
+            for (int axis = 0; axis < 3; ++axis) {
+                palette[p][axis] += double(entries[i].channel[axis]) * double(entries[i].count);
+            }
+        }
+        for (int axis = 0; axis < 3; ++axis) {
+            palette[p][axis] /= total;
+        }
+    }
+
+    // k-means refinement: assign each distinct colour to its nearest palette entry, then
+    // move each palette entry to the weighted mean of the colours assigned to it.
+    std::vector<int> assignment(entries.size(), 0);
+    auto assign = [&]() {
+        for (size_t i = 0; i < entries.size(); ++i) {
+            double best = std::numeric_limits<double>::max();
+            for (int p = 0; p < paletteSize; ++p) {
+                double distance = 0.0;
+                for (int axis = 0; axis < 3; ++axis) {
+                    const double delta = palette[p][axis] - entries[i].channel[axis];
+                    distance += delta * delta;
+                }
+                if (distance < best) {
+                    best = distance;
+                    assignment[i] = p;
+                }
+            }
+        }
+    };
+    for (int pass = 0; pass < 3; ++pass) {
+        assign();
+        std::vector<std::array<double, 4>> sums(size_t(paletteSize), { 0.0, 0.0, 0.0, 0.0 });
+        for (size_t i = 0; i < entries.size(); ++i) {
+            std::array<double, 4> &sum = sums[assignment[i]];
+            for (int axis = 0; axis < 3; ++axis) {
+                sum[axis] += double(entries[i].channel[axis]) * double(entries[i].count);
+            }
+            sum[3] += double(entries[i].count);
+        }
+        for (int p = 0; p < paletteSize; ++p) {
+            if (sums[p][3] > 0.0) {     // an entry left with no colours keeps its position
+                for (int axis = 0; axis < 3; ++axis) {
+                    palette[p][axis] = sums[p][axis] / sums[p][3];
+                }
+            }
+        }
+    }
+    assign();
+
+    QList<QRgb> colorTable;
+    colorTable.reserve(paletteSize);
+    for (int p = 0; p < paletteSize; ++p) {
+        colorTable.append(qRgb(qRound(palette[p][0]), qRound(palette[p][1]), qRound(palette[p][2])));
+    }
+    QHash<QRgb, uchar> lookup;
+    lookup.reserve(qsizetype(entries.size()));
+    for (size_t i = 0; i < entries.size(); ++i) {
+        lookup.insert(qRgb(entries[i].channel[0], entries[i].channel[1], entries[i].channel[2]),
+                      uchar(assignment[i]));
+    }
+
+    QImage indexed(rgb.size(), QImage::Format_Indexed8);
+    indexed.setColorTable(colorTable);
+    indexed.setDevicePixelRatio(rgb.devicePixelRatio());
+    for (int y = 0; y < height; ++y) {
+        const QRgb *in = reinterpret_cast<const QRgb *>(rgb.constScanLine(y));
+        uchar *out = indexed.scanLine(y);
+        QRgb last = in[0] | 0xff000000;
+        uchar lastIndex = lookup.value(last);
+        for (int x = 0; x < width; ++x) {
+            const QRgb value = in[x] | 0xff000000;
+            if (value != last) {
+                last = value;
+                lastIndex = lookup.value(value);
+            }
+            out[x] = lastIndex;
+        }
+    }
+    return indexed;
+}
+
 bool toolbox_visible = false;
 void MainWindow::on_action_Screenshot_triggered()
 {
@@ -2505,8 +2710,13 @@ void MainWindow::DelayedScreenshot()
 
     // png_filepath will be empty if the user canceled the file selection above.
     if (png_filepath.isEmpty() == false) {
-        qDebug() << "Saving screenshot to" << png_filepath;
-        if (!pixmap.save(png_filepath)) {
+        // Saved as an 8-bit indexed PNG (PNG/8) with a palette picked for this image, which
+        // is much smaller than a full-colour PNG - screenshots are mostly posted to forums.
+        // OSCAR's screens are flat colours, lines and text, so 256 colours are enough (#390).
+        const QImage indexed = quantizeToIndexed8(pixmap.toImage());
+        qDebug() << "Saving screenshot to" << png_filepath
+                 << "with" << indexed.colorCount() << "palette entries";
+        if (!indexed.save(png_filepath, "PNG")) {
             Notify(tr("There was an error saving screenshot to file \"%1\"").arg(QDir::toNativeSeparators(png_filepath)));
         } else {
             Notify(tr("Screenshot saved to file \"%1\"").arg(QDir::toNativeSeparators(png_filepath)));
