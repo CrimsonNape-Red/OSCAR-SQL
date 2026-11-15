@@ -4,6 +4,24 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-14 - Crash popping out a graph after switching profile (GitLab #388)
+
+**Files:** `oscar/daily.cpp`
+
+**Symptom:** With a graph popped out of the Daily page and its window left open, switching or
+reopening a profile and then popping out a graph again crashed OSCAR (access violation in
+Qt6Widgets.dll).
+
+**Root cause:** The popout window, held in the static `gGraphView::dock`, is created as a child of
+the Daily page. Closing the profile deletes the Daily page and the window with it, but only the
+window's own close event cleared the pointer. `popoutGraph()` then reused the deleted window.
+Reprocess Events deletes the Daily page too.
+
+**Fix:** `Daily::~Daily()` clears `gGraphView::dock` when the window is its child. Verified by a
+scripted run on master: crashed before the fix, popped out again after it.
+
+---
+
 ## 2026-11-13 - Ctrl/Cmd+wheel trackpad zoom moved in chunks (#306 follow-up)
 
 **Files:** `oscar/Graphs/gGraph.cpp`, `gGraph.h`
