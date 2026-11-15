@@ -5,6 +5,7 @@
 ::: Checks whether GitLab master has new commits since the last nightly build.
 ::: If so, builds OSCAR, renames the installer with a "-nightly" suffix, and
 ::: copies it to the Dropbox folder.  Replaces any previous nightly build.
+::: Then publishes it to the nightly download page (nightly-publish.ps1).
 :::
 ::: Usage: run from any directory.  No arguments needed.
 :::
@@ -17,6 +18,8 @@ set BUILD_SCRIPT=buildall-msvc.bat
 set INSTALLER_DIR=C:\OSCAR\OSCAR-code\build-oscar-win_64_bit\Installer
 set LOG_FILE=C:\OSCAR\nightly-build.log
 set NOTIFY_SCRIPT=%~dp0nightly-notify.ps1
+set PUBLISH_SCRIPT=%BUILD_DIR%\nightly-publish.ps1
+set LINUX_DIR=C:\Users\Guy\Dropbox\SQL_Version
 
 :: -----------------------------------------------------------------------
 :: Logging: re-invoke this script with all output redirected to the log.
@@ -201,6 +204,26 @@ if %errorlevel% neq 0 (
 
 echo.
 echo Nightly build complete: %DROPBOX_DIR%\!NIGHTLY_NEW_NAME!
+
+:: -----------------------------------------------------------------------
+:: Step 9: Publish to the nightly download page: copy the Windows and
+::         matching Linux files to Dropbox\OSCAR Files\Nightly under fixed
+::         names, then update and push the page.  Waits once (60 minutes)
+::         if the Linux build for this commit is not there yet.
+::         Exit code 2 = Linux build not found, nothing published.
+::         Skipped until the shared Linux folder (SQL_Version) syncs here.
+:: -----------------------------------------------------------------------
+if not exist "%LINUX_DIR%\" (
+    echo Linux build folder %LINUX_DIR% not found - nightly page not updated.
+    endlocal
+    exit /b 0
+)
+powershell -NoProfile -ExecutionPolicy Bypass -File "%PUBLISH_SCRIPT%" -LinuxRoot "%LINUX_DIR%"
+set PUBLISH_RESULT=!errorlevel!
+if !PUBLISH_RESULT! neq 0 (
+    echo ERROR: Publishing the nightly page failed with code !PUBLISH_RESULT!.
+    exit /b !PUBLISH_RESULT!
+)
 endlocal
 :::pause
 exit /b 0
