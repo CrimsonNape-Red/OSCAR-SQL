@@ -202,6 +202,8 @@ class Statistics : public QObject
 
     QString GenerateHTML();
 
+    /*! \brief Returns the content of the right sidebar's Records panel as an HTML body
+        fragment (usage totals and the best and worst days), without fonts or colours */
     QString UpdateRecordsBox();
 
     static void printReport(QWidget *parent = nullptr);

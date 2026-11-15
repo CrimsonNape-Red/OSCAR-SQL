@@ -36,9 +36,6 @@ Colours screenColours(const QPalette &palette);
     replaced by screenColours(). The printed report never goes through this. */
 QString screenHtml(const QString &html, const QPalette &palette);
 
-//! \brief Returns the stylesheet of the records box (the Statistics side panel)
-QString recordsBoxStyleSheet(const QPalette &palette);
-
 } // namespace StatisticsStyle
 
 #endif // STATISTICSSTYLE_H

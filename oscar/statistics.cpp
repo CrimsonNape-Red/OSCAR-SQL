@@ -1822,15 +1822,9 @@ void Statistics::printReport(QWidget * parent) {
 
 QString Statistics::UpdateRecordsBox()
 {
-    QString html = "<html><head><style type='text/css'>"
-                     "p,a,td,body { font-family: '" + QApplication::font().family() + "'; }"
-                     "p,a,td,body { font-size: " + QString::number(QApplication::font().pointSize() + 2) + "px; }"
-                     "body { line-height: 0.95; }"
-                     "a:link,a:visited { color: inherit; text-decoration: none; }" //font-weight: normal;
-                     "a:hover { background-color: inherit; color: white; text-decoration:none; font-weight: bold; }"
-                     "</style>"
-                     "<title>Device Statistics Panel</title>"
-                     "</head><body>";
+    // Body content only, without fonts or colours: the main window wraps it with
+    // SidebarStyle::document() for the current palette
+    QString html;
 
     Machine * cpap = p_profile->GetMachine(MT_CPAP);
     QDate firstCpapDay = p_profile->FirstDay(MT_CPAP);
@@ -2119,7 +2113,6 @@ QString Statistics::UpdateRecordsBox()
         }
     }
 
-    html += "</body></html>";
     return html;
 }
 

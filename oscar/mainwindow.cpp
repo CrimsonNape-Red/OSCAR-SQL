@@ -92,6 +92,7 @@
 #include "mainwindow.h"
 #include "welcomepage.h"
 #include "statisticsstyle.h"
+#include "sidebarstyle.h"
 #include "importhandover.h"
 #include "ui_mainwindow.h"
 #include "devicetimecorrectiondialog.h"
@@ -146,12 +147,29 @@
 CheckUpdates *updateChecker;
 bool openOk;
 
+//! \brief Added to a right sidebar panel's index to give its saved number: the numbers date
+//!        from when a Navigation panel came first, so Bookmarks is 1 and Records is 2
+static const int kSidebarPanelOffset = 1;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    applyStatisticsTheme();     // the records box's colours; the report follows when it is built
+    applyStatisticsTheme();     // nothing to show yet; the report follows when it is built
+    ui->filterBookmarks->setPlaceholderText(tr("Filter bookmarks"));
+    ui->filterBookmarksButton->setToolTip(tr("Clear the filter"));
+    // The sidebar is styled in SetupGUI(): its look depends on the app settings, which
+    // main() creates after this window
+
+    // Opening another sidebar panel hides the open one, and Qt moves the focus off a hidden
+    // widget to the next Tab stop, which is a button on the main tab bar. Note when that
+    // happens, so on_toolBox_currentChanged() can put the focus in the panel just opened.
+    connect(qApp, &QApplication::focusChanged, this, [this](QWidget *old, QWidget *) {
+        if (old && ui->toolBox->isVisible() && ui->toolBox->isAncestorOf(old) && !old->isVisible()) {
+            m_sidebarPanelLostFocus = true;
+        }
+    });
 
 
     {
@@ -318,14 +336,6 @@ void MainWindow::SetupGUI(bool batchMode)
 #ifdef NO_CHECKUPDATES
     ui->action_Check_for_Updates->setVisible(false);
 #endif
-    ui->oximetryButton->setDisabled(true);
-    ui->dailyButton->setDisabled(true);
-    ui->overviewButton->setDisabled(true);
-    ui->statisticsButton->setDisabled(true);
-    ui->importButton->setDisabled(true);
-#ifdef helpless
-    ui->helpButton->setVisible(false);
-#endif
 
     m_restartRequired = false;
     // Initialize Status Bar objects
@@ -348,11 +358,15 @@ void MainWindow::SetupGUI(bool batchMode)
     ui->tabWidget->setTabEnabled(1, false);             // this should be the Statistics tab
     setupColorSchemeButton();
 
-    // toolbox is the right sidebar that contain the Navigation, bookmark , and Records tabs.
-    // Navigation has offset 0
-    // Bookmarks  has offset 1
-    // Records    has offset 2
-    ui->toolBox->setCurrentIndex(AppSetting->rightSidebarPanel());
+    applySidebarTheme();
+    // toolbox is the right sidebar that contains the Bookmarks and Records panels. The saved
+    // panel number dates from when a Navigation panel came first (0), so Bookmarks is saved
+    // as 1 and Records as 2; a saved Navigation panel opens Records, the default.
+    {
+        const int panel = AppSetting->rightSidebarPanel() - kSidebarPanelOffset;
+        ui->toolBox->setCurrentIndex(panel >= 0 && panel < ui->toolBox->count()
+                                         ? panel : ui->toolBox->indexOf(ui->recordsPage));
+    }
     bool b = AppSetting->rightSidebarVisible();
     ui->action_Sidebar_Toggle->setChecked(b);
     ui->toolBox->setVisible(b);
@@ -480,6 +494,7 @@ void MainWindow::changeEvent(QEvent *event)
     if (event->type() == QEvent::ThemeChange || event->type() == QEvent::ApplicationPaletteChange
         || event->type() == QEvent::PaletteChange) {
         applyStatisticsTheme();
+        applySidebarTheme();
         updateColorSchemeButton();
     }
     QMainWindow::changeEvent(event);
@@ -539,6 +554,8 @@ void MainWindow::closeEvent(QCloseEvent * event)
 
 MainWindow::~MainWindow()
 {
+    // The focus moves as the child widgets are destroyed, after ui is gone
+    disconnect(qApp, &QApplication::focusChanged, this, nullptr);
     delete ui;
 }
 
@@ -895,11 +912,6 @@ bool MainWindow::OpenProfile(QString profileName)
     QList<Machine *> stgmachines = p_profile->GetMachines(MT_SLEEPSTAGE);
     bool noMachines = machines.isEmpty() && posmachines.isEmpty() && oximachines.isEmpty() && stgmachines.isEmpty();
 
-    ui->importButton->setDisabled(false);
-    ui->oximetryButton->setDisabled(false);
-    ui->dailyButton->setDisabled(noMachines);
-    ui->overviewButton->setDisabled(noMachines);
-    ui->statisticsButton->setDisabled(noMachines);
     ui->tabWidget->setTabEnabled(2, !noMachines);       // daily, STR_TR_Daily);
     ui->tabWidget->setTabEnabled(3, !noMachines);       // overview, STR_TR_Overview);
     ui->tabWidget->setTabEnabled(4, !noMachines);       // statistics, STR_TR_Statistics);
@@ -1075,7 +1087,7 @@ void MainWindow::Startup()
             ui->tabWidget->setCurrentIndex(AppSetting->openTabAtStart());
 
             if (AppSetting->autoLaunchImport()) {
-                on_importButton_clicked();
+                on_action_Import_Data_triggered();
             }
         }
     } else {
@@ -1860,7 +1872,45 @@ void MainWindow::on_action_Fullscreen_triggered()
 
 void MainWindow::setRecBoxHTML(QString html)
 {
-    ui->recordsBox->setHtml(html);
+    m_recordsBody = html;
+    showSidebarHtml();
+}
+
+void MainWindow::showSidebarHtml()
+{
+    if (!AppSetting) return;    // as applySidebarTheme()
+    const QPalette palette = QGuiApplication::palette();
+    const bool modern = AppSetting->useNewPages();
+    const QFont font = QApplication::font();
+    // Keep each panel where the user was reading it
+    auto show = [&](QTextBrowser *view, const QString &body, const QString &extraCss) {
+        QScrollBar *bar = view->verticalScrollBar();
+        const int position = bar->value();
+        view->setHtml(SidebarStyle::document(body, palette, modern, font, extraCss));
+        bar->setValue(position);
+    };
+    show(ui->recordsBox, m_recordsBody, QStringLiteral("body { line-height: 0.95; }"));
+    show(ui->bookmarkView, m_bookmarksBody, QString());
+}
+
+void MainWindow::applySidebarTheme()
+{
+    // main() builds this window before the app settings, and a palette change can arrive in
+    // between; SetupGUI() styles the sidebar once the settings exist
+    if (!AppSetting) return;
+    const bool modern = AppSetting->useNewPages();
+    const QString key = paletteKey() + (modern ? "modern" : "classic");
+    if (key == m_sidebarThemeKey) return;
+    m_sidebarThemeKey = key;
+
+    ui->toolBox->setStyleSheet(SidebarStyle::styleSheet(QGuiApplication::palette(), modern));
+    // The Modern cards stand clear of the sidebar's edge; the Classic boxes fill it
+    const int margin = SidebarStyle::panelMargin(modern);
+    for (QWidget *page : { ui->bookmarksPage, ui->recordsPage }) {
+        page->layout()->setContentsMargins(margin, margin, margin, margin);
+        page->layout()->setSpacing(margin);
+    }
+    showSidebarHtml();      // the text and link colours are written into the HTML
 }
 
 void MainWindow::setStatsHTML(QString html)
@@ -1946,6 +1996,7 @@ void MainWindow::togglePageLook()
     if (welcome) rebuildWelcomePage();
     rebuildDailyPage();
     updatePageLookButton();
+    applySidebarTheme();
 }
 
 void MainWindow::updateColorSchemeButton()
@@ -1976,7 +2027,6 @@ void MainWindow::applyStatisticsTheme()
     if (key == m_statsThemeKey) return;
     m_statsThemeKey = key;
 
-    ui->recordsBox->setStyleSheet(StatisticsStyle::recordsBoxStyleSheet(palette));
     if (m_statsHtml.isEmpty()) return;
     // Re-show the report in the new colours where the user was reading it
     QScrollBar *bar = ui->statisticsView->verticalScrollBar();
@@ -1991,19 +2041,13 @@ void MainWindow::updateFavourites()
     if (!p_profile) return;
     QDate date = p_profile->LastDay(MT_JOURNAL);
 
-    if (!date.isValid()) {
-        return;
-    }
+    // Built without colours: SidebarStyle::document() adds them when it is shown
+    QString html = "<table width=100% cellpadding=2 cellspacing=0>";
+    bool anyShown = false;
 
-    QString html = "<html><head><style type='text/css'>"
-                   "p,a,td,body { font-family: '" + QApplication::font().family() + "'; }"
-                   "p,a,td,body { font-size: " + QString::number(QApplication::font().pointSize() + 2) + "px; }"
-                   "a:link,a:visited { color: inherit; text-decoration: none; }" //font-weight: normal;
-                   "a:hover { background-color: inherit; color: white; text-decoration:none; font-weight: bold; }"
-                   "</style></head><body>"
-                   "<table width=100% cellpadding=2 cellspacing=0>";
-
-    do {
+    // No journal days at all gives an invalid date, and the "no bookmarks" note below
+    const QDate firstDate = p_profile->FirstDay(MT_JOURNAL);
+    while (date.isValid() && date >= firstDate) {
         Day *journal = p_profile->GetDay(date, MT_JOURNAL);
 
         if (journal) {
@@ -2044,29 +2088,24 @@ void MainWindow::updateFavourites()
                         }
                     }
 
-                    if (found) { html += tmp; }
+                    if (found && !tmp.isEmpty()) {
+                        html += tmp;
+                        anyShown = true;
+                    }
                 }
             }
         }
 
         date = date.addDays(-1);
-    } while (date >= p_profile->FirstDay(MT_JOURNAL));
-
-    html += "</table></body></html>";
-    ui->bookmarkView->setHtml(html);
-}
-
-void MainWindow::on_dailyButton_clicked()
-{
-    if (daily) {
-        QTimer::singleShot(0, this, [this]{ ui->tabWidget->setCurrentWidget(daily); daily->RedrawGraphs(); });
     }
-}
-void MainWindow::on_overviewButton_clicked()
-{
-    if (overview) {
-        QTimer::singleShot(0, this, [this]{ ui->tabWidget->setCurrentWidget(overview); });
+
+    html += "</table>";
+    if (!anyShown) {
+        html = "<i>" + (bookmarkFilter.isEmpty() ? tr("No bookmarks yet. Add them on the Daily page.")
+                                                 : tr("No bookmarks match the filter.")) + "</i>";
     }
+    m_bookmarksBody = html;
+    showSidebarHtml();
 }
 
 void MainWindow::aboutBoxLinkClicked(const QUrl &url)
@@ -2333,11 +2372,6 @@ void MainWindow::on_actionPurgeAllTimeCorrections_triggered()
 
 #include "oximeterimport.h"
 QDateTime datetimeDialog(QDateTime datetime, QString message);
-
-void MainWindow::on_oximetryButton_clicked()
-{
-    runOximetryWizard(false);
-}
 
 void MainWindow::runOximetryWizard(bool viatom)
 {
@@ -2734,7 +2768,7 @@ void MainWindow::DelayedScreenshot()
 
 void MainWindow::on_actionView_Oximetry_triggered()
 {
-    on_oximetryButton_clicked();
+    runOximetryWizard(false);
 }
 
 void MainWindow::on_actionPrint_Report_triggered()
@@ -3581,16 +3615,14 @@ void MainWindow::on_action_Sidebar_Toggle_toggled(bool visible)
 
 void MainWindow::on_toolBox_currentChanged(int index)
 {
-    AppSetting->setRightSidebarPanel(index);
-}
-
-void MainWindow::on_helpButton_clicked()
-{
-#ifndef helpless
-    ui->tabWidget->setCurrentWidget(help);
-#else
-    staticQMessageBox::information(this, STR_MessageBox_Error, tr("No help is available."));
-#endif
+    AppSetting->setRightSidebarPanel(index + kSidebarPanelOffset);
+    if (m_sidebarPanelLostFocus) {
+        // The focus was in the panel that just closed: keep it in the sidebar
+        m_sidebarPanelLostFocus = false;
+        QWidget *view = ui->toolBox->widget(index) == ui->bookmarksPage
+                            ? static_cast<QWidget *>(ui->bookmarkView) : ui->recordsBox;
+        view->setFocus(Qt::OtherFocusReason);
+    }
 }
 
 void MainWindow::on_actionView_Statistics_triggered()
@@ -4665,20 +4697,13 @@ void MainWindow::JumpStatistics()
 }
 void MainWindow::JumpImport()
 {
-    on_importButton_clicked();
+    on_action_Import_Data_triggered();
 }
 void MainWindow::JumpOxiWizard()
 {
-    on_oximetryButton_clicked();
+    runOximetryWizard(false);
 }
 
-
-void MainWindow::on_statisticsButton_clicked()
-{
-    if (p_profile) {
-        QTimer::singleShot(0, this, [this]{ ui->tabWidget->setCurrentWidget(ui->statisticsTab); });
-    }
-}
 
 void MainWindow::init_reportModeUi()
 {
@@ -4852,11 +4877,6 @@ void MainWindow::on_actionPurgeCurrentDaysOximetry_triggered()
         staticQMessageBox::information(this, STR_MessageBox_Information,
             tr("Select the day with valid oximetry data in daily view first."),QMessageBox::Ok);
     }
-}
-
-void MainWindow::on_importButton_clicked()
-{
-    on_action_Import_Data_triggered();
 }
 
 
@@ -5555,11 +5575,6 @@ void MainWindow::on_actionSystem_Information_triggered()
     dlg.exec();
 }
 
-void MainWindow::on_profilesButton_clicked()
-{
-    ui->tabWidget->setCurrentWidget(profileSelector);
-}
-
 void MainWindow::on_bookmarkView_anchorClicked(const QUrl &arg1)
 {
     on_recordsBox_anchorClicked(arg1);
@@ -5587,8 +5602,8 @@ void MainWindow::on_recordsBox_anchorClicked(const QUrl &linkurl)
     } else if (link == "import") {
         // Don't run the importer directly from here because it destroys the object that called this function..
         // Schedule it instead
-        if (data == "cpap") QTimer::singleShot(0, mainwin, SLOT(on_importButton_clicked()));
-        if (data == "oximeter") QTimer::singleShot(0, mainwin, SLOT(on_oximetryButton_clicked()));
+        if (data == "cpap") QTimer::singleShot(0, mainwin, SLOT(on_action_Import_Data_triggered()));
+        if (data == "oximeter") QTimer::singleShot(0, mainwin, SLOT(on_actionView_Oximetry_triggered()));
     } else if (link == "statistics") {
         ui->tabWidget->setCurrentWidget(ui->statisticsTab);
     }

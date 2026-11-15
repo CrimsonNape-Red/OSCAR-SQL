@@ -22,11 +22,7 @@ const QString kEvenRow = QStringLiteral("#f8f8f8");     // tr.datarow:nth-child(
 const QString kHoverLight = QStringLiteral("#eeeeee");
 const QString kHoverDark = QStringLiteral("#dddddd");
 
-// The records box's background in the .ui form
-const QString kRecordsBoxLight = QStringLiteral("background: rgb(163, 190, 255)");
-
 constexpr double kSubheadingMix = 0.23;  //!< Text mixed into the page for dark sub-headings
-constexpr double kRecordsBoxMix = 0.30;  //!< Highlight mixed into the page for the dark records box
 
 QColor mix(const QColor &a, const QColor &b, double t)
 {
@@ -65,18 +61,6 @@ QString screenHtml(const QString &html, const QPalette &palette)
         out.replace(swap.first, Theme::css(swap.second), Qt::CaseInsensitive);
     }
     return out;
-}
-
-QString recordsBoxStyleSheet(const QPalette &palette)
-{
-    using Theme::Role;
-    if (!Theme::isDark(palette)) return kRecordsBoxLight;
-    // A dark blue in place of the light one; the text a step softer than white, so the
-    // records' links still show the white-and-bold hover they have in light mode
-    const QColor background = mix(Theme::color(Role::Surface, palette),
-                                  palette.color(QPalette::Highlight), kRecordsBoxMix);
-    return QString("background: %1; color: %2")
-        .arg(Theme::css(background), Theme::css(Theme::color(Role::Ink2, palette)));
 }
 
 } // namespace StatisticsStyle

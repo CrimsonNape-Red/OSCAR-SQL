@@ -259,12 +259,6 @@ class MainWindow : public QMainWindow
     //! \brief Toggle Fullscreen (currently F11)
     void on_action_Fullscreen_triggered();
 
-    //! \brief Selects the Daily page and redraws the graphs
-    void on_dailyButton_clicked();
-
-    //! \brief Selects the Overview page and redraws the graphs
-    void on_overviewButton_clicked();
-
     //! \brief Display About Dialog
     void on_action_About_triggered();
 
@@ -316,9 +310,6 @@ class MainWindow : public QMainWindow
     void on_actionDrift_Analysis_triggered();
     void on_actionPurgeAllTimeCorrections_triggered();
 
-    //! \brief Opens and/or shows the Oximetry page
-    void on_oximetryButton_clicked();
-
     //! \brief Creates the CheckUpdates object that actually does the real check for updates
     void on_action_Check_for_Updates_triggered();
 
@@ -365,8 +356,6 @@ class MainWindow : public QMainWindow
     void on_action_Sidebar_Toggle_toggled(bool arg1);
     void on_toolBox_currentChanged(int index);
 
-        void on_helpButton_clicked();
-
     void on_actionView_Statistics_triggered();
 
 
@@ -407,9 +396,6 @@ class MainWindow : public QMainWindow
     //! Opens the Oximetry Wizard on its import choices, with Viatom/Wellue selected.
     void on_actionImport_Viatom_Data_triggered();
 
-    //! \brief Populates the statistics with information.
-    void on_statisticsButton_clicked();
-
     void on_reportModeMonthly_clicked();
 
     void on_reportModeStandard_clicked();
@@ -430,8 +416,6 @@ class MainWindow : public QMainWindow
     void on_actionPurgeCurrentDaysOximetry_triggered();
 
     void logMessage(QString msg);
-
-    void on_importButton_clicked();
 
     void on_actionLine_Cursor_toggled(bool arg1);
 
@@ -484,8 +468,6 @@ class MainWindow : public QMainWindow
 
     void on_actionSystem_Information_triggered();
 
-    void on_profilesButton_clicked();
-
     void on_bookmarkView_anchorClicked(const QUrl &arg1);
 
     void on_recordsBox_anchorClicked(const QUrl &linkurl);
@@ -498,11 +480,22 @@ public slots:
     void reloadProfile();
 
 private:
-    /*! \brief Shows the Statistics page and records box in the current light or dark palette.
+    /*! \brief Shows the Statistics page in the current light or dark palette.
         Does nothing if the palette is unchanged since the last call. */
     void applyStatisticsTheme();
     QString m_statsHtml;            //!< Statistics report as built, in the printed colours
     QString m_statsThemeKey;        //!< Palette colours applyStatisticsTheme() last used
+
+    /*! \brief Styles the right sidebar (Bookmarks and Records) for the current light or dark
+        palette and the Classic or Modern pages. Does nothing if neither has changed since the
+        last call. */
+    void applySidebarTheme();
+    //! \brief Shows the Bookmarks and Records text in the current colours, keeping the scroll positions
+    void showSidebarHtml();
+    QString m_recordsBody;          //!< Records panel content as built, without colours
+    QString m_bookmarksBody;        //!< Bookmarks panel content as built, without colours
+    QString m_sidebarThemeKey;      //!< Palette colours and page look applySidebarTheme() last used
+    bool m_sidebarPanelLostFocus = false;   //!< The focus was in a sidebar panel when it was closed
 
     /*! \brief Adds the Classic/Modern button and the moon/sun button at the right end of the main
         tabs (moon/sun on Qt 6.8+ only; older Qt can't switch the colour scheme while OSCAR runs) */

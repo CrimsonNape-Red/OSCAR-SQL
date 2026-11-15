@@ -52,8 +52,6 @@ const QString kReport =
 void StatisticsStyleTests::testLightModeKeepsReportColours()
 {
     QCOMPARE(StatisticsStyle::screenHtml(kReport, lightPalette()), kReport);
-    QCOMPARE(StatisticsStyle::recordsBoxStyleSheet(lightPalette()),
-             QString("background: rgb(163, 190, 255)"));
 }
 
 void StatisticsStyleTests::testDarkModeReplacesLightFills()
@@ -80,15 +78,4 @@ void StatisticsStyleTests::testDarkSubheadingOutranksTintedRows()
     QVERIFY2(subStep >= 4 * tintStep, qPrintable(QString("sub-heading step %1, tint step %2")
                                                      .arg(subStep).arg(tintStep)));
     QVERIFY(c.subheading.lightness() < 128);    // white text stays readable
-}
-
-void StatisticsStyleTests::testDarkRecordsBoxIsDark()
-{
-    const QPalette dark = darkPalette();
-    const QString sheet = StatisticsStyle::recordsBoxStyleSheet(dark);
-    QVERIFY(!sheet.contains("163, 190, 255"));
-    QVERIFY(sheet.contains("color: " + Theme::css(Theme::color(Theme::Role::Ink2, dark))));
-    const int at = sheet.indexOf("background: ") + int(strlen("background: "));
-    const QColor background(sheet.mid(at, 7));
-    QVERIFY2(background.isValid() && background.lightness() < 100, qPrintable(sheet));
 }

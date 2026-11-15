@@ -345,6 +345,7 @@ SOURCES += \
     profileselector.cpp \
     profileselectorstyle.cpp \
     statisticsstyle.cpp \
+    sidebarstyle.cpp \
     rawdata.cpp \
     reports.cpp \
     saveGraphLayoutSettings.cpp \
@@ -708,6 +709,7 @@ HEADERS  += \
     profileselector.h \
     profileselectorstyle.h \
     statisticsstyle.h \
+    sidebarstyle.h \
     SleepLib/appsettings.h \
     SleepLib/loader_plugins/edfparser.h \
     aboutdialog.h \
@@ -1016,6 +1018,7 @@ test {
         tests/imagetrimtests.cpp \
         tests/profilepagetests.cpp \
         tests/statisticsstyletests.cpp \
+        tests/sidebarstyletests.cpp \
         tests/overviewbarstests.cpp \
         tests/graphcardtests.cpp \
         tests/summarylinestests.cpp \
@@ -1061,6 +1064,7 @@ test {
         tests/imagetrimtests.h \
         tests/profilepagetests.h \
         tests/statisticsstyletests.h \
+        tests/sidebarstyletests.h \
         tests/overviewbarstests.h \
         tests/graphcardtests.h \
         tests/summarylinestests.h \

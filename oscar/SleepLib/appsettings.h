@@ -214,7 +214,8 @@ public:
   inline bool lineCursorMode() const { return m_lineCursorMode; }
   //! \brief Whether to show the right sidebar
   bool rightSidebarVisible() const { return getPref(STR_AS_RightSidebarVisible).toBool(); }
-  //! \brief Index of the last-selected right sidebar panel (0=Navigation, 1=Bookmarks, 2=Records)
+  //! \brief Index of the last-selected right sidebar panel (1=Bookmarks, 2=Records; 0 was the
+  //!        Navigation panel, since removed)
   int rightSidebarPanel() const { return getPref(STR_AS_RightSidebarPanel).toInt(); }
   //! \brief Bitmask of enabled Daily left-sidebar sections (bit N = section enum value N).
   int leftSideBarEnable() const { return getPref(STR_AS_LeftSideBarEnable).toInt(); }
