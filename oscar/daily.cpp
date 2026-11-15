@@ -888,6 +888,9 @@ void Daily::applyTheme()
         dateDisplay->setPalette(palette);
     }
     if (m_modern) applyModernStyles();
+    if (p_profile) {    // the days' text colours are set when each day is formatted
+        on_calendar_currentPageChanged(ui->calendar->yearShown(), ui->calendar->monthShown());
+    }
 }
 
 void Daily::applyModernStyles()
@@ -935,9 +938,6 @@ void Daily::applyModernStyles()
         .arg(surface, line, ink, ink2, Theme::css(Theme::Role::Accent), pages,
              inPages("QTreeWidget") + ", " + inPages("QTextEdit") + ", " + inPages("QTableWidget"),
              inPages("QLabel")));
-    if (p_profile) {    // the days' text colours are set when each day is formatted
-        on_calendar_currentPageChanged(ui->calendar->yearShown(), ui->calendar->monthShown());
-    }
 }
 
 void Daily::applyWeekendFormat()
