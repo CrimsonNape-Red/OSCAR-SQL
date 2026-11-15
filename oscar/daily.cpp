@@ -692,6 +692,12 @@ Daily::~Daily()
     // Save graph orders and pin status, etc...
     GraphView->SaveSettings("Daily");
 
+    // The window holding popped-out graphs (gGraphView::dock) is a child of this page and is
+    // deleted with it; forget it, or the next popout would use a deleted window
+    if (gGraphView::dock && gGraphView::dock->parentWidget() == this) {
+        gGraphView::dock = nullptr;
+    }
+
     delete ui;
     delete icon_on;
     delete icon_off;

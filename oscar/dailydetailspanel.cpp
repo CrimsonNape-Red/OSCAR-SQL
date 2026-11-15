@@ -176,11 +176,10 @@ void DailyDetailsPanel::setPage(const Page &page)
     case DayKind::SessionsOff:
         m_column->addWidget(new Callout(Callout::Kind::Warning, classic("Sessions exist for this day but are switched off."),
                                         QString(), body));
-        if (page.device.present) m_column->addWidget(deviceCard(page.device));
+        // No device card: with no session on, there are no settings to show (as on Classic)
         break;
     case DayKind::ZeroHours:
         m_column->addWidget(new Callout(Callout::Kind::Info, classic("Impossibly short session"), QString(), body));
-        if (page.device.present) m_column->addWidget(deviceCard(page.device));
         break;
     case DayKind::NonCpapOnly:
         // Data from other devices without CPAP data is normal: no callout, only the cards
