@@ -369,6 +369,9 @@ SOURCES += \
     uikit/lineicons.cpp \
     uikit/metriccard.cpp \
     uikit/panel.cpp \
+    uikit/collapsiblecard.cpp \
+    uikit/callout.cpp \
+    uikit/toggleswitch.cpp \
     uikit/sectionheader.cpp \
     uikit/iconbutton.cpp \
     uikit/imagetrim.cpp \
@@ -380,6 +383,7 @@ SOURCES += \
     Graphs/gdailysummary.cpp \
     Graphs/gFlagsLine.cpp \
     Graphs/gSessionBarLayer.cpp \
+    Graphs/gSessionGapLayer.cpp \
     Graphs/gFooBar.cpp \
     Graphs/gGraph.cpp \
     Graphs/gGraphView.cpp \
@@ -390,6 +394,11 @@ SOURCES += \
     Graphs/rangefigures.cpp \
     overviewstats.cpp \
     overviewdateaxis.cpp \
+    dailytimeaxis.cpp \
+    dailytoolbar.cpp \
+    dailydetails.cpp \
+    dailydetailspanel.cpp \
+    dailycalendar.cpp \
     Graphs/daylabels.cpp \
     Graphs/glcommon.cpp \
     Graphs/gLineChart.cpp \
@@ -579,6 +588,7 @@ HEADERS  += \
     VERSION \
     Graphs/gFlagsLine.h \
     Graphs/gSessionBarLayer.h \
+    Graphs/gSessionGapLayer.h \
     Graphs/gFooBar.h \
     Graphs/gGraph.h \
     Graphs/gGraphView.h \
@@ -590,6 +600,11 @@ HEADERS  += \
     Graphs/rangefigures.h \
     overviewstats.h \
     overviewdateaxis.h \
+    dailytimeaxis.h \
+    dailytoolbar.h \
+    dailydetails.h \
+    dailydetailspanel.h \
+    dailycalendar.h \
     Graphs/daylabels.h \
     Graphs/glcommon.h \
     Graphs/gLineChart.h \
@@ -709,6 +724,9 @@ HEADERS  += \
     uikit/lineicons.h \
     uikit/metriccard.h \
     uikit/panel.h \
+    uikit/collapsiblecard.h \
+    uikit/callout.h \
+    uikit/toggleswitch.h \
     uikit/sectionheader.h \
     uikit/iconbutton.h \
     uikit/imagetrim.h \
@@ -1002,7 +1020,9 @@ test {
         tests/graphcardtests.cpp \
         tests/summarylinestests.cpp \
         tests/overviewstatstests.cpp \
-        tests/daylabelstests.cpp
+        tests/daylabelstests.cpp \
+        tests/sessiongaptests.cpp \
+        tests/dailydetailstests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -1045,7 +1065,9 @@ test {
         tests/graphcardtests.h \
         tests/summarylinestests.h \
         tests/overviewstatstests.h \
-        tests/daylabelstests.h
+        tests/daylabelstests.h \
+        tests/sessiongaptests.h \
+        tests/dailydetailstests.h
 }
 
 macx {

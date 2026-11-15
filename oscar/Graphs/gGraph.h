@@ -371,6 +371,12 @@ class gGraph : public QObject
     //! \brief Where the last paint() put the plot (the centre layers), in the view's coordinates
     QRect plotRect() const { return m_plotRect; }
 
+    /*! \brief True when \a layer is a scale this graph leaves to the page's one shared axis
+        (gGraphView::setSharedXAxis()): Overview's date scale, or Daily's time scale on a graph
+        that follows zoom. A zoom-blocked graph (Event Flags) keeps its own time scale, since it
+        always shows the whole day. Other scales (Time at Pressure's) are never left out. */
+    bool leavesAxisToPage(Layer *layer);
+
     //! \brief Card look: takes \a width pixels off the right of headerTextRect() (for a legend)
     void reserveHeaderRight(int width) { m_headerText.setWidth(qMax(0, m_headerText.width() - width)); }
     //! \brief The colour that stands for this graph, or an invalid colour if none was set

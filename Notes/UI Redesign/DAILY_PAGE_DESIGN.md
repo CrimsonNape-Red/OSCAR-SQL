@@ -1,6 +1,7 @@
 # Daily page redesign
 
-Status: design settled 2026-11-14 after two rounds of review. Nothing here is built yet.
+Status: design settled 2026-11-14 after two rounds of review; built on branch `daily-modern`
+(plan: `DAILY_PAGE_PLAN.md`). Two items wait for an on-screen judgement (see Open).
 Mockup: https://claude.ai/artifact/BTbtLbvEQScYbr8pMkvaZn (three boards: the page on an ordinary
 night, the left panel with the calendar open plus the session information, and the other kinds
 of day; sample data).
@@ -129,8 +130,24 @@ may be revisited later.
 
 ## Open
 
-Nothing is open. Two items are to be judged on screen when built: the hatching between
-sessions, and the red tint on a switched-off segment of the session bar.
+Two items are to be judged on screen; both are built and wait for that judgement:
+- The hatching between sessions. Built in the theme's line colour in light mode; in dark mode
+  that colour did not show on the graph background, so the muted text colour, softened, is used
+  there. To the builder it reads clearly differently from a Large Leak span in both modes.
+- The red tint on a switched-off session, on the session bar and in the Session Information
+  card. In dark mode the tint is dark, and the bar's switched-off segment reads almost black.
+
+## Decided while building
+
+- A day with oximetry but no CPAP data (or CPAP data without oximetry) is normal: it gets no
+  callout, only the cards that have something to show.
+- Event Flags keeps its own time scale: it always shows the whole night while the other graphs
+  zoom, so the shared axis would not match it.
+- A day whose sessions are all off, or add up to no time, shows no Device card: with no session
+  on there are no settings to show (the Classic page shows no device section either).
+- The Search tab keeps the white and black that its own buttons, labels and result table set
+  for themselves; only the tab around them takes the theme.
+- The graph header shows a graph's unit only (Daily's captions also hold a description).
 
 ## Not in this work
 

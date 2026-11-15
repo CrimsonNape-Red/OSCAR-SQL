@@ -109,7 +109,8 @@ void gXAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     QFontMetrics fm(*defaultfont);
 
-    bool usepixmap = AppSetting->usePixmapCaching(); // Whether or not to use pixmap caching
+    // Whether or not to use pixmap caching
+    bool usepixmap = m_cacheEnabled && AppSetting->usePixmapCaching();
 
     // The cached labels are redrawn after a switch between light and dark, too
     if (!usepixmap || (usepixmap && (w.invalidate_xAxisImage || m_imageDark != GraphTheme::dark()))) {
@@ -248,7 +249,9 @@ void gXAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
             aligned_start += step;
         }
 
-        painter.setPen(GraphTheme::ink(Qt::black));
+        // Card look: the quiet grey of Modern Overview's axes
+        const bool card = w.graphView()->cardLook() && !w.printing();
+        painter.setPen(card ? GraphTheme::axis() : GraphTheme::ink(Qt::black));
 
         int num_minor_ticks;
 
@@ -344,7 +347,10 @@ void gXAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
             }
 
             if ((tx + x) < (left + width)) {
-                if (!usepixmap) { w.renderText(tmpstr, tx, texttop, 0, Qt::black, defaultfont); }
+                if (!usepixmap) {
+                    if (m_cacheEnabled) w.renderText(tmpstr, tx, texttop, 0, card ? GraphTheme::kAxisGrey : QColor(Qt::black), defaultfont);
+                    else painter.drawText(tx, texttop, tmpstr);     // straight onto the axis widget
+                }
                 else { painter2.drawText(tx - left + 20, texttop - top, tmpstr); }
             }
 

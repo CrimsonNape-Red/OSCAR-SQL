@@ -34,6 +34,7 @@
 #include "Graphs/gLineChart.h"
 #include "sessionbar.h"
 #include "mytextbrowser.h"
+#include "dailydetails.h"
 class SaveGraphLayoutSettings;
 
 
@@ -44,6 +45,9 @@ namespace Ui {
 class MainWindow;
 class DailySearchTab;
 class gFlagsGroup;
+class DailyTimeAxis;
+class DailyToolbar;
+class DailyDetailsPanel;
 
 
 /*! \class Daily
@@ -94,6 +98,11 @@ public:
         \returns the main graphView area for the Daily View
         */
     gGraphView *graphView() { return GraphView; }
+
+    /*! \brief True when this page has the Modern look (graph cards, a fixed time axis, the
+        Details tab as cards). Read once from AppSetting->useNewPages() when the page is
+        built; MainWindow rebuilds the page when the setting changes. */
+    bool modern() const { return m_modern; }
 
     /*! \fn RedrawGraphs()
         \brief Calls updateGL on the main graphView area, redrawing the OpenGL area
@@ -330,10 +339,13 @@ protected:
     virtual void showEvent(QShowEvent *);
 
 private:
+    bool m_modern = false;          //!< See modern()
     QString m_calendarStyleSheet;   //!< The calendar's style sheet from the form, in light colours
     QString m_calButtonStyleSheet;  //!< The date button's style sheet from the form, in light colours
     //! \brief Sets the calendar's weekend text to the weekday colour for the current mode
     void applyWeekendFormat();
+    //! \brief Modern: the calendar card, the day bar and the tabs in theme colours (see applyTheme())
+    void applyModernStyles();
     double  calculateBMI(double weight_kg, double height_cm);
     void set_JournalZombie(QDate&, int);
     void set_JournalWeightValue(QDate&, double kgs);
@@ -391,12 +403,18 @@ private:
     QString getStatisticsInfo(Day *);
     QString getCPAPInformation(Day *);
     QString getOximeterInformation(Day *);
-    QString getViatomSummary(Day *, Machine *);
     QString getEventBreakdown(Day *);
     QString getPieChart(float values, Day *);
     QString getIndices(Day * day, QHash<ChannelID, EventDataType>& values );
     QString getSleepTime(Day *);
     QString getLeftSidebar (bool honorPieChart);
+
+    /*! \brief What the Modern Details tab shows for \a day (null when the date has no data)
+        \param brick The CPAP device records only compliance data
+        \param otherDevices The day has an oximeter or a position sensor */
+    DailyDetails::Page detailsPage(Day *day, QDate date, bool brick, bool otherDevices);
+    //! Modern: the Details tab's cards (null in Classic)
+    DailyDetailsPanel *m_detailsPanel = nullptr;
 
     QHash<QString, gGraph *> graphlist;
 
@@ -425,7 +443,11 @@ private:
     QIcon * icon_warning;
 
     SessionBar * sessionbar;
-    MyLabel * dateDisplay;
+    MyLabel * dateDisplay = nullptr;
+    //! Modern: the time scale under the graphs, shared by all of them (null in Classic)
+    DailyTimeAxis * m_timeAxis = nullptr;
+    //! Modern: the bar above the graphs with the device line and the drop-downs (null in Classic)
+    DailyToolbar * m_toolbar = nullptr;
 
     MyTextBrowser * webView;
     Day * lastcpapday;

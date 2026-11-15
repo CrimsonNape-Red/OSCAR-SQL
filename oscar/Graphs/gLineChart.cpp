@@ -24,6 +24,7 @@
 #include "SleepLib/profiles.h"
 #include "Graphs/gLineOverlay.h"
 #include "Graphs/graphtheme.h"
+#include "Graphs/graphcard.h"
 
 #define EXTRA_ASSERTS 1
 
@@ -374,6 +375,48 @@ QString gLineChart::getMetaString(qint64 time)
     return lasttext;
 }
 
+void gLineChart::paintCardHeader(QPainter &painter, gGraph &w, const QString &text, const QVector<HeaderLegendItem> &items)
+{
+    const QRect header = w.headerTextRect();
+    const QFontMetrics fm(*defaultfont);
+    const int sample = 16;      // length of an entry's piece of line
+    const int gap = 4;          // between the line and its label
+    const int spacing = 12;     // between entries
+    const int minText = 80;     // the text keeps at least this much of the header
+    const auto entryWidth = [&](const HeaderLegendItem &item) { return sample + gap + fm.horizontalAdvance(item.text); };
+
+    int legendWidth = 0;
+    for (int i = 0; i < items.size(); ++i) {
+        legendWidth += entryWidth(items[i]) + (i > 0 ? spacing : 0);
+    }
+    const GraphCard::HeaderSplit split = GraphCard::splitHeader(header, legendWidth, minText);
+
+    // Legend, filled in from the right; entries that don't fit are left out
+    painter.save();
+    painter.setClipping(false);
+    painter.setFont(*defaultfont);
+    int right = split.legend.left() + split.legend.width();
+    for (const HeaderLegendItem &item : items) {
+        const int width = entryWidth(item);
+        if (right - width < split.legend.left()) break;
+        const int textWidth = fm.horizontalAdvance(item.text);
+        painter.setPen(GraphTheme::ink(QColor(60, 60, 60)));
+        painter.drawText(QRect(right - textWidth, header.top(), textWidth, header.height()),
+                         Qt::AlignLeft | Qt::AlignVCenter, item.text);
+        painter.setPen(QPen(QBrush(GraphTheme::ink(item.color)), 2, item.style));
+        const double y = header.center().y() + 1.5;
+        painter.drawLine(QLineF(right - width, y, right - textWidth - gap, y));
+        right -= width + spacing;
+    }
+    painter.restore();
+
+    const QString shown = GraphCard::elideSummary(text.trimmed(), [&fm](const QString &s) { return fm.horizontalAdvance(s); },
+                                                  split.text.width() - spacing);
+    if (!shown.isEmpty()) {
+        w.renderText(shown, QRectF(split.text), Qt::AlignLeft | Qt::AlignVCenter, 0, QColor(90, 90, 90));
+    }
+}
+
 // Time Domain Line Chart
 void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
 {
@@ -462,6 +505,16 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
 
     bool linecursormode = AppSetting->lineCursorMode();
+
+    // Card look (on screen): the cursor text and the legend go along the graph's header, laid
+    // out together once both are known (see paintCardHeader()). Classic draws them above the
+    // plot as it goes.
+    // (In a card too narrow for any header text the rectangle is empty and nothing is drawn
+    // there; the Classic positions would land on the title and the menu button.)
+    const bool cardHeader = w.graphView()->cardLook() && !w.printing();
+    QString headerText;
+    QVector<HeaderLegendItem> legendItems;
+
     ////////////////////////////////////////////////////////////////////////
     // Display Line Cursor
     ////////////////////////////////////////////////////////////////////////
@@ -481,9 +534,13 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
         if (m_codes[0] != CPAP_FlowRate) {
             QString text = lasttext;
 
-            int wid, h;
-            GetTextExtent(text, wid, h);
-            w.renderText(text, left , top-6); //(h+(4 * w.printScaleY())));  //+ width/2 - wid/2
+            if (cardHeader) {
+                headerText = text;
+            } else {
+                int wid, h;
+                GetTextExtent(text, wid, h);
+                w.renderText(text, left , top-6); //(h+(4 * w.printScaleY())));  //+ width/2 - wid/2
+            }
         }
     }
 
@@ -496,9 +553,13 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
     int sam;
     int minz, maxz;
 
-    // Draw bounding box
-    painter.setPen(GraphTheme::ink(Qt::black));
-    painter.drawRect(rect);
+    // Draw bounding box (card look: the left and bottom lines only, as on Modern Overview)
+    if (w.graphView()->cardLook() && !w.printing()) {
+        GraphTheme::paintCardAxes(painter, rect);
+    } else {
+        painter.setPen(GraphTheme::ink(Qt::black));
+        painter.drawRect(rect);
+    }
 
     width--;
     height -= 2;
@@ -977,7 +1038,9 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
         // Draw Legends on the top line
         ////////////////////////////////////////////////////////////////////
 
-        if ((codepoints > 0)) {
+        if ((codepoints > 0) && cardHeader) {
+            legendItems.append({schema::channel[code].label(), chan.defaultColor(), Qt::SolidLine});
+        } else if ((codepoints > 0)) {
             QString text = schema::channel[code].label();
             QRectF rec(0, rect.top()-3, 0,0);
             rec = painter.boundingRect(rec, Qt::AlignBottom | Qt::AlignLeft, text);
@@ -1009,6 +1072,12 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
         if (!dot.visible) continue;
         code = dot.code;
         schema::Channel &chan = schema::channel[code];
+        if (cardHeader) {
+            QColor color = chan.calc[dot.type].color;
+            color.setAlpha(200);
+            legendItems.append({chan.calc[dot.type].label(), color, Qt::DotLine});
+            continue;
+        }
         int linewidth = (10 * ratioX);
         QRectF rec(0, rect.top()-3, 0,0);
 
@@ -1114,7 +1183,15 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
         if (linecursormode) txt+=lasttext;
 
-        w.renderText(txt,left,top-5);
+        if (cardHeader) {
+            headerText = txt;
+        } else {
+            w.renderText(txt,left,top-5);
+        }
+    }
+
+    if (cardHeader) {
+        paintCardHeader(painter, w, headerText, legendItems);
     }
 
 

@@ -24,7 +24,7 @@ namespace UiKit {
 enum class LineIcon { None, Import, Oximetry, Daily, Overview, Statistics, Insights,
                       ArrowUpRight, ArrowDownRight, Settings,
                       FolderOpen, Edit, UserAdd, Delete, Clear, Moon, Sun,
-                      ModernLook, ClassicLook };
+                      ModernLook, ClassicLook, ChevronDown, ChevronRight, Info, Warning };
 
 //! \brief Stroke width of the tile icons, on the 24x24 design grid
 constexpr double LineIconStroke = 1.8;

@@ -354,6 +354,12 @@ bool gGraph::headerSummary(const QString &text)
     return true;
 }
 
+bool gGraph::leavesAxisToPage(Layer *layer)
+{
+    if (dynamic_cast<gXAxisDay *>(layer)) return true;
+    return dynamic_cast<gXAxis *>(layer) && !blockZoom();
+}
+
 void gGraph::paint(QPainter &painter, const QRegion &region)
 {
     m_rect = region.boundingRect();
@@ -490,8 +496,8 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
     // Where the page has one date axis for all its graphs, a graph leaves its own out.
     // Printed graphs always draw theirs.
     const bool sharedAxis = m_graphview->sharedXAxis() && !printing();
-    const auto leftOut = [sharedAxis](Layer *layer) {
-        return sharedAxis && dynamic_cast<gXAxisDay *>(layer) != nullptr;
+    const auto leftOut = [this, sharedAxis](Layer *layer) {
+        return sharedAxis && leavesAxisToPage(layer);
     };
 
     for (const auto & layer : m_layers) {

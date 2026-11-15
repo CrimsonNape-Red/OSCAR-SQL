@@ -19,5 +19,8 @@ private slots:
     void testInHeader();
     void testElideSummary();
     void testHeaderUnits();
+    void testSplitHeaderFits();
+    void testSplitHeaderNarrow();
+    void testSplitHeaderEmpty();
 };
 DECLARE_TEST(GraphCardTests)

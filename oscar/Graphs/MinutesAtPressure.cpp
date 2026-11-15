@@ -798,7 +798,11 @@ void MinutesAtPressure::paint(QPainter &painter, gGraph &graph, const QRegion &r
     // draw rectangle for graph boundary.
     painter.setFont(*defaultfont);
     painter.setPen(GraphTheme::ink(Qt::black));
-    painter.drawRect(boundingRect);
+    if (graph.graphView()->cardLook() && !graph.printing()) {
+        GraphTheme::paintCardAxes(painter, boundingRect);     // as on Modern Overview
+    } else {
+        painter.drawRect(boundingRect);
+    }
 
 
     ////////////////////////////////////////////////////////////////////
@@ -1177,8 +1181,9 @@ void MapPainter::drawMetaData(QPoint& last_mouse , QString& topBarLabel,Pressure
     }
 
     // DRAW top line status information
+    // (along the header in the card look)
     int topBarTop=boundingRect.top()-5;
-    graph.renderText(topBarLabel, boundingRect.left(),  topBarTop);
+    if (!graph.headerSummary(topBarLabel)) graph.renderText(topBarLabel, boundingRect.left(),  topBarTop);
 }
 
 // set the opacity and default color

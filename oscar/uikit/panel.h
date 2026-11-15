@@ -31,6 +31,9 @@ public:
     explicit Panel(Theme::Role fill = Theme::Role::Surface, Theme::Role border = Theme::Role::Line,
                    int radius = Theme::Radius, QWidget *parent = nullptr);
 
+    //! \brief Changes the background and border roles (Theme::Role::Count: no border)
+    void setRoles(Theme::Role fill, Theme::Role border) { m_fill = fill; m_border = border; update(); }
+
     //! \brief Adds the card drop shadow
     void setShadow(bool shadow);
 

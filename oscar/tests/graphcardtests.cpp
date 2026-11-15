@@ -66,4 +66,40 @@ void GraphCardTests::testHeaderUnits()
     QCOMPARE(headerUnits("AHI", "Apnea\nHypopnea\nIndex"), QString("Apnea Hypopnea Index"));
     QCOMPARE(headerUnits("Session Times", "Session Times"), QString());
     QCOMPARE(headerUnits("Weight", ""), QString());
+    // Daily captions: name, description, then the unit in brackets on the last line
+    QCOMPARE(headerUnits("Flow Rate", "Flow Rate\nBreathing flow rate waveform\n(L/min)"), QString("L/min"));
+    QCOMPARE(headerUnits("Snore", "Snore\nSnore count\n()"), QString());
+}
+
+void GraphCardTests::testSplitHeaderFits()
+{
+    // The legend takes its width from the right; the text keeps the rest
+    const HeaderSplit split = splitHeader(QRect(100, 6, 400, 26), 150, 80);
+    QCOMPARE(split.text.left(), 100);
+    QCOMPARE(split.text.right(), 349);
+    QCOMPARE(split.legend.left(), 350);
+    QCOMPARE(split.legend.right(), 499);
+    QCOMPARE(split.text.top(), 6);
+    QCOMPARE(split.legend.height(), 26);
+}
+
+void GraphCardTests::testSplitHeaderNarrow()
+{
+    // A legend wider than the room left over is narrowed so the text keeps its minimum
+    const HeaderSplit split = splitHeader(QRect(100, 6, 400, 26), 380, 80);
+    QCOMPARE(split.text.width(), 80);
+    QCOMPARE(split.legend.width(), 320);
+    QCOMPARE(split.legend.left(), 180);
+
+    // Less room than the text's minimum: no legend at all, never a negative width
+    const HeaderSplit tiny = splitHeader(QRect(100, 6, 60, 26), 50, 80);
+    QCOMPARE(tiny.text.width(), 60);
+    QCOMPARE(tiny.legend.width(), 0);
+}
+
+void GraphCardTests::testSplitHeaderEmpty()
+{
+    const HeaderSplit split = splitHeader(QRect(), 150, 80);
+    QVERIFY(split.text.isEmpty());
+    QVERIFY(split.legend.isEmpty());
 }

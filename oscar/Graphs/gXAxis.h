@@ -40,6 +40,12 @@ class gXAxis: public Layer
 
     void setRoundDays(bool b) { m_roundDays = b; }
 
+    /*! \brief With the cache off, the axis paints its ticks and labels straight onto the
+        painter it is given every time, ignoring the pixmap caching preference and
+        gGraph::invalidate_xAxisImage. For an axis drawn outside its graph (DailyTimeAxis),
+        where the graph's text queue would not reach the painter. On by default. */
+    void setCacheEnabled(bool on) { m_cacheEnabled = on; }
+
     //! \brief Returns the minimum height needed to fit
     virtual int minimumHeight();
 
@@ -96,6 +102,7 @@ class gXAxis: public Layer
     bool m_imageDark = false;   //!< Whether m_image was drawn in dark-mode colours
 
     bool m_roundDays;
+    bool m_cacheEnabled = true; //!< See setCacheEnabled()
 };
 
 

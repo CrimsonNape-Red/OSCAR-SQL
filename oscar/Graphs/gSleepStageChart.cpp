@@ -279,8 +279,12 @@ void gSleepStageChart::paint(QPainter &painter, gGraph &w, const QRegion &region
     painter.setClipping(false);
     painter.setRenderHint(QPainter::Antialiasing, hadAntialiasing);
     painter.setBrush(Qt::NoBrush);
-    painter.setPen(GraphTheme::ink(COLOR_Outline));
-    painter.drawRect(rect);
+    if (w.graphView()->cardLook() && !w.printing()) {
+        GraphTheme::paintCardAxes(painter, rect);     // as on Modern Overview
+    } else {
+        painter.setPen(GraphTheme::ink(COLOR_Outline));
+        painter.drawRect(rect);
+    }
 
     if (AppSetting->lineCursorMode()) {
         const double time = w.currentTime();

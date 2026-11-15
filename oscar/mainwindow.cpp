@@ -1940,7 +1940,7 @@ void MainWindow::togglePageLook()
     AppSetting->setUseNewPages(!AppSetting->useNewPages());
     p_pref->Save();             // keep the choice even if OSCAR doesn't close normally
     if (welcome) rebuildWelcomePage();
-    rebuildOverviewPage();
+    rebuildDailyPage();
     updatePageLookButton();
 }
 
@@ -2148,24 +2148,54 @@ void MainWindow::rebuildWelcomePage()
     welcome->refreshPage();
 }
 
-void MainWindow::rebuildOverviewPage()
+void MainWindow::rebuildDailyPage()
 {
     if (!overview || !daily) return;
-    int index = ui->tabWidget->indexOf(overview);
-    if (index < 0) return;
-    const bool wasCurrent = (ui->tabWidget->currentWidget() == overview);
+    const int dailyIndex = ui->tabWidget->indexOf(daily);
+    const int overviewIndex = ui->tabWidget->indexOf(overview);
+    if (dailyIndex < 0 || overviewIndex < 0) return;
+    QWidget *current = ui->tabWidget->currentWidget();
+    const bool dailyCurrent = (current == daily);
+    const bool overviewCurrent = (current == overview);
+    const bool dailyEnabled = ui->tabWidget->isTabEnabled(dailyIndex);
+    const bool overviewEnabled = ui->tabWidget->isTabEnabled(overviewIndex);
+    const QDate date = daily->getDate();
 
-    // Remove the old page from the tab first so the tab widget never shows a deleted page.
-    // Deleting it saves its graph layout, which the new page then loads.
-    ui->tabWidget->removeTab(index);
+    // Save the day's journal notes before the page goes
+    daily->Unload();
+    daily->clearLastDay();
+
+    // Remove each old page from the tab first so the tab widget never shows a deleted page.
+    // Overview goes first, since it uses Daily's graph view. Deleting a page saves its graph
+    // layout, which the new page then loads.
+    ui->tabWidget->removeTab(ui->tabWidget->indexOf(overview));
     delete overview;
+    overview = nullptr;
+    ui->tabWidget->removeTab(ui->tabWidget->indexOf(daily));
+    delete daily;
+    daily = nullptr;
+
+    daily = new Daily(ui->tabWidget, nullptr);
+    ui->tabWidget->insertTab(dailyIndex, daily, STR_TR_Daily);
+    connect(daily, &Daily::dateLoaded, this, [this](QDate date) {
+        if (m_correctionDialog) m_correctionDialog->setDate(date);
+    });
+    daily->ReloadGraphs();
 
     overview = new Overview(ui->tabWidget, daily->graphView());
-    ui->tabWidget->insertTab(index, overview, STR_TR_Overview);
-    if (wasCurrent) {
+    ui->tabWidget->insertTab(overviewIndex, overview, STR_TR_Overview);
+    overview->ReloadGraphs();
+
+    ui->tabWidget->setTabEnabled(dailyIndex, dailyEnabled);
+    ui->tabWidget->setTabEnabled(overviewIndex, overviewEnabled);
+    if (dailyCurrent) {
+        ui->tabWidget->setCurrentWidget(daily);
+    } else if (overviewCurrent) {
         ui->tabWidget->setCurrentWidget(overview);
     }
-    overview->ReloadGraphs();
+    if (date.isValid()) {
+        daily->LoadDate(date);
+    }
 }
 
 void MainWindow::on_action_Preferences_triggered()
@@ -2191,7 +2221,7 @@ void MainWindow::on_action_Preferences_triggered()
             rebuildWelcomePage();
         }
         if (pagesChanged) {
-            rebuildOverviewPage();
+            rebuildDailyPage();
             updatePageLookButton();
         }
 

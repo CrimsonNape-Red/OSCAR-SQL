@@ -216,7 +216,8 @@ void gFlagsGroup::paint(QPainter &painter, gGraph &g, const QRegion &region)
         arg(QObject::tr("Selection Length")).
         arg(QTime(0,0).addMSecs(seldur).toString("H:mm:ss.zzz")) ;
     #endif
-    g.renderText(text, left , top -5 );
+    // Card look: the text goes along the header; Classic: above the plot
+    if (!g.headerSummary(text)) g.renderText(text, left , top -5 );
 
     QColor barcol;
 
@@ -255,8 +256,12 @@ void gFlagsGroup::paint(QPainter &painter, gGraph &g, const QRegion &region)
         }
     }
 
-    painter.setPen(GraphTheme::ink(COLOR_Outline));
-    painter.drawRect(outline);
+    if (g.graphView()->cardLook() && !g.printing()) {
+        GraphTheme::paintCardAxes(painter, outline);     // as on Modern Overview
+    } else {
+        painter.setPen(GraphTheme::ink(COLOR_Outline));
+        painter.drawRect(outline);
+    }
 
     if (AppSetting->lineCursorMode()) {
         double time = g.currentTime();
