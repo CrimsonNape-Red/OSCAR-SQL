@@ -4,6 +4,31 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-15 - Modern Daily page: Statistics tooltips unreadable in Light mode (GitLab #391)
+
+**Files:** `oscar/dailydetailspanel.cpp` (`label()`)
+
+**Symptom:** In Light mode, hovering a channel name in the Statistics card showed a black box:
+dark text on a black background. The names in the Device Settings card did the same.
+
+**Root cause:** Qt styles a widget's tooltip from that widget's own style sheet, which takes
+precedence over the application's `QToolTip` rule. The cards' labels had a sheet with no selector
+(`color: ...; background: transparent;`), so the rule applied to the tooltip too: the label's text
+colour on a transparent background, which a tooltip window shows as black. Dark mode had the same
+fault, but its light text stayed readable.
+
+**Fix:** The sheet is now `QLabel { ... }`, which Qt does not match against a tooltip.
+
+**Non-obvious:**
+- Reproduced and checked with a stand-alone Qt 6.12 harness that grabs the tooltip and counts its
+  colours: transparent before, OSCAR's yellow (or the system's colours) after.
+- The Events card was unaffected: its tooltip is on the row widget, which has no style sheet.
+- The Classic page's tooltips (HTML `title` attributes) painted correctly in the same harness.
+- Any sheet with no selector does this on a widget that has a tooltip. `UiKit::Callout` has such
+  sheets, but its labels have no tooltips.
+
+---
+
 ## 2026-11-14 - Crash popping out a graph after switching profile (GitLab #388)
 
 **Files:** `oscar/daily.cpp`

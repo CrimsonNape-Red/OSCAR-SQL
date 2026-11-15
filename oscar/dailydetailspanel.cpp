@@ -46,7 +46,9 @@ QLabel *label(const QString &text, Theme::Role role, QWidget *parent, bool bold 
         l->setFont(font);
     }
     l->setWordWrap(wrap);
-    l->setStyleSheet(QString("color: %1; background: transparent;").arg(Theme::css(role)));
+    // The QLabel selector is needed: Qt styles a widget's tooltip from that widget's style sheet,
+    // and a rule with no selector would give the tooltip this text colour on no background.
+    l->setStyleSheet(QString("QLabel { color: %1; background: transparent; }").arg(Theme::css(role)));
     return l;
 }
 
