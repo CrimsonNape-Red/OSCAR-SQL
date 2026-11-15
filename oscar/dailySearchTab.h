@@ -127,6 +127,8 @@ public:
     DailySearchTab ( Daily* daily , QWidget* ,  QTabWidget* ) ;
     ~DailySearchTab();
     void updateEvents(ChannelID id,QString fullname);
+    //! \brief Restyles the tab for the current light or dark mode (its style sheets are in light colours)
+    void applyTheme();
 
 private:
     enum STATE { reset = 0 ,

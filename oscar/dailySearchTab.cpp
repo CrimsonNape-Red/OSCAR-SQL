@@ -34,6 +34,57 @@
 #include "SleepLib/journal.h"
 #include "daily.h"
 #include "SleepLib/machine_common.h"
+#include "Graphs/graphtheme.h"
+#include <QRegularExpression>
+
+namespace {
+
+//! The property that keeps a widget's style sheet in its light colours, to translate again
+const char *const kLightStyleSheet = "oscarLightStyleSheet";
+
+/*! \brief A style sheet written in light colours, translated for the current mode
+
+    In dark mode each colour in a declaration is translated as the graphs translate theirs:
+    backgrounds with GraphTheme::fill() (white becomes dark, pale tints dark tints), and text
+    and borders with GraphTheme::ink() (black becomes light). */
+QString themedSheet(const QString &light)
+{
+    if (!GraphTheme::dark()) return light;
+    // A declaration: its property and value, at the start or after '{' or ';'
+    static const QRegularExpression declaration(QStringLiteral(R"((?:^|[{;])\s*([\w-]+)\s*:\s*([^;}]*))"));
+    static const QRegularExpression colour(QStringLiteral(R"(#[0-9A-Fa-f]{6}\b|\bwhite\b|\bblack\b)"));
+    QString out;
+    qsizetype done = 0;
+    QRegularExpressionMatchIterator decls = declaration.globalMatch(light);
+    while (decls.hasNext()) {
+        const QRegularExpressionMatch decl = decls.next();
+        const bool background = decl.captured(1).contains(QLatin1String("background"));
+        const QString value = decl.captured(2);
+        QString translated;
+        qsizetype at = 0;
+        QRegularExpressionMatchIterator colours = colour.globalMatch(value);
+        while (colours.hasNext()) {
+            const QRegularExpressionMatch c = colours.next();
+            const QColor lightColour(c.captured());
+            translated += value.mid(at, c.capturedStart() - at)
+                          + (background ? GraphTheme::fill(lightColour) : GraphTheme::ink(lightColour)).name();
+            at = c.capturedEnd();
+        }
+        translated += value.mid(at);
+        out += light.mid(done, decl.capturedStart(2) - done) + translated;
+        done = decl.capturedEnd(2);
+    }
+    return out + light.mid(done);
+}
+
+//! \brief Sets \a widget's style sheet from one in light colours, remembered for DailySearchTab::applyTheme()
+void setThemedStyleSheet(QWidget *widget, const QString &light)
+{
+    widget->setProperty(kLightStyleSheet, light);
+    widget->setStyleSheet(themedSheet(light));
+}
+
+} // namespace
 
 enum DS_COL { DS_COL_LEFT=0, DS_COL_RIGHT, DS_COL_MAX };
 enum DS_ROW{ DS_ROW_HEADER, DS_ROW_DATA };
@@ -139,6 +190,14 @@ DailySearchTab::DailySearchTab(Daily* daily , QWidget* searchTabWidget  , QTabWi
     connectUi(true);
 }
 
+void DailySearchTab::applyTheme()
+{
+    for (QWidget *widget : searchTabWidget->findChildren<QWidget *>()) {
+        const QVariant light = widget->property(kLightStyleSheet);
+        if (light.isValid()) widget->setStyleSheet(themedSheet(light.toString()));
+    }
+}
+
 DailySearchTab::~DailySearchTab() {
     connectUi(false);
     delete m_icon_selected;
@@ -224,7 +283,7 @@ void    DailySearchTab::createUi() {
 
 
         QString styleSheetWidget = QString("border: 1px solid black; padding:none;");
-        startWidget->setStyleSheet(styleSheetWidget);
+        setThemedStyleSheet(startWidget, styleSheetWidget);
         searchTabLayout ->addWidget(helpButton);
         searchTabLayout ->addWidget(helpText);
         searchTabLayout ->addWidget(startWidget);
@@ -261,19 +320,19 @@ void    DailySearchTab::createUi() {
         helpText->setMinimumSize(textsize(this->font(),helpString));
         helpText->setSizePolicy( sizePolicyEE );
 
-        helpButton->setStyleSheet( styleButton );
+        setThemedStyleSheet(helpButton, styleButton );
         helpMode = true;
         on_helpButton_clicked();
 
         matchButton->setIcon(*m_icon_configure);
-        matchButton->setStyleSheet( styleButton );
-        clearButton->setStyleSheet( styleButton );
-        addMatchButton->setStyleSheet( styleButton );
+        setThemedStyleSheet(matchButton, styleButton );
+        setThemedStyleSheet(clearButton, styleButton );
+        setThemedStyleSheet(addMatchButton, styleButton );
         setText(matchButton,tr("Match"));
         setText(clearButton,tr("Clear"));
 
 
-        commandButton->setStyleSheet("border:none;");
+        setThemedStyleSheet(commandButton, "border:none;");
 
         float height = float(commandList->count())*commandListItemHeight ;
         commandList->setMinimumHeight(height);
@@ -288,7 +347,7 @@ void    DailySearchTab::createUi() {
         cmdDescList->show();
 
         setText(operationButton,"");
-        operationButton->setStyleSheet("border:none;");
+        setThemedStyleSheet(operationButton, "border:none;");
         operationButton->hide();
         operationCombo->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
         setOperationPopupEnabled(false);
@@ -299,14 +358,13 @@ void    DailySearchTab::createUi() {
         selectUnits->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
         setText(selectUnits,"");
 
-        progressBar->setStyleSheet(
-            "QProgressBar{border: 1px solid black; text-align: center;}"
+        setThemedStyleSheet(progressBar, "QProgressBar{border: 1px solid black; text-align: center;}"
             "QProgressBar::chunk { border: none; background-color: #ccddFF; } ");
 
 
-        summaryProgress->setStyleSheet( styleButton );
-        summaryFound->setStyleSheet( styleButton );
-        summaryMinMax->setStyleSheet( styleButton );
+        setThemedStyleSheet(summaryProgress, styleButton );
+        setThemedStyleSheet(summaryFound, styleButton );
+        setThemedStyleSheet(summaryMinMax, styleButton );
         summaryProgress->setSizePolicy( sizePolicyEM ) ;
         summaryFound->setSizePolicy( sizePolicyEM ) ;
         summaryMinMax->setSizePolicy( sizePolicyEM ) ;
@@ -314,7 +372,7 @@ void    DailySearchTab::createUi() {
         resultTable->horizontalHeader()->hide();   // hides numbers above each column
         resultTable->horizontalHeader()->setStretchLastSection(true);
         // get rid of selection coloring
-        resultTable->setStyleSheet("QTableView{background-color: white; selection-background-color: white; }");
+        setThemedStyleSheet(resultTable, "QTableView{background-color: white; selection-background-color: white; }");
 
         float width = 14/*styleSheet:padding+border*/ + QFontMetrics(this->font()).size(Qt::TextSingleLine ,"WWW MMM 99 2222").width();
         resultTable->setColumnWidth(DS_COL_LEFT, width);
@@ -801,8 +859,7 @@ void DailySearchTab::setResult(int row,int column,QDate date,QString text) {
     GPushButton* item;
     if (header == nullptr) {
         item = new GPushButton(row,column,date,this);
-        item->setStyleSheet(
-            "QPushButton { text-align: left;color: black; border: 1px solid black; padding: 5px ;background-color:white; }" );
+        setThemedStyleSheet(item, "QPushButton { text-align: left;color: black; border: 1px solid black; padding: 5px ;background-color:white; }" );
         resultTable->setCellWidget(row,column,item);
     } else {
         item = dynamic_cast<GPushButton *>(header);
@@ -1612,7 +1669,7 @@ QLabel* DailySearchTab::getCmdDescLabel() {
                 );
             label = new QLabel();
             cmdDescLabels.append(label);
-            label ->setStyleSheet( styleLabel );
+            setThemedStyleSheet(label, styleLabel );
             label ->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
             cmdDescLayout ->addWidget(label);
         }
@@ -1624,7 +1681,7 @@ QLabel* DailySearchTab::getCmdDescLabel() {
 void    DailySearchTab::setColor(QPushButton* button,QString color)  {
         QString style=QString(
             "QPushButton { color: black; border: 1px solid black; padding: 5px ;background-color:%1; }").arg(color);
-        button->setStyleSheet(style);
+        setThemedStyleSheet(button, style);
         // Avoid nested event processing here. This is called while Daily UI is still
         // being constructed, and re-entrant paints can flush the OpenGL-backed window
         // before Qt/macOS has finished stabilizing its surfaces.

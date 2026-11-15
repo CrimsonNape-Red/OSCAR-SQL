@@ -192,6 +192,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     m_modern = AppSetting->useNewPages();
     ui->setupUi(this);
     m_calendarStyleSheet = ui->calendar->styleSheet();
+    m_formPalette = palette();
     m_calButtonStyleSheet = ui->calButton->styleSheet();
     applyTheme();
 
@@ -880,9 +881,15 @@ void Daily::applyTheme()
         sheet.replace("color: #808080", "color: " + GraphTheme::ink(QColor(0x80, 0x80, 0x80)).name());
         return sheet;
     };
+    // The form sets a white palette on the whole page, which in dark mode left the Details panel
+    // and the other tabs white with black text. In dark mode the page takes the application's
+    // colours instead (an empty palette only clears the form's).
+    setPalette(Theme::isDark(QGuiApplication::palette()) ? QPalette() : m_formPalette);
     ui->calendar->setStyleSheet(withBackgrounds(m_calendarStyleSheet));
     ui->calButton->setStyleSheet(withBackgrounds(m_calButtonStyleSheet));
     applyWeekendFormat();
+    if (dailySearchTab) dailySearchTab->applyTheme();
+    if (sessionbar) sessionbar->update();
     if (m_modern && dateDisplay) {
         // The status line under the time axis, in the theme's secondary text colour
         QPalette palette = dateDisplay->palette();

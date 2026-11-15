@@ -341,6 +341,7 @@ protected:
 private:
     bool m_modern = false;          //!< See modern()
     QString m_calendarStyleSheet;   //!< The calendar's style sheet from the form, in light colours
+    QPalette m_formPalette;         //!< The page's palette from the form, in light colours
     QString m_calButtonStyleSheet;  //!< The date button's style sheet from the form, in light colours
     //! \brief Sets the calendar's weekend text to the weekday colour for the current mode
     void applyWeekendFormat();
@@ -442,7 +443,7 @@ private:
     QIcon * icon_up_down;
     QIcon * icon_warning;
 
-    SessionBar * sessionbar;
+    SessionBar * sessionbar = nullptr;
     MyLabel * dateDisplay = nullptr;
     //! Modern: the time scale under the graphs, shared by all of them (null in Classic)
     DailyTimeAxis * m_timeAxis = nullptr;
