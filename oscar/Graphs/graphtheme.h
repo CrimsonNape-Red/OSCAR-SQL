@@ -14,6 +14,9 @@
 #define GRAPHTHEME_H
 
 #include <QColor>
+#include <QRectF>
+
+class QPainter;
 
 /*! \namespace GraphTheme
     \brief Light-mode graph colours, translated for dark mode
@@ -45,6 +48,9 @@ const QColor kAxisGrey(120, 120, 120);
 
 //! \brief The card look's colour for axis lines, ticks and labels: kAxisGrey, or its dark-mode match
 QColor axis();
+
+//! \brief Card look: the plot's frame as Modern Overview draws it, the left and bottom lines only, in axis()
+void paintCardAxes(QPainter &painter, const QRectF &plot);
 
 /*! \brief The outline of a graph card or statistics tile. In dark mode the palette's border
     colour can be as dark as the card itself, so a grey that shows on it is used instead. */

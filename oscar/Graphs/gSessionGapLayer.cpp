@@ -74,10 +74,12 @@ void gSessionGapLayer::paint(QPainter &painter, gGraph &w, const QRegion &region
     painter.setPen(Qt::NoPen);
     // The theme's line colour; in dark mode that is too close to the graph background for a
     // one-pixel hatch to show, so the muted text colour, softened, is used there instead
+    // Kept faint: the gap should show without drawing the eye
     QColor hatch = Theme::color(Theme::Role::Line);
+    hatch.setAlpha(150);
     if (GraphTheme::dark()) {
         hatch = Theme::color(Theme::Role::Ink3);
-        hatch.setAlpha(150);
+        hatch.setAlpha(80);
     }
     painter.setBrush(QBrush(hatch, Qt::BDiagPattern));
     for (const SessionGaps::Span &gap : m_gaps) {

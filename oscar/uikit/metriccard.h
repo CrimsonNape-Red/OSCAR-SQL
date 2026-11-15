@@ -58,6 +58,10 @@ public:
 
     void setTint(Tint tint);
 
+    /*! \brief Draws no card background, border or shadow: for a card set inside another card
+        (the comparison boxes still follow setTint()) */
+    void setFlat(bool flat);
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 
@@ -70,6 +74,7 @@ private:
     CompareBox *m_box7;
     CompareBox *m_box30;
     Tint m_tint = Tint::None;
+    bool m_flat = false;
 };
 
 } // namespace UiKit

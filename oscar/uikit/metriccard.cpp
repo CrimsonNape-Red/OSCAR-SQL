@@ -255,8 +255,21 @@ void MetricCard::setTint(Tint tint)
     update();
 }
 
+void MetricCard::setFlat(bool flat)
+{
+    m_flat = flat;
+    if (flat) {
+        setGraphicsEffect(nullptr);     // no shadow
+        const int margin = 2;
+        layout()->setContentsMargins(margin, 0, margin, margin);
+    }
+    m_title->setVisible(!flat || !m_title->text().isEmpty());   // the enclosing card names it
+    update();
+}
+
 void MetricCard::paintEvent(QPaintEvent *)
 {
+    if (m_flat) return;     // the enclosing card draws the frame
     using Theme::Role;
     Role fill = Role::Surface, border = Role::Line;
     switch (m_tint) {

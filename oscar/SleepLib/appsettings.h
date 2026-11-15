@@ -77,8 +77,9 @@ const QString STR_AS_RightSidebarVisible = "RightSidebarVisible";
 const QString STR_AS_RightSidebarPanel = "RightSidebarPanel";
 const QString STR_AS_LeftSideBarEnable = "LeftSideBarEnable";
 const QString STR_AS_DailyCardsOpen = "DailyCardsOpen";
-//! Modern Daily: the cards open by default (only the Device card, see DailyCard in dailydetails.h)
-constexpr int DefaultDailyCardsOpen = 1;
+//! Modern Daily: the cards open by default: AHI, Device, Events and Statistics (bits 5, 0, 6, 7 of
+//! DailyCard in dailydetails.h)
+constexpr int DefaultDailyCardsOpen = (1 << 0) | (1 << 5) | (1 << 6) | (1 << 7);
 const QString STR_US_TooltipTimeout = "TooltipTimeout";
 const QString STR_US_ScrollDampening = "ScrollDampening";
 const QString STR_US_ShowDebug = "ShowDebug";

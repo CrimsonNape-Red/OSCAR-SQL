@@ -10,6 +10,7 @@
 
 #include <QGuiApplication>
 #include <QHash>
+#include <QPainter>
 #include <QPalette>
 #include <cmath>
 
@@ -141,6 +142,16 @@ QColor background()
 QColor axis()
 {
     return ink(kAxisGrey);
+}
+
+void paintCardAxes(QPainter &painter, const QRectF &plot)
+{
+    painter.save();
+    painter.setPen(axis());
+    painter.setBrush(Qt::NoBrush);
+    painter.drawLine(plot.topLeft(), plot.bottomLeft());
+    painter.drawLine(plot.bottomLeft(), plot.bottomRight());
+    painter.restore();
 }
 
 QColor outline()

@@ -553,9 +553,13 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
     int sam;
     int minz, maxz;
 
-    // Draw bounding box
-    painter.setPen(GraphTheme::ink(Qt::black));
-    painter.drawRect(rect);
+    // Draw bounding box (card look: the left and bottom lines only, as on Modern Overview)
+    if (w.graphView()->cardLook() && !w.printing()) {
+        GraphTheme::paintCardAxes(painter, rect);
+    } else {
+        painter.setPen(GraphTheme::ink(Qt::black));
+        painter.drawRect(rect);
+    }
 
     width--;
     height -= 2;

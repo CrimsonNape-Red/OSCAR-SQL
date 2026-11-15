@@ -50,7 +50,8 @@ QLabel *label(const QString &text, Theme::Role role, QWidget *parent, bool bold 
     return l;
 }
 
-//! \brief A string the Classic page also shows, in the Classic page's translation context
+//! \brief A string the Classic page also shows, in the Classic page's translation context.
+//! Callers mark the literal with QT_TRANSLATE_NOOP("Daily", ...) so lupdate collects it.
 QString classic(const char *text)
 {
     return QCoreApplication::translate("Daily", text);
@@ -161,11 +162,11 @@ void DailyDetailsPanel::setPage(const Page &page)
 
     switch (page.kind) {
     case DayKind::NoData:
-        m_column->addWidget(new Callout(Callout::Kind::Info, classic("No data is available for this day."), QString(), body));
+        m_column->addWidget(new Callout(Callout::Kind::Info, classic(QT_TRANSLATE_NOOP("Daily", "No data is available for this day.")), QString(), body));
         break;
     case DayKind::ComplianceOnly: {
-        m_column->addWidget(new Callout(Callout::Kind::Warning, classic("This CPAP device does NOT record detailed data"),
-                                        classic("Sorry, this device only provides compliance data."), body));
+        m_column->addWidget(new Callout(Callout::Kind::Warning, classic(QT_TRANSLATE_NOOP("Daily", "This CPAP device does NOT record detailed data")),
+                                        classic(QT_TRANSLATE_NOOP("Daily", "Sorry, this device only provides compliance data.")), body));
         QVBoxLayout *column = nullptr;
         auto *card = titledCard(QString(), body, &column);
         column->addWidget(usageRow(page.usage, card));
@@ -176,13 +177,13 @@ void DailyDetailsPanel::setPage(const Page &page)
         break;
     }
     case DayKind::SessionsOff:
-        m_column->addWidget(new Callout(Callout::Kind::Warning, classic("Sessions exist for this day but are switched off."),
+        m_column->addWidget(new Callout(Callout::Kind::Warning, classic(QT_TRANSLATE_NOOP("Daily", "Sessions exist for this day but are switched off.")),
                                         QString(), body));
         // No device card: with no session on, there are no settings to show (as on Classic)
         if (!page.statistics.rows.isEmpty()) m_column->addWidget(statisticsCard(page.statistics));
         break;
     case DayKind::ZeroHours:
-        m_column->addWidget(new Callout(Callout::Kind::Info, classic("Impossibly short session"), QString(), body));
+        m_column->addWidget(new Callout(Callout::Kind::Info, classic(QT_TRANSLATE_NOOP("Daily", "Impossibly short session")), QString(), body));
         break;
     case DayKind::NonCpapOnly:
         // Data from other devices without CPAP data is normal: no callout, only the cards
@@ -198,7 +199,7 @@ void DailyDetailsPanel::setPage(const Page &page)
     }
     if (page.statistics.summaryOnlyNote && (page.kind == DayKind::Cpap || page.kind == DayKind::NonCpapOnly)) {
         m_column->addWidget(new Callout(Callout::Kind::Info, QString(),
-                                        STR_MessageBox_PleaseNote + " " + classic("This day just contains summary data, only limited information is available."),
+                                        STR_MessageBox_PleaseNote + " " + classic(QT_TRANSLATE_NOOP("Daily", "This day just contains summary data, only limited information is available.")),
                                         body));
     }
 
@@ -233,8 +234,8 @@ QStringList DailyDetailsPanel::texts() const
 QWidget *DailyDetailsPanel::ahiCard(const Page &page)
 {
     const Headline &h = page.headline;
-    auto *card = new UiKit::MetricCard(m_body);
-    card->setTitle(h.name);
+    auto *card = new UiKit::MetricCard();
+    card->setFlat(true);                // the collapsible card around it draws the frame and tint
     card->setToolTip(h.fullName);
     card->setValue(QString::number(h.value, 'f', 2), tr("events per hour"));
     if (h.hasShares) {
@@ -249,13 +250,23 @@ QWidget *DailyDetailsPanel::ahiCard(const Page &page)
     };
     card->setComparisons(tr("7 nights"), average(page.avg7, page.nights7), c7,
                          tr("30 nights"), average(page.avg30, page.nights30), c30);
-    switch (UiKit::statusTint(c7, c30)) {
-    case UiKit::StatusTint::Good: card->setTint(UiKit::MetricCard::Tint::Good); break;
-    case UiKit::StatusTint::Bad: card->setTint(UiKit::MetricCard::Tint::Bad); break;
-    case UiKit::StatusTint::None: break;
-    }
     card->setFooterWidget(usageRow(page.usage, card));
-    return card;
+    auto *outer = static_cast<UiKit::CollapsibleCard *>(collapsible(DC_Ahi, h.name, card));
+    outer->setHeaderToolTip(h.fullName);
+    // Green or red only when both comparisons agree (the Welcome page's rule)
+    switch (UiKit::statusTint(c7, c30)) {
+    case UiKit::StatusTint::Good:
+        card->setTint(UiKit::MetricCard::Tint::Good);
+        outer->setRoles(Theme::Role::GoodTint, Theme::Role::GoodLine);
+        break;
+    case UiKit::StatusTint::Bad:
+        card->setTint(UiKit::MetricCard::Tint::Bad);
+        outer->setRoles(Theme::Role::BadTint, Theme::Role::BadLine);
+        break;
+    case UiKit::StatusTint::None:
+        break;
+    }
+    return outer;
 }
 
 QWidget *DailyDetailsPanel::usageRow(const Usage &usage, QWidget *parent)
@@ -308,7 +319,7 @@ QWidget *DailyDetailsPanel::deviceCard(const Device &device)
     auto *column = new QVBoxLayout(content);
     column->setContentsMargins(26, 0, 0, 2);
     column->setSpacing(2);
-    column->addWidget(label(classic("PAP Mode: %1").arg(device.mode), Theme::Role::Ink, content, false, true));
+    column->addWidget(label(classic(QT_TRANSLATE_NOOP("Daily", "PAP Mode: %1")).arg(device.mode), Theme::Role::Ink, content, false, true));
     const QString pressure = QTextDocumentFragment::fromHtml(device.pressure).toPlainText().simplified();
     if (!pressure.isEmpty()) column->addWidget(label(pressure, Theme::Role::Ink, content, false, true));
     if (device.settingsMissing) {
@@ -323,8 +334,9 @@ QWidget *DailyDetailsPanel::deviceCard(const Device &device)
 
 QWidget *DailyDetailsPanel::eventsCard(const QVector<EventRow> &events)
 {
-    QVBoxLayout *column = nullptr;
-    auto *card = titledCard(tr("Events"), m_body, &column);
+    auto *card = new QWidget();
+    auto *column = new QVBoxLayout(card);
+    column->setContentsMargins(0, 0, 0, 2);
     column->setSpacing(0);
     for (const EventRow &row : events) {
         std::function<void()> onClick;
@@ -334,13 +346,14 @@ QWidget *DailyDetailsPanel::eventsCard(const QVector<EventRow> &events)
         }
         column->addWidget(new EventRowWidget(row, card, onClick));
     }
-    return card;
+    return collapsible(DC_Events, tr("Events"), card);
 }
 
 QWidget *DailyDetailsPanel::statisticsCard(const DailyDetails::Statistics &statistics)
 {
-    QVBoxLayout *column = nullptr;
-    auto *card = titledCard(classic("Statistics"), m_body, &column);
+    auto *card = new QWidget();
+    auto *column = new QVBoxLayout(card);
+    column->setContentsMargins(4, 0, 0, 2);
     auto *table = new QWidget(card);
     auto *grid = new QGridLayout(table);
     grid->setContentsMargins(0, 2, 0, 0);
@@ -384,7 +397,7 @@ QWidget *DailyDetailsPanel::statisticsCard(const DailyDetails::Statistics &stati
         eg->setColumnStretch(0, 1);
         column->addWidget(extras);
     }
-    return card;
+    return collapsible(DC_Statistics, classic(QT_TRANSLATE_NOOP("Daily", "Statistics")), card);
 }
 
 QWidget *DailyDetailsPanel::eventBreakdownCard(const Page &page)
@@ -397,7 +410,7 @@ QWidget *DailyDetailsPanel::eventBreakdownCard(const Page &page)
     // The pie, or the "0.0" image when the device scores these events but recorded none
     image->setPixmap(page.pie.isNull() ? QPixmap(":/docs/0.0.gif") : page.pie);
     column->addWidget(image);
-    return collapsible(DC_EventBreakdown, classic("Event Breakdown"), content);
+    return collapsible(DC_EventBreakdown, classic(QT_TRANSLATE_NOOP("Daily", "Event Breakdown")), content);
 }
 
 QWidget *DailyDetailsPanel::oximeterCard(const DailyDetails::Oximeter &oximeter)
@@ -439,7 +452,7 @@ QWidget *DailyDetailsPanel::oximeterCard(const DailyDetails::Oximeter &oximeter)
         grid->addWidget(note, r++, 0, 1, 2);
     }
     grid->setColumnStretch(0, 1);
-    return collapsible(DC_Oximeter, classic("Oximeter Information"), content);
+    return collapsible(DC_Oximeter, classic(QT_TRANSLATE_NOOP("Daily", "Oximeter Information")), content);
 }
 
 QWidget *DailyDetailsPanel::settingsCard(const DailyDetails::Settings &settings)
@@ -449,12 +462,12 @@ QWidget *DailyDetailsPanel::settingsCard(const DailyDetails::Settings &settings)
     column->setContentsMargins(26, 0, 0, 2);
     column->setSpacing(4);
     if (settings.loaderMissing) {
-        column->addWidget(new Callout(Callout::Kind::Warning, classic("DEVICE SETTINGS ERROR"), QString(), content));
+        column->addWidget(new Callout(Callout::Kind::Warning, classic(QT_TRANSLATE_NOOP("Daily", "DEVICE SETTINGS ERROR")), QString(), content));
     } else {
         if (settings.assumed) {
             // The Classic text has its "Please Note:" in bold HTML; the callout shows it plain
             const QString note = QTextDocumentFragment::fromHtml(
-                classic("<b>Please Note:</b> All settings shown below are based on assumptions that nothing has changed since previous days.")).toPlainText();
+                classic(QT_TRANSLATE_NOOP("Daily", "<b>Please Note:</b> All settings shown below are based on assumptions that nothing has changed since previous days."))).toPlainText();
             column->addWidget(new Callout(Callout::Kind::Warning, QString(), note, content));
         }
         auto *table = new QWidget(content);
@@ -473,7 +486,7 @@ QWidget *DailyDetailsPanel::settingsCard(const DailyDetails::Settings &settings)
         grid->setColumnStretch(1, 2);
         column->addWidget(table);
     }
-    return collapsible(DC_DeviceSettings, classic("Device Settings"), content);
+    return collapsible(DC_DeviceSettings, classic(QT_TRANSLATE_NOOP("Daily", "Device Settings")), content);
 }
 
 QWidget *DailyDetailsPanel::sessionsCard(const QVector<SessionGroup> &groups)
@@ -491,7 +504,7 @@ QWidget *DailyDetailsPanel::sessionsCard(const QVector<SessionGroup> &groups)
         grid->setHorizontalSpacing(6);
         grid->setVerticalSpacing(0);
         // The date sits on the line with the session's name, so the table fits a narrow panel
-        const QStringList headings = { STR_TR_On, STR_TR_Start, STR_TR_End, classic("Duration") };
+        const QStringList headings = { STR_TR_On, STR_TR_Start, STR_TR_End, classic(QT_TRANSLATE_NOOP("Daily", "Duration")) };
         for (int c = 0; c < headings.size(); ++c) grid->addWidget(label(headings[c], Theme::Role::Ink2, table), 0, c);
         int r = 1;
         for (const SessionRow &row : group.rows) {
@@ -506,7 +519,7 @@ QWidget *DailyDetailsPanel::sessionsCard(const QVector<SessionGroup> &groups)
                             r, 0, 1, headings.size());
             auto *toggle = new UiKit::ToggleSwitch(table);
             toggle->setChecked(row.on);
-            const QString tip = classic("Click to %1 this session.").arg(row.on ? classic("disable") : classic("enable"));
+            const QString tip = classic(QT_TRANSLATE_NOOP("Daily", "Click to %1 this session.")).arg(row.on ? classic(QT_TRANSLATE_NOOP("Daily", "disable")) : classic(QT_TRANSLATE_NOOP("Daily", "enable")));
             toggle->setToolTip(tip);
             toggle->setAccessibleName(row.name);
             Session *session = row.session;
@@ -523,5 +536,5 @@ QWidget *DailyDetailsPanel::sessionsCard(const QVector<SessionGroup> &groups)
         grid->setColumnStretch(headings.size() - 1, 1);
         column->addWidget(table);
     }
-    return collapsible(DC_SessionInfo, classic("Session Information"), content);
+    return collapsible(DC_SessionInfo, classic(QT_TRANSLATE_NOOP("Daily", "Session Information")), content);
 }

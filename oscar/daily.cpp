@@ -845,6 +845,8 @@ void Daily::ReloadGraphs()
 void Daily::updateLeftSidebar() {
     if (webView && !htmlLeftHeader.isEmpty())
         webView->setHtml(getLeftSidebar(true));
+    // Modern: the cards are built when the day loads (the pie preference changed: F3)
+    if (m_detailsPanel && previous_date.isValid()) LoadDate(previous_date);
 }
 
 void Daily::hideSpaceHogs()

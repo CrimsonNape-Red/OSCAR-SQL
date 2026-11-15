@@ -798,7 +798,11 @@ void MinutesAtPressure::paint(QPainter &painter, gGraph &graph, const QRegion &r
     // draw rectangle for graph boundary.
     painter.setFont(*defaultfont);
     painter.setPen(GraphTheme::ink(Qt::black));
-    painter.drawRect(boundingRect);
+    if (graph.graphView()->cardLook() && !graph.printing()) {
+        GraphTheme::paintCardAxes(painter, boundingRect);     // as on Modern Overview
+    } else {
+        painter.drawRect(boundingRect);
+    }
 
 
     ////////////////////////////////////////////////////////////////////

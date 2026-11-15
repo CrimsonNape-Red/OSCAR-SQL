@@ -50,8 +50,11 @@ void DailyDetailsTests::testClassifyZeroHours()
 
 void DailyDetailsTests::testCardBitsDefault()
 {
-    // Only the Device card starts open
+    // The AHI, Device, Events and Statistics cards start open; the others closed
     const int bits = DefaultDailyCardsOpen;
+    QVERIFY(DailyDetails::cardOpen(bits, DC_Ahi));
+    QVERIFY(DailyDetails::cardOpen(bits, DC_Events));
+    QVERIFY(DailyDetails::cardOpen(bits, DC_Statistics));
     QVERIFY(DailyDetails::cardOpen(bits, DC_Device));
     QVERIFY(!DailyDetails::cardOpen(bits, DC_EventBreakdown));
     QVERIFY(!DailyDetails::cardOpen(bits, DC_Oximeter));
@@ -70,6 +73,13 @@ void DailyDetailsTests::testCardBitsRoundTrip()
     QVERIFY(!DailyDetails::cardOpen(bits, DC_EventBreakdown));
     QVERIFY(!DailyDetails::cardOpen(bits, DC_Oximeter));
     QVERIFY(!DailyDetails::cardOpen(bits, DC_DeviceSettings));
+    QVERIFY(DailyDetails::cardOpen(bits, DC_Ahi));
+    QVERIFY(DailyDetails::cardOpen(bits, DC_Events));
+    QVERIFY(DailyDetails::cardOpen(bits, DC_Statistics));
+    // Closing one of those leaves the rest
+    bits = DailyDetails::setCardOpen(bits, DC_Statistics, false);
+    QVERIFY(!DailyDetails::cardOpen(bits, DC_Statistics));
+    QVERIFY(DailyDetails::cardOpen(bits, DC_Events));
     // Opening an open card changes nothing
     QCOMPARE(DailyDetails::setCardOpen(bits, DC_SessionInfo, true), bits);
 }

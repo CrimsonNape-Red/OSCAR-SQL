@@ -29,7 +29,8 @@ class Session;
 
 /*! \brief The Modern Details tab's cards that can be closed; their open state is one bit each
     in AppSettings::dailyCardsOpen() */
-enum DailyCard { DC_Device, DC_EventBreakdown, DC_Oximeter, DC_DeviceSettings, DC_SessionInfo };
+enum DailyCard { DC_Device, DC_EventBreakdown, DC_Oximeter, DC_DeviceSettings, DC_SessionInfo,
+                 DC_Ahi, DC_Events, DC_Statistics };
 
 /*! \namespace DailyDetails
     \brief Collects what the Daily page's Details tab shows for a day */
