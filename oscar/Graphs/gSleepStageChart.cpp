@@ -18,6 +18,7 @@
 #include "gSleepStageChart.h"
 #include "gGraph.h"
 #include "gGraphView.h"
+#include "graphtheme.h"
 #include "SleepLib/profiles.h"
 
 namespace {
@@ -210,7 +211,7 @@ void gSleepStageChart::paint(QPainter &painter, gGraph &w, const QRegion &region
     painter.setClipRect(left, top, width, height);
     painter.setClipping(true);
 
-    painter.setPen(QPen(QColor(0, 0, 0, 60), 1));
+    painter.setPen(QPen(GraphTheme::ink(QColor(0, 0, 0, 60)), 1));
     for (int i = 1; i < m_intervals.size(); ++i) {
         const Interval &previous = m_intervals.at(i - 1);
         const Interval &current = m_intervals.at(i);
@@ -248,7 +249,7 @@ void gSleepStageChart::paint(QPainter &painter, gGraph &w, const QRegion &region
         const double radius = qMin(barHeight * 0.5, barWidth * 0.5);
 
         painter.setPen(Qt::NoPen);
-        painter.setBrush(monochrome ? Qt::black : LaneColors[interval.lane]);
+        painter.setBrush(monochrome ? QColor(Qt::black) : GraphTheme::ink(LaneColors[interval.lane]));
         painter.drawRoundedRect(barRect, radius, radius, Qt::AbsoluteSize);
 
         const double hoverSlop = barWidth < 6.0 ? 3.0 : 0.0;
@@ -278,8 +279,12 @@ void gSleepStageChart::paint(QPainter &painter, gGraph &w, const QRegion &region
     painter.setClipping(false);
     painter.setRenderHint(QPainter::Antialiasing, hadAntialiasing);
     painter.setBrush(Qt::NoBrush);
-    painter.setPen(COLOR_Outline);
-    painter.drawRect(rect);
+    if (w.graphView()->cardLook() && !w.printing()) {
+        GraphTheme::paintCardAxes(painter, rect);     // as on Modern Overview
+    } else {
+        painter.setPen(GraphTheme::ink(COLOR_Outline));
+        painter.drawRect(rect);
+    }
 
     if (AppSetting->lineCursorMode()) {
         const double time = w.currentTime();

@@ -80,6 +80,7 @@ extern QStatusBar *qstatusbar;
 
 
 class Daily;
+class QAbstractButton;
 class Report;
 class Overview;
 
@@ -497,6 +498,34 @@ public slots:
     void reloadProfile();
 
 private:
+    /*! \brief Shows the Statistics page and records box in the current light or dark palette.
+        Does nothing if the palette is unchanged since the last call. */
+    void applyStatisticsTheme();
+    QString m_statsHtml;            //!< Statistics report as built, in the printed colours
+    QString m_statsThemeKey;        //!< Palette colours applyStatisticsTheme() last used
+
+    /*! \brief Adds the Classic/Modern button and the moon/sun button at the right end of the main
+        tabs (moon/sun on Qt 6.8+ only; older Qt can't switch the colour scheme while OSCAR runs) */
+    void setupColorSchemeButton();
+    //! \brief Shows a moon in light mode and a sun in dark mode, with a matching tooltip
+    void updateColorSchemeButton();
+    //! \brief Switches between light and dark, and saves the choice
+    void toggleColorScheme();
+    QAbstractButton *m_colorSchemeButton = nullptr;     //!< Moon/sun button; null on older Qt
+    //! \brief Shows the look the button switches to (Classic or Modern pages), with a matching tooltip
+    void updatePageLookButton();
+    //! \brief Switches between the Classic (2.1) and Modern (redesigned) pages, and saves the choice
+    void togglePageLook();
+    QAbstractButton *m_pageLookButton = nullptr;        //!< Classic/Modern button, left of the moon/sun
+
+    //! \brief The application palette's main colours as one string, to tell when they change
+    static QString paletteKey();
+    /*! \brief After a switch between light and dark, rebuilds what takes its colours when it is
+        built: the redesigned Welcome page, and Daily's left panel. Does nothing if the palette
+        is unchanged since the last call. */
+    void applyPageThemes();
+    QString m_pageThemeKey;         //!< Palette colours the pages were last built in
+
     QString getMainWindowTitle();
     void importCPAPBackups();
 
@@ -522,11 +551,26 @@ private:
 
     void FreeSessions();
 
+    //! \brief Creates the Welcome page chosen in Preferences (original or redesigned)
+    WelcomePageBase *createWelcomePage();
+
+    //! \brief Replaces the Welcome tab's page after the Preferences choice changes
+    void rebuildWelcomePage();
+
+    /*! \brief Replaces the Daily and Overview tabs with new ones, after the Classic/Modern
+     *         setting changes
+     *
+     *  Both pages read the setting when they are built, and Overview shares Daily's graph
+     *  view, so the two are rebuilt together. The day shown, the journal notes (saved first)
+     *  and the current tab are kept.
+     */
+    void rebuildDailyPage();
+
     Ui::MainWindow *ui;
     Daily *daily;
     Overview *overview;
     ProfileSelector *profileSelector;
-    Welcome * welcome;
+    WelcomePageBase * welcome;
 #ifndef helpless
     Help * help;
 #endif

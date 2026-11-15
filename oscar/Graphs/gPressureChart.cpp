@@ -11,6 +11,7 @@
 #include <test_macros.h>
 
 #include "gPressureChart.h"
+#include "rangefigures.h"
 
 gPressureChart::gPressureChart()
     : gSummaryChart("Pressure", MT_CPAP)
@@ -126,7 +127,7 @@ void gPressureChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
     }
 
     QString txt = presstr.join(" ");
-    graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
+    if (!graph.headerSummary(txt)) graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
 
 }
 
@@ -211,6 +212,38 @@ void gPressureChart::addObservedIPAPMax(const QString & label)
         sliceLabel, color));
 }
 
+
+QList<DetailRow> gPressureChart::detailRows(Day *day, int idx)
+{
+    QList<DetailRow> rows;
+    const auto &slices = slicesFor(day, idx);
+    const double percentile = p_profile->general->prefCalcPercentile();
+    for (int i = slices.size() - 1; i >= 0; --i) {
+        const auto &s = slices.at(i);
+        if (s.value == 0) continue;     // a setting the device doesn't report
+        QString note;
+        switch (s.calc ? s.calc->type : ST_CNT) {
+        case ST_SETMIN: note = QObject::tr("Lowest pressure"); break;
+        case ST_SETMAX: note = QObject::tr("Highest pressure"); break;
+        case ST_MID:    note = QObject::tr("The middle of the night's pressures"); break;
+        case ST_90P:    note = QObject::tr("At or below this %1% of the time").arg(percentile); break;
+        default: break;
+        }
+        rows.append({ QString("%1 %2").arg(s.value, 0, 'f', 1).arg(STR_UNIT_CMH2O), s.name.trimmed(), note,
+                      s.color, s.height });
+    }
+    return rows;
+}
+
+QString gPressureChart::detailHeadline(Day *day, int)
+{
+    return day->getCPAPModeStr();
+}
+
+QString gPressureChart::detailSubtitle(Day *day, int)
+{
+    return day->getPressureSettings();
+}
 
 void gPressureChart::populate(Day * day, int idx)
 {
@@ -303,4 +336,26 @@ void gPressureChart::populate(Day * day, int idx)
         addObservedIPAPMax(QObject::tr("Peak Pressure"));
     }
     sortSlices();
+}
+
+QVector<SummaryLine> gPressureChart::calcLines(const QDate &start, const QDate &end, quint32 wanted)
+{
+    // Both lines are always offered; one is available when the range has the data its figure needs
+    QVector<SummaryLine> out;
+    SummaryLine perc{ SL_Perc, RangeFigures::percentileLabel(), 0, QColor(190, 40, 40), false };
+    SummaryLine middle{ SL_Middle, RangeFigures::middleLabel(), 0, QColor(60, 60, 60), false };
+    if (wanted & ((1u << SL_Perc) | (1u << SL_Middle))) {
+        const ChannelID code = RangeFigures::pressureChannel(start, end);
+        if (wanted & (1u << SL_Perc)) {
+            perc.available = code != NoChannel && RangeFigures::hasDetail(code, MT_CPAP, start, end);
+            if (perc.available) perc.value = RangeFigures::percentile(code, MT_CPAP, start, end);
+        }
+        if (wanted & (1u << SL_Middle)) {
+            middle.available = code != NoChannel && RangeFigures::middleAvailable(code, MT_CPAP, start, end);
+            if (middle.available) middle.value = RangeFigures::middle(code, MT_CPAP, start, end);
+        }
+    }
+    out.append(perc);
+    out.append(middle);
+    return out;
 }

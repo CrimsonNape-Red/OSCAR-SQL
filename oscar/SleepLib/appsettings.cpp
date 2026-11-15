@@ -33,6 +33,9 @@ AppWideSetting::AppWideSetting(Preferences *pref) : PrefSettings(pref)
     initPref(STR_AS_AllowYAxisScaling, true);
     m_graphTooltips = initPref(STR_AS_GraphTooltips, true).toBool();
     m_useFusionTheme = initPref(STR_AS_UseFusionTheme, false).toBool();
+    initPref(STR_AS_UseNewWelcome, true);
+    initPref(STR_AS_WelcomeCardColour, int(WCC_Plain));
+    initPref(STR_AS_ColorScheme, int(CSC_System));
     m_useSystemTooltipColors = initPref(STR_AS_UseSystemTooltipColors, false).toBool();
     m_usePixmapCaching = initPref(STR_AS_UsePixmapCaching, false).toBool();
     m_odt = (OverlayDisplayType)initPref(STR_AS_OverlayType, (int)ODT_Bars).toInt();
@@ -47,6 +50,7 @@ AppWideSetting::AppWideSetting(Preferences *pref) : PrefSettings(pref)
     initPref(STR_AS_RightSidebarVisible, false);
     initPref(STR_AS_RightSidebarPanel, 2);   // default to Records panel
     initPref(STR_AS_LeftSideBarEnable, -1);  // -1 = all bits set = all sections enabled
+    initPref(STR_AS_DailyCardsOpen, DefaultDailyCardsOpen);
     initPref(STR_CS_UserEventPieChart, false);
     initPref(STR_US_ShowSerialNumbers, false);
     initPref(STR_US_ShowPersonalData, true);

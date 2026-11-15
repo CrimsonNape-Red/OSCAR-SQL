@@ -43,6 +43,8 @@
 #endif
 #include <Graphs/gGraph.h>
 #include <Graphs/glcommon.h>
+#include <Graphs/graphlook.h>
+#include <Graphs/graphcard.h>
 #include <SleepLib/day.h>
 
 
@@ -356,11 +358,64 @@ class gGraphView
     //! \brief Add gGraph g to this gGraphView, in the requested graph-linkage group
     void addGraph(gGraph *g, short group = 0);
 
+    //! \brief Sets how this view frames its graphs. Set it before graphs are added.
+    void setLook(GraphLook look) { m_look = look; }
+
+    //! \brief How this view frames its graphs (Classic unless set otherwise)
+    GraphLook look() const { return m_look; }
+
+    //! \brief True when graphs are drawn as outlined cards with a header
+    bool cardLook() const { return m_look == GraphLook::Card; }
+
+    /*! \brief Says the page draws one date axis for all the graphs (see OverviewDateAxis), so
+        the graphs leave their own out. Printed graphs still draw theirs. */
+    void setSharedXAxis(bool shared) { m_sharedXAxis = shared; }
+
+    //! \brief True when the graphs leave their date axis to the page
+    bool sharedXAxis() const { return m_sharedXAxis; }
+
     //! \brief The width of the vertical text Title area for all graphs
     static const int titleWidth = 30;
 
     //! \brief The splitter is drawn inside this gap
     static const int graphSpacer = 4;
+
+    //! \brief Width of the column at the left of each graph: the rotated title, or a card's padding
+    int titleW() const { return cardLook() ? GraphCard::Padding : titleWidth; }
+
+    //! \brief Space between one graph and the next
+    int graphGap() const { return cardLook() ? GraphCard::Gap : graphSpacer; }
+
+    /*! \brief True when a point is on a graph's title: where a drag re-orders graphs, a
+        double-click pins and a right-click opens the graph's menu
+
+        Classic: the column at the left (\a x within titleWidth + \a slack). Card: the header
+        band along the top (\a yInGraph, measured from the graph's top edge). */
+    bool onTitle(int x, int yInGraph, int slack = 0) const {
+        return cardLook() ? yInGraph < GraphCard::TopPadding + GraphCard::HeaderHeight
+                          : x < titleWidth + slack;
+    }
+
+    //! \brief The colour behind the graphs: the page colour between cards, else the graph background
+    QColor viewBackground() const;
+
+    /*! \brief Opens the menu for graph \a g at \a globalPos
+
+        Classic look: the original menu. Card look: the same commands grouped under Display,
+        Y-axis and Overlays headings; in a popped-out graph Close replaces Pop out. */
+    void showGraphMenu(gGraph *g, const QPoint &globalPos);
+
+    //! \brief True when this view is a popped-out graph in its own window
+    bool isPopout() const;
+
+    //! \brief True when (\a x, \a y) is on the menu button of graph \a g (Card look only)
+    bool onMenuButton(gGraph *g, int x, int y) const;
+
+public slots:
+    //! \brief Closes this popped-out graph
+    void closePopout();
+
+public:
 
     bool contains(QString name) {
         for (int i=0; i<m_graphs.size(); ++i) {
@@ -745,11 +800,34 @@ class gGraphView
     QAction * snap_action;
 
     QAction * zoom100_action;
+    QAction * reset_action;                 //!< "Reset Graph Heights"
+
+    // Card look menu (built on first use by arrangeCardMenu)
+    //! \brief Puts the menu's items in the card look's order, under its section headings (once)
+    void arrangeCardMenu();
+    //! \brief A section heading for the card menu: a small bold label that cannot be chosen
+    QAction * menuHeading(const QString &text);
+    bool m_cardMenuBuilt = false;
+    QAction * m_headDisplay = nullptr;
+    QAction * m_headYAxis = nullptr;
+    QAction * m_headOverlays = nullptr;
+    QAction * m_autoScale = nullptr;
+    QAction * m_defaultScale = nullptr;
+    QAction * m_dynamicScale = nullptr;    //!< Card look: the Daily graphs' dynamic Y scale
+    QAction * m_closeAction = nullptr;
+    gGraph * m_menuGraph = nullptr;         //!< The graph the open menu belongs to
+    gGraph * m_menuHover = nullptr;         //!< The graph whose menu button is under the mouse
     QWidget * caller;
 
     bool m_showAuthorMessage;
+    GraphLook m_look = GraphLook::Classic;  //!< How graphs are framed (see setLook())
+    bool m_sharedXAxis = false;             //!< See setSharedXAxis()
 
   signals:
+    //! \brief The view has just drawn itself
+    void painted();
+    //! \brief The user switched a summary chart's dotted line on or off
+    void summaryLinesChanged();
     void updateCurrentTime(double);
     void updateRange(double,double);
     void GraphsChanged();

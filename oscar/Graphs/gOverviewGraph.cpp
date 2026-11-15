@@ -16,6 +16,7 @@
 #include <QTimeZone>
 #include "gYAxis.h"
 #include "gOverviewGraph.h"
+#include "graphtheme.h"
 
 #ifndef REMOVE_FITNESS
 /* To enable this module change the REMOTE_FITNESS define in appsettings.h
@@ -405,7 +406,7 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     rtop = top;
 
-    painter.setPen(QColor(Qt::black));
+    painter.setPen(GraphTheme::ink(Qt::black));
     painter.drawLine(left, top, left, top+height);
     painter.drawLine(left, top+height, left+width, top+height);
     painter.drawLine(left+width, top+height, left+width, top);
@@ -607,7 +608,7 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
             if (graphtype == GT_SESSIONS) {
                 int j;
                 auto times = m_times.find(zd);
-                QColor col = m_colors[0];
+                QColor col = GraphTheme::ink(m_colors[0]);
 
                 if (summary_only) {
                     col = summaryColor;
@@ -641,7 +642,7 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
                     painter.fillRect(x1, py-h, barw, h, QBrush(gradient));
 
                     if ((h > 0) && (barw > 2)) {
-                        painter.setPen(QColor(Qt::black));
+                        painter.setPen(GraphTheme::ink(Qt::black));
                         painter.drawLine(x1, py, x1, py - h);
                         painter.drawLine(x1, py - h, x2, py - h);
                         painter.drawLine(x1, py, x2, py);
@@ -695,7 +696,7 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
                     tmp = g.value();
 
-                    QColor col = m_colors[j];
+                    QColor col = GraphTheme::ink(m_colors[j]);
 
                     if (type == ST_HOURS) {
                         if (tmp < compliance_hours) {
@@ -736,7 +737,7 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
 
                         if (h > 0 && barw > 2) {
-                            painter.setPen(QColor(Qt::black));
+                            painter.setPen(GraphTheme::ink(Qt::black));
                             painter.drawLine(x1, py, x1, py - h);
                             painter.drawLine(x1, py - h, x2, py - h);
                             painter.drawLine(x1, py, x2, py);
@@ -746,7 +747,7 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
                         py -= h;
                     } else if (graphtype == GT_LINE) { // if (m_graphtype==GT_BAR
                         QColor col1 = col;
-                        QColor col2 = m_colors[j];
+                        QColor col2 = GraphTheme::ink(m_colors[j]);
                         px2 = px + barw;
                         py2 = (top + height - 1) - h;
 
@@ -772,7 +773,7 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
                         lastY[j] = py2;
                     } else if (graphtype == GT_POINTS) {
                         QColor col1 = col;
-                        QColor  col2 = m_colors[j];
+                        QColor  col2 = GraphTheme::ink(m_colors[j]);
                         px2 = px + barw;
                         py2 = (top + height - 2) - h;
 
@@ -929,7 +930,7 @@ jumpnext:
         legendx -= wid;
         w.renderText(a, legendx, top - 4);
 
-        painter.fillRect(legendx - bw-4, top-w.marginTop()-1, bh, w.marginTop(), QBrush(m_colors[j]));
+        painter.fillRect(legendx - bw-4, top-w.marginTop()-1, bh, w.marginTop(), QBrush(GraphTheme::ink(m_colors[j])));
         legendx -= bw * 2;
 
 

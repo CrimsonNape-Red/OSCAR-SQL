@@ -34,6 +34,7 @@ public:
          }
     }
     virtual void afterDraw(QPainter &, gGraph &, QRectF);
+    virtual QVector<SummaryLine> calcLines(const QDate &start, const QDate &end, quint32 wanted) override;
 
     virtual void populate(Day * day, int idx);
 
@@ -44,6 +45,10 @@ public:
     }
 
     virtual int addCalc(ChannelID code, SummaryType type);
+
+    virtual QList<DetailRow> detailRows(Day *day, int idx) override;
+    virtual QString detailHeadline(Day *day, int idx) override;
+    virtual QString detailSubtitle(Day *day, int idx) override;
 
 protected:
     SummaryCalcItem* getCalc(ChannelID code, SummaryType type = ST_SETMAX);

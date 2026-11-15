@@ -168,6 +168,20 @@ class gLineChart: public Layer
     //! \brief Mouse moved over this layers area (shows the hover-over tooltips here)
     virtual bool mouseMoveEvent(QMouseEvent *event, gGraph *graph);
 
+    //! \brief One entry of the legend: a plotted channel or a dotted line, with its sample line
+    struct HeaderLegendItem {
+        QString text;           //!< The channel's or dotted line's label
+        QColor color;           //!< Light-mode colour of the sample line
+        Qt::PenStyle style;     //!< Solid for a plot, dotted for a dotted line
+    };
+
+    /*! \brief Card look: draws the cursor text and the legend along the graph's header
+
+        The legend sits at the right of the header's free space, in the order the Classic
+        legend reads from right to left; entries that don't fit are dropped from the left. The
+        text takes the rest, cut short with an ellipsis. */
+    void paintCardHeader(QPainter &painter, gGraph &w, const QString &text, const QVector<HeaderLegendItem> &items);
+
 
     bool m_report_empty;
     bool m_square_plot;

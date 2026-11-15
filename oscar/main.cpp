@@ -51,6 +51,7 @@
 #include "translation.h"
 #include "speedcheck.h"
 #include "tooltipcolors.h"
+#include "colorscheme.h"
 #include "SleepLib/common.h"
 #include "SleepLib/portablemode.h"
 #include "SleepLib/deviceconnection.h"
@@ -960,24 +961,11 @@ int main(int argc, char *argv[]) {
     // store and AppDataLocation; changing it would orphan existing settings. The name users
     // see (e.g. appended to window titles on Linux) covers every 2.x release.
     QGuiApplication::setApplicationDisplayName(getAppName() + " 2");
+    // Dark-mode trial (ui-next only): the forced light colour scheme is off, so OSCAR follows
+    // the system's light or dark setting.
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     ToolTipColors::captureSystemScheme();  // Qt hides the system's dark mode once Light is forced
-#endif
-#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
-    // setColorScheme() is Qt 6.8+; older Qt follows the system scheme
-    mainapp.styleHints()->setColorScheme(Qt::ColorScheme::Light);
-#ifdef Q_OS_LINUX
-    // On Linux, Qt 6.5+ also takes its colors from the desktop's GTK theme. Some themes (e.g. Mint-L)
-    // give lists and panels the window's own color and gray text, so OSCAR's cards and tables lose
-    // their edges. Use Fusion's standard light colors, as older Qt did, whatever the desktop theme.
-    {
-        QStyle *fusion = QStyleFactory::create(QStringLiteral("Fusion"));
-        if (fusion) {
-            QApplication::setPalette(fusion->standardPalette());
-            delete fusion;
-        }
-    }
-#endif
+//    mainapp.styleHints()->setColorScheme(Qt::ColorScheme::Light);
 #endif
     QStringList args = mainapp.arguments();
 
@@ -1571,6 +1559,7 @@ int main(int argc, char *argv[]) {
     if (AppSetting->useFusionTheme()) {
         QApplication::setStyle(QStyleFactory::create("Fusion"));
     }
+    ColorScheme::apply();    // light, dark or the system's; may switch to Fusion on older Qt
     ToolTipColors::apply();  // now from the preference, and for the final widget style
 
     QString language = settings.value(LangSetting, "").toString();

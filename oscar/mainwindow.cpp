@@ -37,8 +37,11 @@
 #include <QCalendarWidget>
 #include <QDialogButtonBox>
 #include <QTextBrowser>
+#include <QGuiApplication>
+#include <QScrollBar>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QTabBar>
 #include <QClipboard>
 #include <QStandardPaths>
 #include <QDesktopServices>
@@ -83,6 +86,8 @@
 #include <QScopedValueRollback>
 
 #include "mainwindow.h"
+#include "welcomepage.h"
+#include "statisticsstyle.h"
 #include "importhandover.h"
 #include "ui_mainwindow.h"
 #include "devicetimecorrectiondialog.h"
@@ -126,6 +131,9 @@
 #include "zip.h"
 #include "speedcheck.h"
 #include "tooltipcolors.h"
+#include "colorscheme.h"
+#include "uikit/iconbutton.h"
+#include "uikit/theme.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,4,0)
 #include <QOpenGLFunctions>
@@ -139,6 +147,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    applyStatisticsTheme();     // the records box's colours; the report follows when it is built
 
 
     {
@@ -333,6 +342,7 @@ void MainWindow::SetupGUI(bool batchMode)
     // Start with the new Profile Tab
     ui->tabWidget->setCurrentWidget(profileSelector);   // setting this to daily shows the cube during loading..
     ui->tabWidget->setTabEnabled(1, false);             // this should be the Statistics tab
+    setupColorSchemeButton();
 
     // toolbox is the right sidebar that contain the Navigation, bookmark , and Records tabs.
     // Navigation has offset 0
@@ -453,7 +463,20 @@ void MainWindow::changeEvent(QEvent *event)
     if (event->type() == QEvent::ThemeChange) {
         // Qt has reset the tooltips to the theme's palette. Set their colors again once the
         // change has been handled.
-        QTimer::singleShot(0, this, [] { ToolTipColors::apply(); });
+        QTimer::singleShot(0, this, [this] {
+            ToolTipColors::apply(true);
+            // Restyling resets the menus, labels and buttons to the system's own (smaller) fonts:
+            // Qt reloads them from the platform theme when the application style changes. Put
+            // OSCAR's font back before anything is drawn, or the menu bar shrinks for a moment.
+            setApplicationFont();
+            if (layout()) layout()->activate();     // the menu bar's height, now rather than after a paint
+            applyPageThemes();
+        });
+    }
+    if (event->type() == QEvent::ThemeChange || event->type() == QEvent::ApplicationPaletteChange
+        || event->type() == QEvent::PaletteChange) {
+        applyStatisticsTheme();
+        updateColorSchemeButton();
     }
     QMainWindow::changeEvent(event);
 }
@@ -811,7 +834,7 @@ bool MainWindow::OpenProfile(QString profileName)
     }
     SpeedCheck sc(500);
     PERF_TIMER_START("MW::OP::Welcome");
-    welcome = new Welcome(ui->tabWidget);
+    welcome = createWelcomePage();
     ui->tabWidget->insertTab(1, welcome, tr("Welcome"));
     sc.check("created Welcome page");
     PERF_TIMER_STOP("MW::OP::Welcome");
@@ -1838,7 +1861,124 @@ void MainWindow::setRecBoxHTML(QString html)
 
 void MainWindow::setStatsHTML(QString html)
 {
-    ui->statisticsView->setHtml(html);
+    m_statsHtml = html;
+    ui->statisticsView->setHtml(StatisticsStyle::screenHtml(m_statsHtml, QGuiApplication::palette()));
+}
+
+QString MainWindow::paletteKey()
+{
+    const QPalette palette = QGuiApplication::palette();
+    return palette.color(QPalette::Window).name() + palette.color(QPalette::Base).name()
+           + palette.color(QPalette::Text).name() + palette.color(QPalette::Highlight).name();
+}
+
+void MainWindow::applyPageThemes()
+{
+    const QString key = paletteKey();
+    if (key == m_pageThemeKey) return;
+    m_pageThemeKey = key;
+    // The redesigned page's components take their colours when they are built
+    if (dynamic_cast<WelcomePage *>(welcome)) {
+        rebuildWelcomePage();
+    }
+    if (daily) {
+        daily->applyTheme();    // calendar and date button
+        // Daily's left panel is HTML with the text colour written in when the day is loaded
+        if (p_profile && daily->getDate().isValid()) {
+            daily->LoadDate(daily->getDate());
+        }
+    }
+}
+
+void MainWindow::setupColorSchemeButton()
+{
+    m_pageThemeKey = paletteKey();      // pages are built in the current colours
+
+    // QTabWidget caps a corner widget at the tab bar's height and aligns it to the bottom, so
+    // size the buttons to fit inside the bar. A little space keeps them off the window edge.
+    auto *corner = new QWidget(ui->tabWidget);
+    auto *layout = new QHBoxLayout(corner);
+    layout->setContentsMargins(0, 0, 6, 0);
+    layout->setSpacing(4);
+    const int side = qMax(20, ui->tabWidget->tabBar()->sizeHint().height() - 2);
+
+    auto *look = new UiKit::IconButton(corner);
+    look->setFrameless(true);
+    look->setSide(side);
+    layout->addWidget(look, 0, Qt::AlignVCenter);
+    m_pageLookButton = look;
+    connect(look, &QAbstractButton::clicked, this, &MainWindow::togglePageLook);
+
+    if (ColorScheme::canSwitchLive()) {     // otherwise Preferences > Appearance only, with a restart
+        auto *button = new UiKit::IconButton(corner);
+        button->setFrameless(true);
+        button->setSide(side);
+        layout->addWidget(button, 0, Qt::AlignVCenter);
+        m_colorSchemeButton = button;
+        connect(button, &QAbstractButton::clicked, this, &MainWindow::toggleColorScheme);
+    }
+    ui->tabWidget->setCornerWidget(corner, Qt::TopRightCorner);
+    corner->show();     // a corner widget set after the tab widget is shown starts hidden
+
+    updatePageLookButton();
+    updateColorSchemeButton();
+}
+
+void MainWindow::updatePageLookButton()
+{
+    auto *button = qobject_cast<UiKit::IconButton *>(m_pageLookButton);
+    if (!button) return;
+    const bool modern = AppSetting->useNewPages();
+    button->setLineIcon(modern ? UiKit::LineIcon::ClassicLook : UiKit::LineIcon::ModernLook);
+    const QString tip = modern ? tr("Switch to the Classic pages") : tr("Switch to the Modern pages");
+    button->setToolTip(tip);
+    button->setAccessibleName(tip);
+}
+
+void MainWindow::togglePageLook()
+{
+    AppSetting->setUseNewPages(!AppSetting->useNewPages());
+    p_pref->Save();             // keep the choice even if OSCAR doesn't close normally
+    if (welcome) rebuildWelcomePage();
+    rebuildDailyPage();
+    updatePageLookButton();
+}
+
+void MainWindow::updateColorSchemeButton()
+{
+    auto *button = qobject_cast<UiKit::IconButton *>(m_colorSchemeButton);
+    if (!button) return;
+    const bool dark = Theme::isDark(QGuiApplication::palette());
+    button->setLineIcon(dark ? UiKit::LineIcon::Sun : UiKit::LineIcon::Moon);
+    const QString tip = dark ? tr("Switch to light mode") : tr("Switch to dark mode");
+    button->setToolTip(tip);
+    button->setAccessibleName(tip);
+}
+
+void MainWindow::toggleColorScheme()
+{
+    const bool dark = Theme::isDark(QGuiApplication::palette());
+    AppSetting->setColorScheme(dark ? CSC_Light : CSC_Dark);
+    p_pref->Save();             // keep the choice even if OSCAR doesn't close normally
+    ColorScheme::apply();
+    updateColorSchemeButton();  // also comes with the palette change, but not on every platform
+}
+
+void MainWindow::applyStatisticsTheme()
+{
+    const QPalette palette = QGuiApplication::palette();
+    const QString key = palette.color(QPalette::Base).name() + palette.color(QPalette::Text).name()
+                        + palette.color(QPalette::Highlight).name();
+    if (key == m_statsThemeKey) return;
+    m_statsThemeKey = key;
+
+    ui->recordsBox->setStyleSheet(StatisticsStyle::recordsBoxStyleSheet(palette));
+    if (m_statsHtml.isEmpty()) return;
+    // Re-show the report in the new colours where the user was reading it
+    QScrollBar *bar = ui->statisticsView->verticalScrollBar();
+    const int position = bar->value();
+    ui->statisticsView->setHtml(StatisticsStyle::screenHtml(m_statsHtml, palette));
+    bar->setValue(position);
 }
 
 
@@ -1982,6 +2122,82 @@ void MainWindow::on_action_Advanced_Graph_Order_triggered()
     if (overview && (ui->tabWidget->currentWidget() == overview)) { overview->ResetGraphOrder(2); }
 }
 
+WelcomePageBase *MainWindow::createWelcomePage()
+{
+    if (AppSetting->useNewPages()) {
+        return new WelcomePage(ui->tabWidget);
+    }
+    return new Welcome(ui->tabWidget);
+}
+
+void MainWindow::rebuildWelcomePage()
+{
+    int index = ui->tabWidget->indexOf(welcome);
+    if (index < 0) return;
+    bool wasCurrent = (ui->tabWidget->currentWidget() == welcome);
+
+    // Remove the old page from the tab first so the tab widget never shows a deleted page
+    ui->tabWidget->removeTab(index);
+    delete welcome;
+
+    welcome = createWelcomePage();
+    ui->tabWidget->insertTab(index, welcome, tr("Welcome"));
+    if (wasCurrent) {
+        ui->tabWidget->setCurrentWidget(welcome);
+    }
+    welcome->refreshPage();
+}
+
+void MainWindow::rebuildDailyPage()
+{
+    if (!overview || !daily) return;
+    const int dailyIndex = ui->tabWidget->indexOf(daily);
+    const int overviewIndex = ui->tabWidget->indexOf(overview);
+    if (dailyIndex < 0 || overviewIndex < 0) return;
+    QWidget *current = ui->tabWidget->currentWidget();
+    const bool dailyCurrent = (current == daily);
+    const bool overviewCurrent = (current == overview);
+    const bool dailyEnabled = ui->tabWidget->isTabEnabled(dailyIndex);
+    const bool overviewEnabled = ui->tabWidget->isTabEnabled(overviewIndex);
+    const QDate date = daily->getDate();
+
+    // Save the day's journal notes before the page goes
+    daily->Unload();
+    daily->clearLastDay();
+
+    // Remove each old page from the tab first so the tab widget never shows a deleted page.
+    // Overview goes first, since it uses Daily's graph view. Deleting a page saves its graph
+    // layout, which the new page then loads.
+    ui->tabWidget->removeTab(ui->tabWidget->indexOf(overview));
+    delete overview;
+    overview = nullptr;
+    ui->tabWidget->removeTab(ui->tabWidget->indexOf(daily));
+    delete daily;
+    daily = nullptr;
+
+    daily = new Daily(ui->tabWidget, nullptr);
+    ui->tabWidget->insertTab(dailyIndex, daily, STR_TR_Daily);
+    connect(daily, &Daily::dateLoaded, this, [this](QDate date) {
+        if (m_correctionDialog) m_correctionDialog->setDate(date);
+    });
+    daily->ReloadGraphs();
+
+    overview = new Overview(ui->tabWidget, daily->graphView());
+    ui->tabWidget->insertTab(overviewIndex, overview, STR_TR_Overview);
+    overview->ReloadGraphs();
+
+    ui->tabWidget->setTabEnabled(dailyIndex, dailyEnabled);
+    ui->tabWidget->setTabEnabled(overviewIndex, overviewEnabled);
+    if (dailyCurrent) {
+        ui->tabWidget->setCurrentWidget(daily);
+    } else if (overviewCurrent) {
+        ui->tabWidget->setCurrentWidget(overview);
+    }
+    if (date.isValid()) {
+        daily->LoadDate(date);
+    }
+}
+
 void MainWindow::on_action_Preferences_triggered()
 {
     if (!p_profile) {
@@ -1992,10 +2208,22 @@ void MainWindow::on_action_Preferences_triggered()
     PreferencesDialog pd(this, p_profile);
     prefdialog = &pd;
 
+    const bool oldNewPages = AppSetting->useNewPages();
+    const WelcomeCardColour oldCardColour = AppSetting->welcomeCardColour();
+
     if (pd.exec() == PreferencesDialog::Accepted) {
         // Apply any updates from preference changes (notably fonts)
 
         setApplicationFont();
+
+        const bool pagesChanged = (oldNewPages != AppSetting->useNewPages());
+        if (welcome && (pagesChanged || oldCardColour != AppSetting->welcomeCardColour())) {
+            rebuildWelcomePage();
+        }
+        if (pagesChanged) {
+            rebuildDailyPage();
+            updatePageLookButton();
+        }
 
 
         if (m_clinicalMode != p_profile->cpap->clinicalMode()) {
@@ -3315,7 +3543,7 @@ void MainWindow::doReprocessEvents()
     p_profile->recalculateOximetryEvents(&progress);
     progress.close();
 
-    welcome = new Welcome(ui->tabWidget);
+    welcome = createWelcomePage();
     ui->tabWidget->insertTab(1, welcome, tr("Welcome"));
 
     daily = new Daily(ui->tabWidget, nullptr);

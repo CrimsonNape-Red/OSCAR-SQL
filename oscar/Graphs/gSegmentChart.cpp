@@ -10,6 +10,7 @@
 #include <cmath>
 #include "SleepLib/appsettings.h"
 #include "gSegmentChart.h"
+#include "graphtheme.h"
 
 gSegmentChart::gSegmentChart(GraphSegmentType type, QColor gradient_color, QColor outline_color)
     : Layer(NoChannel), m_graph_type(type), m_gradient_color(gradient_color),
@@ -127,7 +128,7 @@ void gSegmentChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
         // Pie Chart
         /////////////////////////////////////////////////////////////////////////////////////
         if (m_graph_type == GST_Pie) {
-            QColor col = schema::channel[m_codes[m]].defaultColor();
+            QColor col = GraphTheme::ink(schema::channel[m_codes[m]].defaultColor());
             if (w.printing() && AppSetting->monochromePrinting()) {
                 col = Qt::white;
             }

@@ -68,7 +68,7 @@ void gTTIAChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
         txtlist.append(QString("%1 %2 / %3 / %4").arg(QObject::tr("TTIA:")).arg(durationInMinutesToHhMmSs(calc.min)).arg(durationInMinutesToHhMmSs(mid)).arg(durationInMinutesToHhMmSs(calc.max)));
     }
     QString txt = txtlist.join(", ");
-    graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
+    if (!graph.headerSummary(txt)) graph.renderText(txt, rect.left(), rect.top()-5*graph.printScaleY(), 0);
 }
 
 void gTTIAChart::populate(Day *day, int idx)
@@ -77,6 +77,24 @@ void gTTIAChart::populate(Day *day, int idx)
     float ttia = day->sum(AllAhiChannels);
 
     slices.append(SummaryChartSlice(&calcitems[0], ttia / 60.0, ttia / 60.0, QObject::tr("\nTTIA: %1").arg(durationInSecondsToHhMmSs(ttia)), QColor(255,147,150)));
+}
+
+QList<DetailRow> gTTIAChart::detailRows(Day *day, int idx)
+{
+    const auto &slices = slicesFor(day, idx);
+    if (slices.isEmpty()) return {};
+    const auto &s = slices.first();
+    return { { durationInMinutesToHhMmSs(s.value), QObject::tr("Total time in apnea"), QString(), s.color, s.height } };
+}
+
+QString gTTIAChart::detailHeadline(Day *, int)
+{
+    return QObject::tr("Total Time in Apnea");
+}
+
+QString gTTIAChart::detailSubtitle(Day *, int)
+{
+    return QString();
 }
 
 QString gTTIAChart::tooltipData(Day *, int idx)

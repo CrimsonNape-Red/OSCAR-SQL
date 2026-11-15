@@ -99,6 +99,7 @@ some messages from Apnea Board.
 #include "Graphs/gYAxis.h"
 #include "common_gui.h"
 #include "Graphs/gLineChart.h"
+#include "Graphs/graphtheme.h"
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -796,8 +797,12 @@ void MinutesAtPressure::paint(QPainter &painter, gGraph &graph, const QRegion &r
 
     // draw rectangle for graph boundary.
     painter.setFont(*defaultfont);
-    painter.setPen(Qt::black);
-    painter.drawRect(boundingRect);
+    painter.setPen(GraphTheme::ink(Qt::black));
+    if (graph.graphView()->cardLook() && !graph.printing()) {
+        GraphTheme::paintCardAxes(painter, boundingRect);     // as on Modern Overview
+    } else {
+        painter.drawRect(boundingRect);
+    }
 
 
     ////////////////////////////////////////////////////////////////////
@@ -1022,10 +1027,10 @@ int MapPainter::drawYaxis(int peaktime) {
     int widest_YAxis = 2;
     EventDataType limit =peakMinutes +(yMinutesPerStep/2) ;
     for (EventDataType f=0.0; f<limit; f+=yMinutesPerStep,bot-=yPixelsPerStep) {
-        painter.setPen(Qt::black);
+        painter.setPen(GraphTheme::ink(Qt::black));
         painter.drawLine(left, bot, left-4, bot);
 
-        painter.setPen(QColor(128,128,128, AppSetting->gridLineOpacity()));
+        painter.setPen(GraphTheme::ink(QColor(128,128,128, AppSetting->gridLineOpacity())));
         painter.drawLine(left, bot, left+width, bot);
 
         label = QString("%1").arg(f);
@@ -1073,7 +1078,7 @@ void MapPainter::drawXaxis(int numberXaxisDivisions , int startGraphBucket , int
     int j=0,labelWidth,labelHeight;
     int right = drawingRect.right()+1;
     int end=(endGraphBucket-startGraphBucket);
-    painter.setPen(Qt::black);
+    painter.setPen(GraphTheme::ink(Qt::black));
 
     for (int i=0 ; i<=end  && xp <=right ; ++i) {
         for (j=0; j<numberXaxisDivisions && xp<=right; ++j,xp+=pixelsPerTick,tickPressure+= pressurePerTick) {
@@ -1137,7 +1142,7 @@ void MapPainter::drawMetaData(QPoint& last_mouse , QString& topBarLabel,Pressure
         int bucketX = ((mouseOverPressure-minpressure)*pixelsPerPressure) +drawingRect.left() ;
 
         // Draw veritical line for mouse cursor. jump to closest pressure bucket.
-        painter.setPen(QPen(QColor(128,128,128,30), 1.5*AppSetting->lineThickness()));
+        painter.setPen(QPen(GraphTheme::ink(QColor(128,128,128,30)), 1.5*AppSetting->lineThickness()));
         painter.drawLine(bucketX, top, bucketX, bottom);
 
         bool epapEnabled = enabled[epap.code]  ;
@@ -1176,18 +1181,19 @@ void MapPainter::drawMetaData(QPoint& last_mouse , QString& topBarLabel,Pressure
     }
 
     // DRAW top line status information
+    // (along the header in the card look)
     int topBarTop=boundingRect.top()-5;
-    graph.renderText(topBarLabel, boundingRect.left(),  topBarTop);
+    if (!graph.headerSummary(topBarLabel)) graph.renderText(topBarLabel, boundingRect.left(),  topBarTop);
 }
 
 // set the opacity and default color
 void MapPainter::setPenColorAlpha(ChannelID channelId ,int opacity) {
-        QColor color=schema::channel[channelId].defaultColor();
+        QColor color = GraphTheme::ink(schema::channel[channelId].defaultColor());
         if (opacity>0 &&  opacity<=255) {
             color.setAlpha(opacity);
         }
         linePen=QPen(color, AppSetting->lineThickness());
-        pointEnhancePen =QPen(QColor(Qt::black), 2.5*AppSetting->lineThickness());
+        pointEnhancePen =QPen(GraphTheme::ink(Qt::black), 2.5*AppSetting->lineThickness());
         pointSelectionPen=QPen(color, 1.5*AppSetting->lineThickness());
 }
 
@@ -1285,7 +1291,7 @@ void MapPainter::drawPoint(bool accent,int xp, int yp) {
 // Draw a plot of points on Graphs
 // CPAP_Pressure or CPAP_EPAP or Events
 void MapPainter::drawPlot() {
-        tickPen =                   QPen(Qt::black, 1);
+        tickPen =                   QPen(GraphTheme::ink(Qt::black), 1);
         bool started=false;
         EventDataType yp=drawingRect.bottom();
         EventDataType xp=drawingRect.left();
@@ -1333,7 +1339,7 @@ void MapPainter::drawSpanEvents() {
     QRectF box= QRectF(xp,boundingRect.top(),pixelsPerBucket,boundingRect.height());
     int tickTop = boundingRect.top();
     int tickHeight =boundingRect.height();
-    QColor color=schema::channel[channel->id()].defaultColor();
+    QColor color = GraphTheme::fill(schema::channel[channel->id()].defaultColor());   // shaded area
     color.setAlpha(128);
 
     for (int i=startGraphBucket;  i<dataArray.size(); ++i) {
@@ -1372,7 +1378,7 @@ void MapPainter::drawEventTick() {
             painter.drawLine(xp ,top+tickLength, xp, bottom-tickLength);
             painter.setPen(tickPen);
         } else {
-            painter.setPen(QColor(128,128,128,30));
+            painter.setPen(GraphTheme::ink(QColor(128,128,128,30)));
             painter.drawLine(xp ,top+tickLength, xp, bottom);
             painter.setPen(tickPen);
             painter.drawLine(xp ,top, xp, top+tickLength);
@@ -1382,9 +1388,9 @@ void MapPainter::drawEventTick() {
 
 void MapPainter::drawEvent() {
     if (chanType == schema::FLAG) {
-        tickPen =                   QPen(Qt::black, 1);
-        tickEnhancePen =            QPen(QColor(0,0,255),    3.5*AppSetting->lineThickness());
-        tickEnhanceTransparentPen = QPen(QColor(0,0,255,60), 3.5*AppSetting->lineThickness());
+        tickPen =                   QPen(GraphTheme::ink(Qt::black), 1);
+        tickEnhancePen =            QPen(GraphTheme::ink(QColor(0,0,255)),    3.5*AppSetting->lineThickness());
+        tickEnhanceTransparentPen = QPen(GraphTheme::ink(QColor(0,0,255,60)), 3.5*AppSetting->lineThickness());
         drawEventTick();
         return;
     }

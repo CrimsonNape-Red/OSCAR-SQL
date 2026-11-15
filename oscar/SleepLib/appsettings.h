@@ -65,6 +65,9 @@ const QString STR_AS_SteadyBreathingDuration = "SteadyBreathingDuration";
 #endif
 const QString STR_AS_GraphTooltips = "GraphTooltips";
 const QString STR_AS_UseFusionTheme = "UseFusionTheme";
+const QString STR_AS_UseNewWelcome = "UseNewWelcome";
+const QString STR_AS_WelcomeCardColour = "WelcomeCardColour";
+const QString STR_AS_ColorScheme = "ColorScheme";
 const QString STR_AS_UseSystemTooltipColors = "UseSystemTooltipColors";
 const QString STR_AS_LineThickness = "LineThickness";
 const QString STR_AS_GridLineOpacity = "GridLineOpacity";
@@ -73,6 +76,10 @@ const QString STR_AS_CalendarVisible = "CalendarVisible";
 const QString STR_AS_RightSidebarVisible = "RightSidebarVisible";
 const QString STR_AS_RightSidebarPanel = "RightSidebarPanel";
 const QString STR_AS_LeftSideBarEnable = "LeftSideBarEnable";
+const QString STR_AS_DailyCardsOpen = "DailyCardsOpen";
+//! Modern Daily: the cards open by default: AHI, Device, Events and Statistics (bits 5, 0, 6, 7 of
+//! DailyCard in dailydetails.h)
+constexpr int DefaultDailyCardsOpen = (1 << 0) | (1 << 5) | (1 << 6) | (1 << 7);
 const QString STR_US_TooltipTimeout = "TooltipTimeout";
 const QString STR_US_ScrollDampening = "ScrollDampening";
 const QString STR_US_ShowDebug = "ShowDebug";
@@ -100,6 +107,20 @@ const QString STR_GEN_UpdateCheckFrequency = "Updates_CheckFrequency";
 const QString STR_PREF_AllowEarlyUpdates = "AllowEarlyUpdates";
 const QString STR_GEN_SkippedReleaseVersion = "SkippedReleaseVersion";
 const QString STR_GEN_SkippedTestVersion = "SkippedTestVersion";
+
+//! \brief How the redesigned Welcome page colours its metric cards
+enum WelcomeCardColour {
+    WCC_Plain = 0,      //!< No card tint
+    WCC_ByGroup = 1,    //!< Tint shows the kind of number (breathing, mask, usage)
+    WCC_ByStatus = 2    //!< Green or red when the night is better or worse than both averages
+};
+
+//! \brief Light or dark colours for the whole application. The values match Qt::ColorScheme.
+enum ColorSchemeChoice {
+    CSC_System = 0,     //!< Follow the operating system's light or dark setting
+    CSC_Light = 1,      //!< Always light
+    CSC_Dark = 2        //!< Always dark
+};
 
 
 class AppWideSetting: public PrefSettings
@@ -171,6 +192,17 @@ public:
   inline bool graphTooltips() const { return m_graphTooltips; }
   //! \brief Whether to use the Fusion theme instead of the platform-native theme
   inline bool useFusionTheme() const { return m_useFusionTheme; }
+  //! \brief Whether to show the redesigned pages (Welcome, Overview) instead of the original ones.
+  //!        Stored under the Welcome page's original key so that earlier choices carry over.
+  bool useNewPages() const { return getPref(STR_AS_UseNewWelcome).toBool(); }
+  //! \brief How the redesigned Welcome page colours its metric cards
+  WelcomeCardColour welcomeCardColour() const {
+      return WelcomeCardColour(getPref(STR_AS_WelcomeCardColour).toInt());
+  }
+  //! \brief Whether the application is light, dark, or follows the operating system
+  ColorSchemeChoice colorScheme() const {
+      return ColorSchemeChoice(getPref(STR_AS_ColorScheme).toInt());
+  }
   //! \brief Whether tooltips use the system's colors instead of OSCAR's black on yellow
   inline bool useSystemTooltipColors() const { return m_useSystemTooltipColors; }
   inline int  alternatingColorsCombo() { return m_alternatingColorsCombo;}
@@ -188,6 +220,11 @@ public:
   int leftSideBarEnable() const { return getPref(STR_AS_LeftSideBarEnable).toInt(); }
   //! \brief Save the enabled/disabled state of Daily left-sidebar sections.
   void setLeftSideBarEnable(int bits) { setPref(STR_AS_LeftSideBarEnable, bits); }
+  //! \brief Modern Daily: which collapsible cards are open (bit N = DailyCard N); default
+  //!        DefaultDailyCardsOpen. Separate from leftSideBarEnable(), which the Classic page uses.
+  int dailyCardsOpen() const { return getPref(STR_AS_DailyCardsOpen).toInt(); }
+  //! \brief Stores which Modern Daily cards are open
+  void setDailyCardsOpen(int bits) { setPref(STR_AS_DailyCardsOpen, bits); }
   //! \brief Returns the type of overlay flags (which are displayed over the Flow Waveform)
   inline OverlayDisplayType overlayType() const { return m_odt; }
 #ifndef REMOVE_FITNESS
@@ -251,6 +288,12 @@ public:
   void setGraphTooltips(bool b) { setPref(STR_AS_GraphTooltips, m_graphTooltips=b); }
   //! \brief Sets whether to use the Fusion theme instead of the platform-native theme
   void setUseFusionTheme(bool b) { setPref(STR_AS_UseFusionTheme, m_useFusionTheme=b); }
+  //! \brief Sets whether to show the redesigned pages (Welcome, Overview)
+  void setUseNewPages(bool b) { setPref(STR_AS_UseNewWelcome, b); }
+  //! \brief Sets how the redesigned Welcome page colours its metric cards
+  void setWelcomeCardColour(WelcomeCardColour c) { setPref(STR_AS_WelcomeCardColour, int(c)); }
+  //! \brief Sets whether the application is light, dark, or follows the operating system
+  void setColorScheme(ColorSchemeChoice c) { setPref(STR_AS_ColorScheme, int(c)); }
   //! \brief Sets whether tooltips use the system's colors. ToolTipColors::apply() puts it into effect.
   void setUseSystemTooltipColors(bool b) { setPref(STR_AS_UseSystemTooltipColors, m_useSystemTooltipColors=b); }
   //! \brief Sets the type of overlay flags (which are displayed over the Flow Waveform)

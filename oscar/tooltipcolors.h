@@ -32,8 +32,10 @@ void captureSystemScheme();
  *  Safe to call again at any time, and needed after the setting, the widget style or the
  *  system theme changes (Qt resets the tooltip palette on a theme change). Until the preferences
  *  are loaded it applies OSCAR's own colors.
+ *  \param restyle After a switch between light and dark: also set the application style sheet
+ *         afresh (Windows), without which widgets keep their old palette
  */
-void apply();
+void apply(bool restyle = false);
 
 //! \brief The fill of a tooltip that the graphs draw. May be translucent.
 QColor graphBackground();

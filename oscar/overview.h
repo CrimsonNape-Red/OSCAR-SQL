@@ -31,6 +31,8 @@
 #include <QRegularExpression>
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QPointer>
+#include <QButtonGroup>
 class SaveGraphLayoutSettings;
 
 namespace Ui {
@@ -39,6 +41,10 @@ class Overview;
 
 class Report;
 class Overview;
+class OverviewDetailsPopup;
+class OverviewStatsRow;
+class OverviewDateAxis;
+class QLabel;
 
 class DateErrorDisplay:QObject {
 	Q_OBJECT
@@ -149,8 +155,49 @@ class Overview : public QWidget
     void on_layout_clicked();
     void on_graphHelp_clicked();
 
+  protected:
+    //! \brief Restyles the range strip when the colour scheme changes
+    void changeEvent(QEvent *event) override;
+    //! \brief Leaving the Overview tab closes the details popups
+    void hideEvent(QHideEvent *event) override;
+    //! \brief Switches the selection bar between full and short range names as its width changes
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
   private:
     void CreateAllGraphs();
+
+    /*! \brief Redesigned page: moves the selection bar to the top of the page, replaces the
+        range drop-down with a strip of buttons, and adds the statistics row and the one date
+        axis below the graphs */
+    void buildRangeStrip();
+    //! \brief Colours the selection bar from the theme (again after a light/dark switch)
+    void styleRangeStrip();
+    OverviewDateAxis *m_dateAxis = nullptr;     //!< The one date axis under the graphs; null on the original page
+    QLabel *m_daysLabel = nullptr;              //!< Number of days on screen, beside the dates; null on the original page
+    QWidget *m_rangeStrip = nullptr;            //!< The strip of range buttons; null on the original page
+    OverviewStatsRow *m_statsRow = nullptr;     //!< Figures for the dates on screen; null on the original page
+    QButtonGroup *m_rangeButtons = nullptr;     //!< Its buttons, numbered as the range drop-down's items
+    /*! \brief Narrow window: short range names ("1W") and no count of days, so the selection bar
+        does not set a wide minimum width for the whole window */
+    void setStripCompact(bool compact);
+    bool m_stripCompact = false;                //!< The selection bar is showing short range names
+    int m_stripFullWidth = 0;                   //!< Narrowest selection bar that fits the full names; 0 until measured
+
+    //! \brief Applies the profile's saved choice of dotted lines to the graphs
+    void loadDottedLines();
+    //! \brief Saves each graph's choice of dotted lines in the profile preferences
+    void saveDottedLines();
+
+    //! \brief Connects \a chart's Details button, and remembers \a graph as the graph it is on
+    void watchDetails(gSummaryChart *chart, gGraph *graph);
+    //! \brief Opens a details popup for \a chart's bar on \a date (index \a idx in its day list)
+    void openDetails(gSummaryChart *chart, QDate date, int idx);
+    //! \brief Closes every details popup
+    void closeDetailPopups();
+
+    QList<QPointer<OverviewDetailsPopup>> m_detailPopups;   //!< Open details popups
+    QHash<gSummaryChart *, QPointer<gGraph>> m_chartGraphs;    //!< Graph each summary chart is on
+    bool m_keepDetailPopups = false;    //!< Set while reloading, when range changes must not close popups
     void timedUpdateOverview(int ms=0);
 
     Ui::Overview *ui;

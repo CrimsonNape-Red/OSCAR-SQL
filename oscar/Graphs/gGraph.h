@@ -12,8 +12,10 @@
 
 //#define DEBUG_LAYOUT
 
+#include <QDate>
 #include <QFont>
 #include <QObject>
+#include <QSet>
 #include <QPixmap>
 #include <QResizeEvent>
 #include <QString>
@@ -344,6 +346,42 @@ class gGraph : public QObject
 
     inline bool printing() const { return m_printing; }
 
+    //! \brief Sets the day under the mouse on an Overview graph (invalid = none); its date label is bold
+    void setHoverDate(const QDate &date) { m_hoverDate = date; }
+    //! \brief The day under the mouse on an Overview graph, or an invalid date
+    const QDate &hoverDate() const { return m_hoverDate; }
+    //! \brief Sets the days that have a details popup open; their date labels are marked
+    void setPinnedDates(const QSet<QDate> &dates) { m_pinnedDates = dates; }
+    //! \brief The days that have a details popup open
+    const QSet<QDate> &pinnedDates() const { return m_pinnedDates; }
+
+    /*! \brief Sets the colour that stands for this graph (a light-mode colour). It is not drawn on
+        the graph itself; the graph's Details popups use it for their header. */
+    void setTitleColor(const QColor &color) { m_titleColor = color; }
+
+    /*! \brief Card look: the free part of the header, between the title and the menu button,
+        where layers put their summary text. Set by paint(); empty in the Classic look. */
+    QRect headerTextRect() const { return m_headerText; }
+
+    /*! \brief Card look: shows \a text in the header, cut short with an ellipsis if it doesn't
+        fit, and returns true. Returns false in the Classic look, where the caller draws the
+        text above the plot as before. */
+    bool headerSummary(const QString &text);
+
+    //! \brief Where the last paint() put the plot (the centre layers), in the view's coordinates
+    QRect plotRect() const { return m_plotRect; }
+
+    /*! \brief True when \a layer is a scale this graph leaves to the page's one shared axis
+        (gGraphView::setSharedXAxis()): Overview's date scale, or Daily's time scale on a graph
+        that follows zoom. A zoom-blocked graph (Event Flags) keeps its own time scale, since it
+        always shows the whole day. Other scales (Time at Pressure's) are never left out. */
+    bool leavesAxisToPage(Layer *layer);
+
+    //! \brief Card look: takes \a width pixels off the right of headerTextRect() (for a legend)
+    void reserveHeaderRight(int width) { m_headerText.setWidth(qMax(0, m_headerText.width() - width)); }
+    //! \brief The colour that stands for this graph, or an invalid colour if none was set
+    const QColor &titleColor() const { return m_titleColor; }
+
     void mouseDoubleClickYAxis(QMouseEvent *event);
 
   protected:
@@ -406,11 +444,17 @@ class gGraph : public QObject
     bool m_showTitle;
     bool m_printing;
     bool m_pinned;
+    QDate m_hoverDate;              //!< Day under the mouse (Overview), invalid if none
+    QSet<QDate> m_pinnedDates;      //!< Days with a details popup open (Overview)
+    QColor m_titleColor;            //!< The colour that stands for this graph (its Details popups use it)
     //! \brief Cached font for vertical title; shrunk when title is too long for the graph height
     QFont m_titleFont;
     ZoomyScaling m_zoomY;
     bool m_block_select;
     QRect m_rect;
+    QRect m_headerText;             //!< See headerTextRect()
+    QRect m_plotRect;               //!< See plotRect()
+    bool m_cardPainted = false;     //!< The last paint() drew this graph as a card
     int m_defaultLayerMinHeight;
 
     qint64 m_selectedDuration;

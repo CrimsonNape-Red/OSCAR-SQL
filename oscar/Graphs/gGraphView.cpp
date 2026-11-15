@@ -48,6 +48,7 @@
 #include "Graphs/gOverviewGraph.h"
 #endif
 #include "Graphs/gSummaryChart.h"
+#include "Graphs/gSessionTimesChart.h"
 #include "Graphs/gYAxis.h"
 #include "Graphs/gFlagsLine.h"
 #include "SleepLib/profiles.h"
@@ -56,6 +57,8 @@
 #include "database/database_manager.h"
 #include "database/graph_layouts_repository.h"
 #include "database/profile_repository.h"
+#include "graphtheme.h"
+#include "uikit/theme.h"
 extern bool openOk;
 
 
@@ -356,6 +359,11 @@ void gGraphView::trashGraphs(bool destroy)
     }
     // Don't actually want to delete them here.. we are just borrowing the graphs
     m_graphs.clear();
+    // Nothing may keep pointing at a graph that is gone
+    m_menuGraph = nullptr;
+    m_menuHover = nullptr;
+    pin_graph = nullptr;
+    popout_graph = nullptr;
     m_graphsbyname.clear();
 }
 
@@ -442,8 +450,8 @@ gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
     else
         zoom100_action->setToolTip(tr("Restore X-axis zoom to 100% to view entire day's data."));
 
-    QAction * action = context_menu->addAction(tr("Reset Graph Heights"), this, SLOT(resetLayout()));
-    action->setToolTip(tr("Resets all graphs to a uniform height."));
+    reset_action = context_menu->addAction(tr("Reset Graph Heights"), this, SLOT(resetLayout()));
+    reset_action->setToolTip(tr("Resets all graphs to a uniform height."));
 
     context_menu->addSeparator();
     limits_menu = context_menu->addMenu(tr("Y-Axis"));
@@ -496,6 +504,14 @@ void gGraphView::popoutGraph()
     int screenHeight = screenGeometry.height();
 
     if (popout_graph) {
+        // A graph that left its date axis to the page draws its own once popped out, so the
+        // popout is that much taller and the plot keeps its height
+        int popoutHeight = popout_graph->height();
+        if (sharedXAxis()) {
+            for (Layer *layer : popout_graph->m_layers) {
+                if (popout_graph->leavesAxisToPage(layer)) popoutHeight += layer->minimumHeight();
+            }
+        }
         // Create new dock if we don't have one already
         if (dock == nullptr) {
             dock = new MyDockWindow(mainwin->getDaily(), Qt::Window);
@@ -507,21 +523,22 @@ void gGraphView::popoutGraph()
         newDockWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         newDockWidget->setMouseTracking(true);
         int titleBarHeight = 30;
-        int newDockHeight = dock->height()+popout_graph->height()+titleBarHeight/*+2*/; // +2 for group box border
+        int newDockHeight = dock->height()+popoutHeight+titleBarHeight/*+2*/; // +2 for group box border
         qDebug() << "widget geometry" << newDockWidget->frameGeometry() << "title bar height" << titleBarHeight;
         if (newDockHeight > screenHeight) {
             QMessageBox::warning(nullptr, STR_MessageBox_Warning,
             QObject::tr("The popout window is full. You should capture the existing\npopout window, delete it, then pop out this graph again."));
             return;
         }
-        qDebug() << "dock height" << dock->height() << "popout graph height" << popout_graph->height();
+        qDebug() << "dock height" << dock->height() << "popout graph height" << popoutHeight;
         dock->resize(dock->width(), newDockHeight);
-        newDockWidget->setMinimumHeight(popout_graph->height()+titleBarHeight);
-        newDockWidget->resize(width(), popout_graph->height()+titleBarHeight);
+        newDockWidget->setMinimumHeight(popoutHeight+titleBarHeight);
+        newDockWidget->resize(width(), popoutHeight+titleBarHeight);
         qDebug() << "dock height resized to" << dock->height() << "widget resized to" << newDockWidget->height();
         //////// End resize dock to hold new widget
 
         gGraphView * gv = new gGraphView(newDockWidget, this);
+        gv->setLook(m_look);    // a popped-out graph keeps the look of the page it came from
         newDockWidget->setWidget(gv);
         gv->setMouseTracking(true);
         gv->setDay(this->day());
@@ -563,9 +580,9 @@ void gGraphView::popoutGraph()
         // end name construction and setting title
         /////////////////////
 
-        qDebug() << "original graph height is" << graph->height();
-        gGraph * newgraph = new gGraph(newname, nullptr, newtitle, graph->units(), graph->height(), graph->group());
-        newgraph->setHeight(graph->height());
+        qDebug() << "original graph height is" << popoutHeight;
+        gGraph * newgraph = new gGraph(newname, nullptr, newtitle, graph->units(), popoutHeight, graph->group());
+        newgraph->setHeight(popoutHeight);
 
         short group = 0;
         gv->m_graphs.insert(gv->m_graphs.indexOf(graph)+1, newgraph);
@@ -629,6 +646,150 @@ void gGraphView::popoutGraph()
         this->activateWindow();
         this->raise();
     }
+}
+
+bool gGraphView::isPopout() const
+{
+    return qobject_cast<QDockWidget *>(parentWidget()) != nullptr;
+}
+
+void gGraphView::closePopout()
+{
+    QDockWidget *holder = qobject_cast<QDockWidget *>(parentWidget());
+    if (!holder) return;
+    holder->close();
+    // The last graph to go takes the popout window with it, rather than leaving it empty
+    if (dock) {
+        for (QDockWidget *other : dock->findChildren<QDockWidget *>()) {
+            if (other->isVisible()) return;
+        }
+        dock->close();
+    }
+}
+
+bool gGraphView::onMenuButton(gGraph *g, int x, int y) const
+{
+    return cardLook() && g && GraphCard::menuButtonRect(g->m_rect).contains(x, y);
+}
+
+QAction * gGraphView::menuHeading(const QString &text)
+{
+    // A section title that shows the same on every platform (QMenu::addSection's text is
+    // dropped by several styles)
+    QLabel *label = new QLabel(text.toUpper(), context_menu);
+    QFont font = QApplication::font();
+    font.setBold(true);
+    font.setPointSizeF(font.pointSizeF() * 0.85);
+    label->setFont(font);
+    label->setEnabled(false);
+    label->setContentsMargins(10, 6, 10, 2);
+    QWidgetAction *heading = new QWidgetAction(context_menu);
+    heading->setDefaultWidget(label);
+    heading->setEnabled(false);
+    return heading;
+}
+
+void gGraphView::arrangeCardMenu()
+{
+    if (m_cardMenuBuilt) return;
+    m_cardMenuBuilt = true;
+
+    // Take the Classic menu apart (its separators go) and put the same commands back in groups
+    const QList<QAction *> old = context_menu->actions();
+    for (QAction *action : old) {
+        context_menu->removeAction(action);
+        if (action->isSeparator()) action->deleteLater();
+    }
+
+    context_menu->addAction(m_headDisplay = menuHeading(tr("Display")));
+    context_menu->addAction(reset_action);
+    context_menu->addAction(pin_action);
+    context_menu->addAction(popout_action);
+    m_closeAction = context_menu->addAction(tr("Close"), this, SLOT(closePopout()));
+    context_menu->addAction(snap_action);
+    context_menu->addAction(zoom100_action);
+
+    context_menu->addAction(m_headYAxis = menuHeading(tr("Y-axis")));
+    m_autoScale = context_menu->addAction(tr("Auto scale"));
+    m_autoScale->setCheckable(true);
+    m_defaultScale = context_menu->addAction(tr("Default scale"));
+    m_defaultScale->setCheckable(true);
+    connect(m_autoScale, &QAction::triggered, this, [this] {
+        if (m_menuGraph) { m_menuGraph->setZoomY(ZS_AUTO_FIT); timedRedraw(0); }
+    });
+    connect(m_defaultScale, &QAction::triggered, this, [this] {
+        if (m_menuGraph) { m_menuGraph->setZoomY(ZS_DEFAULT); timedRedraw(0); }
+    });
+    // The Daily line graphs' dynamic scale, which double-clicking the Y axis also switches
+    m_dynamicScale = context_menu->addAction(tr("Dynamic scale"));
+    m_dynamicScale->setCheckable(true);
+    connect(m_dynamicScale, &QAction::triggered, this, [this](bool on) {
+        if (m_menuGraph && m_menuGraph->isDynamicScalingEnabled()) {
+            m_menuGraph->dynamicScalingOn = on;
+            timedRedraw(0);
+        }
+    });
+    limits_menu->setTitle(tr("Override scale..."));
+    context_menu->addMenu(limits_menu);
+
+    context_menu->addAction(m_headOverlays = menuHeading(tr("Overlays")));
+    context_menu->addMenu(plots_menu);
+    context_menu->addMenu(cpap_menu);
+    context_menu->addMenu(oximeter_menu);
+    context_menu->addMenu(lines_menu);
+}
+
+void gGraphView::showGraphMenu(gGraph *g, const QPoint &globalPos)
+{
+    if (!g) return;
+    setCursor(Qt::ArrowCursor);
+    pin_graph = g;
+    popout_graph = g;
+    m_menuGraph = g;
+    populateMenu(g);
+
+    if (cardLook()) {
+        arrangeCardMenu();
+        // Colours from the theme, so the menu reads in light and dark mode
+        const auto hex = [](Theme::Role role) { return Theme::color(role).name(); };
+        context_menu->setStyleSheet(QString(
+            "QMenu { background-color: %1; color: %2; border: 1px solid %3; }"
+            "QMenu::item { background-color: %1; color: %2; }"
+            "QMenu::item:selected { background-color: %4; color: %2; }"
+            "QMenu::item:disabled { color: %5; }"
+            "QMenu QLabel, QMenu QCheckBox { color: %2; background: transparent; }"
+            "QMenu QLabel:disabled { color: %5; }")
+            .arg(hex(Theme::Role::Surface), hex(Theme::Role::Ink), hex(Theme::Role::Line),
+                 hex(Theme::Role::AccentSoft), hex(Theme::Role::Ink3)));
+        const bool popout = isPopout();
+        reset_action->setText(tr("Reset graph heights"));
+        reset_action->setVisible(!popout);
+        pin_action->setText(g->isPinned() ? tr("Unpin") : tr("Pin"));
+        pin_action->setVisible(!popout);
+        popout_action->setText(tr("Pop out"));
+        popout_action->setVisible(!popout);
+        m_closeAction->setVisible(popout);
+        snap_action->setText(g->isSnapshot() ? tr("Remove clone") : tr("Clone"));
+        snap_action->setVisible(!popout);
+        zoom100_action->setText(tr("100% zoom"));
+
+        const bool scalable = limits_menu->menuAction()->isVisible();
+        m_headYAxis->setVisible(scalable);
+        m_autoScale->setVisible(scalable);
+        m_defaultScale->setVisible(scalable);
+        m_autoScale->setChecked(g->zoomY() == ZS_AUTO_FIT);
+        m_defaultScale->setChecked(g->zoomY() == ZS_DEFAULT);
+        m_dynamicScale->setVisible(scalable && g->isDynamicScalingEnabled());
+        m_dynamicScale->setChecked(g->dynamicScalingOn);
+
+        m_headOverlays->setVisible(plots_menu->menuAction()->isVisible() || cpap_menu->menuAction()->isVisible()
+                                   || oximeter_menu->menuAction()->isVisible() || lines_menu->menuAction()->isVisible());
+    } else {
+        pin_action->setText(g->isPinned() ? QObject::tr("Unpin %1 Graph").arg(g->title())
+                                          : QObject::tr("Pin %1 Graph").arg(g->title()));
+        popout_action->setText(QObject::tr("Popout %1 Graph").arg(g->title()));
+    }
+    context_menu->popup(globalPos);
 }
 
 void gGraphView::togglePin()
@@ -718,7 +879,7 @@ bool gGraphView::pinchTriggered(QPinchGesture * gesture)
         pinch_max = m_maxx;
     }
 
-     int origin_px = gesture->centerPoint().x() - titleWidth;
+     int origin_px = gesture->centerPoint().x() - titleW();
 
      // could use this instead, and have it more dynamic
 
@@ -829,7 +990,7 @@ void gGraphView::DrawTextQue(QPainter &painter)
     for (const TextQue & q : m_textque) {
         // can do antialiased text via texture cache fine on mac
         // Just draw the fonts..
-        painter.setPen(QColor(q.color));
+        painter.setPen(GraphTheme::ink(q.color));
         painter.setFont(*q.font);
 
         if (q.angle == 0) {
@@ -858,7 +1019,7 @@ void gGraphView::DrawTextQue(QPainter &painter)
     for (const TextQueRect & q : m_textqueRect) {
         // Just draw the fonts..
 
-        painter.setPen(QColor(q.color));
+        painter.setPen(GraphTheme::ink(q.color));
         painter.setFont(*q.font);
 
         if (q.angle == 0) {
@@ -904,7 +1065,8 @@ void gGraphView::DrawTextQueCached(QPainter &painter)
         // Generate the pixmap cache "key"
         size = (q.font == defaultfont) ? fonta : (q.font==mediumfont) ? fontb : (q.font == bigfont) ? fontc : q.font->pointSize();
 
-        hstr = z__cacheStr.arg(q.text).arg(q.color.name()).arg(size);
+        const QColor textColor = GraphTheme::ink(q.color);
+        hstr = z__cacheStr.arg(q.text).arg(textColor.name(QColor::HexArgb)).arg(size);
 
         if (!QPixmapCache::find(hstr, &pm)) {
 
@@ -921,7 +1083,7 @@ void gGraphView::DrawTextQueCached(QPainter &painter)
 
             QPainter imgpainter(&pm);
 
-            imgpainter.setPen(q.color);
+            imgpainter.setPen(textColor);
             imgpainter.setFont(*q.font);
 
             imgpainter.setRenderHint(QPainter::TextAntialiasing, q.antialias);
@@ -960,7 +1122,8 @@ void gGraphView::DrawTextQueCached(QPainter &painter)
 
         size = (q.font == defaultfont) ? fonta : (q.font==mediumfont) ? fontb : (q.font == bigfont) ? fontc : q.font->pointSize();
 
-        hstr = z__cacheStr.arg(q.text).arg(q.color.name()).arg(size);
+        const QColor textColor = GraphTheme::ink(q.color);
+        hstr = z__cacheStr.arg(q.text).arg(textColor.name(QColor::HexArgb)).arg(size);
 
         if (!QPixmapCache::find(hstr, &pm)) {
 
@@ -973,7 +1136,7 @@ void gGraphView::DrawTextQueCached(QPainter &painter)
 
             QPainter imgpainter(&pm);
 
-            imgpainter.setPen(q.color);
+            imgpainter.setPen(textColor);
             imgpainter.setFont(*q.font);
             imgpainter.setRenderHint(QPainter::TextAntialiasing, true);
             imgpainter.drawText(QRect(0,0, w, h), q.flags, q.text);
@@ -1044,7 +1207,7 @@ float gGraphView::totalHeight()
     for (const auto & g : m_graphs) {
         if (g->isEmpty() || (!g->visible())) { continue; }
 
-        th += g->height() + graphSpacer;
+        th += g->height() + graphGap();
     }
 
     return ceil(th);
@@ -1059,7 +1222,7 @@ float gGraphView::findTop(gGraph *graph)
 
         if (g->isEmpty() || (!g->visible())) { continue; }
 
-        th += g->height() * m_scaleY + graphSpacer;
+        th += g->height() * m_scaleY + graphGap();
     }
 
     return ceil(th);
@@ -1072,7 +1235,7 @@ float gGraphView::scaleHeight()
     for (const auto & graph : m_graphs) {
         if (graph->isEmpty() || (!graph->visible())) { continue; }
 
-        th += graph->height() * m_scaleY + graphSpacer;
+        th += graph->height() * m_scaleY + graphGap();
     }
 
     return ceil(th);
@@ -1090,7 +1253,7 @@ void gGraphView::updateScale()
 
 
     if (th < h) {
-        th -= graphSpacer;
+        th -= graphGap();
     //    th -= visibleGraphs() * graphSpacer;   // compensate for spacer height
         m_scaleY = h / th;  // less graphs than fits on screen, so scale to fit
     } else {
@@ -1288,7 +1451,7 @@ bool gGraphView::renderGraphs(QPainter &painter)
         if (!g->isPinned()) { continue; }
 
         h = g->height() * m_scaleY;
-        pinned_height += h + graphSpacer;
+        pinned_height += h + graphGap();
     }
 
     py += pinned_height; // start drawing at the end of pinned space
@@ -1310,27 +1473,27 @@ bool gGraphView::renderGraphs(QPainter &painter)
             break;    // we are done.. can't draw anymore
         }
 
-        if ((py + h + graphSpacer) >= 0) {
+        if ((py + h + graphGap()) >= 0) {
             w = width();
             int tw = 0; // (g->showTitle() ? titleWidth : 0);
 
             queGraph(g, px + tw, py, width() - tw, h);
 
-            if ((m_graphs.size() > 1) && m_showsplitter) {
+            if ((m_graphs.size() > 1) && m_showsplitter && !cardLook()) {
                 // draw the splitter handle
 
-                painter.setPen(QColor(220, 220, 220, 255));
+                painter.setPen(GraphTheme::ink(QColor(220, 220, 220, 255)));
                 painter.drawLine(0, py + h, w, py + h);
-                painter.setPen(QColor(158,158,158,255));
+                painter.setPen(GraphTheme::ink(QColor(158,158,158,255)));
                 painter.drawLine(0, py + h + 1, w, py + h + 1);
-                painter.setPen(QColor(240, 240, 240, 255));
+                painter.setPen(GraphTheme::ink(QColor(240, 240, 240, 255)));
                 painter.drawLine(0, py + h + 2, w, py + h + 2);
 
             }
 
         }
 
-        py = ceil(py + h + graphSpacer);
+        py = ceil(py + h + graphGap());
     }
 
     // Physically draw the unpinned graphs
@@ -1342,12 +1505,17 @@ bool gGraphView::renderGraphs(QPainter &painter)
     if (m_graphs.size() > 1) {
         AppSetting->usePixmapCaching() ? DrawTextQueCached(painter) :DrawTextQue(painter);
 
-        // Draw a gradient behind pinned graphs
-        QLinearGradient linearGrad(QPointF(100, 100), QPointF(width() / 2, 100));
-        linearGrad.setColorAt(0, QColor(216, 216, 255));
-        linearGrad.setColorAt(1, Qt::white);
+        if (cardLook()) {
+            // Cards carry their own background; hide what scrolled under the pinned ones
+            painter.fillRect(0, 0, width(), pinned_height, QBrush(viewBackground()));
+        } else {
+            // Draw a gradient behind pinned graphs
+            QLinearGradient linearGrad(QPointF(100, 100), QPointF(width() / 2, 100));
+            linearGrad.setColorAt(0, GraphTheme::fill(QColor(216, 216, 255)));
+            linearGrad.setColorAt(1, GraphTheme::background());
 
-        painter.fillRect(0, 0, width(), pinned_height, QBrush(linearGrad));
+            painter.fillRect(0, 0, width(), pinned_height, QBrush(linearGrad));
+        }
     }
 
     py = 0; // start drawing at top...
@@ -1367,25 +1535,25 @@ bool gGraphView::renderGraphs(QPainter &painter)
             break;    // we are done.. can't draw anymore
         }
 
-        if ((py + h + graphSpacer) >= 0) {
+        if ((py + h + graphGap()) >= 0) {
             w = width();
             int tw = 0; //(g->showTitle() ? titleWidth : 0);
 
             queGraph(g, px + tw, py, width() - tw, h);
 
-            if ((m_graphs.size() > 1) && m_showsplitter) {
+            if ((m_graphs.size() > 1) && m_showsplitter && !cardLook()) {
                 // draw the splitter handle
-                painter.setPen(QColor(220, 220, 220, 255));
+                painter.setPen(GraphTheme::ink(QColor(220, 220, 220, 255)));
                 painter.drawLine(0, py + h, w, py + h);
-                painter.setPen(QColor(128, 128, 128, 255));
+                painter.setPen(GraphTheme::ink(QColor(128, 128, 128, 255)));
                 painter.drawLine(0, py + h + 1, w, py + h + 1);
-                painter.setPen(QColor(190, 190, 190, 255));
+                painter.setPen(GraphTheme::ink(QColor(190, 190, 190, 255)));
                 painter.drawLine(0, py + h + 2, w, py + h + 2);
             }
 
         }
 
-        py = ceil(py + h + graphSpacer);
+        py = ceil(py + h + graphGap());
     }
 
     for (const auto & g : m_drawlist) {
@@ -1452,7 +1620,7 @@ QPixmap gGraphView::renderToRasterPixmap()
     const qreal dpr = devicePixelRatioF();
     QPixmap pixmap((QSizeF(width(), height()) * dpr).toSize());
     pixmap.setDevicePixelRatio(dpr);
-    pixmap.fill(Qt::white);
+    pixmap.fill(viewBackground());
 
     QPainter painter(&pixmap);
     paintView(painter);
@@ -1476,7 +1644,7 @@ bool gGraphView::paintView(QPainter &painter)
 
 
     QRect bgrect(0, 0, width(), height());
-    painter.fillRect(bgrect,QBrush(QColor(255,255,255)));
+    painter.fillRect(bgrect, QBrush(viewBackground()));
 
     bool graphs_drawn = true;
 
@@ -1515,7 +1683,7 @@ bool gGraphView::paintView(QPainter &painter)
         }
 ***/
 
-        QColor col = Qt::black;
+        QColor col = GraphTheme::ink(Qt::black);
         painter.setPen(col);
 
         QRectF rec(0,0,width(),0);
@@ -1537,6 +1705,7 @@ bool gGraphView::paintView(QPainter &painter)
 
     m_tooltip->paint(painter);
     m_parent_tooltip->paint(painter,width(), height() );
+    emit painted();
 
 #ifdef DEBUG_EFFICIENCY
     const int rs = 20;
@@ -1672,6 +1841,11 @@ void gGraphView::enterEvent(QEnterEvent * event)
     takeHoverFocus();
 }
 
+QColor gGraphView::viewBackground() const
+{
+    return cardLook() ? Theme::color(Theme::Role::Page) : GraphTheme::background();
+}
+
 void gGraphView::leaveEvent(QEvent * event)
 {
     Q_UNUSED(event);
@@ -1684,6 +1858,12 @@ void gGraphView::leaveEvent(QEvent * event)
     // shown by whatever widget the mouse moves to next.
     if (m_tooltip->visible()) {
         m_tooltip->cancel();
+        timedRedraw(0);
+    }
+
+    // Card look: the hover line, Details button and menu-button highlight go with the mouse too
+    if (cardLook()) {
+        m_mouse = QPoint(-1, -1);
         timedRedraw(0);
     }
 
@@ -1759,6 +1939,18 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
 
     m_mouse = QPoint(x, y);
 
+    if (cardLook()) {
+        // Repaint when the mouse moves on or off a menu button, so its highlight follows
+        gGraph *over = nullptr;
+        for (const auto & g : m_graphs) {
+            if (g->visible() && !g->isEmpty() && onMenuButton(g, x, y)) { over = g; break; }
+        }
+        if (over != m_menuHover) {
+            m_menuHover = over;
+            timedRedraw(0);
+        }
+    }
+
     if (m_sizer_dragging) { // Resize handle being dragged
         float my = y - m_sizer_point.y();
         float h = m_graphs[m_sizer_index]->height();
@@ -1793,7 +1985,7 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
 
                 empty = m_graphs[i]->isEmpty() || (!m_graphs[i]->visible());
                 // swapping upwards.
-                int yy2 = yy - graphSpacer - m_graphs[i]->height() * m_scaleY;
+                int yy2 = yy - graphGap() - m_graphs[i]->height() * m_scaleY;
                 yy2 += m_graphs[m_graph_index]->height() * m_scaleY;
 
                 if (y < yy2) {
@@ -1802,7 +1994,7 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
                     m_graphs[i] = p;
 
                     if (!empty) {
-                        m_sizer_point.setY(yy - graphSpacer - m_graphs[m_graph_index]->height()*m_scaleY);
+                        m_sizer_point.setY(yy - graphGap() - m_graphs[m_graph_index]->height()*m_scaleY);
                         redraw();
                     }
 
@@ -1812,7 +2004,7 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
                 if (!empty) { break; }
 
             }
-        } else if (y > yy + graphSpacer + m_graphs[m_graph_index]->height()*m_scaleY) {
+        } else if (y > yy + graphGap() + m_graphs[m_graph_index]->height()*m_scaleY) {
             // swapping downwards
             for (int i = m_graph_index + 1; i < m_graphs.size(); i++) {
                 if (m_graphs[i]->isPinned() != m_graphs[m_graph_index]->isPinned()) {
@@ -1826,7 +2018,7 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
                 m_graphs[i] = p;
 
                 if (!empty) {
-                    m_sizer_point.setY(yy + graphSpacer + m_graphs[m_graph_index]->height()*m_scaleY);
+                    m_sizer_point.setY(yy + graphGap() + m_graphs[m_graph_index]->height()*m_scaleY);
                     timedRedraw();
                 }
 
@@ -1850,7 +2042,7 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
         }
 
         h = graph->height() * m_scaleY;
-        pinned_height += h + graphSpacer;
+        pinned_height += h + graphGap();
 
         if (py > height()) {
             break;    // we are done.. can't draw anymore
@@ -1864,15 +2056,17 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
         }
 
         // Update Mouse Cursor shape
-        if ((y >= py + h - 1) && (y < (py + h + graphSpacer))) {
+        if ((y >= py + h - 1) && (y < (py + h + graphGap()))) {
             this->setCursor(Qt::SplitVCursor);
             done = true;
         } else if ((y >= py + 1) && (y < py + h)) {
-            if (x >= titleWidth + 10) {
+            if (!onTitle(x, y - py, 10)) {
                 this->setCursor(Qt::ArrowCursor);
             } else {
-                m_tooltip->display(tr("Double click title to pin / unpin\nClick and drag to reorder graphs"), x + 10, y, TT_AlignLeft);
-                timedRedraw(0);
+                if (!cardLook()) {
+                    m_tooltip->display(tr("Double click title to pin / unpin\nClick and drag to reorder graphs"), x + 10, y, TT_AlignLeft);
+                    timedRedraw(0);
+                }
 
                 this->setCursor(Qt::OpenHandCursor);
             }
@@ -1887,7 +2081,7 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
             done = true;
         }
 
-        py += h + graphSpacer;
+        py += h + graphGap();
 
     }
 
@@ -1916,14 +2110,16 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
             }
 
             // Update Mouse Cursor shape
-            if ((y >= py + h - 1) && (y < (py + h + graphSpacer))) {
+            if ((y >= py + h - 1) && (y < (py + h + graphGap()))) {
                 this->setCursor(Qt::SplitVCursor);
             } else if ((y >= py + 1) && (y < py + h)) {
-                if (x >= titleWidth + 10) {
+                if (!onTitle(x, y - py, 10)) {
                     this->setCursor(Qt::ArrowCursor);
                 } else {
-                    m_tooltip->display(tr("Double click title to pin / unpin\nClick and drag to reorder graphs"), x + 10, y, TT_AlignLeft);
-                    timedRedraw(0);
+                    if (!cardLook()) {
+                        m_tooltip->display(tr("Double click title to pin / unpin\nClick and drag to reorder graphs"), x + 10, y, TT_AlignLeft);
+                        timedRedraw(0);
+                    }
 
                     this->setCursor(Qt::OpenHandCursor);
                 }
@@ -1989,7 +2185,7 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
 
                         } */
 
-            py += h + graphSpacer;
+            py += h + graphGap();
         }
 
 }
@@ -2184,10 +2380,12 @@ void gGraphView::populateMenu(gGraph * graph)
     gSummaryChart * stg = dynamic_cast<gSummaryChart *>(findLayer(graph,LT_Overview));
 
     limits_menu->clear();
+    // Card look: Session Times has no scale to override (its axis is the time of day)
+    const bool fixedScale = cardLook() && dynamic_cast<gSessionTimesChart *>(stg);
     #ifndef REMOVE_FITNESS
-    if (lc || sc || stg )
+    if ((lc || sc || stg) && !fixedScale)
     #else
-    if (lc || stg )
+    if ((lc || stg) && !fixedScale)
     #endif
     {
         QWidgetAction * widget = new QWidgetAction(this);
@@ -2402,6 +2600,39 @@ void gGraphView::populateMenu(gGraph * graph)
         oximeter_menu->menuAction()->setVisible(false);
         cpap_menu->clear();
         cpap_menu->menuAction()->setVisible(false);
+    }
+
+    if (stg && cardLook()) {
+        // An Overview graph's dotted lines, each with its value for the dates on screen
+        lines_menu->clear();
+        const QVector<SummaryLine> lines = stg->lines(true);     // the menu shows every line's value
+        for (const SummaryLine &line : lines) {
+            QWidgetAction * widget = new QWidgetAction(context_menu);
+            // A dash for a line the dates on screen have no figure for
+            const QString value = line.available ? QString::number(line.value, 'f', 2) : QString(QChar(0x2014));
+            QCheckBox *chbox = new QCheckBox(QString("%1  (%2)").arg(line.label, value), context_menu);
+            chbox->setMouseTracking(true);
+            chbox->setChecked(line.enabled);
+            // A sample of the line, in its colour
+            QPixmap sample(24, 12);
+            sample.fill(Qt::transparent);
+            {
+                QPainter samplePainter(&sample);
+                samplePainter.setPen(QPen(QBrush(GraphTheme::ink(line.color)), 3, Qt::DotLine));
+                samplePainter.drawLine(1, 6, 23, 6);
+            }
+            chbox->setIcon(QIcon(sample));
+            chbox->setIconSize(sample.size());
+            widget->setDefaultWidget(chbox);
+            const int id = line.id;
+            connect(chbox, &QCheckBox::toggled, this, [this, stg, id](bool on) {
+                stg->setLineEnabled(id, on);
+                emit summaryLinesChanged();
+                timedRedraw(0);
+            });
+            lines_menu->addAction(widget);
+        }
+        lines_menu->menuAction()->setVisible(!lines.isEmpty());
     }
 }
 
@@ -2665,14 +2896,14 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
         }
 
         h = g->height() * m_scaleY;
-        pinned_height += h + graphSpacer;
+        pinned_height += h + graphGap();
 
         if (py > height()) {
             break;
         }
 
-        if ((py + h + graphSpacer) >= 0) {
-            if ((y >= py + h - 1) && (y <= py + h + graphSpacer)) {
+        if ((py + h + graphGap()) >= 0) {
+            if ((y >= py + h - 1) && (y <= py + h + graphGap())) {
                 this->setCursor(Qt::SplitVCursor);
                 m_sizer_dragging = true;
                 m_sizer_index = i;
@@ -2680,7 +2911,9 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                 m_sizer_point.setY(y);
                 done = true;
             } else if ((y >= py) && (y < py + h)) {
-                if ((event->button() == Qt::LeftButton) && (x < titleWidth + 20)) {
+                if ((event->button() == Qt::LeftButton) && onMenuButton(g, x, y)) {
+                    showGraphMenu(g, mapToGlobal(GraphCard::menuButtonRect(g->m_rect).bottomLeft()));
+                } else if ((event->button() == Qt::LeftButton) && onTitle(x, y - py, 20)) {
                     // clicked on title to drag graph..
                     // Note: reorder has to be limited to pinned graphs.
                     m_graph_dragging = true;
@@ -2691,19 +2924,8 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                     m_sizer_point.setX(x);
                     m_sizer_point.setY(py); // point at top of graph..
                     this->setCursor(Qt::ClosedHandCursor);
-                } else if ((event->button() == Qt::RightButton) && (x < (titleWidth + gYAxis::Margin))) {
-                    this->setCursor(Qt::ArrowCursor);
-                    pin_action->setText(QObject::tr("Unpin %1 Graph").arg(g->title()));
-                    pin_graph = g;
-                    popout_action->setText(QObject::tr("Popout %1 Graph").arg(g->title()));
-                    popout_graph = g;
-
-                    populateMenu(g);
-                    #if QT_VERSION < QT_VERSION_CHECK(6,0,0)
-                        context_menu->popup(event->globalPos());
-                    #else
-                        context_menu->popup(event->globalPosition().toPoint());
-                    #endif
+                } else if ((event->button() == Qt::RightButton) && onTitle(x, y - py, gYAxis::Margin)) {
+                    showGraphMenu(g, event->globalPosition().toPoint());
                 } else if (!g->blockSelect()) {
                     if (m_metaselect) {
                         if (m_selected_graph) {
@@ -2732,7 +2954,7 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
 
         }
 
-        py += h + graphSpacer;
+        py += h + graphGap();
     }
 
 
@@ -2753,8 +2975,8 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                 break;
             }
 
-            if ((py + h + graphSpacer) >= 0) {
-                if ((y >= py + h - 1) && (y <= py + h + graphSpacer)) {
+            if ((py + h + graphGap()) >= 0) {
+                if ((y >= py + h - 1) && (y <= py + h + graphGap())) {
                     this->setCursor(Qt::SplitVCursor);
                     m_sizer_dragging = true;
                     m_sizer_index = i;
@@ -2762,7 +2984,9 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                     m_sizer_point.setY(y);
                 } else if ((y >= py) && (y < py + h)) {
 
-                    if ((event->button() == Qt::LeftButton) && (x < (titleWidth + 20))) { // clicked on title to drag graph..
+                    if ((event->button() == Qt::LeftButton) && onMenuButton(g, x, y)) {
+                    showGraphMenu(g, mapToGlobal(GraphCard::menuButtonRect(g->m_rect).bottomLeft()));
+                } else if ((event->button() == Qt::LeftButton) && onTitle(x, y - py, 20)) { // clicked on title to drag graph..
                         m_graph_dragging = true;
                         m_tooltip->cancel();
                         redraw();
@@ -2770,19 +2994,8 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                         m_sizer_point.setX(x);
                         m_sizer_point.setY(py); // point at top of graph..
                         this->setCursor(Qt::ClosedHandCursor);
-                    } else if ((event->button() == Qt::RightButton) && (x < (titleWidth + gYAxis::Margin))) {
-                        this->setCursor(Qt::ArrowCursor);
-                        popout_action->setText(QObject::tr("Popout %1 Graph").arg(g->title()));
-                        popout_graph = g;
-                        pin_action->setText(QObject::tr("Pin %1 Graph").arg(g->title()));
-                        pin_graph = g;
-                        populateMenu(g);
-
-                        #if QT_VERSION < QT_VERSION_CHECK(6,0,0)
-                            context_menu->popup(event->globalPos());
-                        #else
-                            context_menu->popup(event->globalPosition().toPoint());
-                        #endif
+                    } else if ((event->button() == Qt::RightButton) && onTitle(x, y - py, gYAxis::Margin)) {
+                        showGraphMenu(g, event->globalPosition().toPoint());
                     } else if (!g->blockSelect()) {
                        if (m_metaselect) {
                             if (m_selected_graph) {
@@ -2807,7 +3020,7 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
 
             }
 
-            py += h + graphSpacer;
+            py += h + graphGap();
             done=true;
         }
     }
@@ -2840,19 +3053,19 @@ void gGraphView::mouseReleaseEvent(QMouseEvent *event)
         }
 
         h = g->height() * m_scaleY;
-        pinned_height += h + graphSpacer;
+        pinned_height += h + graphGap();
 
         if (py > height()) {
             break;    // we are done.. can't draw anymore
         }
 
-        if ((y >= py + h - 1) && (y < (py + h + graphSpacer))) {
+        if ((y >= py + h - 1) && (y < (py + h + graphGap()))) {
             this->setCursor(Qt::SplitVCursor);
             done = true;
         } else if ((y >= py + 1) && (y <= py + h)) {
 
 
-            if (x >= titleWidth + 10) {
+            if (!onTitle(x, y - py, 10)) {
                 this->setCursor(Qt::ArrowCursor);
             } else {
                 this->setCursor(Qt::OpenHandCursor);
@@ -2861,7 +3074,7 @@ void gGraphView::mouseReleaseEvent(QMouseEvent *event)
             done = true;
         }
 
-        py += h + graphSpacer;
+        py += h + graphGap();
     }
 
     // Now do the unpinned ones
@@ -2881,19 +3094,19 @@ void gGraphView::mouseReleaseEvent(QMouseEvent *event)
                 break;    // we are done.. can't draw anymore
             }
 
-            if ((y >= py + h - 1) && (y < (py + h + graphSpacer))) {
+            if ((y >= py + h - 1) && (y < (py + h + graphGap()))) {
                 this->setCursor(Qt::SplitVCursor);
             } else if ((y >= py + 1) && (y <= py + h)) {
 
 
-                if (x >= titleWidth + 10) {
+                if (!onTitle(x, y - py, 10)) {
                     this->setCursor(Qt::ArrowCursor);
                 } else {
                     this->setCursor(Qt::OpenHandCursor);
                 }
             }
 
-            py += h + graphSpacer;
+            py += h + graphGap();
         }
 
     if (m_sizer_dragging) {
@@ -2905,7 +3118,7 @@ void gGraphView::mouseReleaseEvent(QMouseEvent *event)
         m_graph_dragging = false;
 
         // not sure why the cursor code doesn't catch this..
-        if (x >= titleWidth + 10) {
+        if (cardLook() || x >= (titleWidth + 10)) {
             this->setCursor(Qt::ArrowCursor);
         } else {
             this->setCursor(Qt::OpenHandCursor);
@@ -2995,15 +3208,15 @@ void gGraphView::mouseDoubleClickEvent(QMouseEvent *event)
         }
 
         h = g->height() * m_scaleY;
-        pinned_height += h + graphSpacer;
+        pinned_height += h + graphGap();
 
         if (py > height()) {
             break;    // we are done.. can't draw anymore
         }
 
-        if ((py + h + graphSpacer) >= 0) {
+        if ((py + h + graphGap()) >= 0) {
             if ((y >= py) && (y <= py + h)) {
-                if (x < titleWidth) {
+                if (onTitle(x, y - py)) {
                     // What to do when double clicked on the graph title ??
 
                     g->mouseDoubleClickEvent(event);
@@ -3016,14 +3229,14 @@ void gGraphView::mouseDoubleClickEvent(QMouseEvent *event)
                 }
 
                 done = true;
-            } else if ((y >= py + h) && (y <= py + h + graphSpacer + 1)) {
+            } else if ((y >= py + h) && (y <= py + h + graphGap() + 1)) {
                 // What to do when double clicked on the resize handle?
                 done = true;
             }
         }
 
         py += h;
-        py += graphSpacer; // do we want the extra spacer down the bottom?
+        py += graphGap(); // do we want the extra spacer down the bottom?
     }
 
 
@@ -3042,9 +3255,9 @@ void gGraphView::mouseDoubleClickEvent(QMouseEvent *event)
                 break;
             }
 
-            if ((py + h + graphSpacer) >= 0) {
+            if ((py + h + graphGap()) >= 0) {
                 if ((y >= py) && (y <= py + h)) {
-                    if (x < titleWidth) {
+                    if (onTitle(x, y - py)) {
                         // What to do when double clicked on the graph title ??
                         g->mouseDoubleClickEvent(event);
 
@@ -3054,14 +3267,14 @@ void gGraphView::mouseDoubleClickEvent(QMouseEvent *event)
                         // send event to graph..
                         g->mouseDoubleClickEvent(event);
                     }
-                } else if ((y >= py + h) && (y <= py + h + graphSpacer + 1)) {
+                } else if ((y >= py + h) && (y <= py + h + graphGap() + 1)) {
                     // What to do when double clicked on the resize handle?
                 }
 
             }
 
             py += h;
-            py += graphSpacer; // do we want the extra spacer down the bottom?
+            py += graphGap(); // do we want the extra spacer down the bottom?
         }
 }
 
@@ -3110,17 +3323,17 @@ void gGraphView::wheelEvent(QWheelEvent *event)
         }
 
         h = g->height() * m_scaleY;
-        pinned_height += h + graphSpacer;
+        pinned_height += h + graphGap();
 
         if (py > height()) {
             break;    // we are done.. can't draw anymore
         }
 
-        if ((py + h + graphSpacer) >= 0) {
+        if ((py + h + graphGap()) >= 0) {
             if ((y >= py) && (y <= py + h)) {
                 graph = g;
                 break;
-            } else if ((y >= py + h) && (y <= py + h + graphSpacer + 1)) {
+            } else if ((y >= py + h) && (y <= py + h + graphGap() + 1)) {
                 // What to do when double clicked on the resize handle?
                 graph = g;
                 break;
@@ -3128,7 +3341,7 @@ void gGraphView::wheelEvent(QWheelEvent *event)
         }
 
         py += h;
-        py += graphSpacer; // do we want the extra spacer down the bottom?
+        py += graphGap(); // do we want the extra spacer down the bottom?
     }
     if (!graph) {
         py = -m_offsetY;
@@ -3145,11 +3358,11 @@ void gGraphView::wheelEvent(QWheelEvent *event)
                 break;
             }
 
-            if ((py + h + graphSpacer) >= 0) {
+            if ((py + h + graphGap()) >= 0) {
                 if ((y >= py) && (y <= py + h)) {
                     graph = g;
                     break;
-                } else if ((y >= py + h) && (y <= py + h + graphSpacer + 1)) {
+                } else if ((y >= py + h) && (y <= py + h + graphGap() + 1)) {
                     // What to do when double clicked on the resize handle?
                     graph = g;
                     break;
@@ -3158,7 +3371,7 @@ void gGraphView::wheelEvent(QWheelEvent *event)
             }
 
             py += h;
-            py += graphSpacer; // do we want the extra spacer down the bottom?
+            py += graphGap(); // do we want the extra spacer down the bottom?
         }
     }
 
@@ -3234,7 +3447,7 @@ void gGraphView::getSelectionTimes(qint64 & start, qint64 & end)
             end = 0;
             return;
         }
-        int x1 = g->m_selection.x() + titleWidth;
+        int x1 = g->m_selection.x() + titleW();
         int x2 = x1 + g->m_selection.width();
         start = g->screenToTime(x1);
         end = g->screenToTime(x2);
