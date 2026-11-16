@@ -20,6 +20,7 @@ set LOG_FILE=C:\OSCAR\nightly-build.log
 set NOTIFY_SCRIPT=%~dp0nightly-notify.ps1
 set PUBLISH_SCRIPT=%BUILD_DIR%\nightly-publish.ps1
 set LINUX_DIR=C:\Users\Guy\Dropbox\tranfert_deb
+set PUBLISH_ARGS=
 
 :: -----------------------------------------------------------------------
 :: Logging: re-invoke this script with all output redirected to the log.
@@ -120,9 +121,11 @@ if defined NIGHTLY_NAME (
 if defined NIGHTLY_HASH (
     echo %REMOTE_FULL_HASH% | findstr /B /I "!NIGHTLY_HASH!" >nul
     if !errorlevel! == 0 (
-        echo Remote HEAD matches current nightly build. No action needed.
+        echo Remote HEAD matches current nightly build. No build needed.
         if !HAVE_STASH! == 1 git stash pop
-        exit /b 0
+        rem A Linux build may have caught up since last night; publish it.
+        set PUBLISH_ARGS=-LinuxOnly
+        goto :publish
     )
 )
 
@@ -210,9 +213,11 @@ echo Nightly build complete: %DROPBOX_DIR%\!NIGHTLY_NEW_NAME!
 ::         Linux files to Dropbox\OSCAR Files\Nightly under fixed names,
 ::         then update and push the page.  Uses the Linux build for the
 ::         same commit if it is complete, otherwise the most recent
-::         complete one.
+::         complete one.  Also reached from Step 3 with -LinuxOnly when
+::         there is no new commit, to publish a Linux build that caught up.
 :: -----------------------------------------------------------------------
-powershell -NoProfile -ExecutionPolicy Bypass -File "%PUBLISH_SCRIPT%" -LinuxRoot "%LINUX_DIR%"
+:publish
+powershell -NoProfile -ExecutionPolicy Bypass -File "%PUBLISH_SCRIPT%" -LinuxRoot "%LINUX_DIR%" %PUBLISH_ARGS%
 set PUBLISH_RESULT=!errorlevel!
 if !PUBLISH_RESULT! neq 0 (
     echo ERROR: Publishing the nightly page failed with code !PUBLISH_RESULT!.

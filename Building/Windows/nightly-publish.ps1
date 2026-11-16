@@ -26,7 +26,11 @@
 #
 # Exit codes: 0 = published, 1 = error.
 #
+# Files already published (same build id on the page) are not copied again, and if nothing
+# is new the files and page are left unchanged.
+#
 # Usage: powershell -NoProfile -ExecutionPolicy Bypass -File nightly-publish.ps1 [options]
+#   -LinuxOnly   no new Windows build tonight: publish a newer Linux build only
 #   -SkipLinux   publish the Windows files and page only (for testing)
 #   -NoPush      commit the page locally but do not push it
 
@@ -35,6 +39,7 @@ param(
     [string]$NightlyDir   = "$env:USERPROFILE\Dropbox\OSCAR Files\Nightly",
     [string]$LinuxRoot    = "$env:USERPROFILE\Dropbox\tranfert_deb",
     [string]$PageRepo     = 'C:\OSCAR\OSCAR-nightly',
+    [switch]$LinuxOnly,
     [switch]$SkipLinux,
     [switch]$NoPush
 )
@@ -135,37 +140,50 @@ function Get-CompleteLinuxBuild($dir, [string[]]$expected) {
 }
 
 try {
-    # ---------------------------------------------------------------------
-    # Step 1: Windows files and the commit hash.
-    # ---------------------------------------------------------------------
-    $exe = Get-ChildItem -Path $InstallerDir -Filter 'OSCAR-*-Win64-*.exe' -File -ErrorAction SilentlyContinue |
-           Sort-Object LastWriteTime -Descending | Select-Object -First 1
-    if (-not $exe) { Fail "No installer found in $InstallerDir" }
-
-    if ($exe.BaseName -notmatch '-Win64-([0-9a-fA-F]{7,40})$') {
-        Fail "Cannot take a commit hash from $($exe.Name) (a '-plus' build has uncommitted changes)"
-    }
-    $winHash = $Matches[1].ToLower()
-
-    $zip = Join-Path $InstallerDir ($exe.BaseName + '-Portable.zip')
-    if (-not (Test-Path $zip)) { Fail "Portable ZIP not found: $zip" }
-
-    Log "Windows build: $($exe.Name) (commit $winHash)"
-
     if (-not (Test-Path $NightlyDir)) { Fail "Nightly folder not found: $NightlyDir" }
 
-    # Source -> fixed name in the Nightly folder.
-    $copies = [ordered]@{}
-    $copies[$exe.FullName] = 'OSCAR-nightly-Win64.exe'
-    $copies[$zip]          = 'OSCAR-nightly-Win64-Portable.zip'
-
-    # The page records which Linux build is currently published.
+    # The page records which Windows and Linux builds are currently published.
     Git pull --quiet --ff-only origin master
     $page = Join-Path $PageRepo 'public\index.html'
     $html = [System.IO.File]::ReadAllText($page, $utf8NoBom)
-    $currentLinux = Get-PageSpan $html 'buildIdLinux'
-    if ($null -eq $currentLinux) { Fail 'Page has no <span id="buildIdLinux">' }
+    $currentWindows = Get-PageSpan $html 'buildIdWindows'
+    $currentLinux   = Get-PageSpan $html 'buildIdLinux'
+    if ($null -eq $currentWindows) { Fail 'Page has no <span id="buildIdWindows">' }
+    if ($null -eq $currentLinux)   { Fail 'Page has no <span id="buildIdLinux">' }
     $linuxHash = $currentLinux
+
+    # Source -> fixed name in the Nightly folder.
+    $copies = [ordered]@{}
+
+    # ---------------------------------------------------------------------
+    # Step 1: Windows files and the commit hash.
+    #         With -LinuxOnly (no new Windows build tonight) the installer
+    #         folder is not looked at; the published Windows build stays.
+    # ---------------------------------------------------------------------
+    if ($LinuxOnly) {
+        $winHash = $currentWindows
+        Log "No new Windows build; Windows build $winHash kept."
+    } else {
+        $exe = Get-ChildItem -Path $InstallerDir -Filter 'OSCAR-*-Win64-*.exe' -File -ErrorAction SilentlyContinue |
+               Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if (-not $exe) { Fail "No installer found in $InstallerDir" }
+
+        if ($exe.BaseName -notmatch '-Win64-([0-9a-fA-F]{7,40})$') {
+            Fail "Cannot take a commit hash from $($exe.Name) (a '-plus' build has uncommitted changes)"
+        }
+        $winHash = $Matches[1].ToLower()
+
+        $zip = Join-Path $InstallerDir ($exe.BaseName + '-Portable.zip')
+        if (-not (Test-Path $zip)) { Fail "Portable ZIP not found: $zip" }
+
+        if ($winHash -eq $currentWindows) {
+            Log "Windows build $winHash is already published; not copied again."
+        } else {
+            Log "Windows build: $($exe.Name) (commit $winHash)"
+            $copies[$exe.FullName] = 'OSCAR-nightly-Win64.exe'
+            $copies[$zip]          = 'OSCAR-nightly-Win64-Portable.zip'
+        }
+    }
 
     # ---------------------------------------------------------------------
     # Step 2: Choose the Linux build.
@@ -212,6 +230,11 @@ try {
                 foreach ($src in $chosenMap.Keys) { $copies[$src] = $chosenMap[$src] }
             }
         }
+    }
+
+    if ($copies.Count -eq 0) {
+        Log 'Nothing new to publish; files and page left unchanged.'
+        exit 0
     }
 
     # ---------------------------------------------------------------------
