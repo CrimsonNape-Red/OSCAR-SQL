@@ -5,7 +5,7 @@ name: macOS build
 
 on:
   push:
-    branches: [mac-arm-build, '*-ci']   # *-ci: GitHub-only test builds of other branches
+    branches: [mac-build, '*-ci']   # *-ci: GitHub-only test builds of other branches
   workflow_dispatch:
 
 env:
