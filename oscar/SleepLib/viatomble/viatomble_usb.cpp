@@ -38,6 +38,8 @@ extern "C" {
 #include <IOKit/hid/IOHIDDevice.h>
 #include <IOKit/hid/IOHIDKeys.h>
 #include <IOKit/hid/IOHIDManager.h>
+#include <IOKit/IOCFPlugIn.h>
+#include <IOKit/usb/IOUSBLib.h>
 #include <mach/mach_error.h>
 #endif
 
@@ -757,6 +759,84 @@ void UsbLink::deliverReport(const QByteArray &report)
     deliver(report);
 }
 
+//! The USB device (not its HID interface) that the HID device belongs to; released by the caller.
+static io_service_t usbDeviceOf(IOHIDDeviceRef hid)
+{
+    io_registry_entry_t entry = IOHIDDeviceGetService(hid);
+    IOObjectRetain(entry);
+    while (entry != IO_OBJECT_NULL) {
+        if (IOObjectConformsTo(entry, "IOUSBHostDevice") || IOObjectConformsTo(entry, "IOUSBDevice")) {
+            return entry;
+        }
+        io_registry_entry_t parent = IO_OBJECT_NULL;
+        const kern_return_t kr = IORegistryEntryGetParentEntry(entry, kIOServicePlane, &parent);
+        IOObjectRelease(entry);
+        entry = (kr == KERN_SUCCESS) ? parent : IO_OBJECT_NULL;
+    }
+    return IO_OBJECT_NULL;
+}
+
+static IOReturn controlRequest(IOUSBDeviceInterface **dev, UInt8 bRequest, UInt16 wValue, QByteArray *data)
+{
+    IOUSBDevRequest request {};
+    request.bmRequestType = 0x21;   // host to device, class, interface 0
+    request.bRequest = bRequest;
+    request.wValue = wValue;
+    request.wIndex = 0;
+    request.wLength = data ? UInt16(data->size()) : 0;
+    request.pData = data ? data->data() : nullptr;
+    return (*dev)->DeviceRequest(dev, &request);
+}
+
+/*! Sends the WCH bridge its setup as a SET_REPORT control transfer on the device's default
+ *  pipe, as O2 Insight Pro does (IOHIDDeviceSetReport() would use the interrupt OUT endpoint,
+ *  which the bridge doesn't take as setup). Logs each step. */
+static IOReturn sendBridgeSetup(IOHIDDeviceRef hid)
+{
+    io_service_t usb = usbDeviceOf(hid);
+    if (usb == IO_OBJECT_NULL) {
+        qWarning().noquote() << "ViatomUsb: no USB device above the cable's HID device";
+        return kIOReturnNoDevice;
+    }
+    IOCFPlugInInterface **plugin = nullptr;
+    SInt32 score = 0;
+    const kern_return_t kr = IOCreatePlugInInterfaceForService(usb, kIOUSBDeviceUserClientTypeID,
+                                                               kIOCFPlugInInterfaceID, &plugin, &score);
+    IOObjectRelease(usb);
+    if (kr != KERN_SUCCESS || !plugin) {
+        qWarning().noquote() << "ViatomUsb: no USB device interface:" << errorText(kr);
+        return kr != KERN_SUCCESS ? kr : kIOReturnError;
+    }
+    IOUSBDeviceInterface **dev = nullptr;
+    const HRESULT hr = (*plugin)->QueryInterface(plugin, CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID),
+                                                 reinterpret_cast<LPVOID *>(&dev));
+    IODestroyPlugInInterface(plugin);
+    if (hr != S_OK || !dev) {
+        qWarning().noquote() << "ViatomUsb: no USB device interface (QueryInterface" << hr << ")";
+        return kIOReturnError;
+    }
+
+    QByteArray setup = Usb::bridgeSetupReport();
+    IOReturn idle = controlRequest(dev, 0x0A, 0, nullptr);          // SET_IDLE
+    IOReturn result = controlRequest(dev, 0x09, 0x0200, &setup);   // SET_REPORT, output report 0
+    qDebug().noquote() << "ViatomUsb: setup without opening the device: SET_IDLE" << errorText(idle)
+                       << "SET_REPORT" << errorText(result);
+    if (result != kIOReturnSuccess) {
+        // Some macOS versions want the device open for requests on its default pipe.
+        const IOReturn opened = (*dev)->USBDeviceOpen(dev);
+        qDebug().noquote() << "ViatomUsb: opening the USB device:" << errorText(opened);
+        if (opened == kIOReturnSuccess) {
+            idle = controlRequest(dev, 0x0A, 0, nullptr);
+            result = controlRequest(dev, 0x09, 0x0200, &setup);
+            qDebug().noquote() << "ViatomUsb: setup with the device open: SET_IDLE" << errorText(idle)
+                               << "SET_REPORT" << errorText(result);
+            (*dev)->USBDeviceClose(dev);
+        }
+    }
+    (*dev)->Release(dev);
+    return result;
+}
+
 void UsbLink::deviceRemoved()
 {
     const QString reason = tr("The USB cable stopped working: %1").arg(tr("unplugged"));
@@ -768,13 +848,6 @@ void UsbLink::open(const Usb::Port &port)
     close();
     m_cable = port.cable;
     m_reportSize = Usb::reportSize(port.cable);
-    if (m_cable != Usb::Cable::Checkme) {
-        // The WCH bridge needs its setup as a control transfer (SET_REPORT), but macOS sends
-        // output reports to a device with an interrupt OUT endpoint over that endpoint, as
-        // Linux's HID driver does. Not done on macOS yet.
-        fail(tr("On a Mac, OSCAR can't use this oximeter's USB cable yet. Use Bluetooth instead."));
-        return;
-    }
     bool ok = false;
     const uint64_t entryId = port.path.toULongLong(&ok);
     io_service_t service = ok ? IOServiceGetMatchingService(kIOMainPortDefault, IORegistryEntryIDMatching(entryId))
@@ -804,9 +877,17 @@ void UsbLink::open(const Usb::Port &port)
     IOHIDDeviceRegisterInputReportCallback(device, reinterpret_cast<uint8_t *>(m_inputBuffer.data()),
                                            m_inputBuffer.size(), inputReportCallback, this);
     IOHIDDeviceRegisterRemovalCallback(device, removalCallback, this);
-    qDebug().noquote() << "ViatomUsb: opened" << port.location << "(Checkme cable) input"
-                       << m_inputBuffer.size() << "output"
+    const bool checkme = (m_cable == Usb::Cable::Checkme);
+    qDebug().noquote() << "ViatomUsb: opened" << port.location << (checkme ? "(Checkme cable)" : "(WCH bridge)")
+                       << "input" << m_inputBuffer.size() << "output"
                        << Usb::intProperty(device, CFSTR(kIOHIDMaxOutputReportSizeKey));
+    if (!checkme) {
+        const IOReturn setup = sendBridgeSetup(device);
+        if (setup != kIOReturnSuccess) {
+            fail(tr("The USB cable did not accept its setup: %1").arg(errorText(setup)));
+            return;
+        }
+    }
     startReader();
 }
 
@@ -834,7 +915,8 @@ void UsbLink::send(const QByteArray &frame)
         }
         first = false;
         // Report ID 0: the device has none, so the report goes without an ID byte. The
-        // Checkme cable has no OUT endpoint, so macOS sends it as a SET_REPORT control transfer.
+        // Checkme cable has no OUT endpoint, so macOS sends it as a SET_REPORT control
+        // transfer; the WCH bridge's goes over its interrupt OUT endpoint, as on Linux.
         const IOReturn err = IOHIDDeviceSetReport(device, kIOHIDReportTypeOutput, 0,
                                                   reinterpret_cast<const uint8_t *>(report.constData()),
                                                   report.size());

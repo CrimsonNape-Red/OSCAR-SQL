@@ -36,9 +36,10 @@ namespace ViatomBle {
  *  HidD_SetOutputReport() sends the setup as a control transfer, so the link uses the
  *  HID driver.
  *
- *  On macOS the link uses IOKit's HID API, for the Checkme cable only so far: like Linux's
- *  HID driver, IOHIDDeviceSetReport() sends output reports to a device that has an
- *  interrupt OUT endpoint, such as the WCH bridge, over that endpoint.
+ *  On macOS the link uses IOKit's HID API for data. Like Linux's HID driver,
+ *  IOHIDDeviceSetReport() sends output reports to a device that has an interrupt OUT
+ *  endpoint, such as the WCH bridge, over that endpoint, so the bridge's setup goes
+ *  separately, as a control transfer on the USB device's default pipe (IOUSBLib).
  */
 namespace Usb {
 
