@@ -19,7 +19,7 @@ set INSTALLER_DIR=C:\OSCAR\OSCAR-code\build-oscar-win_64_bit\Installer
 set LOG_FILE=C:\OSCAR\nightly-build.log
 set NOTIFY_SCRIPT=%~dp0nightly-notify.ps1
 set PUBLISH_SCRIPT=%BUILD_DIR%\nightly-publish.ps1
-set LINUX_DIR=C:\Users\Guy\Dropbox\SQL_Version
+set LINUX_DIR=C:\Users\Guy\Dropbox\tranfert_deb
 
 :: -----------------------------------------------------------------------
 :: Logging: re-invoke this script with all output redirected to the log.
@@ -207,17 +207,11 @@ echo Nightly build complete: %DROPBOX_DIR%\!NIGHTLY_NEW_NAME!
 
 :: -----------------------------------------------------------------------
 :: Step 9: Publish to the nightly download page: copy the Windows and
-::         matching Linux files to Dropbox\OSCAR Files\Nightly under fixed
-::         names, then update and push the page.  Waits once (60 minutes)
-::         if the Linux build for this commit is not there yet.
-::         Exit code 2 = Linux build not found, nothing published.
-::         Skipped until the shared Linux folder (SQL_Version) syncs here.
+::         Linux files to Dropbox\OSCAR Files\Nightly under fixed names,
+::         then update and push the page.  Uses the Linux build for the
+::         same commit if it is complete, otherwise the most recent
+::         complete one.
 :: -----------------------------------------------------------------------
-if not exist "%LINUX_DIR%\" (
-    echo Linux build folder %LINUX_DIR% not found - nightly page not updated.
-    endlocal
-    exit /b 0
-)
 powershell -NoProfile -ExecutionPolicy Bypass -File "%PUBLISH_SCRIPT%" -LinuxRoot "%LINUX_DIR%"
 set PUBLISH_RESULT=!errorlevel!
 if !PUBLISH_RESULT! neq 0 (
