@@ -15,5 +15,6 @@ private slots:
     void testLightModeKeepsReportColours();
     void testDarkModeReplacesLightFills();
     void testDarkSubheadingOutranksTintedRows();
+    void testDarkTintedRowsAreClearlyGreen();
 };
 DECLARE_TEST(StatisticsStyleTests)

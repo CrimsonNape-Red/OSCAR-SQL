@@ -39,6 +39,12 @@ const QColor kBreath(0x7a, 0x5b, 0xc7);
 const QColor kMask(0x2f, 0x80, 0xc8);
 const QColor kUsage(0xb5, 0x82, 0x1f);
 
+// Tinted alternate rows. Light: the Statistics report's pale green. Dark: the surface moved
+// towards a saturated green, since a pale green mixed in thinly comes out as a muddy grey.
+const QColor kRowTintLight(0xe8, 0xff, 0xe8);
+const QColor kRowTintDarkSource(0x22, 0x9d, 0x5e);
+constexpr qreal kRowTintDarkMix = 0.22;
+
 // How far each derived colour moves from the surface towards its source colour
 constexpr qreal kSoft = 0.14;   // icon boxes, chips
 constexpr qreal kTint = 0.07;   // card backgrounds
@@ -93,6 +99,7 @@ QColor color(Role role, const QPalette &p)
     case Role::GroupMaskLine:   return mix(base, kMask, kLine);
     case Role::GroupUsage:      return mix(base, kUsage, kTint);
     case Role::GroupUsageLine:  return mix(base, kUsage, kLine);
+    case Role::RowTint:         return dark ? mix(base, kRowTintDarkSource, kRowTintDarkMix) : kRowTintLight;
     case Role::Shadow:          return QColor(0, 0, 0, dark ? 90 : 20);
     case Role::Count:           break;
     }

@@ -39,12 +39,13 @@ Colours screenColours(const QPalette &palette)
     if (!Theme::isDark(palette)) {
         return { QColor(kWhite), QColor(kSubheading), QColor(kRowTint), QColor(kHoverLight) };
     }
-    // Sub-headings a clear step lighter than the page; the tinted rows only a faint green,
-    // so the sub-headings stay the stronger of the two
+    // Sub-headings a clear step lighter than the page; the tinted rows the theme's deep green
+    // (shared with Daily's Events list), which gains colour rather than brightness, so the
+    // sub-headings stay the stronger of the two
     const QColor page = Theme::color(Role::Surface, palette);
     return { page,
              mix(page, Theme::color(Role::Ink, palette), kSubheadingMix),
-             Theme::color(Role::GoodTint, palette),
+             Theme::color(Role::RowTint, palette),
              Theme::color(Role::Surface2, palette) };
 }
 

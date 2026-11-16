@@ -2,7 +2,7 @@
  *
  * Checks that the Statistics report keeps its own colours in light mode and that in dark
  * mode its light fills are replaced by theme colours, with sub-headings standing out more
- * than the tinted rows.
+ * than the tinted rows and the tinted rows clearly green.
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -78,4 +78,13 @@ void StatisticsStyleTests::testDarkSubheadingOutranksTintedRows()
     QVERIFY2(subStep >= 4 * tintStep, qPrintable(QString("sub-heading step %1, tint step %2")
                                                      .arg(subStep).arg(tintStep)));
     QVERIFY(c.subheading.lightness() < 128);    // white text stays readable
+}
+
+void StatisticsStyleTests::testDarkTintedRowsAreClearlyGreen()
+{
+    // A thin mix of pale green reads as muddy grey on a dark page: the tint must carry
+    // real colour, with green well clear of red and blue
+    const QColor tint = StatisticsStyle::screenColours(darkPalette()).rowTint;
+    QVERIFY2(tint.green() - tint.red() >= 20, qPrintable(tint.name()));
+    QVERIFY2(tint.green() - tint.blue() >= 10, qPrintable(tint.name()));
 }

@@ -8159,3 +8159,23 @@ loads after the CPAP device.
 **Non-obvious:**
 - The Journal device has no loader, so it never set a picture; only devices with a loader but no series picture did.
 - Checked by reading the code; the window closes too quickly to capture.
+
+## 2026-11-16 - Classic graphs in dark mode: right-click menu white on near-white
+
+**Files:** `oscar/Graphs/gGraphView.cpp` (`gGraphView::showGraphMenu()`)
+
+**Symptom:** In Classic mode with dark mode on, the graphs' right-click menu and its sub-menus showed white text on
+a near-white background.
+
+**Root cause:** The Classic menu's style sheet, set once in the constructor, fixed a light grey background and named
+no text colour, so the text took the dark palette's white.
+
+**Fix:** The menu's style sheet is set each time it is shown. Classic in dark mode uses the theme colours the Modern
+menu already used; Classic in light mode keeps its grey menu.
+
+**Non-obvious:**
+- The sub-menus (Y-Axis, Plots, overlays, Dotted Lines) and their check boxes inherit the menu's style sheet, so they
+  were affected and are fixed the same way.
+- In the same commit, alternate rows in dark mode take one theme colour (`Theme::Role::RowTint`): the Statistics
+  report's tinted rows (were a muddy grey-green) and Daily's Events and Bookmarks lists (were the Windows accent's
+  darkest shade, from the desktop palette's `AlternateBase`).

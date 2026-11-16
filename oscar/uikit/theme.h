@@ -59,6 +59,7 @@ enum class Role {
     GroupMaskLine,
     GroupUsage,      //!< "By group" tint: usage metrics
     GroupUsageLine,
+    RowTint,         //!< Tinted alternate rows (Statistics report, Daily's Events and Bookmarks lists)
     Shadow,          //!< Card drop shadow
     Count
 };

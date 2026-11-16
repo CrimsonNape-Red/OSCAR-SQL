@@ -367,6 +367,39 @@ void gGraphView::trashGraphs(bool destroy)
     m_graphsbyname.clear();
 }
 
+namespace {
+
+/*! \brief The Classic graph menu's style sheet for light mode: a fixed light grey background
+    (macOS keeps its native menu) and a pale blue selection. It names no text colour, so it
+    only suits a light palette. */
+QString classicLightMenuSheet()
+{
+#if !defined(Q_OS_MAC)
+    return QStringLiteral("QMenu { background-color: #f0f0f0; border: 1px solid black; }"
+                          "QMenu::item { background-color: #f0f0f0; }"
+                          "QMenu::item:selected { background-color: #ABCDEF; }");
+#else
+    return QStringLiteral("QMenu::item:selected { background-color: #ABCDEF; }");
+#endif
+}
+
+//! \brief The graph menu's style sheet in theme colours, so it reads in light and dark mode
+QString themedMenuSheet()
+{
+    const auto hex = [](Theme::Role role) { return Theme::color(role).name(); };
+    return QString(
+        "QMenu { background-color: %1; color: %2; border: 1px solid %3; }"
+        "QMenu::item { background-color: %1; color: %2; }"
+        "QMenu::item:selected { background-color: %4; color: %2; }"
+        "QMenu::item:disabled { color: %5; }"
+        "QMenu QLabel, QMenu QCheckBox { color: %2; background: transparent; }"
+        "QMenu QLabel:disabled { color: %5; }")
+        .arg(hex(Theme::Role::Surface), hex(Theme::Role::Ink), hex(Theme::Role::Line),
+             hex(Theme::Role::AccentSoft), hex(Theme::Role::Ink3));
+}
+
+} // namespace
+
 gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
 #ifdef BROKEN_OPENGL_BUILD
     : QWidget(parent),
@@ -468,25 +501,7 @@ gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
     lines_menu = context_menu->addMenu(tr("Dotted Lines"));
     connect(lines_menu, SIGNAL(triggered(QAction*)), this, SLOT(onLinesClicked(QAction*)));
 
-#if !defined(Q_OS_MAC)
-    context_menu->setStyleSheet("QMenu {\
-                              background-color: #f0f0f0; /* sets background of the menu */\
-                              border: 1px solid black;\
-                          }\
-                          QMenu::item {\
-                              /* sets background of menu item. set this to something non-transparent\
-                                  if you want menu color and menu item color to be different */\
-                              background-color: #f0f0f0;\
-                          }\
-                          QMenu::item:selected { /* when user selects item using mouse or keyboard */\
-                              background-color: #ABCDEF;\
-                          }");
-
-#else
-    context_menu->setStyleSheet("QMenu::item:selected { /* when user selects item using mouse or keyboard */\
-                                    background-color: #ABCDEF;\
-                                }");
-#endif
+    // The menu's colours are set each time it is shown (showGraphMenu), to follow light and dark
 }
 
 void MyDockWindow::closeEvent(QCloseEvent *event)
@@ -751,16 +766,7 @@ void gGraphView::showGraphMenu(gGraph *g, const QPoint &globalPos)
     if (cardLook()) {
         arrangeCardMenu();
         // Colours from the theme, so the menu reads in light and dark mode
-        const auto hex = [](Theme::Role role) { return Theme::color(role).name(); };
-        context_menu->setStyleSheet(QString(
-            "QMenu { background-color: %1; color: %2; border: 1px solid %3; }"
-            "QMenu::item { background-color: %1; color: %2; }"
-            "QMenu::item:selected { background-color: %4; color: %2; }"
-            "QMenu::item:disabled { color: %5; }"
-            "QMenu QLabel, QMenu QCheckBox { color: %2; background: transparent; }"
-            "QMenu QLabel:disabled { color: %5; }")
-            .arg(hex(Theme::Role::Surface), hex(Theme::Role::Ink), hex(Theme::Role::Line),
-                 hex(Theme::Role::AccentSoft), hex(Theme::Role::Ink3)));
+        context_menu->setStyleSheet(themedMenuSheet());
         const bool popout = isPopout();
         reset_action->setText(tr("Reset graph heights"));
         reset_action->setVisible(!popout);
@@ -785,6 +791,10 @@ void gGraphView::showGraphMenu(gGraph *g, const QPoint &globalPos)
         m_headOverlays->setVisible(plots_menu->menuAction()->isVisible() || cpap_menu->menuAction()->isVisible()
                                    || oximeter_menu->menuAction()->isVisible() || lines_menu->menuAction()->isVisible());
     } else {
+        // Classic keeps its light grey menu in light mode. In dark mode that grey sat under the
+        // palette's white text (and the sub-menus' check boxes and labels), so the menu takes
+        // the theme's colours instead.
+        context_menu->setStyleSheet(GraphTheme::dark() ? themedMenuSheet() : classicLightMenuSheet());
         pin_action->setText(g->isPinned() ? QObject::tr("Unpin %1 Graph").arg(g->title())
                                           : QObject::tr("Pin %1 Graph").arg(g->title()));
         popout_action->setText(QObject::tr("Popout %1 Graph").arg(g->title()));

@@ -888,6 +888,14 @@ void Daily::applyTheme()
     ui->calendar->setStyleSheet(withBackgrounds(m_calendarStyleSheet));
     ui->calButton->setStyleSheet(withBackgrounds(m_calButtonStyleSheet));
     applyWeekendFormat();
+    // The Events and Bookmarks lists' alternate rows: in dark mode the desktop's palette can make
+    // them a vivid accent colour (Windows uses its darkest accent shade), so they take the theme's
+    // row tint. In light mode the form's palette leaves them the same white as the other rows.
+    const QString rowTint = Theme::isDark(QGuiApplication::palette())
+        ? QString("QAbstractItemView { alternate-background-color: %1; }").arg(Theme::css(Theme::Role::RowTint))
+        : QString();
+    ui->treeWidget->setStyleSheet(rowTint);
+    ui->bookmarkTable->setStyleSheet(rowTint);
     if (dailySearchTab) dailySearchTab->applyTheme();
     if (sessionbar) sessionbar->update();
     if (m_modern && dateDisplay) {
