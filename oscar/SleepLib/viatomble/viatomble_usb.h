@@ -35,6 +35,10 @@ namespace ViatomBle {
  *  driver while connected and hands the interface back when closed. On Windows,
  *  HidD_SetOutputReport() sends the setup as a control transfer, so the link uses the
  *  HID driver.
+ *
+ *  On macOS the link uses IOKit's HID API, for the Checkme cable only so far: like Linux's
+ *  HID driver, IOHIDDeviceSetReport() sends output reports to a device that has an
+ *  interrupt OUT endpoint, such as the WCH bridge, over that endpoint.
  */
 namespace Usb {
 
@@ -127,6 +131,15 @@ class UsbLink : public Link
     void *m_handle = nullptr;      //!< HANDLE of the HID device, opened for overlapped I/O
     int m_inputSize = 0;           //!< report ID byte + input report
     int m_outputSize = 0;          //!< report ID byte + output report
+#elif defined(Q_OS_MACOS)
+  public:
+    //! Called by IOKit on the reader thread.
+    void deliverReport(const QByteArray &report);
+    void deviceRemoved();
+
+  private:
+    void *m_device = nullptr;      //!< IOHIDDeviceRef, open while the link is
+    QByteArray m_inputBuffer;      //!< where IOKit puts each input report
 #else
     int m_fd = -1;
     bool m_claimed = false;

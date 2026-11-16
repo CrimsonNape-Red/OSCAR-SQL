@@ -30,6 +30,15 @@
 extern "C" {
 #include <hidsdi.h>
 }
+#elif defined(Q_OS_MACOS)
+// AssertMacros.h (pulled in by IOKit) otherwise defines check(), verify() and require().
+#define __ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES 0
+#include <CoreFoundation/CoreFoundation.h>
+#include <IOKit/IOKitLib.h>
+#include <IOKit/hid/IOHIDDevice.h>
+#include <IOKit/hid/IOHIDKeys.h>
+#include <IOKit/hid/IOHIDManager.h>
+#include <mach/mach_error.h>
 #endif
 
 namespace ViatomBle {
@@ -230,6 +239,79 @@ QList<Port> findPorts()
         }
     }
     SetupDiDestroyDeviceInfoList(set);
+    return ports;
+}
+
+#elif defined(Q_OS_MACOS)
+
+bool supported()
+{
+    return true;
+}
+
+static int intProperty(IOHIDDeviceRef device, CFStringRef key)
+{
+    int value = 0;
+    CFTypeRef ref = IOHIDDeviceGetProperty(device, key);
+    if (ref && CFGetTypeID(ref) == CFNumberGetTypeID()) {
+        CFNumberGetValue(static_cast<CFNumberRef>(ref), kCFNumberIntType, &value);
+    }
+    return value;
+}
+
+static CFDictionaryRef matchingFor(int vendor, int product)
+{
+    CFMutableDictionaryRef dict = CFDictionaryCreateMutable(kCFAllocatorDefault, 2, &kCFTypeDictionaryKeyCallBacks,
+                                                            &kCFTypeDictionaryValueCallBacks);
+    CFNumberRef v = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &vendor);
+    CFNumberRef p = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &product);
+    CFDictionarySetValue(dict, CFSTR(kIOHIDVendorIDKey), v);
+    CFDictionarySetValue(dict, CFSTR(kIOHIDProductIDKey), p);
+    CFRelease(v);
+    CFRelease(p);
+    return dict;
+}
+
+QList<Port> findPorts()
+{
+    QList<Port> ports;
+    IOHIDManagerRef manager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
+    if (!manager) {
+        return ports;
+    }
+    CFDictionaryRef wanted[2] = { matchingFor(VENDOR_ID, PRODUCT_ID),
+                                  matchingFor(CHECKME_VENDOR_ID, CHECKME_PRODUCT_ID) };
+    CFArrayRef matching = CFArrayCreate(kCFAllocatorDefault, reinterpret_cast<const void **>(wanted), 2,
+                                        &kCFTypeArrayCallBacks);
+    IOHIDManagerSetDeviceMatchingMultiple(manager, matching);
+    CFRelease(matching);
+    CFRelease(wanted[0]);
+    CFRelease(wanted[1]);
+
+    CFSetRef set = IOHIDManagerCopyDevices(manager);
+    if (set) {
+        const CFIndex count = CFSetGetCount(set);
+        QList<const void *> devices(int(count), nullptr);
+        CFSetGetValues(set, devices.data());
+        for (const void *ref : devices) {
+            IOHIDDeviceRef device = static_cast<IOHIDDeviceRef>(const_cast<void *>(ref));
+            uint64_t entryId = 0;
+            if (IORegistryEntryGetRegistryEntryID(IOHIDDeviceGetService(device), &entryId) != KERN_SUCCESS) {
+                continue;
+            }
+            Port port;
+            port.cable = intProperty(device, CFSTR(kIOHIDVendorIDKey)) == CHECKME_VENDOR_ID ? Cable::Checkme
+                                                                                           : Cable::WchBridge;
+            // The registry entry ID finds the same device again in UsbLink::open().
+            port.path = QString::number(entryId);
+            port.location = QCoreApplication::translate(tr_context, "USB (location %1)")
+                                .arg(uint(intProperty(device, CFSTR(kIOHIDLocationIDKey))), 8, 16, QLatin1Char('0'));
+            port.accessible = true;   // macOS asks no permission for an oximeter's HID device
+            ports.append(port);
+        }
+        CFRelease(set);
+    }
+    CFRelease(manager);
     return ports;
 }
 
@@ -644,6 +726,142 @@ void UsbLink::close()
     if (m_handle) {
         CloseHandle(m_handle);
         m_handle = nullptr;
+    }
+}
+
+#elif defined(Q_OS_MACOS)
+
+static QString errorText(IOReturn err)
+{
+    const char *text = mach_error_string(err);
+    return text ? QStringLiteral("%1 (0x%2)").arg(QString::fromLatin1(text)).arg(uint(err), 8, 16, QLatin1Char('0'))
+                : QStringLiteral("0x%1").arg(uint(err), 8, 16, QLatin1Char('0'));
+}
+
+// IOKit calls these on the reader thread's run loop; context is the UsbLink.
+static void inputReportCallback(void *context, IOReturn result, void *, IOHIDReportType, uint32_t,
+                                uint8_t *report, CFIndex length)
+{
+    if (result == kIOReturnSuccess && length > 0) {
+        static_cast<UsbLink *>(context)->deliverReport(QByteArray(reinterpret_cast<const char *>(report), int(length)));
+    }
+}
+
+static void removalCallback(void *context, IOReturn, void *)
+{
+    static_cast<UsbLink *>(context)->deviceRemoved();
+}
+
+void UsbLink::deliverReport(const QByteArray &report)
+{
+    deliver(report);
+}
+
+void UsbLink::deviceRemoved()
+{
+    const QString reason = tr("The USB cable stopped working: %1").arg(tr("unplugged"));
+    QMetaObject::invokeMethod(this, [this, reason]() { lose(reason); }, Qt::QueuedConnection);
+}
+
+void UsbLink::open(const Usb::Port &port)
+{
+    close();
+    m_cable = port.cable;
+    m_reportSize = Usb::reportSize(port.cable);
+    if (m_cable != Usb::Cable::Checkme) {
+        // The WCH bridge needs its setup as a control transfer (SET_REPORT), but macOS sends
+        // output reports to a device with an interrupt OUT endpoint over that endpoint, as
+        // Linux's HID driver does. Not done on macOS yet.
+        fail(tr("On a Mac, OSCAR can't use this oximeter's USB cable yet. Use Bluetooth instead."));
+        return;
+    }
+    bool ok = false;
+    const uint64_t entryId = port.path.toULongLong(&ok);
+    io_service_t service = ok ? IOServiceGetMatchingService(kIOMainPortDefault, IORegistryEntryIDMatching(entryId))
+                              : IO_OBJECT_NULL;
+    if (service == IO_OBJECT_NULL) {
+        fail(tr("The USB cable is no longer connected."));
+        return;
+    }
+    IOHIDDeviceRef device = IOHIDDeviceCreate(kCFAllocatorDefault, service);
+    IOObjectRelease(service);
+    if (!device) {
+        fail(tr("Could not open the USB cable."));
+        return;
+    }
+    const IOReturn err = IOHIDDeviceOpen(device, kIOHIDOptionsTypeNone);
+    if (err != kIOReturnSuccess) {
+        CFRelease(device);
+        fail(err == kIOReturnExclusiveAccess || err == kIOReturnBusy
+                 ? tr("The USB cable is in use by another program, such as O2 Insight Pro. Close it and try again.")
+                 : tr("Could not open the USB cable: %1").arg(errorText(err)));
+        return;
+    }
+    m_device = device;
+    m_open = true;
+    // IOKit fills this buffer with each input report; it must outlive the registration.
+    m_inputBuffer = QByteArray(qMax(m_reportSize, Usb::intProperty(device, CFSTR(kIOHIDMaxInputReportSizeKey))), '\0');
+    IOHIDDeviceRegisterInputReportCallback(device, reinterpret_cast<uint8_t *>(m_inputBuffer.data()),
+                                           m_inputBuffer.size(), inputReportCallback, this);
+    IOHIDDeviceRegisterRemovalCallback(device, removalCallback, this);
+    qDebug().noquote() << "ViatomUsb: opened" << port.location << "(Checkme cable) input"
+                       << m_inputBuffer.size() << "output"
+                       << Usb::intProperty(device, CFSTR(kIOHIDMaxOutputReportSizeKey));
+    startReader();
+}
+
+void UsbLink::readLoop()
+{
+    // The device's callbacks run on this thread's run loop until close().
+    IOHIDDeviceRef device = static_cast<IOHIDDeviceRef>(m_device);
+    IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+    while (!m_stop) {
+        CFRunLoopRunInMode(kCFRunLoopDefaultMode, READ_POLL_MS / 1000.0, false);
+    }
+    IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+}
+
+void UsbLink::send(const QByteArray &frame)
+{
+    if (!m_open) {
+        return;
+    }
+    IOHIDDeviceRef device = static_cast<IOHIDDeviceRef>(m_device);
+    bool first = true;
+    for (const QByteArray &report : Usb::toReports(frame, m_reportSize)) {
+        if (!first) {
+            QThread::msleep(Usb::REPORT_GAP_MS);   // see REPORT_GAP_MS
+        }
+        first = false;
+        // Report ID 0: the device has none, so the report goes without an ID byte. The
+        // Checkme cable has no OUT endpoint, so macOS sends it as a SET_REPORT control transfer.
+        const IOReturn err = IOHIDDeviceSetReport(device, kIOHIDReportTypeOutput, 0,
+                                                  reinterpret_cast<const uint8_t *>(report.constData()),
+                                                  report.size());
+        if (err != kIOReturnSuccess) {
+            lose(tr("Could not send to the USB cable: %1").arg(errorText(err)));
+            return;
+        }
+    }
+}
+
+void UsbLink::close()
+{
+    if (m_reader) {
+        m_stop = true;
+        m_reader->wait();
+        delete m_reader;
+        m_reader = nullptr;
+    }
+    m_open = false;
+    if (m_device) {
+        IOHIDDeviceRef device = static_cast<IOHIDDeviceRef>(m_device);
+        IOHIDDeviceRegisterInputReportCallback(device, reinterpret_cast<uint8_t *>(m_inputBuffer.data()),
+                                               m_inputBuffer.size(), nullptr, nullptr);
+        IOHIDDeviceRegisterRemovalCallback(device, nullptr, nullptr);
+        IOHIDDeviceClose(device, kIOHIDOptionsTypeNone);
+        CFRelease(device);
+        m_device = nullptr;
     }
 }
 

@@ -173,6 +173,7 @@ macx  {
   QMAKE_TARGET_BUNDLE_PREFIX = "org.oscar-team"
 # QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.13
   LIBS             += -lz
+  LIBS             += -framework IOKit -framework CoreFoundation   # Viatom/Checkme USB cable (HID)
   ICON              = icons/OSCAR.icns
 } else:haiku {
     LIBS            += -lz -lGLU
