@@ -1,6 +1,7 @@
-# Builds OSCAR for Apple Silicon Macs and keeps the .dmg as a downloadable artifact.
-# The app is ad-hoc signed only, so testers must approve it in Privacy & Security.
-name: macOS ARM build
+# Builds OSCAR as a universal macOS app (Apple Silicon and Intel in one bundle) and keeps
+# the .dmg as a downloadable artifact. The app is ad-hoc signed only, so testers must
+# approve it in Privacy & Security.
+name: macOS build
 
 on:
   push:
@@ -31,7 +32,8 @@ jobs:
         run: |
           mkdir build
           cd build
-          "$QT_BIN/qmake" ../oscar/oscar.pro -spec macx-clang CONFIG+=release QMAKE_APPLE_DEVICE_ARCHS=arm64
+          # Qt's macOS binaries are universal, so one build covers both kinds of Mac.
+          "$QT_BIN/qmake" ../oscar/oscar.pro -spec macx-clang CONFIG+=release "QMAKE_APPLE_DEVICE_ARCHS=x86_64 arm64"
           make -j"$(sysctl -n hw.logicalcpu)"
 
       - name: Bundle Qt and ad-hoc sign
@@ -45,19 +47,21 @@ jobs:
         working-directory: build
         run: |
           set -x
-          [ "$(lipo -archs OSCAR20.app/Contents/MacOS/OSCAR20)" = arm64 ]
+          archs=" $(lipo -archs OSCAR20.app/Contents/MacOS/OSCAR20) "
+          [[ $archs == *" x86_64 "* && $archs == *" arm64 "* ]]
+          lipo -archs OSCAR20.app/Contents/Frameworks/QtBluetooth.framework/QtBluetooth
           codesign --verify --deep --strict OSCAR20.app
           # Packages must have Bluetooth, and macOS kills the app without the usage text.
           test -d OSCAR20.app/Contents/Frameworks/QtBluetooth.framework
           /usr/libexec/PlistBuddy -c "Print NSBluetoothAlwaysUsageDescription" OSCAR20.app/Contents/Info.plist
           # Everything must come from the bundle, not from this runner's Qt.
-          ! otool -L OSCAR20.app/Contents/MacOS/OSCAR20 | grep -F "$RUNNER_TEMP"
+          if otool -L OSCAR20.app/Contents/MacOS/OSCAR20 | grep -F "$RUNNER_TEMP"; then exit 1; fi
 
       - name: Make the .dmg
         working-directory: build
         run: |
           VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleGetInfoString" OSCAR20.app/Contents/Info.plist)
-          DMG="OSCAR-$VERSION-$(git rev-parse --short HEAD)-arm64.dmg"
+          DMG="OSCAR-$VERSION-$(git rev-parse --short HEAD)-macOS-universal.dmg"
           mkdir Staging
           ditto OSCAR20.app Staging/OSCAR20.app
           ditto ../Building/MacOS/README.rtfd Staging/README.rtfd
@@ -73,7 +77,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: OSCAR-macOS-arm64
+          name: OSCAR-macOS-universal
           path: ${{ env.DMG }}
           if-no-files-found: error
           compression-level: 0   # a .dmg is already compressed
