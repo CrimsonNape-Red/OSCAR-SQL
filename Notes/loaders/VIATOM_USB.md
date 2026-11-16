@@ -2,7 +2,8 @@
 
 How OSCAR reads a SleepU through its USB cable, on Linux and Windows, worked out on
 2026-10-30 from a USB capture of Wellue's O2 Insight Pro (Windows) and confirmed by
-downloading recordings on Linux and Windows.
+downloading recordings on Linux and Windows. macOS followed on 2026-11-16; see
+[macOS](#macos).
 
 On 2026-10-30 a tester also downloaded recordings from an **O2Ring S** through its cable
 on Windows 11. Over Bluetooth the O2Ring S uses its own protocol, but over the cable it
@@ -121,6 +122,39 @@ Tested on 2026-11-03 on Linux and on Windows 10 (no driver needed; Windows lists
 3,885 bytes, the same file on both systems; shown in the Daily view with SpO2, pulse and
 movement).
 
-## Other systems
+## macOS
 
-Not implemented on macOS.
+Added on 2026-11-16. macOS needs no driver and no permission for either cable. `UsbLink`
+uses IOKit's HID API, as the Windows code uses the HID driver:
+
+- `IOHIDManager` finds both cables by USB ID. A port's path is the HID device's IORegistry
+  entry ID, which `open()` turns back into the device.
+- Input reports arrive through `IOHIDDeviceRegisterInputReportCallback`, on the reader
+  thread's run loop. They carry no report ID byte.
+- `IOHIDDeviceSetReport` sends the data reports. For the Checkme cable, which has no OUT
+  endpoint, macOS sends them as `SET_REPORT` control transfers. For the WCH cable it uses
+  the interrupt OUT endpoint, which is right for data but not for the setup, as with
+  Linux's HID driver.
+- So for the WCH cable OSCAR sends `SET_IDLE` and the setup report itself, as control
+  transfers on the USB device's default pipe (IOUSBLib `DeviceRequest`), without detaching
+  the HID driver. macOS accepted them without opening the device; if it refuses, OSCAR
+  opens the device and tries again. Each step is logged (`ViatomUsb: setup ...`).
+
+Tested on 2026-11-16 with OSCAR's universal macOS build (Qt 6.12.0) on macOS 15.7.3
+(Intel), in a QEMU virtual machine with the cables passed through:
+
+- SleepU (WCH cable): connects, reads the details, sets the clock, and downloads and
+  imports four recordings.
+- Checkme O2 Max: downloads and imports four overnight recordings (the largest 55,090
+  bytes). In the first try one download stopped answering after 9 chunks (4,608 bytes),
+  and the Checkme then answered nothing over USB, on macOS or Linux, until it was taken
+  off its cable. After that the same file downloaded in full on Linux (108 chunks, 2.5 s)
+  and then on macOS. It looked like a one-off in the virtual machine's USB passthrough,
+  but watch for it on a real Mac.
+
+The virtual machine needs a USB 3 controller (`qemu-xhci`) for the cables: macOS 15 has no
+driver for the USB 1.1 companion controllers that full-speed devices land on behind QEMU's
+USB 2 controller, and it uses at most 15 ports per controller, so `ports='7'` (7 USB 2 + 7
+USB 3) rather than QEMU's larger default.
+
+Not tested yet: an Apple Silicon Mac, a real (not virtual) Mac, and the O2Ring S on macOS.
