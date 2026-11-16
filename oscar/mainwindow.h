@@ -354,7 +354,7 @@ class MainWindow : public QMainWindow
     void on_actionPurgeRangeOfDays_triggered();
 
     void on_action_Sidebar_Toggle_toggled(bool arg1);
-    void on_toolBox_currentChanged(int index);
+    void on_sidebarTabs_currentChanged(int index);
 
     void on_actionView_Statistics_triggered();
 
@@ -495,7 +495,6 @@ private:
     QString m_recordsBody;          //!< Records panel content as built, without colours
     QString m_bookmarksBody;        //!< Bookmarks panel content as built, without colours
     QString m_sidebarThemeKey;      //!< Palette colours and page look applySidebarTheme() last used
-    bool m_sidebarPanelLostFocus = false;   //!< The focus was in a sidebar panel when it was closed
 
     /*! \brief Adds the Classic/Modern button and the moon/sun button at the right end of the main
         tabs (moon/sun on Qt 6.8+ only; older Qt can't switch the colour scheme while OSCAR runs) */

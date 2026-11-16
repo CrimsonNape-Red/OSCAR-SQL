@@ -162,16 +162,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // The sidebar is styled in SetupGUI(): its look depends on the app settings, which
     // main() creates after this window
 
-    // Opening another sidebar panel hides the open one, and Qt moves the focus off a hidden
-    // widget to the next Tab stop, which is a button on the main tab bar. Note when that
-    // happens, so on_toolBox_currentChanged() can put the focus in the panel just opened.
-    connect(qApp, &QApplication::focusChanged, this, [this](QWidget *old, QWidget *) {
-        if (old && ui->toolBox->isVisible() && ui->toolBox->isAncestorOf(old) && !old->isVisible()) {
-            m_sidebarPanelLostFocus = true;
-        }
-    });
-
-
     {
         QAction *searchIcon = ui->filterBookmarks->addAction(
             QIcon(":/icons/edit-find.png"), QLineEdit::LeadingPosition);
@@ -359,17 +349,17 @@ void MainWindow::SetupGUI(bool batchMode)
     setupColorSchemeButton();
 
     applySidebarTheme();
-    // toolbox is the right sidebar that contains the Bookmarks and Records panels. The saved
+    // sidebarTabs is the right sidebar that holds the Bookmarks and Records panels. The saved
     // panel number dates from when a Navigation panel came first (0), so Bookmarks is saved
     // as 1 and Records as 2; a saved Navigation panel opens Records, the default.
     {
         const int panel = AppSetting->rightSidebarPanel() - kSidebarPanelOffset;
-        ui->toolBox->setCurrentIndex(panel >= 0 && panel < ui->toolBox->count()
-                                         ? panel : ui->toolBox->indexOf(ui->recordsPage));
+        ui->sidebarTabs->setCurrentIndex(panel >= 0 && panel < ui->sidebarTabs->count()
+                                         ? panel : ui->sidebarTabs->indexOf(ui->recordsPage));
     }
     bool b = AppSetting->rightSidebarVisible();
     ui->action_Sidebar_Toggle->setChecked(b);
-    ui->toolBox->setVisible(b);
+    ui->sidebarTabs->setVisible(b);
 
     bool oldState = ui->actionShowPersonalData->blockSignals(true);
     ui->actionShowPersonalData->setChecked(AppSetting->showPersonalData());
@@ -554,8 +544,6 @@ void MainWindow::closeEvent(QCloseEvent * event)
 
 MainWindow::~MainWindow()
 {
-    // The focus moves as the child widgets are destroyed, after ui is gone
-    disconnect(qApp, &QApplication::focusChanged, this, nullptr);
     delete ui;
 }
 
@@ -1880,13 +1868,12 @@ void MainWindow::showSidebarHtml()
 {
     if (!AppSetting) return;    // as applySidebarTheme()
     const QPalette palette = QGuiApplication::palette();
-    const bool modern = AppSetting->useNewPages();
     const QFont font = QApplication::font();
     // Keep each panel where the user was reading it
     auto show = [&](QTextBrowser *view, const QString &body, const QString &extraCss) {
         QScrollBar *bar = view->verticalScrollBar();
         const int position = bar->value();
-        view->setHtml(SidebarStyle::document(body, palette, modern, font, extraCss));
+        view->setHtml(SidebarStyle::document(body, palette, font, extraCss));
         bar->setValue(position);
     };
     show(ui->recordsBox, m_recordsBody, QStringLiteral("body { line-height: 0.95; }"));
@@ -1903,7 +1890,7 @@ void MainWindow::applySidebarTheme()
     if (key == m_sidebarThemeKey) return;
     m_sidebarThemeKey = key;
 
-    ui->toolBox->setStyleSheet(SidebarStyle::styleSheet(QGuiApplication::palette(), modern));
+    ui->sidebarTabs->setStyleSheet(SidebarStyle::styleSheet(QGuiApplication::palette(), modern));
     // The Modern cards stand clear of the sidebar's edge; the Classic boxes fill it
     const int margin = SidebarStyle::panelMargin(modern);
     for (QWidget *page : { ui->bookmarksPage, ui->recordsPage }) {
@@ -2626,8 +2613,8 @@ void MainWindow::on_action_Screenshot_triggered()
     setUpdatesEnabled(false);
     if (daily)
         daily->hideSpaceHogs();
-    toolbox_visible = ui->toolBox->isVisible();
-    ui->toolBox->hide();
+    toolbox_visible = ui->sidebarTabs->isVisible();
+    ui->sidebarTabs->hide();
     setUpdatesEnabled(true);
     QTimer::singleShot(250, this, SLOT(DelayedScreenshot()));
 }
@@ -2762,7 +2749,7 @@ void MainWindow::DelayedScreenshot()
     setUpdatesEnabled(false);
     if (daily)
         daily->showSpaceHogs();
-    ui->toolBox->setVisible(toolbox_visible);
+    ui->sidebarTabs->setVisible(toolbox_visible);
     setUpdatesEnabled(true);
 }
 
@@ -3609,20 +3596,13 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::on_action_Sidebar_Toggle_toggled(bool visible)
 {
-    ui->toolBox->setVisible(visible);
+    ui->sidebarTabs->setVisible(visible);
     AppSetting->setRightSidebarVisible(visible);
 }
 
-void MainWindow::on_toolBox_currentChanged(int index)
+void MainWindow::on_sidebarTabs_currentChanged(int index)
 {
     AppSetting->setRightSidebarPanel(index + kSidebarPanelOffset);
-    if (m_sidebarPanelLostFocus) {
-        // The focus was in the panel that just closed: keep it in the sidebar
-        m_sidebarPanelLostFocus = false;
-        QWidget *view = ui->toolBox->widget(index) == ui->bookmarksPage
-                            ? static_cast<QWidget *>(ui->bookmarkView) : ui->recordsBox;
-        view->setFocus(Qt::OtherFocusReason);
-    }
 }
 
 void MainWindow::on_actionView_Statistics_triggered()

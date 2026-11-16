@@ -55,16 +55,14 @@ double contrast(const QColor &a, const QColor &b)
 
 void SidebarStyleTests::testFollowsLightAndDarkPalettes()
 {
-    for (bool modern : { false, true }) {
-        const SidebarStyle::Colours light = SidebarStyle::colours(makePalette(false), modern);
-        const SidebarStyle::Colours dark = SidebarStyle::colours(makePalette(true), modern);
-        QVERIFY(light.panel.lightness() > 200);
-        QVERIFY(light.background.lightness() > 200);
-        QVERIFY(dark.panel.lightness() < 80);
-        QVERIFY(dark.background.lightness() < 80);
-        QCOMPARE(light.panel, makePalette(false).color(QPalette::Base));
-        QCOMPARE(dark.background, makePalette(true).color(QPalette::Window));
-    }
+    const SidebarStyle::Colours light = SidebarStyle::colours(makePalette(false));
+    const SidebarStyle::Colours dark = SidebarStyle::colours(makePalette(true));
+    QVERIFY(light.panel.lightness() > 200);
+    QVERIFY(light.background.lightness() > 200);
+    QVERIFY(dark.panel.lightness() < 80);
+    QVERIFY(dark.background.lightness() < 80);
+    QCOMPARE(light.panel, makePalette(false).color(QPalette::Base));
+    QCOMPARE(dark.background, makePalette(true).color(QPalette::Window));
 }
 
 void SidebarStyleTests::testTextIsReadableOnItsBackground()
@@ -72,15 +70,11 @@ void SidebarStyleTests::testTextIsReadableOnItsBackground()
     // 4.5:1 is the WCAG AA level for body text; notes in italics and the placeholder are
     // muted on purpose and held to the 3:1 level for large or secondary text
     for (bool dark : { false, true }) {
-        for (bool modern : { false, true }) {
-            const SidebarStyle::Colours c = SidebarStyle::colours(makePalette(dark), modern);
-            const QByteArray where = QByteArray(dark ? "dark" : "light") + (modern ? " modern" : " classic");
-            QVERIFY2(contrast(c.text, c.panel) >= 4.5, where + " text");
-            QVERIFY2(contrast(c.link, c.panel) >= 4.5, where + " link");
-            QVERIFY2(contrast(c.muted, c.panel) >= 3.0, where + " muted");
-            QVERIFY2(contrast(c.headerText, c.header) >= 4.5, where + " header");
-            QVERIFY2(contrast(c.headerOpenText, c.headerOpen) >= 4.5, where + " open header");
-        }
+        const SidebarStyle::Colours c = SidebarStyle::colours(makePalette(dark));
+        const QByteArray where = dark ? "dark" : "light";
+        QVERIFY2(contrast(c.text, c.panel) >= 4.5, where + " text");
+        QVERIFY2(contrast(c.link, c.panel) >= 4.5, where + " link");
+        QVERIFY2(contrast(c.muted, c.panel) >= 3.0, where + " muted");
     }
 }
 
@@ -92,6 +86,9 @@ void SidebarStyleTests::testModernAndClassicDiffer()
     // Modern panels are rounded cards; Classic panels are square
     QVERIFY(SidebarStyle::styleSheet(p, true).contains(QString("border-radius: %1px").arg(Theme::Radius)));
     QVERIFY(!SidebarStyle::styleSheet(p, false).contains(QString("border-radius: %1px").arg(Theme::Radius)));
+    // The tabs are left to the platform style in both looks, like the main tab bar
+    QVERIFY(!SidebarStyle::styleSheet(p, true).contains("QTabBar"));
+    QVERIFY(!SidebarStyle::styleSheet(p, false).contains("QTabBar"));
 }
 
 void SidebarStyleTests::testStyleSheetHasNoFixedColours()
@@ -110,12 +107,12 @@ void SidebarStyleTests::testStyleSheetHasNoFixedColours()
 void SidebarStyleTests::testDocumentWrapsBodyWithThemeColours()
 {
     const QPalette dark = makePalette(true);
-    const SidebarStyle::Colours c = SidebarStyle::colours(dark, true);
+    const SidebarStyle::Colours c = SidebarStyle::colours(dark);
     QFont font("Arial");
     font.setPointSize(10);
     // A body with a percent sign and a place marker, as record lines have
     const QString body = "<b>Worst Large Leaks</b><br><a href='daily=2026-01-02'>Leak: 12.50% %1</a>";
-    const QString html = SidebarStyle::document(body, dark, true, font, "body { line-height: 0.95; }");
+    const QString html = SidebarStyle::document(body, dark, font, "body { line-height: 0.95; }");
     QVERIFY(html.contains(body));
     QVERIFY(html.contains("font-family: 'Arial'"));
     QVERIFY(html.contains("font-size: 12px"));
