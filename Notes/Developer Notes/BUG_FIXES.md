@@ -8179,3 +8179,17 @@ menu already used; Classic in light mode keeps its grey menu.
 - In the same commit, alternate rows in dark mode take one theme colour (`Theme::Role::RowTint`): the Statistics
   report's tinted rows (were a muddy grey-green) and Daily's Events and Bookmarks lists (were the Windows accent's
   darkest shade, from the desktop palette's `AlternateBase`).
+
+## 2026-11-16 - Screenshot: the version line at the top was always light
+
+**Files:** `oscar/mainwindow.cpp` (`MainWindow::DelayedScreenshot()`)
+
+**Symptom:** A screenshot (F12) replaces the window's title bar with a line giving the OSCAR version. In dark mode
+that line was still black text on white, above a dark window.
+
+**Root cause:** The line's background and text colours were fixed (`Qt::white`, `Qt::black`).
+
+**Fix:** The line takes the theme's page and text colours (`Theme::Role::Page`, `Theme::Role::Ink`).
+
+**Non-obvious:**
+- It applies to every screenshot, on every page, in Modern and in Classic.

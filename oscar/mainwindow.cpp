@@ -2692,16 +2692,19 @@ void MainWindow::DelayedScreenshot()
 
     // Prepend a plain version header to replace the title bar information.
     // Sizes here are device-independent pixels, matching fontMetrics().
+    // The header takes the theme's page and text colours, so it matches the window under it
+    // in light and in dark mode.
     const int headerHeight = fontMetrics().height() + 8;
     const QSizeF composedSize(clientSize.width(), clientSize.height() + headerHeight);
+    const QColor headerBackground = Theme::color(Theme::Role::Page);
 
     QPixmap pixmap((composedSize * dpr).toSize());
     pixmap.setDevicePixelRatio(dpr);
-    pixmap.fill(Qt::white);
+    pixmap.fill(headerBackground);
 
     QPainter painter(&pixmap);
-    painter.fillRect(QRectF(0, 0, composedSize.width(), headerHeight), Qt::white);
-    painter.setPen(Qt::black);
+    painter.fillRect(QRectF(0, 0, composedSize.width(), headerHeight), headerBackground);
+    painter.setPen(Theme::color(Theme::Role::Ink));
     painter.drawText(QRectF(8, 0, composedSize.width() - 8, headerHeight),
                      Qt::AlignLeft | Qt::AlignVCenter, getMainWindowTitle());
     painter.drawPixmap(QPointF(0, headerHeight), clientPixmap);
