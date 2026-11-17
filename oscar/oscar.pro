@@ -1081,7 +1081,8 @@ test {
 
 macx {
     app_bundle {
-        # On macOS put a custom Info.plist into the bundle that disables dark mode on Mojave.
+        # On macOS put a custom Info.plist into the bundle. It must not set
+        # NSRequiresAquaSystemAppearance: that forces the light appearance and breaks dark mode (#397).
         QMAKE_INFO_PLIST = "../Building/MacOS/Info.plist.in"
 
         # Add the git revision to the Info.plist.

@@ -8291,3 +8291,25 @@ the next index without checking the tab could be selected.
 - `setTabVisible()` keeps the tab's index, so the fixed tab numbers used elsewhere (Welcome 1, Daily 2,
   Overview 3, Statistics 4) are unchanged.
 - The no-profile tab bar was not checked in a running build before the commit.
+
+## 2026-11-17 - macOS: white tab bars after restarting in dark mode (GitLab #397)
+
+**Files:** `Building/MacOS/Info.plist.in`, `oscar/oscar.pro` (comment)
+
+**Symptom:** On macOS, switching to dark mode looked right, but after closing and reopening OSCAR the main tab
+bar, Daily's left tab bar and the bar under the graphs were white, with the tab text invisible. Switching to
+light and back to dark put it right until the next restart.
+
+**Root cause:** The bundle's `Info.plist` still set `NSRequiresAquaSystemAppearance` to true, added in 2019 to
+keep OSCAR out of macOS dark mode. Qt's dark mode works by setting the application's macOS appearance, and the
+key forces the light one. After a restart the parts OSCAR colours from Qt's palette were dark, while the parts
+Qt's macOS style draws with native controls (tab bars, frames) were still drawn light.
+
+**Fix:** The key is removed from `Info.plist.in`.
+
+**Non-obvious:**
+- Confirmed by a rebuild on an Apple Silicon Mac: the restart case is fixed with the key removed.
+- Why a live switch worked with the key present, and only a restart failed, was not established; that is
+  macOS behaviour.
+- Expected but not confirmed on a Mac: with the key gone, the "System" colour scheme follows macOS's own
+  light or dark setting, so a Mac in dark mode may now open OSCAR dark by default.
