@@ -123,8 +123,8 @@ if defined NIGHTLY_HASH (
     if !errorlevel! == 0 (
         echo Remote HEAD matches current nightly build. No build needed.
         if !HAVE_STASH! == 1 git stash pop
-        rem A Linux build may have caught up since last night; publish it.
-        set PUBLISH_ARGS=-LinuxOnly
+        rem Newer Linux or macOS builds may have arrived since last night; publish them.
+        set PUBLISH_ARGS=-SkipWindows
         goto :publish
     )
 )
@@ -209,12 +209,13 @@ echo.
 echo Nightly build complete: %DROPBOX_DIR%\!NIGHTLY_NEW_NAME!
 
 :: -----------------------------------------------------------------------
-:: Step 9: Publish to the nightly download page: copy the Windows and
-::         Linux files to Dropbox\OSCAR Files\Nightly under fixed names,
+:: Step 9: Publish to the nightly download page: copy the Windows, Linux
+::         and macOS files to Dropbox\OSCAR Files\Nightly under fixed names,
 ::         then update and push the page.  Uses the Linux build for the
 ::         same commit if it is complete, otherwise the most recent
-::         complete one.  Also reached from Step 3 with -LinuxOnly when
-::         there is no new commit, to publish a Linux build that caught up.
+::         complete one, and the universal .dmg in Dropbox\Nightly.  Also
+::         reached from Step 3 with -SkipWindows when there is no new
+::         commit, to publish newer Linux or macOS builds.
 :: -----------------------------------------------------------------------
 :publish
 powershell -NoProfile -ExecutionPolicy Bypass -File "%PUBLISH_SCRIPT%" -LinuxRoot "%LINUX_DIR%" %PUBLISH_ARGS%

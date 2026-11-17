@@ -15,10 +15,15 @@
 #      checksumSHA256.txt (which also catches files still being synced).
 #      If no Linux build is newer than the one already published, the Linux files are left
 #      as they are.
+#   2b. Take the macOS build from the Mac folder, which holds a single universal .dmg
+#      (OSCAR-<version>-<hash>-macOS-universal.dmg) built before this script runs. It is
+#      published if its hash differs from the page's and the file is whole (it ends with the
+#      UDIF "koly" trailer, so a file still syncing is skipped).
 #   3. Copy the files into the Dropbox Nightly folder under fixed names, overwriting the
 #      previous files in place so their Dropbox shared links keep working.
 #   4. Rewrite OSCAR-nightly-checksums.txt.
-#   5. Set the build date and the Windows and Linux build ids in the page, then commit and push.
+#   5. Set the build date and the Windows, Linux and macOS build ids in the page, then
+#      commit and push.
 #
 # Only files whose fixed name already exists in the Nightly folder are replaced, because
 # only those have shared links in the page. A Linux package with a new name is reported
@@ -30,19 +35,26 @@
 # is new the files and page are left unchanged.
 #
 # Usage: powershell -NoProfile -ExecutionPolicy Bypass -File nightly-publish.ps1 [options]
-#   -LinuxOnly   no new Windows build tonight: publish a newer Linux build only
-#   -SkipLinux   publish the Windows files and page only (for testing)
+#   -SkipWindows no new Windows build tonight: publish newer Linux/macOS builds only
+#                (-LinuxOnly is accepted as an older name for it)
+#   -SkipLinux   leave the Linux files and id as they are (for testing)
+#   -SkipMac     leave the macOS file and id as they are (for testing)
 #   -NoPush      commit the page locally but do not push it
 
 param(
     [string]$InstallerDir = 'C:\OSCAR\OSCAR-code\build-oscar-win_64_bit\Installer',
     [string]$NightlyDir   = "$env:USERPROFILE\Dropbox\OSCAR Files\Nightly",
     [string]$LinuxRoot    = "$env:USERPROFILE\Dropbox\tranfert_deb",
+    [string]$MacRoot      = "$env:USERPROFILE\Dropbox\Nightly",
     [string]$PageRepo     = 'C:\OSCAR\OSCAR-nightly',
-    [switch]$LinuxOnly,
+    [Alias('LinuxOnly')]
+    [switch]$SkipWindows,
     [switch]$SkipLinux,
+    [switch]$SkipMac,
     [switch]$NoPush
 )
+
+$MacTarget = 'OSCAR-nightly-macOS-universal.dmg'
 
 $ErrorActionPreference = 'Stop'
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
@@ -139,6 +151,21 @@ function Get-CompleteLinuxBuild($dir, [string[]]$expected) {
     return $null
 }
 
+# True if the .dmg ends with its UDIF trailer ("koly" 512 bytes from the end), i.e. it is
+# not truncated or still being synced.
+function Test-DmgComplete([string]$path) {
+    $stream = [System.IO.File]::OpenRead($path)
+    try {
+        if ($stream.Length -lt 512) { return $false }
+        [void]$stream.Seek(-512, [System.IO.SeekOrigin]::End)
+        $magic = New-Object byte[] 4
+        [void]$stream.Read($magic, 0, 4)
+        return ([System.Text.Encoding]::ASCII.GetString($magic) -eq 'koly')
+    } finally {
+        $stream.Close()
+    }
+}
+
 try {
     if (-not (Test-Path $NightlyDir)) { Fail "Nightly folder not found: $NightlyDir" }
 
@@ -148,19 +175,22 @@ try {
     $html = [System.IO.File]::ReadAllText($page, $utf8NoBom)
     $currentWindows = Get-PageSpan $html 'buildIdWindows'
     $currentLinux   = Get-PageSpan $html 'buildIdLinux'
+    $currentMac     = Get-PageSpan $html 'buildIdMac'
     if ($null -eq $currentWindows) { Fail 'Page has no <span id="buildIdWindows">' }
     if ($null -eq $currentLinux)   { Fail 'Page has no <span id="buildIdLinux">' }
+    if ($null -eq $currentMac)     { Fail 'Page has no <span id="buildIdMac">' }
     $linuxHash = $currentLinux
+    $macHash   = $currentMac
 
     # Source -> fixed name in the Nightly folder.
     $copies = [ordered]@{}
 
     # ---------------------------------------------------------------------
     # Step 1: Windows files and the commit hash.
-    #         With -LinuxOnly (no new Windows build tonight) the installer
+    #         With -SkipWindows (no new Windows build tonight) the installer
     #         folder is not looked at; the published Windows build stays.
     # ---------------------------------------------------------------------
-    if ($LinuxOnly) {
+    if ($SkipWindows) {
         $winHash = $currentWindows
         Log "No new Windows build; Windows build $winHash kept."
     } else {
@@ -232,6 +262,42 @@ try {
         }
     }
 
+    # ---------------------------------------------------------------------
+    # Step 2b: The macOS build. The Mac folder holds a single universal .dmg;
+    #          its build id comes from the file name.
+    # ---------------------------------------------------------------------
+    if ($SkipMac) {
+        Log "macOS skipped (-SkipMac); page keeps macOS build $currentMac."
+    } elseif (-not (Test-Path $MacRoot)) {
+        Log "WARNING: macOS build folder not found: $MacRoot. macOS build $currentMac kept."
+    } elseif (-not (Test-Path (Join-Path $NightlyDir $MacTarget))) {
+        Log "WARNING: $MacTarget is not in the Nightly folder, so it has no download link; macOS not published."
+    } else {
+        $dmgs = @(Get-ChildItem -Path $MacRoot -Filter '*-macOS-universal.dmg' -File |
+                  Sort-Object LastWriteTime -Descending)
+        if ($dmgs.Count -eq 0) {
+            Log "No macOS build in $MacRoot; macOS build $currentMac kept."
+        } else {
+            $dmg = $dmgs[0]
+            if ($dmgs.Count -gt 1) {
+                Log "WARNING: $($dmgs.Count) macOS builds in $MacRoot; using the newest, $($dmg.Name)."
+            }
+            $dmgHash = $null
+            if ($dmg.Name -match '-([0-9a-fA-F]{7,40})-macOS-universal\.dmg$') { $dmgHash = $Matches[1].ToLower() }
+            if (-not $dmgHash) {
+                Log "WARNING: Cannot take a build id from $($dmg.Name); macOS build $currentMac kept."
+            } elseif ($dmgHash -eq $currentMac) {
+                Log "macOS build $currentMac is already published."
+            } elseif (-not (Test-DmgComplete $dmg.FullName)) {
+                Log "WARNING: $($dmg.Name) is incomplete (still syncing?); macOS build $currentMac kept."
+            } else {
+                $macHash = $dmgHash
+                Log "macOS build: $($dmg.Name)"
+                $copies[$dmg.FullName] = $MacTarget
+            }
+        }
+    }
+
     if ($copies.Count -eq 0) {
         Log 'Nothing new to publish; files and page left unchanged.'
         exit 0
@@ -252,7 +318,8 @@ try {
     # Step 4: Checksums for everything in the Nightly folder except itself.
     # ---------------------------------------------------------------------
     $sumsName = 'OSCAR-nightly-checksums.txt'
-    $lines = @("SHA256 checksums for OSCAR nightly builds: Windows $winHash, Linux $linuxHash", '')
+    $ids = "Windows $winHash, Linux $linuxHash, macOS $macHash"
+    $lines = @("SHA256 checksums for OSCAR nightly builds: $ids", '')
     Get-ChildItem -Path $NightlyDir -File |
         Where-Object { $_.Name -ne $sumsName -and $_.Name -ne 'desktop.ini' } |
         Sort-Object Name |
@@ -270,20 +337,21 @@ try {
     $en = [System.Globalization.CultureInfo]::GetCultureInfo('en-US')
     $buildDate = (Get-Date).ToString('MMMM d, yyyy', $en)
 
-    foreach ($pair in @(@('buildDate', $buildDate), @('buildIdWindows', $winHash), @('buildIdLinux', $linuxHash))) {
+    foreach ($pair in @(@('buildDate', $buildDate), @('buildIdWindows', $winHash),
+                        @('buildIdLinux', $linuxHash), @('buildIdMac', $macHash))) {
         $pattern = '(<span id="' + $pair[0] + '">)[^<]*(</span>)'
         if ($html -notmatch $pattern) { Fail "Page has no <span id=`"$($pair[0])`">" }
         $html = [regex]::Replace($html, $pattern, '${1}' + $pair[1] + '${2}')
     }
     [System.IO.File]::WriteAllText($page, $html, $utf8NoBom)
-    Log "Page set to $buildDate, Windows build $winHash, Linux build $linuxHash"
+    Log "Page set to $buildDate, $ids"
 
     GitTry diff --quiet '--' public/index.html
     if ($LASTEXITCODE -eq 0) {
         Log 'Page unchanged; nothing to commit.'
     } else {
         $msgFile = Join-Path $env:TEMP 'oscar-nightly-commit.txt'
-        [System.IO.File]::WriteAllText($msgFile, "Nightly build: Windows $winHash, Linux $linuxHash`n", $utf8NoBom)
+        [System.IO.File]::WriteAllText($msgFile, "Nightly build: $ids`n", $utf8NoBom)
         Git add public/index.html
         Git commit --quiet -F $msgFile
         Remove-Item $msgFile
@@ -295,7 +363,7 @@ try {
         }
     }
 
-    Log "Published: Windows $winHash, Linux $linuxHash."
+    Log "Published: $ids."
     exit 0
 }
 catch {
