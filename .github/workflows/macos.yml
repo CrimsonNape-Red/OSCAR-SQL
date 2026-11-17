@@ -20,6 +20,16 @@ jobs:
         with:
           fetch-depth: 0   # update_gitinfo.sh reads the branch and revision
 
+      # mac-build is master plus commits that only add this workflow. Build master's own
+      # commit, on a branch named master, so the app's version and the .dmg name carry
+      # master's branch and revision rather than mac-build's.
+      - name: Check out master's commit
+        if: github.ref_name == 'mac-build'
+        run: |
+          MASTER=$(git log -1 --format=%H -- . ':(exclude).github')
+          git checkout -q -B master "$MASTER"
+          echo "Building master at $(git rev-parse --short HEAD): $(git log -1 --format=%s)"
+
       - name: Install Qt
         run: |
           python3 -m venv "$RUNNER_TEMP/aqt"
