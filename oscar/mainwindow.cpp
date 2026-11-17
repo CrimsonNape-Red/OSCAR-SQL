@@ -715,6 +715,7 @@ bool MainWindow::OpenProfile(QString profileName)
             if (m_batchMode) {
                 qCritical().noquote() << QString("OpenProfile: Lockfile already present for profile '%1', claimed on host '%2'. Aborting batch operation.")
                     .arg(prof->user->userName(), lockhost);
+                profileSelector->updateProfileHighlight(QString());  // SelectProfile() marked it open
                 return false;
             }
             if (staticQMessageBox::warning(this, STR_MessageBox_Warning,
@@ -724,6 +725,7 @@ bool MainWindow::OpenProfile(QString profileName)
                     QMessageBox::Cancel |QMessageBox::Ok, QMessageBox::Cancel) == QMessageBox::Cancel) {
                 qDebug() << "OpenProfile:" << profileName
                          << "cancelled by user at the lockfile prompt; lock held by" << lockhost;
+                profileSelector->updateProfileHighlight(QString());  // SelectProfile() marked it open
                 return false;
             }
         } // not worried about localhost locks anymore, just silently drop it.
@@ -764,6 +766,7 @@ bool MainWindow::OpenProfile(QString profileName)
             p_profile->removeLock();
             p_profile = nullptr;
         }
+        resetNoProfileUi();     // SelectProfile() marked the profile open in the list
 
         ensureCleanDatabaseState();
         return false;
@@ -956,12 +959,28 @@ void MainWindow::CloseProfile()
     // Reset the title bar to its no-profile state. OpenProfile() overwrites this
     // immediately when switching to another profile.
     setWindowTitle(getMainWindowTitle() + dbFolderSuffix());
+    resetNoProfileUi();
 
     // Ensure any pending database transaction is committed before profile close
     // This prevents data loss when switching between profiles
     ensureCleanDatabaseState();
     PERF_TIMER_REPORT();
     PERF_TIMER_RESET();
+}
+
+void MainWindow::resetNoProfileUi()
+{
+    // The device menus' handlers look each device up in the open profile
+    ui->menu_Rebuild_CPAP_Data->clear();
+    ui->menuPurge_CPAP_Data->clear();
+
+    // Statistics, Records and Bookmarks link into the Daily and Overview pages, which are gone
+    setStatsHTML(QString());
+    m_bookmarksBody.clear();
+    setRecBoxHTML(QString());
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->statisticsTab), false);
+
+    if (profileSelector) profileSelector->updateProfileHighlight(QString());
 }
 
 
@@ -2877,6 +2896,8 @@ void MainWindow::on_action_Frequently_Asked_Questions_triggered()
 
 void MainWindow::on_action_Rebuild_Oximetry_Index_triggered()
 {
+    if (!p_profile || !daily || !overview) return;  // no profile is open
+
     QVector<ChannelID> invalid;
 
     QList<Machine *> machines = p_profile->GetMachines(MT_OXIMETER);
@@ -3340,6 +3361,7 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
 
 void MainWindow::on_actionRebuildCPAP(QAction *action)
 {
+    if (!p_profile) return;
     QString data = action->data().toString();
     QString cls = data.section(":",0,0);
     QString serial = data.section(":", 1);
@@ -3508,6 +3530,7 @@ void MainWindow::checkResMedOximetryRebuild()
 
 void MainWindow::on_actionPurgeMachine(QAction *action)
 {
+    if (!p_profile) return;
     QString data = action->data().toString();
     QString cls = data.section(":",0,0);
     QString serial = data.section(":", 1);
@@ -3685,6 +3708,8 @@ void MainWindow::on_actionView_Overview_triggered()
 
 void MainWindow::on_actionView_Statistics_triggered()
 {
+    // As Daily and Overview: the tab is disabled until a profile with devices is open
+    if (!ui->tabWidget->isTabEnabled(ui->tabWidget->indexOf(ui->statisticsTab))) return;
     ui->tabWidget->setCurrentWidget(ui->statisticsTab);
 }
 
@@ -4839,6 +4864,7 @@ void MainWindow::reset_reportModeUi()
 
 void MainWindow::on_reportModeMonthly_clicked()
 {
+    if (!p_profile) return;
     if (p_profile->general->statReportMode() != STAT_MODE_MONTHLY) {
         p_profile->general->setStatReportMode(STAT_MODE_MONTHLY);
         GenerateStatistics();
@@ -4847,6 +4873,7 @@ void MainWindow::on_reportModeMonthly_clicked()
 
 void MainWindow::on_reportModeStandard_clicked()
 {
+    if (!p_profile) return;
     if (p_profile->general->statReportMode() != STAT_MODE_STANDARD) {
         p_profile->general->setStatReportMode(STAT_MODE_STANDARD);
         GenerateStatistics();
@@ -4856,6 +4883,7 @@ void MainWindow::on_reportModeStandard_clicked()
 
 void MainWindow::on_reportModeRange_clicked()
 {
+    if (!p_profile) return;
     if (p_profile->general->statReportMode() != STAT_MODE_RANGE) {
         p_profile->general->setStatReportMode(STAT_MODE_RANGE);
         GenerateStatistics();
@@ -4864,6 +4892,7 @@ void MainWindow::on_reportModeRange_clicked()
 
 void MainWindow::on_statEndDate_dateChanged(const QDate &date)
 {
+    if (!p_profile) return;
     if (p_profile->general->statReportMode() == STAT_MODE_RANGE ) {
         p_profile->general->setStatReportRangeEnd(date);
     } else {
@@ -4874,6 +4903,7 @@ void MainWindow::on_statEndDate_dateChanged(const QDate &date)
 
 void MainWindow::on_statStartDate_dateChanged(const QDate &date)
 {
+    if (!p_profile) return;
     p_profile->general->setStatReportRangeStart(date);
     GenerateStatistics();
 }
@@ -5643,6 +5673,9 @@ void MainWindow::on_recordsBox_anchorClicked(const QUrl &linkurl)
     QString link = linkurl.toString().section("=", 0, 0).toLower();
     QString data = linkurl.toString().section("=", 1).toLower();
     qDebug() << linkurl.toString() << link << data;
+
+    // Links to the Daily and Overview pages need a profile to be open
+    if ((link == "daily" && !daily) || (link == "overview" && !overview)) return;
 
     if (link == "daily") {
         QDate date = QDate::fromString(data, Qt::ISODate);

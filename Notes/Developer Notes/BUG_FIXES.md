@@ -8242,3 +8242,32 @@ the dialog and returns, so OSCAR leaves through `main()` like the other restarts
   for whether the database can be open when they run.
 - Not reproduced: the crash needs macOS. On Windows the rename and restart work with the fix; a Mac build has
   not been tested.
+
+## 2026-11-16 - Window kept the closed profile's menus, links and "Open" mark
+
+**Files:** `oscar/mainwindow.cpp` (`CloseProfile()`, new `resetNoProfileUi()`, `OpenProfile()`),
+`oscar/profileselector.cpp` (`updateProfileHighlight()`)
+
+**Symptom:** Found while adding Close Profile to the profile list's right-click menu. A profile could already be
+closed without another one opening (New Profile then Cancel; Destroy of the open profile; an open attempt stopped
+at the lockfile prompt or by a data-format error). Afterwards the list could still show the "Open" tag, and the
+Rebuild/Purge device menus, the Statistics page and the Records and Bookmarks panels still held the closed
+profile's entries.
+
+**Root cause:** `CloseProfile()` deleted the pages and cleared `p_profile` but left everything else as it was.
+The device-menu handlers call `p_profile->GetMachines()` and the Records/Bookmarks/Statistics links call
+`daily->LoadDate()` or `overview->setRange()` with no null check. `SelectProfile()` marks the row as open before
+the profile has opened, and the paths that then give up did not clear the mark.
+
+**Fix:** `CloseProfile()` ends with `resetNoProfileUi()`: empties the two device menus, the Statistics page and
+both sidebar panels, disables the Statistics tab and clears the "Open" mark. `OpenProfile()` clears the mark (or
+calls the reset) where it gives up after `SelectProfile()`. The handlers involved now return when no profile is open.
+
+**Non-obvious:**
+- `updateProfileHighlight("")` used to mark a row that has no name (a cancelled import can leave one) as open;
+  an empty name now only clears.
+- `QTabWidget::setCurrentWidget()` selects a disabled tab, so View > Statistics now checks the tab is enabled,
+  as View > Daily and View > Overview do.
+- The crashes were found by reading the code, not reproduced.
+- Not examined: dialogs opened from the menus with no profile open (Backup, Share, Export, Journal notes). That
+  state already existed at startup when no profile opens automatically.

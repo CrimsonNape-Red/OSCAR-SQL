@@ -606,6 +606,13 @@ private:
 
     void PopulatePurgeMenu();
 
+    /*! \brief Returns the window to its no-profile state, as at startup before a profile opens.
+        Empties what belonged to the closed profile and would act on it if clicked: the
+        Rebuild and Purge device menus, the Statistics page (its tab is disabled) and the
+        Records and Bookmarks panels. Also clears the "Open" mark in the profile list.
+        Called by CloseProfile() and when OpenProfile() gives up part-way. */
+    void resetNoProfileUi();
+
     //! \brief Rebuild a CPAP device's data from OSCAR's backup, asking first
     //! \return true if it was rebuilt
     bool rebuildCPAPMachine(Machine *mach);

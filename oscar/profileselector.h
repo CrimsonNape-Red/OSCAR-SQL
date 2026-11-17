@@ -87,6 +87,8 @@ public:
 
     void updateProfileList();
     Profile *SelectProfile(QString profname);
+    //! @brief Marks the named profile's row as the open one (bold, with an "Open" tag) and
+    //!        clears the mark from every other row. An empty name only clears: no profile is open.
     void updateProfileHighlight(QString name);
 
     /// Returns the username of the currently highlighted (single-clicked) profile,
@@ -99,6 +101,11 @@ protected:
 
 private slots:
     void on_profileView_doubleClicked(const QModelIndex &index);
+
+    //! @brief Shows the profile list's right-click menu: New, Open, Edit and Close.
+    //!        The row under the pointer is selected first and the menu acts on it.
+    //! @param pos Pointer position, in the list's viewport coordinates
+    void on_profileView_customContextMenuRequested(const QPoint &pos);
 
     void on_profileFilter_textChanged(const QString &arg1);
 

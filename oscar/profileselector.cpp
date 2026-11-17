@@ -12,6 +12,7 @@
 
 #include <QGuiApplication>
 #include <QHeaderView>
+#include <QMenu>
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QFileInfo>
@@ -430,6 +431,7 @@ void ProfileSelector::updateProfileList()
 
 void ProfileSelector::updateProfileHighlight(QString name)
 {
+    if (!model || !proxy) return;
 
     // Clear the previous mark: plain font and no tag. Text colour comes from the stylesheet.
     QFont font = ui->profileView->font();
@@ -442,6 +444,10 @@ void ProfileSelector::updateProfileHighlight(QString name)
         }
         model->setData(model->index(row, 0, QModelIndex()), QVariant(), UiKit::TagDelegate::TagRole);
     }
+
+    // No profile is open. Stop here: a row left without a name (e.g. by a cancelled
+    // import) would otherwise match the empty name and be marked as open.
+    if (name.isEmpty()) return;
 
     // Mark the open profile: bold, with an "Open" tag after its name
     font.setBold(true);
@@ -482,6 +488,43 @@ void ProfileSelector::on_profileView_doubleClicked(const QModelIndex &index)
     QString profname = proxy->data(idx, Qt::UserRole+2).toString();
 
     mainwin->OpenProfile(profname);
+}
+
+void ProfileSelector::on_profileView_customContextMenuRequested(const QPoint &pos)
+{
+    // The menu acts on the row under the pointer, so select it: the info panel and the
+    // buttons then show the same profile the menu is about.
+    const QModelIndex index = ui->profileView->indexAt(pos);
+    if (index.isValid()) ui->profileView->setCurrentIndex(index);
+
+    // As on_selectionChanged(): a listed profile that Profiles::Scan() did not load can be
+    // neither opened nor edited. Below the last row only New applies.
+    const QString name = index.isValid() ? selectedProfileName() : QString();
+    const bool loaded = index.isValid() && Profiles::profiles.contains(name);
+    const bool isOpen = loaded && p_profile && (Profiles::profiles.value(name) == p_profile);
+
+    QMenu menu(this);
+    QAction *newAction = menu.addAction(tr("New Profile"));
+    QAction *openAction = menu.addAction(tr("Open Profile"));
+    QAction *editAction = menu.addAction(tr("Edit Profile"));
+    QAction *closeAction = menu.addAction(tr("Close Profile"));
+    openAction->setEnabled(loaded && !isOpen);
+    editAction->setEnabled(loaded);
+    closeAction->setEnabled(isOpen);
+
+    const QAction *chosen = menu.exec(ui->profileView->viewport()->mapToGlobal(pos));
+    if (chosen == newAction) {
+        on_buttonNewProfile_clicked();
+    } else if (chosen == openAction) {
+        on_buttonOpenProfile_clicked();
+    } else if (chosen == editAction) {
+        on_buttonEditProfile_clicked();
+    } else if (chosen == closeAction) {
+        // Saving a large profile can take a moment; CloseProfile() also clears the "Open" tag
+        QGuiApplication::setOverrideCursor(Qt::WaitCursor);
+        mainwin->CloseProfile();
+        QGuiApplication::restoreOverrideCursor();
+    }
 }
 
 void ProfileSelector::on_profileFilter_textChanged(const QString &arg1)
