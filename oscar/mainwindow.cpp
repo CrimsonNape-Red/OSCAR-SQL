@@ -346,7 +346,11 @@ void MainWindow::SetupGUI(bool batchMode)
 
     // Start with the new Profile Tab
     ui->tabWidget->setCurrentWidget(profileSelector);   // setting this to daily shows the cube during loading..
-    ui->tabWidget->setTabEnabled(1, false);             // this should be the Statistics tab
+    // Statistics is the one page built into the form, so its tab exists before any profile
+    // is open. It has nothing to show until then: keep it disabled and out of the tab bar.
+    const int statisticsIndex = ui->tabWidget->indexOf(ui->statisticsTab);
+    ui->tabWidget->setTabEnabled(statisticsIndex, false);
+    ui->tabWidget->setTabVisible(statisticsIndex, false);
     setupColorSchemeButton();
 
     applySidebarTheme();
@@ -907,6 +911,7 @@ bool MainWindow::OpenProfile(QString profileName)
     ui->tabWidget->setTabEnabled(2, !noMachines);       // daily, STR_TR_Daily);
     ui->tabWidget->setTabEnabled(3, !noMachines);       // overview, STR_TR_Overview);
     ui->tabWidget->setTabEnabled(4, !noMachines);       // statistics, STR_TR_Statistics);
+    ui->tabWidget->setTabVisible(4, true);              // hidden while no profile is open
 
     progress->close();
     delete progress;
@@ -978,7 +983,9 @@ void MainWindow::resetNoProfileUi()
     setStatsHTML(QString());
     m_bookmarksBody.clear();
     setRecBoxHTML(QString());
-    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(ui->statisticsTab), false);
+    const int statisticsIndex = ui->tabWidget->indexOf(ui->statisticsTab);
+    ui->tabWidget->setTabEnabled(statisticsIndex, false);
+    ui->tabWidget->setTabVisible(statisticsIndex, false);
 
     if (profileSelector) profileSelector->updateProfileHighlight(QString());
 }
@@ -2871,12 +2878,16 @@ void MainWindow::on_action_Edit_Profile_triggered()
 
 void MainWindow::on_action_CycleTabs_triggered()
 {
-    int i;
     qDebug() << "Switching Tabs";
-    i = ui->tabWidget->currentIndex() + 1;
+    const int count = ui->tabWidget->count();
+    if (count == 0) return;
 
-    if (i >= ui->tabWidget->count()) {
-        i = 0;
+    // Next tab the user could click: skip disabled ones, and Statistics while it is hidden.
+    // With no other such tab the search comes back round to the current one.
+    int i = ui->tabWidget->currentIndex();
+    for (int step = 0; step < count; ++step) {
+        i = (i + 1) % count;
+        if (ui->tabWidget->isTabEnabled(i) && ui->tabWidget->isTabVisible(i)) break;
     }
 
     ui->tabWidget->setCurrentIndex(i);

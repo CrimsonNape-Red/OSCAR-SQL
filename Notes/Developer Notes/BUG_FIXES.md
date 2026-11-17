@@ -8271,3 +8271,23 @@ calls the reset) where it gives up after `SelectProfile()`. The handlers involve
 - The crashes were found by reading the code, not reproduced.
 - Not examined: dialogs opened from the menus with no profile open (Backup, Share, Export, Journal notes). That
   state already existed at startup when no profile opens automatically.
+
+## 2026-11-16 - Disabled Statistics tab shown while no profile is open
+
+**Files:** `oscar/mainwindow.cpp` (`SetupGUI()`, `OpenProfile()`, `resetNoProfileUi()`,
+`on_action_CycleTabs_triggered()`)
+
+**Symptom:** With no profile open the tab bar showed Profile and a greyed-out Statistics tab. Ctrl+Tab could
+select the disabled Statistics page.
+
+**Root cause:** Statistics is the only page built into `mainwindow.ui`, so its tab exists from startup; Welcome,
+Daily and Overview are created when a profile opens. It was disabled but left in the tab bar. Ctrl+Tab stepped to
+the next index without checking the tab could be selected.
+
+**Fix:** The tab is hidden (and still disabled) at startup and whenever a profile closes, and shown again by
+`OpenProfile()`. Ctrl+Tab skips tabs that are disabled or hidden.
+
+**Non-obvious:**
+- `setTabVisible()` keeps the tab's index, so the fixed tab numbers used elsewhere (Welcome 1, Daily 2,
+  Overview 3, Statistics 4) are unchanged.
+- The no-profile tab bar was not checked in a running build before the commit.

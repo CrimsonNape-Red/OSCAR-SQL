@@ -608,7 +608,7 @@ private:
 
     /*! \brief Returns the window to its no-profile state, as at startup before a profile opens.
         Empties what belonged to the closed profile and would act on it if clicked: the
-        Rebuild and Purge device menus, the Statistics page (its tab is disabled) and the
+        Rebuild and Purge device menus, the Statistics page (its tab is hidden) and the
         Records and Bookmarks panels. Also clears the "Open" mark in the profile list.
         Called by CloseProfile() and when OpenProfile() gives up part-way. */
     void resetNoProfileUi();
