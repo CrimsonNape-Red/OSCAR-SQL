@@ -3,7 +3,7 @@
 **Status:** Reverse-engineered; not vendor-documented.
 **Scope:** `<serial>.evt` event/telemetry stream produced by BMC G3X cards.
 **Implementation:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp`
-**Last updated:** 2026-11-17 (0x0B identified as snore and imported, §3c). Earlier: 2026-08-12 (0x0C/0x0D value2 characterised; 0x11-0x13 breath tick tag; 0x02 day sequence; 0x1A milliseconds; 0x43 span durations)
+**Last updated:** 2026-11-17 (0x0B identified as snore and imported; timestamp = start and value2 = duration confirmed against PAP-Link, §3c). Earlier: 2026-08-12 (0x0C/0x0D value2 characterised; 0x11-0x13 breath tick tag; 0x02 day sequence; 0x1A milliseconds; 0x43 span durations)
 
 ---
 
@@ -126,7 +126,7 @@ The table below reflects analysis of two nights of G3X data (file `A3112345678` 
 | `0x08` | Confirmed | `CPAP_Hypopnea` (CH) | Timestamp ms (§2a) | **Duration, ms** (confirmed 2026-03-25) | Central hypopnea subtype. PAP-Link displays OH and CH as distinct event types; OSCAR maps both to `CPAP_Hypopnea`. |
 | `0x09` | Confirmed | `CPAP_PB` | Timestamp ms (§2a) | **uint32 LE duration, ms** — `value2` (0x1C) = low 16 bits, `unk1e` (0x1E) = high 16 bits (confirmed 2026-03-30 via Lijunjun and Kavolodin data) | **Periodic breathing episode start marker.** Timestamp marks the **START** of the episode, consistent with all other respiratory event types. Duration is a uint32 spanning offsets 0x1C–0x1F (reading only the low 16 bits gives wrong durations ~28s/23s; uint32 gives correct ~159s/154s matching PAP-Link on Lijunjun 2026-03-16). Primary PB source in OSCAR. Confirmed on Lijunjun (B20A SC.75) and Kavolodin (A20) data. |
 | `0x0A` | Confirmed | `CPAP_RERA` | Timestamp ms (§2a) | **Duration, ms** (confirmed 2026-03-25; ~11 000 ms observed, ≈10 s per PAP-Link) | **Respiratory Effort Related Arousal.** Confirmed 2026-03-24: present in all five independently identified RERA windows from PAP-Link (JCCPAP data, 2026-02-12 through 2026-02-24). Two records at 02:59 and 03:10 on OSCAR day 2/22 match two PAP-Link RERAs on the same night. Duration confirmed ~10 seconds (PAP-Link). ~1–3 records/night on well-treated nights; up to ~200+ on nights with heavy FL. |
-| `0x0B` | Confirmed (GitLab #398) | `CPAP_VSnore` (VS) | Timestamp ms (§2a) | A length in ms, in 20 ms steps on most cards; mostly 0.4–3 s. Thought to be how long the snore lasted within the breath — **not imported** | **Snore.** At most one record per snoring breath, arriving in runs. Imported as a point flag at the record timestamp. The IDX day record carries the matching per-hour index. See §3c. |
+| `0x0B` | Confirmed (GitLab #398) | `CPAP_VSnore` (VS) | Timestamp ms (§2a) | **Snore duration, ms** (confirmed 2026-11-17 against PAP-Link bar widths); 20 ms steps on most cards; mostly 0.4–3 s — **not imported** | **Snore.** At most one record per snoring breath, arriving in runs. Imported as a point flag at the record timestamp. The IDX day record carries the matching per-hour index. See §3c. |
 | `0x0C` | Per-breath inspiration | Timestamps collected; not decoded to channels | Timestamp ms (§2a) | **value2 = a per-breath volume-like magnitude** (§3b); `unk1e` always 0 | [8308]; mirrors `0x0D` count. **Not a leak source.** Timestamp collected into `rawInspirationTimestamps` for potential future AASM-based PB detection but not currently used. The value at `0x11`-`0x13` is the breath tick tag that pairs this record with its `0x0D` (§3a). |
 | `0x0D` | Per-breath expiration | Not decoded | Timestamp ms (§2a) | **value2 = a per-breath volume-like magnitude** (§3b); `unk1e` always 0 | [8308]; mirrors `0x0C`. Carries the same tick tag as the `0x0C` it closes (§3a). |
 | `0x0E` | Confirmed | `CPAP_FLG` (Mild) | Timestamp ms (§2a) | **Inspiration duration (Ti), ms** — multiples of 20 ms; median 1.62 s; decreases with FL severity (confirmed 2026-03-26). **Used** as bar width in OSCAR. | **Mild flow limitation.** Confirmed by PAP-Link alignment on two sessions (G3X-2 2026-02-20: 376 events matching PAP-Link mild pattern; JCCPAP 2025-12-20: 181 events). Timestamp = end-of-expiration trough; bar plots forward by value2 ms to cover the inspiratory peak. |
@@ -262,8 +262,14 @@ not decoded.
 
 - **Vendor display.** A contributor rewrote three records on their own card to type
   `0x0B` and loaded the card into a recent PAP-Link, which displayed them as snores.
-  This is the only evidence that names the event; it used patched records, not ones
-  the device wrote.
+  The contributor has since confirmed the identification with a newer PAP-Link
+  version (reported 2026-11-17). Older PAP-Link versions could not load the card
+  concerned at all, so use the newer version for any further comparison.
+- **PAP-Link comparison on device-written records (2026-11-17).** A two-minute
+  stretch of PAP-Link's Snoring graph was measured against the EVT file: 23 bars for
+  23 `0x0B` records, one for one. Each bar starts at the record timestamp rounded to
+  the nearest whole second (23 of 23) and its width equals `value2` to within one
+  screen pixel (0.08 s) on all 23, over a range of 400–1,080 ms.
 - **The device indexes it.** The IDX day record holds a per-hour index at IT `0x4E`
   (record `0x0CE`) equal to that day's `0x0B` count / therapy hours x 10. Checked on
   four G3 cards: exact (within rounding) on **215 of 219 nights** — 118/121, 15/16,
@@ -284,14 +290,14 @@ not decoded.
 
 ### Fields
 
-- **Timestamp** — when in the breath it falls (start, end or detection instant) is
-  not established. On the two cards that also carry breath markers it usually falls
-  0.5–3 s after the preceding inspiration marker (`0x0C`).
-- **`value2`** — a length in milliseconds. A multiple of 20 on three cards
+- **Timestamp** — the start of the snore. PAP-Link draws the bar forward from it
+  (rounded to the nearest second). On the two cards that also carry breath markers it
+  usually falls 0.5–3 s after the preceding inspiration marker (`0x0C`).
+- **`value2`** — the snore's duration in milliseconds; PAP-Link uses it as the bar
+  width (confirmed 2026-11-17, see Evidence). A multiple of 20 on three cards
   (2,104 / 572 / 1,702 records, no exceptions); on the fourth, 329 of 2,104 records
   are multiples of 5 instead. Typical range 0.4–3 s, median 0.58–0.96 s by card, with
-  a tail to 10 s on one card. The likeliest reading is the time the snore lasted
-  within the breath. **Unconfirmed**, and not imported.
+  a tail to 10 s on one card. **Not imported.**
 - **`unk1e`** — always zero.
 - **`0x11`–`0x13`** — in the breath tick counter's range (§3a). Not used.
 
@@ -313,7 +319,8 @@ after a rebuild.
 
 - Whether E5 and P5 platform cards write `0x0B`. The one E5 card examined has none,
   and its IT `0x4E` is zero on every night.
-- A side-by-side of PAP-Link's snore display against records the device itself wrote.
+- Whether OSCAR should carry the duration. VS is drawn as a point flag; the durations
+  are mostly under a second, so a bar would be visible only when zoomed well in.
 
 ---
 
@@ -386,7 +393,7 @@ For message types `0x01`–`0x08`, `0x0A` (RERA), and `0x09` (PB):
 - Not subject to the 10–180 s clamp (PB episodes can be several minutes long).
 
 **Snore events `0x0B`:**
-- Point event at the record timestamp; `value2` is not used and no clamp applies (§3c).
+- Point event at the record timestamp (the snore's start); `value2` (its duration in ms) is not used and no clamp applies (§3c).
 
 **Flow limitation events `0x0E`/`0x0F`/`0x10`:**
 - Timestamp = end-of-expiration trough (start of inspiration).
@@ -487,7 +494,7 @@ to need it.
 8. Cause of the single `0x09` record carrying `seq = 0` at `0x02` where its neighbours carry the correct day index (§2b). One occurrence in 246,260 records.
 9. Where the **per-sample** I:E ratio lives in the waveform packet. The daily summary is settled: the IDX day record carries I/E as percent x 10 at `0x140` (max), `0x142` (average), `0x144` (P95) and `0x146` (median), confirmed 2026-08-08 against a PAP-Link readout — see `BMC_G3X_IDX_File_Layout.md`. Those four values are an oracle for the per-sample field: the right offset is the one whose per-day statistics reproduce them. Ruled out so far: waveform tidal volume (`0x52C`), Ti/Te reconstructed from tag-paired breath markers (§3a), and `value2` on the breath records read as Ti/Te (§3b). Until it is found the G3X path exports no I:E, Ti or Te — `packetIePermille` is hardcoded to 0.
 
-10. `0x0B` snore records (§3c): what `value2` measures, where in the breath the timestamp falls, and whether E5/P5 cards write the type at all.
+10. `0x0B` snore records (§3c): whether E5/P5 cards write the type at all, and whether OSCAR should carry the duration (`value2`).
 
 ---
 

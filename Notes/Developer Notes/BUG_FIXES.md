@@ -8329,10 +8329,12 @@ event, written at most once per snoring breath.
 event list is created only when a session has a snore.
 
 **Non-obvious:**
-- The identification rests on a contributor's patched-record test in PAP-Link plus a device-side
-  check: the IDX day record holds a per-hour index at IT `0x4E` that equals the `0x0B` count / hours
+- The identification rests on a contributor's patched-record test in PAP-Link, later confirmed by
+  the contributor with a newer PAP-Link version, plus a device-side check: the IDX day record holds a per-hour index at IT `0x4E` that equals the `0x0B` count / hours
   x 10 on 215 of 219 nights across four cards. See `Notes/loaders/G3X/BMC_G3X_EVT_FORMAT.md` §3c.
-- `value2` (a length in ms, 20 ms steps) is not imported; its meaning is unconfirmed.
+- A PAP-Link comparison on device-written records (23 bars for 23 records) showed the timestamp is
+  the snore's start and `value2` its duration in ms. The duration is not imported; VS stays a
+  point flag.
 - The loader's data version was not changed, so existing sessions gain VS events only when
   re-imported or rebuilt.
 - Verified by a batch import of a 16-day card: 2,104 records in the file, 2,104 VS events imported.

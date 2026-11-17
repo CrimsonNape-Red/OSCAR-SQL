@@ -180,9 +180,9 @@ constexpr int kG3xEvtTypePBMarker = 0x09; ///< Periodic breathing episode marker
                                            ///< in milliseconds (confirmed 2026-03-30 via Lijunjun data).
 
 /// Snore — at most one record per snoring breath (GitLab #398).  The IDX day record
-/// carries the matching per-hour index at IT 0x4E (count / hours x 10).  value2 is a
-/// length in milliseconds quantised to 20 ms, thought to be how long the snore lasted
-/// within the breath; it is not imported.
+/// carries the matching per-hour index at IT 0x4E (count / hours x 10).  The timestamp
+/// is the start of the snore and value2 its duration in milliseconds (20 ms steps), as
+/// the vendor software draws it; the duration is not imported.
 constexpr int kG3xEvtTypeSnore = 0x0B;
 
 /// Session boundary markers — timestamp only, value fields unused.
