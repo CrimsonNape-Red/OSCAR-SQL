@@ -1207,53 +1207,5 @@
     </hint>
    </hints>
   </connection>
-  <connection>
-   <sender>actionView_Daily</sender>
-   <signal>triggered()</signal>
-   <receiver>dailyButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>850</x>
-     <y>219</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionView_Overview</sender>
-   <signal>triggered()</signal>
-   <receiver>overviewButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>850</x>
-     <y>301</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionView_Statistics</sender>
-   <signal>triggered()</signal>
-   <receiver>statisticsButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>772</x>
-     <y>101</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
 </ui>

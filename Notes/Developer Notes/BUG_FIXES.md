@@ -8193,3 +8193,23 @@ that line was still black text on white, above a dark window.
 
 **Non-obvious:**
 - It applies to every screenshot, on every page, in Modern and in Classic.
+
+## 2026-11-16 - View Daily (F5) and View Overview (F6) did nothing (GitLab #394)
+
+**Files:** `oscar/mainwindow.cpp` (`MainWindow::on_actionView_Daily_triggered()`,
+`MainWindow::on_actionView_Overview_triggered()`), `oscar/mainwindow.h`, `oscar/mainwindow.ui`
+
+**Symptom:** View > View Daily (F5) and View > View Overview (F6) no longer changed the page, from the menu or from
+the shortcut. View > View Statistics (F4) still worked. All three worked in 2.1.1.
+
+**Root cause:** The form connected the three actions to the Navigation panel's buttons (`dailyButton`,
+`overviewButton`, `statisticsButton`). When that panel was removed from the right sidebar, the buttons went and the
+connections stayed in `mainwindow.ui`; `uic` drops a connection whose receiver does not exist, so nothing was
+connected. Statistics kept working only because it also had a slot connected by name.
+
+**Fix:** Daily and Overview have slots connected by name that select their page (when the page exists and its tab
+is enabled). The three stale connections are removed from the form.
+
+**Non-obvious:**
+- `uic` reports a connection to a missing widget as a warning, not an error, so the build stayed clean.
+- Checked the form's remaining connection (`action_Exit`): its receiver exists.

@@ -3608,6 +3608,22 @@ void MainWindow::on_sidebarTabs_currentChanged(int index)
     AppSetting->setRightSidebarPanel(index + kSidebarPanelOffset);
 }
 
+// The View menu's page actions are connected by name. They used to click the Navigation
+// panel's buttons; that panel is gone, so each action selects its page itself (#394).
+void MainWindow::on_actionView_Daily_triggered()
+{
+    // No page until a profile is open; its tab is disabled while the profile has no devices
+    if (!daily || !ui->tabWidget->isTabEnabled(ui->tabWidget->indexOf(daily))) return;
+    ui->tabWidget->setCurrentWidget(daily);
+    daily->RedrawGraphs();
+}
+
+void MainWindow::on_actionView_Overview_triggered()
+{
+    if (!overview || !ui->tabWidget->isTabEnabled(ui->tabWidget->indexOf(overview))) return;
+    ui->tabWidget->setCurrentWidget(overview);
+}
+
 void MainWindow::on_actionView_Statistics_triggered()
 {
     ui->tabWidget->setCurrentWidget(ui->statisticsTab);

@@ -356,6 +356,11 @@ class MainWindow : public QMainWindow
     void on_action_Sidebar_Toggle_toggled(bool arg1);
     void on_sidebarTabs_currentChanged(int index);
 
+    //! \brief View > View Daily (F5): brings the Daily page to the front
+    void on_actionView_Daily_triggered();
+    //! \brief View > View Overview (F6): brings the Overview page to the front
+    void on_actionView_Overview_triggered();
+    //! \brief View > View Statistics (F4): brings the Statistics page to the front
     void on_actionView_Statistics_triggered();
 
 
