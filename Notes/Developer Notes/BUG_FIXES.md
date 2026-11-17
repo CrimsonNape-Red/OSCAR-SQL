@@ -8339,3 +8339,34 @@ event list is created only when a session has a snore.
   re-imported or rebuilt.
 - Verified by a batch import of a 16-day card: 2,104 records in the file, 2,104 VS events imported.
   The Daily page display was not checked in a running build.
+
+## 2026-11-17 - Daily: white areas in the full-height screenshot after switching to dark mode (GitLab #399)
+
+**Files:** `oscar/daily.cpp` (`applyPagePalette()`, `changeEvent()`, `applyTheme()`), `oscar/daily.h`,
+`oscar/Graphs/gGraphView.cpp` / `.h` (`MyLabel::setTextColor()`)
+
+**Symptom:** Windows, OSCAR started in light mode and switched to dark while running: the
+full-height screenshot of the Daily page had white behind the day bar, the tab bar, the graph
+toolbar and the status line. On screen, the status line under the graphs was dark text on dark.
+
+**Root cause:** On Windows OSCAR sets an application style sheet (`ToolTipColors::apply()`). Under
+it Qt remembers each widget's palette when the widget is styled and puts that palette back on the
+next restyle. The switch restyles the application once per theme-change event, and there is more
+than one: the first restyle was followed by `Daily::applyTheme()`, which cleared the form's white
+palette; the next restyle put the white palette back, and `applyTheme()` did not run again because
+the colours had not changed since. The same happened to the status line's text colour, set through
+its palette. Child widgets do not inherit a parent's palette under an application style sheet, so
+the white page palette showed nowhere on screen - only where the page is drawn on its own, with
+its palette's background, for the full-height screenshot.
+
+**Fix:** The page sets its palette again whenever it changes (`changeEvent()` on `PaletteChange`).
+The status line's colour is given to the label as a colour, not through its palette.
+
+**Non-obvious:**
+- A palette set on a long-lived widget after it has been shown does not survive
+  `qApp->setStyleSheet()` on Windows. Set it again on `PaletteChange`, or avoid the palette.
+- Starting OSCAR already in dark mode never showed the problem: the palette was cleared before
+  the page was first styled.
+- Reproduced and checked with a small Qt program (page palette white, children dark, after a second
+  restyle), then in the app: started light, switched to dark, full-height screenshot has no white.
+  Dark to light, Linux and macOS (no application style sheet there) were not checked.

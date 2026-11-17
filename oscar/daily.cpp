@@ -198,6 +198,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     ui->setupUi(this);
     m_calendarStyleSheet = ui->calendar->styleSheet();
     m_formPalette = palette();
+    m_formPaletteKept = true;
     m_calButtonStyleSheet = ui->calButton->styleSheet();
     applyTheme();
 
@@ -998,10 +999,7 @@ void Daily::applyTheme()
         sheet.replace("color: #808080", "color: " + GraphTheme::ink(QColor(0x80, 0x80, 0x80)).name());
         return sheet;
     };
-    // The form sets a white palette on the whole page, which in dark mode left the Details panel
-    // and the other tabs white with black text. In dark mode the page takes the application's
-    // colours instead (an empty palette only clears the form's).
-    setPalette(Theme::isDark(QGuiApplication::palette()) ? QPalette() : m_formPalette);
+    applyPagePalette();
     ui->calendar->setStyleSheet(withBackgrounds(m_calendarStyleSheet));
     ui->calButton->setStyleSheet(withBackgrounds(m_calButtonStyleSheet));
     applyWeekendFormat();
@@ -1016,15 +1014,35 @@ void Daily::applyTheme()
     if (dailySearchTab) dailySearchTab->applyTheme();
     if (sessionbar) sessionbar->update();
     if (m_modern && dateDisplay) {
-        // The status line under the time axis, in the theme's secondary text colour
-        QPalette palette = dateDisplay->palette();
-        palette.setColor(QPalette::WindowText, Theme::color(Theme::Role::Ink2));
-        dateDisplay->setPalette(palette);
+        // The status line under the time axis, in the theme's secondary text colour. Given as
+        // a colour rather than through the label's palette, which Qt puts back to an earlier
+        // one when the application is restyled (see applyPagePalette()).
+        dateDisplay->setTextColor(Theme::color(Theme::Role::Ink2));
     }
     if (m_modern) applyModernStyles();
     if (p_profile) {    // the days' text colours are set when each day is formatted
         on_calendar_currentPageChanged(ui->calendar->yearShown(), ui->calendar->monthShown());
     }
+}
+
+void Daily::applyPagePalette()
+{
+    if (!m_formPaletteKept || m_applyingPalette) return;
+    // The form sets a white palette on the whole page, which in dark mode left the Details panel
+    // and the other tabs white with black text. In dark mode the page takes the application's
+    // colours instead (an empty palette only clears the form's).
+    m_applyingPalette = true;
+    setPalette(Theme::isDark(QGuiApplication::palette()) ? QPalette() : m_formPalette);
+    m_applyingPalette = false;
+}
+
+void Daily::changeEvent(QEvent *event)
+{
+    QWidget::changeEvent(event);
+    // After a switch between light and dark, restyling the application put the page's earlier
+    // palette back. Nothing showed it on screen in dark mode, but the page drawn on its own
+    // for the full-height screenshot had the form's white behind everything.
+    if (event->type() == QEvent::PaletteChange) applyPagePalette();
 }
 
 void Daily::applyModernStyles()

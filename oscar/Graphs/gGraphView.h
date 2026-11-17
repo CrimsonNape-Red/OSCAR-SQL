@@ -100,10 +100,13 @@ public:
 
     void setFont(QFont & font);
     QFont & font() { return m_font; }
+    //! \brief Draws the text in \a color instead of the palette's text colour (an invalid colour goes back to the palette's)
+    void setTextColor(const QColor &color);
 
     virtual void paintEvent(QPaintEvent *);
 
     QFont m_font;
+    QColor m_textColor;     //!< See setTextColor(); invalid = the palette's text colour
     QString m_text;
     Qt::Alignment m_alignment;
     QElapsedTimer time;

@@ -364,11 +364,21 @@ private slots:
 
 protected:
     virtual void showEvent(QShowEvent *);
+    //! \brief Puts the page's palette back when something else has changed it (see applyPagePalette())
+    void changeEvent(QEvent *event) override;
 
 private:
     bool m_modern = false;          //!< See modern()
     QString m_calendarStyleSheet;   //!< The calendar's style sheet from the form, in light colours
     QPalette m_formPalette;         //!< The page's palette from the form, in light colours
+    bool m_formPaletteKept = false; //!< m_formPalette holds the form's palette (not so while the form is being built)
+    bool m_applyingPalette = false; //!< applyPagePalette() is setting the palette
+    /*! \brief Gives the page the form's palette in light mode and the application's in dark mode
+
+        Called from applyTheme(), and again whenever the page's palette changes: restyling the
+        application (ToolTipColors::apply()) makes Qt put back the palette each widget had when
+        its style was last applied, which undoes a palette set since then. */
+    void applyPagePalette();
     QString m_calButtonStyleSheet;  //!< The date button's style sheet from the form, in light colours
     //! \brief Sets the calendar's weekend text to the weekday colour for the current mode
     void applyWeekendFormat();

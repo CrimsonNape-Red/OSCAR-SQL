@@ -104,6 +104,11 @@ void MyLabel::setFont(QFont & font)
 {
     m_font=font;
 }
+void MyLabel::setTextColor(const QColor &color)
+{
+    m_textColor = color;
+    update();
+}
 void MyLabel::doRedraw()
 {
     update();
@@ -119,6 +124,7 @@ void MyLabel::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
     painter.setFont(m_font);
+    if (m_textColor.isValid()) painter.setPen(m_textColor);
     painter.drawText(rect(), m_alignment, m_text);
 }
 
