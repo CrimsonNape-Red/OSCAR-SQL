@@ -8313,3 +8313,27 @@ Qt's macOS style draws with native controls (tab bars, frames) were still drawn 
   macOS behaviour.
 - Expected but not confirmed on a Mac: with the key gone, the "System" colour scheme follows macOS's own
   light or dark setting, so a Mac in dark mode may now open OSCAR dark by default.
+
+## 2026-11-17 - BMC G3/G3X: snore events not imported (GitLab #398)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`ReadDateSession()`),
+`oscar/SleepLib/loader_plugins/bmcDataParsing.h` (`BmcRespiratoryEventType`),
+`oscar/SleepLib/loader_plugins/bmc_loader.cpp` (`setSessionRespiratoryEvents()`)
+
+**Symptom:** OSCAR showed no snoring for BMC G3/G3X devices, although the vendor software does.
+
+**Root cause:** EVT record type `0x0B` was listed as unknown and skipped. It is the device's snore
+event, written at most once per snoring breath.
+
+**Fix:** `0x0B` records are imported as Vibratory Snore (VS) flags at the record timestamp. The VS
+event list is created only when a session has a snore.
+
+**Non-obvious:**
+- The identification rests on a contributor's patched-record test in PAP-Link plus a device-side
+  check: the IDX day record holds a per-hour index at IT `0x4E` that equals the `0x0B` count / hours
+  x 10 on 215 of 219 nights across four cards. See `Notes/loaders/G3X/BMC_G3X_EVT_FORMAT.md` §3c.
+- `value2` (a length in ms, 20 ms steps) is not imported; its meaning is unconfirmed.
+- The loader's data version was not changed, so existing sessions gain VS events only when
+  re-imported or rebuilt.
+- Verified by a batch import of a 16-day card: 2,104 records in the file, 2,104 VS events imported.
+  The Daily page display was not checked in a running build.

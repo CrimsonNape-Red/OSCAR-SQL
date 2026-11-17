@@ -420,6 +420,9 @@ void BmcLoader::setSessionRespiratoryEvents(BmcSession* bmcSession, Session* osc
                                ? oscarSession->AddEventList(CPAP_PB, EVL_Event)
                                : nullptr;
     EventList* oscarReraList = oscarSession->AddEventList(CPAP_RERA,        EVL_Event);
+    // Only the G3X parser produces snores (EVT type 0x0B, GitLab #398); created on the
+    // first one for the same reason as OH/CH above.
+    EventList* oscarSnoreList = nullptr;
 
     for (auto & bmcEvent : bmcSession->RespiratoryEvents)
     {
@@ -437,6 +440,10 @@ void BmcLoader::setSessionRespiratoryEvents(BmcSession* bmcSession, Session* osc
         case BmcRespiratoryEventType::UA:   oscarUaList->AddEvent(bmcEvent.EndTime.toMSecsSinceEpoch(),    bmcEvent.DurationSeconds); break;
         case BmcRespiratoryEventType::PB:   if (oscarPbList) oscarPbList->AddEvent(bmcEvent.EndTime.toMSecsSinceEpoch(),   bmcEvent.DurationSeconds); break;
         case BmcRespiratoryEventType::RERA: oscarReraList->AddEvent(bmcEvent.EndTime.toMSecsSinceEpoch(),  bmcEvent.DurationSeconds); break;
+        case BmcRespiratoryEventType::Snore:
+            // A point flag at the record time; the device reports no usable duration.
+            if (!oscarSnoreList) oscarSnoreList = oscarSession->AddEventList(CPAP_VSnore, EVL_Event);
+            oscarSnoreList->AddEvent(bmcEvent.StartTime.toMSecsSinceEpoch(), 0); break;
         default: qDebug() << "Unknown BMC respiratory event type not added to OSCAR";
         }
     }

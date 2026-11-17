@@ -5,14 +5,14 @@
 ///   - `.idx`  — index; one 0x800-byte record per day, carrying byte offsets into
 ///               the waveform and event streams plus daily summary statistics.
 ///   - `.evt`  — event stream; fixed-size 0x20-byte records containing respiratory
-///               events (apneas, hypopneas) and therapy pressure snapshots.
+///               events (apneas, hypopneas, snores) and therapy pressure snapshots.
 ///   - `.000`–`.062` — waveform stream; a circular series of 64 MiB files, each a
 ///               stream of 0x800-byte packets at one-second cadence.  Absent on some
 ///               firmware (G3 A20, SC.76), which is then imported from `.evt` alone.
 ///
 /// All multi-byte integers are little-endian unless otherwise stated.
 ///
-/// See Notes/G3X/BMC_G3X_EVT_FORMAT.md and BMC_G3X_00X_FORMAT.md for detailed
+/// See Notes/loaders/G3X/BMC_G3X_EVT_FORMAT.md and BMC_G3X_00X_FORMAT.md for detailed
 /// offset maps and confidence levels for each field.
 ///
 /// Copyright (c) 2026 The OSCAR Team
@@ -178,6 +178,12 @@ constexpr int kG3xEvtTypePBMarker = 0x09; ///< Periodic breathing episode marker
                                            ///< Like other respiratory events, timestamp marks the START.
                                            ///< Duration is uint32 at offset 0x1C (low 16 | high 16 at 0x1E),
                                            ///< in milliseconds (confirmed 2026-03-30 via Lijunjun data).
+
+/// Snore — at most one record per snoring breath (GitLab #398).  The IDX day record
+/// carries the matching per-hour index at IT 0x4E (count / hours x 10).  value2 is a
+/// length in milliseconds quantised to 20 ms, thought to be how long the snore lasted
+/// within the breath; it is not imported.
+constexpr int kG3xEvtTypeSnore = 0x0B;
 
 /// Session boundary markers — timestamp only, value fields unused.
 constexpr int kG3xEvtTypeSessionStart = 0x40; ///< Session start (machine begins therapy recording).
@@ -843,7 +849,7 @@ BmcMachineInfo BmcG3xData::ReadMachineInfo()
 ///
 /// Processing order:
 ///   1. Parse the EVT stream for the day window:
-///      - Respiratory events (0x02–0x09) → dateSession.RespiratoryEvents.
+///      - Respiratory events (0x01–0x0A) and snores (0x0B) → dateSession.RespiratoryEvents.
 ///      - Therapy pressure snapshots (0x42) → timedSampleUpdates (pressure only).
 ///   2. Seed the initial pressure state from the IDX daily summary if EVT
 ///      provides no pressure records.
@@ -905,6 +911,7 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
     int rawRespType09Count = 0;  // counts 0x09 PB marker records (for BMCDEBUG)
     int rawRespType0ACount = 0;
     QVector<BmcRespiratoryEvent> rawPbEvents;  // PB episodes from 0x09 records
+    QVector<BmcRespiratoryEvent> rawSnoreEvents;  // Snores from 0x0B records
 
     // Collected for EVT-only session boundary detection (waveLen == 0).
     QVector<QDateTime> evtSessionStarts;
@@ -1003,6 +1010,20 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
                     pbEvt.DurationSeconds = static_cast<int>(durationMs / 1000.0 + 0.5);
                     pbEvt.EndTime         = pbEvt.StartTime.addSecs(pbEvt.DurationSeconds);
                     rawPbEvents.append(pbEvt);
+                    break;
+                }
+
+                case kG3xEvtTypeSnore:
+                {
+                    // Snore: a point event at the record timestamp.  value2 (sub-second
+                    // to a few seconds) is not carried, so the duration stays zero and
+                    // the respiratory-event 10-180 s clamp does not apply.
+                    BmcRespiratoryEvent snoreEvt;
+                    snoreEvt.EventType       = BmcRespiratoryEventType::Snore;
+                    snoreEvt.StartTime       = evtTime;
+                    snoreEvt.EndTime         = evtTime;
+                    snoreEvt.DurationSeconds = 0;
+                    rawSnoreEvents.append(snoreEvt);
                     break;
                 }
 
@@ -1146,6 +1167,10 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
               [](const BmcFlowLimitEvent& a, const BmcFlowLimitEvent& b) {
                   return a.Timestamp < b.Timestamp;
               });
+    std::sort(rawSnoreEvents.begin(), rawSnoreEvents.end(),
+              [](const BmcRespiratoryEvent& a, const BmcRespiratoryEvent& b) {
+                  return a.StartTime < b.StartTime;
+              });
 
     // ---- Phase 2: Map EVT respiratory events to OSCAR types ----
 
@@ -1238,6 +1263,16 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
 #ifdef BMCDEBUG
     qDebug() << "BmcG3xData PB day" << aDate.toString(Qt::ISODate)
              << "episodes" << rawPbEvents.size();
+#endif // BMCDEBUG
+
+    // ---- Phase 2b': Collect snores from EVT 0x0B records ----
+
+    for (const BmcRespiratoryEvent& snoreEvt : rawSnoreEvents) {
+        dateSession.RespiratoryEvents.append(snoreEvt);
+    }
+#ifdef BMCDEBUG
+    qDebug() << "BmcG3xData snore day" << aDate.toString(Qt::ISODate)
+             << "events" << rawSnoreEvents.size();
 #endif // BMCDEBUG
 
     // ---- Phase 2c: Collect flow limitation events ----

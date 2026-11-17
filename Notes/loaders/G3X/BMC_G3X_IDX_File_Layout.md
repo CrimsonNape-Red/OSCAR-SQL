@@ -121,6 +121,13 @@ Offsets below are relative to the start of the IT sub-record (i.e., record + 0x8
 > | 0x66 | RERA index | events/hour × 10 |
 > | 0x90 / 0x92 / 0x94 / 0x96 | Leak maximum / mean / 95th percentile / median | L/min × 10 |
 
+> **Snore index at IT `0x4E` (2026-11-17, GitLab #398):** uint16 LE, events/hour × 10.
+> It equals the day's count of EVT `0x0B` (snore) records divided by therapy hours
+> (IT `0x14`), within rounding, on 215 of 219 nights across four G3 cards; on the four
+> exceptions the IDX figure is the higher of the two. It is zero on every night of the
+> one E5 card examined, which has no `0x0B` records. Not parsed — OSCAR derives its own
+> index from the imported events. See `BMC_G3X_EVT_FORMAT.md` §3c.
+
 ---
 
 ### I/E Ratio distribution summary at record `0x140`–`0x147`
@@ -293,7 +300,7 @@ see `BMC_G3X_EVT_FORMAT.md` §2a).
 | 0x08 | CH — Central hypopnea → `CPAP_Hypopnea` | Duration ms |
 | 0x09 | **PB episode start marker** → `CPAP_PB`; timestamp = START; duration = uint32 at 0x1C–0x1F (low 16 = value2, high 16 = unk1e), ms | — / high 16 bits of uint32 duration |
 | 0x0A | RERA → `CPAP_RERA` | Duration ms (~10 s) |
-| 0x0B | Unknown (per-breath; not decoded) | Multiples of 20, not duration |
+| 0x0B | **Snore** → `CPAP_VSnore`; point flag, at most one per breath (GitLab #398) | A length in ms (20 ms steps); not imported |
 | 0x0C | Per-breath inspiration (timestamps collected; not decoded to channels) | — |
 | 0x0D | Per-breath expiration (not decoded) | — |
 | 0x0E | **Mild flow limitation** → `CPAP_FLG` grade 1; timestamp = end-of-expiration | Ti in ms (bar width) |

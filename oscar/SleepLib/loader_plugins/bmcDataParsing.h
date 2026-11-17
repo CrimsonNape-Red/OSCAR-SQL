@@ -72,6 +72,7 @@ enum class BmcRespiratoryEventType
     RERA,       ///< Respiratory Effort Related Arousal
     OH,         ///< Obstructive hypopnea (G3X only; legacy cards never report one)
     CH,         ///< Central hypopnea (G3X only)
+    Snore,      ///< Snore, one per snoring breath (G3X only; EVT type 0x0B)
     Unknown
 };
 
