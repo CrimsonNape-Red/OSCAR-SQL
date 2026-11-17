@@ -585,6 +585,24 @@ private:
     bool m_geometryCorrected = false;
     bool m_batchMode = false;
     int m_importsRunning = 0;   //!< imports in progress (they process events, so more can be asked for)
+    bool m_tallScreenshot = false;  //!< The screenshot being taken is the full-height one of the Daily page
+
+    /*! \brief Grabs the window's client area as displayed, for a screenshot
+
+        The graph views are drawn without OpenGL (see the comments in the function, #237).
+        \return The client area, carrying the display's device pixel ratio */
+    QPixmap grabClientArea();
+
+    /*! \brief Grabs the client area with the Daily page at full height, for a screenshot
+
+        Used when Daily::tallCaptureAvailable(). The right sidebar is closed for the grab and
+        put back before this returns. The tall page (Daily::grabTall()) is joined to an
+        ordinary grab of the window: the grab is lengthened at the page's bottom edge
+        (TallCapture::insertRows()) and the page is painted over its place in it, so the menu
+        bar and page tabs stay above it and anything under the page moves down. The whole
+        capture is one pass that never runs the event loop, so nothing of it reaches the screen.
+        \return The lengthened client area, carrying the display's device pixel ratio */
+    QPixmap grabClientAreaTall();
 
     void PopulatePurgeMenu();
 

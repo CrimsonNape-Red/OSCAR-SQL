@@ -23,6 +23,10 @@
 #include <QScrollBar>
 #include <QSpacerItem>
 #include <QFontMetrics>
+#include <QPainter>
+#include <QPointer>
+#include <QScopeGuard>
+#include <QTextDocument>
 #include <QLabel>
 #include <QMutexLocker>
 #include <QFile>
@@ -64,6 +68,7 @@
 #include "Graphs/gStatsLine.h"
 #include "Graphs/gdailysummary.h"
 #include "Graphs/MinutesAtPressure.h"
+#include "Graphs/tallcapture.h"
 #include "dailytimeaxis.h"
 #include "dailytoolbar.h"
 #include "dailydetails.h"
@@ -867,6 +872,118 @@ void Daily::showSpaceHogs()
     if (AppSetting->showPieChart()) {
         webView->setHtml(getLeftSidebar(true));
     }
+}
+
+bool Daily::tallCaptureAvailable() const
+{
+    // The tabs can be dragged into another order, so the Details tab is found by its widget
+    // (the HTML view's parent, which also holds the Modern cards), not by its index.
+    return ui->splitter->isVisible()
+           && ui->splitter_2->sizes().value(0) > 0
+           && ui->tabWidget->currentWidget() == webView->parentWidget();
+}
+
+QPixmap Daily::grabTall()
+{
+    // The Details tab's scrolling view: the cards (Modern) or the HTML text (Classic)
+    QAbstractScrollArea *details = m_detailsPanel ? static_cast<QAbstractScrollArea *>(m_detailsPanel)
+                                                  : static_cast<QAbstractScrollArea *>(webView);
+    // Layout requests are normally delivered by the event loop. Delivering them here keeps
+    // the whole capture in one pass, with nothing painted on screen in between. They are
+    // delivered to this page and the widgets in it only: each layout that runs asks its
+    // parent to lay out again, and a request reaching the page's own parent would have that
+    // layout put the page back to its on-screen size. Children come before their parents
+    // (the reverse of findChildren()'s order), so one pass carries a change up to the page.
+    // A scroll area shows or hides its scroll bars through a queued call, so the Details
+    // view's queued calls are run as well; otherwise a scroll bar no longer needed stays.
+    const auto deliverLayouts = [this, details] {
+        for (int pass = 0; pass < 3; ++pass) {
+            const QList<QWidget *> widgets = findChildren<QWidget *>();
+            for (auto it = widgets.crbegin(); it != widgets.crend(); ++it) {
+                QApplication::sendPostedEvents(*it, QEvent::LayoutRequest);
+            }
+            QApplication::sendPostedEvents(this, QEvent::LayoutRequest);
+            QApplication::sendPostedEvents(details, QEvent::MetaCall);
+        }
+    };
+    // How much taller the Details view has to be to show all of its contents
+    const auto detailsShort = [this, details] {
+        const int contents = m_detailsPanel ? m_detailsPanel->contentHeight()
+                                            : int(std::ceil(webView->document()->size().height()));
+        return qMax(0, contents - details->viewport()->height());
+    };
+    const auto graphAreaRect = [this] { return ui->graphFrame->contentsRect(); };
+
+    // 1. What is put back afterwards
+    const QSize pageSize = size();
+    const int scroll = details->verticalScrollBar()->value();
+    const QPointer<QWidget> focused = QApplication::focusWidget();
+    const bool axisShown = m_timeAxis && !m_timeAxis->isHidden();
+    const bool viewShown = !GraphView->isHidden();
+    const bool barShown = !scrollbar->isHidden();
+
+    // 2. The graphs: from the top, own time scales, the on-screen scale held (the view must
+    //    still be shown here)
+    GraphView->beginTallCapture();
+    // 3. Modern: the cards open, the shared time scale out of the way
+    if (m_detailsPanel) m_detailsPanel->setCaptureOpen(true);
+    if (axisShown) m_timeAxis->hide();
+    // 4. The graph view is hidden, so the layout leaves it alone and grab() skips it
+    GraphView->hide();
+    scrollbar->hide();
+
+    const auto restore = qScopeGuard([&] {
+        resize(pageSize);
+        GraphView->setVisible(viewShown);
+        scrollbar->setVisible(barShown);
+        if (axisShown) m_timeAxis->show();
+        if (m_detailsPanel) m_detailsPanel->setCaptureOpen(false);
+        // Back at its own size, the page can be laid out by its parents again
+        QApplication::sendPostedEvents(nullptr, QEvent::LayoutRequest);
+        QApplication::sendPostedEvents(details, QEvent::MetaCall);
+        QApplication::sendPostedEvents(nullptr, QEvent::LayoutRequest);
+        details->verticalScrollBar()->setValue(scroll);
+        if (focused) focused->setFocus();
+        GraphView->endTallCapture();
+    });
+
+    deliverLayouts();
+
+    // 5-7. The height that shows the sidebar to its bottom, lengthened so the graph crossing
+    //      that line is whole
+    const int extra = detailsShort();
+    const int needed = graphAreaRect().height() + extra;
+    const int graphArea = GraphView->tallCaptureHeight(needed);
+    const int wanted = pageSize.height() + extra + (graphArea - needed);
+    const int pageHeight = TallCapture::cappedPageHeight(wanted, pageSize.height(), devicePixelRatioF());
+    resize(pageSize.width(), pageHeight);
+    deliverLayouts();
+
+    // The extra height should all have gone to the Details view and the graph area. Where
+    // the layout gave some of it to something else, make up the difference once.
+    if (pageHeight == wanted) {
+        const int lack = qMax(detailsShort(), graphArea - graphAreaRect().height());
+        if (lack > 0) {
+            resize(pageSize.width(),
+                   TallCapture::cappedPageHeight(pageHeight + lack, pageSize.height(), devicePixelRatioF()));
+            deliverLayouts();
+        }
+    }
+
+    // 8. The page without its graphs, then the graphs painted into their frame
+    QPixmap page = grab();
+    const QRect inner = graphAreaRect();
+    const QRect area(ui->graphFrame->mapTo(this, inner.topLeft()), inner.size());
+    if (area.width() > 0 && area.height() > 0) {
+        const QPixmap graphs = GraphView->renderTallRasterPixmap(area.size());
+        QPainter painter(&page);
+        painter.drawPixmap(area.topLeft(), graphs);
+    }
+    qDebug() << "Daily::grabTall(): page" << pageSize << "drawn at" << size() << "graph area" << area
+             << "sidebar lacked" << extra << "graphs wanted" << graphArea;
+
+    // 9. 'restore' puts everything back as this returns
+    return page;
 }
 
 void Daily::applyTheme()

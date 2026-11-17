@@ -181,6 +181,33 @@ public:
     void hideSpaceHogs();
     void showSpaceHogs();
 
+    /*! \brief True when a screenshot of this page should be the full-height one (grabTall()):
+        the left sidebar is shown and its Details tab is in front. With another tab in front,
+        or the sidebar hidden, the screenshot is the ordinary one of the window as displayed. */
+    bool tallCaptureAvailable() const;
+
+    /*! \brief Draws the page tall enough to show the whole Details tab, for a screenshot
+
+        The page is drawn as if it were taller than the window:
+        - Modern: every card of the Details tab is open, except Event Breakdown, which is as
+          the user has it; each graph draws its own time scale, and the shared one under the
+          graphs is left out.
+        - Classic: the Details text is shown at its full length.
+        - The graphs are drawn from the top of the list, at the zoom and heights shown on
+          screen, down to the one that crosses the bottom of the left sidebar; that one is
+          drawn whole and nothing follows it.
+        - The calendar and the pie chart are as the user has them.
+
+        For this the page is given the tall size for a moment and laid out by Qt. The graph
+        view is hidden meanwhile, so that its OpenGL framebuffer does not grow, and its graphs
+        are painted in from a raster render (gGraphView::renderTallRasterPixmap()). Everything
+        is put back before the function returns, and it never runs the event loop, so nothing
+        of this reaches the screen.
+
+        \return The page, at least as tall as it is on screen, carrying the display's device
+                pixel ratio */
+    QPixmap grabTall();
+
     QLabel * getDateDisplay();
 
 

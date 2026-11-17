@@ -392,6 +392,7 @@ SOURCES += \
     Graphs/graphtheme.cpp \
     Graphs/overviewbars.cpp \
     Graphs/graphcard.cpp \
+    Graphs/tallcapture.cpp \
     Graphs/summarylines.cpp \
     Graphs/rangefigures.cpp \
     overviewstats.cpp \
@@ -598,6 +599,7 @@ HEADERS  += \
     Graphs/overviewbars.h \
     Graphs/graphlook.h \
     Graphs/graphcard.h \
+    Graphs/tallcapture.h \
     Graphs/summarylines.h \
     Graphs/rangefigures.h \
     overviewstats.h \
@@ -1022,6 +1024,7 @@ test {
         tests/sidebarstyletests.cpp \
         tests/overviewbarstests.cpp \
         tests/graphcardtests.cpp \
+        tests/tallcapturetests.cpp \
         tests/summarylinestests.cpp \
         tests/overviewstatstests.cpp \
         tests/daylabelstests.cpp \
@@ -1068,6 +1071,7 @@ test {
         tests/sidebarstyletests.h \
         tests/overviewbarstests.h \
         tests/graphcardtests.h \
+        tests/tallcapturetests.h \
         tests/summarylinestests.h \
         tests/overviewstatstests.h \
         tests/daylabelstests.h \

@@ -20,6 +20,7 @@
 
 class QVBoxLayout;
 class Session;
+namespace UiKit { class CollapsibleCard; }
 
 /*! \class DailyDetailsPanel
     \brief Shows a DailyDetails::Page as cards in a scrolling column */
@@ -38,6 +39,20 @@ public:
     //! \brief Which collapsible cards are open (bits of DailyCard); applied at the next setPage()
     void setCardsOpen(int bits) { m_cardsOpen = bits; }
     int cardsOpen() const { return m_cardsOpen; }
+
+    /*! \brief Opens the cards for a full-height screenshot, or puts them back
+
+        With \a capture true every card is opened except Event Breakdown, which stays as the
+        user has it (DailyDetails::captureCardsOpen()). With false the cards go back to what
+        cardsOpen() says. Neither changes cardsOpen() nor emits cardToggled(), so the stored
+        preference is untouched. */
+    void setCaptureOpen(bool capture);
+
+    /*! \brief The height of the column of cards
+
+        The scroll area keeps the column at least as tall as its contents, so once pending
+        layout requests have been delivered this is the height at which nothing scrolls. */
+    int contentHeight() const;
 
     //! \brief The texts the cards show, one line each, for checks
     QStringList texts() const;
@@ -81,6 +96,8 @@ private:
     QVBoxLayout *m_column = nullptr;
     QDate m_date;
     int m_cardsOpen = 0;
+    //! The collapsible cards now shown, each with the DailyCard it stores its state as
+    QVector<QPair<DailyCard, UiKit::CollapsibleCard *>> m_cards;
 };
 
 #endif // DAILYDETAILSPANEL_H

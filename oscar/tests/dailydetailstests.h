@@ -22,5 +22,6 @@ private slots:
     void testClassifyZeroHours();
     void testCardBitsDefault();
     void testCardBitsRoundTrip();
+    void testCaptureCardsOpen();
 };
 DECLARE_TEST(DailyDetailsTests)

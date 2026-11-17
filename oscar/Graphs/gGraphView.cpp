@@ -43,6 +43,7 @@
 
 #include "mainwindow.h"
 #include "Graphs/glcommon.h"
+#include "Graphs/tallcapture.h"
 #include "Graphs/gLineChart.h"
 #ifndef REMOVE_FITNESS
 #include "Graphs/gOverviewGraph.h"
@@ -1253,6 +1254,12 @@ float gGraphView::scaleHeight()
 
 void gGraphView::updateScale()
 {
+    // A full-height screenshot draws at the scale shown on screen; the view is hidden
+    // meanwhile, which would otherwise zero the scale here.
+    if (m_tallCapture) {
+        return;
+    }
+
     if (!isVisible()) {
         m_scaleY = 0.0;
         return;
@@ -1429,7 +1436,7 @@ bool gGraphView::renderGraphs(QPainter &painter)
     float h, w;
     //ax=px;//-m_offsetX;
 
-    if (height() < 40) return false;
+    if (viewHeight() < 40) return false;
 
     if (m_scaleY < 0.0000001) {
         updateScale();
@@ -1460,7 +1467,7 @@ bool gGraphView::renderGraphs(QPainter &painter)
 
         if (!g->isPinned()) { continue; }
 
-        h = g->height() * m_scaleY;
+        h = drawnHeight(g);
         pinned_height += h + graphGap();
     }
 
@@ -1475,19 +1482,19 @@ bool gGraphView::renderGraphs(QPainter &painter)
         if (g->isPinned()) { continue; }
 
         numgraphs++;
-        h = g->height() * m_scaleY;
+        h = drawnHeight(g);
 
         // set clipping?
 
-        if (py > height()) {
+        if (py > viewHeight()) {
             break;    // we are done.. can't draw anymore
         }
 
         if ((py + h + graphGap()) >= 0) {
-            w = width();
+            w = viewWidth();
             int tw = 0; // (g->showTitle() ? titleWidth : 0);
 
-            queGraph(g, px + tw, py, width() - tw, h);
+            queGraph(g, px + tw, py, viewWidth() - tw, h);
 
             if ((m_graphs.size() > 1) && m_showsplitter && !cardLook()) {
                 // draw the splitter handle
@@ -1517,14 +1524,14 @@ bool gGraphView::renderGraphs(QPainter &painter)
 
         if (cardLook()) {
             // Cards carry their own background; hide what scrolled under the pinned ones
-            painter.fillRect(0, 0, width(), pinned_height, QBrush(viewBackground()));
+            painter.fillRect(0, 0, viewWidth(), pinned_height, QBrush(viewBackground()));
         } else {
             // Draw a gradient behind pinned graphs
-            QLinearGradient linearGrad(QPointF(100, 100), QPointF(width() / 2, 100));
+            QLinearGradient linearGrad(QPointF(100, 100), QPointF(viewWidth() / 2, 100));
             linearGrad.setColorAt(0, GraphTheme::fill(QColor(216, 216, 255)));
             linearGrad.setColorAt(1, GraphTheme::background());
 
-            painter.fillRect(0, 0, width(), pinned_height, QBrush(linearGrad));
+            painter.fillRect(0, 0, viewWidth(), pinned_height, QBrush(linearGrad));
         }
     }
 
@@ -1538,18 +1545,18 @@ bool gGraphView::renderGraphs(QPainter &painter)
 
         if (!g->isPinned()) { continue; }
 
-        h = g->height() * m_scaleY;
+        h = drawnHeight(g);
         numgraphs++;
 
-        if (py > height()) {
+        if (py > viewHeight()) {
             break;    // we are done.. can't draw anymore
         }
 
         if ((py + h + graphGap()) >= 0) {
-            w = width();
+            w = viewWidth();
             int tw = 0; //(g->showTitle() ? titleWidth : 0);
 
-            queGraph(g, px + tw, py, width() - tw, h);
+            queGraph(g, px + tw, py, viewWidth() - tw, h);
 
             if ((m_graphs.size() > 1) && m_showsplitter && !cardLook()) {
                 // draw the splitter handle
@@ -1638,6 +1645,70 @@ QPixmap gGraphView::renderToRasterPixmap()
     return pixmap;
 }
 
+float gGraphView::drawnHeight(gGraph *g) const
+{
+    float h = g->height() * m_scaleY;
+    if (m_tallOwnAxes) {
+        // As for a popped-out graph: the time scale is added below, the plot keeps its height
+        for (Layer *layer : g->m_layers) {
+            if (layer->visible() && g->leavesAxisToPage(layer)) h += layer->minimumHeight();
+        }
+    }
+    return h;
+}
+
+void gGraphView::beginTallCapture()
+{
+    if (m_tallCapture) return;
+    m_tallCapture = true;
+    m_tallOwnAxes = m_sharedXAxis;
+    m_sharedXAxis = false;
+    m_tallSavedOffsetY = m_offsetY;
+    m_offsetY = 0;
+}
+
+int gGraphView::tallCaptureHeight(int needed) const
+{
+    // Drawing order, as in renderGraphs(): the pinned graphs, then the others
+    QVector<float> heights;
+    for (const bool pinned : { true, false }) {
+        for (gGraph *g : m_graphs) {
+            if (g->isEmpty() || !g->visible() || g->isPinned() != pinned) continue;
+            heights.append(drawnHeight(g));
+        }
+    }
+    return TallCapture::graphAreaHeight(heights, graphGap(), needed);
+}
+
+QPixmap gGraphView::renderTallRasterPixmap(const QSize &size)
+{
+    // See renderToRasterPixmap(). m_canvas makes the paint path lay the graphs out in a
+    // rectangle of the given size instead of the widget's own.
+    const qreal dpr = devicePixelRatioF();
+    QPixmap pixmap((QSizeF(size) * dpr).toSize());
+    pixmap.setDevicePixelRatio(dpr);
+    pixmap.fill(viewBackground());
+
+    m_canvas = size;
+    QPainter painter(&pixmap);
+    paintView(painter);
+    painter.end();
+    m_canvas = QSize();
+    return pixmap;
+}
+
+void gGraphView::endTallCapture()
+{
+    if (!m_tallCapture) return;
+    m_sharedXAxis = m_tallOwnAxes;
+    m_offsetY = m_tallSavedOffsetY;
+    m_tallOwnAxes = false;
+    m_tallCapture = false;
+    // The capture left the graphs' rectangles as drawn in the screenshot; the next paint puts
+    // back the ones mouse handling and the page's time scale go by.
+    redraw();
+}
+
 bool gGraphView::paintView(QPainter &painter)
 {
 #ifdef DEBUG_EFFICIENCY
@@ -1653,7 +1724,7 @@ bool gGraphView::paintView(QPainter &painter)
     #endif
 
 
-    QRect bgrect(0, 0, width(), height());
+    QRect bgrect(0, 0, viewWidth(), viewHeight());
     painter.fillRect(bgrect, QBrush(viewBackground()));
 
     bool graphs_drawn = true;
@@ -1685,8 +1756,8 @@ bool gGraphView::paintView(QPainter &painter)
 
 /*** This doesn't seem to do anything?
         if (! this->m_emptyimage.isNull()) {
-            int x = width()/2 - this->m_emptyimage.width()/2;
-            int y = height()/2 - this->m_emptyimage.height()/2;
+            int x = viewWidth()/2 - this->m_emptyimage.width()/2;
+            int y = viewHeight()/2 - this->m_emptyimage.height()/2;
 
             QRectF target(QRect(x, y, this->m_emptyimage.width(), this->m_emptyimage.height()));
             QRectF source(QRect(0, 0, this->m_emptyimage.width(), this->m_emptyimage.height()));
@@ -1696,12 +1767,12 @@ bool gGraphView::paintView(QPainter &painter)
         QColor col = GraphTheme::ink(Qt::black);
         painter.setPen(col);
 
-        QRectF rec(0,0,width(),0);
+        QRectF rec(0,0,viewWidth(),0);
         // To put text in center of screen:
 
         painter.setFont(*mediumfont);
         rec = painter.boundingRect(rec, Qt::AlignHCenter | Qt::AlignBottom, txt);
-        rec.moveBottom(height()-15);
+        rec.moveBottom(viewHeight()-15);
 
         painter.drawText(rec, Qt::AlignCenter, txt);
     }
@@ -1714,7 +1785,7 @@ bool gGraphView::paintView(QPainter &painter)
     AppSetting->usePixmapCaching() ? DrawTextQueCached(painter) :DrawTextQue(painter);
 
     m_tooltip->paint(painter);
-    m_parent_tooltip->paint(painter,width(), height() );
+    m_parent_tooltip->paint(painter,viewWidth(), viewHeight() );
     emit painted();
 
 #ifdef DEBUG_EFFICIENCY

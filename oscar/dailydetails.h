@@ -28,7 +28,10 @@ class Day;
 class Session;
 
 /*! \brief The Modern Details tab's cards that can be closed; their open state is one bit each
-    in AppSettings::dailyCardsOpen() */
+    in AppSettings::dailyCardsOpen()
+
+    DC_Statistics must stay the last one: DailyDetails::captureCardsOpen() builds its mask of
+    all the cards from it. Add new cards before it, or update that function. */
 enum DailyCard { DC_Device, DC_EventBreakdown, DC_Oximeter, DC_DeviceSettings, DC_SessionInfo,
                  DC_Ahi, DC_Events, DC_Statistics };
 
@@ -43,6 +46,15 @@ inline bool cardOpen(int bits, DailyCard card) { return (bits >> card) & 1; }
 inline int setCardOpen(int bits, DailyCard card, bool open)
 {
     return open ? (bits | (1 << card)) : (bits & ~(1 << card));
+}
+
+/*! \brief The cards a full-height screenshot shows open, given the user's \a bits: every card,
+    except Event Breakdown (the pie chart), which stays as the user has it */
+inline int captureCardsOpen(int bits)
+{
+    const int all = (1 << (DC_Statistics + 1)) - 1;     // DC_Statistics is the last card
+    const int pie = 1 << DC_EventBreakdown;
+    return (all & ~pie) | (bits & pie);
 }
 
 //! \brief The kinds of day the Details tab draws differently

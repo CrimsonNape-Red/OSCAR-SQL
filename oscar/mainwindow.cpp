@@ -139,6 +139,7 @@
 #include "colorscheme.h"
 #include "uikit/iconbutton.h"
 #include "uikit/theme.h"
+#include "Graphs/tallcapture.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,4,0)
 #include <QOpenGLFunctions>
@@ -2610,73 +2611,65 @@ static QImage quantizeToIndexed8(const QImage &source)
 bool toolbox_visible = false;
 void MainWindow::on_action_Screenshot_triggered()
 {
-    setUpdatesEnabled(false);
-    if (daily)
-        daily->hideSpaceHogs();
-    toolbox_visible = ui->sidebarTabs->isVisible();
-    ui->sidebarTabs->hide();
-    setUpdatesEnabled(true);
+    // The Daily page with its Details tab in front is captured at full height. That capture
+    // changes and restores the page itself, in one pass, so nothing is hidden here for it.
+    m_tallScreenshot = daily && ui->tabWidget->currentWidget() == daily && daily->tallCaptureAvailable();
+    if (!m_tallScreenshot) {
+        setUpdatesEnabled(false);
+        if (daily)
+            daily->hideSpaceHogs();
+        toolbox_visible = ui->sidebarTabs->isVisible();
+        ui->sidebarTabs->hide();
+        setUpdatesEnabled(true);
+    }
+    // The delay gives the menu time to close
     QTimer::singleShot(250, this, SLOT(DelayedScreenshot()));
+}
+
+QPixmap MainWindow::grabClientAreaTall()
+{
+    const auto deliverLayouts = [] {
+        QApplication::sendPostedEvents(nullptr, QEvent::LayoutRequest);
+        QApplication::sendPostedEvents(nullptr, QEvent::LayoutRequest);
+    };
+
+    // Updates are left enabled: Qt does not draw the children of a widget whose updates are
+    // disabled, so the grabs would come out empty. Nothing is painted on screen anyway,
+    // because control does not return to the event loop until everything is back in place.
+    const bool sidebarShown = !ui->sidebarTabs->isHidden();
+    ui->sidebarTabs->hide();
+    deliverLayouts();
+
+    const QRect pageRect(daily->mapTo(this, QPoint(0, 0)), daily->size());
+    const QPixmap page = daily->grabTall();
+    const QPixmap client = grabClientArea();
+
+    ui->sidebarTabs->setVisible(sidebarShown);
+    deliverLayouts();
+
+    // Lengthen the window grab at the page's bottom edge by what the page gained, then paint
+    // the tall page over its place. insertRows() works in device pixels.
+    const qreal dpr = client.devicePixelRatio();
+    const int extra = qMax(0, qRound(page.deviceIndependentSize().height()) - pageRect.height());
+    QImage image = TallCapture::insertRows(client.toImage(),
+                                           qRound((pageRect.y() + pageRect.height()) * dpr),
+                                           qRound(extra * dpr));
+    QPainter painter(&image);
+    painter.drawPixmap(pageRect.topLeft(), page);
+    painter.end();
+
+    QPixmap result = QPixmap::fromImage(image);
+    result.setDevicePixelRatio(dpr);
+    return result;
 }
 
 void MainWindow::DelayedScreenshot()
 {
-    // Grab the window client area only, excluding the OS title bar.
-    // This avoids exposing the profile name (which appears in the title bar) when
-    // users post screenshots to forums. QWidget::grab() works cross-platform
-    // (Windows, macOS, Linux/X11, Wayland, Raspberry Pi, Chromebook) and handles
-    // high-DPI/Retina displays automatically without requiring screen capture permissions.
-    //
-    // Each graph view is a QOpenGLWidget, and grab() captures one by calling its
-    // grabFramebuffer(), which re-runs paintGL() into the widget's own framebuffer - the
-    // one shown on screen - and reads it back. On some OpenGL drivers that extra pass
-    // comes out overlaid with a lattice of coloured specks, which then spoiled both the
-    // saved image and the on-screen graphs until their next repaint (#237). So each
-    // visible graph view is first rendered to a raster pixmap (no GL), then hidden for
-    // the grab - grab() skips hidden children, so no GL pass runs - and shown again
-    // before control returns to the event loop, so nothing moves or flickers on screen.
-    // The raster renders are painted into the grab afterwards, clipped to the part of
-    // each view that was visible.
-    struct CapturedView {
-        gGraphView *view;
-        QPoint offset;
-        QRegion visible;
-        QPixmap pixmap;
-    };
-    QList<CapturedView> capturedViews;
-    const QList<gGraphView *> views = findChildren<gGraphView *>();
-    for (gGraphView *view : views) {
-        if (!view->isVisible() || view->window() != this) {
-            continue;
-        }
-        const QRegion visible = view->visibleRegion();
-        if (visible.isEmpty()) {
-            continue;
-        }
-        const QPoint offset = view->mapTo(this, QPoint(0, 0));
-        capturedViews.append({ view, offset, visible.translated(offset), view->renderToRasterPixmap() });
-    }
-
-    // Hiding a view that has keyboard focus moves focus elsewhere; put it back afterwards.
-    QPointer<QWidget> focused = focusWidget();
-    for (const CapturedView &captured : std::as_const(capturedViews)) {
-        captured.view->hide();
-    }
-    QPixmap clientPixmap = grab();
-    for (const CapturedView &captured : std::as_const(capturedViews)) {
-        captured.view->show();
-    }
-    if (focused) {
-        focused->setFocus();
-    }
-
-    if (!capturedViews.isEmpty()) {
-        QPainter overlay(&clientPixmap);
-        for (const CapturedView &captured : std::as_const(capturedViews)) {
-            overlay.setClipRegion(captured.visible);
-            overlay.drawPixmap(captured.offset, captured.pixmap);
-        }
-    }
+    // The full-height capture was chosen when the command was given. Should the page have
+    // changed since (another tab in front), the window is captured as displayed instead.
+    const bool tall = m_tallScreenshot && daily && ui->tabWidget->currentWidget() == daily
+                      && daily->tallCaptureAvailable();
+    QPixmap clientPixmap = tall ? grabClientAreaTall() : grabClientArea();
 
     // grab() returns a pixmap whose raw size is the widget size multiplied by the
     // display's device pixel ratio, and it tags the pixmap with that ratio (1.0 at
@@ -2749,11 +2742,77 @@ void MainWindow::DelayedScreenshot()
         }
     }
 
-    setUpdatesEnabled(false);
-    if (daily)
-        daily->showSpaceHogs();
-    ui->sidebarTabs->setVisible(toolbox_visible);
-    setUpdatesEnabled(true);
+    // Only the ordinary capture hid anything in on_action_Screenshot_triggered(). The
+    // full-height capture put everything back itself, before the save dialog opened.
+    if (!m_tallScreenshot) {
+        setUpdatesEnabled(false);
+        if (daily)
+            daily->showSpaceHogs();
+        ui->sidebarTabs->setVisible(toolbox_visible);
+        setUpdatesEnabled(true);
+    }
+}
+
+QPixmap MainWindow::grabClientArea()
+{
+    // Grab the window client area only, excluding the OS title bar.
+    // This avoids exposing the profile name (which appears in the title bar) when
+    // users post screenshots to forums. QWidget::grab() works cross-platform
+    // (Windows, macOS, Linux/X11, Wayland, Raspberry Pi, Chromebook) and handles
+    // high-DPI/Retina displays automatically without requiring screen capture permissions.
+    //
+    // Each graph view is a QOpenGLWidget, and grab() captures one by calling its
+    // grabFramebuffer(), which re-runs paintGL() into the widget's own framebuffer - the
+    // one shown on screen - and reads it back. On some OpenGL drivers that extra pass
+    // comes out overlaid with a lattice of coloured specks, which then spoiled both the
+    // saved image and the on-screen graphs until their next repaint (#237). So each
+    // visible graph view is first rendered to a raster pixmap (no GL), then hidden for
+    // the grab - grab() skips hidden children, so no GL pass runs - and shown again
+    // before control returns to the event loop, so nothing moves or flickers on screen.
+    // The raster renders are painted into the grab afterwards, clipped to the part of
+    // each view that was visible.
+    struct CapturedView {
+        gGraphView *view;
+        QPoint offset;
+        QRegion visible;
+        QPixmap pixmap;
+    };
+    QList<CapturedView> capturedViews;
+    const QList<gGraphView *> views = findChildren<gGraphView *>();
+    for (gGraphView *view : views) {
+        if (!view->isVisible() || view->window() != this) {
+            continue;
+        }
+        const QRegion visible = view->visibleRegion();
+        if (visible.isEmpty()) {
+            continue;
+        }
+        const QPoint offset = view->mapTo(this, QPoint(0, 0));
+        capturedViews.append({ view, offset, visible.translated(offset), view->renderToRasterPixmap() });
+    }
+
+    // Hiding a view that has keyboard focus moves focus elsewhere; put it back afterwards.
+    QPointer<QWidget> focused = focusWidget();
+    for (const CapturedView &captured : std::as_const(capturedViews)) {
+        captured.view->hide();
+    }
+    QPixmap clientPixmap = grab();
+    for (const CapturedView &captured : std::as_const(capturedViews)) {
+        captured.view->show();
+    }
+    if (focused) {
+        focused->setFocus();
+    }
+
+    if (!capturedViews.isEmpty()) {
+        QPainter overlay(&clientPixmap);
+        for (const CapturedView &captured : std::as_const(capturedViews)) {
+            overlay.setClipRegion(captured.visible);
+            overlay.drawPixmap(captured.offset, captured.pixmap);
+        }
+    }
+
+    return clientPixmap;
 }
 
 void MainWindow::on_actionView_Oximetry_triggered()

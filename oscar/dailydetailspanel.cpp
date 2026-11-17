@@ -152,6 +152,7 @@ void DailyDetailsPanel::setPage(const Page &page)
     const bool sameDay = page.date.isValid() && page.date == m_date;
     const int scroll = verticalScrollBar()->value();
     m_date = page.date;
+    m_cards.clear();    // the cards they point to go when setWidget() replaces the column below
 
     auto *body = new QWidget();
     body->setObjectName("dailyDetailsBody");
@@ -312,7 +313,21 @@ QWidget *DailyDetailsPanel::collapsible(DailyCard which, const QString &title, Q
         m_cardsOpen = DailyDetails::setCardOpen(m_cardsOpen, which, open);
         emit cardToggled(which, open);
     });
+    m_cards.append({which, card});
     return card;
+}
+
+void DailyDetailsPanel::setCaptureOpen(bool capture)
+{
+    const int bits = capture ? DailyDetails::captureCardsOpen(m_cardsOpen) : m_cardsOpen;
+    for (const auto &entry : std::as_const(m_cards)) {
+        entry.second->setOpen(DailyDetails::cardOpen(bits, entry.first));
+    }
+}
+
+int DailyDetailsPanel::contentHeight() const
+{
+    return widget() ? widget()->height() : 0;
 }
 
 QWidget *DailyDetailsPanel::deviceCard(const Device &device)

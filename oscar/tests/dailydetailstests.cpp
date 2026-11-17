@@ -83,3 +83,12 @@ void DailyDetailsTests::testCardBitsRoundTrip()
     // Opening an open card changes nothing
     QCOMPARE(DailyDetails::setCardOpen(bits, DC_SessionInfo, true), bits);
 }
+
+void DailyDetailsTests::testCaptureCardsOpen()
+{
+    const int all = (1 << (DC_Statistics + 1)) - 1;             // the eight cards
+    const int pie = 1 << DC_EventBreakdown;
+    QCOMPARE(DailyDetails::captureCardsOpen(0), all & ~pie);    // the pie stays closed
+    QCOMPARE(DailyDetails::captureCardsOpen(pie), all);         // the pie stays open
+    QCOMPARE(DailyDetails::captureCardsOpen(all & ~pie), all & ~pie);
+}

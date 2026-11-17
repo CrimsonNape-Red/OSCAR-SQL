@@ -597,6 +597,35 @@ public:
         The pixmap carries the widget's device pixel ratio. */
     QPixmap renderToRasterPixmap();
 
+    /*! \brief Readies the view for a full-height screenshot (see Daily::grabTall())
+
+        Call while the view is still shown, and pair with endTallCapture(). Until then:
+        - the graphs are drawn from the top of the list (the scroll offset is set aside);
+        - a graph that leaves its time scale to the page (setSharedXAxis()) draws its own,
+          and is that much taller so its plot keeps the height it has on screen;
+        - the scale that stretches a few graphs to fill the view is held as it is on screen,
+          even while the view is hidden for the capture. */
+    void beginTallCapture();
+
+    /*! \brief The height the graphs need in a full-height screenshot
+
+        The graph crossing \a needed is drawn whole and is the last one
+        (TallCapture::graphAreaHeight()). Valid between beginTallCapture() and endTallCapture().
+        \param needed The height at which the left sidebar is shown to its bottom
+        \return The height to draw the graphs at, never less than \a needed */
+    int tallCaptureHeight(int needed) const;
+
+    /*! \brief Renders the graphs to a raster pixmap of \a size, in the widget's coordinates
+        scaled by its device pixel ratio, without touching OpenGL
+
+        As renderToRasterPixmap(), but at a size other than the widget's own, so the view (a
+        QOpenGLWidget) never has to grow to the height of the screenshot. Valid between
+        beginTallCapture() and endTallCapture(). */
+    QPixmap renderTallRasterPixmap(const QSize &size);
+
+    //! \brief Puts back what beginTallCapture() changed and schedules a repaint
+    void endTallCapture();
+
     //! \brief Used internally by graph mousehandler to set modifier state
     void setMetaSelect(bool b) { m_metaselect = b; }
 
@@ -822,6 +851,21 @@ public:
     bool m_showAuthorMessage;
     GraphLook m_look = GraphLook::Classic;  //!< How graphs are framed (see setLook())
     bool m_sharedXAxis = false;             //!< See setSharedXAxis()
+
+    // Full-height screenshot (beginTallCapture() .. endTallCapture())
+    bool m_tallCapture = false;             //!< Between beginTallCapture() and endTallCapture()
+    bool m_tallOwnAxes = false;             //!< The graphs draw the time scale they left to the page
+    int m_tallSavedOffsetY = 0;             //!< The scroll offset to put back
+    QSize m_canvas;                         //!< Size being drawn at; invalid = the widget's own
+
+    //! \brief The width the paint path draws at: the widget's, or that of renderTallRasterPixmap()
+    int viewWidth() const { return m_canvas.isValid() ? m_canvas.width() : width(); }
+    //! \brief The height the paint path draws at: the widget's, or that of renderTallRasterPixmap()
+    int viewHeight() const { return m_canvas.isValid() ? m_canvas.height() : height(); }
+
+    /*! \brief The height \a g is drawn at: its own height by the view's scale, plus, in a
+        full-height screenshot, the height of the time scale it normally leaves to the page */
+    float drawnHeight(gGraph *g) const;
 
   signals:
     //! \brief The view has just drawn itself
