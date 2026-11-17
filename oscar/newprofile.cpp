@@ -341,8 +341,17 @@ void NewProfile::on_nextButton_clicked()
                                 qWarning() << "NewProfile: could not find profile in DB for rename:" << originalProfileName;
                             }
                             mainwin->RestartApplication();
-                            QCoreApplication::processEvents();
-                            exit(0);
+                            // Quit through the event loop, never with ::exit(): that runs the
+                            // static destructors without main()'s cleanup, so DatabaseManager's
+                            // destructor queries a connection Qt SQL has already torn down and
+                            // the process crashes on macOS (GitLab #395). RestartApplication()
+                            // has asked for the quit when it could start the new instance; ask
+                            // again so OSCAR also closes when it could not (it has told the user
+                            // to restart by hand). reject() keeps the profile selector from
+                            // refreshing a row for the profile that was just closed.
+                            QApplication::exit(0);
+                            reject();
+                            return;
                         } else {
                             // Renaming a non-open profile: update the DB and refresh the
                             // profile selector — no restart needed.

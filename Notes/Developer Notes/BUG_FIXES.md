@@ -8213,3 +8213,32 @@ is enabled). The three stale connections are removed from the form.
 **Non-obvious:**
 - `uic` reports a connection to a missing widget as a warning, not an error, so the build stayed clean.
 - Checked the form's remaining connection (`action_Exit`): its receiver exists.
+
+## 2026-11-16 - macOS crash on exit after renaming the open profile (GitLab #395)
+
+**Files:** `oscar/newprofile.cpp` (`NewProfile::on_nextButton_clicked()`)
+
+**Symptom:** On macOS, renaming the profile that is open (Profile tab > Edit Profile, change the name, Finish)
+brought up Apple's crash report for OSCAR. The rename was saved and the restarted OSCAR opened the profile under
+its new name; only the instance that was closing crashed (`EXC_BAD_ACCESS` at address 0 in
+`QSqlQuery::QSqlQuery()`, called from `DatabaseManager::close()` under `exit()`).
+
+**Root cause:** After `RestartApplication()` the rename path called `::exit(0)`. That runs the static destructors
+straight away, without returning to `main()`, so `main()`'s explicit `DatabaseManager::instance().close()` never
+ran. The singleton's destructor then found the database still open and ran `PRAGMA optimize` through Qt SQL,
+whose own statics had already been destroyed.
+
+**Fix:** The rename path no longer calls `::exit()`. It asks for the quit with `QApplication::exit(0)`, rejects
+the dialog and returns, so OSCAR leaves through `main()` like the other restarts (Preferences, Change Language).
+
+**Non-obvious:**
+- `main()` already documents this crash for Linux (the comment above its `DatabaseManager::instance().close()`);
+  `::exit()` with the database open bypasses that protection on any platform.
+- `RestartApplication()` quits only when it could start the new instance. The rename path asks again, so OSCAR
+  still closes when it could not, as it did before (the user has been told to restart by hand).
+- The dialog is rejected, not accepted, so `ProfileSelector::on_buttonEditProfile_clicked()` skips its row update
+  for a profile that has just been closed.
+- The remaining `::exit()` calls (`main.cpp` usage text, `preferences.cpp` SleepyHead check) were not examined
+  for whether the database can be open when they run.
+- Not reproduced: the crash needs macOS. On Windows the rename and restart work with the fix; a Mac build has
+  not been tested.
