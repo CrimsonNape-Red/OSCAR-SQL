@@ -331,8 +331,11 @@ class MainWindow : public QMainWindow
     //! \brief Selects the next view tab
     void on_action_CycleTabs_triggered();
 
-    //! \brief Opens the User Guide at the wiki in the welcome browser.
+    //! \brief Opens the online How-To Guide (Apnea Board wiki) in the default browser.
     void on_actionOnline_Users_Guide_triggered();
+
+    //! \brief Opens the OSCAR 2 Reference Manual (sleepfiles.com) in the default browser.
+    void on_actionOSCAR2_Reference_Manual_triggered();
 
     //! \brief Opens the Frequently Asked Questions at the wiki in the welcome browser.
     void on_action_Frequently_Asked_Questions_triggered();

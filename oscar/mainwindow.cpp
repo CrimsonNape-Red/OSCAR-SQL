@@ -2895,9 +2895,16 @@ void MainWindow::on_action_CycleTabs_triggered()
 
 void MainWindow::on_actionOnline_Users_Guide_triggered()
 {
-    if (staticQMessageBox::question(this, STR_MessageBox_Question, tr("The User's Guide will open in your default browser"),
+    if (staticQMessageBox::question(this, STR_MessageBox_Question, tr("The How-To Guide will open in your default browser"),
             QMessageBox::Ok|QMessageBox::Cancel, QMessageBox::Ok) == QMessageBox::Ok )
-        QDesktopServices::openUrl(QUrl("https://www.apneaboard.com/wiki/index.php?title=OSCAR_Help"));
+        QDesktopServices::openUrl(QUrl("https://www.apneaboard.com/wiki/index.php?title=OSCAR_How-To_Guide"));
+}
+
+void MainWindow::on_actionOSCAR2_Reference_Manual_triggered()
+{
+    if (staticQMessageBox::question(this, STR_MessageBox_Question, tr("The OSCAR 2 Reference Manual will open in your default browser"),
+            QMessageBox::Ok|QMessageBox::Cancel, QMessageBox::Ok) == QMessageBox::Ok )
+        QDesktopServices::openUrl(QUrl("https://www.sleepfiles.com/OSCAR/OSCAR2-Guide"));
 }
 
 void MainWindow::on_action_Frequently_Asked_Questions_triggered()

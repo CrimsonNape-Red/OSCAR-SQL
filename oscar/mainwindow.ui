@@ -557,6 +557,7 @@
     <addaction name="action_Check_for_Updates"/>
     <addaction name="separator"/>
     <addaction name="actionOnline_Users_Guide"/>
+    <addaction name="actionOSCAR2_Reference_Manual"/>
     <addaction name="action_Frequently_Asked_Questions"/>
     <addaction name="actionSleep_Disorder_Terms_Glossary"/>
     <addaction name="separator"/>
@@ -797,7 +798,12 @@
   </action>
   <action name="actionOnline_Users_Guide">
    <property name="text">
-    <string>Online Users Guide</string>
+    <string>Online How-To Guide</string>
+   </property>
+  </action>
+  <action name="actionOSCAR2_Reference_Manual">
+   <property name="text">
+    <string>OSCAR 2 Reference Manual</string>
    </property>
   </action>
   <action name="action_Frequently_Asked_Questions">
