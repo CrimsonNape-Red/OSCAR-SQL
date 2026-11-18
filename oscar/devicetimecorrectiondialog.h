@@ -1,8 +1,8 @@
 /* Device Time Correction Dialog Header
  *
  * The Time Corrections dialog (Data / Time Corrections...). It lists every device in the
- * profile and every time correction saved for them, whatever day the Daily page shows, and
- * edits one correction at a time with a live preview on the Daily graphs.
+ * profile and the time corrections saved for them (those for the day the Daily page shows,
+ * or all of them), and edits one correction at a time with a live preview on the Daily graphs.
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -32,7 +32,8 @@ class DeviceTimeCorrectionDialog;
     \brief Modeless dialog that lists, adds, edits and deletes device time corrections
 
     The dialog is not tied to one day. The device list shows every correctable device in
-    the profile and the table shows every saved correction; the day shown in Daily is only
+    the profile and the table can show every saved correction (by default it shows those
+    of the selected device for the day shown in Daily); the day shown in Daily is only
     used to mark which corrections are in force, as the default date of a new correction,
     and for the live preview on the Daily graphs.
 
@@ -92,6 +93,7 @@ private slots:
 private:
     Ui::DeviceTimeCorrectionDialog *ui;
     QDate m_date;                       //!< The day shown in Daily
+    Machine* m_machine = nullptr;       //!< The device in effect: the last device chosen in the list
 
     //! \brief Staged (preview) correction, not yet written to the database
     struct StagedRow {
@@ -105,11 +107,14 @@ private:
     bool      m_hasStagedChange = false;
     bool      m_datesTouched = false;   //!< The user changed the dates of the new correction
 
+    //! \brief Returns the device in effect (m_machine), or nullptr when there is none
     Machine* currentMachine() const;
+    //! \brief Selects the list entry of the device in effect, after a group heading took the selection
+    void highlightDevice();
 
     //! \brief Rebuilds the device list with every correctable device in the profile
     void populateSidebar();
-    //! \brief Sets each device's text (name, data span, corrections) and dims those with no data on m_date
+    //! \brief Sets each device's name and tooltip (data span, corrections) and dims those with no data on m_date
     void refreshSidebarText();
     void refreshTitleArea(Machine* mach);
     void refreshCurrentOffset();
@@ -158,8 +163,16 @@ private:
     QList<Machine*>                 m_historyMachines;
     QHash<Machine*, int>            m_correctionCounts;   //!< Active corrections per device, unfiltered
 
+    bool m_ready = false;           //!< Set at the end of the constructor; changeEvent() waits for it
+    bool m_inThemeChange = false;   //!< Guards changeEvent() against re-entry while restyling
+
+    //! \brief Sets the palette-derived colours of the labels and title bars
+    void applyTheme();
+
 protected:
     void closeEvent(QCloseEvent* event) override;
+    //! \brief Restyles the dialog when the theme changes while it is open
+    void changeEvent(QEvent* event) override;
 };
 
 #endif // DEVICETIMECORRECTIONDIALOG_H

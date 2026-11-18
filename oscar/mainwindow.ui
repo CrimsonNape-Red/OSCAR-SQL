@@ -638,7 +638,7 @@
     <string>Time Corrections...</string>
    </property>
    <property name="toolTip">
-    <string>Adjust device clock errors (timezone, travel, DST, reset)</string>
+    <string>Correct device clock errors (timezone, travel, DST, reset)</string>
    </property>
   </action>
   <action name="actionDrift_Analysis">

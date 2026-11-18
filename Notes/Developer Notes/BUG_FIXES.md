@@ -8393,16 +8393,37 @@ dates were hidden behind "Apply to date range", and the editor header showed bra
 
 **Fix:** The dialog is profile-wide; the day shown in Daily only marks rows, dates a new
 correction and drives the preview.
-- The table lists every active correction of every device, sorted by start date, with From and
-  To columns. Rows in force on the day shown are bold. Two check boxes narrow the list to the
-  selected device and to the day shown.
-- The device list shows every correctable device with its serial number, the span of its data and
-  its number of corrections; devices with no data on the day shown are dimmed, not hidden. The
-  selection is kept across a change of day.
+- The table has From and To columns and can list every active correction of every device,
+  sorted by start date. By default it lists the selected device's corrections for the day shown
+  (the old view); "Show all devices" and "Show all days with corrections" widen it, and the
+  heading counts the saved corrections not listed. A Save whose row the default view would hide
+  ticks "Show all days with corrections". Rows that apply to the day shown are bold in
+  every view; the others are greyed, like devices with no data on that day in the device list.
+- The device list shows every correctable device with its serial number; the span of its data and
+  its number of corrections are in the tooltip. Devices with no data on the day shown are dimmed,
+  not hidden. The selection is kept across a change of day. The group headings are "CPAP devices"
+  and "Other devices" ("Reference" suggested the CPAP is not corrected, and Drift Analysis uses
+  "reference device" for the trusted non-CPAP device).
 - From / To / "No end" are always visible. A summary line says what Save will store, for which
   device, and whether the graphs can show it. A total line gives the sum of all corrections for
   the device on the day shown.
 - Save reports what was stored in a status line and selects the new row.
+- The dialog has three framed panels with title bars: "Select Device to Correct", "Edit Correction"
+  and "Saved Corrections". "Show in Daily" and "Delete Correction" are in the last one, since they
+  act on the row selected there. Only the title labels carry a style sheet; a style sheet on the panel
+  frames also changed the background of the list and the table inside them.
+- The editor was squeezed (date fields overlapping the summary) when the summary wrapped to three
+  lines: a word-wrapped label does not add its extra lines to the layout's minimum height. The
+  summary and status labels now keep room for three lines, From and To share a row, and the two
+  time buttons sit beside the time field.
+- The dialog kept its old colours when the theme was switched while it was open (dark title bars
+  and pale text on a light window). `changeEvent()` now restyles it on `PaletteChange`.
+- The selected row of the table could hardly be seen on a light theme: the style's selection mark
+  is faint, and the row tint covered it. A small item delegate (`SelectedRowDelegate`) fills the
+  selected row with the accent colour, on both themes.
+- One word, "correction", for the thing being edited: "Time Adjustment" is now "Time Correction",
+  the table's "Offset" column is "Correction", and the status, summary, menu tooltip and
+  instructions texts no longer say "adjustment". "Offset" remains the name of one correction type.
 - "Show in Daily" (or a double-click) moves Daily to the first day in the correction's dates on
   which the device has data.
 - Deleting a correction that does not cover the day shown asks for confirmation and removes it
@@ -8415,6 +8436,13 @@ correction and drives the preview.
   was being edited on a CPAP with a drift model, the graphs showed the CPAP without its drift.
   Found by reading the code; not reproduced, the test profile has no drift model.
 - A To date before the From date could be saved. Save is now disabled and the summary says why.
+- A group heading in the device list could become the list's current item (an arrow key past the
+  first or last device of a group, or a click on the heading). `currentMachine()` read the current
+  item, so the dialog then had no device: the editor still named the last one, but the next refresh
+  listed no corrections for it and Save did nothing. The device in effect is now kept in
+  `m_machine`, set only when a device entry becomes current, and its entry is re-selected when a
+  heading takes the selection (queued: a mouse click changes the selection after the current
+  item). Present on master too. Checked by key presses and by clicks posted to the dialog.
 - Tab could not leave the corrections table (`tabKeyNavigation`); the dialog now has a tab order.
 - The row tints and label colours were fixed light-theme colours; they now follow the palette.
 

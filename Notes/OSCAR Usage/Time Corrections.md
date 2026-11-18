@@ -29,7 +29,7 @@ A correction is an amount of time, plus or minus, that OSCAR adds to everything 
 - **+** moves that device's data **later** (to the right on the graphs); **−** moves it **earlier**.
 - Each correction belongs to **one device**. Correcting the CPAP does not move the oximeter.
 - A correction covers a single night, a range of dates, or everything from a start date onward. Dates are OSCAR days, the same ones you select in the Daily view.
-- If more than one correction covers a night, they **add together**. A time-zone correction of +2:00:00 and a fine adjustment of −0:00:12 give a total shift of +1:59:48.
+- If more than one correction covers a night, they **add together**. A time-zone correction of +2:00:00 and a fine correction of −0:00:12 give a total shift of +1:59:48.
 - Your recorded data is **not changed**. Corrections are kept separately and applied when data is displayed, so deleting a correction puts things back exactly as they were. Corrections are included in profile backups.
 - One correction can be at most 23:59:59.
 
@@ -59,26 +59,28 @@ Two types behave specially:
 1. Open the **Daily** view and select a night you want to correct.
 2. Choose *Data / Time Corrections...*. The first time, an instructions window appears; click **Continue**. Tick **Don't show this again** to skip it in future.
 
-The Time Corrections window stays open while you work in OSCAR, and the graphs behind it update as you make changes, so you can see the effect of an adjustment before saving it.
+The Time Corrections window stays open while you work in OSCAR, and the graphs behind it update as you make changes, so you can see the effect of a correction before saving it.
 
-The window is not limited to the day shown in the Daily view. It always lists all of your devices and all of your saved corrections. The day shown in Daily is used for three things: it is the starting date of a new correction, the corrections in force on it are shown in bold, and it is the day whose graphs you see change.
+The window is not limited to the day shown in the Daily view. It always lists all of your devices, and a correction can be given any dates. The day shown in Daily is used for three things: it is the starting date of a new correction, the table starts out listing the corrections in force on it, and it is the day whose graphs you see change.
 
 ### The window
 
-- **Left: device list.** Every device in the profile, with its serial number, the dates it has data for, and how many corrections it has. CPAP devices are under **Reference**; everything else is under **Other Devices**. A device with no data on the day shown in Daily is greyed but can still be selected. If the same device appears twice with different serial numbers, each one needs its own corrections; the data dates show which is which.
-- **Right: the editor.** The device being corrected is named at the top. Below it are *New correction* or *Editing: ...*, the type, the time adjustment, and the dates covered.
-- **Bottom: corrections table.** Every saved correction for every device, in date order, with its dates, type, amount, and the date it was added. Rows in **bold** are in force on the day shown in Daily. Rows are coloured by type. Tick **Only the selected device** or **Only the day shown in Daily** to shorten the list.
+The window has three titled panels. Start in **Select Device to Correct**; then go to **Edit Correction** to add a correction, or to **Saved Corrections** to find one you saved earlier.
+
+- **Select Device to Correct (top left).** Every device in the profile, with its serial number, under **CPAP devices** or **Other devices**. Hold the mouse over a device to see the dates it has data for and how many corrections it has. A device with no data on the day shown in Daily is greyed but can still be selected. If the same device appears twice with different serial numbers, each one needs its own corrections; the data dates show which is which.
+- **Edit Correction (top right).** The device being corrected is named at the top. Below it are *New correction* or *Editing: ...*, the type, the time correction, and the dates covered.
+- **Saved Corrections (bottom).** The corrections of the selected device that are in force on the day shown in Daily, with their dates, type, amount, and the date they were added. Rows that apply to the day shown in Daily are in **bold**. In the light theme, rows are coloured by type. Tick **Show all devices** to include the other devices, and **Show all days with corrections** to list every saved correction in date order; the rows that do not apply to the day shown in Daily are greyed, not bold. The line above the table says how many saved corrections are not listed.
 
 ### Adding a correction
 
 1. Select the device, and check its name at the top of the editor.
 2. Choose the **Type**.
-3. Set the **Time Adjustment**. Click the **+ / −** button to choose the direction, then enter hours, minutes, and seconds. The up and down arrows change whichever field the cursor is in and carry over into the next field; stepping down past zero flips the sign.
+3. Set the **Time Correction**. Click the **+ / −** button to choose the direction, then enter hours, minutes, and seconds. The up and down arrows change whichever field the cursor is in and carry over into the next field; stepping down past zero flips the sign.
 4. Set the **Dates Covered**: **From** and **To**, or tick **No end** for a correction that continues on every later night. They start on the day shown in Daily.
 5. Read the summary under the dates. It says in words what will be saved, for example "Shifts *device* by +1:00:00 from 2027-03-14 to 2027-11-07." It also tells you if the graphs will not change, either because the dates do not include the day shown in Daily or because the device has no data on that day.
 6. Click **Save**.
 
-After saving, a message confirms what was stored and the new correction is highlighted in the table.
+After saving, a message confirms what was stored and the new correction is highlighted in the table. If its dates do not include the day shown in Daily, OSCAR ticks **Show all days with corrections** so that you can see it.
 
 Below the summary, **Total of all corrections for this device** shows the combined shift on the day shown in Daily, including the change you are making. If it is not what you expect, look in the table for another correction covering that day.
 
@@ -87,14 +89,14 @@ Nothing is stored until you click **Save**. **Cancel** throws away the unsaved c
 Other buttons:
 
 - **Reuse Previous** — copies the single-night corrections from the most recent of the previous seven nights that has any, for the selected device, to the day shown in Daily. This is saved immediately.
-- **Reset to Zero** — sets the adjustment to zero. Saving a zero adjustment while editing an existing correction removes that correction.
+- **Reset to Zero** — sets the time correction to zero. Saving a time of zero while editing an existing correction removes that correction.
 - **Clear** — abandons what is in the editor and starts a new, blank correction.
 
 ### Finding, changing or deleting a correction
 
-Every correction you have saved is in the table, whatever day Daily is showing.
+Tick **Show all days with corrections**, and **Show all devices** if needed, to find a correction that is not for the day shown in Daily.
 
-- **To see its effect**, click the correction and then **Show in Daily**, or double-click it. Daily moves to the first day in the correction's dates on which that device has data.
+- **To see its effect**, click the correction and then **Show in Daily** (above the table), or double-click it. Daily moves to the first day in the correction's dates on which that device has data.
 - **To change it**, click it. Its values load into the editor; change them and click **Save**.
 - **To remove it**, click it and then **Delete Correction**.
 
@@ -117,11 +119,11 @@ All devices are aligned to the CPAP's timeline, so work in this order:
 2. **Apply the same kind of corrections to the other devices** if their clocks had the same problem.
 3. **Fine-tune.** Use Offsets on the other devices to bring them into line with the CPAP.
 
-For fine-tuning, zoom in on a short event that both devices recorded. The most reliable are events caused by physical movement: a sudden irregular change in flow rate, a sleep-stage transition, a movement spike. Adjust the other device until the two line up. If the other device shows the event *before* the CPAP does, it needs a **+** adjustment; if *after*, a **−** adjustment.
+For fine-tuning, zoom in on a short event that both devices recorded. The most reliable are events caused by physical movement: a sudden irregular change in flow rate, a sleep-stage transition, a movement spike. Adjust the other device until the two line up. If the other device shows the event *before* the CPAP does, it needs a **+** correction; if *after*, a **−** correction.
 
 ### Examples
 
-**CPAP clock two hours behind because of the wrong time zone.** Select the CPAP, type *Device Timezone Misconfiguration*, adjustment **+ 02:00:00**. Set **From** to the first affected night and leave **No end** ticked, then **Save**. When you later fix the clock on the device, go to the first night recorded with the right time, select the correction, click **Delete Correction**, and choose **Close from *date* onward**.
+**CPAP clock two hours behind because of the wrong time zone.** Select the CPAP, type *Device Timezone Misconfiguration*, time correction **+ 02:00:00**. Set **From** to the first affected night and leave **No end** ticked, then **Save**. When you later fix the clock on the device, go to the first night recorded with the right time, select the correction, click **Delete Correction**, and choose **Close from *date* onward**.
 
 **Clock not changed for daylight saving.** Select the device, type *DST Change*, one hour in the right direction, and set **From** and **To** to the first and last affected nights. You can enter the periods for several years one after another without leaving the window; each appears in the table as you save it. Repeat for every device whose clock had the same problem.
 
@@ -133,7 +135,7 @@ Use this when the CPAP clock steadily gains or loses time, so the Offset needed 
 
 ### What you need
 
-- A second device whose clock you trust, such as an oximeter or watch that sets its time from a phone. Drift Analysis calls this the **reference device**. (Note that this is the opposite of the Time Corrections window, where the CPAP is listed under *Reference*.)
+- A second device whose clock you trust, such as an oximeter or watch that sets its time from a phone. Drift Analysis calls this the **reference device**.
 - At least **three nights**, spread over the period, on which you have saved a single-night **Offset** for that reference device that lines it up with the CPAP. More nights, further apart, give a better result.
 
 Each of those Offsets is treated as a measurement of how far ahead of the reference device the CPAP clock was on that night.

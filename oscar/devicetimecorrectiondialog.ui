@@ -21,20 +21,46 @@
      <widget class="QSplitter" name="mainSplitter">
       <property name="orientation"><enum>Qt::Horizontal</enum></property>
 
-      <!-- Left: Device sidebar -->
-      <widget class="QTreeWidget" name="deviceSidebar">
+      <!-- Left: the device to correct. The three panels each have a title bar (styled in the
+           constructor) and a 1 px margin that leaves room for the panel border. -->
+      <widget class="QFrame" name="devicePanel">
+       <property name="frameShape"><enum>QFrame::StyledPanel</enum></property>
        <property name="minimumSize"><size><width>200</width><height>0</height></size></property>
        <property name="maximumSize"><size><width>400</width><height>16777215</height></size></property>
-       <property name="headerHidden"><bool>true</bool></property>
-       <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAsNeeded</enum></property>
-       <column><property name="text"><string>Device</string></property></column>
+       <layout class="QVBoxLayout" name="deviceLayout">
+        <property name="spacing"><number>0</number></property>
+        <property name="leftMargin"><number>1</number></property><property name="topMargin"><number>1</number></property><property name="rightMargin"><number>1</number></property><property name="bottomMargin"><number>1</number></property>
+        <item>
+         <widget class="QLabel" name="titleDevice">
+          <property name="text"><string>Select Device to Correct</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="deviceSidebar">
+          <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+          <property name="headerHidden"><bool>true</bool></property>
+          <property name="horizontalScrollBarPolicy"><enum>Qt::ScrollBarAsNeeded</enum></property>
+          <column><property name="text"><string>Device</string></property></column>
+         </widget>
+        </item>
+       </layout>
       </widget>
 
       <!-- Right: Correction editor — clean top-to-bottom flow, no group boxes -->
-      <widget class="QWidget" name="rightPanel">
+      <widget class="QFrame" name="rightPanel">
+       <property name="frameShape"><enum>QFrame::StyledPanel</enum></property>
+       <layout class="QVBoxLayout" name="rightOuterLayout">
+        <property name="spacing"><number>0</number></property>
+        <property name="leftMargin"><number>1</number></property><property name="topMargin"><number>1</number></property><property name="rightMargin"><number>1</number></property><property name="bottomMargin"><number>1</number></property>
+        <item>
+         <widget class="QLabel" name="titleEditor">
+          <property name="text"><string>Edit Correction</string></property>
+         </widget>
+        </item>
+        <item>
        <layout class="QVBoxLayout" name="rightLayout">
-        <property name="margin"><number>8</number></property>
         <property name="spacing"><number>6</number></property>
+        <property name="leftMargin"><number>8</number></property><property name="topMargin"><number>8</number></property><property name="rightMargin"><number>8</number></property><property name="bottomMargin"><number>8</number></property>
 
         <!-- Header: device name + active date -->
         <item>
@@ -76,11 +102,23 @@
          </layout>
         </item>
 
-        <!-- Time Adjustment: sign toggle + direct time entry -->
+        <!-- Time correction: its label with the warning about its value beside it, then
+             sign toggle + direct time entry -->
         <item>
-         <widget class="QLabel">
-          <property name="text"><string>Time Adjustment</string></property>
-         </widget>
+         <layout class="QHBoxLayout" name="timeLabelLayout" stretch="0,1">
+          <property name="spacing"><number>12</number></property>
+          <item>
+           <widget class="QLabel" name="timeCorrectionLabel">
+            <property name="text"><string>Time Correction</string></property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="largeDriftWarning">
+            <property name="text"><string></string></property>
+            <property name="wordWrap"><bool>true</bool></property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QHBoxLayout">
@@ -99,13 +137,13 @@
             </property>
            </widget>
           </item>
-          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
-         </layout>
-        </item>
-
-        <!-- Offset-related actions -->
-        <item>
-         <layout class="QHBoxLayout">
+          <item>
+           <spacer>
+            <property name="orientation"><enum>Qt::Horizontal</enum></property>
+            <property name="sizeType"><enum>QSizePolicy::Fixed</enum></property>
+            <property name="sizeHint" stdset="0"><size><width>12</width><height>0</height></size></property>
+           </spacer>
+          </item>
           <item>
            <widget class="QPushButton" name="btnApplyLastNight">
             <property name="text"><string>Reuse Previous</string></property>
@@ -138,23 +176,23 @@
             <property name="currentSection"><enum>QDateTimeEdit::DaySection</enum></property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="0" column="2">
            <widget class="QLabel"><property name="text"><string>To:</string></property></widget>
           </item>
-          <item row="1" column="1">
+          <item row="0" column="3">
            <widget class="QDateEdit" name="advEndDate">
             <property name="calendarPopup"><bool>false</bool></property>
             <property name="displayFormat"><string>yyyy-MM-dd</string></property>
             <property name="currentSection"><enum>QDateTimeEdit::DaySection</enum></property>
            </widget>
           </item>
-          <item row="1" column="2">
+          <item row="0" column="4">
            <widget class="QCheckBox" name="advEndDateCheck">
             <property name="text"><string>No end</string></property>
             <property name="toolTip"><string>The correction continues for every later night</string></property>
            </widget>
           </item>
-          <item row="0" column="3">
+          <item row="0" column="5">
            <spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer>
           </item>
          </layout>
@@ -184,7 +222,7 @@
          </widget>
         </item>
 
-        <!-- Save / Cancel / Clear | Show in Daily / Delete -->
+        <!-- Save / Cancel / Clear -->
         <item>
          <layout class="QHBoxLayout">
           <item>
@@ -205,57 +243,76 @@
            </widget>
           </item>
           <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
-          <item>
-           <widget class="QFrame" name="buttonSeparator">
-            <property name="frameShape"><enum>QFrame::VLine</enum></property>
-            <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnShowInDaily">
-            <property name="text"><string>Show in Daily</string></property>
-            <property name="toolTip"><string>Show the first day the selected correction applies to in the Daily view</string></property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnDeleteRow">
-            <property name="text"><string>Delete Correction</string></property>
-           </widget>
-          </item>
          </layout>
         </item>
 
+       </layout>
+        </item>
        </layout>
       </widget>
      </widget><!-- end mainSplitter -->
 
      <!-- BOTTOM: History panel — full width -->
-     <widget class="QWidget" name="historyPanel">
+     <widget class="QFrame" name="historyPanel">
+      <property name="frameShape"><enum>QFrame::StyledPanel</enum></property>
       <layout class="QVBoxLayout" name="historyLayout">
-       <property name="margin"><number>4</number></property>
-
+       <property name="spacing"><number>0</number></property>
+       <property name="leftMargin"><number>1</number></property><property name="topMargin"><number>1</number></property><property name="rightMargin"><number>1</number></property><property name="bottomMargin"><number>1</number></property>
        <item>
-        <layout class="QHBoxLayout" name="historyHeaderLayout">
+        <widget class="QLabel" name="titleSaved">
+         <property name="text"><string>Saved Corrections</string></property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="historyHeaderLayout">
+         <property name="spacing"><number>4</number></property>
+         <property name="leftMargin"><number>8</number></property><property name="topMargin"><number>6</number></property><property name="rightMargin"><number>8</number></property><property name="bottomMargin"><number>6</number></property>
          <item>
           <widget class="QLabel" name="activeDateLabel">
-           <property name="text"><string>All saved corrections.</string></property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>1</horstretch><verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text"><string>Saved corrections.</string></property>
+           <property name="wordWrap"><bool>true</bool></property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="historyActionsLayout">
+           <property name="spacing"><number>12</number></property>
+         <item>
+          <widget class="QCheckBox" name="chkAllDevices">
+           <property name="text"><string>Show all devices</string></property>
+           <property name="toolTip"><string>List the corrections of every device, not only the selected one.</string></property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="chkAllDays">
+           <property name="text"><string>Show all days with corrections</string></property>
+           <property name="toolTip"><string>List every saved correction, not only those in force on the day shown in Daily.</string></property>
           </widget>
          </item>
          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
          <item>
-          <widget class="QCheckBox" name="chkOnlyDevice">
-           <property name="text"><string>Only the selected device</string></property>
+          <widget class="QPushButton" name="btnShowInDaily">
+           <property name="text"><string>Show in Daily</string></property>
+           <property name="toolTip"><string>Show the first day the selected correction applies to in the Daily view</string></property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="chkOnlyActive">
-           <property name="text"><string>Only the day shown in Daily</string></property>
+          <widget class="QPushButton" name="btnDeleteRow">
+           <property name="text"><string>Delete Correction</string></property>
+           <property name="toolTip"><string>Delete the selected correction</string></property>
           </widget>
+         </item>
+          </layout>
          </item>
         </layout>
        </item>
        <item>
         <widget class="QTableWidget" name="historyTable">
+         <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
          <property name="toolTip"><string>Click a correction to edit it. Double-click it to show its first day in the Daily view.</string></property>
          <property name="selectionBehavior"><enum>QAbstractItemView::SelectRows</enum></property>
          <property name="selectionMode"><enum>QAbstractItemView::SingleSelection</enum></property>
@@ -265,7 +322,7 @@
          <column><property name="text"><string>From</string></property></column>
          <column><property name="text"><string>To</string></property></column>
          <column><property name="text"><string>Type</string></property></column>
-         <column><property name="text"><string>Offset</string></property></column>
+         <column><property name="text"><string>Correction</string></property></column>
          <column><property name="text"><string>Added</string></property></column>
         </widget>
        </item>
@@ -275,17 +332,10 @@
     </widget><!-- end verticalSplitter -->
    </item>
 
-   <!-- Bottom row: warning label + close button -->
+   <!-- Bottom row: close button -->
    <item>
     <layout class="QHBoxLayout">
-     <item>
-      <widget class="QLabel" name="largeDriftWarning">
-       <property name="text"><string></string></property>
-       <property name="wordWrap"><bool>true</bool></property>
-       <property name="styleSheet"><string>color: #cc6600;</string></property>
-       <property name="minimumSize"><size><width>0</width><height>20</height></size></property>
-      </widget>
-     </item>
+     <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
      <item>
       <widget class="QDialogButtonBox" name="buttonBox">
        <property name="orientation"><enum>Qt::Horizontal</enum></property>
@@ -322,10 +372,10 @@
   <tabstop>btnSaveCorrection</tabstop>
   <tabstop>btnDiscardChanges</tabstop>
   <tabstop>btnClearCorrection</tabstop>
+  <tabstop>chkAllDevices</tabstop>
+  <tabstop>chkAllDays</tabstop>
   <tabstop>btnShowInDaily</tabstop>
   <tabstop>btnDeleteRow</tabstop>
-  <tabstop>chkOnlyDevice</tabstop>
-  <tabstop>chkOnlyActive</tabstop>
   <tabstop>historyTable</tabstop>
  </tabstops>
  <resources/>

@@ -1,8 +1,8 @@
 /* Device Time Correction Dialog Implementation
  *
  * The Time Corrections dialog (Data / Time Corrections...). It lists every device in the
- * profile and every time correction saved for them, whatever day the Daily page shows, and
- * edits one correction at a time with a live preview on the Daily graphs.
+ * profile and the time corrections saved for them (those for the day the Daily page shows,
+ * or all of them), and edits one correction at a time with a live preview on the Daily graphs.
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -21,8 +21,11 @@
 #include <QDateTime>
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QEvent>
+#include <QGuiApplication>
 #include <QLabel>
 #include <QRadioButton>
+#include <QStyledItemDelegate>
 #include <QVBoxLayout>
 #include <QtMath>
 #include <algorithm>
@@ -36,10 +39,34 @@ static const QStringList kTypeKeys = { "offset", "travel", "dst", "timezone", "r
 //! \brief Number of columns in the corrections table
 static const int kHistoryColumns = 6;
 
+/*! \class SelectedRowDelegate
+    \brief Draws the selected row of the corrections table in the accent colour
+
+    On a light theme the rows are tinted by correction type, and the style's own selection
+    mark is too faint to see over a tint. The selected row is filled with the accent colour
+    and its text drawn in the matching ink, on both themes. */
+class SelectedRowDelegate : public QStyledItemDelegate
+{
+public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+
+protected:
+    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override
+    {
+        QStyledItemDelegate::initStyleOption(option, index);
+        if (!(option->state & QStyle::State_Selected)) return;
+        const QColor ink = Theme::color(Theme::Role::OnAccent, option->palette);
+        option->backgroundBrush = Theme::color(Theme::Role::Accent, option->palette);
+        // After the fill: a greyed row sets the Text colour from its foreground.
+        option->palette.setColor(QPalette::Text, ink);
+        option->palette.setColor(QPalette::HighlightedText, ink);
+    }
+};
+
 /*! \brief Returns the row background for a correction type
     \param type Database type key
-    \param dark True when the palette is dark; the tints are then dark enough for light text
-    \return An invalid colour for a type with no tint (drift models) */
+    \param dark True when the palette is dark; rows are then not tinted
+    \return An invalid colour for no tint (drift models, and every type on a dark palette) */
 static QColor typeTint(const QString& type, bool dark)
 {
     QColor light;
@@ -48,8 +75,9 @@ static QColor typeTint(const QString& type, bool dark)
     else if (type == "travel")   light = QColor(210, 255, 225);
     else if (type == "dst")      light = QColor(255, 225, 210);
     else if (type == "reset")    light = QColor(240, 210, 255);
-    if (!light.isValid() || !dark) return light;
-    return QColor::fromHsv(light.hsvHue(), 120, 80);
+    // No tint on a dark palette: the rows keep the table's own background, and the Type
+    // column says what the colour would have.
+    return dark ? QColor() : light;
 }
 
 //! \brief Returns the Machine a device-list item stands for, or nullptr for a group header
@@ -84,8 +112,8 @@ DeviceTimeCorrectionDialog::DeviceTimeCorrectionDialog(QWidget *parent)
             this, &DeviceTimeCorrectionDialog::onHistoryRowClicked);
     connect(ui->historyTable, &QTableWidget::itemDoubleClicked,
             this, &DeviceTimeCorrectionDialog::onShowInDaily);
-    connect(ui->chkOnlyDevice, &QCheckBox::toggled, this, &DeviceTimeCorrectionDialog::refreshHistory);
-    connect(ui->chkOnlyActive, &QCheckBox::toggled, this, &DeviceTimeCorrectionDialog::refreshHistory);
+    connect(ui->chkAllDevices, &QCheckBox::toggled, this, &DeviceTimeCorrectionDialog::refreshHistory);
+    connect(ui->chkAllDays,    &QCheckBox::toggled, this, &DeviceTimeCorrectionDialog::refreshHistory);
     connect(ui->correctionTypeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &DeviceTimeCorrectionDialog::onTypeChanged);
     connect(ui->offsetTimeEdit, &QTimeEdit::timeChanged,
@@ -111,13 +139,56 @@ DeviceTimeCorrectionDialog::DeviceTimeCorrectionDialog(QWidget *parent)
 
     ui->historyTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->historyTable->horizontalHeader()->setStretchLastSection(true);
+    ui->historyTable->setItemDelegate(new SelectedRowDelegate(ui->historyTable));
 
-    // Colours come from the palette, so the labels stay readable on a dark theme.
+    // The summary and the status line wrap. A wrapped label does not add its extra lines to
+    // the layout's minimum height, so without room kept for them the date fields above
+    // were squeezed when the text ran to three lines.
+    const int lineHeight = fontMetrics().lineSpacing();
+    ui->summaryLabel->setMinimumHeight(3 * lineHeight + 6);   // a little over: the third line was clipped
+    ui->summaryLabel->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    ui->statusLabel->setMinimumHeight(3 * lineHeight);
+    ui->statusLabel->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
+
+    applyTheme();
+    m_ready = true;
+}
+
+/*! Colours come from the palette, so the labels stay readable on a dark theme. Called again
+    from changeEvent() when the theme is switched while the dialog is open. */
+void DeviceTimeCorrectionDialog::applyTheme()
+{
     const QString ink2 = Theme::css(Theme::Role::Ink2);
     ui->activeDateLabel->setStyleSheet(QString("font-style: italic; color: %1;").arg(ink2));
     ui->totalLabel->setStyleSheet(QString("color: %1;").arg(ink2));
     ui->statusLabel->setStyleSheet("font-weight: 600;");
-    ui->largeDriftWarning->setStyleSheet(QString("color: %1;").arg(Theme::css(Theme::Role::Warn)));
+    // Red on a light theme; the dark theme keeps the warning colour, which reads well there.
+    const bool dark = Theme::isDark(QGuiApplication::palette());
+    ui->largeDriftWarning->setStyleSheet(
+        QString("color: %1;").arg(Theme::css(dark ? Theme::Role::Warn : Theme::Role::Bad)));
+
+    // The three panels (device, editor, saved corrections) each have a frame (set in the
+    // .ui) and a title bar, so the sections of the dialog can be told apart at a glance.
+    // Only the title labels get a style sheet: one on the panels would also restyle the
+    // list and the table inside them.
+    const QString titleCss =
+        QString("background: %1; color: %2; font-weight: 600; padding: 5px 8px;")
+            .arg(Theme::css(Theme::Role::AccentSoft), Theme::css(Theme::Role::Ink));
+    for (QLabel* title : {ui->titleDevice, ui->titleEditor, ui->titleSaved})
+        title->setStyleSheet(titleCss);
+}
+
+void DeviceTimeCorrectionDialog::changeEvent(QEvent* event)
+{
+    QDialog::changeEvent(event);
+    // A switch between light and dark while the dialog is open: the label colours, the mode
+    // label, the greyed devices and the table rows were all worked out for the old palette.
+    if (event->type() != QEvent::PaletteChange || !m_ready || m_inThemeChange) return;
+    m_inThemeChange = true;
+    applyTheme();
+    refreshModeLabel();
+    refreshHistory();   // also refreshes the device list
+    m_inThemeChange = false;
 }
 
 DeviceTimeCorrectionDialog::~DeviceTimeCorrectionDialog()
@@ -174,13 +245,15 @@ void DeviceTimeCorrectionDialog::populateSidebar()
     tree->blockSignals(true);
     tree->clear();
 
-    auto* refHeader = new QTreeWidgetItem(tree, QStringList{tr("Reference")});
+    // "CPAP devices", not "Reference": these devices are corrected like any other, and
+    // Drift Analysis uses "reference device" for the trusted non-CPAP device.
+    auto* refHeader = new QTreeWidgetItem(tree, QStringList{tr("CPAP devices")});
     refHeader->setFlags(Qt::ItemIsEnabled);
     QFont hf = refHeader->font(0);
     hf.setBold(true);
     refHeader->setFont(0, hf);
 
-    auto* otherHeader = new QTreeWidgetItem(tree, QStringList{tr("Other Devices")});
+    auto* otherHeader = new QTreeWidgetItem(tree, QStringList{tr("Other devices")});
     otherHeader->setFlags(Qt::ItemIsEnabled);
     otherHeader->setFont(0, hf);
 
@@ -218,7 +291,10 @@ void DeviceTimeCorrectionDialog::populateSidebar()
     if (!choice) choice = firstOtherToday;
     if (!choice) choice = firstCpap;
     if (!choice) choice = firstOther;
-    if (choice) tree->setCurrentItem(choice);
+    if (choice)
+        tree->setCurrentItem(choice);   // onDeviceChanged() sets m_machine when it differs
+    else
+        m_machine = nullptr;            // no correctable device in the profile
 }
 
 void DeviceTimeCorrectionDialog::refreshSidebarText()
@@ -233,42 +309,43 @@ void DeviceTimeCorrectionDialog::refreshSidebarText()
             Machine* mach = machineOf(item);
             if (!mach) continue;
 
-            // Line 1: the device.  Line 2: the days it has data for.
-            QString text = deviceLabel(mach);
+            // The list shows one line per device; the details are in the tooltip, one per
+            // line (rich text, so a long line wraps).
+            const QString label = deviceLabel(mach);
+            QStringList tip;
+            tip << "<b>" + label.toHtmlEscaped() + "</b>";
             if (mach->day.isEmpty()) {
-                text += "\n" + tr("No data");
+                tip << tr("No data");
             } else {
                 const QString first = mach->day.firstKey().toString(Qt::ISODate);
                 const QString last  = mach->day.lastKey().toString(Qt::ISODate);
-                text += "\n" + (first == last ? tr("Data: %1").arg(first)
-                                              : tr("Data: %1 to %2").arg(first, last));
+                tip << (first == last ? tr("Data: %1").arg(first)
+                                      : tr("Data: %1 to %2").arg(first, last));
             }
 
-            // Line 3, only when there is something to say.
             const int count = m_correctionCounts.value(mach, 0);
-            const bool noDataToday = m_date.isValid() && !mach->day.contains(m_date);
-            QStringList extra;
-            if (count > 0) extra << tr("Corrections: %1").arg(count);
-            if (noDataToday && !mach->day.isEmpty())
-                extra << tr("no data on %1").arg(m_date.toString(Qt::ISODate));
-            if (!extra.isEmpty()) text += "\n" + extra.join(", ");
+            tip << (count > 0 ? tr("Corrections: %1").arg(count) : tr("No corrections"));
 
-            item->setText(0, text);
-            if (noDataToday) {
+            const bool noDataToday = m_date.isValid() && !mach->day.contains(m_date);
+            if (noDataToday)
+                tip << tr("This device has no data on %1, the day shown in Daily. "
+                          "You can still add corrections for other dates.")
+                           .arg(m_date.toString(Qt::ISODate));
+
+            item->setText(0, label);
+            item->setToolTip(0, tip.join("<br>"));
+            if (noDataToday)
                 item->setForeground(0, muted);
-                item->setToolTip(0, tr("This device has no data on the day shown in Daily. "
-                                       "You can still add corrections for other dates."));
-            } else {
+            else
                 item->setData(0, Qt::ForegroundRole, QVariant());
-                item->setToolTip(0, QString());
-            }
         }
     }
 }
 
 Machine* DeviceTimeCorrectionDialog::currentMachine() const
 {
-    return machineOf(ui->deviceSidebar->currentItem());
+    // Not the list's current item: that can be a group heading, which is not a device.
+    return p_profile ? m_machine : nullptr;
 }
 
 void DeviceTimeCorrectionDialog::refreshTitleArea(Machine* mach)
@@ -346,11 +423,25 @@ void DeviceTimeCorrectionDialog::commitAndRefresh(Machine* mach)
 // Corrections panel
 // ---------------------------------------------------------------------------
 
+/*! The device in effect is kept in m_machine, not read from the list's current item. An
+    arrow key or a click can make a group heading the current item; the device then stays
+    in effect and stays highlighted. Before, the dialog was left with no device: the editor
+    still named the last one, but the next refresh emptied the table and Save did nothing. */
 void DeviceTimeCorrectionDialog::onDeviceChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous)
 {
-    if (!machineOf(current)) return;
+    Q_UNUSED(previous);
+    Machine* newMach = machineOf(current);
+    if (!newMach || newMach == m_machine) {
+        // A heading, or back from a heading to the same device: nothing changes. Moving to
+        // a heading clears the selection, so show again which device is in effect. Queued,
+        // because a mouse click changes the selection after it changes the current item.
+        QMetaObject::invokeMethod(this, &DeviceTimeCorrectionDialog::highlightDevice, Qt::QueuedConnection);
+        return;
+    }
+
+    Machine* prevMach = currentMachine();
+    m_machine = newMach;
     if (m_hasStagedChange) {
-        Machine* prevMach = machineOf(previous);
         resetToNewMode();
         if (prevMach) {
             rebuildMachine(prevMach);
@@ -363,6 +454,19 @@ void DeviceTimeCorrectionDialog::onDeviceChanged(QTreeWidgetItem* current, QTree
     Machine* mach = currentMachine();
     refreshTitleArea(mach);
     refreshHistory();   // resetToNewMode inside calls refreshCurrentOffset
+}
+
+void DeviceTimeCorrectionDialog::highlightDevice()
+{
+    QTreeWidget* tree = ui->deviceSidebar;
+    for (int i = 0; i < tree->topLevelItemCount(); ++i) {
+        QTreeWidgetItem* header = tree->topLevelItem(i);
+        for (int j = 0; j < header->childCount(); ++j) {
+            QTreeWidgetItem* item = header->child(j);
+            if (m_machine && machineOf(item) == m_machine && !item->isSelected())
+                item->setSelected(true);
+        }
+    }
 }
 
 void DeviceTimeCorrectionDialog::refreshCurrentOffset()
@@ -405,10 +509,11 @@ void DeviceTimeCorrectionDialog::refreshCurrentOffset()
         ? tr("Large offset — consider using a different correction type.") : "");
 }
 
-/*! The table lists every active correction of every device, sorted by start date, so a
-    correction that does not cover the day shown in Daily can still be seen, found and
-    edited (GitLab #400). Rows in force on that day are bold. The two check boxes narrow
-    the list to the selected device and to the day shown. */
+/*! By default the table lists the corrections of the selected device that are in force on
+    the day shown in Daily. "Show all devices" and "Show all days with corrections" widen
+    it, so a correction that does not cover the day shown can still be seen, found and
+    edited (GitLab #400); rows that do not apply to that day are greyed. The label above the
+    table says how many saved corrections are not listed, so none is hidden silently. */
 void DeviceTimeCorrectionDialog::refreshHistory()
 {
     // Block signals for the entire population so Qt's auto-selection of row 0
@@ -424,9 +529,10 @@ void DeviceTimeCorrectionDialog::refreshHistory()
         return;
     }
 
-    const bool onlyDevice = ui->chkOnlyDevice->isChecked();
-    const bool onlyActive = ui->chkOnlyActive->isChecked() && m_date.isValid();
+    const bool onlyDevice = !ui->chkAllDevices->isChecked();
+    const bool onlyActive = !ui->chkAllDays->isChecked() && m_date.isValid();
     Machine* selected = currentMachine();
+    int total = 0;   // all active corrections, listed or not
 
     struct Entry {
         DeviceTimeCorrectionData row;
@@ -440,6 +546,7 @@ void DeviceTimeCorrectionDialog::refreshHistory()
         if (!Machine::isCorrectableType(mach->type()) || mach->getDatabaseId() <= 0) continue;
         const QList<DeviceTimeCorrectionData> rows = repo.findActive(mach->getDatabaseId());
         m_correctionCounts[mach] = rows.size();
+        total += rows.size();
         if (onlyDevice && mach != selected) continue;
         const QString device = deviceLabel(mach);
         for (const auto& r : rows) {
@@ -456,6 +563,10 @@ void DeviceTimeCorrectionDialog::refreshHistory()
     });
 
     const bool dark = Theme::isDark(palette());
+    const QColor muted = Theme::color(Theme::Role::Ink3, palette());
+    int greyed = 0;   // rows listed that do not apply to the day shown in Daily
+    QFont boldFont = ui->historyTable->font();
+    boldFont.setBold(true);
     ui->historyTable->setRowCount(entries.size());
     for (int i = 0; i < entries.size(); ++i) {
         const auto& r = entries[i].row;
@@ -478,31 +589,49 @@ void DeviceTimeCorrectionDialog::refreshHistory()
             appliedDateLocal
         };
 
-        const bool inForce = coversDate(r.dateFrom, r.dateTo, m_date);
+        // Rows that apply to the day shown are bold; rows for other dates are greyed, as
+        // devices with no data on that day are in the device list. A row looks the same
+        // whichever boxes are ticked.
+        const bool applies    = coversDate(r.dateFrom, r.dateTo, m_date);
+        const bool otherDates = m_date.isValid() && !applies;
+        if (otherDates) ++greyed;
         const QColor bg = typeTint(r.type, dark);
         for (int c = 0; c < kHistoryColumns; ++c) {
             auto* item = new QTableWidgetItem(cells[c]);
-            if (inForce) {
-                QFont f = item->font();
-                f.setBold(true);
-                item->setFont(f);
-            }
+            if (applies)    item->setFont(boldFont);
+            if (otherDates) item->setForeground(muted);
             if (bg.isValid()) item->setBackground(bg);
             ui->historyTable->setItem(i, c, item);
         }
     }
 
-    if (entries.isEmpty()) {
-        ui->activeDateLabel->setText((onlyDevice || onlyActive)
-            ? tr("No saved corrections match the boxes ticked on the right.")
-            : tr("No corrections have been saved."));
-    } else if (m_date.isValid()) {
-        ui->activeDateLabel->setText(
-            tr("Saved corrections. Rows in bold are in force on %1, the day shown in Daily.")
-                .arg(m_date.toString(Qt::ISODate)));
+    // What is listed, then how many saved corrections the two boxes leave out.
+    QString heading;
+    const QString day = m_date.toString(Qt::ISODate);
+    if (total == 0) {
+        heading = tr("No corrections have been saved.");
+    } else if (onlyActive) {
+        if (entries.isEmpty())
+            heading = onlyDevice ? tr("No corrections for the selected device on %1, the day shown in Daily.").arg(day)
+                                 : tr("No corrections on %1, the day shown in Daily.").arg(day);
+        else
+            heading = onlyDevice ? tr("Corrections for the selected device on %1, the day shown in Daily.").arg(day)
+                                 : tr("Corrections on %1, the day shown in Daily.").arg(day);
     } else {
-        ui->activeDateLabel->setText(tr("Saved corrections."));
+        if (entries.isEmpty())
+            heading = tr("No corrections for the selected device.");   // only reachable with onlyDevice
+        else
+            heading = onlyDevice ? tr("All corrections for the selected device.") : tr("All saved corrections.");
+        if (greyed > 0)
+            heading += " " + tr("Highlighted rows apply to %1, the day shown in Daily.").arg(day);
     }
+    const int hidden = total - entries.size();
+    qDebug() << "Time Corrections: listing" << entries.size() << "of" << total << "corrections; device"
+             << (selected ? deviceLabel(selected) : QStringLiteral("(none)")) << "day" << day
+             << "all devices" << !onlyDevice << "all days" << ui->chkAllDays->isChecked();
+    if (hidden > 0)
+        heading += " " + tr("Other saved corrections not listed: %1.").arg(hidden);
+    ui->activeDateLabel->setText(heading);
 
     refreshSidebarText();
     ui->historyTable->blockSignals(false);
@@ -594,9 +723,9 @@ void DeviceTimeCorrectionDialog::refreshSummary()
         summary = tr("The To date is before the From date.");
         warn = true;
     } else if (ms == 0 && m_staged.id == 0) {
-        summary = tr("Enter a time adjustment for %1.").arg(device);
+        summary = tr("Enter a time correction for %1.").arg(device);
     } else if (ms == 0) {
-        summary = tr("A zero adjustment removes this correction from %1.").arg(device);
+        summary = tr("A time of zero removes this correction from %1.").arg(device);
     } else {
         QString from, to;
         effectiveDateRange(from, to);
@@ -781,8 +910,8 @@ void DeviceTimeCorrectionDialog::onSaveStaged()
         return;
     }
     if (offsetMs == 0) {
-        setStatus(wasEdit ? tr("Correction removed: its adjustment was set to zero.")
-                          : tr("No correction stored: the adjustment is zero."));
+        setStatus(wasEdit ? tr("Correction removed: its time was set to zero.")
+                          : tr("No correction stored: the time is zero."));
         return;
     }
 
@@ -795,6 +924,15 @@ void DeviceTimeCorrectionDialog::onSaveStaged()
         msg += " " + tr("This device has no data on %1, so the graphs have not changed.")
                          .arg(m_date.toString(Qt::ISODate));
     }
+
+    // A correction for other dates is not in the default list. Widen the list so the new
+    // row can be seen and selected; without this it would seem to vanish (GitLab #400).
+    bool listed = false;
+    for (const auto& r : m_historyRows)
+        if (r.id == newId) { listed = true; break; }
+    if (!listed)
+        ui->chkAllDays->setChecked(true);   // toggled() refreshes the table
+
     setStatus(msg);
     selectHistoryRowById(newId);
 }
