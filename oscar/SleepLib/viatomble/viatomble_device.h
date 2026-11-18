@@ -100,6 +100,8 @@ class Device : public Link
     QLowEnergyCharacteristic m_writeChar;
     QLowEnergyCharacteristic m_notifyChar;
     QTimer m_connectTimer;
+    //! macOS: how long to wait for CoreBluetooth to confirm notifications before going on anyway.
+    QTimer m_notifyConfirmTimer;
     int m_mtu = 23;
     bool m_ready = false;
     bool m_acknowledgedWrites = false;   //!< write with response even if the device allows without

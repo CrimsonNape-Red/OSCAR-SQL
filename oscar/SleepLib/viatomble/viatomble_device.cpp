@@ -8,6 +8,7 @@
 
 #include <QBluetoothUuid>
 #include <QDebug>
+#include <QLoggingCategory>
 #include <QLowEnergyDescriptor>
 
 #ifdef OSCAR_BLE_BLUEZ_DBUS
@@ -33,12 +34,31 @@
 namespace ViatomBle {
 
 static const int CONNECT_TIMEOUT_MS = 20000;
+//! macOS: CoreBluetooth sometimes never confirms that notifications are on (seen on an
+//! Apple Silicon Mac with an O2Ring S, 2026-11-17). After this long, carry on regardless.
+static const int NOTIFY_CONFIRM_MS = 3000;
 
 Device::Device(QObject *parent)
     : Link(parent)
 {
     m_connectTimer.setSingleShot(true);
     connect(&m_connectTimer, &QTimer::timeout, this, &Device::onConnectTimeout);
+    m_notifyConfirmTimer.setSingleShot(true);
+    m_notifyConfirmTimer.setInterval(NOTIFY_CONFIRM_MS);
+    connect(&m_notifyConfirmTimer, &QTimer::timeout, this, [this]() {
+        if (m_ready || !m_service) {
+            return;
+        }
+        // Notifications are usually on by now even without the confirmation; the first
+        // request shows whether the device answers.
+        qWarning().noquote() << QStringLiteral("ViatomBle::Device: notifications not confirmed after %1 ms; "
+                                               "going on without the confirmation").arg(NOTIFY_CONFIRM_MS);
+        setReady();
+    });
+#ifdef Q_OS_MACOS
+    // Qt's own CoreBluetooth messages, so a log shows where a connection stops.
+    QLoggingCategory::setFilterRules(QStringLiteral("qt.bluetooth.darwin.debug=true"));
+#endif
 }
 
 Device::~Device()
@@ -73,6 +93,9 @@ void Device::connectToDevice(const QBluetoothDeviceInfo &info, DeviceFamily fami
     connect(m_controller, &QLowEnergyController::disconnected, this, &Device::onDisconnected);
     connect(m_controller, &QLowEnergyController::errorOccurred, this, &Device::onControllerError);
     connect(m_controller, &QLowEnergyController::discoveryFinished, this, &Device::onDiscoveryFinished);
+    connect(m_controller, &QLowEnergyController::stateChanged, this, [](QLowEnergyController::ControllerState state) {
+        qDebug() << "ViatomBle::Device: controller state" << state;
+    });
     connect(m_controller, &QLowEnergyController::mtuChanged, this, [this](int mtu) {
         qDebug() << "ViatomBle::Device: MTU now" << mtu;
         m_mtu = mtu;
@@ -85,6 +108,7 @@ void Device::connectToDevice(const QBluetoothDeviceInfo &info, DeviceFamily fami
 void Device::disconnectFromDevice()
 {
     m_connectTimer.stop();
+    m_notifyConfirmTimer.stop();
     m_ready = false;
     m_connection++;   // answers still on their way for this connection are ignored
 #ifdef OSCAR_BLE_BLUEZ_DBUS
@@ -112,6 +136,8 @@ void Device::disconnectFromDevice()
 void Device::fail(const QString &reason)
 {
     const bool wasReady = m_ready;
+    qWarning().noquote() << (wasReady ? "ViatomBle::Device: connection lost:" : "ViatomBle::Device: connection failed:")
+                         << reason;
     disconnectFromDevice();
     if (wasReady) {
         emit linkLost(reason);
@@ -136,7 +162,8 @@ void Device::onDisconnected()
 
 void Device::onControllerError(QLowEnergyController::Error error)
 {
-    Q_UNUSED(error);
+    qWarning().noquote() << "ViatomBle::Device: controller error" << int(error)
+                         << (m_controller ? m_controller->errorString() : QString());
     fail(tr("Bluetooth error: %1").arg(m_controller ? m_controller->errorString() : QString()));
 }
 
@@ -174,6 +201,7 @@ void Device::onDiscoveryFinished()
     connect(m_service, &QLowEnergyService::stateChanged, this, &Device::onServiceStateChanged);
     connect(m_service, &QLowEnergyService::characteristicChanged, this, &Device::onCharacteristicChanged);
     connect(m_service, &QLowEnergyService::errorOccurred, this, [this](QLowEnergyService::ServiceError error) {
+        qWarning() << "ViatomBle::Device: service error" << int(error) << (m_ready ? "while connected" : "while connecting");
         if (!m_ready) {
             // e.g. notifications could not be enabled: say so now rather than at the timeout
             fail(tr("The Viatom data service reported an error (%1).").arg(int(error)));
@@ -222,6 +250,8 @@ void Device::enableQtNotifications()
         fail(tr("Notifications cannot be enabled on this device."));
         return;
     }
+    qDebug().noquote() << "ViatomBle::Device: enabling notifications; descriptor value now"
+                       << (cccd.value().isEmpty() ? QStringLiteral("(not read)") : QString::fromLatin1(cccd.value().toHex()));
     connect(m_service, &QLowEnergyService::descriptorWritten, this,
             [this](const QLowEnergyDescriptor &, const QByteArray &value) {
                 if (!m_ready) {
@@ -235,11 +265,15 @@ void Device::enableQtNotifications()
                 qDebug() << "ViatomBle::Device: write acknowledged," << value.size() << "bytes";
             });
     m_service->writeDescriptor(cccd, QByteArray::fromHex("0100"));
+#ifdef Q_OS_MACOS
+    m_notifyConfirmTimer.start();
+#endif
 }
 
 void Device::setReady()
 {
     m_connectTimer.stop();
+    m_notifyConfirmTimer.stop();
     m_ready = true;
     if (m_controller && m_controller->mtu() > 0) {
         m_mtu = m_controller->mtu();

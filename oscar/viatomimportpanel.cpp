@@ -693,6 +693,7 @@ void ViatomImportPanel::onDeviceReady()
 
 void ViatomImportPanel::onConnectFailed(const QString &reason)
 {
+    qDebug().noquote() << "ViatomBleImport: could not connect:" << reason;
     closeConnection();
     showPage(DevicesPage);
     m_rescanButton->setEnabled(true);
