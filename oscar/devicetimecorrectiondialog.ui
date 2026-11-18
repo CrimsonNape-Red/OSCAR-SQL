@@ -3,7 +3,7 @@
  <class>DeviceTimeCorrectionDialog</class>
  <widget class="QDialog" name="DeviceTimeCorrectionDialog">
   <property name="geometry">
-   <rect><x>0</x><y>0</y><width>820</width><height>640</height></rect>
+   <rect><x>0</x><y>0</y><width>900</width><height>720</height></rect>
   </property>
   <property name="windowTitle">
    <string>Time Corrections</string>
@@ -120,52 +120,71 @@
          </layout>
         </item>
 
-        <!-- Date range: checkbox + collapsible fields -->
+        <!-- Dates the correction covers: always visible, so the user sees what will be saved -->
         <item>
-         <widget class="QCheckBox" name="chkDateRange">
-          <property name="text"><string>Apply to date range</string></property>
+         <widget class="QLabel">
+          <property name="text"><string>Dates Covered</string></property>
          </widget>
         </item>
         <item>
-         <widget class="QWidget" name="dateRangeWidget">
-          <property name="visible"><bool>false</bool></property>
-          <layout class="QGridLayout">
-           <property name="margin"><number>0</number></property>
-           <item row="0" column="0">
-            <widget class="QLabel"><property name="text"><string>Start:</string></property></widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLabel"><property name="text"><string>End:</string></property></widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QDateEdit" name="advStartDate">
-             <property name="calendarPopup"><bool>false</bool></property>
-             <property name="displayFormat"><string>yyyy-MM-dd</string></property>
-             <property name="currentSection"><enum>QDateTimeEdit::DaySection</enum></property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QDateEdit" name="advEndDate">
-             <property name="calendarPopup"><bool>false</bool></property>
-             <property name="displayFormat"><string>yyyy-MM-dd</string></property>
-             <property name="currentSection"><enum>QDateTimeEdit::DaySection</enum></property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QCheckBox" name="advEndDateCheck">
-             <property name="text"><string>No end</string></property>
-            </widget>
-           </item>
-           <item row="1" column="3">
-            <spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer>
-           </item>
-          </layout>
+         <layout class="QGridLayout" name="dateRangeLayout">
+          <item row="0" column="0">
+           <widget class="QLabel"><property name="text"><string>From:</string></property></widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDateEdit" name="advStartDate">
+            <property name="calendarPopup"><bool>false</bool></property>
+            <property name="displayFormat"><string>yyyy-MM-dd</string></property>
+            <property name="currentSection"><enum>QDateTimeEdit::DaySection</enum></property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel"><property name="text"><string>To:</string></property></widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDateEdit" name="advEndDate">
+            <property name="calendarPopup"><bool>false</bool></property>
+            <property name="displayFormat"><string>yyyy-MM-dd</string></property>
+            <property name="currentSection"><enum>QDateTimeEdit::DaySection</enum></property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QCheckBox" name="advEndDateCheck">
+            <property name="text"><string>No end</string></property>
+            <property name="toolTip"><string>The correction continues for every later night</string></property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer>
+          </item>
+         </layout>
+        </item>
+
+        <!-- Plain-language summary of what Save will store, and the day's total for this device -->
+        <item>
+         <widget class="QLabel" name="summaryLabel">
+          <property name="text"><string></string></property>
+          <property name="wordWrap"><bool>true</bool></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="totalLabel">
+          <property name="text"><string></string></property>
+          <property name="wordWrap"><bool>true</bool></property>
          </widget>
         </item>
 
         <item><spacer><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
 
-        <!-- Save / Cancel / Clear | Delete -->
+        <!-- Result of the last Save, Delete or Show in Daily -->
+        <item>
+         <widget class="QLabel" name="statusLabel">
+          <property name="text"><string></string></property>
+          <property name="wordWrap"><bool>true</bool></property>
+         </widget>
+        </item>
+
+        <!-- Save / Cancel / Clear | Show in Daily / Delete -->
         <item>
          <layout class="QHBoxLayout">
           <item>
@@ -193,6 +212,12 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="btnShowInDaily">
+            <property name="text"><string>Show in Daily</string></property>
+            <property name="toolTip"><string>Show the first day the selected correction applies to in the Daily view</string></property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="btnDeleteRow">
             <property name="text"><string>Delete Correction</string></property>
            </widget>
@@ -210,18 +235,35 @@
        <property name="margin"><number>4</number></property>
 
        <item>
-        <widget class="QLabel" name="activeDateLabel">
-         <property name="text"><string>Showing corrections active on —</string></property>
-         <property name="styleSheet"><string>font-style: italic; color: #555555;</string></property>
-        </widget>
+        <layout class="QHBoxLayout" name="historyHeaderLayout">
+         <item>
+          <widget class="QLabel" name="activeDateLabel">
+           <property name="text"><string>All saved corrections.</string></property>
+          </widget>
+         </item>
+         <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+         <item>
+          <widget class="QCheckBox" name="chkOnlyDevice">
+           <property name="text"><string>Only the selected device</string></property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="chkOnlyActive">
+           <property name="text"><string>Only the day shown in Daily</string></property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="QTableWidget" name="historyTable">
+         <property name="toolTip"><string>Click a correction to edit it. Double-click it to show its first day in the Daily view.</string></property>
          <property name="selectionBehavior"><enum>QAbstractItemView::SelectRows</enum></property>
          <property name="selectionMode"><enum>QAbstractItemView::SingleSelection</enum></property>
          <property name="editTriggers"><set>QAbstractItemView::NoEditTriggers</set></property>
+         <property name="tabKeyNavigation"><bool>false</bool></property>
          <column><property name="text"><string>Device</string></property></column>
-         <column><property name="text"><string>Date Range</string></property></column>
+         <column><property name="text"><string>From</string></property></column>
+         <column><property name="text"><string>To</string></property></column>
          <column><property name="text"><string>Type</string></property></column>
          <column><property name="text"><string>Offset</string></property></column>
          <column><property name="text"><string>Added</string></property></column>
@@ -267,6 +309,25 @@
    <header>borrowingtimeedit.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>deviceSidebar</tabstop>
+  <tabstop>correctionTypeCombo</tabstop>
+  <tabstop>btnOffsetSign</tabstop>
+  <tabstop>offsetTimeEdit</tabstop>
+  <tabstop>btnApplyLastNight</tabstop>
+  <tabstop>btnResetToZero</tabstop>
+  <tabstop>advStartDate</tabstop>
+  <tabstop>advEndDate</tabstop>
+  <tabstop>advEndDateCheck</tabstop>
+  <tabstop>btnSaveCorrection</tabstop>
+  <tabstop>btnDiscardChanges</tabstop>
+  <tabstop>btnClearCorrection</tabstop>
+  <tabstop>btnShowInDaily</tabstop>
+  <tabstop>btnDeleteRow</tabstop>
+  <tabstop>chkOnlyDevice</tabstop>
+  <tabstop>chkOnlyActive</tabstop>
+  <tabstop>historyTable</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

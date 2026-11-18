@@ -2330,8 +2330,14 @@ void MainWindow::on_actionTime_Corrections_triggered()
         connect(m_correctionDialog, &QObject::destroyed, this, [this]() {
             m_correctionDialog = nullptr;
         });
-        connect(m_correctionDialog, &DeviceTimeCorrectionDialog::correctionsChanged,
-                daily, &Daily::redrawWithZoom);
+        // Both go through the current Daily page: it is replaced when the pages are rebuilt
+        // (a theme change, for one), and a connection to the old page would be lost.
+        connect(m_correctionDialog, &DeviceTimeCorrectionDialog::correctionsChanged, this, [this]() {
+            if (daily) daily->redrawWithZoom();
+        });
+        connect(m_correctionDialog, &DeviceTimeCorrectionDialog::dateRequested, this, [this](const QDate& date) {
+            if (daily) daily->LoadDate(date);
+        });
     }
     m_correctionDialog->setDate(daily->getDate());
     m_correctionDialog->show();

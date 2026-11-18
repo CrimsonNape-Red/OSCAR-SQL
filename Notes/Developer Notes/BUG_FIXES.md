@@ -8370,3 +8370,66 @@ The status line's colour is given to the label as a colour, not through its pale
 - Reproduced and checked with a small Qt program (page palette white, children dark, after a second
   restyle), then in the app: started light, switched to dark, full-height screenshot has no white.
   Dark to light, Linux and macOS (no application style sheet there) were not checked.
+
+## 2026-11-17 - Time Corrections: saved corrections and devices hidden by the day shown in Daily (GitLab #400)
+
+**Files:** `oscar/devicetimecorrectiondialog.cpp` / `.h` / `.ui`, `oscar/mainwindow.cpp`
+(`on_actionTime_Corrections_triggered()`)
+
+**Status:** on branch `time-corrections-all-dates`, not yet merged to master.
+
+**Symptom:** A correction saved for dates other than the day shown in Daily seemed to do nothing:
+it was stored but never listed, and could not be found again without going to a day it covered. A
+device with no data on the day shown was missing from the device list, so it could not be
+corrected from that day. Moving to a day on which the selected device had no data switched the
+selection to the first CPAP without notice, and the next correction went to the wrong device. Two
+device records of one model could not be told apart in the editor.
+
+**Root cause:** The dialog was scoped to the day shown in Daily, but a correction is a date range
+that often lies outside that day. `refreshHistory()` listed only the rows whose range contained
+the day, `populateSidebar()` skipped devices without data on it and fell back to the first CPAP
+when the previous device was no longer listed, and Save reset the editor with no message. The
+dates were hidden behind "Apply to date range", and the editor header showed brand and model only.
+
+**Fix:** The dialog is profile-wide; the day shown in Daily only marks rows, dates a new
+correction and drives the preview.
+- The table lists every active correction of every device, sorted by start date, with From and
+  To columns. Rows in force on the day shown are bold. Two check boxes narrow the list to the
+  selected device and to the day shown.
+- The device list shows every correctable device with its serial number, the span of its data and
+  its number of corrections; devices with no data on the day shown are dimmed, not hidden. The
+  selection is kept across a change of day.
+- From / To / "No end" are always visible. A summary line says what Save will store, for which
+  device, and whether the graphs can show it. A total line gives the sum of all corrections for
+  the device on the day shown.
+- Save reports what was stored in a status line and selects the new row.
+- "Show in Daily" (or a double-click) moves Daily to the first day in the correction's dates on
+  which the device has data.
+- Deleting a correction that does not cover the day shown asks for confirmation and removes it
+  whole; "close from" and "remove only" are relative to that day and are offered only when the
+  correction covers it.
+
+**Also fixed while there:**
+- The preview dropped an active drift model: `previewStaged()` built its rows without the `type`,
+  and `Machine::correctionMs()` tells a drift row from a constant one by it. While a correction
+  was being edited on a CPAP with a drift model, the graphs showed the CPAP without its drift.
+  Found by reading the code; not reproduced, the test profile has no drift model.
+- A To date before the From date could be saved. Save is now disabled and the summary says why.
+- Tab could not leave the corrections table (`tabKeyNavigation`); the dialog now has a tab order.
+- The row tints and label colours were fixed light-theme colours; they now follow the palette.
+
+**Non-obvious:**
+- After a Save the new row is selected but the editor stays on "New correction". Loading the row
+  for editing instead would make the next entry (the next year's DST change, say) replace the one
+  just saved. `itemClicked` / `itemActivated` load a row that is already selected.
+- `done()` reverts an unsaved preview as `closeEvent()` does. Whether the Close button reached
+  `closeEvent()` before was not checked on the old build.
+- `Daily::LoadDate()` is asynchronous (zero timer), so the dialog learns the new day through
+  `Daily::dateLoaded`, not on return from the `dateRequested` signal.
+- The two dialog signals are connected through `MainWindow` lambdas that use the current `daily`
+  pointer; a direct connection to the Daily page is lost when the page is rebuilt.
+- Checked on Windows in a running build through UI Automation and key presses posted to the
+  dialog: save for the day shown; a future-dated DST range on a device with no data that day;
+  the To-before-From warning; delete with confirmation; load a row by keyboard and change its
+  dates; Show in Daily; Close with an unsaved preview. Not checked: mouse interaction, dark theme,
+  the delete choices for a range covering the day shown, Reuse Previous, drift rows, Linux, macOS.
