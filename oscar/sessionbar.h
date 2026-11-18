@@ -43,9 +43,11 @@ class SessionBar : public QWidget
     void add(Session *sess, QColor col) { if (sess) { segments.push_back(SBSeg(sess, col)); } }
     void setSelectMode(bool b) { m_selectMode = b; }
     void setSelectColor(QColor col) { m_selectColor = col; }
-    /*! \brief Theme colours (Modern Daily): the outline and the "No Sessions Present" text in
-        the secondary text colour, a switched-off session filled with the "worse" tint and
-        outlined in its line colour, its text in the theme's text colour. Off by default. */
+    /*! \brief Theme look (Modern Daily): each session is an outline box on the page background,
+        with no frame around the bar. Outlines alternate between amber and blue in both the
+        light and dark palettes (the colour given to add() is not used); a switched-off session
+        is outlined in the theme's "worse" colour. Text is in the theme's text colour, and the
+        segment under the mouse gets a pale fill of its outline colour. Off by default. */
     void setThemed(bool themed) { m_themed = themed; update(); }
     int count() { return segments.size(); }
     int selected() { return m_selectIDX; }

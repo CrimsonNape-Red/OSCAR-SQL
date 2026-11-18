@@ -18,6 +18,20 @@
 #include "Graphs/glcommon.h"
 #include "sessionbar.h"
 
+namespace {
+
+//! \brief Outline colours of the themed bar's alternating segments, by segment parity.
+//!        The same pair serves the light and dark palettes.
+const QColor kThemedOutline[2] = {
+    QColor(0xb5, 0x82, 0x1f),       // amber
+    QColor(0x2f, 0x80, 0xc8),       // blue
+};
+
+constexpr int kThemedOutlineWidth = 2;      //!< Pen width of a themed segment's outline
+constexpr int kThemedHoverAlpha = 48;       //!< Opacity (0-255) of the outline colour under the mouse
+
+} // namespace
+
 SBSeg::SBSeg()
 {
     session = nullptr;
@@ -214,8 +228,8 @@ void SessionBar::paintEvent(QPaintEvent *)
 
     QRect rect(1, 1, width() - 2, height() - 2);
 
-    if (m_themed) painter.setPen(Theme::color(Theme::Role::Ink2));
-    painter.drawRect(rect);
+    // Themed: each segment is its own outline box, so the bar has no frame around it
+    if (!m_themed) painter.drawRect(rect);
 
     SegType mn = min();
     SegType mx = max();
@@ -249,6 +263,36 @@ void SessionBar::paintEvent(QPaintEvent *)
         QString msg = tr("%1h %2m").arg((short)h, 1, 10, QChar('0')).arg((short)m, 1, 10, QChar('0'));
         QRect segrect(3 + sx, 3, ex, height() - 6);
 
+        if (m_themed) {
+            // Modern: an outline box on the page background rather than a block of colour.
+            // Alternating colours tell neighbours apart; a switched-off session is outlined
+            // in the "worse" colour. The segment under the mouse gets a pale fill.
+            const QColor line = seg.session->enabled() ? kThemedOutline[cnt % 2]
+                                                       : Theme::color(Theme::Role::Bad);
+            // Pulled in at the sides so that adjoining sessions' outlines stay apart
+            QRect box = segrect.adjusted(kThemedOutlineWidth, 0, -kThemedOutlineWidth, 0);
+            if (box.width() < 1) box = segrect;
+
+            if (seg.highlight) {
+                QColor tint = line;
+                tint.setAlpha(kThemedHoverAlpha);
+                painter.fillRect(box, tint);
+            }
+
+            if (painter.boundingRect(segrect, Qt::AlignCenter, msg).width() < box.width()) {
+                painter.setPen(Theme::color(Theme::Role::Ink));
+                painter.drawText(segrect, Qt::AlignCenter, msg);
+            }
+
+            QPen pen(line, kThemedOutlineWidth);
+            if (m_selectMode && (cnt == m_selectIDX)) pen = QPen(m_selectColor, 3);
+            pen.setJoinStyle(Qt::MiterJoin);
+            painter.setPen(pen);
+            painter.drawRect(box);
+            cnt++;
+            continue;
+        }
+
         if (seg.session->enabled()) {
             QLinearGradient linearGrad(QPointF(0, 0), QPointF(0, height() / 2));
             linearGrad.setSpread(QGradient::ReflectSpread);
@@ -260,9 +304,6 @@ void SessionBar::paintEvent(QPaintEvent *)
             linearGrad.setColorAt(1, brighten(col));
             QBrush brush(linearGrad);
             painter.fillRect(segrect, brush);
-        } else if (m_themed) {
-            // A switched-off session, tinted rather than left empty
-            painter.fillRect(segrect, Theme::color(Theme::Role::BadTint));
         } else {
             if (seg.highlight) {
                 QColor col = QColor("#f0f0f0");
@@ -274,15 +315,13 @@ void SessionBar::paintEvent(QPaintEvent *)
         QRect rect = painter.boundingRect(segrect, Qt::AlignCenter, msg);
 
         if (rect.width() < segrect.width()) {
-            painter.setPen((m_themed && !seg.session->enabled()) ? Theme::color(Theme::Role::Ink) : QColor(Qt::black));
+            painter.setPen(QColor(Qt::black));
             painter.drawText(segrect, Qt::AlignCenter, msg);
         }
 
 
         if (m_selectMode && (cnt == m_selectIDX)) {
             painter.setPen(QPen(m_selectColor, 3));
-        } else if (m_themed) {
-            painter.setPen(QPen(Theme::color(seg.session->enabled() ? Theme::Role::Ink2 : Theme::Role::BadLine), 1));
         } else {
             painter.setPen(QPen(Qt::black, 1));
         }
