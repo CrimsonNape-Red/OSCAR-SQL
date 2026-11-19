@@ -210,9 +210,14 @@ void Device::onDiscoveryFinished()
             qWarning() << "ViatomBle::Device: service error" << int(error);
         }
     });
-#if QT_VERSION >= QT_VERSION_CHECK(6, 2, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 2, 0) && !defined(Q_OS_MACOS)
     // The characteristic values aren't needed, and on Windows reading them sometimes
     // fails ("Could not read characteristic value"), which aborts the connection.
+    // Not on macOS: there Qt's SkipValueDiscovery stops after the characteristics and never
+    // discovers their descriptors, so the notify characteristic has no CCCD and
+    // notifications can't be enabled (seen with an O2Ring S on an Apple Silicon Mac,
+    // Qt 6.12, 2026-11-18; Qt's darwin/btcentralmanager.mm only discovers descriptors
+    // on the path that also reads values).
     m_service->discoverDetails(QLowEnergyService::SkipValueDiscovery);
 #else
     m_service->discoverDetails();
