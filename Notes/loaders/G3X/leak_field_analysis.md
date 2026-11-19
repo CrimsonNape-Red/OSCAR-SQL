@@ -35,6 +35,15 @@ median scale of 0.092 (mean, 61 nights), 0.096 (95th percentile, 71 nights) and 
 contradicts the 0.16 calibrated earlier against the vendor program on a single SC.72 card,
 which is no longer available to re-check.
 
+**The vendor program displays these IDX statistics.** On a second G3 A20 `G3-2.11.03.12`
+card its leak figures for two nights equal IT `0x90`–`0x94` exactly (max 4.0 / mean 0.1,
+and max 17.0 / 95th 6.0 / mean 0.5). On the calibration card itself, one night reads
+mean 34.2 / median 39.0 / 95th 55.0 / max 66.0 in the vendor program, identical to the IDX;
+0x52A for that night gives mean 34.2 / median 39.2 at 0.10, against 54.7 / 62.7 at 0.16.
+So the ~0.10 scale is tied to what the vendor program reports, by way of the IDX; the
+vendor program's leak *graph* has not been compared with 0x52A directly. 0x52A is not vent flow: on a fixed-pressure night it moves from 0 to
+19 L/min and back.
+
 **Still unverified:** that 0x52A is populated on G3-2.12 firmware. The only evidence is
 the report's three nights; no G3-2.12 card with waveform data was available here. Note that
 a mostly-zero 0x52A does not mean a dead field: on the 2.11 card, nights with 2–5% non-zero
