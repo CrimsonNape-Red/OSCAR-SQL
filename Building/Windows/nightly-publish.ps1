@@ -5,7 +5,10 @@
 #
 # Copyright (c) 2026 The OSCAR Team
 #
-# Called by nightly-build.bat after a successful build. Steps:
+# Called by nightly-build.bat after a successful build. The download files are kept in the
+# oscar-nightly project's GitLab package registry under their original names, one package
+# per platform and build: oscar-windows/<hash>, oscar-linux/<hash>, oscar-macos/<hash>, plus
+# oscar-checksums/<timestamp>. Steps:
 #   1. Find the Windows installer and portable ZIP just built, and take the commit hash
 #      from the installer name (OSCAR-<version>-Win64-<hash>.exe).
 #   2. Choose a Linux build from the shared Linux folder, whose subfolders are named
@@ -13,40 +16,37 @@
 #      otherwise use the most recent complete one. "Complete" means it has a package for
 #      every Linux download on the page, and every package matches the folder's
 #      checksumSHA256.txt (which also catches files still being synced).
-#      If no Linux build is newer than the one already published, the Linux files are left
-#      as they are.
-#   2b. Take the macOS build from the Mac folder, which holds a single universal .dmg
+#      If no Linux build is newer than the one already published, Linux is left as it is.
+#   3. Take the macOS build from the Mac folder, which holds a single universal .dmg
 #      (OSCAR-<version>-<hash>-macOS-universal.dmg) built before this script runs. It is
 #      published if its hash differs from the page's and the file is whole (it ends with the
 #      UDIF "koly" trailer, so a file still syncing is skipped).
-#   3. Copy the files into the Dropbox Nightly folder under fixed names, overwriting the
-#      previous files in place so their Dropbox shared links keep working.
-#   4. Rewrite OSCAR-nightly-checksums.txt.
-#   5. Set the build date and the Windows, Linux and macOS build ids in the page, then
-#      commit and push.
+#   4. Upload the new files, then a checksums file built from the registry's own SHA256 of
+#      every file the page will link to.
+#   5. Set the build date, build ids and download links in the page; commit and push.
+#   6. Delete the packages the page no longer links to.
 #
-# Only files whose fixed name already exists in the Nightly folder are replaced, because
-# only those have shared links in the page. A Linux package with a new name is reported
-# in the log but not copied.
+# Download links in the page are <a data-dl="KEY" href="...">file name</a>; this script
+# rewrites the whole element. Keys: Win64, Win64-Portable, macOS-universal, checksums, and
+# <Distro>_<arch>-Qt6 for each Linux package (e.g. Debian12_amd64-Qt6).
 #
-# Exit codes: 0 = published, 1 = error.
+# Needs a GitLab token with api scope in the GITLAB_TOKEN environment variable.
 #
-# Files already published (same build id on the page) are not copied again, and if nothing
-# is new the files and page are left unchanged.
+# Exit codes: 0 = published (or nothing new), 1 = error.
 #
 # Usage: powershell -NoProfile -ExecutionPolicy Bypass -File nightly-publish.ps1 [options]
 #   -SkipWindows no new Windows build tonight: publish newer Linux/macOS builds only
 #                (-LinuxOnly is accepted as an older name for it)
-#   -SkipLinux   leave the Linux files and id as they are (for testing)
-#   -SkipMac     leave the macOS file and id as they are (for testing)
-#   -NoPush      commit the page locally but do not push it
+#   -SkipLinux   leave Linux as it is (for testing)
+#   -SkipMac     leave macOS as it is (for testing)
+#   -NoPush      commit the page locally, do not push it or delete old packages (for testing)
 
 param(
     [string]$InstallerDir = 'C:\OSCAR\OSCAR-code\build-oscar-win_64_bit\Installer',
-    [string]$NightlyDir   = "$env:USERPROFILE\Dropbox\OSCAR Files\Nightly",
     [string]$LinuxRoot    = "$env:USERPROFILE\Dropbox\tranfert_deb",
     [string]$MacRoot      = "$env:USERPROFILE\Dropbox\Nightly",
     [string]$PageRepo     = 'C:\OSCAR\OSCAR-nightly',
+    [string]$ProjectId    = '88962889',     # Seeker4/oscar-nightly
     [Alias('LinuxOnly')]
     [switch]$SkipWindows,
     [switch]$SkipLinux,
@@ -54,10 +54,11 @@ param(
     [switch]$NoPush
 )
 
-$MacTarget = 'OSCAR-nightly-macOS-universal.dmg'
-
 $ErrorActionPreference = 'Stop'
+$ProgressPreference    = 'SilentlyContinue'     # the progress bar makes uploads very slow
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+$Api = "https://gitlab.com/api/v4/projects/$ProjectId"
 
 # Writes straight to the console (stdout), not the PowerShell output stream: anything a
 # function writes to the output stream becomes part of its return value.
@@ -93,16 +94,14 @@ function Get-PageSpan([string]$html, [string]$id) {
     return $null
 }
 
-# Maps a Linux package name to its fixed name in the Nightly folder, or $null.
-# oscar20-test_2.2.0-alpha-1-Debian12_amd64-Qt6.deb -> oscar20-nightly-Debian12_amd64-Qt6.deb
-function Get-DebTarget([string]$name) {
-    if ($name -match '-((?:Debian|Ubuntu|RasPiOS-?)\d+_[A-Za-z0-9]+-Qt6)\.deb$') {
-        return "oscar20-nightly-$($Matches[1]).deb"
-    }
+# Maps a Linux package name to its page key, or $null.
+# oscar20-test_2.2.0-alpha-1-Debian12_amd64-Qt6.deb -> Debian12_amd64-Qt6
+function Get-DebKey([string]$name) {
+    if ($name -match '-((?:Debian|Ubuntu|RasPiOS-?)\d+_[A-Za-z0-9]+-Qt6)\.deb$') { return $Matches[1] }
     return $null
 }
 
-# Checks one Linux build folder. Returns an ordered map (source path -> fixed name) if the
+# Checks one Linux build folder. Returns an ordered map (source path -> page key) if the
 # build is complete, or $null. The packages are sometimes also in a subfolder of the same
 # name, so that is tried as well.
 function Get-CompleteLinuxBuild($dir, [string[]]$expected) {
@@ -120,13 +119,13 @@ function Get-CompleteLinuxBuild($dir, [string[]]$expected) {
         $map = [ordered]@{}
         $ok = $true
         foreach ($deb in Get-ChildItem -LiteralPath $candidate -Filter '*.deb' -File) {
-            $target = Get-DebTarget $deb.Name
-            if (-not $target) {
-                Log "  WARNING: Unrecognised Linux package name, not copied: $($deb.Name)"
+            $key = Get-DebKey $deb.Name
+            if (-not $key) {
+                Log "  WARNING: Unrecognised Linux package name, not published: $($deb.Name)"
                 continue
             }
-            if ($expected -notcontains $target) {
-                Log "  WARNING: $($deb.Name) has no download link yet ($target); not copied."
+            if ($expected -notcontains $key) {
+                Log "  WARNING: $($deb.Name) has no download link on the page ($key); not published."
                 continue
             }
             if ($sums.Count -gt 0) {
@@ -140,7 +139,7 @@ function Get-CompleteLinuxBuild($dir, [string[]]$expected) {
                     $ok = $false; break
                 }
             }
-            $map[$deb.FullName] = $target
+            $map[$deb.FullName] = $key
         }
         if (-not $ok) { continue }
 
@@ -166,10 +165,86 @@ function Test-DmgComplete([string]$path) {
     }
 }
 
-try {
-    if (-not (Test-Path $NightlyDir)) { Fail "Nightly folder not found: $NightlyDir" }
+# ---- GitLab package registry ----
 
-    # The page records which Windows and Linux builds are currently published.
+function Get-Token {
+    $t = $env:GITLAB_TOKEN
+    if (-not $t) { $t = [Environment]::GetEnvironmentVariable('GITLAB_TOKEN', 'User') }
+    if (-not $t) { $t = [Environment]::GetEnvironmentVariable('GITLAB_TOKEN', 'Machine') }
+    if (-not $t) { Fail 'GITLAB_TOKEN is not set; it is needed to upload to the package registry.' }
+    return $t
+}
+
+function Invoke-Api([string]$method, [string]$path, [string]$inFile) {
+    $p = @{ Method = $method; Uri = "$Api/$path"; Headers = @{ 'PRIVATE-TOKEN' = $script:Token } }
+    if ($inFile) { $p.InFile = $inFile; $p.ContentType = 'application/octet-stream' }
+    # PowerShell 5.1's Invoke-RestMethod emits a JSON array as one object; assigning it and
+    # writing the variable out unrolls it, so callers get one item per array element.
+    $r = Invoke-RestMethod @p
+    $r
+}
+
+# All generic packages called $name (the API's name filter is a partial match).
+function Get-Packages([string]$name) {
+    $all = @(); $page = 1
+    do {
+        $batch = @(Invoke-Api GET "packages?package_type=generic&package_name=$name&per_page=100&page=$page")
+        $all += $batch; $page++
+    } while ($batch.Count -eq 100)
+    return @($all | Where-Object { $_.name -eq $name })
+}
+
+# file name -> sha256 for the files in package $name/$version (empty if it does not exist).
+function Get-PackageFiles([string]$name, [string]$version) {
+    $files = @{}
+    foreach ($p in (Get-Packages $name | Where-Object { $_.version -eq $version })) {
+        foreach ($f in @(Invoke-Api GET "packages/$($p.id)/package_files?per_page=100")) {
+            $files[$f.file_name] = $f.file_sha256
+        }
+    }
+    return $files
+}
+
+function Get-DownloadUrl([string]$name, [string]$version, [string]$file) {
+    return "$Api/packages/generic/$name/$version/$file"
+}
+
+# Uploads $path into package $name/$version unless the same file is already there.
+function Publish-File([string]$name, [string]$version, [string]$path, $existing) {
+    $file = Split-Path $path -Leaf
+    $sha = (Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash.ToLower()
+    if ($existing[$file] -eq $sha) {
+        Log "  $file is already uploaded."
+        return
+    }
+    # Upload a temporary copy: Invoke-RestMethod -InFile opens the file for writing, which
+    # fails on the read-only files in a shared Dropbox folder.
+    $tmpDir = Join-Path $env:TEMP 'oscar-nightly-upload'
+    [void](New-Item -ItemType Directory -Force -Path $tmpDir)
+    $tmp = Join-Path $tmpDir $file
+    Copy-Item -LiteralPath $path -Destination $tmp -Force
+    try {
+        Set-ItemProperty -LiteralPath $tmp -Name IsReadOnly -Value $false
+        $r = Invoke-Api PUT "packages/generic/$name/$version/$file`?select=package_file" $tmp
+    } finally {
+        Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
+    }
+    if ($r.file_sha256 -ne $sha) { Fail "Upload of $file did not verify (SHA256 $($r.file_sha256), expected $sha)" }
+    Log "  Uploaded $file -> $name/$version"
+}
+
+# Replaces every <a data-dl="$key" ...>...</a> in $html.
+function Set-PageLink([string]$html, [string]$key, [string]$url, [string]$text) {
+    $pattern = '<a data-dl="' + [regex]::Escape($key) + '"[^>]*>[^<]*</a>'
+    if ($html -notmatch $pattern) { Fail "Page has no <a data-dl=`"$key`">" }
+    $a = '<a data-dl="' + $key + '" href="' + $url + '">' + $text + '</a>'
+    return [regex]::Replace($html, $pattern, { param($m) $a })
+}
+
+try {
+    $script:Token = Get-Token
+
+    # The page records which builds are currently published.
     Git pull --quiet --ff-only origin master
     $page = Join-Path $PageRepo 'public\index.html'
     $html = [System.IO.File]::ReadAllText($page, $utf8NoBom)
@@ -179,39 +254,36 @@ try {
     if ($null -eq $currentWindows) { Fail 'Page has no <span id="buildIdWindows">' }
     if ($null -eq $currentLinux)   { Fail 'Page has no <span id="buildIdLinux">' }
     if ($null -eq $currentMac)     { Fail 'Page has no <span id="buildIdMac">' }
-    $linuxHash = $currentLinux
-    $macHash   = $currentMac
+    $winHash = $currentWindows; $linuxHash = $currentLinux; $macHash = $currentMac
 
-    # Source -> fixed name in the Nightly folder.
-    $copies = [ordered]@{}
+    # New files to publish: package name -> @{ version; files = [ordered]@{ path -> page key } }
+    $uploads = [ordered]@{}
 
     # ---------------------------------------------------------------------
     # Step 1: Windows files and the commit hash.
-    #         With -SkipWindows (no new Windows build tonight) the installer
-    #         folder is not looked at; the published Windows build stays.
     # ---------------------------------------------------------------------
     if ($SkipWindows) {
-        $winHash = $currentWindows
         Log "No new Windows build; Windows build $winHash kept."
     } else {
         $exe = Get-ChildItem -Path $InstallerDir -Filter 'OSCAR-*-Win64-*.exe' -File -ErrorAction SilentlyContinue |
                Sort-Object LastWriteTime -Descending | Select-Object -First 1
         if (-not $exe) { Fail "No installer found in $InstallerDir" }
-
         if ($exe.BaseName -notmatch '-Win64-([0-9a-fA-F]{7,40})$') {
             Fail "Cannot take a commit hash from $($exe.Name) (a '-plus' build has uncommitted changes)"
         }
-        $winHash = $Matches[1].ToLower()
-
+        $exeHash = $Matches[1].ToLower()
         $zip = Join-Path $InstallerDir ($exe.BaseName + '-Portable.zip')
         if (-not (Test-Path $zip)) { Fail "Portable ZIP not found: $zip" }
 
-        if ($winHash -eq $currentWindows) {
-            Log "Windows build $winHash is already published; not copied again."
+        if ($exeHash -eq $currentWindows) {
+            Log "Windows build $exeHash is already published."
         } else {
-            Log "Windows build: $($exe.Name) (commit $winHash)"
-            $copies[$exe.FullName] = 'OSCAR-nightly-Win64.exe'
-            $copies[$zip]          = 'OSCAR-nightly-Win64-Portable.zip'
+            $winHash = $exeHash
+            Log "Windows build: $($exe.Name)"
+            $files = [ordered]@{}
+            $files[$exe.FullName] = 'Win64'
+            $files[$zip]          = 'Win64-Portable'
+            $uploads['oscar-windows'] = @{ version = $winHash; files = $files }
         }
     }
 
@@ -219,11 +291,12 @@ try {
     # Step 2: Choose the Linux build.
     # ---------------------------------------------------------------------
     if ($SkipLinux) {
-        Log "Linux skipped (-SkipLinux); page keeps Linux build $currentLinux."
+        Log "Linux skipped (-SkipLinux); Linux build $currentLinux kept."
     } elseif (-not (Test-Path $LinuxRoot)) {
         Log "WARNING: Linux build folder not found: $LinuxRoot. Linux build $currentLinux kept."
     } else {
-        $expected = @(Get-ChildItem -Path $NightlyDir -Filter 'oscar20-nightly-*.deb' -File | ForEach-Object Name)
+        $expected = @([regex]::Matches($html, '<a data-dl="([^"]+-Qt6)"') | ForEach-Object { $_.Groups[1].Value } |
+                      Select-Object -Unique)
         $folders = @(Get-ChildItem -Path $LinuxRoot -Directory |
                      Where-Object { $_.Name -match '^\d{12}_[0-9a-fA-F]{7,40}$' } |
                      Sort-Object Name -Descending)
@@ -251,27 +324,23 @@ try {
 
         if (-not $chosen) {
             Log "No newer complete Linux build; Linux build $currentLinux kept."
+        } elseif ((& $folderHash $chosen) -eq $currentLinux) {
+            Log "Linux build $($chosen.Name) is already published."
         } else {
             $linuxHash = & $folderHash $chosen
-            if ($linuxHash -eq $currentLinux) {
-                Log "Linux build $($chosen.Name) is already published."
-            } else {
-                Log "Linux build: $($chosen.Name)"
-                foreach ($src in $chosenMap.Keys) { $copies[$src] = $chosenMap[$src] }
-            }
+            Log "Linux build: $($chosen.Name)"
+            $uploads['oscar-linux'] = @{ version = $linuxHash; files = $chosenMap }
         }
     }
 
     # ---------------------------------------------------------------------
-    # Step 2b: The macOS build. The Mac folder holds a single universal .dmg;
-    #          its build id comes from the file name.
+    # Step 3: The macOS build. The Mac folder holds a single universal .dmg;
+    #         its build id comes from the file name.
     # ---------------------------------------------------------------------
     if ($SkipMac) {
-        Log "macOS skipped (-SkipMac); page keeps macOS build $currentMac."
+        Log "macOS skipped (-SkipMac); macOS build $currentMac kept."
     } elseif (-not (Test-Path $MacRoot)) {
         Log "WARNING: macOS build folder not found: $MacRoot. macOS build $currentMac kept."
-    } elseif (-not (Test-Path (Join-Path $NightlyDir $MacTarget))) {
-        Log "WARNING: $MacTarget is not in the Nightly folder, so it has no download link; macOS not published."
     } else {
         $dmgs = @(Get-ChildItem -Path $MacRoot -Filter '*-macOS-universal.dmg' -File |
                   Sort-Object LastWriteTime -Descending)
@@ -293,43 +362,46 @@ try {
             } else {
                 $macHash = $dmgHash
                 Log "macOS build: $($dmg.Name)"
-                $copies[$dmg.FullName] = $MacTarget
+                $files = [ordered]@{}
+                $files[$dmg.FullName] = 'macOS-universal'
+                $uploads['oscar-macos'] = @{ version = $macHash; files = $files }
             }
         }
     }
 
-    if ($copies.Count -eq 0) {
-        Log 'Nothing new to publish; files and page left unchanged.'
+    if ($uploads.Count -eq 0) {
+        Log 'Nothing new to publish; page left unchanged.'
         exit 0
     }
 
     # ---------------------------------------------------------------------
-    # Step 3: Overwrite the fixed-name files in place.
-    #         Copy over the existing file; never delete or rename it, so its
-    #         Dropbox shared link stays valid.
+    # Step 4: Upload the new files, then the checksums of everything the
+    #         page will link to.
     # ---------------------------------------------------------------------
-    foreach ($src in $copies.Keys) {
-        $dest = Join-Path $NightlyDir $copies[$src]
-        Copy-Item -LiteralPath $src -Destination $dest -Force
-        Log "Copied $(Split-Path $src -Leaf) -> $($copies[$src])"
+    foreach ($name in $uploads.Keys) {
+        $u = $uploads[$name]
+        $existing = Get-PackageFiles $name $u.version
+        foreach ($path in $u.files.Keys) {
+            Publish-File $name $u.version $path $existing
+            $file = Split-Path $path -Leaf
+            $html = Set-PageLink $html $u.files[$path] (Get-DownloadUrl $name $u.version $file) $file
+        }
     }
 
-    # ---------------------------------------------------------------------
-    # Step 4: Checksums for everything in the Nightly folder except itself.
-    # ---------------------------------------------------------------------
-    $sumsName = 'OSCAR-nightly-checksums.txt'
     $ids = "Windows $winHash, Linux $linuxHash, macOS $macHash"
     $lines = @("SHA256 checksums for OSCAR nightly builds: $ids", '')
-    Get-ChildItem -Path $NightlyDir -File |
-        Where-Object { $_.Name -ne $sumsName -and $_.Name -ne 'desktop.ini' } |
-        Sort-Object Name |
-        ForEach-Object {
-            $h = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLower()
-            $lines += "$h  $($_.Name)"
-        }
-    [System.IO.File]::WriteAllText((Join-Path $NightlyDir $sumsName),
-                                   ($lines -join "`n") + "`n", $utf8NoBom)
-    Log "Wrote $sumsName"
+    foreach ($pair in @(@('oscar-windows', $winHash), @('oscar-linux', $linuxHash), @('oscar-macos', $macHash))) {
+        $files = Get-PackageFiles $pair[0] $pair[1]
+        if ($files.Count -eq 0) { Log "WARNING: no $($pair[0])/$($pair[1]) package in the registry for the checksums." }
+        foreach ($f in ($files.Keys | Sort-Object)) { $lines += "$($files[$f])  $f" }
+    }
+    $sumsName = 'OSCAR-nightly-checksums.txt'
+    $sumsVersion = Get-Date -Format 'yyyyMMddHHmmss'
+    $sumsPath = Join-Path $env:TEMP $sumsName
+    [System.IO.File]::WriteAllText($sumsPath, ($lines -join "`n") + "`n", $utf8NoBom)
+    Publish-File 'oscar-checksums' $sumsVersion $sumsPath @{}
+    Remove-Item $sumsPath
+    $html = Set-PageLink $html 'checksums' (Get-DownloadUrl 'oscar-checksums' $sumsVersion $sumsName) 'SHA256 checksums for all downloads'
 
     # ---------------------------------------------------------------------
     # Step 5: Update the page, commit and push.
@@ -340,26 +412,33 @@ try {
     foreach ($pair in @(@('buildDate', $buildDate), @('buildIdWindows', $winHash),
                         @('buildIdLinux', $linuxHash), @('buildIdMac', $macHash))) {
         $pattern = '(<span id="' + $pair[0] + '">)[^<]*(</span>)'
-        if ($html -notmatch $pattern) { Fail "Page has no <span id=`"$($pair[0])`">" }
         $html = [regex]::Replace($html, $pattern, '${1}' + $pair[1] + '${2}')
     }
     [System.IO.File]::WriteAllText($page, $html, $utf8NoBom)
     Log "Page set to $buildDate, $ids"
 
-    GitTry diff --quiet '--' public/index.html
-    if ($LASTEXITCODE -eq 0) {
-        Log 'Page unchanged; nothing to commit.'
-    } else {
-        $msgFile = Join-Path $env:TEMP 'oscar-nightly-commit.txt'
-        [System.IO.File]::WriteAllText($msgFile, "Nightly build: $ids`n", $utf8NoBom)
-        Git add public/index.html
-        Git commit --quiet -F $msgFile
-        Remove-Item $msgFile
-        if ($NoPush) {
-            Log 'Page committed; not pushed (-NoPush).'
-        } else {
-            Git push --quiet origin master
-            Log 'Page pushed.'
+    $msgFile = Join-Path $env:TEMP 'oscar-nightly-commit.txt'
+    [System.IO.File]::WriteAllText($msgFile, "Nightly build: $ids`n", $utf8NoBom)
+    Git add public/index.html
+    Git commit --quiet -F $msgFile
+    Remove-Item $msgFile
+    if ($NoPush) {
+        Log 'Page committed; not pushed (-NoPush), old packages kept.'
+        Log "Published: $ids."
+        exit 0
+    }
+    Git push --quiet origin master
+    Log 'Page pushed.'
+
+    # ---------------------------------------------------------------------
+    # Step 6: Delete the packages the page no longer links to.
+    # ---------------------------------------------------------------------
+    $keep = @{ 'oscar-windows' = $winHash; 'oscar-linux' = $linuxHash; 'oscar-macos' = $macHash;
+               'oscar-checksums' = $sumsVersion }
+    foreach ($name in $keep.Keys) {
+        foreach ($p in (Get-Packages $name | Where-Object { $_.version -ne $keep[$name] })) {
+            Invoke-Api DELETE "packages/$($p.id)" | Out-Null
+            Log "  Deleted old package $name/$($p.version)"
         }
     }
 
