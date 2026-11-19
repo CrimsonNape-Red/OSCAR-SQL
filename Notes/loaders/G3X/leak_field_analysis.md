@@ -8,6 +8,45 @@
 
 ---
 
+## Update 2026-11-19 — 0x568 is not a leak field at all (GitLab #403)
+
+**This supersedes the "What 0x568 Actually Represents" section below.** A report on a
+G3 B20A (firmware `G3-2.12.55.05`) showed that the `uint16` read at 0x568 straddles two
+unrelated byte arrays. Checked here on two G3 A20 cards (`G3-2.11.03.12`) and the E5 card:
+
+| Bytes | Type | Behaviour |
+|---|---|---|
+| `0x564..0x568` | `uint8[5]`, 5 Hz | All five equal in 67–83% of packets; last sample carries into the next packet's first (92–97%). Median 98. |
+| `0x569..0x56D` | `uint8[5]`, 5 Hz | Zero 93–99% of the time; otherwise counts up 1, 2, 3… for the length of an event. |
+
+So `u16@0x568 × 0.16` = `byte[0x568] × 0.16 + byte[0x569] × 40.96` L/min. The
+"pressure-independent ~15.7 L/min baseline" is the first array's median (98 × 0.16), and
+the spikes are the second array's counter. Neither is leak, on any firmware examined.
+
+**Device leak statistics exist on G3 cards.** IDX IT `0x90` / `0x92` / `0x94` / `0x96`
+(leak maximum / mean / 95th percentile / median, tenths of L/min) are populated on G3 A20
+cards with both 2.11 and 2.12 firmware. Maximum, 95th percentile and median are stored in
+whole L/min.
+
+**The G3 scale for 0x52A appears to be ~0.10, not 0.16.** Over one G3 A20
+`G3-2.11.03.12` card, the device statistics divided by the raw 0x52A statistics give a
+median scale of 0.092 (mean, 61 nights), 0.096 (95th percentile, 71 nights) and 0.091
+(median, 53 nights). The reported G3 B20A nights give 0.088–0.092 from the mean. This
+contradicts the 0.16 calibrated earlier against the vendor program on a single SC.72 card,
+which is no longer available to re-check.
+
+**Still unverified:** that 0x52A is populated on G3-2.12 firmware. The only evidence is
+the report's three nights; no G3-2.12 card with waveform data was available here. Note that
+a mostly-zero 0x52A does not mean a dead field: on the 2.11 card, nights with 2–5% non-zero
+packets have device-reported mean leak of 0.0–0.2 L/min. The original "0x52A is always
+zero on SC.74+" finding (0.33% non-zero on one card) may have been a well-sealed mask.
+
+**Not yet changed in OSCAR.** Pending a sample card from the reporter: whether
+`ResolveLeakFieldOffset()` should ever select 0x568, and whether the G3 scale should
+become 0.10.
+
+---
+
 ## Update 2026-11-10 — P5 B20A Plus: 0x52A is live, scale confirmed at 0.10
 
 **P5 B20A Plus**, firmware `P5-1.02.05.10`. Its 0x52A field is populated (53% of probed
