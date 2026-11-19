@@ -1012,6 +1012,7 @@ test {
         tests/respiratoryeventstests.cpp \
         tests/bmcsessionendstests.cpp \
         tests/bmcusrsessionstests.cpp \
+        tests/bmcpressurewavetests.cpp \
         tests/steadybreathingsettingstests.cpp \
         tests/oximetryeventstests.cpp \
         tests/oximetryrecalctests.cpp \
@@ -1059,6 +1060,7 @@ test {
         tests/respiratoryeventstests.h \
         tests/bmcsessionendstests.h \
         tests/bmcusrsessionstests.h \
+        tests/bmcpressurewavetests.h \
         tests/steadybreathingsettingstests.h \
         tests/oximetryeventstests.h \
         tests/oximetryrecalctests.h \

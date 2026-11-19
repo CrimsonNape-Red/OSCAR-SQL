@@ -4,9 +4,40 @@
 #include <QDate>
 #include <QDataStream>
 #include <QList>
+#include <QString>
 
 constexpr int kBmcLegacyWaveformSamples = 25;
 constexpr int kBmcExtendedWaveformSamples = 50;
+
+/// @name G2S pressure wave
+/// The legacy waveform packet's PressureWave[25] (offset 0x08) is tenths of cmH2O on the
+/// G3 and E5, but on the G2S it is a raw sensor reading that fits
+/// `raw = 22.84 × cmH2O + 111.5`.  Imported at the G3 scale it read about 20 cmH2O high
+/// (GitLab #393).  The fit is empirical: packet-mean samples against the set pressure in
+/// the same packet, on two G2S A20 machines.  It has not been checked against a measured
+/// reference, so the intercept may be out by about ±0.5 cmH2O.
+/// See Notes/loaders/Luna/BMC_Legacy_File_Formats.md, section 3.2.1.
+/// @{
+
+/// Gain of the samples returned by BmcG2sPressureWaveToHundredths(): hundredths of cmH2O.
+constexpr double kBmcG2sPressureWaveGain = 0.01;
+
+/// @brief Whether a legacy BMC model stores its pressure wave in G2S raw sensor units
+/// @param model Model name as read from the .USR file, e.g. "G2S A20"
+/// @return true for the G2S platform, whatever the therapy variant after the name
+///
+/// Only the G2S A20 has been seen.  Other G2S variants are assumed to share its sensor
+/// scale, as the G3 A20, G3 B20A and G3 B25A share theirs.
+bool BmcModelUsesG2sPressureWave(const QString& model);
+
+/// @brief Convert one G2S pressure-wave sample to hundredths of cmH2O
+/// @param raw Sample as stored in the waveform packet
+/// @return Pressure in hundredths of cmH2O, held to the range 0 to the largest qint16.
+///         A reading below the sensor's zero (including a zero-filled sample) is
+///         returned as 0 rather than as a negative pressure.
+qint16 BmcG2sPressureWaveToHundredths(qint16 raw);
+
+/// @}
 
 //The raw I:E Ratio value recorded by BMC is transformed using a function that maps the raw
 //value to a percentage: `InspirationPercentage = (100 * rawValue) / (rawValue + 10)`

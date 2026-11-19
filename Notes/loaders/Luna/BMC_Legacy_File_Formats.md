@@ -177,7 +177,7 @@ All multi-byte fields are **little-endian**. The packet is mapped directly via
 | 0x03 | 1 | uint8 | *unknown* | — | Always 0 on all tested machines. May be the high byte of a 16-bit counter that hasn't exceeded 255, or a separate unused field |
 | 0x04 | 2 | int16 LE | EPAP | ÷ 2.0 → cmH2O | Confirmed: 0x04 is always the smaller value (EPAP); 0x06 is always the larger (IPAP) |
 | 0x06 | 2 | int16 LE | IPAP | ÷ 2.0 → cmH2O | Confirmed: always larger than 0x04 across all tested machines |
-| 0x08 | 50 | int16 LE × 25 | PressureWave[25] | ÷ 10.0 → cmH2O | **Mask pressure waveform. Confirmed**: raw ÷ 10 = cmH2O (e.g. raw 85 → 8.5 cmH2O at EPAP=8.5). Loaded into CPAP_MaskPressure channel. No separate pressure-wave chart |
+| 0x08 | 50 | int16 LE × 25 | PressureWave[25] | ÷ 10.0 → cmH2O | **Mask pressure waveform. Confirmed** on G3 / E5: raw ÷ 10 = cmH2O (e.g. raw 85 → 8.5 cmH2O at EPAP=8.5). **Not valid on G2S A20** — see 3.2.1. Loaded into CPAP_MaskPressure channel. No separate pressure-wave chart |
 | 0x3A | 50 | int16 LE × 25 | FlowAbnormality[25] | unknown | 25 values, baseline ~366-390 raw. Spikes at the onset and recovery of apnea-like events but is low and flat during the event itself. Consistent with a **flow rate-of-change or variability metric**: during apnea, flow is near-zero and stable (low variability → low value); at the transition in/out, flow changes rapidly (high rate of change → spike). Likely a machine-internal signal used for breath detection and respiratory event flagging. NOT vent leak, NOT tidal flow |
 | 0x6C | 50 | int16 LE × 25 | Flow[25] | ÷ 10.0 → L/min | 25 **total machine output flow** samples. Always positive (includes vent leak + patient tidal component). CPAP 4.0: range ~400–686 raw (40–68 L/min). BiPAP 8.5/11.5: range ~273–1034 raw (27–103 L/min). No separate tidal flow channel has been identified in the 256-byte packet |
 | 0x9E | 22 | int16 LE × 11 | *flow variants* | — | Offsets 0x9E–0xB0 (11 words). All are visually similar to the Flow channel (0x6C) — appear to be flow rate with slightly different amplification or clipping. No additional clinical information beyond Flow[25]. Logged but not exported |
@@ -224,9 +224,64 @@ Each packet contains **25 samples** for three waveform channels, representing
 
 | Channel | Array Offset | Samples | Raw Unit | Display Gain |
 |---------|-------------|---------|----------|-------------|
-| PressureWave | 0x08 | 25 | int16 | × 0.1 cmH2O (**confirmed**) |
+| PressureWave | 0x08 | 25 | int16 | × 0.1 cmH2O (**confirmed** on G3 / E5); G2S is converted — see 3.2.1 |
 | FlowAbnormality | 0x3A | 25 | int16 | × 1.0 |
 | Flow | 0x6C | 25 | int16 | × 0.1 L/min |
+
+### 3.2.1 PressureWave scale is model-dependent (GitLab #393, 2026-11-19)
+
+The ÷10 scale was confirmed on G3 / E5 cards and then applied to every legacy model. It
+does not hold on the G2S A20. Method: over every valid packet on each sample card, compare
+the mean of the 25 PressureWave samples with the set pressure in the same packet
+(0x06 ÷ 2), and fit `raw = slope × pressure + intercept`.
+
+| Model (USR 0x2296) | Fit of raw against set pressure (cmH2O) | Reading at ÷10 relative to set pressure |
+|---|---|---|
+| G2S A20 | `22.84 × P + 111.5` (r = 0.977, residual sd 4.8 raw) | 13.6 – 26.1 cmH2O **above** (median +20.7); no packet within 1 cmH2O |
+| E5 B25A Plus330 | `9.64 × P + 10.7` (r = 0.74) | median +0.6 cmH2O |
+| G3 B20A | — | median +0.1 cmH2O; 95% of packets within 1 cmH2O |
+| G3 A20 | — | median −1.2 cmH2O |
+| G3 B25A, E5 B25A (bilevel) | — | between EPAP and IPAP, as expected of a bilevel mean |
+
+G2S A20, median packet mean (raw) at each set pressure — linear across the whole range:
+
+| Set cmH2O | 4.0 | 5.0 | 6.0 | 7.0 | 8.0 | 9.0 | 9.5 |
+|---|---|---|---|---|---|---|---|
+| Raw | 203 | 226 | 249 | 270 | 293 | 316 | 328 |
+
+So on G2S the field is not tenths of cmH2O. The empirical conversion is
+`cmH2O = (raw − 111.5) / 22.84`. What the raw unit actually is (for example an
+uncalibrated sensor count) is **not established**.
+
+A second G2S A20 (data available only as an earlier import, not as a card) agrees. Its
+Reslex is 2–3 with minimum pressure 8.0; the stored samples sit at about 220 raw in
+expiration and rise to about 290 raw at the end of inspiration. With the conversion above
+that is 4.75 and 7.8 cmH2O at a set pressure of 8.0 — the same calibration as the first
+machine (293 raw at 8.0, Reslex 1), with the Reslex expiratory dip visible (the question
+behind #386). Its slope across 8.0 – 9.5 cmH2O is 22 raw per cmH2O.
+
+Status and limits:
+
+- The conversion is fitted against **set** pressure, not a measured reference, on a
+  machine with Reslex 1. Expect the intercept to be uncertain by roughly ±0.5 cmH2O. It
+  has not been compared with the vendor program.
+- Only one G2S model (A20) has been seen. Whether other G2-generation models share the
+  G2S scale is unknown.
+- Loader, from 2026-11-19: for models whose name starts with "G2S",
+  `BmcLoader::setSessionWaveforms()` converts each sample with
+  `BmcG2sPressureWaveToHundredths()` and stores it in hundredths of cmH2O (gain 0.01).
+  A reading below the sensor's zero is stored as 0. Other legacy models and the G3X
+  loader are unchanged.
+- The conversion is done on the samples because `EventList`'s `offset` argument cannot
+  carry the intercept: `EventList::data()` and `AddWaveform()` apply gain only
+  (`event.cpp`).
+- G2S sessions imported before the change keep the ÷10 scale (about 20 cmH2O high) until
+  they are re-imported. The loader version was not changed.
+
+Not a fault: the Mask Pressure `avg` / `wavg` / `median` of 0.00 in `session_channels`.
+`Session::UpdateSummaries()` deliberately skips those statistics for `CPAP_FlowRate`,
+`CPAP_MaskPressure`, `CPAP_MaskPressureHi` and `CPAP_RespEvent`, so they are 0 for every
+loader; only min and max are stored.
 
 ### 3.3 I:E Ratio Decoding
 

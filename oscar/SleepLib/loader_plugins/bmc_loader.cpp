@@ -504,13 +504,20 @@ void BmcLoader::setSessionWaveforms(BmcSession* bmcSession, Session* oscarSessio
     auto wIPAP = oscarSession->AddEventList(CPAP_IPAP, EVL_Event, pressureGain, 0.0, 0.0, 0.0, 1000);
     auto wEPAP = oscarSession->AddEventList(CPAP_EPAP, EVL_Event, pressureGain, 0.0, 0.0, 0.0, 1000);
 
+    // G2S stores the pressure wave as a raw sensor reading, not tenths of cmH2O.  Its
+    // samples are converted one by one in the packet loop below, to hundredths of cmH2O,
+    // so the event lists take that gain instead of the model family's (GitLab #393).
+    const Machine* machine = oscarSession->machine();
+    const bool g2sPressureWave = machine && UsesG2sPressureWave(machine->model());
+    const double pressureWaveGain = g2sPressureWave ? kBmcG2sPressureWaveGain : PressureWaveformGain();
+
     auto wFlow = oscarSession->AddEventList(CPAP_FlowRate, EVL_Waveform, FlowWaveformGain(), 0.0, 0.0, 0.0, waveformSampleIntervalMs);
     EventList* wPressureWave = nullptr;
     EventList* wFlowAbnormality = nullptr;
     if (ExportPressureWaveform()) {
         wPressureWave = oscarSession->AddEventList(BMC_PressureWave,
                                                    EVL_Waveform,
-                                                   PressureWaveformGain(),
+                                                   pressureWaveGain,
                                                    0.0, 0.0, 0.0,
                                                    waveformSampleIntervalMs);
     }
@@ -522,9 +529,9 @@ void BmcLoader::setSessionWaveforms(BmcSession* bmcSession, Session* oscarSessio
                                                       waveformSampleIntervalMs);
     }
     // Mask pressure waveform. Both legacy BMC and G3X source from Raw.PressureWave.
-    // Legacy BMC: PressureWave[25] at packet offset 0x08 (gain 0.1 → cmH2O).
+    // Legacy BMC: PressureWave[25] at packet offset 0x08 (gain 0.1 → cmH2O; G2S converted, see above).
     // G3X: waveform offset 0x380, 50 samples/packet (confirmed correct; 0x24A was tried but noisy).
-    auto wMaskPressure = oscarSession->AddEventList(CPAP_MaskPressure, EVL_Waveform, PressureWaveformGain(), 0.0, 0.0, 0.0, waveformSampleIntervalMs);
+    auto wMaskPressure = oscarSession->AddEventList(CPAP_MaskPressure, EVL_Waveform, pressureWaveGain, 0.0, 0.0, 0.0, waveformSampleIntervalMs);
 
     // A leak reading of zero is a *valid measurement* — it means the mask is sealing
     // perfectly — so zero samples must be stored like any other.  Dropping them per-sample
@@ -575,10 +582,20 @@ void BmcLoader::setSessionWaveforms(BmcSession* bmcSession, Session* oscarSessio
         qint64 timestamp = bmcWaveform.Timestamp.toMSecsSinceEpoch();
 
         wFlow->AddWaveform(timestamp, bmcWaveform.Raw.Flow, waveformSamplesPerPacket, waveformPacketDurationMs);
-        if (wPressureWave) {
-            wPressureWave->AddWaveform(timestamp, bmcWaveform.Raw.PressureWave, waveformSamplesPerPacket, waveformPacketDurationMs);
+
+        qint16 g2sPressureWaveSamples[kBmcExtendedWaveformSamples];
+        qint16* pressureWaveSamples = bmcWaveform.Raw.PressureWave;
+        if (g2sPressureWave) {
+            const int sampleCount = std::min(waveformSamplesPerPacket, kBmcExtendedWaveformSamples);
+            for (int i = 0; i < sampleCount; ++i) {
+                g2sPressureWaveSamples[i] = BmcG2sPressureWaveToHundredths(bmcWaveform.Raw.PressureWave[i]);
+            }
+            pressureWaveSamples = g2sPressureWaveSamples;
         }
-        wMaskPressure->AddWaveform(timestamp, bmcWaveform.Raw.PressureWave, waveformSamplesPerPacket, waveformPacketDurationMs);
+        if (wPressureWave) {
+            wPressureWave->AddWaveform(timestamp, pressureWaveSamples, waveformSamplesPerPacket, waveformPacketDurationMs);
+        }
+        wMaskPressure->AddWaveform(timestamp, pressureWaveSamples, waveformSamplesPerPacket, waveformPacketDurationMs);
         if (wFlowAbnormality) {
             wFlowAbnormality->AddWaveform(timestamp, bmcWaveform.Raw.FlowAbnormality, waveformSamplesPerPacket, waveformPacketDurationMs);
         }

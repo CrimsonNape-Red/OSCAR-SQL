@@ -29,6 +29,9 @@ public:
     // G3X pressure-wave bytes appear to be in finer units than legacy BMC packets.
     // Start with a conservative scale to put the plotted range near clinical values.
     virtual double PressureWaveformGain() const override { return 0.01; }
+    /// The G2S conversion belongs to the legacy 256-byte packet; G3X reads its pressure
+    /// wave from its own packet layout, so it never applies whatever the model name.
+    virtual bool UsesG2sPressureWave(const QString&) const override { return false; }
     virtual double PressureChannelGain() const override { return 0.01; }
     virtual double WaveformSampleIntervalMs() const override { return 20.0; }
     virtual int WaveformSamplesPerPacket() const override { return 50; }

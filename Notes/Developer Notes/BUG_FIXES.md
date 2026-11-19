@@ -8461,3 +8461,43 @@ correction and drives the preview.
   the To-before-From warning; delete with confirmation; load a row by keyboard and change its
   dates; Show in Daily; Close with an unsaved preview. Not checked: mouse interaction, dark theme,
   the delete choices for a range covering the day shown, Reuse Previous, drift rows, Linux, macOS.
+
+---
+
+## 2026-11-19 - BMC G2S: Mask Pressure about 20 cmH2O too high (GitLab #393)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcDataParsing.h`, `bmcDataParsing.cpp`
+(`BmcModelUsesG2sPressureWave()`, `BmcG2sPressureWaveToHundredths()`), `bmc_loader.cpp`
+(`BmcLoader::setSessionWaveforms()`), `bmc_loader.h`, `bmcg3x_loader.h`
+(`UsesG2sPressureWave()`), `oscar/tests/bmcpressurewavetests.cpp`
+
+**Symptom:** On a BMC G2S A20 the Mask Pressure waveform read 20 - 32 cmH2O on a device running at
+4 - 9 cmH2O, with session maxima of 34 - 43.
+
+**Root cause:** The legacy waveform packet's pressure wave (offset 0x08) was imported as tenths of
+cmH2O on every model. That scale was confirmed on G3 and E5 cards only. On the G2S the field is a raw
+sensor reading that fits `raw = 22.84 x cmH2O + 111.5` (r = 0.977 over 1.97 million packets, linear
+from 4.0 to 9.5 cmH2O).
+
+**Fix:** For models whose name starts with "G2S", the legacy loader converts each sample with
+`(raw - 111.5) / 22.84` and stores it in hundredths of cmH2O (gain 0.01). Other legacy models and the
+G3X loader are unchanged.
+
+**Non-obvious:**
+- The fit is against the set pressure in the same packet, not a measured reference. The vendor
+  program shows only the stepped set pressure for this card, so the intercept could not be checked
+  independently; it may be out by about +-0.5 cmH2O. A second G2S A20 agrees (about 290 raw at a set
+  pressure of 8.0, against 293).
+- Only the G2S A20 has been seen. Other G2S variants are assumed to share the scale, as the G3 A20,
+  B20A and B25A share theirs.
+- The conversion is done on the samples because an `EventList` offset is not applied by
+  `EventList::data()` or `AddWaveform()`.
+- A reading below the sensor's zero is stored as 0, so a zero-filled sample does not become -4.9.
+- Sessions already imported keep the old scale until they are re-imported. The loader version was
+  not changed.
+- Mask Pressure `avg` of 0.00 in `session_channels`, noted in the issue, is not a fault:
+  `Session::UpdateSummaries()` skips those statistics for Flow Rate and Mask Pressure on all loaders.
+- Checked by unit test (fails with the old scale, passes with the fix) and by applying the conversion
+  to the card's packets outside OSCAR. Then by importing the card into a build with the fix: stored
+  gain 0.01, Mask Pressure averaging 7.98 cmH2O at a set pressure of 8.0, and the graph judged
+  correct on the Daily page.

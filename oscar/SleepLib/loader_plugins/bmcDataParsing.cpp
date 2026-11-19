@@ -7,6 +7,8 @@
 
 #include <QDebug>
 #include <algorithm>
+#include <cmath>
+#include <limits>
 
 
 #ifdef DEBUG_BMC
@@ -14,6 +16,30 @@
 QTextStream qout2(stdout);
 #endif
 
+
+
+namespace {
+
+/// G2S pressure-wave fit: raw sensor units per cmH2O (GitLab #393).
+constexpr double kG2sPressureWaveRawPerCmH2O = 22.84;
+/// G2S pressure-wave fit: raw reading at 0 cmH2O (GitLab #393).
+constexpr double kG2sPressureWaveRawAtZero = 111.5;
+
+} // namespace
+
+bool BmcModelUsesG2sPressureWave(const QString& model)
+{
+    return model.trimmed().startsWith(QLatin1String("G2S"), Qt::CaseInsensitive);
+}
+
+qint16 BmcG2sPressureWaveToHundredths(qint16 raw)
+{
+    const double hundredths =
+        (raw - kG2sPressureWaveRawAtZero) * 100.0 / kG2sPressureWaveRawPerCmH2O;
+    return static_cast<qint16>(
+        qBound(0.0, std::round(hundredths),
+               static_cast<double>(std::numeric_limits<qint16>::max())));
+}
 
 
 QDateTime BmcEncodedDate::DecodeDate(quint16 encodedDate)

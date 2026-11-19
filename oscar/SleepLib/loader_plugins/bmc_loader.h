@@ -83,6 +83,15 @@ public:
 
     virtual double FlowWaveformGain() const { return 0.1; }
     virtual double PressureWaveformGain() const { return 0.1; }
+    /// Returns true when @p model stores its pressure wave in G2S raw sensor units, in
+    /// which case setSessionWaveforms() converts each sample with
+    /// BmcG2sPressureWaveToHundredths() and stores it at kBmcG2sPressureWaveGain instead
+    /// of PressureWaveformGain().  Legacy BMC: decided by the model name.  Override to
+    /// false on families whose pressure wave comes from a different packet layout.
+    /// See GitLab #393.
+    virtual bool UsesG2sPressureWave(const QString& model) const {
+        return BmcModelUsesG2sPressureWave(model);
+    }
     /// Gain applied to Raw.IPAP/Raw.EPAP when writing CPAP_Pressure/CPAP_IPAP/CPAP_EPAP
     /// event lists.  Legacy BMC stores half-cmH2O units (gain 0.5); G3X stores hundredths
     /// of cmH2O (gain 0.01) for full 0.01 cmH2O resolution.
