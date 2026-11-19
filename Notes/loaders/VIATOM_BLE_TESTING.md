@@ -100,6 +100,8 @@ Whatever happens, even if it fails at the first step, please send:
 | Checkme O2 Max ("O2M", model 1642) | 1.7.0 | USB cable | Linux Mint 22, Windows 10 | Works |
 | SleepU (model 1654) | 1.2.0 | USB cable | macOS 15.7.3 (Intel, virtual machine) | Works |
 | Checkme O2 Max ("O2M", model 1642) | | USB cable | macOS 15.7.3 (Intel, virtual machine) | Works |
+| O2Ring S ("S8-AW 3832") | | Bluetooth | macOS 27.2 (Apple Silicon), Qt 6.12 | Works (from f7f331c8) |
+| Lookee O2Ring (Viatom-made, sold under the Lookee brand) | | Bluetooth | Windows 11 | Works (another tester, 2026-11-19) |
 
 The Checkme O2 Max was first reported (2026-11-02) as working over Bluetooth and its USB
 cable, but both of those tests were really over Bluetooth: its cable is a different USB
@@ -123,10 +125,22 @@ The 2026-11-01 report (the last four rows) also found:
 The EMAY EMO-80 (Bluetooth, see `EMAY_EMO80_BLE.md`) is untested too: choose the **EMAY**
 card in the wizard, then **Over Bluetooth**.
 
-The macOS rows (2026-11-16, see `VIATOM_USB.md`) are the cables only, in a virtual machine.
+The macOS cable rows (2026-11-16, see `VIATOM_USB.md`) are in a virtual machine.
+
+Bluetooth on macOS was first tested on 2026-11-17 by a tester with an O2Ring S on an Apple
+Silicon Mac (macOS 27.2, the universal nightly build with Qt 6.12). The ring was found, but
+every connection failed with "Notifications cannot be enabled on this device" (the log
+only showed it once connection failures were logged, !73): the notify characteristic had
+no CCCD descriptor. OSCAR asked Qt for `SkipValueDiscovery`, and in Qt's macOS backend
+that mode never discovers descriptors (`darwin/btcentralmanager.mm` only does so on the
+path that also reads values). Since !74 (f7f331c8, 2026-11-18) macOS uses the full
+discovery. On 2026-11-19 the ring connected, macOS confirmed notifications at once (the
+3-second fallback from !73 wasn't needed), the MTU became 247, and 4 recordings
+downloaded and imported in about 13 s each with no retries. ViHealth was closed on the
+tester's iPhone; with it running, earlier attempts also failed after a few seconds.
 
 Untested: the classic O2Ring over its cable, the Checkme O2 (not Max), the O2Ring SC/SF/SP,
-Bluetooth on macOS, and anything on an Apple Silicon Mac.
+the USB cables on an Apple Silicon Mac, and Bluetooth on an Intel Mac.
 
 ## Known limits
 
