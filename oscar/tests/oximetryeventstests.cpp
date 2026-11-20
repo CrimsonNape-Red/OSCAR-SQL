@@ -18,6 +18,7 @@
 #include "SleepLib/schema.h"
 #include "SleepLib/session.h"
 #include "SleepLib/loader_plugins/bmc_loader.h"
+#include "SleepLib/loader_plugins/prismavent_loader.h"
 
 #define TESTDATA_PATH "./testdata/"
 
@@ -465,6 +466,36 @@ void OximetryEventsTests::testBmcOximeterDropoutsLeaveGaps()
     QCOMPARE(after->first(), kStart + 6 * kSecondMs);
     QCOMPARE(after->data(0), EventDataType(96));
     QCOMPARE(sess.Max(OXI_SPO2), EventDataType(97));
+}
+
+// Prisma VENT oximetry, a 1 Hz signal: zeros (sensor off) partway through are gaps, not
+// readings of 0%, and the readings after a gap keep their place in time.
+void OximetryEventsTests::testPrismaVentOximetryDropoutsLeaveGaps()
+{
+    Machine mach(nullptr, 3);
+    Session sess(&mach, 1);
+
+    qint16 samples[] = { 0, 0, 95, 94, 93, 0, 0, 0, 96, 97 };
+    const long count = sizeof(samples) / sizeof(samples[0]);
+    QCOMPARE(PrismaVentAddValidRuns(&sess, OXI_SPO2, kStart, samples, count, 1000.0, 1.0, 0.0,
+                                    1, 100, QStringLiteral("%")), 2);
+
+    EventList *before = sess.eventlist[OXI_SPO2].at(0);
+    EventList *after = sess.eventlist[OXI_SPO2].at(1);
+    QCOMPARE(before->count(), quint32(3));
+    QCOMPARE(before->time(0), kStart + 2 * kSecondMs);
+    QCOMPARE(before->data(2), EventDataType(93));
+    QCOMPARE(after->count(), quint32(2));
+    QCOMPARE(after->time(0), kStart + 8 * kSecondMs);
+    QCOMPARE(after->data(1), EventDataType(97));
+    QCOMPARE(sess.Min(OXI_SPO2), EventDataType(93));
+
+    // All zeros (no sensor connected): no lists at all
+    Session empty(&mach, 2);
+    qint16 zeros[5] = { 0, 0, 0, 0, 0 };
+    QCOMPARE(PrismaVentAddValidRuns(&empty, OXI_SPO2, kStart, zeros, 5, 1000.0, 1.0, 0.0,
+                                    1, 100, QStringLiteral("%")), 0);
+    QVERIFY(!empty.eventlist.contains(OXI_SPO2));
 }
 
 void OximetryEventsTests::cleanupTestCase()

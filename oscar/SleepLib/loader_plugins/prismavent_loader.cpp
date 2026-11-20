@@ -578,10 +578,36 @@ int PrismaVentLoader::importDayArchive(const QString & zipPath)
     return added;
 }
 
+int PrismaVentAddValidRuns(Session * session, ChannelID code, qint64 startMs, qint16 * data,
+                           long count, double rate, EventDataType gain, EventDataType offset,
+                           EventDataType low, EventDataType high, const QString & dimension)
+{
+    int lists = 0;
+    long i = 0;
+    while (i < count) {
+        // Skip samples that are no reading
+        while (i < count && !(data[i] * gain >= low && data[i] * gain <= high)) ++i;
+        const long runStart = i;
+        while (i < count && data[i] * gain >= low && data[i] * gain <= high) ++i;
+        const long runLength = i - runStart;
+        if (runLength == 0) break;
+
+        EventList * el = session->AddEventList(code, EVL_Waveform, gain, offset, 0, 0, rate);
+        el->setDimension(dimension);
+        el->AddWaveform(startMs + qint64(runStart * rate), data + runStart, int(runLength),
+                        qint64(runLength * rate));
+        ++lists;
+    }
+    return lists;
+}
+
 //! Adds one WMEDF signal to the session as a waveform.
-//! \return false if the file has no signal labelled \a label.
+//! When \a low < \a high, samples outside [low, high] (in physical units) are no reading:
+//! they are left out as gaps, each stretch of valid samples becoming its own event list.
+//! \return false if the file has no signal labelled \a label, or it has no valid samples.
 static bool addWaveform(Session * session, WMEDFInfo & wmedf, qint64 startMs,
-                        ChannelID code, const QString & label, bool skipIfAllZero = false)
+                        ChannelID code, const QString & label, bool skipIfAllZero = false,
+                        EventDataType low = 0, EventDataType high = 0)
 {
     EDFSignal * es = wmedf.lookupLabel(label);
     if (es == nullptr || es->dataArray == nullptr) return false;
@@ -596,6 +622,15 @@ static bool addWaveform(Session * session, WMEDFInfo & wmedf, qint64 startMs,
 
     // The parser leaves offset at 0; every signal imported here has its physical
     // and digital ranges both anchored at zero, so gain alone is correct.
+    if (low < high) {
+        if (PrismaVentAddValidRuns(session, code, startMs, es->dataArray, recs, rate, es->gain,
+                                   es->offset, low, high, es->physical_dimension) == 0) {
+            return false;
+        }
+        session->setPhysMin(code, es->physical_minimum);
+        session->setPhysMax(code, es->physical_maximum);
+        return true;
+    }
     EventList * el = session->AddEventList(code, EVL_Waveform, es->gain, es->offset, 0, 0, rate);
     el->setDimension(es->physical_dimension);
     el->AddWaveform(startMs, es->dataArray, int(recs), duration);
@@ -653,9 +688,11 @@ Session * PrismaVentLoader::buildSession(const QByteArray & signalData, const QB
     addWaveform(session, wmedf, startMs, CPAP_PTB, "Part Spont Insp.");
     addWaveform(session, wmedf, startMs, CPAP_IPAP, "IPAPsoll");
     addWaveform(session, wmedf, startMs, CPAP_EPAP, "EPAPsoll");
-    // The oximetry signals are written as zeros when no sensor is connected.
-    addWaveform(session, wmedf, startMs, OXI_SPO2, "SpO2 Value", true);
-    addWaveform(session, wmedf, startMs, OXI_Pulse, "Pulse Rate", true);
+    // The oximetry signals are written as zeros when no sensor is connected. A zero (or any
+    // other out of range value) partway through, such as a sensor off the finger, is no
+    // reading either: it is left as a gap rather than imported as 0% SpO2 or 0 bpm.
+    addWaveform(session, wmedf, startMs, OXI_SPO2, "SpO2 Value", true, 1, 100);
+    addWaveform(session, wmedf, startMs, OXI_Pulse, "Pulse Rate", true, 25, 250);
 
     // Respiratory events. The id space is shared with the Prisma LINE (see
     // Prisma_Event_Type); names were checked against prismaTS's event dictionary.

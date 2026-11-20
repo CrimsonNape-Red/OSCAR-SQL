@@ -29,6 +29,13 @@ class QDir;
 //********************************************************************************************
 // Please INCREMENT the following value when making changes to this loaders implementation
 // BEFORE making a release
+/// Adds a sampled signal to the session as waveform event lists, one per stretch of samples
+/// whose physical value (sample * gain) is within [low, high]. Samples outside it are no
+/// reading and are left as gaps. \return the number of event lists added.
+int PrismaVentAddValidRuns(Session * session, ChannelID code, qint64 startMs, qint16 * data,
+                           long count, double rate, EventDataType gain, EventDataType offset,
+                           EventDataType low, EventDataType high, const QString & dimension);
+
 const int prismavent_data_version = 1;
 //
 //********************************************************************************************
