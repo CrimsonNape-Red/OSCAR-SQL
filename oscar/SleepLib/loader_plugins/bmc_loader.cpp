@@ -471,6 +471,25 @@ void BmcLoader::setSessionRespiratoryEvents(BmcSession* bmcSession, Session* osc
     }
 }
 
+// Adds one reading from the optional oximeter accessory. A reading outside [low, high] is
+// no reading: 0 when the accessory has none, or an invalid-reading code such as 0xFF or
+// 0xFFFF. It ends the current event list, so the dropout stays a gap: the graph does not
+// draw across it and the statistics do not carry the previous reading through it. The last
+// good reading is held until the dropout starts, as the serial oximeter import does.
+void BmcAddOximeterReading(Session* oscarSession, EventList*& list, EventStoreType& lastValue,
+                        ChannelID code, qint64 timestamp, int value, int low, int high)
+{
+    if (value >= low && value <= high) {
+        if (!list)
+            list = oscarSession->AddEventList(code, EVL_Event, 1.0, 0.0, 0.0, 0.0, 1000);
+        list->AddEvent(timestamp, value);
+        lastValue = value;
+    } else if (list) {
+        list->AddEvent(timestamp, lastValue);
+        list = nullptr;
+    }
+}
+
 //Given a created session, we add the BMC waveforms for the session to the OSCAR session
 void BmcLoader::setSessionWaveforms(BmcSession* bmcSession, Session* oscarSession)
 {
@@ -556,6 +575,8 @@ void BmcLoader::setSessionWaveforms(BmcSession* bmcSession, Session* oscarSessio
     EventList* wIERatio = ExportTimingChannels() ? oscarSession->AddEventList(BMC_IE_Ratio,  EVL_Event, 0.1,   0.0, 0.0, 0.0, 1000) : nullptr;
     EventList* wSpO2 = nullptr;
     EventList* wPulse = nullptr;
+    EventStoreType lastSpO2 = 0;
+    EventStoreType lastPulse = 0;
     // Always create Ti/Te event lists so calcs.cpp doesn't attempt to derive them
     // from the flow waveform (which fails for BMC due to the non-zero baseline).
     // Events are only populated when ExportTimingChannels() confirms the source
@@ -625,16 +646,10 @@ void BmcLoader::setSessionWaveforms(BmcSession* bmcSession, Session* oscarSessio
             wTidalVolume->AddEvent(timestamp, bmcWaveform.Raw.TidalVolume);
         if (bmcWaveform.Raw.MinuteVentilation > 0)
             wMinuteVentilation->AddEvent(timestamp, bmcWaveform.Raw.MinuteVentilation);
-        if (bmcWaveform.Raw.SpO2Pct > 0) {
-            if (!wSpO2)
-                wSpO2 = oscarSession->AddEventList(OXI_SPO2, EVL_Event, 1.0, 0.0, 0.0, 0.0, 1000);
-            wSpO2->AddEvent(timestamp, bmcWaveform.Raw.SpO2Pct);
-        }
-        if (bmcWaveform.Raw.PulseRate > 0) {
-            if (!wPulse)
-                wPulse = oscarSession->AddEventList(OXI_Pulse, EVL_Event, 1.0, 0.0, 0.0, 0.0, 1000);
-            wPulse->AddEvent(timestamp, bmcWaveform.Raw.PulseRate);
-        }
+        BmcAddOximeterReading(oscarSession, wSpO2, lastSpO2, OXI_SPO2, timestamp,
+                              bmcWaveform.Raw.SpO2Pct, 1, 100);
+        BmcAddOximeterReading(oscarSession, wPulse, lastPulse, OXI_Pulse, timestamp,
+                              bmcWaveform.Raw.PulseRate, 25, 250);
         if (bmcWaveform.Raw.RespiratoryRate > 0)
             wRespiratoryRate->AddEvent(timestamp, bmcWaveform.Raw.RespiratoryRate);
         if (wIEValue || wIERatio) {

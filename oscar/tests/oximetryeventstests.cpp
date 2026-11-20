@@ -17,6 +17,7 @@
 #include "SleepLib/profiles.h"
 #include "SleepLib/schema.h"
 #include "SleepLib/session.h"
+#include "SleepLib/loader_plugins/bmc_loader.h"
 
 #define TESTDATA_PATH "./testdata/"
 
@@ -434,6 +435,36 @@ void OximetryEventsTests::testTimeAboveThresholdSummaryStopsAtGaps()
 
     // 20 readings of 4 s at 96%
     QCOMPARE(sess.timeAboveThreshold(OXI_SPO2, 95), EventDataType(80.0 / 60.0));
+}
+
+// BMC CPAP oximeter accessory readings, one per second: 0 (no reading) and invalid codes
+// (0xFF, and 0xFFFF in the 16-bit field) end the list instead of being imported or bridged.
+void OximetryEventsTests::testBmcOximeterDropoutsLeaveGaps()
+{
+    Machine mach(nullptr, 3);
+    Session sess(&mach, 1);
+    EventList *list = nullptr;
+    EventStoreType last = 0;
+
+    const QVector<int> raw = { 0, 95, 94, 0xFF, 0xFFFF, 0, 96, 97 };
+    for (int i = 0; i < raw.size(); ++i) {
+        BmcAddOximeterReading(&sess, list, last, OXI_SPO2, kStart + i * kSecondMs, raw[i], 1, 100);
+    }
+
+    QCOMPARE(sess.eventlist[OXI_SPO2].size(), 2);
+    EventList *before = sess.eventlist[OXI_SPO2].at(0);
+    EventList *after = sess.eventlist[OXI_SPO2].at(1);
+
+    // 95, 94, then 94 held until the dropout starts at 3 s
+    QCOMPARE(before->count(), quint32(3));
+    QCOMPARE(before->first(), kStart + 1 * kSecondMs);
+    QCOMPARE(before->last(), kStart + 3 * kSecondMs);
+    QCOMPARE(before->data(2), EventDataType(94));
+
+    QCOMPARE(after->count(), quint32(2));
+    QCOMPARE(after->first(), kStart + 6 * kSecondMs);
+    QCOMPARE(after->data(0), EventDataType(96));
+    QCOMPARE(sess.Max(OXI_SPO2), EventDataType(97));
 }
 
 void OximetryEventsTests::cleanupTestCase()

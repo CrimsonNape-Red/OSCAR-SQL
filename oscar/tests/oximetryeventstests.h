@@ -36,6 +36,7 @@ private slots:
     void testTimeBelowThresholdStopsAtGaps();
     void testTimeAboveThresholdStopsAtGaps();
     void testTimeAboveThresholdSummaryStopsAtGaps();
+    void testBmcOximeterDropoutsLeaveGaps();
     void cleanupTestCase();
 };
 

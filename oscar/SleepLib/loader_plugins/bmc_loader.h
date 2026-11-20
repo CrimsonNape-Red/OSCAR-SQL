@@ -43,6 +43,12 @@ public:
 
 
 
+/// Adds one oximeter accessory reading to list. A value outside [low, high] is no reading:
+/// it ends the list (holding the last good value until then) so the dropout stays a gap.
+/// list is created on the next valid reading.
+void BmcAddOximeterReading(Session* oscarSession, EventList*& list, EventStoreType& lastValue,
+                           ChannelID code, qint64 timestamp, int value, int low, int high);
+
 class BmcLoader : public CPAPLoader
 {    
 public:
