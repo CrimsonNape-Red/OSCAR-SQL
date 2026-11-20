@@ -8376,7 +8376,7 @@ The status line's colour is given to the label as a colour, not through its pale
 **Files:** `oscar/devicetimecorrectiondialog.cpp` / `.h` / `.ui`, `oscar/mainwindow.cpp`
 (`on_actionTime_Corrections_triggered()`)
 
-**Status:** on branch `time-corrections-all-dates`, not yet merged to master.
+**Status:** merged to master 2026-11-18.
 
 **Symptom:** A correction saved for dates other than the day shown in Daily seemed to do nothing:
 it was stored but never listed, and could not be found again without going to a day it covered. A
@@ -8408,6 +8408,9 @@ correction and drives the preview.
   device, and whether the graphs can show it. A total line gives the sum of all corrections for
   the device on the day shown.
 - Save reports what was stored in a status line and selects the new row.
+- The result of "Show in Daily" and "Delete Correction" is shown in a second status line at the
+  bottom of the dialog, beside Close (2026-11-19). It was in the editor's status line, away from
+  the panel whose buttons produced it. A message in one status line clears the other.
 - The dialog has three framed panels with title bars: "Select Device to Correct", "Edit Correction"
   and "Saved Corrections". "Show in Daily" and "Delete Correction" are in the last one, since they
   act on the row selected there. Only the title labels carry a style sheet; a style sheet on the panel

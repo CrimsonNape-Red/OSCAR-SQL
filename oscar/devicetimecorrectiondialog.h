@@ -133,8 +133,12 @@ private:
     void resetToNewMode();
     void refreshModeLabel();
     void updateControlStates();
-    //! \brief Shows \a text as the result of the last action (empty clears it)
+    //! \brief Shows \a text in the editor as the result of a Save (empty clears both status lines)
     void setStatus(const QString& text);
+    //! \brief Shows \a text beside Close as the result of an action on the table's selected row
+    void setListStatus(const QString& text);
+    //! \brief Sets the text and the frame of the status line beside Close
+    void showListStatus(const QString& text);
 
     QString currentTypeName() const;
     QString formatOffset(qint64 ms) const;

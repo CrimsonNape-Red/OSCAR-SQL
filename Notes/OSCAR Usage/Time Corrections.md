@@ -100,6 +100,8 @@ Tick **Show all days with corrections**, and **Show all devices** if needed, to 
 - **To change it**, click it. Its values load into the editor; change them and click **Save**.
 - **To remove it**, click it and then **Delete Correction**.
 
+The result of **Show in Daily** or **Delete Correction** appears at the bottom of the window, beside **Close**. For example, it tells you when the device has no data on the correction's dates, so there is nothing to show.
+
 What Delete Correction does depends on the day shown in Daily:
 
 - A single-night correction for the day shown is deleted straight away.

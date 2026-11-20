@@ -149,6 +149,8 @@ DeviceTimeCorrectionDialog::DeviceTimeCorrectionDialog(QWidget *parent)
     ui->summaryLabel->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     ui->statusLabel->setMinimumHeight(3 * lineHeight);
     ui->statusLabel->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
+    // Two lines beside Close: its longest message wraps at the dialog's smallest width.
+    ui->listStatusLabel->setMinimumHeight(2 * lineHeight + 2 * ui->listStatusLabel->margin() + 2);
 
     applyTheme();
     m_ready = true;
@@ -162,6 +164,7 @@ void DeviceTimeCorrectionDialog::applyTheme()
     ui->activeDateLabel->setStyleSheet(QString("font-style: italic; color: %1;").arg(ink2));
     ui->totalLabel->setStyleSheet(QString("color: %1;").arg(ink2));
     ui->statusLabel->setStyleSheet("font-weight: 600;");
+    ui->listStatusLabel->setStyleSheet("font-weight: 600;");
     // Red on a light theme; the dark theme keeps the warning colour, which reads well there.
     const bool dark = Theme::isDark(QGuiApplication::palette());
     ui->largeDriftWarning->setStyleSheet(
@@ -404,6 +407,22 @@ bool DeviceTimeCorrectionDialog::coversDate(const QString& dateFrom, const QStri
 void DeviceTimeCorrectionDialog::setStatus(const QString& text)
 {
     ui->statusLabel->setText(text);
+    showListStatus(QString());
+}
+
+/*! Show in Daily and Delete Correction are in the Saved Corrections panel, so their result
+    is shown below that panel, beside Close, and not in the editor above it. The label is
+    framed only while it has a message; an empty frame would look like an input field. */
+void DeviceTimeCorrectionDialog::setListStatus(const QString& text)
+{
+    ui->statusLabel->clear();
+    showListStatus(text);
+}
+
+void DeviceTimeCorrectionDialog::showListStatus(const QString& text)
+{
+    ui->listStatusLabel->setText(text);
+    ui->listStatusLabel->setFrameShape(text.isEmpty() ? QFrame::NoFrame : QFrame::StyledPanel);
 }
 
 void DeviceTimeCorrectionDialog::rebuildMachine(Machine* mach)
@@ -1210,7 +1229,7 @@ void DeviceTimeCorrectionDialog::onDeleteRow()
     m_hasStagedChange = false;
     m_staged = {};
     commitAndRefresh(mach);
-    setStatus(status);
+    setListStatus(status);
 }
 
 /*! Daily is asked for the first day in the correction's dates on which the device has
@@ -1230,14 +1249,14 @@ void DeviceTimeCorrectionDialog::onShowInDaily()
 
     auto it = mach->day.lowerBound(from);
     if (it == mach->day.end() || (to.isValid() && it.key() > to)) {
-        setStatus(tr("%1 has no data on the dates this correction covers, so there is nothing to show in Daily.")
-                      .arg(deviceLabel(mach)));
+        setListStatus(tr("%1 has no data on the dates this correction covers, so there is nothing to show in Daily.")
+                          .arg(deviceLabel(mach)));
         return;
     }
     const QDate target = it.key();
 
     if (target == m_date) {
-        setStatus(tr("Daily already shows %1.").arg(target.toString(Qt::ISODate)));
+        setListStatus(tr("Daily already shows %1.").arg(target.toString(Qt::ISODate)));
         return;
     }
 
