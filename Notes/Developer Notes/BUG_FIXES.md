@@ -8535,3 +8535,36 @@ Open, CSV export and journal notes export.
   have no Qt alternative on Windows, so they still follow the system.
 - The three newly covered dialogs now also switch to Qt's dialog when OSCAR's language differs from
   Windows' display language, as the others already did.
+
+---
+
+## 2026-11-19 - Layout dialog: bright white buttons in dark mode (GitLab #405)
+
+**Files:** `oscar/saveGraphLayoutSettings.cpp` (`calculateButtonStyle()`, `buttonIcon()`,
+`applyButtonTheme()`, `confirmAction()`, `helpInfo()`), `oscar/saveGraphLayoutSettings.h`
+
+**Symptom:** With OSCAR in dark mode, the buttons of the Layout dialog (Daily and Overview) were
+bright white with black text, and its Delete confirmation was bright yellow with partly illegible
+text.
+
+**Root cause:** `calculateButtonStyle()` gave the buttons a fixed style sheet: black on white when
+available, dark grey on `#e8e8e8` when greyed out. It does not depend on the system's mode.
+
+**Fix:** In dark mode the style sheet takes its colours from the application palette (button colours
+when available; window colour and disabled text when greyed out), and the buttons' black icons are
+redrawn in the button text colour. Light mode is unchanged. The dialog is built once, so the styles
+and icons are set again each time it opens (`applyButtonTheme()`), to follow a scheme changed since.
+
+**Non-obvious:**
+- The buttons are never disabled; "greyed out" is only a style, so that a click can still explain
+  why nothing happens. That is kept.
+- The confirmation and "No Item Selected" boxes had their own style sheet (yellow background, red and
+  black text, no title bar), which in dark mode left yellow buttons with white text and some white
+  text on yellow. By the user's decision they are now standard message boxes with a title bar, the
+  application's colours and the standard icon size. Their text is shown as plain text, as a layout's
+  description is typed by the user.
+- The Help button's heavy question-mark bitmap is replaced by a plain "?" in the button's font, by
+  the user's decision. `icons/question_mark.png` is no longer used by this dialog.
+- The first paragraph of the dialog's Help text had a fixed black colour, unreadable on a dark
+  dialog; it now uses the palette's text colour.
+- The dialogs' `border: 3px solid black` style is left as it is.

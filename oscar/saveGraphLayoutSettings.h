@@ -58,7 +58,6 @@ protected:
     HelpData help;
     HelpData menu;
     QIcon*  m_icon_return       = new QIcon(":/icons/return.png");
-    QIcon*  m_icon_help         = new QIcon(":/icons/question_mark.png");
     QIcon*  m_icon_exit         = new QIcon(":/icons/exit.png");
     QIcon*  m_icon_delete       = new QIcon(":/icons/trash_can.png");
     QIcon*  m_icon_update       = new QIcon(":/icons/update.png");
@@ -69,7 +68,6 @@ protected:
 private:
     const static int fileNumMaxLength = 3;
     const static int maxFiles = 30;     // Max supported design limited is 1000 10**fileNumMaxLength(3).
-    const static int iconWidthMessageBox = 50;
     const static int maxDescriptionLen = 80;
     const QString fileBaseName = QString("layout");
     const int fileNameRole = Qt::UserRole;
@@ -119,10 +117,11 @@ private:
     QString styleOn;
     QString styleOff;
     QString styleExit;
-    QString styleMessageBox;
     QString styleDialog;
 
     QString calculateButtonStyle(bool on,bool border);
+    QIcon   buttonIcon(const QIcon* icon) const;
+    void    applyButtonTheme();
     void    looksOn(QPushButton* button,bool on);
     bool    confirmAction(QString name,QString question,QIcon* icon,
                 QMessageBox::StandardButtons flags = (QMessageBox::Cancel|QMessageBox::Yes) ,
@@ -130,8 +129,6 @@ private:
                 QMessageBox::StandardButton success = QMessageBox::Yes
                 );
     bool    verifyItem(QListWidgetItem* item,QString name,QIcon* icon) ;
-
-    const QString calculateStyleMessageBox( QFont* font, QString& s1, QString& s2);
 
     void     displaywidgets(QWidget* widget);
     QSize    calculateParagraphSize(QString& text,QFont& font, QString& );

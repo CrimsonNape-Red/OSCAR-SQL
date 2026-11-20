@@ -24,7 +24,11 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QVBoxLayout>
+#include <QPainter>
+#include <QPalette>
+#include <QStyle>
 #include "SleepLib/profiles.h"
+#include "uikit/theme.h"
 #include "saveGraphLayoutSettings.h"
 #include "database/database_manager.h"
 #include "database/graph_layouts_repository.h"
@@ -79,7 +83,7 @@ QPushButton*  SaveGraphLayoutSettings::menuBtn(QString name, QIcon* icon, QStrin
 
 QPushButton*  SaveGraphLayoutSettings::newBtnRtn(QHBoxLayout* layout,QString name, QIcon* icon, QString style,QSizePolicy::Policy hPolicy,QString tooltip) {
     QPushButton* button = new QPushButton(name, menu.dialog);
-    button->setIcon(*icon);
+    if (icon) button->setIcon(*icon);       // nullptr: a button with text only
     button->setStyleSheet(style);
     button->setSizePolicy(hPolicy,QSizePolicy::Fixed);
     button->setToolTip(tooltip);
@@ -93,24 +97,6 @@ void SaveGraphLayoutSettings::createStyleSheets() {
     styleOn=        calculateButtonStyle(true,false);
     styleOff=       calculateButtonStyle(false,false);
     styleExit=      calculateButtonStyle(true,true);
-    styleMessageBox=
-            "QMessageBox   { "
-                "background-color:yellow;"
-                //"color:black;"
-                "color:red;"
-                "border: 2px solid black;"
-                "text-align: right;"
-                "font-size: 16px;"
-            "}"
-            "QTextEdit {"
-                "background-color:lightblue;"
-                //"color:black;"
-                "color:red;"
-                "border: 9px solid black;"
-                "text-align: center;"
-                "vertical-align:top;"
-            "}"
-            ;
     styleDialog= QString ( R"( QDialog { border: 3px solid black; } )") ;
 }
 
@@ -132,7 +118,8 @@ void SaveGraphLayoutSettings::createMenu() {
     menuRenameBtn  = menuBtn(tr("Rename" ),m_icon_rename  , styleOn  ,QSizePolicy::Minimum, tr("Renames the selection. Must edit existing name then press enter."));
     menuUpdateBtn  = menuBtn(tr("Update" ),m_icon_update  , styleOn  ,QSizePolicy::Minimum, tr("Updates the selection with current settings."));
     menuDeleteBtn  = menuBtn(tr("Delete" ),m_icon_delete  , styleOn  ,QSizePolicy::Minimum, tr("Deletes the selection."));
-    menuHelpBtn    = menuBtn(""           ,m_icon_help    , styleOn  ,QSizePolicy::Fixed  , tr("Expanded Help menu."));
+    // A plain "?" in the button's font, not an icon: it stays crisp and follows light and dark.
+    menuHelpBtn    = menuBtn("?"          ,nullptr        , styleOn  ,QSizePolicy::Fixed  , tr("Expanded Help menu."));
 
     menuList = new QListWidget(menu.dialog);
     menuList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -278,7 +265,7 @@ return strList.join("\n");
 
 QString SaveGraphLayoutSettings::helpInfo() {
 QStringList strList;
-    strList<<QString("<p style=\"color:black;\">")
+    strList<<QString("<p>")     // no fixed colour: the text follows the light or dark palette
 <<QString(tr("This feature manages the saving and restoring of Layout Settings."))
     <<QString("<br>")
 <<QString(tr("Layout Settings control the layout of a graph or chart."))
@@ -375,20 +362,6 @@ QStringList strList;
 return strList.join("\n");
 };
 
-const QString  SaveGraphLayoutSettings::calculateStyleMessageBox(QFont* font , QString& s1, QString& s2) {
-    QFontMetrics fm = QFontMetrics(*font);
-    int width = fm.boundingRect(s1).size().width();
-    int width2 = fm.boundingRect(s2).size().width();
-    width = qMax(width,width2) + iconWidthMessageBox;
-
-    QString style = QString("%1 QLabel{%2 min-width: %3px;}" ).
-            arg(styleMessageBox).
-            arg("text-align: center;" "color:black;").
-            arg(width);
-
-    return style;
-}
-
 bool SaveGraphLayoutSettings::verifyItem(QListWidgetItem* item,QString text,QIcon* icon) {
     //if (verifyhelp() ) return false;
     if (item) return true;
@@ -397,57 +370,77 @@ bool SaveGraphLayoutSettings::verifyItem(QListWidgetItem* item,QString text,QIco
     return false;
 }
 
-#if 1
+/*! \brief Shows a standard message box and returns true when the user answers with \a success
+ *
+ *  \a top is the main text (a layout's description or a message) and \a bottom the question, if
+ *  any. Both are shown as plain text, as a description is typed by the user. The box has the
+ *  application's normal colours; \a icon is the action's icon, drawn to suit light or dark.
+ */
 bool SaveGraphLayoutSettings::confirmAction(QString top ,QString bottom,QIcon* icon,QMessageBox::StandardButtons flags , QMessageBox::StandardButton adefault, QMessageBox::StandardButton success) {
-    //QString topText=QString("<Center>%1</Center>").arg(top);
-    //QString bottomText=QString("<Center>%1</Center>").arg(bottom);
-    QString topText=QString("<p style=""text-align:center"">%1</p>").arg(top);
-    QString bottomText=QString("<p style=""text-align:center"">%1</p>").arg(bottom);
-
     QMessageBox msgBox(menu.dialog);
-    msgBox.setText(topText);
-    msgBox.setInformativeText(bottomText);
+    msgBox.setWindowTitle(menu.dialog->windowTitle());
+    msgBox.setTextFormat(Qt::PlainText);
+    msgBox.setText(top);
+    msgBox.setInformativeText(bottom);
     if (icon!=nullptr) {
-        msgBox.setIconPixmap(icon->pixmap(QSize(iconWidthMessageBox,iconWidthMessageBox)));
+        const int size = msgBox.style()->pixelMetric(QStyle::PM_MessageBoxIconSize, nullptr, &msgBox);
+        msgBox.setIconPixmap(buttonIcon(icon).pixmap(QSize(size,size)));
     }
-    // may be good for help menu. a pull down box with box of data.  msgBox.setDetailedText("some detailed string");
     msgBox.setStandardButtons(flags);
     msgBox.setDefaultButton(adefault);
-    msgBox.setWindowFlag(Qt::FramelessWindowHint,true);
-
-    msgBox.setStyleSheet(calculateStyleMessageBox(&menu.font,top,bottom));
-
-    // displaywidgets((QWidget*)&msgBox);
-    bool ret= msgBox.exec()==success;
-    return ret;
+    return msgBox.exec()==success;
 }
-#else
-bool SaveGraphLayoutSettings::confirmAction(QString name ,QString question,QIcon* icon,QMessageBox::StandardButtons flags , QMessageBox::StandardButton adefault, QMessageBox::StandardButton success) {
-//bool SaveGraphLayoutSettings::confirmAction(QString name,QString question,QIcon* icon)
-    Q_UNUSED(flags);
-    Q_UNUSED(adefault);
-    Q_UNUSED(success);
-    QMessageBox msgBox(menu.dialog);
-    msgBox.setText(question);
-    if (icon!=nullptr) {
-        msgBox.setIconPixmap(icon->pixmap(QSize(50,50)));
-    }
 
-    msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Yes );
-    msgBox.setDefaultButton(QMessageBox::Cancel);
-    msgBox.setStyleSheet(styleMessageBox);
-    msgBox.setWindowFlag(Qt::FramelessWindowHint,true);
-
-    return (msgBox.exec()==QMessageBox::Yes);
-    Q_UNUSED(name);
-
+/*! \brief Returns \a icon for a button: as it is in light mode, redrawn in the button text colour in dark mode
+ *
+ *  The icons are black glyphs on a transparent background, which don't show on a dark button.
+ *  Also used for the icon in the message boxes.
+ */
+QIcon SaveGraphLayoutSettings::buttonIcon(const QIcon* icon) const {
+    const QPalette palette = QApplication::palette();
+    if (!Theme::isDark(palette)) return *icon;
+    QPixmap pixmap = icon->pixmap(icon->availableSizes().value(0, QSize(64,64)));
+    QPainter painter(&pixmap);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    painter.fillRect(pixmap.rect(), palette.color(QPalette::Active, QPalette::ButtonText));
+    painter.end();
+    return QIcon(pixmap);
 }
-#endif
 
+/*! \brief Gives the menu's buttons the colours and icons of the colour scheme in effect
+ *
+ *  Called each time the menu opens, as the menu is built once and the scheme may have changed
+ *  since. manageButtonApperance() then sets the style of the buttons that depend on the selection.
+ */
+void SaveGraphLayoutSettings::applyButtonTheme() {
+    createStyleSheets();
+    menuAddFullBtn->setIcon(buttonIcon(m_icon_add));
+    menuAddBtn->setIcon(buttonIcon(m_icon_add));
+    menuRestoreBtn->setIcon(buttonIcon(m_icon_restore));
+    menuRenameBtn->setIcon(buttonIcon(m_icon_rename));
+    menuUpdateBtn->setIcon(buttonIcon(m_icon_update));
+    menuDeleteBtn->setIcon(buttonIcon(m_icon_delete));
+    menuAddFullBtn->setStyleSheet(styleOff);
+    menuAddBtn->setStyleSheet(styleOn);
+    menuHelpBtn->setStyleSheet(styleOn);
+}
+
+/*! \brief Returns the style sheet of a button that looks available (\a on) or greyed out
+ *
+ *  Light mode keeps its fixed colours. Dark mode takes them from the application palette:
+ *  the button colours when on, the window colour and disabled text when greyed out.
+ */
 QString SaveGraphLayoutSettings::calculateButtonStyle(bool on,bool exitBtn){
-        QString btnStyle=QString("QPushButton{%1%2}").arg(on
-            ?"color: black;background-color:white;"
-            :"color: darkgray;background-color:#e8e8e8 ;"
+        QString colors = on ? "color: black;background-color:white;"
+                            : "color: darkgray;background-color:#e8e8e8 ;";
+        const QPalette palette = QApplication::palette();
+        if (Theme::isDark(palette)) {
+            const QColor text = on ? palette.color(QPalette::Active, QPalette::ButtonText)
+                                   : palette.color(QPalette::Disabled, QPalette::ButtonText);
+            const QColor background = palette.color(QPalette::Active, on ? QPalette::Button : QPalette::Window);
+            colors = QString("color: %1;background-color:%2;").arg(text.name(), background.name());
+        }
+        QString btnStyle=QString("QPushButton{%1%2}").arg(colors
             ).arg(!exitBtn ?
             ""
             :
@@ -774,6 +767,7 @@ void SaveGraphLayoutSettings::triggerLayout(gGraphView* graphView) {
     }
     this->graphView=graphView;
     updateFileList();
+    applyButtonTheme();
     manageButtonApperance();
     menu.dialog->raise();
     menu.open=true;
