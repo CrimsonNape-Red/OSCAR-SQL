@@ -13,6 +13,8 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMessageBox>
+#include <QDialog>
+#include <QPointer>
 class QVBoxLayout;
 class QListWidget;
 class QListWidgetItem;
@@ -31,8 +33,10 @@ public:
     QLabel title ;
     QLabel message ;
 
-    QDialog*dialog = nullptr;
-    bool    open = false;
+    QPointer<QDialog> dialog;       //!< Child of the main window; null until created
+    //! \brief True while the dialog is on screen
+    bool    isOpen() const { return dialog && dialog->isVisible(); }
+    void    showDialog();
     QVBoxLayout* layout =nullptr;
 
     QFont   font ;
@@ -54,6 +58,7 @@ public:
     void triggerLayout(gGraphView* graphView);
     void    hintHelp();
 protected:
+    bool    eventFilter(QObject* watched, QEvent* event) override;
     HelpData hint;
     HelpData help;
     HelpData menu;

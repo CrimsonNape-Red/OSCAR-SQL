@@ -25,6 +25,7 @@
 #include <QListWidgetItem>
 #include <QVBoxLayout>
 #include <QPainter>
+#include <QEvent>
 #include <QPalette>
 #include <QStyle>
 #include "SleepLib/profiles.h"
@@ -54,11 +55,16 @@ SaveGraphLayoutSettings::SaveGraphLayoutSettings(QString title,QWidget* parent) 
     menu.dialog->connect(menuList,       SIGNAL(itemSelectionChanged()), this, SLOT(itemSelectionChanged()   ));
 
     singleLineRe = new QRegularExpression( QString("^\\s*([^\\r\\n]{0,%1})").arg(1+maxDescriptionLen) );
+
+    // The dialogs are not modal, so the user can leave the page or close the menu while they are open.
+    // Closing the menu closes its help; leaving the page closes them all (see eventFilter()).
+    connect(menu.dialog.data(), &QDialog::finished, this, [this]() { closeHelp(); closeHint(); });
+    if (parent) parent->installEventFilter(this);
 }
 
 SaveGraphLayoutSettings::~SaveGraphLayoutSettings()
 {
-    if (!menu.dialog) return;
+    if (menu.dialog) {
     menu.dialog->disconnect(menuAddFullBtn, SIGNAL(clicked()), this, SLOT (addFull_feature()  ));
     menu.dialog->disconnect(menuAddBtn,     SIGNAL(clicked()), this, SLOT (add_feature()  ));
     menu.dialog->disconnect(menuRestoreBtn, SIGNAL(clicked()), this, SLOT (restore_feature()  ));
@@ -68,9 +74,28 @@ SaveGraphLayoutSettings::~SaveGraphLayoutSettings()
     menu.dialog->disconnect(menuHelpBtn,    SIGNAL(clicked()), this, SLOT (help_feature()  ));
     menu.dialog->disconnect(menuList,       SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(itemChanged(QListWidgetItem*)   ));
     menu.dialog->disconnect(menuList,       SIGNAL(itemSelectionChanged()), this, SLOT(itemSelectionChanged()   ));
+    }
     helpDestructor();
 
     delete singleLineRe;
+
+    // The dialogs are children of the main window, which outlives this object (a new one is made
+    // each time a profile is opened), so they are deleted here.
+    delete help.dialog.data();
+    delete hint.dialog.data();
+    delete menu.dialog.data();
+}
+
+/*! \brief Closes the dialogs when the page they belong to is hidden
+ *
+ *  The dialogs act on that page's graphs, so they must not stay open over another page.
+ */
+bool SaveGraphLayoutSettings::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == parent && event->type() == QEvent::Hide) {
+        closeMenu();
+    }
+    return QWidget::eventFilter(watched, event);
 }
 
 QPushButton*  SaveGraphLayoutSettings::menuBtn(QString name, QIcon* icon, QString style,QSizePolicy::Policy hPolicy,QString tooltip) {
@@ -136,22 +161,29 @@ void SaveGraphLayoutSettings::createMenu() {
 
 void HelpData::setDialog(QWidget* parent,QString windowsTitle) {
     if (dialog) return;
-    open=false;
     #ifdef USE_FRAMELESS_WINDOW
         dialog= new QDialog(parent, Qt::FramelessWindowHint);
         title.setText(QString("<h4>%1</h4>").arg(windowsTitle) );
         headerLayout = new QHBoxLayout();
     #else
-        dialog = new QDialog(nullptr, Qt::WindowTitleHint | Qt::WindowCloseButtonHint|Qt::WindowSystemMenuHint);
+        // A child of the main window, so it stays in front of it and can't be lost behind it.
+        // Not modal: the rest of OSCAR stays usable while it is open.
+        dialog = new QDialog(parent ? parent->window() : nullptr, Qt::WindowTitleHint | Qt::WindowCloseButtonHint|Qt::WindowSystemMenuHint);
         dialog->setWindowTitle(windowsTitle) ;
-        dialog->setWindowModality(Qt::WindowModal);
         dialog->setStyleSheet(QString ( "QDialog { border: 3px solid black; }"));
     #endif
-    Q_UNUSED(parent);
     font = QApplication::font();
     fontBold = font;
     fontBold.setWeight(QFont::Bold);
     layout = new QVBoxLayout(dialog);
+}
+
+//! \brief Shows the dialog without blocking, in front of the main window and with the keyboard focus
+void HelpData::showDialog() {
+    if (!dialog) return;
+    dialog->show();
+    dialog->raise();
+    dialog->activateWindow();
 }
 
 void SaveGraphLayoutSettings::initDialog(
@@ -532,15 +564,11 @@ void SaveGraphLayoutSettings::help_feature() {
     initminMenuListSize();
     createHelp();
     if(!help.dialog) return;
-    if (help.open) {
+    if (help.isOpen()) {
         closeHelp();
         return;
     }
-    help.dialog->raise();
-    help.open=true;
-    help.dialog->exec();
-    help.open=false;
-    manageButtonApperance();
+    help.showDialog();
 }
 
 void SaveGraphLayoutSettings::delete_feature() {
@@ -740,13 +768,13 @@ QListWidgetItem* SaveGraphLayoutSettings::updateFileList(int findSlot) {
 
 
 void SaveGraphLayoutSettings::closeHelp() {
-    if (help.open) {
+    if (help.isOpen()) {
         help.dialog->close();
     }
 }
 
 void SaveGraphLayoutSettings::closeHint() {
-    if (hint.open) {
+    if (hint.isOpen()) {
         hint.dialog->close();
     }
 }
@@ -754,14 +782,14 @@ void SaveGraphLayoutSettings::closeHint() {
 void SaveGraphLayoutSettings::closeMenu() {
     closeHelp();
     closeHint();
-    if (menu.open) {
+    if (menu.isOpen()) {
         menu.dialog->close();
     }
 }
 
 void SaveGraphLayoutSettings::triggerLayout(gGraphView* graphView) {
     if (!menu.dialog) return;
-    if (menu.open) {
+    if (menu.isOpen()) {
         closeMenu();
         return;
     }
@@ -769,11 +797,7 @@ void SaveGraphLayoutSettings::triggerLayout(gGraphView* graphView) {
     updateFileList();
     applyButtonTheme();
     manageButtonApperance();
-    menu.dialog->raise();
-    menu.open=true;
-    menu.dialog->exec();
-    menu.open=false;
-    closeMenu();
+    menu.showDialog();      // not modal; closing it closes its help (see the constructor)
 }
 
 QSize   textsize(QFont font ,QString text) {
@@ -788,18 +812,12 @@ void SaveGraphLayoutSettings::createHint() {
 };
 
 void SaveGraphLayoutSettings::hintHelp() {
-    if (hint.open) {
+    if (hint.isOpen()) {
         hint.dialog->close();
         return;
     }
     createHint();
-    if (!hint.dialog) return;
-
-    hint.dialog->raise();
-    hint.dialog->show();
-    hint.open=true;
-    hint.dialog->exec();
-    hint.open=false;
+    hint.showDialog();
 }
 
 

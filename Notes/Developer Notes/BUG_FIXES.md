@@ -8568,3 +8568,34 @@ and icons are set again each time it opens (`applyButtonTheme()`), to follow a s
 - The first paragraph of the dialog's Help text had a fixed black colour, unreadable on a dark
   dialog; it now uses the palette's text colour.
 - The dialogs' `border: 3px solid black` style is left as it is.
+
+---
+
+## 2026-11-19 - Layout dialog could be lost behind the main window (GitLab #406)
+
+**Files:** `oscar/saveGraphLayoutSettings.cpp` (`HelpData::setDialog()`, `HelpData::showDialog()`,
+`triggerLayout()`, `help_feature()`, `hintHelp()`, `eventFilter()`, destructor),
+`oscar/saveGraphLayoutSettings.h`
+
+**Symptom:** The Layout dialog, its Help window and the Graph Short-Cuts Help could drop behind
+OSCAR's main window and be forgotten there.
+
+**Root cause:** The three dialogs were created with no parent window (`new QDialog(nullptr, ...)`),
+so nothing kept them in front of the main window. They were also set window-modal and run with
+`exec()`, a nested event loop inside the Layout button's click.
+
+**Fix:** The dialogs are children of the main window and are shown with `show()`, not modal, by the
+user's decision. Whether one is open is read from the dialog (`HelpData::isOpen()`), not from a flag
+set around `exec()`.
+
+**Non-obvious:**
+- Because the dialogs are not modal, the user can leave the page while one is open. They act on that
+  page's graphs, so an event filter on the page closes them when it is hidden.
+- Closing the Layout dialog still closes its Help and the Short-Cuts Help, now through
+  `QDialog::finished`.
+- The dialogs used to be leaked. As children of the main window they would pile up, one set per
+  profile opened, so the destructor deletes them; `HelpData::dialog` is a `QPointer` in case the main
+  window deletes them first.
+- The confirmation boxes stay modal, with the Layout dialog as their parent.
+- Checked by compiling only at the time of writing. Staying in front of the parent is the Windows
+  behaviour of an owned window; macOS and Linux were not checked.
