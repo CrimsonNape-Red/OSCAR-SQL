@@ -4,7 +4,14 @@
 #include <QDate>
 #include <QDataStream>
 #include <QList>
+#include <QMutex>
 #include <QString>
+#include <QStringList>
+
+#include <functional>
+#include <memory>
+
+#include "SleepLib/card_archive.h"
 
 constexpr int kBmcLegacyWaveformSamples = 25;
 constexpr int kBmcExtendedWaveformSamples = 50;
@@ -488,6 +495,32 @@ public:
     ~BmcDateSession();
 };
 
+/// @brief One record (night) of a BMC card as offered to a CardArchive.
+struct BmcArchiveRecord
+{
+    CardArchiveRecord info;   ///< what the archive needs to know about the record
+    int handle = -1;          ///< the parser's own reference to the record; -1 = none
+    /// Set by ReadArchiveRecordBytes() when the record's data is there but could not be
+    /// read (a ring file would not open, or a read came up short).  That is an error, not
+    /// a night without waveform: nothing may be concluded from the empty result.
+    bool readFailed = false;
+};
+
+/// @brief Capture-rule version of the legacy BMC parser, stored with every archived night.
+///
+/// Raise it when the logic that decides which waveform packets belong to a night changes
+/// (the crumb search, the session window, the wrap handling in ReadWaveformBytes()).
+/// Nights archived under a lower number are then captured again from any card that still
+/// holds them.  This is not the loader's data version and forces no rebuild.
+constexpr int kBmcLegacyCaptureRule = 1;
+
+/// @brief Common interface of the legacy and G3X BMC card parsers.
+///
+/// Besides importing, a parser serves the night archive (CardArchive, GitLab #380): it
+/// lists the card's records, hands over a record's raw waveform packets for storing, and
+/// in archive mode reads those packets back from an archive in place of the card's ring
+/// files.  The same code path defines a night's packets for import and for the archive,
+/// so the two cannot disagree.
 class BmcDataParser
 {
 public:
@@ -496,6 +529,49 @@ public:
     virtual BmcMachineInfo ReadMachineInfo() = 0;
     virtual BmcDateSession ReadDateSession(QDate aDate) = 0;
     virtual const QList<BmcDataLink>& GetSessionLinks() const = 0;
+
+    /// @brief Read waveforms from @p archive in place of the card's ring files.
+    /// Call before ReadData().  Null (the default) reads the card.  The parser only ever
+    /// reads the archive; it never changes it.
+    virtual void SetArchive(CardArchive* archive) = 0;
+
+    /// @brief The records (nights) the parsed index describes.  Call after ReadData().
+    virtual QList<BmcArchiveRecord> ArchiveRecords() = 0;
+
+    /// @brief A record's waveform packets, in recording order, with the ring's wrap removed.
+    /// @param rec     A record from ArchiveRecords(); its first, last, bytes and complete
+    ///                fields are filled in from what was read.
+    /// @param aborted Polled while reading; may be empty.  A true result abandons the read.
+    /// @return The packets, or an empty array if the record has none, the read was abandoned,
+    ///         or it failed (then @p rec.readFailed is set).
+    virtual QByteArray ReadArchiveRecordBytes(BmcArchiveRecord& rec,
+                                              const std::function<bool()>& aborted) = 0;
+
+    /// @brief Size of one waveform packet in bytes.
+    virtual int PacketSize() const = 0;
+
+    /// @brief First and last packet times of a buffer of this parser's waveform packets.
+    /// @return false if @p packets is empty, not whole packets, or carries no valid times.
+    virtual bool DescribePackets(const QByteArray& packets, QDateTime& first, QDateTime& last) const = 0;
+
+    /// @brief The card's file base name (the part its data files share).
+    virtual QString BaseName() const = 0;
+
+    /// @brief Names of the index-class files present: the small files that describe every
+    ///        night and only grow, which the archive keeps verbatim.
+    virtual QStringList IndexFileNames() const = 0;
+
+    /// @brief Earliest and latest date the parsed index describes.
+    /// @return false if it describes none.
+    virtual bool IndexDateRange(QDate* first, QDate* last) const = 0;
+
+    /// @brief True if @p fileName is one of the card's ring-buffer waveform files, which
+    ///        the archive never copies as files.
+    virtual bool IsRingFileName(const QString& fileName) const = 0;
+
+    /// @brief Archive mode: dates whose segment is listed in the archive but could not be
+    ///        read during this import.  Safe to call while import tasks are running.
+    virtual QList<QDate> UnreadableNights() const = 0;
 };
 
 class BmcData
@@ -525,9 +601,45 @@ public:
     BmcDateSession ReadDateSession(QDate aDate) override;
     const QList<BmcDataLink>& GetSessionLinks() const override;
 
+    void SetArchive(CardArchive* archive) override;
+    QList<BmcArchiveRecord> ArchiveRecords() override;
+    QByteArray ReadArchiveRecordBytes(BmcArchiveRecord& rec,
+                                      const std::function<bool()>& aborted) override;
+    int PacketSize() const override;
+    bool DescribePackets(const QByteArray& packets, QDateTime& first, QDateTime& last) const override;
+    QString BaseName() const override;
+    QStringList IndexFileNames() const override;
+    bool IndexDateRange(QDate* first, QDate* last) const override;
+    bool IsRingFileName(const QString& fileName) const override;
+    QList<QDate> UnreadableNights() const override;
+
 protected:
+#ifdef UNITTEST_MODE
+    friend class BmcArchiveTests;
+#endif
+
     QString dirPath;
     QString usrFilePath;
+
+    /// Archive to read waveforms from in place of the .nnn ring files; null reads the card.
+    CardArchive* archive = nullptr;
+    /// Nights whose archive segment failed to read; see UnreadableNights().
+    QList<QDate> unreadableNights;
+    mutable QMutex unreadableMutex;
+
+    /// Timestamp of the 256-byte waveform packet at @p packet (offsets 0xF8-0xFE).
+    static QDateTime PacketTimestamp(const char* packet);
+    /// The archive entry holding @p session's waveform, or null if there is none.
+    const CardArchiveEntry* ArchiveEntryFor(const BmcUsrSession& session) const;
+    // The raw 256-byte packets ReadWaveforms() decodes for a session: read from the card's
+    // ring files, or in archive mode from the session's archive segment.
+    QByteArray ReadWaveformBytes(BmcDataLink& link, const std::function<bool()>& aborted,
+                                 bool* complete = nullptr, bool* readFailed = nullptr);
+    /// Opens one .nnn ring file for reading; null if it cannot be opened.  Virtual so that
+    /// tests can stand in a file that fails.
+    virtual std::unique_ptr<QIODevice> OpenRingFile(const QString& path) const;
+    /// Decode a buffer of 256-byte waveform packets.
+    static QList<BmcWaveformPacket> DecodeWaveformBytes(const QByteArray& packets);
 
     static QString ChangeFileExtension(const QString& path, QString newExtensionWithDot);
     static QString GetUsrFilePath(const QString& path);

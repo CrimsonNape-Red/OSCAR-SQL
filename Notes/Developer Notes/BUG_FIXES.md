@@ -4,6 +4,96 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-20 - BMC card backup recopied the whole card on every import and kept only the last card (GitLab #380)
+
+**Files:** `oscar/SleepLib/card_archive.cpp/.h` (new), `oscar/SleepLib/loader_plugins/bmc_archive.cpp/.h`
+(new), `bmcDataParsing.cpp/.h`, `bmcG3xDataParsing.cpp/.h`, `bmc_loader.cpp/.h`, `bmcg3x_loader.cpp/.h`,
+`oscar/SleepLib/machine_loader.h`, `oscar/mainwindow.cpp`, `oscar/SleepLib/profiles.cpp`
+
+**Symptom:** Every import of a BMC or BMC G3X card spent most of its time on "Creating data backup...",
+even when one night was new. "Rebuild from backup" restored waveforms only for the nights still on the
+card at the last import (about two months); every earlier night came back as events only.
+
+**Root cause:** Both loaders deleted the Backup folder and copied the whole card on each import. BMC keeps
+waveforms in a fixed set of ring files that the device overwrites, so the copy was up to 4 GB each time
+and could never hold more than one ring's worth of nights.
+
+**Fix:** The Backup folder is now a night archive. Each night's waveform packets are stored once as a
+gzipped segment (`Backup/Segments/`), with a manifest (`archive.json`) and the card's small index files.
+An import stores only nights the archive does not hold; a rebuild reads the index files and takes each
+night from its segment. Measured on sample cards: an unchanged card imports in 4–6 s, the backup of a
+3.9 GB G3X card is 1.39 GB, and a fresh data folder importing only the Backup folder gets identical
+sessions. The design, the rules and the measurements are in
+`Notes/specs/2026-11-19-ring-buffer-backup-archive-design.md`.
+
+**Non-obvious:**
+- The Backup folder is no longer a card image, so the vendor program cannot open it.
+- A backup left by an earlier version (a full card copy) is converted on the first import, in place. When
+  all its nights are stored the manifest gets `"converted": true`, and only then are its ring files
+  deleted. Ring files without that flag mean "conversion not finished", and such a folder is read as a
+  card. A ring file that cannot be read during the conversion counts as a failure, not as an empty
+  night, so the copy is kept.
+- Nights whose waveform was overwritten on the card before the archive existed are in the database and
+  nowhere else. A rebuild loses their graphs. The rebuild confirmation now says how many nights and
+  which dates, and the upgrade prompt says from which date the backup holds detailed data.
+- A damaged segment is reported after a rebuild and moved to `Segments/Damaged/`, not deleted. To get
+  that night's graphs back, import a card that still holds it and then rebuild again: an import only
+  re-reads the newest day. A segment that merely could not be opened is left where it is.
+- If the backup step fails, the user is told (outside batch mode), since the card keeps overwriting its
+  oldest nights. Ring files of an old copy that cannot be read as a card are moved to
+  `Backup/Unconverted/`.
+- No loader data version changed. `kBmcLegacyCaptureRule` and `kBmcG3xCaptureRule` are separate: raise one
+  when the logic that decides which packets belong to a night changes, so archived nights are captured
+  again from cards that still hold them.
+- "This night has waveform" is a stored flow sample count above zero. An events-only legacy BMC session
+  still has a flow summary row, with a count of zero, so `Day::channelHasData(CPAP_FlowRate)` is true
+  for it.
+- Not checked in the running application: Cancel during the backup step (unit tests only). No pair of
+  images from one legacy device at different dates was available.
+
+---
+
+## 2026-11-20 - gCompress() wrote an invalid gzip checksum for binary data (GitLab #407, found during #380)
+
+**Files:** `oscar/SleepLib/common.cpp` (`CRC32()`)
+
+**Symptom:** None in released builds: nothing called `gCompress()`. As soon as the night archive stored
+binary waveform packets with it, `gUncompress()` returned nothing for every segment.
+
+**Root cause:** `CRC32()` read each byte through a plain `char`. A byte of 0x80 or more sign-extended to
+0xFFFFFFxx before the XOR, corrupting the upper 24 bits of the CRC. The gzip trailer therefore held a
+wrong checksum, and zlib rejects a gzip stream whose checksum does not match. Text-only data never
+shows it.
+
+**Fix:** The byte is cast to `quint8`. `CardArchiveTests::testGzipChecksumOfHighBytes` checks the trailer
+against known CRC-32 values (0xFF gives 0xFF000000) and round-trips all 256 byte values.
+
+**Non-obvious:** `prs1_parser.cpp` has its own static `CRC32()` and is unaffected.
+
+---
+
+## 2026-11-20 - Legacy BMC: waveform scan had no end on a card holding one short recording (GitLab #408, found during #380)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcDataParsing.cpp` (`BmcData::ReadWaveformBytes()`, formerly
+the body of `ReadWaveforms()`)
+
+**Symptom:** Not reproduced on a real card. Found by a unit test with a synthetic card
+(`BmcArchiveTests::testLegacyShortCardReadOnce`): reading the only night never returned.
+
+**Root cause:** The scan follows the `.nnn` files in order and from the last back to the first, and
+stopped only at a packet past the session's window or at a backward jump of more than two hours (the
+newest data meeting the oldest). A card whose whole ring is one recording shorter than two hours, all
+inside one session window, has neither, so the scan went round again and collected the same packets
+without end.
+
+**Fix:** The scan stops when it returns to where it began. It also ends a file at a trailing part-packet
+instead of decoding the previous packet's bytes again, and stops if a ring file cannot be opened.
+
+**Non-obvious:** The new backup reads every night on the card, not only the newest, which is why the
+case mattered now.
+
+---
+
 ## 2026-11-15 - Classic Daily page half light, half dark in dark mode on Linux (GitLab #392)
 
 **Files:** `oscar/daily.cpp` (`Daily::applyTheme()`), `oscar/daily.h`, `oscar/dailySearchTab.cpp`,

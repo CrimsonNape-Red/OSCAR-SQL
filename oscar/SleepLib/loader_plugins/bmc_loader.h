@@ -3,6 +3,7 @@
 
 #include <QVector>
 #include <QFile>
+#include <memory>
 #include "SleepLib/machine.h" // Base class: MachineLoader
 #include "SleepLib/machine_loader.h"
 #include "SleepLib/profiles.h"
@@ -60,6 +61,9 @@ public:
     virtual void initChannels();
 
     virtual int Open(const QString &);
+    /// Says, for the rebuild prompts, which nights with detailed graphs this device's
+    /// backup cannot restore.  The G3X loader inherits this.
+    virtual QString rebuildLossWarning(Machine *mach) override;
 
     static void Register();
 
@@ -143,6 +147,18 @@ public:
     }
 
     int sessionsLoaded;
+
+protected:
+    /// Makes the parser for a folder of this loader's card data: BmcData here, BmcG3xData
+    /// in the G3X loader.  Used for the import source, for each retired index set of a
+    /// night archive, and for a backup folder that is still a full card copy.
+    virtual std::unique_ptr<BmcDataParser> createParser(const QString& dirpath) const;
+
+    /// The part of Open() both BMC loaders share, once the machine is known: read
+    /// @p dirpath (a card or a night archive), import its nights from @p firstImportDay
+    /// on, report anything an archive could not supply, and bring the device's backup up
+    /// to date.  Returns the number of sessions imported.
+    int importFromFolder(const QString& dirpath, Machine* mach, const QDate& firstImportDay);
 };
 
 #endif // BMCLOADER_H

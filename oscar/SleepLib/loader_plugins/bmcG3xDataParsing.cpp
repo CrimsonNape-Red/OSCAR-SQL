@@ -19,11 +19,13 @@
 
 #include "SleepLib/loader_plugins/bmcG3xDataParsing.h"
 
+#include <QBuffer>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileInfoList>
 #include <QIODevice>
+#include <QMutexLocker>
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include <QTextStream>
@@ -750,9 +752,18 @@ void ApplyFlowWaveformFromG3xPacket(const QByteArray& waveformPacket,
 /// Either the first waveform file (`.000`) or the event stream (`.evt`) qualifies.  Some
 /// firmware (G3 A20, internal build SC.76) writes no waveform files at all: every IDX record
 /// has a zero waveform length and the nights are imported from the EVT stream alone.
+///
+/// OSCAR's own backup of a card qualifies too: there the waveform is held as a night
+/// archive (CardArchive, GitLab #380) in place of the .00x files.
 bool HasG3xDataFiles(const QString& basePath)
 {
-    return QFile::exists(basePath + ".000") || QFile::exists(basePath + ".evt");
+    const QString folder = QFileInfo(basePath).absolutePath();
+    // An archive written by a later version of OSCAR is not something this build can read.
+    if (CardArchive::isArchive(folder) && CardArchive::isNewerFormat(folder)) {
+        return false;
+    }
+    return QFile::exists(basePath + ".000") || QFile::exists(basePath + ".evt")
+           || CardArchive::isArchive(folder);
 }
 
 } // end anonymous namespace
@@ -881,6 +892,26 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
     }
     if (!dayEntry) {
         throw std::invalid_argument("No G3X session with that date could be found");
+    }
+
+    // Archive mode: fetch the night's segment now.  If it cannot be read, carry on exactly
+    // as for a night whose waveform the ring had overwritten: events only, timed from noon
+    // of its date as ParseIdxRecords() does for a record without waveform.
+    std::vector<WaveSpan> waveSpans;
+    G3xDayEntry eventsOnlyEntry;
+    if (archive != nullptr && dayEntry->HasSegment) {
+        waveSpans = OpenWaveSpans(*dayEntry);
+        if (waveSpans.empty()) {
+            eventsOnlyEntry = *dayEntry;
+            eventsOnlyEntry.HasSegment      = false;
+            eventsOnlyEntry.WaveStartOffset = 0;
+            eventsOnlyEntry.WaveEndOffset   = 0;
+            eventsOnlyEntry.WaveLength      = 0;
+            eventsOnlyEntry.StartTimestamp  = QDateTime(dayEntry->Date, QTime(12, 0, 0));
+            eventsOnlyEntry.EndTimestamp    = eventsOnlyEntry.StartTimestamp.addSecs(
+                dayEntry->ItDurationSeconds > 0 ? dayEntry->ItDurationSeconds : 3600);
+            dayEntry = &eventsOnlyEntry;
+        }
     }
 
     // ---- Populate session metadata ----
@@ -1498,38 +1529,18 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
     int    timedUpdateIndex      = 0;
     int    staleWindowPacketCount = 0;
 
-    // fileIndex counts 64 MiB segments of the unwrapped virtual range, so a night that
-    // crosses the ring's wrap point runs from the last file on into .000;
-    // WaveformFileFor() maps each segment to its physical file.
-    const quint64 waveStart      = dayEntry->WaveStartOffset;
-    const quint64 waveEnd        = dayEntry->WaveEndOffset;
-    const int     startFileIndex = static_cast<int>(waveStart / kG3xWaveformFileSpan);
-    const int     endFileIndex   = (waveEnd > waveStart)
-                                       ? static_cast<int>((waveEnd - 1) / kG3xWaveformFileSpan)
-                                       : startFileIndex - 1;
+    // The night's packets come as one or more spans: stretches of the card's ring files
+    // (a night that crosses the ring's wrap point runs from the last file on into .000),
+    // or in archive mode the night's archive segment.  See OpenWaveSpans().
+    if (archive == nullptr) {
+        waveSpans = OpenWaveSpans(*dayEntry);
+    }
 
-    for (int fileIndex = startFileIndex; fileIndex <= endFileIndex; ++fileIndex) {
-        const quint64 segmentBase = static_cast<quint64>(fileIndex) * kG3xWaveformFileSpan;
-        const QString filepath    = WaveformFileFor(segmentBase, nullptr);
+    for (WaveSpan& waveSpan : waveSpans) {
+        QIODevice& waveformFile = *waveSpan.device;
+        const qint64 localEnd   = waveSpan.end;
 
-        QFile waveformFile(filepath);
-        if (!waveformFile.open(QIODevice::ReadOnly)) {
-            continue;
-        }
-
-        qint64 localStart = (fileIndex == startFileIndex)
-                                ? static_cast<qint64>(waveStart - segmentBase) : 0;
-        qint64 localEnd   = static_cast<qint64>(std::min<quint64>(waveEnd - segmentBase,
-                                                                  kG3xWaveformFileSpan));
-
-        localStart = std::max<qint64>(0, std::min(localStart, waveformFile.size()));
-        localEnd   = std::max<qint64>(0, std::min(localEnd,   waveformFile.size()));
-        if (localEnd <= localStart) {
-            waveformFile.close();
-            continue;
-        }
-
-        qint64 cursor = (localStart / kG3xWaveformPacketSize) * kG3xWaveformPacketSize;
+        qint64 cursor = waveSpan.start;
         while (cursor + kG3xWaveformPacketSize <= localEnd) {
             waveformFile.seek(cursor);
             const QByteArray waveformPacket = waveformFile.read(kG3xWaveformPacketSize);
@@ -1692,8 +1703,7 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
             if (diagnosticsEnabled) {
                 G3xDiagRow row;
                 row.TimestampSec  = timestampKey;
-                row.VirtualOffset = (static_cast<quint64>(fileIndex) * static_cast<quint64>(kG3xWaveformFileSpan)) +
-                                    static_cast<quint64>(cursor);
+                row.VirtualOffset = waveSpan.virtualBase + static_cast<quint64>(cursor);
 
                 row.RawPressureSeed            = packetPressureSeedHundredths > 0 ? packetPressureSeedHundredths : 0;
                 row.RawUnknown074              = ReadUInt16LEPtr(packetData, kG3xOffsetInspirationTime);
@@ -1724,9 +1734,8 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
             lastTimestampKey = timestampKey;
             cursor += kG3xWaveformPacketSize;
         }
-
-        waveformFile.close();
     }
+    waveSpans.clear();      // closes the ring files, or frees the decompressed segment
 
     if (staleWindowPacketCount > 0) {
         qDebug() << "BmcG3xData:" << aDate.toString(Qt::ISODate) << "skipped"
@@ -2094,7 +2103,28 @@ void BmcG3xData::ParseIdxRecords(const QByteArray& idxBytes)
         dayEntry.LogLength        = logLen;
 
         bool hasWaveform = (waveLen > 0 && waveEndV > waveStartV);
-        if (hasWaveform) {
+        if (archive != nullptr) {
+            // Archive mode: the IDX offsets point into ring files that are not here.  The
+            // night's waveform, if the archive holds it, is a segment filed under the
+            // record's date; the range becomes [0, bytes) within that segment.
+            CardArchiveRecord key;
+            key.date = dayEntry.Date;
+            const CardArchiveEntry* segment = archive->find(key);
+            if (segment != nullptr) {
+                dayEntry.HasSegment      = true;
+                dayEntry.Segment         = *segment;
+                dayEntry.WaveStartOffset = 0;
+                dayEntry.WaveEndOffset   = static_cast<quint64>(segment->bytes);
+                dayEntry.WaveLength      = static_cast<quint32>(segment->bytes);
+                dayEntry.WaveTailOnly    = !segment->complete;
+                hasWaveform = true;
+            } else {
+                dayEntry.WaveStartOffset = dayEntry.WaveEndOffset;
+                dayEntry.WaveLength      = 0;   // selects the EVT-only path in ReadDateSession
+                hasWaveform = false;
+            }
+        }
+        if (hasWaveform && archive == nullptr) {
             const QDateTime startTs = ReadWaveformPacketTimestamp(waveStartV);
 
             // Once the ring has wrapped, the oldest records point at space that a later
@@ -2106,6 +2136,7 @@ void BmcG3xData::ParseIdxRecords(const QByteArray& idxBytes)
                          << "waveform overwritten by a later night -"
                          << (survivingStart < waveEndV ? "keeping the surviving tail"
                                                        : "none survives, using event data only");
+                dayEntry.WaveTailOnly = true;
                 if (survivingStart < waveEndV) {
                     dayEntry.WaveStartOffset = survivingStart;
                     dayEntry.WaveLength      = static_cast<quint32>(waveEndV - survivingStart);
@@ -2116,7 +2147,11 @@ void BmcG3xData::ParseIdxRecords(const QByteArray& idxBytes)
                 }
             }
         }
-        if (hasWaveform) {
+        if (hasWaveform && archive != nullptr) {
+            // The segment was stored with the span this code computed from the card.
+            dayEntry.StartTimestamp = dayEntry.Segment.first;
+            dayEntry.EndTimestamp   = dayEntry.Segment.last.addSecs(1);
+        } else if (hasWaveform) {
             // Normal path: derive session timestamps from waveform packets.
             const QDateTime startTs = ReadWaveformPacketTimestamp(dayEntry.WaveStartOffset);
             const quint64 endPacketOffset = (waveEndV - dayEntry.WaveStartOffset >= kG3xWaveformPacketSize)
@@ -2519,31 +2554,34 @@ int BmcG3xData::ResolveLeakFieldOffset()
         if (entry.WaveLength == 0) {
             continue;
         }
-        qint64 startRaw = 0;
-        QFile probeFile(WaveformFileFor(entry.WaveStartOffset, &startRaw));
-        if (!probeFile.open(QIODevice::ReadOnly)) {
-            continue;
-        }
-        const qint64 startLocal = (startRaw / kG3xWaveformPacketSize) * kG3xWaveformPacketSize;
-        probeFile.seek(std::max<qint64>(0, startLocal));
-
+        // Probe through the same spans the import reads, so this works on the card and on
+        // a night archive alike.
         int packetsThisDay = 0;
-        while (packetsThisDay < kProbePacketsPerDay) {
-            const QByteArray probePkt = probeFile.read(kG3xWaveformPacketSize);
-            if (probePkt.size() < static_cast<int>(kG3xWaveformPacketSize)) {
+        std::vector<WaveSpan> probeSpans = OpenWaveSpans(entry);
+        for (WaveSpan& probeSpan : probeSpans) {
+            if (packetsThisDay >= kProbePacketsPerDay) {
                 break;
             }
-            if (static_cast<unsigned char>(probePkt[0]) != 0xAD ||
-                static_cast<unsigned char>(probePkt[1]) != 0xAA) {
-                continue;
+            probeSpan.device->seek(probeSpan.start);
+            qint64 cursor = probeSpan.start;
+            while (packetsThisDay < kProbePacketsPerDay &&
+                   cursor + kG3xWaveformPacketSize <= probeSpan.end) {
+                const QByteArray probePkt = probeSpan.device->read(kG3xWaveformPacketSize);
+                cursor += kG3xWaveformPacketSize;
+                if (probePkt.size() < static_cast<int>(kG3xWaveformPacketSize)) {
+                    break;
+                }
+                if (static_cast<unsigned char>(probePkt[0]) != 0xAD ||
+                    static_cast<unsigned char>(probePkt[1]) != 0xAA) {
+                    continue;
+                }
+                if (ReadUInt16LEPtr(probePkt.constData(), kG3xOffsetLeak) > 0) {
+                    ++probeNonZero52A;
+                }
+                ++packetsThisDay;
+                ++probeTotal;
             }
-            if (ReadUInt16LEPtr(probePkt.constData(), kG3xOffsetLeak) > 0) {
-                ++probeNonZero52A;
-            }
-            ++packetsThisDay;
-            ++probeTotal;
         }
-        probeFile.close();
         if (packetsThisDay > 0) {
             ++daysProbed;
         }
@@ -2591,6 +2629,8 @@ void BmcG3xData::ParseWaveformRingGeometry(const QByteArray& idxBytes)
 /// @return Path of the .00x file holding that byte.
 QString BmcG3xData::WaveformFileFor(quint64 virtualByteOffset, qint64* localOffset) const
 {
+    // Ring offsets mean nothing in archive mode; every read there goes through OpenWaveSpans().
+    Q_ASSERT(archive == nullptr);
     const quint64 fileIndex = (virtualByteOffset / kG3xWaveformFileSpan) %
                               static_cast<quint64>(std::max(1, waveFileCount));
     if (localOffset) {
@@ -2712,6 +2752,11 @@ QList<QDateTime> BmcG3xData::ReadWaveformPacketTimestamps(quint32 startOffset, q
 QByteArray BmcG3xData::ReadVirtualWaveformBytes(quint64 virtualByteOffset, int byteCount) const
 {
     QByteArray output;
+    // Ring offsets mean nothing in archive mode; every read there goes through OpenWaveSpans().
+    Q_ASSERT(archive == nullptr);
+    if (archive != nullptr) {
+        return output;
+    }
     output.reserve(byteCount);
 
     quint64 currentOffset = virtualByteOffset;
@@ -2796,4 +2841,365 @@ quint32 BmcG3xData::ReadUInt32LE(const QByteArray& bytes, int offset)
            (static_cast<quint32>(p[1]) << 8)  |
            (static_cast<quint32>(p[2]) << 16) |
            (static_cast<quint32>(p[3]) << 24);
+}
+
+// ============================================================
+// Night archive support (CardArchive, GitLab #380)
+// ============================================================
+
+void BmcG3xData::SetArchive(CardArchive* newArchive)
+{
+    archive = newArchive;
+}
+
+/// @brief Where on the card a night's waveform lies: one range per ring file it touches.
+///
+/// The record's range is in the unwrapped virtual address space, so a night that crosses
+/// the ring's wrap point simply runs on into the next 64 MiB stretch; WaveformFileFor()
+/// maps each stretch to its physical file.  Each range starts on a packet boundary within
+/// its file and is clipped to the file's actual size.  A change to this logic must raise
+/// kBmcG3xCaptureRule.
+///
+/// @param indexedBytes If non-null, receives the whole-packet bytes the index says the
+///        night holds, before clipping to what the files actually contain.  Less in the
+///        returned ranges means the ring files are short of the index (a truncated copy).
+std::vector<BmcG3xData::WaveRange> BmcG3xData::CardWaveRanges(const G3xDayEntry& entry, qint64* indexedBytes) const
+{
+    std::vector<WaveRange> ranges;
+    if (indexedBytes != nullptr) {
+        *indexedBytes = 0;
+    }
+    const quint64 waveStart = entry.WaveStartOffset;
+    const quint64 waveEnd   = entry.WaveEndOffset;
+    if (waveEnd <= waveStart) {
+        return ranges;
+    }
+
+    const int startFileIndex = static_cast<int>(waveStart / kG3xWaveformFileSpan);
+    const int endFileIndex   = static_cast<int>((waveEnd - 1) / kG3xWaveformFileSpan);
+
+    for (int fileIndex = startFileIndex; fileIndex <= endFileIndex; ++fileIndex) {
+        const quint64 segmentBase = static_cast<quint64>(fileIndex) * kG3xWaveformFileSpan;
+
+        WaveRange range;
+        range.path        = WaveformFileFor(segmentBase, nullptr);
+        range.virtualBase = segmentBase;
+        const qint64 fileSize = QFileInfo(range.path).size();    // 0 if the file is missing
+
+        qint64 localStart = (fileIndex == startFileIndex)
+                                ? static_cast<qint64>(waveStart - segmentBase) : 0;
+        qint64 localEnd   = static_cast<qint64>(std::min<quint64>(waveEnd - segmentBase,
+                                                                  kG3xWaveformFileSpan));
+        if (indexedBytes != nullptr && localEnd > localStart) {
+            const qint64 alignedStart = (localStart / kG3xWaveformPacketSize) * kG3xWaveformPacketSize;
+            *indexedBytes += ((localEnd - alignedStart) / kG3xWaveformPacketSize) * kG3xWaveformPacketSize;
+        }
+        localStart = std::max<qint64>(0, std::min(localStart, fileSize));
+        localEnd   = std::max<qint64>(0, std::min(localEnd,   fileSize));
+        if (localEnd <= localStart) {
+            continue;
+        }
+
+        range.start = (localStart / kG3xWaveformPacketSize) * kG3xWaveformPacketSize;
+        range.end   = localEnd;
+        ranges.push_back(range);
+    }
+    return ranges;
+}
+
+/// @brief Opens the devices holding a night's waveform packets, in recording order.
+///
+/// This is the one way waveform packets are reached, for import, for the leak-field probe
+/// and for the night archive, so all three see the same bytes.
+///   - Reading the card: one span per ring file the night touches (see CardWaveRanges()).
+///   - Archive mode: a single span over the night's decompressed archive segment.  A
+///     segment that cannot be read is recorded for UnreadableNights() and no span is
+///     returned, which the caller treats as a night without waveform.
+///
+/// @param readFailed If non-null: set true when a ring file that holds part of the night
+///        could not be opened.  The spans returned are then not the whole night.
+std::vector<BmcG3xData::WaveSpan> BmcG3xData::OpenWaveSpans(const G3xDayEntry& entry, bool* readFailed) const
+{
+    std::vector<WaveSpan> spans;
+
+    if (archive != nullptr) {
+        if (!entry.HasSegment) {
+            return spans;
+        }
+        bool ok = false;
+        const QByteArray data = archive->read(entry.Segment, &ok);
+        if (!ok) {
+            qWarning() << "BmcG3xData: the backup's waveform for" << entry.Date.toString(Qt::ISODate)
+                       << "could not be read; importing that night without it";
+            QMutexLocker locker(&unreadableMutex);
+            if (!unreadableNights.contains(entry.Date)) {
+                unreadableNights.append(entry.Date);
+            }
+            return spans;
+        }
+        auto buffer = std::make_unique<QBuffer>();
+        buffer->setData(data);
+        if (!buffer->open(QIODevice::ReadOnly)) {
+            return spans;
+        }
+        WaveSpan span;
+        span.end    = data.size();
+        span.device = std::move(buffer);
+        spans.push_back(std::move(span));
+        return spans;
+    }
+
+    for (const WaveRange& range : CardWaveRanges(entry)) {
+        std::unique_ptr<QIODevice> file = OpenRingFile(range.path);
+        if (!file) {
+            // The file has these bytes (its size said so) but cannot be read.
+            if (readFailed != nullptr) {
+                *readFailed = true;
+            }
+            continue;
+        }
+        WaveSpan span;
+        span.start       = range.start;
+        span.end         = range.end;
+        span.virtualBase = range.virtualBase;
+        span.device      = std::move(file);
+        spans.push_back(std::move(span));
+    }
+    return spans;
+}
+
+std::unique_ptr<QIODevice> BmcG3xData::OpenRingFile(const QString& path) const
+{
+    auto file = std::make_unique<QFile>(path);
+    if (!file->open(QIODevice::ReadOnly)) {
+        return nullptr;
+    }
+    return file;
+}
+
+const BmcG3xData::G3xDayEntry* BmcG3xData::EntryForHandle(int handle) const
+{
+    if (handle < 0 || handle >= dayEntries.size()) {
+        return nullptr;
+    }
+    return &dayEntries.at(handle);
+}
+
+/// @brief One record per IDX day that has waveform data.
+///
+/// A G3X index gives each night's extent, so its size and span are known without reading
+/// the waveform: the archive can decide what to skip from the index alone.
+QList<BmcArchiveRecord> BmcG3xData::ArchiveRecords()
+{
+    // The newest night can still grow, so it is not final.  A record dated in the future
+    // (a device clock fault) must not take that place from the real one.
+    const QDate latestPlausible = QDate::currentDate().addDays(1);
+    QDate newest;
+    for (const G3xDayEntry& entry : dayEntries) {
+        if (entry.Date <= latestPlausible && (!newest.isValid() || entry.Date > newest)) {
+            newest = entry.Date;
+        }
+    }
+
+    QList<BmcArchiveRecord> records;
+    for (int i = 0; i < dayEntries.size(); ++i) {
+        const G3xDayEntry& entry = dayEntries.at(i);
+        if (entry.WaveLength == 0) {
+            continue;
+        }
+
+        BmcArchiveRecord record;
+        record.handle     = i;
+        record.info.date  = entry.Date;
+        record.info.first = entry.StartTimestamp;
+        record.info.last  = entry.EndTimestamp.addSecs(-1);
+
+        if (archive != nullptr) {
+            record.info.bytes    = entry.Segment.bytes;
+            record.info.final    = entry.Segment.final;
+            record.info.complete = entry.Segment.complete;
+            record.info.rule     = entry.Segment.rule;
+        } else {
+            qint64 bytes = 0;
+            qint64 indexedBytes = 0;
+            for (const WaveRange& range : CardWaveRanges(entry, &indexedBytes)) {
+                bytes += ((range.end - range.start) / kG3xWaveformPacketSize) * kG3xWaveformPacketSize;
+            }
+            if (bytes == 0) {
+                continue;       // indexed, but the ring files do not hold it
+            }
+            record.info.bytes    = bytes;
+            record.info.final    = entry.Date < newest;
+            // Complete only if nothing was lost to the ring and the files hold everything
+            // the index lists: a cut-short copy of the card must not pass for the whole night.
+            record.info.complete = !entry.WaveTailOnly && bytes == indexedBytes;
+            record.info.rule     = kBmcG3xCaptureRule;
+        }
+        records.append(record);
+    }
+    return records;
+}
+
+QByteArray BmcG3xData::ReadArchiveRecordBytes(BmcArchiveRecord& rec, const std::function<bool()>& aborted)
+{
+    const G3xDayEntry* entry = EntryForHandle(rec.handle);
+    if (entry == nullptr || (aborted && aborted())) {
+        return QByteArray();
+    }
+
+    // Read in pieces of 4 MiB (a whole number of packets) so a cancel is seen promptly.
+    constexpr qint64 kChunk = 4 * 1024 * 1024;
+
+    QByteArray packets;
+    bool failed = false;
+    std::vector<WaveSpan> spans = OpenWaveSpans(*entry, &failed);
+    for (WaveSpan& span : spans) {
+        qint64 remaining = ((span.end - span.start) / kG3xWaveformPacketSize) * kG3xWaveformPacketSize;
+        if (remaining <= 0 || !span.device->seek(span.start)) {
+            continue;
+        }
+        while (remaining > 0) {
+            const qint64 want = std::min(remaining, kChunk);
+            const QByteArray part = span.device->read(want);
+            if (part.size() < want) {
+                // The file's size said these bytes are there and they did not come: an
+                // error.  A short night must not be stored as if it were what the card holds.
+                failed = true;
+                break;
+            }
+            packets.append(part);
+            remaining -= want;
+            if (aborted && aborted()) {
+                return QByteArray();
+            }
+        }
+    }
+    if (failed) {
+        rec.readFailed = true;      // an error, not a night without waveform
+        return QByteArray();
+    }
+    if (packets.isEmpty()) {
+        return QByteArray();
+    }
+
+    // first, last and complete were set by ArchiveRecords() from the index and the file
+    // sizes; what was read confirms the size.
+    rec.info.first = entry->StartTimestamp;
+    rec.info.last  = entry->EndTimestamp.addSecs(-1);
+    rec.info.bytes = packets.size();
+    return packets;
+}
+
+int BmcG3xData::PacketSize() const
+{
+    return static_cast<int>(kG3xWaveformPacketSize);
+}
+
+/// @brief The times of the first and last valid packets in a buffer of G3X waveform packets.
+bool BmcG3xData::DescribePackets(const QByteArray& packets, QDateTime& first, QDateTime& last) const
+{
+    const int packetSize = static_cast<int>(kG3xWaveformPacketSize);
+    if (packets.isEmpty() || (packets.size() % packetSize) != 0) {
+        return false;
+    }
+    const int count = static_cast<int>(packets.size() / packetSize);
+
+    const auto timeOf = [&packets, packetSize](int index, QDateTime* out) {
+        const char* p = packets.constData() + static_cast<qsizetype>(index) * packetSize;
+        return static_cast<unsigned char>(p[0]) == 0xAD && static_cast<unsigned char>(p[1]) == 0xAA
+               && DecodeG3xTimestamp(p, 0x04, out);
+    };
+
+    QDateTime firstTime, lastTime;
+    int i = 0;
+    while (i < count && !timeOf(i, &firstTime)) {
+        ++i;
+    }
+    if (i == count) {
+        return false;
+    }
+    int j = count - 1;
+    while (j > i && !timeOf(j, &lastTime)) {
+        --j;
+    }
+    if (j == i) {
+        lastTime = firstTime;
+    }
+
+    first = firstTime;
+    last  = lastTime;
+    return true;
+}
+
+QString BmcG3xData::BaseName() const
+{
+    return QFileInfo(idxFilePath).completeBaseName();
+}
+
+/// @brief The card's index-class files: the .idx and the .evt, .log and .set it refers to.
+QStringList BmcG3xData::IndexFileNames() const
+{
+    static const QStringList kIndexSuffixes { "idx", "evt", "log", "set" };
+
+    const QString base = BaseName();
+    QStringList names;
+    const QFileInfoList files = QDir(dirPath).entryInfoList(QDir::Files, QDir::Name);
+    for (const QFileInfo& file : files) {
+        if (file.completeBaseName().compare(base, Qt::CaseInsensitive) == 0
+            && kIndexSuffixes.contains(file.suffix().toLower())) {
+            names.append(file.fileName());
+        }
+    }
+    return names;
+}
+
+bool BmcG3xData::IndexDateRange(QDate* first, QDate* last) const
+{
+    QDate earliest, latest;
+    for (const G3xDayEntry& entry : dayEntries) {
+        if (!entry.Date.isValid()) {
+            continue;
+        }
+        if (!earliest.isValid() || entry.Date < earliest) {
+            earliest = entry.Date;
+        }
+        if (!latest.isValid() || entry.Date > latest) {
+            latest = entry.Date;
+        }
+    }
+    if (!earliest.isValid()) {
+        return false;
+    }
+    if (first != nullptr) {
+        *first = earliest;
+    }
+    if (last != nullptr) {
+        *last = latest;
+    }
+    return true;
+}
+
+/// @brief True for the card's .00x waveform files: the base name and a three-digit extension.
+bool BmcG3xData::IsRingFileName(const QString& fileName) const
+{
+    const QFileInfo file(fileName);
+    if (file.completeBaseName().compare(BaseName(), Qt::CaseInsensitive) != 0) {
+        return false;
+    }
+    const QString suffix = file.suffix();
+    if (suffix.size() != 3) {
+        return false;
+    }
+    for (const QChar c : suffix) {
+        if (!c.isDigit()) {
+            return false;
+        }
+    }
+    return true;
+}
+
+QList<QDate> BmcG3xData::UnreadableNights() const
+{
+    QMutexLocker locker(&unreadableMutex);
+    return unreadableNights;
 }

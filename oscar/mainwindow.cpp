@@ -3441,11 +3441,18 @@ bool MainWindow::rebuildCPAPMachine(Machine *mach)
             return false;
         }
     } else if (backups) {
+        // Some loaders can tell which nights their backup cannot restore in full; say so
+        // now, before the purge. Empty for every loader that has nothing to add.
+        const QString lossWarning = loader ? loader->rebuildLossWarning(mach) : QString();
+        // In the log too: after a rebuild it is the only record of what was known beforehand.
+        qDebug() << "rebuildCPAPMachine:" << mach->loaderName() << "backup loss warning:"
+                 << (lossWarning.isEmpty() ? QStringLiteral("none") : lossWarning);
         if (staticQMessageBox::question(this, STR_MessageBox_Question,
                 tr("Are you sure you want to rebuild all CPAP data for the following device:\n\n") +
                 mach->brand() + " " + mach->model() + " " +
                 mach->modelnumber() + " (" + mach->serial() + ")\n\n" +
-                tr("Please note, that this could result in loss of data if OSCAR's backups have been disabled."),
+                tr("Please note, that this could result in loss of data if OSCAR's backups have been disabled.") +
+                (lossWarning.isEmpty() ? QString() : QString("\n\n") + lossWarning),
                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No) {
             return false;
         }

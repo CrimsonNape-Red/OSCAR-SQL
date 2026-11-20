@@ -434,6 +434,7 @@ SOURCES += \
     SleepLib/loader_plugins/apexDataParsing.cpp \
     SleepLib/loader_plugins/apex_loader.cpp \
     SleepLib/loader_plugins/bmcDataParsing.cpp \
+    SleepLib/loader_plugins/bmc_archive.cpp \
     SleepLib/loader_plugins/bmcG3xDataParsing.cpp \
     SleepLib/loader_plugins/bmc_loader.cpp \
     SleepLib/loader_plugins/bmcg3x_loader.cpp \
@@ -484,6 +485,7 @@ SOURCES += \
     SleepLib/serialoximeter.cpp \
     SleepLib/session.cpp \
     SleepLib/session_split.cpp \
+    SleepLib/card_archive.cpp \
     SleepLib/thirdparty/miniz.c \
     SleepLib/xmlreplay.cpp \
     database/database_manager.cpp \
@@ -641,11 +643,13 @@ HEADERS  += \
     SleepLib/schema.h \
     SleepLib/session.h \
     SleepLib/session_split.h \
+    SleepLib/card_archive.h \
     SleepLib/loader_plugins/applehealthDataParsing.h \
     SleepLib/loader_plugins/applehealth_loader.h \
     SleepLib/loader_plugins/apexDataParsing.h \
     SleepLib/loader_plugins/apex_loader.h \
     SleepLib/loader_plugins/bmcDataParsing.h \
+    SleepLib/loader_plugins/bmc_archive.h \
     SleepLib/loader_plugins/bmcG3xDataParsing.h \
     SleepLib/loader_plugins/bmc_loader.h \
     SleepLib/loader_plugins/bmcg3x_loader.h \
@@ -1007,6 +1011,8 @@ test {
         tests/machinetests.cpp \
         tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp \
+        tests/cardarchivetests.cpp \
+        tests/bmcarchivetests.cpp \
         tests/prismaventtests.cpp \
         tests/prismalinetests.cpp \
         tests/respiratoryeventstests.cpp \
@@ -1055,6 +1061,8 @@ test {
         tests/machinetests.h \
         tests/portablemodetests.h \
         tests/sessionsplittests.h \
+        tests/cardarchivetests.h \
+        tests/bmcarchivetests.h \
         tests/prismaventtests.h \
         tests/prismalinetests.h \
         tests/respiratoryeventstests.h \

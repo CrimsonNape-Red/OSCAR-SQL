@@ -1148,7 +1148,9 @@ quint32 CRC32(const char * data, quint32 length)
 
   for (quint32 idx=0; idx<length; idx++) {
 
-    quint32 i = (data[idx]) ^ ((crc32) & 0x000000ff);
+    // The byte must be taken as unsigned: a plain char of 0x80 or more would sign-extend
+    // and corrupt the upper 24 bits, giving a wrong CRC for any binary data.
+    quint32 i = static_cast<quint8>(data[idx]) ^ ((crc32) & 0x000000ff);
 
     for(int j=8; j > 0; j--) {
         if (i & 1) {

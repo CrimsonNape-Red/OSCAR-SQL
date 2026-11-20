@@ -883,6 +883,15 @@ void Profile::DataFormatError(Machine *m)
     if (backups) {
         msg = msg + QObject::tr("<b>OSCAR maintains a backup of your devices data card that it uses for this purpose.</b>")+ "<br/><br/>";
         msg = msg + QObject::tr("<i>Your old device data should be regenerated provided this backup feature has not been disabled in preferences during a previous data import.</i>") + "<br/><br/>";
+        // Some loaders can tell what their backup cannot restore in full; say so before
+        // the purge. Empty for every loader that has nothing to add.
+        MachineLoader * lossLoader = lookupLoader(m);
+        const QString lossWarning = lossLoader ? lossLoader->rebuildLossWarning(m) : QString();
+        qDebug() << "Profile::DataFormatError:" << m->loaderName() << "backup loss warning:"
+                 << (lossWarning.isEmpty() ? QStringLiteral("none") : lossWarning);
+        if (!lossWarning.isEmpty()) {
+            msg = msg + lossWarning.toHtmlEscaped() + "<br/><br/>";
+        }
         backups = true;
     } else {
         msg = msg + "<font size=+1>"+STR_MessageBox_Warning+":</font> "+QObject::tr("OSCAR does not yet have any automatic card backups stored for this device.") + "<br/><br/>";

@@ -13,10 +13,17 @@
 #include <algorithm>
 #include <cmath>
 #include <QMessageBox>
+#include <QApplication>
+#include <QElapsedTimer>
+#include <memory>
 #include "SleepLib/day.h"
 #include "SleepLib/loader_plugins/bmcDataParsing.h"
+#include "SleepLib/loader_plugins/bmc_archive.h"
 #include "SleepLib/loader_plugins/bmc_loader.h"
 #include "../../database/session_repository.h"
+#include "mainwindow.h"
+
+extern MainWindow *mainwin;
 
 
 ChannelID BMC_MODE, BMC_RESLEX, BMC_HUMIDIFIER, BMC_SMARTA, BMC_SMARTC, BMC_SMARTB,
@@ -976,20 +983,7 @@ int BmcLoader::Open(const QString & dirpath)
 {
     this->sessionsLoaded = 0;
 
-
-    //#region Open the BMC data files and ready out
-    //******************************************************************************
-    QCoreApplication::processEvents();
-    emit updateMessage(QObject::tr("Reading data..."));
-    QCoreApplication::processEvents();
-
     const auto machine_info = PeekInfo(dirpath);
-    std::unique_ptr<BmcDataParser> parser = std::make_unique<BmcData>(dirpath);
-    parser->ReadData();
-
-    //******************************************************************************
-    //#endregion
-
 
 
     //#region Find or create the OSCAR machine and determine the date to import from
@@ -1035,29 +1029,100 @@ int BmcLoader::Open(const QString & dirpath)
     //******************************************************************************
     //#endregion
 
+    return importFromFolder(dirpath, mach, firstImportDay);
+}
 
-    //#region Create backup
-    //******************************************************************************
+/*
+  Base Class Implementation. What a rebuild from this device's backup would lose.
 
-    QString backupPath = mach->getBackupPath();
-    if (QDir::cleanPath(dirpath) == QDir::cleanPath(backupPath)) {
-        qDebug() << "BmcLoader::Open: input is the backup directory, skipping backup creation";
-    } else if (!p_profile->session->backupCardData()) {
-        // User turned off "Create SD Card Backups during Import"; leave any existing backup as is.
-        qDebug() << "BmcLoader::Open: SD card backups disabled in preferences, skipping backup creation";
-    } else {
-        emit updateMessage(QObject::tr("Creating data backup..."));
-        QCoreApplication::processEvents();
-
-        QDir backupDir(backupPath);
-        if (backupDir.exists(backupPath))
-            backupDir.removeRecursively();
-
-        backupDir.mkpath(backupPath);
-
-        copyPath(dirpath, backupPath);
+  A rebuild purges the database and imports the backup. The backup can only restore the
+  waveforms it holds, so nights whose waveform was overwritten on the card before the
+  night archive existed would come back as events and statistics only. The rebuild
+  prompts show this text so that is known before the purge, not discovered after it.
+*/
+QString BmcLoader::rebuildLossWarning(Machine *mach)
+{
+    if (mach == nullptr) {
+        return QString();
+    }
+    const QString backupDir = mach->getBackupPath();
+    if (!QDir(backupDir).exists() || !Detect(backupDir)) {
+        return QString();       // no usable backup: the existing prompts already say so
     }
 
+    const std::unique_ptr<BmcDataParser> probe = createParser(backupDir);
+    CardArchive archive(backupDir);
+    archive.load();
+    archive.setReadOnly(true);      // this only asks; it must not change the backup
+
+    // A backup that holds ring files whose conversion has not finished is a full copy of
+    // the card as it was at the last import. What it lacks cannot be listed cheaply.
+    if (!CardArchive::isArchive(backupDir)
+        || (probe && BmcHasRingFiles(*probe, backupDir) && !archive.conversionComplete())) {
+        return BmcRebuildCardCopyText();
+    }
+    if (probe) {
+        // Count segments whose manifest entry was lost as held: the rebuild will too.
+        const BmcDataParser* describer = probe.get();
+        archive.adoptOrphans(describer->PacketSize(),
+            [describer](const QByteArray& packets, QDateTime& first, QDateTime& last) {
+                return describer->DescribePackets(packets, first, last);
+            });
+    }
+    if (mach->day.isEmpty()) {
+        // The device's sessions are not loaded: the upgrade prompt asks before loading
+        // them. Say what the archive alone shows.
+        return BmcRebuildLossTextFromArchive(archive);
+    }
+    return BmcRebuildLossText(BmcNightsNotInArchive(BmcStoredNights(mach), archive));
+}
+
+/*
+  Makes the parser for a folder of this loader's card data. The G3X loader overrides it.
+*/
+std::unique_ptr<BmcDataParser> BmcLoader::createParser(const QString & dirpath) const
+{
+    return std::make_unique<BmcData>(dirpath);
+}
+
+/*
+  The part of Open() that the legacy and G3X loaders share: read the folder, import its
+  nights, and bring the device's backup up to date.
+
+  The folder is either a card or a night archive (OSCAR's own backup of the card, or a copy
+  of one). An archive may hold more than one set of index files; each has its own parser,
+  and a night is imported from the first set that lists it.
+
+  The methodology was changed to allow for multithreaded importing so the importing of
+  sessions is added as tasks which are all run by OSCAR's machine class instance.
+
+  Backup (GitLab #380): the card is no longer copied whole on every import. Only nights the
+  backup does not yet hold are stored, each as its own segment, so a rebuild from backup
+  restores every night ever captured and not just those still on the card. A backup left
+  by an earlier version as a full card copy is converted the first time through.
+*/
+int BmcLoader::importFromFolder(const QString & dirpath, Machine * mach, const QDate & firstImportDay)
+{
+    const QString backupPath = mach->getBackupPath();
+    // Compare QDirs rather than strings: separators and a trailing slash may differ.
+    const bool sourceIsBackup = (QDir(dirpath) == QDir(backupPath));
+    const BmcParserFactory factory = [this](const QString & dir) { return createParser(dir); };
+
+
+    //#region Open the BMC data files and read them
+    //******************************************************************************
+    QCoreApplication::processEvents();
+    emit updateMessage(QObject::tr("Reading data..."));
+    QCoreApplication::processEvents();
+
+    BmcImportSource source = BmcOpenImportSource(dirpath, sourceIsBackup, factory);
+    if (source.parsers.empty()) {
+        qWarning() << "BmcLoader: no readable BMC data in" << dirpath;
+        return 0;
+    }
+    if (source.isArchive) {
+        qDebug() << "BmcLoader: importing from a night archive with" << source.parsers.size() << "index set(s)";
+    }
     //******************************************************************************
     //#endregion
 
@@ -1065,29 +1130,31 @@ int BmcLoader::Open(const QString & dirpath)
     //#region Determine the set of sessions to import and set the progress bar values
     //******************************************************************************
 
+    // One task per night. With more than one index set, a night already taken from an
+    // earlier set is not imported again from a later one.
     QList<BmcDataLink> linksToImport;
-    const QList<BmcDataLink>& parserLinks = parser->GetSessionLinks();
-    for (auto & link : parserLinks)
+    QList<BmcDataParser*> linkParsers;
+    QSet<QDate> datesFromEarlierSets;
+    for (const auto & parser : source.parsers)
     {
-        if (link.UsrSession.StartTimestamp.date() >= firstImportDay){
-            linksToImport.append(link);
+        QSet<QDate> datesFromThisSet;
+        const QList<BmcDataLink>& parserLinks = parser->GetSessionLinks();
+        for (const auto & link : parserLinks)
+        {
+            const QDate date = link.UsrSession.StartTimestamp.date();
+            if (date >= firstImportDay && !datesFromEarlierSets.contains(date)){
+                linksToImport.append(link);
+                linkParsers.append(parser.get());
+                datesFromThisSet.insert(date);
+            }
         }
+        datesFromEarlierSets.unite(datesFromThisSet);
     }
 
     emit updateMessage(QObject::tr("Starting import..."));
     emit setProgressMax(linksToImport.length());    // add one to include Save in progress.
     emit setProgressValue(0);
     QCoreApplication::processEvents();
-
-    //32-bit users import an entire SD card of data may get a bad memory allocation exception
-    //while OSCAR tries to store the session.
-    /*if (linksToImport.length() > 10 && QSysInfo::WordSize == 32){
-        QMessageBox::warning(nullptr, QObject::tr("Import Warning"),
-                             QObject::tr("You are about to import a large number of sessions and may run out of memory.")+"\n\n"+
-                             QObject::tr("Please try switching to 64-bit OSCAR or setting your preferences to ignore older sessions."),
-                             QMessageBox::Ok);
-    }*/
-
 
     //******************************************************************************
     //#endregion
@@ -1099,11 +1166,94 @@ int BmcLoader::Open(const QString & dirpath)
         BmcDataLink *link;
         link = (BmcDataLink*)&linksToImport.at(i);
 
-        queTask(new BmcLoaderTask(this, mach, parser.get(), link, linksToImport.length(), i));
+        queTask(new BmcLoaderTask(this, mach, linkParsers.at(i), link, linksToImport.length(), i));
     }
 
 
     runTasks();
+
+
+    //#region After an import from an archive, say what it could not supply
+    //******************************************************************************
+    if (source.isArchive && !isAborted()) {
+        // Nights whose segment is damaged came in without waveform, and a segment no
+        // index lists was not imported at all. Neither may pass silently: after a rebuild
+        // the archive is the only copy there is.
+        const BmcArchiveReadReport report = BmcFinishArchiveImport(source);
+        const QString warning = BmcArchiveReadWarning(report);
+        if (!warning.isEmpty()) {
+            qWarning().noquote() << "BmcLoader: backup read check:" << warning;
+            if (!(mainwin && mainwin->isBatchMode())) {
+                QMessageBox::warning(QApplication::activeWindow(), QObject::tr("BMC Backup"),
+                                     warning, QMessageBox::Ok);
+            }
+        }
+    }
+    //******************************************************************************
+    //#endregion
+
+
+    //#region Bring the backup up to date
+    //******************************************************************************
+    if (sourceIsBackup) {
+        qDebug() << "BmcLoader: input is the backup directory, nothing to back up";
+    } else if (!p_profile->session->backupCardData()) {
+        // User turned off "Create SD Card Backups during Import"; leave any existing backup as is.
+        qDebug() << "BmcLoader: SD card backups disabled in preferences, skipping backup";
+    } else if (isAborted()) {
+        qDebug() << "BmcLoader: import cancelled, skipping backup";
+    } else {
+        emit updateMessage(QObject::tr("Backing up new nights..."));
+        emit setProgressMax(1);
+        emit setProgressValue(0);
+        QCoreApplication::processEvents();
+
+        QElapsedTimer sinceEvents;
+        sinceEvents.start();
+        BmcBackupOutcome outcome = BmcBackUpImportSource(
+            source, backupPath, factory,
+            [this](const QString & dir) { return Detect(dir); },
+            loaderName(),
+            [this](int done, int total) {
+                // Processing events here is what lets a click on Cancel be seen.
+                emit setProgressMax(std::max(total, 1));
+                emit setProgressValue(done);
+                QCoreApplication::processEvents();
+            },
+            [this, &sinceEvents]() {
+                // The reads poll this every few megabytes. Cancel only registers when
+                // events are processed, so do that here too, but not on every poll.
+                if (sinceEvents.elapsed() > 100) {
+                    QCoreApplication::processEvents();
+                    sinceEvents.restart();
+                }
+                return isAborted();
+            });
+
+        outcome.cancelledByUser = isAborted();
+        // Tell the user, not only the log: the card goes on overwriting its oldest nights,
+        // so a backup that keeps failing has to be seen.
+        const QString backupWarning = BmcBackupWarning(outcome);
+        if (!backupWarning.isEmpty()) {
+            qWarning().noquote() << "BmcLoader: backup warning:" << backupWarning;
+            if (!(mainwin && mainwin->isBatchMode())) {
+                QMessageBox::warning(QApplication::activeWindow(), QObject::tr("BMC Backup"),
+                                     backupWarning, QMessageBox::Ok);
+            }
+        }
+        if (!outcome.ok()) {
+            // The import itself succeeded; only the backup is behind. It catches up on
+            // the next import, since nights already stored are not read again.
+            qWarning() << "BmcLoader: the backup is not up to date -"
+                       << "converted old copy:" << outcome.migrated
+                       << "(failed" << outcome.migration.failed << "cancelled" << outcome.migration.aborted << ")"
+                       << "card: stored" << outcome.capture.stored << "failed" << outcome.capture.failed
+                       << "cancelled or held back" << outcome.capture.aborted;
+        }
+    }
+    //******************************************************************************
+    //#endregion
+
 
     //When everything is imported, we can finish up and return the number of new sessions imported.
 

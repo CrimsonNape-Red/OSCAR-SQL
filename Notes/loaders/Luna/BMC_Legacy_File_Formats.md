@@ -308,6 +308,24 @@ when the SD card fills. The loader validates sessions by:
 3. Sessions split on forward timestamp gaps ≥ 5 seconds; backward jumps up
    to 2 hours (DST fall-back) are tolerated
 
+The scan for a night's packets (`BmcData::ReadWaveformBytes()`) follows the files in
+order and from the last back to the first, and stops at a packet past the session's
+window, at a backward jump of more than 2 hours, or after one full lap of the ring.
+
+### 3.6 How OSCAR backs these files up
+
+OSCAR does not keep the `.nnn` files in a device's Backup folder, because the next import
+would overwrite them and take the older nights with it. Each night's packets, exactly as
+the scan above selects them, are stored as one gzipped segment under `Backup/Segments/`,
+listed in `Backup/archive.json`; the `.USR`, `.idx`, `.evt`, `.log` and `.set` files are
+kept as they are on the card. A rebuild from backup reads the index files as usual and
+takes each night's packets from its segment. A Backup folder that still holds `.nnn`
+files is a full card copy from an earlier version of OSCAR and is converted on the next
+import. Design and rules: `Notes/specs/2026-11-19-ring-buffer-backup-archive-design.md`.
+
+If the logic that decides which packets belong to a night changes, raise
+`kBmcLegacyCaptureRule` in the same change (see section 12.5 of that design).
+
 ---
 
 ## 4. Date Encoding

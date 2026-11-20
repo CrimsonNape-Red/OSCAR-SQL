@@ -15,6 +15,7 @@ public:
     virtual bool Detect(const QString& path) override;
     virtual MachineInfo PeekInfo(const QString& path) override;
     virtual int Open(const QString& path) override;
+    virtual std::unique_ptr<BmcDataParser> createParser(const QString& dirpath) const override;
     virtual void initChannels() override;
 
     static void Register();

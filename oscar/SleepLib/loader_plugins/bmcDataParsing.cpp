@@ -3,11 +3,14 @@
 #include <QFile>
 #include <QDir>
 #include <QBuffer>
+#include <QFileInfo>
+#include <QMutexLocker>
 #include <QtEndian>
 
 #include <QDebug>
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <limits>
 
 
@@ -528,7 +531,13 @@ bool BmcData::DirectoryHasBmcData(const QString& path)
         return false;
     }
 
-    if (!QFile::exists(ChangeFileExtension(usrFile, ".000"))){
+    // The waveform data is either the card's ring files, or, in OSCAR's own backup of the
+    // card, a night archive that holds each night's packets as a segment (GitLab #380).
+    // An archive written by a later version of OSCAR is not something this build can read.
+    if (CardArchive::isArchive(tmpPath) && CardArchive::isNewerFormat(tmpPath)){
+        return false;
+    }
+    if (!QFile::exists(ChangeFileExtension(usrFile, ".000")) && !CardArchive::isArchive(tmpPath)){
         return false;
     }
 
@@ -557,7 +566,10 @@ void BmcData::ReadData()
 {
     this->ReadIdxFile();
     this->ReadAllSessions();
-    this->BuildWaveformCrumbs();
+    // In archive mode there are no ring files to sample: each night's packets come whole
+    // from its archive segment, so no crumbs are needed to find where a night starts.
+    if (this->archive == nullptr)
+        this->BuildWaveformCrumbs();
     this->FindValidSessions();
 }
 
@@ -1017,83 +1029,443 @@ void BmcData::AddWrapPointCrumb()
 }
 
 
-QList<BmcWaveformPacket> BmcData::ReadWaveforms(BmcDataLink& link)
+QDateTime BmcData::PacketTimestamp(const char* packet)
+{
+    const BmcWaveformPacketStruct* packetStruct = reinterpret_cast<const BmcWaveformPacketStruct*>(packet);
+    return QDateTime(QDate(packetStruct->Year, packetStruct->Month, packetStruct->Day),
+                     QTime(packetStruct->Hour, packetStruct->Minute, packetStruct->Second));
+}
+
+
+const CardArchiveEntry* BmcData::ArchiveEntryFor(const BmcUsrSession& session) const
+{
+    if (this->archive == nullptr)
+        return nullptr;
+
+    // A night is filed under its USR session date; the span check picks the right one in
+    // the rare case that two recordings share a date.
+    CardArchiveRecord rec;
+    rec.date = session.StartTimestamp.date();
+    rec.first = session.StartTimestamp;
+    rec.last = session.EndTimestamp;
+    return this->archive->find(rec);
+}
+
+
+QList<BmcWaveformPacket> BmcData::DecodeWaveformBytes(const QByteArray& packets)
 {
     QList<BmcWaveformPacket> waveforms;
-    QDateTime lastPacketTimestamp(QDate(2000, 1, 1), QTime(0, 0, 0));
+    const int count = static_cast<int>(packets.size() / 0x100);
+    waveforms.reserve(count);
+
+    char packetBuf[0x100];
+    for (int i = 0; i < count; i++)
+    {
+        memcpy(packetBuf, packets.constData() + static_cast<qsizetype>(i) * 0x100, 0x100);
+        waveforms.append(BmcWaveformPacket(packetBuf));
+    }
+    return waveforms;
+}
+
+
+QList<BmcWaveformPacket> BmcData::ReadWaveforms(BmcDataLink& link)
+{
+    return DecodeWaveformBytes(ReadWaveformBytes(link, nullptr));
+}
+
+
+/**
+ * @brief The raw 256-byte waveform packets that belong to a USR session, in order.
+ *
+ * This one function defines which packets make up a night, both for import (decoded by
+ * ReadWaveforms()) and for the night archive (stored as they are by
+ * ReadArchiveRecordBytes()), so the two cannot disagree.  A change to which packets it
+ * accepts must raise kBmcLegacyCaptureRule.
+ *
+ * Reading the card: starts at the link's crumb and takes every packet stamped inside the
+ * session's window, following the .nnn files in order and from the last one back to the
+ * first, until a packet is past the window or steps back in time by more than
+ * kBmcMaxBackwardJumpSecs (the newest data running into the oldest).  The scan never
+ * goes round the ring more than once: a card holding less than that many seconds of
+ * waveform in total has no such step back and would otherwise be read for ever.
+ *
+ * Archive mode: returns the session's archive segment.  A segment that fails to read is
+ * recorded for UnreadableNights() and nothing is returned, which selects the events-only
+ * import path.
+ *
+ * @param link     The session and where its waveform starts on the card
+ * @param aborted  Polled while reading; may be empty.  A true result returns nothing.
+ * @param complete If non-null: set false when the packets may be only the tail of the
+ *                 night because they begin at the oldest data on the card; true otherwise
+ * @param readFailed If non-null: set true when a ring file that exists could not be opened
+ *                 or a read came up short.  The result is then incomplete for a reason
+ *                 that has nothing to do with what the card holds, and must not be
+ *                 archived or taken to mean the night has no waveform.
+ * @return The accepted packets, concatenated
+ */
+QByteArray BmcData::ReadWaveformBytes(BmcDataLink& link, const std::function<bool()>& aborted,
+                                      bool* complete, bool* readFailed)
+{
+    QByteArray accepted;
+    if (complete != nullptr)
+        *complete = true;
+    if (aborted && aborted())
+        return accepted;
+
+    if (this->archive != nullptr)
+    {
+        const CardArchiveEntry* entry = ArchiveEntryFor(link.UsrSession);
+        if (entry == nullptr)
+            return accepted;
+
+        const CardArchiveEntry held = *entry;
+        if (complete != nullptr)
+            *complete = held.complete;
+
+        bool ok = false;
+        accepted = this->archive->read(held, &ok);
+        if (!ok)
+        {
+            const QDate night = link.UsrSession.StartTimestamp.date();
+            qWarning() << "BmcData: the backup's waveform for" << night.toString(Qt::ISODate)
+                       << "could not be read; importing that night without it";
+            QMutexLocker locker(&this->unreadableMutex);
+            if (!this->unreadableNights.contains(night))
+                this->unreadableNights.append(night);
+            return QByteArray();
+        }
+        return accepted;
+    }
 
     if (!QFile::exists(link.WaveformCrumb.Filepath))
-        return waveforms;
+        return accepted;
 
-    char packetBuf[256];
+    QDateTime lastPacketTimestamp(QDate(2000, 1, 1), QTime(0, 0, 0));
+    QDateTime firstAccepted;
+    char packetBuf[0x100];
 
-    int currentFileIndex = link.WaveformCrumb.FileIndex;
-    QFile* nnnFile = new QFile(link.WaveformCrumb.Filepath);
-    nnnFile->open(QIODevice::ReadOnly);
-    nnnFile->seek(link.WaveformCrumb.ByteOffset);
+    const int startFileIndex = link.WaveformCrumb.FileIndex;
+    const qint64 startOffset = static_cast<qint64>(link.WaveformCrumb.ByteOffset);
+    int currentFileIndex = startFileIndex;
+    QString currentPath = link.WaveformCrumb.Filepath;
+    qint64 seekTo = startOffset;
+    bool wrapped = false;       // gone from the last file back to the first
+    bool done = false;
+    int packetsSinceCheck = 0;
 
-    bool complete = false;
-
-    while (!complete)
+    while (!done)
     {
-        while (nnnFile->pos() < nnnFile->size())
+        std::unique_ptr<QIODevice> ringFile = OpenRingFile(currentPath);
+        if (!ringFile)
         {
-            nnnFile->read(packetBuf, 0x100);
+            // The file is there (its existence was checked) but cannot be read: locked,
+            // not downloaded from a synced folder, or on a failing disk.
+            if (readFailed != nullptr)
+                *readFailed = true;
+            break;
+        }
+        QIODevice& nnnFile = *ringFile;
+        if (seekTo > 0)
+            nnnFile.seek(seekTo);
+
+        while (nnnFile.pos() < nnnFile.size())
+        {
+            // Back where the scan began: the whole ring has been read once.
+            if (wrapped && currentFileIndex == startFileIndex && nnnFile.pos() >= startOffset)
+            {
+                done = true;
+                break;
+            }
+            // A trailing part-packet is not data.
+            if (nnnFile.size() - nnnFile.pos() < 0x100)
+                break;
+            if (nnnFile.read(packetBuf, 0x100) != 0x100)
+            {
+                // A whole packet was there and did not come: a read error.
+                if (readFailed != nullptr)
+                    *readFailed = true;
+                done = true;
+                break;
+            }
 #ifdef DEBUG_BMC
             qout2 << currentFileIndex << "   ";
-            qout2 << QString("%1").arg((double)(nnnFile->pos()) / nnnFile->size() * 100);
+            qout2 << QString("%1").arg((double)(nnnFile.pos()) / nnnFile.size() * 100);
             qout2 << "\n";
             qout2.flush();
 #endif
-            BmcWaveformPacket packet(packetBuf);
+            // Poll for cancellation about every 4 MiB.
+            if (aborted && ++packetsSinceCheck >= 0x4000)
+            {
+                packetsSinceCheck = 0;
+                if (aborted())
+                    return QByteArray();
+            }
 
-            if (packet.Timestamp >= link.UsrSession.StartTimestamp &&
-                packet.Timestamp <= link.UsrSession.EndTimestamp)
-                waveforms.append(packet);
+            const QDateTime timestamp = PacketTimestamp(packetBuf);
+
+            if (timestamp >= link.UsrSession.StartTimestamp &&
+                timestamp <= link.UsrSession.EndTimestamp)
+            {
+                if (accepted.isEmpty())
+                    firstAccepted = timestamp;
+                accepted.append(packetBuf, 0x100);
+            }
 
             // Allow backward timestamp jumps of up to 2 hours to handle DST "fall back"
             // (clocks go back 1 hour). Larger backward jumps indicate stale circular
             // buffer data from a previous recording cycle.
-            if (packet.Timestamp > link.UsrSession.EndTimestamp ||
-                packet.Timestamp < lastPacketTimestamp.addSecs(-kBmcMaxBackwardJumpSecs)){
-                complete = true;
+            if (timestamp > link.UsrSession.EndTimestamp ||
+                timestamp < lastPacketTimestamp.addSecs(-kBmcMaxBackwardJumpSecs))
+            {
+                done = true;
                 break;
             }
 
-            lastPacketTimestamp = packet.Timestamp;
+            lastPacketTimestamp = timestamp;
         }
-        nnnFile->close();
+        nnnFile.close();
+        if (done)
+            break;
 
         currentFileIndex++;
         QString nextExtension = QString(".%1").arg(currentFileIndex, 3, 10, QLatin1Char('0'));
         QString nextPath = ChangeFileExtension(this->usrFilePath, nextExtension);
 
-        if (!QFile::exists(nextPath)){
+        if (!QFile::exists(nextPath))
+        {
+            if (wrapped)
+                break;          // already been round once
+            wrapped = true;
             currentFileIndex = 0;
             nextExtension = QString(".%1").arg(currentFileIndex, 3, 10, QLatin1Char('0'));
             nextPath = ChangeFileExtension(this->usrFilePath, nextExtension);
-            if (!QFile::exists(nextPath)){
-                complete = true;
+            if (!QFile::exists(nextPath))
                 break;
-            }
         }
 
-        delete(nnnFile);
+        currentPath = nextPath;
+        // Skip the 255-byte legacy tail packet if present so subsequent
+        // 256-byte reads are correctly aligned to the current data region.
+        seekTo = DetectFileDataOffset(nextPath);
+    }
 
-        if (!complete)
+    // The crumbs are sorted by time, so the first plausible one is the oldest sampled packet
+    // on the card (exactly the oldest once AddWrapPointCrumb() has run).  A night that
+    // begins there may have lost its start to the ring.  Never-written ring space can
+    // decode to a date centuries back; such a crumb is not the oldest data.
+    if (complete != nullptr && firstAccepted.isValid())
+    {
+        for (const auto& crumb : this->WaveformCrumbs)
         {
-            nnnFile = new QFile(nextPath);
-            nnnFile->open(QIODevice::ReadOnly);
-            // Skip the 255-byte legacy tail packet if present so subsequent
-            // 256-byte reads are correctly aligned to the current data region.
-            const int nextDataOffset = DetectFileDataOffset(nextPath);
-            if (nextDataOffset > 0)
-                nnnFile->seek(nextDataOffset);
+            if (crumb.Timestamp.date().year() < 2000)
+                continue;
+            if (firstAccepted <= crumb.Timestamp)
+                *complete = false;
+            break;
         }
     }
 
-    return waveforms;
+    return accepted;
+}
 
+
+std::unique_ptr<QIODevice> BmcData::OpenRingFile(const QString& path) const
+{
+    auto file = std::make_unique<QFile>(path);
+    if (!file->open(QIODevice::ReadOnly))
+        return nullptr;
+    return file;
+}
+
+
+void BmcData::SetArchive(CardArchive* newArchive)
+{
+    this->archive = newArchive;
+}
+
+
+/// @brief One record per USR session, the card's unit of a night.
+///
+/// Reading the card, a legacy record's size and span are not known until its packets
+/// have been read, so only the date and whether it can still grow are filled in here.
+/// In archive mode they come from the manifest; a session the archive holds nothing for
+/// is offered with zero bytes.
+QList<BmcArchiveRecord> BmcData::ArchiveRecords()
+{
+    // The newest night can still grow, so it is not final.  A record dated in the future
+    // (a device clock fault, a blank slot) must not take that place from the real one.
+    const QDate latestPlausible = QDate::currentDate().addDays(1);
+    QDate newest;
+    for (const auto& link : this->SessionLinks)
+    {
+        const QDate date = link.UsrSession.StartTimestamp.date();
+        if (date.isValid() && date <= latestPlausible && (!newest.isValid() || date > newest))
+            newest = date;
+    }
+
+    QList<BmcArchiveRecord> records;
+    for (int i = 0; i < this->SessionLinks.size(); i++)
+    {
+        const BmcUsrSession& session = this->SessionLinks.at(i).UsrSession;
+        const QDate date = session.StartTimestamp.date();
+        if (!date.isValid())
+            continue;
+
+        BmcArchiveRecord record;
+        record.handle = i;
+        record.info.date = date;
+        record.info.final = date < newest;
+        record.info.rule = kBmcLegacyCaptureRule;
+
+        if (this->archive != nullptr)
+        {
+            const CardArchiveEntry* entry = ArchiveEntryFor(session);
+            if (entry != nullptr)
+            {
+                record.info.first = entry->first;
+                record.info.last = entry->last;
+                record.info.bytes = entry->bytes;
+                record.info.final = entry->final;
+                record.info.complete = entry->complete;
+                record.info.rule = entry->rule;
+            }
+            else
+            {
+                record.info.bytes = 0;
+            }
+        }
+        records.append(record);
+    }
+    return records;
+}
+
+
+QByteArray BmcData::ReadArchiveRecordBytes(BmcArchiveRecord& rec, const std::function<bool()>& aborted)
+{
+    if (rec.handle < 0 || rec.handle >= this->SessionLinks.size())
+        return QByteArray();
+
+    bool complete = true;
+    bool failed = false;
+    const QByteArray packets = ReadWaveformBytes(this->SessionLinks[rec.handle], aborted, &complete, &failed);
+    if (aborted && aborted())
+        return QByteArray();
+    if (failed)
+    {
+        rec.readFailed = true;      // an error, not a night without waveform
+        return QByteArray();
+    }
+    if (packets.isEmpty())
+        return QByteArray();
+
+    QDateTime first, last;
+    if (!DescribePackets(packets, first, last))
+        return QByteArray();
+
+    rec.info.first = first;
+    rec.info.last = last;
+    rec.info.bytes = packets.size();
+    rec.info.complete = complete;
+    return packets;
+}
+
+
+int BmcData::PacketSize() const
+{
+    return 0x100;
+}
+
+
+bool BmcData::DescribePackets(const QByteArray& packets, QDateTime& first, QDateTime& last) const
+{
+    if (packets.isEmpty() || (packets.size() % 0x100) != 0)
+        return false;
+
+    const QDateTime firstTime = PacketTimestamp(packets.constData());
+    const QDateTime lastTime = PacketTimestamp(packets.constData() + packets.size() - 0x100);
+    if (!firstTime.isValid() || !lastTime.isValid())
+        return false;
+
+    first = firstTime;
+    last = lastTime;
+    return true;
+}
+
+
+QString BmcData::BaseName() const
+{
+    return QFileInfo(this->usrFilePath).completeBaseName();
+}
+
+
+/// @brief The card's index-class files: .USR and .idx, which this parser reads, and .evt,
+///        .log and .set, which it does not but which are as small and as permanent.
+QStringList BmcData::IndexFileNames() const
+{
+    static const QStringList kIndexSuffixes { "usr", "idx", "evt", "log", "set" };
+
+    const QString base = BaseName();
+    QStringList names;
+    const QFileInfoList files = QDir(this->dirPath).entryInfoList(QDir::Files, QDir::Name);
+    for (const QFileInfo& file : files)
+    {
+        if (file.completeBaseName().compare(base, Qt::CaseInsensitive) == 0
+            && kIndexSuffixes.contains(file.suffix().toLower()))
+        {
+            names.append(file.fileName());
+        }
+    }
+    return names;
+}
+
+
+bool BmcData::IndexDateRange(QDate* first, QDate* last) const
+{
+    QDate earliest, latest;
+    for (const auto& session : this->AllUsrSessions)
+    {
+        const QDate date = session.StartTimestamp.date();
+        if (!date.isValid())
+            continue;
+        if (!earliest.isValid() || date < earliest)
+            earliest = date;
+        if (!latest.isValid() || date > latest)
+            latest = date;
+    }
+    if (!earliest.isValid())
+        return false;
+
+    if (first != nullptr)
+        *first = earliest;
+    if (last != nullptr)
+        *last = latest;
+    return true;
+}
+
+
+/// @brief True for the card's .nnn waveform files: the base name and a three-digit extension.
+bool BmcData::IsRingFileName(const QString& fileName) const
+{
+    const QFileInfo file(fileName);
+    if (file.completeBaseName().compare(BaseName(), Qt::CaseInsensitive) != 0)
+        return false;
+
+    const QString suffix = file.suffix();
+    if (suffix.size() != 3)
+        return false;
+    for (const QChar c : suffix)
+    {
+        if (!c.isDigit())
+            return false;
+    }
+    return true;
+}
+
+
+QList<QDate> BmcData::UnreadableNights() const
+{
+    QMutexLocker locker(&this->unreadableMutex);
+    return this->unreadableNights;
 }
 
 
@@ -1107,7 +1479,9 @@ void BmcData::FindValidSessions()
     QListIterator<BmcIdxEntry> itr(this->AllIdxEntries);
     itr.toBack();
 
-    while (itr.hasPrevious())
+    // In archive mode the IDX pointers refer to ring files that are not there, so no IDX
+    // entry can be validated; every USR session is still linked below, without a crumb.
+    while (this->archive == nullptr && itr.hasPrevious())
     {
         BmcIdxEntry entry = itr.previous();
         QString startPath = ChangeFileExtension(this->usrFilePath, entry.StartFileExtension());

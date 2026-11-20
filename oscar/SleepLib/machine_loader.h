@@ -74,6 +74,10 @@ class MachineLoader: public QObject
     //! \brief Override to returns the Version number of this DeviceLoader
     virtual int Version() = 0;
 
+    //! \brief Text for the rebuild prompts when rebuilding \a mach from its backup would lose
+    //! detail the database now holds. Empty (the default) when there is nothing to say.
+    virtual QString rebuildLossWarning(Machine *mach) { Q_UNUSED(mach); return QString(); }
+
     //! \brief Name filter for files for this loader
     virtual QStringList getNameFilter() { return QStringList(""); }
 

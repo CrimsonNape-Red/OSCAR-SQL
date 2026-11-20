@@ -223,6 +223,23 @@ data using a *virtual byte offset* that treats all files as a single linear addr
 Each file is up to **64 MiB** (`kG3xWaveformFileSpan`).
 Waveform packets are **2048 bytes** each (`kG3xWaveformPacketSize = 0x800`).
 
+### How OSCAR backs these files up
+
+OSCAR does not keep the `.00x` files in a device's Backup folder: they are one ring
+buffer, so the next import would overwrite them and take the older nights with it. Each
+day record's waveform range (unwrapped, and trimmed to its surviving tail if the ring has
+partly overwritten it) is stored as one gzipped segment under `Backup/Segments/`, listed
+in `Backup/archive.json`; the `.idx`, `.evt`, `.log` and `.set` files are kept as they are
+on the card. On a rebuild from backup the offsets in the day records are not used: a
+night's packets come from its segment (`BmcG3xData::OpenWaveSpans()`), and a night with
+no segment is imported from the event stream alone, as an overwritten night is. A Backup
+folder that still holds `.00x` files is a full card copy from an earlier version of OSCAR
+and is converted on the next import. Design and rules:
+`Notes/specs/2026-11-19-ring-buffer-backup-archive-design.md`.
+
+If the logic that decides which bytes belong to a night changes, raise
+`kBmcG3xCaptureRule` in the same change (see section 12.5 of that design).
+
 ### Waveform Packet Layout (2048 bytes)
 
 See `Notes/G3X/BMC_G3X_00X_FORMAT.md` for the full field map and confidence levels.

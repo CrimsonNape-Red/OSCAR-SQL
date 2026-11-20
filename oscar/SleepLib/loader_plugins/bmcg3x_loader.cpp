@@ -59,13 +59,7 @@ int BmcG3xLoader::Open(const QString& dirpath)
 {
     this->sessionsLoaded = 0;
 
-    QCoreApplication::processEvents();
-    emit updateMessage(QObject::tr("Reading data..."));
-    QCoreApplication::processEvents();
-
     const auto machine_info = PeekInfo(dirpath);
-    auto parser = std::make_unique<BmcG3xData>(dirpath);
-    parser->ReadData();
 
     QCoreApplication::processEvents();
     emit updateMessage(QObject::tr("Find sessions to import..."));
@@ -164,47 +158,15 @@ int BmcG3xLoader::Open(const QString& dirpath)
         }
     }
 
-    QString backupPath = mach->getBackupPath();
-    if (QDir::cleanPath(dirpath) == QDir::cleanPath(backupPath)) {
-        qDebug() << "BmcG3xLoader::Open: input is the backup directory, skipping backup creation";
-    } else if (!p_profile->session->backupCardData()) {
-        // User turned off "Create SD Card Backups during Import"; leave any existing backup as is.
-        qDebug() << "BmcG3xLoader::Open: SD card backups disabled in preferences, skipping backup creation";
-    } else {
-        emit updateMessage(QObject::tr("Creating data backup..."));
-        QCoreApplication::processEvents();
+    // Reading the folder, importing its nights and bringing the backup up to date are the
+    // same as for the legacy loader, apart from the parser (see createParser()).
+    return importFromFolder(dirpath, mach, firstImportDay);
+}
 
-        QDir backupDir(backupPath);
-        if (backupDir.exists(backupPath)) {
-            backupDir.removeRecursively();
-        }
-        backupDir.mkpath(backupPath);
-        copyPath(dirpath, backupPath);
-    }
-
-    QList<BmcDataLink> linksToImport;
-    const QList<BmcDataLink>& parserLinks = parser->GetSessionLinks();
-    for (auto& link : parserLinks) {
-        if (link.UsrSession.StartTimestamp.date() >= firstImportDay) {
-            linksToImport.append(link);
-        }
-    }
-
-    emit updateMessage(QObject::tr("Starting import..."));
-    emit setProgressMax(linksToImport.length());
-    emit setProgressValue(0);
-    QCoreApplication::processEvents();
-
-    for (int i = 0; i < linksToImport.length(); i++) {
-        BmcDataLink* link = (BmcDataLink*)&linksToImport.at(i);
-        queTask(new BmcLoaderTask(this, mach, parser.get(), link, linksToImport.length(), i));
-    }
-
-    runTasks();
-    mach->Save();
-    QCoreApplication::processEvents();
-
-    return this->sessionsLoaded;
+/// Makes the G3X parser for a folder of card data.
+std::unique_ptr<BmcDataParser> BmcG3xLoader::createParser(const QString& dirpath) const
+{
+    return std::make_unique<BmcG3xData>(dirpath);
 }
 
 void BmcG3xLoader::initChannels()
