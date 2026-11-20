@@ -34,6 +34,7 @@
 #include "database/app_preferences_repository.h"
 #include "database/profile_repository.h"
 #include "mainwindow.h"
+#include "translation.h"
 
 extern MainWindow* mainwin;
 
@@ -102,7 +103,7 @@ void JournalNotesDialog::on_exportButton_clicked()
                    ext);
 
     const QString filename = QFileDialog::getSaveFileName(
-        this, tr("Export Journal Notes"), suggestion, filter);
+        this, tr("Export Journal Notes"), suggestion, filter, nullptr, nativeDialogOption());
     if (filename.isEmpty()) return;
 
     saveSettings(QFileInfo(filename).absolutePath());

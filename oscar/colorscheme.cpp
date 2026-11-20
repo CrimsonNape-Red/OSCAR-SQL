@@ -23,6 +23,9 @@ namespace ColorScheme {
 
 namespace {
 
+//! \brief True while OSCAR shows a different scheme from the system's; set by apply()
+bool s_differsFromSystem = false;
+
 #if QT_VERSION < QT_VERSION_CHECK(6, 8, 0)
 //! \brief A dark palette for the Fusion style, used where Qt can't switch the scheme itself
 QPalette darkPalette()
@@ -116,7 +119,15 @@ void apply()
     Qt::ColorScheme scheme = Qt::ColorScheme::Unknown;     // Unknown follows the system
     if (choice == CSC_Light) scheme = Qt::ColorScheme::Light;
     else if (choice == CSC_Dark) scheme = Qt::ColorScheme::Dark;
+    // Qt reports the system's own scheme only while no choice is forced: before the first
+    // call here, and whenever the choice is "System".
+    static Qt::ColorScheme systemScheme = QGuiApplication::styleHints()->colorScheme();
     QGuiApplication::styleHints()->setColorScheme(scheme);
+    if (scheme == Qt::ColorScheme::Unknown) {
+        systemScheme = QGuiApplication::styleHints()->colorScheme();
+    }
+    s_differsFromSystem = scheme != Qt::ColorScheme::Unknown
+                          && systemScheme != Qt::ColorScheme::Unknown && scheme != systemScheme;
 #ifdef Q_OS_LINUX
     static bool watching = false;
     if (!watching) {
@@ -142,6 +153,7 @@ void apply()
         systemDark = Theme::isDark(QApplication::palette());
     }
     const bool wantDark = choice == CSC_Dark || (choice == CSC_System && systemDark);
+    s_differsFromSystem = wantDark != systemDark;
     if (choice == CSC_System || wantDark == systemDark) {
         if (overridden) {
             overridden = false;
@@ -159,6 +171,15 @@ void apply()
     QApplication::setPalette(wantDark ? darkPalette() : QApplication::style()->standardPalette());
     if (!atStartup) sendThemeChange();
     qDebug() << "Colour scheme: Fusion with a" << (wantDark ? "dark" : "light") << "palette";
+#endif
+}
+
+bool nativeDialogsMatch()
+{
+#ifdef Q_OS_WIN
+    return !s_differsFromSystem;
+#else
+    return true;
 #endif
 }
 

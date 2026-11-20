@@ -32,6 +32,17 @@ bool canSwitchLive();
  */
 void apply();
 
+/*! \brief True when dialogs drawn by the operating system appear in the scheme OSCAR is showing
+ *
+ *  Windows draws its own file dialog in the system's light or dark mode whatever scheme Qt has
+ *  been given, so this is false there while OSCAR's choice differs from the system's; callers
+ *  then use Qt's own dialog (see nativeDialogOption()). The system's mode is read at startup
+ *  and whenever the choice is "System", so a change made in Windows while OSCAR runs with a
+ *  forced choice is not seen until then. Always true on macOS, where Qt passes the choice on
+ *  to the system, and on Linux, where the native dialogs have not been checked.
+ */
+bool nativeDialogsMatch();
+
 } // namespace ColorScheme
 
 #endif // COLORSCHEME_H

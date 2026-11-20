@@ -4189,7 +4189,7 @@ void MainWindow::on_actionDatabaseOpen_triggered()
     QString path = QFileDialog::getExistingDirectory(this,
         tr("Select OSCAR Database Folder"),
         QFileInfo(GetAppData()).absolutePath(),
-        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks | nativeDialogOption());
     if (path.isEmpty())
         return;
 

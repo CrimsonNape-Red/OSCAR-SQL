@@ -8501,3 +8501,37 @@ G3X loader are unchanged.
   to the card's packets outside OSCAR. Then by importing the card into a build with the fix: stored
   gain 0.01, Mask Pressure averaging 7.98 cmH2O at a set pressure of 8.0, and the graph judged
   correct on the Daily page.
+
+---
+
+## 2026-11-19 - Windows: file dialogs light while OSCAR is dark (GitLab #404)
+
+**Files:** `oscar/colorscheme.cpp`, `oscar/colorscheme.h` (`ColorScheme::nativeDialogsMatch()`),
+`oscar/translation.cpp`, `oscar/translation.h` (`nativeDialogOption()`), `oscar/mainwindow.cpp`,
+`oscar/exports/exportcsv.cpp`, `oscar/exports/journalnotesdialog.cpp`
+
+**Symptom:** With Windows in light mode and OSCAR set to dark, the folder dialog from Import >
+Specify appeared light. The same cause applies to every other native file or folder dialog, and to
+the reverse case (Windows dark, OSCAR light); those were not tried.
+
+**Root cause:** These are Windows' own dialogs, which Windows draws in the system's app mode.
+`QStyleHints::setColorScheme()` changes only Qt's palette and the title bars of Qt's windows
+(`QWindowsTheme::requestColorScheme()` in the Qt 6.12 source); it does not change the mode Windows
+uses for the process.
+
+**Fix:** `ColorScheme::apply()` records whether the scheme in effect differs from the system's, and
+`nativeDialogOption()` returns `DontUseNativeDialog` while it does, so Qt's own dialog is used and
+follows OSCAR's colours. Three dialogs that did not use `nativeDialogOption()` now do: Database >
+Open, CSV export and journal notes export.
+
+**Non-obvious:**
+- When OSCAR's choice is "System", or matches Windows, the native dialog is still used.
+- The system's scheme can only be read from Qt while no choice is forced, so it is read at startup
+  and whenever the choice is "System". A change made in Windows while OSCAR runs with a forced choice
+  is not seen until then.
+- Windows only. macOS needs nothing: Qt sets `NSApp.appearance`, which the native panels follow.
+  Linux native dialogs were not checked.
+- The print dialogs (`QPrintDialog` in `reports.cpp` and `statistics.cpp`) are also Windows' own and
+  have no Qt alternative on Windows, so they still follow the system.
+- The three newly covered dialogs now also switch to Qt's dialog when OSCAR's language differs from
+  Windows' display language, as the others already did.

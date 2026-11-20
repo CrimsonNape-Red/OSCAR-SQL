@@ -20,6 +20,7 @@
 #include "exportcsv.h"
 #include "ui_exportcsv.h"
 #include "mainwindow.h"
+#include "translation.h"
 
 extern MainWindow *mainwin;
 
@@ -91,7 +92,8 @@ void ExportCSV::on_filenameBrowseButton_clicked()
     QString folder = mainwin->profilePath(STR_PREF_LastExportCsvPath);
 
     QString name = QFileDialog::getSaveFileName(this, tr("Select file to export to"),
-                   folder + QDir::separator() + timestamp, tr("CSV Files (*.csv)"));
+                   folder + QDir::separator() + timestamp, tr("CSV Files (*.csv)"),
+                   nullptr, nativeDialogOption());
     if (name.isEmpty()) {
         ui->exportButton->setEnabled(false);
         return;

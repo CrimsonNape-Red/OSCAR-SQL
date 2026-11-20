@@ -26,6 +26,7 @@
 
 #include "SleepLib/common.h"
 #include "translation.h"
+#include "colorscheme.h"
 
 QHash<QString, QString> langNames;
 
@@ -51,6 +52,10 @@ QFileDialog::Options nativeDialogOption()
     // the actual display-language list, matching what native dialogs will show.
     // Force Qt-rendered dialogs when no UI language matches the OSCAR language, so
     // button labels are correctly translated via the installed Qt translation files.
+    // Likewise when the native dialog would appear light while OSCAR is dark, or the reverse.
+    if (!ColorScheme::nativeDialogsMatch()) {
+        return QFileDialog::DontUseNativeDialog;
+    }
     QString appLang = currentLanguage().left(2);
     const QStringList uiLangs = QLocale::system().uiLanguages();
     for (const QString& lang : uiLangs) {
