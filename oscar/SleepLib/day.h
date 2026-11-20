@@ -10,6 +10,8 @@
 #ifndef DAY_H
 #define DAY_H
 
+#include <QMap>
+
 #include "SleepLib/common.h"
 #include "SleepLib/machine_common.h"
 #include "SleepLib/event.h"
@@ -229,10 +231,15 @@ class Day
     //! \brief Removes a session from this day
     bool removeSession(Session *sess);
 
-    //! \brief Returns a list of channels of supplied types, according to channel orders
+    /*! \brief Returns a list of channels of supplied types, according to channel orders
+
+        Channels that share a schema order value (255 unless the schema sets one) follow in
+        device type order and then by channel id, so the list is the same on every launch.
+      */
     QList<ChannelID> getSortedMachineChannels(quint32 chantype);
 
-    //! \brief Returns a list of device specific channels of supplied types, according to channel orders
+    //! \brief Returns a list of device specific channels of supplied types, according to channel orders.
+    //! Channels that share a schema order value follow by channel id.
     QList<ChannelID> getSortedMachineChannels(MachineType type, quint32 chantype);
 
     // Some ugly CPAP specific stuff
@@ -323,7 +330,14 @@ class Day
     //! \brief A QList containing all Sessions objects for this day
     QList<Session *> sessions;
 
-    QHash<MachineType, Machine *> machines;
+    /*! \brief The day's devices, one per device type.
+
+        A QMap, not a QHash, so that walking it always visits the types in MachineType order
+        (CPAP, oximeter, sleep stage, journal, position). Qt 6 seeds QHash differently on every
+        launch, which made the Daily page list its session groups and event rows in an order
+        that changed from one launch to the next (GitLab #387).
+      */
+    QMap<MachineType, Machine *> machines;
 
     void incUseCounter() { d_useCounter++; }
     void decUseCounter() { d_useCounter--; if (d_useCounter<0) d_useCounter = 0; }

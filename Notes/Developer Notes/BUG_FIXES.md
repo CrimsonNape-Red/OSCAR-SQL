@@ -8599,3 +8599,39 @@ set around `exec()`.
 - The confirmation boxes stay modal, with the Layout dialog as their parent.
 - Checked by compiling only at the time of writing. Staying in front of the parent is the Windows
   behaviour of an owned window; macOS and Linux were not checked.
+
+---
+
+## 2026-11-19 - Daily: Details order of session groups and event rows changed between launches (GitLab #387)
+
+**Files:** `oscar/SleepLib/day.h`, `oscar/SleepLib/day.cpp` (`getSortedMachineChannels()`,
+`sortedByChannelOrder()`), `oscar/SleepLib/machine.cpp` (`Machine::availableChannels()`),
+`oscar/dailydetails.cpp` (`DailyDetails::sessions()`), `oscar/tests/machinetests.cpp`
+
+**Symptom:** On a day with more than one device (CPAP plus an oximeter, say), the Daily page listed
+the Session Information groups, and the event rows that share a schema order value (SpO2 Drop,
+Pulse Change), in an order that could differ each time OSCAR was started.
+
+**Root cause:** Two `QHash` containers were walked to build these lists, and Qt 6 seeds `QHash`
+differently in every process:
+- `Day::machines` (`QHash<MachineType, Machine *>`), walked by `DailyDetails::sessions()` and by
+  `Day::getSortedMachineChannels()`.
+- `Machine::m_availableChannels` (`QHash<ChannelID, bool>`), walked by
+  `Machine::availableChannels()`, so even one device's channels arrived in a varying order.
+
+`getSortedMachineChannels()` sorted by schema order only, and channels with the same order value
+kept whatever order the hashes gave.
+
+**Fix:** `Day::machines` is a `QMap`, so devices are always visited in `MachineType` order (CPAP,
+oximeter, sleep stage, position). `Machine::availableChannels()` returns ascending channel ids.
+`getSortedMachineChannels()` sorts with `std::stable_sort`, so ties resolve by device type, then
+channel id.
+
+**Non-obvious:**
+- The default schema order is 255, shared by every waveform and by the oximetry flags, so the tie
+  order decides more than the two rows in the report: every caller of
+  `getSortedMachineChannels()` (flag lines, line chart, graph menus, search tab, statistics) now
+  gets a repeatable list.
+- Not changed: `DailyDetails::settings()` walks `Session::settings` (a `QHash`) into a map keyed by
+  label. The rows come out in label order, but if two settings ever share a label, which one is
+  shown depends on hash order.

@@ -18,5 +18,6 @@ private slots:
     void testReportedChannelsFromEventLists();
     void testReportedChannelsFromCounts();
     void testEmptyListDoesNotReport();
+    void testAvailableChannelsAscending();
 };
 DECLARE_TEST(MachineTests)

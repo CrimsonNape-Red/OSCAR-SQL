@@ -11,6 +11,8 @@
 #include "SleepLib/session.h"
 #include "SleepLib/schema.h"
 
+#include <algorithm>
+
 // AddEventList() looks the channel up in schema::channel, so the channel table must
 // exist. Guarded as in apextests.cpp: another test class may have initialised it.
 void MachineTests::initTestCase()
@@ -57,4 +59,26 @@ void MachineTests::testEmptyListDoesNotReport()
 
     mach.noteReportedChannels(&sess);
     QVERIFY(!mach.reportsHypopneaMechanism());
+}
+
+// availableChannels() reads a QHash, which Qt 6 orders differently on every launch; the
+// list must come back in ascending channel id whatever that order is (GitLab #387).
+void MachineTests::testAvailableChannelsAscending()
+{
+    Machine mach(nullptr, 4);
+    Session sess(&mach, 1);
+    const QList<ChannelID> flags = { CPAP_VSnore, CPAP_RERA, CPAP_Obstructive, CPAP_LargeLeak,
+        CPAP_Hypopnea, CPAP_FlowLimit, CPAP_ClearAirway, CPAP_CSR, CPAP_Apnea, CPAP_PB };
+    for (ChannelID code : flags) {
+        sess.setCount(code, 1);          // also records the channel as available
+    }
+    sess.setMin(CPAP_FlowRate, -60);
+    mach.updateChannels(&sess);
+
+    const QList<ChannelID> got = mach.availableChannels(schema::FLAG | schema::SPAN);
+    QCOMPARE(got.size(), flags.size());               // the waveform is filtered out
+    QVERIFY(std::is_sorted(got.cbegin(), got.cend()));
+    for (ChannelID code : flags) {
+        QVERIFY(got.contains(code));
+    }
 }

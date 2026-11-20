@@ -243,6 +243,7 @@ class Machine
 
     void setLoaderName(QString value);
 
+    //! \brief The channels of the given type(s) this device has data for, in ascending channel id
     QList<ChannelID> availableChannels(quint32 chantype);
 
     MachineLoader * loader() { return m_loader; }

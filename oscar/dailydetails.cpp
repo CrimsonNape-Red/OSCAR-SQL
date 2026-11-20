@@ -651,10 +651,9 @@ QVector<SessionGroup> sessions(Day *day)
     QVector<SessionGroup> groups;
     if (!day) return groups;
 
-    QHash<MachineType, Machine *>::iterator mach_end = day->machines.end();
-    QHash<MachineType, Machine *>::iterator mi;
-
-    for (mi = day->machines.begin(); mi != mach_end; ++mi) {
+    // Day::machines is a QMap, so the groups come out in MachineType order on every launch
+    // (CPAP, oximetry, sleep stage, position).
+    for (auto mi = day->machines.begin(), mach_end = day->machines.end(); mi != mach_end; ++mi) {
         if (mi.key() == MT_JOURNAL) continue;
         SessionGroup group;
         group.type = mi.key();

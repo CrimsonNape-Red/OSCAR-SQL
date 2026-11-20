@@ -29,6 +29,7 @@
 #include "progressdialog.h"
 
 #include <time.h>
+#include <algorithm>
 
 #include "machine.h"
 #include "profiles.h"
@@ -1060,6 +1061,9 @@ QList<ChannelID> Machine::availableChannels(quint32 chantype)
             list.push_back(code);
         }
     }
+    // m_availableChannels is a QHash, whose order changes from launch to launch in Qt 6.
+    // Return the channels in ascending id so callers see the same list every time (GitLab #387).
+    std::sort(list.begin(), list.end());
     return list;
 }
 

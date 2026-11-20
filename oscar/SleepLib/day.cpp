@@ -1254,16 +1254,18 @@ void Day::CloseEvents()
     d_events_open = false;
 }
 
-QList<ChannelID> Day::getSortedMachineChannels(MachineType type, quint32 chantype)
-{
-    QList<ChannelID> available;
-    auto mi_end = machines.end();
-    for (auto mi = machines.begin(); mi != mi_end; mi++) {
-        if (mi.key() != type) continue;
-        available.append(mi.value()->availableChannels(chantype));
-    }
+/*! \brief Sort \a available by schema channel order, for getSortedMachineChannels().
 
-    QMultiMap<int, ChannelID> order;
+    The sort is stable: channels with the same order value (255 unless the schema sets one,
+    which covers every waveform and the oximetry flags) keep the order they arrive in. The
+    callers supply them device type by device type, each device's channels in ascending
+    channel id, so the result is the same on every launch (GitLab #387). Steady breathing
+    channels are dropped unless that feature is active.
+  */
+static QList<ChannelID> sortedByChannelOrder(const QList<ChannelID> & available)
+{
+    QList<ChannelID> channels;
+    channels.reserve(available.size());
     for (const auto code : available) {
         #if defined(STEADY_BREATHING)
             if (p_profile->cpap->steadyBreathing()!=SB_ACTIVE) {
@@ -1272,46 +1274,36 @@ QList<ChannelID> Day::getSortedMachineChannels(MachineType type, quint32 chantyp
                 }
             }
         #endif
-        order.insert(schema::channel[code].order(), code);
-    }
-
-    QList<ChannelID> channels;
-    for (auto it = order.begin(); it != order.end(); ++it) {
-        ChannelID code = it.value();
         channels.append(code);
     }
+
+    std::stable_sort(channels.begin(), channels.end(), [](ChannelID a, ChannelID b) {
+        return schema::channel[a].order() < schema::channel[b].order();
+    });
     return channels;
+}
+
+QList<ChannelID> Day::getSortedMachineChannels(MachineType type, quint32 chantype)
+{
+    QList<ChannelID> available;
+    auto mi = machines.find(type);
+    if (mi != machines.end()) {
+        available = mi.value()->availableChannels(chantype);
+    }
+    return sortedByChannelOrder(available);
 }
 
 
 QList<ChannelID> Day::getSortedMachineChannels(quint32 chantype)
 {
+    // machines is a QMap, so the devices are visited in MachineType order
     QList<ChannelID> available;
     auto mi_end = machines.end();
     for (auto mi = machines.begin(); mi != mi_end; mi++) {
         if (mi.key() == MT_JOURNAL) continue;
         available.append(mi.value()->availableChannels(chantype));
     }
-
-    QMultiMap<int, ChannelID> order;
-
-    for (auto code : available) {
-        #if defined(STEADY_BREATHING)
-            if (p_profile->cpap->steadyBreathing()!=SB_ACTIVE) {
-                if (code == CPAP_SteadyBreathing || code == CPAP_SteadyBreathingFlag)  {
-                    continue;
-                }
-            }
-        #endif
-        order.insert(schema::channel[code].order(), code);
-    }
-
-    QList<ChannelID> channels;
-    for (auto it = order.begin(); it != order.end(); ++it) {
-        ChannelID code = it.value();
-        channels.append(code);
-    }
-    return channels;
+    return sortedByChannelOrder(available);
 }
 
 qint64 Day::first(MachineType type)
