@@ -3851,6 +3851,12 @@ QByteArray gGraphView::serializeSettings()
     return buffer;
 }
 
+// Profile preference recording the Graph Height preference a view's saved layout was made under.
+static QString layoutHeightKey(const QString & title)
+{
+    return QStringLiteral("LayoutGraphHeight_") + title.toLower();
+}
+
 void gGraphView::SaveSettings(QString title, QString folderName)
 {
     qDebug() << "Saving" << title << "settings";
@@ -3864,6 +3870,8 @@ void gGraphView::SaveSettings(QString title, QString folderName)
             openOk = repo.saveCurrentLayout(pd.id, title.toLower(), gVversion, data);
             if (!openOk)
                 qWarning() << "gGraphView::SaveSettings: failed to save layout to DB for" << title;
+            else
+                p_profile->Set(layoutHeightKey(title), AppSetting->graphHeight());
             return;
         }
     }
@@ -3990,7 +3998,22 @@ bool gGraphView::LoadSettings(QString title, QString folderName)
             GraphLayoutData layoutData;
             if (repo.loadCurrentLayout(pd.id, title.toLower(), layoutData)) {
                 bool ok = deserializeSettings(layoutData.data);
-                if (ok) updateScale();
+                if (ok) {
+                    // Preferences > Appearance > Graph Height resets only the open profile's
+                    // graphs. A layout saved under another height predates the change, so take
+                    // the preferred height now (order, visibility and pins stay).
+                    const QString key = layoutHeightKey(title);
+                    const int height = AppSetting->graphHeight();
+                    if (p_profile->contains(key) && (*p_profile)[key].toInt() != height) {
+                        qDebug() << "gGraphView::LoadSettings:" << title << "layout saved at graph height"
+                                 << (*p_profile)[key].toInt() << "- applying" << height;
+                        for (auto & graph : m_graphs) {
+                            if (graph) graph->setHeight(height);
+                        }
+                    }
+                    p_profile->Set(key, height);
+                    updateScale();
+                }
                 openOk = ok;
                 return ok;
             }
