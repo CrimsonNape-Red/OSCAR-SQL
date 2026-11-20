@@ -19,6 +19,7 @@
 #include "SleepLib/session.h"
 #include "SleepLib/loader_plugins/bmc_loader.h"
 #include "SleepLib/loader_plugins/prismavent_loader.h"
+#include "SleepLib/loader_plugins/csvoximetry.h"
 
 #define TESTDATA_PATH "./testdata/"
 
@@ -449,7 +450,7 @@ void OximetryEventsTests::testBmcOximeterDropoutsLeaveGaps()
 
     const QVector<int> raw = { 0, 95, 94, 0xFF, 0xFFFF, 0, 96, 97 };
     for (int i = 0; i < raw.size(); ++i) {
-        BmcAddOximeterReading(&sess, list, last, OXI_SPO2, kStart + i * kSecondMs, raw[i], 1, 100);
+        AddOximeterReading(&sess, list, last, OXI_SPO2, kStart + i * kSecondMs, raw[i], 1, 100);
     }
 
     QCOMPARE(sess.eventlist[OXI_SPO2].size(), 2);
@@ -496,6 +497,60 @@ void OximetryEventsTests::testPrismaVentOximetryDropoutsLeaveGaps()
     QCOMPARE(PrismaVentAddValidRuns(&empty, OXI_SPO2, kStart, zeros, 5, 1000.0, 1.0, 0.0,
                                     1, 100, QStringLiteral("%")), 0);
     QVERIFY(!empty.eventlist.contains(OXI_SPO2));
+}
+
+// CSV oximetry: a dropout (sensor off: 0, or an out of range code) ends the list, so the
+// reading before it is not carried through it.
+void OximetryEventsTests::testCsvOximetryDropoutsLeaveGaps()
+{
+    const CsvOximetry::Result r = CsvOximetry::parse(QStringLiteral(
+        "2026-11-02 02:00:00,96,60\n"
+        "2026-11-02 02:00:01,95,61\n"
+        "2026-11-02 02:00:02,0,0\n"
+        "2026-11-02 02:00:03,127,255\n"
+        "2026-11-02 02:00:04,0,0\n"
+        "2026-11-02 02:00:05,97,62\n"
+        "2026-11-02 02:00:06,97,62\n"));
+    QVERIFY(r.ok());
+    QCOMPARE(r.recordings.size(), 1);
+
+    Machine mach(nullptr, 3);
+    Session *sess = CsvOximetry::buildSession(&mach, r.recordings.first());
+    QVERIFY(sess != nullptr);
+
+    QCOMPARE(sess->eventlist[OXI_SPO2].size(), 2);
+    QCOMPARE(sess->eventlist[OXI_Pulse].size(), 2);
+    const qint64 start = r.recordings.first().start().toMSecsSinceEpoch();
+    QCOMPARE(sess->eventlist[OXI_SPO2].at(0)->last(), start + 2 * kSecondMs);
+    QCOMPARE(sess->eventlist[OXI_SPO2].at(1)->first(), start + 5 * kSecondMs);
+
+    // 95% from 1 s until the dropout at 2 s; bridged, it ran on to 5 s.
+    QCOMPARE(sess->timeBelowThreshold(OXI_SPO2, 95), EventDataType(1.0 / 60.0));
+    delete sess;
+}
+
+// Yuwell logs one reading a minute; 0, pulse 249+ and SpO2 over 100 are no reading.
+void OximetryEventsTests::testYuwellStyleReadingsLeaveGaps()
+{
+    Machine mach(nullptr, 3);
+    Session sess(&mach, 1);
+    EventList *P = nullptr;
+    EventList *O = nullptr;
+    EventStoreType lastPulse = 0, lastSpO2 = 0;
+
+    const int pulses[] = { 62, 61, 255, 249, 0, 64 };
+    const int spo2s[] = { 95, 94, 255, 0, 127, 96 };
+    for (int i = 0; i < 6; ++i) {
+        const qint64 t = kStart + i * 60000LL;
+        AddOximeterReading(&sess, P, lastPulse, OXI_Pulse, t, pulses[i], 25, 248);
+        AddOximeterReading(&sess, O, lastSpO2, OXI_SPO2, t, spo2s[i], 1, 100);
+    }
+
+    QCOMPARE(sess.eventlist[OXI_Pulse].size(), 2);
+    QCOMPARE(sess.eventlist[OXI_SPO2].size(), 2);
+    QCOMPARE(sess.Max(OXI_SPO2), EventDataType(96));
+    QCOMPARE(sess.Max(OXI_Pulse), EventDataType(64));
+    QCOMPARE(sess.eventlist[OXI_SPO2].at(1)->first(), kStart + 5 * 60000LL);
 }
 
 void OximetryEventsTests::cleanupTestCase()

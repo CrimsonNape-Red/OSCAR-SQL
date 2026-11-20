@@ -1637,17 +1637,24 @@ void OximeterImport::storeSession(SerialOximeter *mod, QVector<OxiRecord> *oxire
     for (int i=0; i < size; ++i) {
         OxiRecord * rec = &(*oxirec)[i];
 
-        if (rec->pulse > 0) {
+        // A reading outside the valid range is no reading, the same as 0, so it ends the
+        // section and leaves a gap. Some drivers pass invalid codes through unchanged:
+        // CMS50 recordings mark no reading as SpO2 127 and pulse 255, and MD300W1 files
+        // are not checked at all.
+        const quint8 pulse = ((rec->pulse >= 25) && (rec->pulse <= 250)) ? rec->pulse : 0;
+        const quint8 spo2 = ((rec->spo2 >= 1) && (rec->spo2 <= 100)) ? rec->spo2 : 0;
+
+        if (pulse > 0) {
             if (lastpulse == 0) {
                 ELpulse = session->AddEventList(OXI_Pulse, EVL_Event);
             }
-            if (lastpulse != rec->pulse) {
+            if (lastpulse != pulse) {
                 if (lastpulse > 0) {
                     ELpulse->AddEvent(ti, lastpulse);
                 }
-                ELpulse->AddEvent(ti, rec->pulse);
+                ELpulse->AddEvent(ti, pulse);
             }
-            lastgoodpulse = rec->pulse;
+            lastgoodpulse = pulse;
         } else {
             // end section properly
             if (lastgoodpulse > 0) {
@@ -1657,19 +1664,19 @@ void OximeterImport::storeSession(SerialOximeter *mod, QVector<OxiRecord> *oxire
             }
         }
 
-        lastpulse = rec->pulse;
+        lastpulse = pulse;
 
-        if (rec->spo2 > 0) {
+        if (spo2 > 0) {
             if (lastspo2 == 0) {
                 ELspo2 = session->AddEventList(OXI_SPO2, EVL_Event);
             }
-            if (lastspo2 != rec->spo2) {
+            if (lastspo2 != spo2) {
                 if (lastspo2 > 0) {
                     ELspo2->AddEvent(ti, lastspo2);
                 }
-                ELspo2->AddEvent(ti, rec->spo2);
+                ELspo2->AddEvent(ti, spo2);
             }
-            lastgoodspo2 = rec->spo2;
+            lastgoodspo2 = spo2;
         } else {
             // end section properly
             if (lastgoodspo2 > 0) {
@@ -1678,7 +1685,7 @@ void OximeterImport::storeSession(SerialOximeter *mod, QVector<OxiRecord> *oxire
                 lastgoodspo2 = 0;
             }
         }
-        lastspo2 = rec->spo2;
+        lastspo2 = spo2;
 
         if (haveperf) {
             // Perfusion Index

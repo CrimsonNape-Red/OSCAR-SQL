@@ -38,6 +38,8 @@ private slots:
     void testTimeAboveThresholdSummaryStopsAtGaps();
     void testBmcOximeterDropoutsLeaveGaps();
     void testPrismaVentOximetryDropoutsLeaveGaps();
+    void testCsvOximetryDropoutsLeaveGaps();
+    void testYuwellStyleReadingsLeaveGaps();
     void cleanupTestCase();
 };
 

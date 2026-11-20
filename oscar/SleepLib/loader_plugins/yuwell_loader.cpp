@@ -735,8 +735,10 @@ int YuwellFormatB::OpenMachine(Machine *mach, const QString & serial) {
             EventList *OA = sess->AddEventList(CPAP_Obstructive, EVL_Event);
             EventList *CA = sess->AddEventList(CPAP_ClearAirway, EVL_Event);
             EventList *H =  sess->AddEventList(CPAP_Hypopnea, EVL_Event);
-            EventList *P =  sess->AddEventList(OXI_Pulse, EVL_Event);
-            EventList *O =  sess->AddEventList(OXI_SPO2, EVL_Event);
+            // Oximeter lists are created on the first valid reading and end at each dropout.
+            EventList *P = nullptr;
+            EventList *O = nullptr;
+            EventStoreType lastPulse = 0, lastSpO2 = 0;
 
             qint64 ti;
             ti = qint64(ts) * 1000L;
@@ -761,10 +763,9 @@ int YuwellFormatB::OpenMachine(Machine *mach, const QString & serial) {
                     }
                     logDecoded = true;
                     PR->AddEvent(ti + (i * 60000), pressure); // Samples are every 60 seconds
-                    if (pulse < 249) {
-                        P->AddEvent(ti + (i * 60000), pulse);
-                    }
-                    O->AddEvent(ti + (i * 60000), spo2);
+                    // Pulse 249 and above, SpO2 0 or above 100: no reading, left as a gap
+                    AddOximeterReading(sess, P, lastPulse, OXI_Pulse, ti + (i * 60000), pulse, 25, 248);
+                    AddOximeterReading(sess, O, lastSpO2, OXI_SPO2, ti + (i * 60000), spo2, 1, 100);
 
                     if (oai > 0) {
                         OA->AddEvent(ti + (i * 60000), 0);
@@ -1470,8 +1471,10 @@ bool YuwellFormatD::OpenSession(Machine *mach, const QString & filename)
     EventList *CA = sess->AddEventList(CPAP_ClearAirway, EVL_Event);
     EventList *H =  sess->AddEventList(CPAP_Hypopnea, EVL_Event);
     EventList *FR =  sess->AddEventList(CPAP_FlowRate, EVL_Event, 1);
-    EventList *P =  sess->AddEventList(OXI_Pulse, EVL_Event);
-    EventList *O =  sess->AddEventList(OXI_SPO2, EVL_Event);
+    // Oximeter lists are created on the first valid reading and end at each dropout.
+    EventList *P = nullptr;
+    EventList *O = nullptr;
+    EventStoreType lastPulse = 0, lastSpO2 = 0;
 
     QStringList mFilters;
     mFilters << "*m.bys";
@@ -1563,12 +1566,9 @@ bool YuwellFormatD::OpenSession(Machine *mach, const QString & filename)
             if (leakage > 0) {
                 LK->AddEvent(ti + (i * 60000), leakage);
             }
-            if (pulse > 0 && pulse < 249) {
-                P->AddEvent(ti + (i * 60000), pulse);
-            }
-            if (spo2 > 0) {
-                O->AddEvent(ti + (i * 60000), spo2);
-            }
+            // Pulse 249 and above, SpO2 0 or above 100: no reading, left as a gap
+            AddOximeterReading(sess, P, lastPulse, OXI_Pulse, ti + (i * 60000), pulse, 25, 248);
+            AddOximeterReading(sess, O, lastSpO2, OXI_SPO2, ti + (i * 60000), spo2, 1, 100);
         }
 
         if (sess->settings[CPAP_Mode] == (int)MODE_APAP) {
@@ -2013,8 +2013,10 @@ bool YuwellFormatE::OpenSession(Machine *mach, const QString & sessionDirPath)
     EventList *H =  sess->AddEventList(CPAP_Hypopnea, EVL_Event);
     EventList *TV = sess->AddEventList(CPAP_TidalVolume, EVL_Event, 1);
     EventList *RR = sess->AddEventList(CPAP_RespRate, EVL_Event, 1);
-    EventList *P =  sess->AddEventList(OXI_Pulse, EVL_Event);
-    EventList *O =  sess->AddEventList(OXI_SPO2, EVL_Event);
+    // Oximeter lists are created on the first valid reading and end at each dropout.
+    EventList *P = nullptr;
+    EventList *O = nullptr;
+    EventStoreType lastPulse = 0, lastSpO2 = 0;
 
     qint64 ti = qint64(ts) * 1000L;
 
@@ -2094,12 +2096,9 @@ bool YuwellFormatE::OpenSession(Machine *mach, const QString & sessionDirPath)
                     MV->AddEvent(ti + (i * 60000), minute_vent);
                     IE->AddEvent(ti + (i * 60000), ie_ratio);
 
-                    if (pulse > 0 && pulse < 249) {
-                        P->AddEvent(ti + (i * 60000), pulse);
-                    }
-                    if (spo2 > 0) {
-                        O->AddEvent(ti + (i * 60000), spo2);
-                    }
+                    // Pulse 249 and above, SpO2 0 or above 100: no reading, left as a gap
+                    AddOximeterReading(sess, P, lastPulse, OXI_Pulse, ti + (i * 60000), pulse, 25, 248);
+                    AddOximeterReading(sess, O, lastSpO2, OXI_SPO2, ti + (i * 60000), spo2, 1, 100);
                     if (oai > 0 && !oai_prev) {
                         OA->AddEvent(ti + (i * 60000), 0);
                     }

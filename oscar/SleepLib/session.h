@@ -547,6 +547,13 @@ protected:
     MachineType s_machtype;
 };
 
+/// Adds one oximeter reading (SpO2 or pulse) to \a list as a timed event. A value outside
+/// [low, high] is no reading (0, or a device's invalid code such as 0xFF): it ends the list,
+/// holding the last good value until the dropout starts, so the dropout stays a gap. The
+/// next valid reading starts a new list. \a list may start out null.
+void AddOximeterReading(Session* session, EventList*& list, EventStoreType& lastValue,
+                        ChannelID code, qint64 timestamp, int value, int low, int high);
+
 QDataStream & operator<<(QDataStream & out, const Session & session);
 QDataStream & operator>>(QDataStream & in, Session & session);
 

@@ -337,6 +337,9 @@ static void addChannel(Session *session, ChannelID code, const QVector<Sample> &
         } else if (last > 0) {
             el->AddEvent(t, last);   // end the section where the readings stop
             session->setLast(code, t);
+            // The next reading starts a new list, so the dropout stays a gap rather than
+            // being bridged on the graph and carried through by the statistics.
+            el = nullptr;
         }
         last = v;
     }

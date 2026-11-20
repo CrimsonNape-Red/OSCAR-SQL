@@ -4180,3 +4180,17 @@ bool Session::LoadEventsFromFile(const QString& filename)
 }
 
 // ===== END IMPORT-SPECIFIC FILE LOADERS =====
+
+void AddOximeterReading(Session* session, EventList*& list, EventStoreType& lastValue,
+                        ChannelID code, qint64 timestamp, int value, int low, int high)
+{
+    if (value >= low && value <= high) {
+        if (!list)
+            list = session->AddEventList(code, EVL_Event, 1.0, 0.0, 0.0, 0.0, 1000);
+        list->AddEvent(timestamp, value);
+        lastValue = value;
+    } else if (list) {
+        list->AddEvent(timestamp, lastValue);
+        list = nullptr;
+    }
+}

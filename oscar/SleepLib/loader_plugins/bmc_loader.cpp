@@ -471,25 +471,6 @@ void BmcLoader::setSessionRespiratoryEvents(BmcSession* bmcSession, Session* osc
     }
 }
 
-// Adds one reading from the optional oximeter accessory. A reading outside [low, high] is
-// no reading: 0 when the accessory has none, or an invalid-reading code such as 0xFF or
-// 0xFFFF. It ends the current event list, so the dropout stays a gap: the graph does not
-// draw across it and the statistics do not carry the previous reading through it. The last
-// good reading is held until the dropout starts, as the serial oximeter import does.
-void BmcAddOximeterReading(Session* oscarSession, EventList*& list, EventStoreType& lastValue,
-                        ChannelID code, qint64 timestamp, int value, int low, int high)
-{
-    if (value >= low && value <= high) {
-        if (!list)
-            list = oscarSession->AddEventList(code, EVL_Event, 1.0, 0.0, 0.0, 0.0, 1000);
-        list->AddEvent(timestamp, value);
-        lastValue = value;
-    } else if (list) {
-        list->AddEvent(timestamp, lastValue);
-        list = nullptr;
-    }
-}
-
 //Given a created session, we add the BMC waveforms for the session to the OSCAR session
 void BmcLoader::setSessionWaveforms(BmcSession* bmcSession, Session* oscarSession)
 {
@@ -646,10 +627,10 @@ void BmcLoader::setSessionWaveforms(BmcSession* bmcSession, Session* oscarSessio
             wTidalVolume->AddEvent(timestamp, bmcWaveform.Raw.TidalVolume);
         if (bmcWaveform.Raw.MinuteVentilation > 0)
             wMinuteVentilation->AddEvent(timestamp, bmcWaveform.Raw.MinuteVentilation);
-        BmcAddOximeterReading(oscarSession, wSpO2, lastSpO2, OXI_SPO2, timestamp,
-                              bmcWaveform.Raw.SpO2Pct, 1, 100);
-        BmcAddOximeterReading(oscarSession, wPulse, lastPulse, OXI_Pulse, timestamp,
-                              bmcWaveform.Raw.PulseRate, 25, 250);
+        AddOximeterReading(oscarSession, wSpO2, lastSpO2, OXI_SPO2, timestamp,
+                           bmcWaveform.Raw.SpO2Pct, 1, 100);
+        AddOximeterReading(oscarSession, wPulse, lastPulse, OXI_Pulse, timestamp,
+                           bmcWaveform.Raw.PulseRate, 25, 250);
         if (bmcWaveform.Raw.RespiratoryRate > 0)
             wRespiratoryRate->AddEvent(timestamp, bmcWaveform.Raw.RespiratoryRate);
         if (wIEValue || wIERatio) {
