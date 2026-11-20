@@ -442,17 +442,21 @@ static QVector<TextRow> viatomSummary(Day * day, Machine * oxi)
         return rows;
     }
 
-    auto hm = [](qint64 secs) {
-        return QString("%1:%2").arg(secs / 3600).arg((secs % 3600) / 60, 2, 10, QChar('0'));
+    // hh:mm:ss, the same form as the ramp times in Statistics. Seconds are shown because a
+    // short time below 90% would otherwise read as zero, and the three fields need no unit.
+    auto hms = [](qint64 secs) {
+        return QString("%1:%2:%3").arg(secs / 3600, 2, 10, QChar('0'))
+                                  .arg((secs / 60) % 60, 2, 10, QChar('0'))
+                                  .arg(secs % 60, 2, 10, QChar('0'));
     };
     rows.append(textRow(QCoreApplication::translate("Daily", "Reported by the oximeter"), QString(), TextRow::Subheading));
     if (hours > 0) {
         rows.append(textRow(QCoreApplication::translate("Daily", "O2 Score"), QString("%1").arg(scoreWeighted / hours,0,'f',1), TextRow::Line));
     }
     rows.append(textRow(QCoreApplication::translate("Daily", "3% / 4% Drops"), QString("%1 / %2").arg(drops3).arg(drops4), TextRow::Line));
-    rows.append(textRow(QCoreApplication::translate("Daily", "Time below 90%"), hm(below90), TextRow::Line));
+    rows.append(textRow(QCoreApplication::translate("Daily", "Time below 90%"), hms(below90), TextRow::Line));
     if (asleep > 0) {
-        rows.append(textRow(QCoreApplication::translate("Daily", "Asleep"), hm(asleep), TextRow::Line));
+        rows.append(textRow(QCoreApplication::translate("Daily", "Asleep"), hms(asleep), TextRow::Line));
     }
     if (steps > 0) {
         rows.append(textRow(QCoreApplication::translate("Daily", "Steps"), QString("%1").arg(steps), TextRow::Line));

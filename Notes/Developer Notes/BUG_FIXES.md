@@ -8638,3 +8638,24 @@ channel id.
 - Not changed: `DailyDetails::settings()` walks `Session::settings` (a `QHash`) into a map keyed by
   label. The rows come out in label order, but if two settings ever share a label, which one is
   shown depends on hash order.
+
+---
+
+## 2026-11-20 - Daily: oximeter "Time below 90%" shown as 0:00 with no unit (GitLab #409)
+
+**Files:** `oscar/dailydetails.cpp` (`viatomSummary()`)
+
+**Symptom:** In Oximeter Information, under "Reported by the oximeter", "Time below 90%" and
+"Asleep" read like `0:07`, with nothing to say whether that was hours:minutes or
+minutes:seconds.
+
+**Root cause:** Both rows were formatted as `h:mm` from a value held in seconds. The seconds
+were dropped, so any time under a minute showed as `0:00`.
+
+**Fix:** Both rows are formatted `hh:mm:ss`, the form already used for "Total ramp time" and
+"Time outside of ramp" on the same page.
+
+**Non-obvious:**
+- Only oximeters imported by the Viatom loader have these rows; the figures are the device's
+  own, summed over the day's enabled sessions.
+- Checked by compiling only at the time of writing.
