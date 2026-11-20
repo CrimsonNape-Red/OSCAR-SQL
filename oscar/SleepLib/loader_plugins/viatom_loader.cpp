@@ -192,14 +192,19 @@ Session* ViatomLoader::ParseFilePOD2(const QString & filename, bool *existing)
         //Lacking better information, I've kept the limit checks from the other Viatom devices.
         //In testing, there were some streaks of 0 values for SPO2 and HR
         //These seem to be invalid measurements.
-        // Viatom advertises a range of 30 - 250 bpm.
-        if (rec.hr>0 && (rec.hr < 30 || rec.hr > 250)) {
-            UNEXPECTED_VALUE(rec.hr, "30-250");
+        // Viatom advertises a range of 30 - 250 bpm, but the devices record pulse rates below 30.
+        // A skipped reading must end the event list. These are waveform lists, whose sample
+        // times come from their position in the list, so dropping a sample without ending
+        // the list would shift every later reading earlier.
+        if (rec.hr>0 && (rec.hr < 25 || rec.hr > 250)) {
+            UNEXPECTED_VALUE(rec.hr, "25-250");
+            EndEventList(OXI_Pulse, time_ms);
         }
-        else{
-            if (rec.hr>0){
-                AddEvent(OXI_Pulse, time_ms, rec.hr);
-            }
+        else if (rec.hr>0) {
+            AddEvent(OXI_Pulse, time_ms, rec.hr);
+        }
+        else {
+            EndEventList(OXI_Pulse, time_ms);
         }
 
 
@@ -215,13 +220,13 @@ Session* ViatomLoader::ParseFilePOD2(const QString & filename, bool *existing)
             // TODO: Consider whether we should import 61%-70% as 70% to match the official reports.
             if (rec.spo2>0 && (rec.spo2 < 61 || rec.spo2 > 100)) {
                 UNEXPECTED_VALUE(rec.spo2, "61-100%");
+                EndEventList(OXI_SPO2, time_ms);
             }
-            else
-            {
-                if (rec.spo2>0)
-                {
-                    AddEvent(OXI_SPO2, time_ms, rec.spo2);
-                }
+            else if (rec.spo2>0) {
+                AddEvent(OXI_SPO2, time_ms, rec.spo2);
+            }
+            else {
+                EndEventList(OXI_SPO2, time_ms);
             }
 
         }
@@ -236,6 +241,7 @@ Session* ViatomLoader::ParseFilePOD2(const QString & filename, bool *existing)
             //Changed to throw a warning at 24% instead of 20%
 
              UNEXPECTED_VALUE(pi, "0-24%");
+             EndEventList(OXI_Perf, time_ms);
         }
         else
         {
@@ -365,9 +371,9 @@ Session* ViatomLoader::ParseFileViatom(const QString & filename, bool *existing)
             EndEventList(OXI_Pulse, time_ms);
             EndEventList(OXI_SPO2, time_ms);
         } else {
-            // Viatom advertises a range of 30 - 250 bpm.
-            if (rec.hr < 30 || rec.hr > 250) {
-                UNEXPECTED_VALUE(rec.hr, "30-250");
+            // Viatom advertises a range of 30 - 250 bpm, but the devices record pulse rates below 30.
+            if (rec.hr < 25 || rec.hr > 250) {
+                UNEXPECTED_VALUE(rec.hr, "25-250");
             }
             AddEvent(OXI_Pulse, time_ms, rec.hr);
 

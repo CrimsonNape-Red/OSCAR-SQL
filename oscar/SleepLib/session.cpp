@@ -2097,9 +2097,16 @@ EventDataType Session::timeAboveThreshold(ChannelID id, EventDataType threshold)
     // at figures like 20764% instead of 20.764%.
     //
     // So take the fraction of the weight that sits above the threshold, which is
-    // unit-agnostic, and scale it by the channel's actual recorded span. Both
-    // endpoints are cached alongside the summaries and persisted to the database,
-    // so this still avoids touching the event data on disk.
+    // unit-agnostic, and scale it by the time the channel actually has readings for.
+    //
+    // The weights leave out the gaps between event lists (where a device recorded no
+    // valid reading), but the first-to-last span includes them. Scaling by the span
+    // would count each gap as if the readings around it carried on through it. For
+    // waveform weights (milliseconds) the total weight is exactly the time covered by
+    // readings, so use that. Event weights (seconds) are truncated per interval and
+    // undercount, so those keep the span; gaps in event-based channels stay counted.
+    // The span endpoints are cached alongside the summaries and persisted to the
+    // database, so this still avoids touching the event data on disk.
     auto ts = m_timesummary.find(id);
     if (ts != m_timesummary.end() && m_gain.contains(id)) {
         double gain = m_gain[id];
@@ -2122,7 +2129,15 @@ EventDataType Session::timeAboveThreshold(ChannelID id, EventDataType threshold)
         if ((total > 0) && (fc != m_firstchan.end()) && (lc != m_lastchan.end())
                 && (lc.value() > fc.value())) {
             // Span is in milliseconds; the result is in decimal minutes.
-            EventDataType time = (above / total) * (double(lc.value() - fc.value()) / 60000.0);
+            double span = double(lc.value() - fc.value());
+
+            // Seconds weights can't add up to more than the span in seconds (plus the
+            // 1-second weight given to each single-event list), so a total above that
+            // means the weights are milliseconds from waveform lists.
+            bool weightsInMs = total > (span / 1000.0) * 1.01 + 2.0;
+            double covered = weightsInMs ? qMin(total, span) : span;
+
+            EventDataType time = (above / total) * (covered / 60000.0);
 
             // Cache the result
             m_timeAboveTheshold[id] = time;
@@ -2149,12 +2164,20 @@ EventDataType Session::timeAboveThreshold(ChannelID id, EventDataType threshold)
     QVector<EventList *> &evec = j.value();
     int evec_size=evec.size();
 
-    qint64 ti, started=0, total=0;
+    qint64 ti = 0, started=0, total=0;
     EventDataType data;
     int elsize;
     for (int i = 0; i < evec_size; ++i) {
         EventList &ev = *(evec[i]);
         elsize = ev.count();
+
+        // Each event list is a stretch of valid readings; the time between lists has no
+        // readings at all. Close any open run at the end of its list, so the gap is not
+        // counted as if the last reading held through it.
+        if (started) {
+            total += ti-started;
+            started = 0;
+        }
 
         for (int j=0; j < elsize; ++j) {
             ti=ev.time(j);
@@ -2204,12 +2227,20 @@ EventDataType Session::timeBelowThreshold(ChannelID id, EventDataType threshold)
     QVector<EventList *> &evec = j.value();
     int evec_size=evec.size();
 
-    qint64 ti, started=0, total=0;
+    qint64 ti = 0, started=0, total=0;
     EventDataType data;
     int elsize;
     for (int i = 0; i < evec_size; ++i) {
         EventList &ev = *(evec[i]);
         elsize = ev.count();
+
+        // Each event list is a stretch of valid readings; the time between lists has no
+        // readings at all. Close any open run at the end of its list, so the gap is not
+        // counted as if the last reading held through it.
+        if (started) {
+            total += ti-started;
+            started = 0;
+        }
 
         for (int j=0; j < elsize; ++j) {
             ti=ev.time(j);

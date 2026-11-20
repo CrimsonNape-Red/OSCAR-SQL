@@ -33,6 +33,9 @@ private slots:
     void testRollingBaselineSpansDataGaps();
     void testPulseChangeRecordsLargestChange();
     void testPulseChangeIgnoresDropouts();
+    void testTimeBelowThresholdStopsAtGaps();
+    void testTimeAboveThresholdStopsAtGaps();
+    void testTimeAboveThresholdSummaryStopsAtGaps();
     void cleanupTestCase();
 };
 

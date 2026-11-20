@@ -42,6 +42,31 @@ QVector<EventDataType> run(EventDataType value, int count)
     return QVector<EventDataType>(count, value);
 }
 
+constexpr qint64 kViatomStepMs = 4000LL;
+constexpr qint64 kGapMs = 10 * 60 * kSecondMs;
+
+// A waveform list of 4-second readings starting at start, as the Viatom loader makes them
+void addWaveform(Session &sess, ChannelID code, qint64 start, const QVector<EventDataType> &values)
+{
+    EventList *el = sess.AddEventList(code, EVL_Waveform, 1.0, 0.0, 0.0, 0.0, kViatomStepMs);
+    for (int i = 0; i < values.size(); ++i) {
+        el->AddEvent(start + i * kViatomStepMs, values[i]);
+    }
+}
+
+// Two stretches of readings with a 10 minute dropout between them, the readings on either
+// side of the dropout being 'edge' and the far ends 'other'
+void addReadingsAroundGap(Session &sess, EventDataType edge, EventDataType other)
+{
+    const QVector<EventDataType> before = run(other, 5) + run(edge, 10);
+    const QVector<EventDataType> after = run(edge, 10) + run(other, 5);
+    const qint64 secondStart = kStart + before.size() * kViatomStepMs + kGapMs;
+    addWaveform(sess, OXI_SPO2, kStart, before);
+    addWaveform(sess, OXI_SPO2, secondStart, after);
+    sess.really_set_first(kStart);
+    sess.really_set_last(secondStart + (after.size() - 1) * kViatomStepMs);
+}
+
 } // namespace
 
 void OximetryEventsTests::initTestCase()
@@ -372,6 +397,43 @@ void OximetryEventsTests::testPulseChangeIgnoresDropouts()
     addReadings(sess, OXI_Pulse, run(60, 30) + run(0, 20) + run(60, 30));
 
     QCOMPARE(calcPulseChange(&sess), 0);
+}
+
+// A dropout ends the event list. Low readings either side of it are counted up to the
+// last reading before it and from the first after it, never through it.
+void OximetryEventsTests::testTimeBelowThresholdStopsAtGaps()
+{
+    Machine mach(nullptr, 3);
+    Session sess(&mach, 1);
+    addReadingsAroundGap(sess, 85, 96);
+
+    // 36 s from the first low reading to the last one before the gap, and 40 s from the
+    // first reading after it to the first one back above: 76 s, not the 10 minute gap too.
+    QCOMPARE(sess.timeBelowThreshold(OXI_SPO2, 88), EventDataType(76.0 / 60.0));
+}
+
+void OximetryEventsTests::testTimeAboveThresholdStopsAtGaps()
+{
+    Machine mach(nullptr, 3);
+    Session sess(&mach, 1);
+    addReadingsAroundGap(sess, 96, 85);
+
+    QCOMPARE(sess.timeAboveThreshold(OXI_SPO2, 95), EventDataType(76.0 / 60.0));
+}
+
+// With summaries made, the time comes from the per-value time weights, which cover each
+// waveform reading's full 4 s and leave out the gap.
+void OximetryEventsTests::testTimeAboveThresholdSummaryStopsAtGaps()
+{
+    Machine mach(nullptr, 3);
+    Session sess(&mach, 1);
+    addReadingsAroundGap(sess, 96, 85);
+    sess.updateCountSummary(OXI_SPO2);
+    sess.first(OXI_SPO2);
+    sess.last(OXI_SPO2);
+
+    // 20 readings of 4 s at 96%
+    QCOMPARE(sess.timeAboveThreshold(OXI_SPO2, 95), EventDataType(80.0 / 60.0));
 }
 
 void OximetryEventsTests::cleanupTestCase()
