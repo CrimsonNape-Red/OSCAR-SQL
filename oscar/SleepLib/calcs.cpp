@@ -64,7 +64,11 @@ bool SearchEvent(Session * session, ChannelID code, qint64 time, int dur, bool u
                     bool overlap = (start1 <= end2) && (start2 <= end1);
 
                     if (overlap) {
-                        if (update) {
+                        // Only resync events the device gave a duration. Some devices (ResMed
+                        // hypopneas, for example) report none, and resyncing would invent one.
+                        // A zero-duration event still counts as a match, so the user flag
+                        // isn't duplicated on top of it.
+                        if (update && (*dptr > 0)) {
                             qint32 delta = time-start;
                             if (delta >= 0) {
                                 *tptr = delta;

@@ -997,7 +997,9 @@ This option must be enabled before import, otherwise a purge is required.</strin
                    <item row="6" column="0" colspan="4">
                     <widget class="QCheckBox" name="resyncMachineDetectedEvents">
                      <property name="toolTip">
-                      <string>This experimental option attempts to use OSCAR's event flagging system to improve device detected event positioning.</string>
+                      <string>This experimental option attempts to use OSCAR's event flagging system to improve device detected event positioning.
+
+It only applies to device events that have a duration, and only while duplicates near device events are not allowed. The changed positions and durations are saved with your data: turning the option off does not restore them, only purging and re-importing the data does.</string>
                      </property>
                      <property name="text">
                       <string>Resync Device Detected Events (Experimental)</string>

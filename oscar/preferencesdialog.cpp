@@ -366,6 +366,12 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->apneaFlowRestriction2->setValue(profile->cpap->userEventRestriction2());
     ui->userEventDuplicates->setChecked(profile->cpap->userEventDuplicates());
     ui->userEventDuplicates->setVisible(false);
+    // Resyncing only happens while device events suppress user flags, so it does nothing
+    // when duplicates are allowed. (Turning off the group box disables it as well.)
+    ui->resyncMachineDetectedEvents->setEnabled(!ui->userEventDuplicates->isChecked());
+    connect(ui->userEventDuplicates, &QCheckBox::toggled, this, [this](bool checked) {
+        ui->resyncMachineDetectedEvents->setEnabled(!checked);
+    });
 
     ui->showUserFlagsInPie->setChecked(AppSetting->userEventPieChart());
 
@@ -862,6 +868,31 @@ bool PreferencesDialog::Save()
         needs_reload = true;
         //} else
         recalc_events = true;
+    }
+
+    // Resync only has an effect while Custom User Flagging is on and duplicates aren't allowed.
+    bool resync_was_active = profile->cpap->userEventFlagging() && !profile->cpap->userEventDuplicates()
+            && profile->cpap->resyncFromUserFlagging();
+    bool resync_now_active = ui->customEventGroupbox->isChecked() && !ui->userEventDuplicates->isChecked()
+            && ui->resyncMachineDetectedEvents->isChecked();
+    if (ui->customEventGroupbox->isChecked()
+            && (profile->cpap->resyncFromUserFlagging() != ui->resyncMachineDetectedEvents->isChecked())) {
+        recalc_events = true;
+    }
+    if (resync_now_active && !resync_was_active
+            && profile->countDays(MT_CPAP, profile->FirstDay(), profile->LastDay()) > 0) {
+        if (QMessageBox::question(this, tr("Resync Device Detected Events"),
+                                  tr("Resyncing moves device detected events and changes their durations, and the changes are saved with your data.\n\n"
+                                     "Turning this option off later will not restore the original positions and durations. Only purging the data and re-importing it from the SD card or OSCAR's backup will.\n\n"
+                                     "Are you sure you want to turn it on?"),
+                                  QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
+            return false;
+        }
+    } else if (resync_was_active && !resync_now_active
+            && profile->countDays(MT_CPAP, profile->FirstDay(), profile->LastDay()) > 0) {
+        QMessageBox::information(this, tr("Resync Device Detected Events"),
+                                 tr("Device detected events that have already been resynced keep their changed positions and durations.\n\n"
+                                    "To restore them, purge the data and re-import it from the SD card or OSCAR's backup."));
     }
 
     if (profile->session->compressSessionData() != ui->compressSessionData->isChecked()) {

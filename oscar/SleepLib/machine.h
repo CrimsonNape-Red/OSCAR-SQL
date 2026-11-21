@@ -252,6 +252,9 @@ class Machine
     const MachineInfo getInfo() { return info; }
 
     void updateChannels(Session * sess);
+    //! \brief Rebuild the available channel list from the sessions, dropping channels
+    //! that no session has any more (e.g. user flags after Custom User Flagging is turned off).
+    void rebuildChannels();
 
     QString getPixmapPath();
     QPixmap & getPixmap();

@@ -1015,6 +1015,17 @@ void Machine::updateChannels(Session * sess)
     }
 }
 
+void Machine::rebuildChannels()
+{
+    m_availableChannels.clear();
+    for (Session * sess : std::as_const(sessionlist)) {
+        int size = sess->m_availableChannels.size();
+        for (int i=0; i < size; ++i) {
+            m_availableChannels[sess->m_availableChannels.at(i)] = true;
+        }
+    }
+}
+
 void Machine::noteReportedChannels(Session * sess)
 {
     QMutexLocker locker(&m_reportedChannelsMutex);

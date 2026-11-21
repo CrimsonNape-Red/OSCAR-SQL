@@ -3894,6 +3894,13 @@ void MainWindow::doReprocessEvents()
         QApplication::processEvents();
     }
 
+    // Machines only ever add to their channel lists, so channels the reprocess removed
+    // (user flags when Custom User Flagging is turned off) would still show as empty
+    // rows in the Event Flags graph until a restart. Rebuild them from the sessions.
+    for (Machine * mach : p_profile->GetMachines(MT_CPAP)) {
+        mach->rebuildChannels();
+    }
+
     // Oximetry flags, so they pick up the current drop/change preferences. Done separately
     // so a recording cut at the day split time is recalculated whole.
     p_profile->recalculateOximetryEvents(&progress);
