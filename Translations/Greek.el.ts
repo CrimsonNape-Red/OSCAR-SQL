@@ -376,7 +376,7 @@ Size: %2</source>
 <context>
     <name>CheckUpdates</name>
     <message>
-        <location filename="../oscar/checkupdates.cpp" line="256"/>
+        <location filename="../oscar/checkupdates.cpp" line="259"/>
         <source>Checking for newer OSCAR versions</source>
         <translation type="unfinished">Έλεγχος για νεότερες εκδόσεις OSCAR</translation>
     </message>
@@ -511,6 +511,64 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <location filename="../oscar/network/cloud_uploader.cpp" line="245"/>
         <source>Delete failed (HTTP %1): %2</source>
         <translation type="unfinished">Αποτυχία διαγραφής (HTTP %1): %2</translation>
+    </message>
+</context>
+<context>
+    <name>CsvOximetry</name>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/csvoximetry.cpp" line="161"/>
+        <source>The file is empty.</source>
+        <translation type="unfinished">Το αρχείο είναι κενό.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/csvoximetry.cpp" line="201"/>
+        <source>The header doesn&apos;t name the columns OSCAR needs: date and time, SpO2 and pulse.</source>
+        <translation type="unfinished">Η κεφαλίδα δεν ονομάζει τις στήλες που χρειάζεται το OSCAR: ημερομηνία και ώρα, SpO2 και σφυγμό.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/csvoximetry.cpp" line="222"/>
+        <source>line %1: date and time not understood (&quot;%2&quot;)</source>
+        <translation type="unfinished">γραμμή %1: η ημερομηνία και η ώρα δεν αναγνωρίστηκαν (&quot;%2&quot;)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/csvoximetry.cpp" line="232"/>
+        <source>The file has no readings.</source>
+        <translation type="unfinished">Το αρχείο δεν έχει μετρήσεις.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/csvoximetry.cpp" line="233"/>
+        <source>None of the rows could be read.</source>
+        <translation type="unfinished">Καμία από τις γραμμές δεν ήταν δυνατό να διαβαστεί.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/csvoximetry.cpp" line="237"/>
+        <source>Most rows could not be read; is this the right kind of file?</source>
+        <translation type="unfinished">Οι περισσότερες γραμμές δεν διαβάστηκαν· είναι αυτό το σωστό είδος αρχείου;</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/csvoximetry.cpp" line="273"/>
+        <source>The file has no SpO2 or pulse readings.</source>
+        <translation type="unfinished">Το αρχείο δεν έχει μετρήσεις SpO2 ή σφυγμού.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/csvoximetry.cpp" line="283"/>
+        <source>Could not open the file: %1</source>
+        <translation type="unfinished">Δεν ήταν δυνατό να ανοίξει το αρχείο: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/csvoximetry.cpp" line="310"/>
+        <source>Oximeter</source>
+        <translation type="unfinished">Οξύμετρο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/csvoximetry.cpp" line="311"/>
+        <source>CSV import</source>
+        <translation type="unfinished">Εισαγωγή CSV</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/csvoximetry.cpp" line="311"/>
+        <source>CSV</source>
+        <translation type="unfinished">CSV</translation>
     </message>
 </context>
 <context>
@@ -704,785 +762,969 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation>Εμφάνιση / απόκρυψη διαθέσιμων γραφημάτων.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="360"/>
+        <location filename="../oscar/daily.cpp" line="424"/>
         <source>Breakdown</source>
         <translation>Ανάλυση</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="360"/>
+        <location filename="../oscar/daily.cpp" line="424"/>
         <source>events</source>
         <translation>Περιστατικα</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="374"/>
+        <location filename="../oscar/daily.cpp" line="438"/>
         <source>UF1</source>
         <translation>UF1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="375"/>
+        <location filename="../oscar/daily.cpp" line="439"/>
         <source>UF2</source>
         <translation>UF2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="434"/>
+        <location filename="../oscar/daily.cpp" line="498"/>
+        <location filename="../oscar/daily.cpp" line="498"/>
         <source>Time at Pressure</source>
         <translation>Χρόνος στην πίεση</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="645"/>
+        <location filename="../oscar/daily.cpp" line="725"/>
         <source>Clinical Mode</source>
         <translation type="unfinished">Κλινική Λειτουργία</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="645"/>
+        <location filename="../oscar/daily.cpp" line="725"/>
         <source> Disabling Sessions requires Permissive Mode be set in OSCAR Preferences in the Clinical tab.</source>
         <translation type="unfinished"> Η απενεργοποίηση Συνεδριών απαιτεί να έχει οριστεί Επιτρεπτική Λειτουργία στις Προτιμήσεις OSCAR στην καρτέλα Κλινική.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="726"/>
+        <location filename="../oscar/daily.cpp" line="806"/>
         <source>No %1 events are recorded on this day</source>
         <translation>Αριθμός %1 Περιστατικα που καταγράφικαν αυτή τη μέρα</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="865"/>
+        <location filename="../oscar/daily.cpp" line="1173"/>
         <source>%1 event</source>
         <translation>%1 Περιστατικο</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="866"/>
+        <location filename="../oscar/daily.cpp" line="1174"/>
         <source>%1 events</source>
         <translation>%1 Περιστατικα</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="932"/>
+        <location filename="../oscar/daily.cpp" line="1240"/>
         <source>Session Start Times</source>
         <translation>Ώρες έναρξης Συνεδρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="933"/>
+        <location filename="../oscar/daily.cpp" line="1241"/>
         <source>Session End Times</source>
         <translation>Ώρες Λήξης Συνεδρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="964"/>
+        <location filename="../oscar/daily.cpp" line="1272"/>
         <source>All</source>
         <translation type="unfinished">Όλα</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1210"/>
+        <location filename="../oscar/daily.cpp" line="1312"/>
+        <source>%L1 min</source>
+        <translation type="unfinished">%L1 λεπτά</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1313"/>
+        <source>%L1 h %L2 min</source>
+        <translation type="unfinished">%L1 ώρ. %L2 λεπτά</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1327"/>
+        <location filename="../oscar/daily.cpp" line="1398"/>
+        <source>%1: %2</source>
+        <extracomment>A calendar tooltip line: a label, then what belongs to it (device and time, a count)</extracomment>
+        <translation type="unfinished">%1: %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1354"/>
+        <source>Sleep position</source>
+        <translation type="unfinished">Θέση ύπνου</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1361"/>
+        <source>No data for this day</source>
+        <translation type="unfinished">Δεν υπάρχουν δεδομένα για αυτή την ημέρα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1368"/>
+        <source>Legend: %1</source>
+        <translation type="unfinished">Υπόμνημα: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1381"/>
+        <source>weight %1</source>
+        <translation type="unfinished">βάρος %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1387"/>
+        <source>feeling %1/100</source>
+        <translation type="unfinished">αίσθηση %1/100</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1388"/>
+        <source>feeling %1/10</source>
+        <translation type="unfinished">αίσθηση %1/10</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1394"/>
+        <source>notes</source>
+        <extracomment>In a calendar tooltip: the day&apos;s journal has notes</extracomment>
+        <translation type="unfinished">σημειώσεις</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1401"/>
+        <source>empty</source>
+        <extracomment>In a calendar tooltip: the day&apos;s journal entry holds nothing</extracomment>
+        <translation type="unfinished">κενό</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1402"/>
+        <source>Journal: %1</source>
+        <translation type="unfinished">Ημερολόγιο: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1443"/>
+        <source>red = CPAP and oximetry</source>
+        <translation type="unfinished">κόκκινο = CPAP και οξυμετρία</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1443"/>
+        <source>red = CPAP and movement data</source>
+        <translation type="unfinished">κόκκινο = CPAP και δεδομένα κίνησης</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1446"/>
+        <source>blue = CPAP</source>
+        <translation type="unfinished">μπλε = CPAP</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1452"/>
+        <source>green = oximetry</source>
+        <translation type="unfinished">πράσινο = οξυμετρία</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1457"/>
+        <source>underlined = journal entry</source>
+        <translation type="unfinished">υπογραμμισμένο = καταχώριση ημερολογίου</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1462"/>
+        <source>italic = bookmarks</source>
+        <translation type="unfinished">πλάγια = σελιδοδείκτες</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1467"/>
+        <source>shaded background = sleep stages</source>
+        <translation type="unfinished">σκιασμένο φόντο = φάσεις ύπνου</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1472"/>
+        <source>line above = sleep position</source>
+        <translation type="unfinished">γραμμή από πάνω = θέση ύπνου</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="1648"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="556"/>
         <source>Session Information</source>
         <translation>Πληροφορίες συνεδρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1234"/>
+        <location filename="../oscar/dailydetails.cpp" line="666"/>
         <source>Oximetry Sessions</source>
         <translation>Οξυμετρικές συνεδρίες</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1254"/>
+        <location filename="../oscar/daily.cpp" line="1674"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="524"/>
         <source>Duration</source>
         <translation>Διάρκεια</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1324"/>
+        <location filename="../oscar/daily.cpp" line="1722"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="482"/>
         <source>DEVICE SETTINGS ERROR</source>
         <translation type="unfinished">ΣΦΑΛΜΑ ΡΥΘΜΙΣΕΩΝ ΣΥΣΚΕΥΗΣ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1327"/>
+        <location filename="../oscar/daily.cpp" line="1725"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="506"/>
         <source>Device Settings</source>
         <translation type="unfinished">Ρυθμίσεις Συσκευής</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1476"/>
+        <location filename="../oscar/dailydetails.cpp" line="493"/>
         <source>Recorded by %1 %2</source>
         <translation type="unfinished">Καταγράφηκε από %1 %2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1488"/>
+        <location filename="../oscar/dailydetails.cpp" line="505"/>
         <source>SpO2 spot checks</source>
         <translation type="unfinished">Στιγμιαίες μετρήσεις SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1489"/>
+        <location filename="../oscar/dailydetails.cpp" line="506"/>
         <source>Pulse readings</source>
         <translation type="unfinished">Μετρήσεις σφυγμού</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1490"/>
+        <location filename="../oscar/dailydetails.cpp" line="507"/>
         <source>Spot-check data; desaturation detection is not applicable</source>
         <translation type="unfinished">Δεδομένα στιγμιαίου ελέγχου· η ανίχνευση αποκορεσμού δεν έχει εφαρμογή</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1571"/>
+        <location filename="../oscar/dailydetails.cpp" line="452"/>
         <source>Reported by the oximeter</source>
         <translation type="unfinished">Αναφέρθηκε από το οξύμετρο</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1573"/>
+        <location filename="../oscar/dailydetails.cpp" line="454"/>
         <source>O2 Score</source>
         <translation type="unfinished">Βαθμολογία O2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1575"/>
+        <location filename="../oscar/dailydetails.cpp" line="456"/>
         <source>3% / 4% Drops</source>
         <translation type="unfinished">Πτώσεις 3% / 4%</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1576"/>
+        <location filename="../oscar/dailydetails.cpp" line="457"/>
         <source>Time below 90%</source>
         <translation type="unfinished">Χρόνος κάτω από 90%</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1578"/>
+        <location filename="../oscar/dailydetails.cpp" line="459"/>
         <source>Asleep</source>
         <translation type="unfinished">Ύπνος</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1581"/>
+        <location filename="../oscar/dailydetails.cpp" line="462"/>
         <source>Steps</source>
         <translation type="unfinished">Βήματα</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1611"/>
+        <location filename="../oscar/daily.cpp" line="1805"/>
         <source>(Mode and Pressure settings missing; yesterday&apos;s shown.)</source>
         <translation type="unfinished">(Λείπουν ρυθμίσεις Λειτουργίας και Πίεσης· εμφανίζονται οι χθεσινές.)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1797"/>
+        <location filename="../oscar/daily.cpp" line="1894"/>
         <source>General</source>
         <translation type="unfinished">Γενικά</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1850"/>
+        <location filename="../oscar/daily.cpp" line="1938"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="171"/>
         <source>This CPAP device does NOT record detailed data</source>
         <translation type="unfinished">Αυτή η συσκευή CPAP ΔΕΝ καταγράφει λεπτομερή δεδομένα</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1866"/>
+        <location filename="../oscar/daily.cpp" line="1950"/>
         <source>Obstructive and Central shares of the %1</source>
         <translation type="unfinished">Ποσοστά Αποφρακτικών και Κεντρικών επί του %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1944"/>
+        <location filename="../oscar/dailydetails.cpp" line="172"/>
         <source>Breathing Disturbances (Apple)</source>
         <translation type="unfinished">Διαταραχές Αναπνοής (Apple)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1956"/>
+        <location filename="../oscar/dailydetails.cpp" line="178"/>
         <source>Wrist Temperature</source>
         <translation type="unfinished">Θερμοκρασία Καρπού</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2037"/>
+        <location filename="../oscar/dailydetails.cpp" line="258"/>
         <source>Time within the watch&apos;s sleep session spent without the CPAP mask on, and its share of that session</source>
         <translation type="unfinished">Χρόνος εντός της συνεδρίας ύπνου του ρολογιού που δαπανήθηκε χωρίς τη μάσκα CPAP, και το ποσοστό του επί της συνεδρίας αυτής</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2042"/>
+        <location filename="../oscar/dailydetails.cpp" line="257"/>
         <source>Unmasked Sleep</source>
         <translation type="unfinished">Ύπνος Χωρίς Μάσκα</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2357"/>
+        <location filename="../oscar/daily.cpp" line="2382"/>
         <source>no data :(</source>
         <translation type="unfinished">δεν υπάρχουν δεδομένα :(</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2358"/>
+        <location filename="../oscar/daily.cpp" line="2383"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="172"/>
         <source>Sorry, this device only provides compliance data.</source>
         <translation type="unfinished">Λυπούμαστε, αυτή η συσκευή παρέχει μόνο δεδομένα συμμόρφωσης.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2380"/>
+        <location filename="../oscar/daily.cpp" line="2405"/>
         <source>No CPAP data is available for this day</source>
         <translation type="unfinished">Δεν υπάρχουν διαθέσιμα δεδομένα CPAP για αυτή την ημέρα</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3096"/>
+        <location filename="../oscar/daily.cpp" line="3139"/>
         <source>This bookmark is in a currently disabled area..</source>
         <translation>Αυτός ο σελιδοδείκτης βρίσκεται σε μια περιοχή με ειδικές ανάγκες.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1231"/>
+        <location filename="../oscar/dailydetails.cpp" line="665"/>
         <source>CPAP Sessions</source>
         <translation>Συνεδρίες CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1237"/>
+        <location filename="../oscar/dailydetails.cpp" line="667"/>
         <source>Sleep Stage Sessions</source>
         <translation>Συνεδρίες Στάδιο Ύπνου</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1240"/>
+        <location filename="../oscar/dailydetails.cpp" line="668"/>
         <source>Position Sensor Sessions</source>
         <translation>Συνεδρίες θέσης αισθητήρα</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1245"/>
+        <location filename="../oscar/dailydetails.cpp" line="669"/>
         <source>Unknown Session</source>
         <translation>άγνωστη Συνεδρία</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1602"/>
+        <location filename="../oscar/dailydetails.cpp" line="91"/>
         <source>Model %1 - %2</source>
         <translation>Μοντέλο %1 - %2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1607"/>
+        <location filename="../oscar/daily.cpp" line="1801"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="339"/>
         <source>PAP Mode: %1</source>
         <translation>Λειτουργία PAP: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1731"/>
+        <location filename="../oscar/daily.cpp" line="1851"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="205"/>
         <source>This day just contains summary data, only limited information is available.</source>
         <translation>Αυτή η μέρα περιέχει μόνο σύνοψη δεδομένων, υπάρχουν μόνο περιορισμένες πληροφορίες.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1757"/>
+        <location filename="../oscar/daily.cpp" line="1856"/>
+        <location filename="../oscar/dailydetails.cpp" line="382"/>
         <source>Total ramp time</source>
         <translation>Συνολικός χρόνος ράμπας</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1761"/>
+        <location filename="../oscar/daily.cpp" line="1856"/>
+        <location filename="../oscar/dailydetails.cpp" line="386"/>
         <source>Time outside of ramp</source>
         <translation>Χρόνος εκτός ράμπας</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1806"/>
+        <location filename="../oscar/daily.cpp" line="1903"/>
         <source>Start</source>
         <translation>Αρχή</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1806"/>
+        <location filename="../oscar/daily.cpp" line="1903"/>
         <source>End</source>
         <translation>Τέλος</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2134"/>
+        <location filename="../oscar/daily.cpp" line="2104"/>
         <source>Unable to display Pie Chart on this system</source>
         <translation>Δεν είναι δυνατή η εμφάνιση του Πίνακα πίτας σε αυτό το σύστημα</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2396"/>
+        <location filename="../oscar/daily.cpp" line="2421"/>
         <source>&quot;Nothing&apos;s here!&quot;</source>
         <translation>&quot;Τίποτα δεν είναι εδώ!&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2399"/>
+        <location filename="../oscar/daily.cpp" line="2424"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="168"/>
         <source>No data is available for this day.</source>
         <translation>Δεν υπάρχουν διαθέσιμα δεδομένα για αυτήν την ημέρα.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1470"/>
+        <location filename="../oscar/daily.cpp" line="1756"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="472"/>
         <source>Oximeter Information</source>
         <translation>πληροφορίες Οξύμετρο</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="232"/>
+        <location filename="../oscar/daily.cpp" line="276"/>
         <source>Details</source>
         <translation>Λεπτομέριες</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1274"/>
+        <location filename="../oscar/daily.cpp" line="1677"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="539"/>
         <source>Click to %1 this session.</source>
         <translation>Κάντε κλικ στο %1 αυτή την περίοδο σύνδεσης.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1274"/>
+        <location filename="../oscar/daily.cpp" line="1677"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="539"/>
         <source>disable</source>
         <translation>καθιστώ ανίκανο</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1274"/>
+        <location filename="../oscar/daily.cpp" line="1677"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="539"/>
         <source>enable</source>
         <translation>επιτρέπω</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1290"/>
+        <location filename="../oscar/dailydetails.cpp" line="684"/>
         <source>%1 Session #%2</source>
         <translation>%1 Συνεδρίαση #%2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1291"/>
+        <location filename="../oscar/dailydetails.cpp" line="685"/>
         <source>%1h %2m %3s</source>
         <translation>%1ώ %2λ %3δ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1333"/>
+        <location filename="../oscar/daily.cpp" line="1731"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="487"/>
         <source>&lt;b&gt;Please Note:&lt;/b&gt; All settings shown below are based on assumptions that nothing has changed since previous days.</source>
         <translation>&lt;b&gt; Σημείωση: &lt;/b&gt; Όλες οι παρακάτω ρυθμίσεις βασίζονται σε υποθέσεις που δεν έχουν αλλάξει από τις προηγούμενες ημέρες.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1521"/>
+        <location filename="../oscar/dailydetails.cpp" line="538"/>
         <source>SpO2 Desaturations</source>
         <translation>Αποκορεσμούς SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1522"/>
+        <location filename="../oscar/dailydetails.cpp" line="540"/>
         <source>Pulse Change events</source>
         <translation>Παλμική Αλλαγή γεγονότων</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1523"/>
+        <location filename="../oscar/dailydetails.cpp" line="542"/>
         <source>SpO2 Baseline Used</source>
         <translation>Χρησιμοποιείται Βάση SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1646"/>
+        <location filename="../oscar/daily.cpp" line="1823"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="417"/>
         <source>Statistics</source>
         <translation>Στατιστικά</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1741"/>
+        <location filename="../oscar/dailydetails.cpp" line="366"/>
         <source>Total time in apnea</source>
         <translation>Συνολικός χρόνος άπνοιας</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1751"/>
+        <location filename="../oscar/dailydetails.cpp" line="376"/>
         <source>Time over leak redline</source>
         <translation>Χρόνο πάνω από διαρροή κόκκινη υπογράμμιση</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2104"/>
+        <location filename="../oscar/daily.cpp" line="2074"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="430"/>
         <source>Event Breakdown</source>
         <translation>Κατανομή εκδήλωσης</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2348"/>
+        <location filename="../oscar/daily.cpp" line="2373"/>
         <source>Sessions all off!</source>
         <translation>Συνεδρίες όλοι σβηστοί!</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2350"/>
+        <location filename="../oscar/daily.cpp" line="2375"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="183"/>
         <source>Sessions exist for this day but are switched off.</source>
         <translation>Υπάρχουν συνεδρίες για αυτήν την ημέρα, αλλά είναι απενεργοποιημένες.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2353"/>
+        <location filename="../oscar/daily.cpp" line="2378"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="189"/>
         <source>Impossibly short session</source>
         <translation>Ανέφικτα σύντομη συνεδρίαση</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2354"/>
+        <location filename="../oscar/daily.cpp" line="2379"/>
         <source>Zero hours??</source>
         <translation>Μηδέν ώρες ??</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2359"/>
+        <location filename="../oscar/daily.cpp" line="2384"/>
         <source>Complain to your Equipment Provider!</source>
         <translation>Παραπονεθείτε στον Πάροχο του εξοπλισμό σας!</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2754"/>
+        <location filename="../oscar/daily.cpp" line="2797"/>
         <source>Pick a Color</source>
         <translation>Διαλέξτε χρώμα</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3047"/>
+        <location filename="../oscar/daily.cpp" line="3090"/>
         <source>Bookmark at %1</source>
         <translation>Αποθηκεύετε με σελιδοδείκτη στο %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.h" line="168"/>
+        <location filename="../oscar/daily.h" line="219"/>
         <source>Hide All Events</source>
         <translation type="unfinished">Απόκρυψη όλων των συμβάντων</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.h" line="169"/>
+        <location filename="../oscar/daily.h" line="220"/>
         <source>Show All Events</source>
         <translation type="unfinished">Εμφάνιση όλων των συμβάντων</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.h" line="170"/>
+        <location filename="../oscar/daily.h" line="221"/>
         <source>Hide All Graphs</source>
         <translation type="unfinished">Απόκρυψη Όλων των Γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.h" line="171"/>
+        <location filename="../oscar/daily.h" line="222"/>
         <source>Show All Graphs</source>
         <translation type="unfinished">Εμφάνιση Όλων των Γραφημάτων</translation>
     </message>
 </context>
 <context>
+    <name>DailyDetailsPanel</name>
+    <message>
+        <location filename="../oscar/dailydetailspanel.cpp" line="243"/>
+        <source>events per hour</source>
+        <translation type="unfinished">συμβάντα ανά ώρα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/dailydetailspanel.cpp" line="254"/>
+        <source>7 nights</source>
+        <translation type="unfinished">7 νύχτες</translation>
+    </message>
+    <message>
+        <location filename="../oscar/dailydetailspanel.cpp" line="255"/>
+        <source>30 nights</source>
+        <translation type="unfinished">30 νύχτες</translation>
+    </message>
+    <message>
+        <location filename="../oscar/dailydetailspanel.cpp" line="287"/>
+        <source>Usage</source>
+        <translation type="unfinished">Χρήση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/dailydetailspanel.cpp" line="287"/>
+        <source>Sessions</source>
+        <translation type="unfinished">Συνεδρίες</translation>
+    </message>
+    <message>
+        <location filename="../oscar/dailydetailspanel.cpp" line="287"/>
+        <location filename="../oscar/dailydetailspanel.cpp" line="301"/>
+        <source>Start – End</source>
+        <translation type="unfinished">Αρχή – Τέλος</translation>
+    </message>
+    <message>
+        <location filename="../oscar/dailydetailspanel.cpp" line="344"/>
+        <source>Mode and Pressure settings missing; yesterday&apos;s shown.</source>
+        <translation type="unfinished">Λείπουν οι ρυθμίσεις τρόπου και πίεσης· εμφανίζονται οι χθεσινές.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/dailydetailspanel.cpp" line="366"/>
+        <source>Events</source>
+        <translation type="unfinished">Εκδηλώσεις</translation>
+    </message>
+</context>
+<context>
     <name>DailySearchTab</name>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="272"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="331"/>
         <source>Match</source>
         <translation type="unfinished">Ταίριασμα</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="273"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="332"/>
         <source>Clear</source>
         <translation type="unfinished">Εκκαθάριση</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="326"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="384"/>
         <source>DATE
 Jumps to Date</source>
         <translation type="unfinished">ΗΜΕΡΟΜΗΝΙΑ
 Μετάβαση σε Ημερομηνία</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="505"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="563"/>
         <source>Journal</source>
         <translation type="unfinished">Ημερολόγιο διάφορων πράξεων</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="506"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="564"/>
         <source>Notes</source>
         <translation type="unfinished">Σημειώσεις</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="507"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="565"/>
         <source>Notes containing</source>
         <translation type="unfinished">Σημειώσεις που περιέχουν</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="508"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="566"/>
         <source>Bookmarks</source>
         <translation type="unfinished">Σελιδοδείκτες</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="509"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="567"/>
         <source>Bookmarks containing</source>
         <translation type="unfinished">Σελιδοδείκτες που περιέχουν</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="510"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="568"/>
         <source>AHI </source>
         <translation type="unfinished">AHI </translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="511"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="569"/>
         <source>Daily Duration</source>
         <translation type="unfinished">Ημερήσια Διάρκεια</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="512"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="570"/>
         <source>Session Duration</source>
         <translation type="unfinished">Διάρκεια Συνεδρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="513"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="571"/>
         <source>Days Skipped</source>
         <translation type="unfinished">Ημέρες που Παραλείφθηκαν</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="514"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="572"/>
         <source>Apnea Length</source>
         <translation type="unfinished">Διάρκεια Άπνοιας</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="517"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="575"/>
         <source>Disabled Sessions</source>
         <translation type="unfinished">Απενεργοποιημένες Συνεδρίες</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="519"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="577"/>
         <source>Number of Sessions</source>
         <translation type="unfinished">Αριθμός Συνεδριών</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="536"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="594"/>
         <source>All Apnea</source>
         <translation type="unfinished">Όλες οι Άπνοιες</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="597"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="655"/>
         <source>Continue Search</source>
         <translation type="unfinished">Συνέχεια Αναζήτησης</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="605"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="663"/>
         <source>End of Search</source>
         <translation type="unfinished">Τέλος Αναζήτησης</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="613"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="671"/>
         <source>No Matches</source>
         <translation type="unfinished">Δεν Βρέθηκαν Αποτελέσματα</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="899"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="956"/>
         <source>Empty</source>
         <translation type="unfinished">Κενό</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1236"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1293"/>
         <source>Number Disabled Session
 Jumps to Date&apos;s Details </source>
         <translation type="unfinished">Αριθμός Απενεργοποιημένης Συνεδρίας
 Μετάβαση στις Λεπτομέρειες Ημερομηνίας </translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1242"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1299"/>
         <source>JUmps
 Jumps to Date&apos;s Notes</source>
         <translation type="unfinished">Άλματα
 Μετάβαση στις Σημειώσεις Ημερομηνίας</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1247"/>
-        <location filename="../oscar/dailySearchTab.cpp" line="1263"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1304"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1320"/>
         <source>Note
 Jumps to Date&apos;s Notes</source>
         <translation type="unfinished">Σημείωση
 Μετάβαση στις Σημειώσεις Ημερομηνίας</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1252"/>
-        <location filename="../oscar/dailySearchTab.cpp" line="1257"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1309"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1314"/>
         <source>Bookmark
 Jumps to Date&apos;s Bookmark</source>
         <translation type="unfinished">Σελιδοδείκτης
 Μετάβαση στον Σελιδοδείκτη Ημερομηνίας</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1269"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1326"/>
         <source>AHI
 Jumps to Date&apos;s Details</source>
         <translation type="unfinished">AHI
 Μετάβαση στις Λεπτομέρειες Ημερομηνίας</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1272"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1329"/>
         <source> EventsPerHour</source>
         <translation type="unfinished"> ΓεγονόταΑνάΏρα</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1282"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1339"/>
         <source>Set of Apnea:Length
 Jumps to Date&apos;s Events</source>
         <translation type="unfinished">Σύνολο Άπνοιας:Διάρκεια
 Μετάβαση στα Γεγονότα Ημερομηνίας</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1288"/>
-        <location filename="../oscar/dailySearchTab.cpp" line="1436"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1345"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1493"/>
         <source> Seconds</source>
         <translation type="unfinished"> Δευτερόλεπτα</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1291"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1348"/>
         <source>Session Duration
 Jumps to Date&apos;s Details</source>
         <translation type="unfinished">Διάρκεια Συνεδρίας
 Μετάβαση στις Λεπτομέρειες Ημερομηνίας</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1295"/>
-        <location filename="../oscar/dailySearchTab.cpp" line="1441"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1352"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1498"/>
         <source> Minutes</source>
         <translation type="unfinished"> Λεπτά</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1300"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1357"/>
         <source>Number of Sessions
 Jumps to Date&apos;s Details</source>
         <translation type="unfinished">Αριθμός Συνεδριών
 Μετάβαση στις Λεπτομέρειες Ημερομηνίας</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1305"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1362"/>
         <source> Sessions</source>
         <translation type="unfinished"> Συνεδρίες</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1308"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1365"/>
         <source>Daily Duration
 Jumps to Date&apos;s Details</source>
         <translation type="unfinished">Ημερήσια Διάρκεια
 Μετάβαση στις Λεπτομέρειες Ημερομηνίας</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1314"/>
-        <location filename="../oscar/dailySearchTab.cpp" line="1431"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1371"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1488"/>
         <source> Hours</source>
         <translation type="unfinished"> Ώρες</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1318"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1375"/>
         <source>Number of events
 Jumps to Date&apos;s Events</source>
         <translation type="unfinished">Αριθμός γεγονότων
 Μετάβαση στα Γεγονότα Ημερομηνίας</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1322"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1379"/>
         <source> Events</source>
         <translation type="unfinished"> Γεγονότα</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1330"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1387"/>
         <source>add another match?</source>
         <translation type="unfinished">Προσθήκη άλλης αντιστοίχισης;</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1385"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1442"/>
         <source>Click HERE to close Help</source>
         <translation type="unfinished">Κάντε κλικ ΕΔΩ για να κλείσετε τη Βοήθεια</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1390"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1447"/>
         <source>Help</source>
         <translation type="unfinished">Βοήθεια</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1495"/>
-        <location filename="../oscar/dailySearchTab.cpp" line="1717"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1552"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1774"/>
         <source>Start Search</source>
         <translation type="unfinished">Έναρξη Αναζήτησης</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1645"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1702"/>
         <source> Skip:%1</source>
         <translation type="unfinished"> Παράλειψη:%1</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1646"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1703"/>
         <source>%1/%2%3 days</source>
         <translation type="unfinished">%1 ημέρες {1/%2%3 ?}</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1649"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1706"/>
         <source>Found %1 </source>
         <translation type="unfinished">Βρέθηκαν %1 </translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1667"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1724"/>
         <source>File errors:%1</source>
         <translation type="unfinished">Σφάλματα αρχείου:%1</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1756"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1813"/>
         <source>Finds days that match specified criteria.</source>
         <translation type="unfinished">Βρίσκει ημέρες που πληρούν καθορισμένα κριτήρια.</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1757"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1814"/>
         <source>  Searches from last day to first day.</source>
         <translation type="unfinished">  Αναζήτηση από την τελευταία ημέρα έως την πρώτη ημέρα.</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1758"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1815"/>
         <source>  Skips Days with no graphing data.</source>
         <translation type="unfinished">  Παραλείπει ημέρες χωρίς δεδομένα γραφήματος.</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1760"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1817"/>
         <source>First click on Match Button then select topic.</source>
         <translation type="unfinished">Πρώτα κάντε κλικ στο κουμπί Αντιστοίχισης και στη συνέχεια επιλέξτε θέμα.</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1761"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1818"/>
         <source>  Then click on the operation to modify it.</source>
         <translation type="unfinished">  Στη συνέχεια κάντε κλικ στην εντολή για να την τροποποιήσετε.</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1762"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1819"/>
         <source>  or update the value</source>
         <translation type="unfinished">  ή ενημερώστε την τιμή</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1764"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1821"/>
         <source>Topics without operations will automatically start.</source>
         <translation type="unfinished">Τα θέματα χωρίς εντολές θα ξεκινούν αυτόματα.</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1766"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1823"/>
         <source>Compare Operations: numeric or character. </source>
         <translation type="unfinished">Εντολές Σύγκρισης: αριθμητικές ή χαρακτήρων. </translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1767"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1824"/>
         <source>  Numeric  Operations: </source>
         <translation type="unfinished">  Αριθμητικές Εντολές: </translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1768"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1825"/>
         <source>  Character Operations: </source>
         <translation type="unfinished">  Εντολές Χαρακτήρων: </translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1770"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1827"/>
         <source>Summary Line</source>
         <translation type="unfinished">Γραμμή Σύνοψης</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1771"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1828"/>
         <source>  Left:Summary - Number of Day searched</source>
         <translation type="unfinished">  Αριστερά: Σύνοψη - Αριθμός ημερών που αναζητήθηκαν</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1772"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1829"/>
         <source>  Center:Number of Items Found</source>
         <translation type="unfinished">  Κέντρο: Αριθμός Στοιχείων που Βρέθηκαν</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1773"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1830"/>
         <source>  Right:Minimum/Maximum for item searched</source>
         <translation type="unfinished">  Δεξιά: Ελάχιστο/Μέγιστο για το στοιχείο που αναζητήθηκε</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1775"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1832"/>
         <source>Result Table</source>
         <translation type="unfinished">Πίνακας Αποτελεσμάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1776"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1833"/>
         <source>  Column One: Date of match. Click selects date.</source>
         <translation type="unfinished">  Πρώτη Στήλη: Ημερομηνία αντιστοίχισης. Το κλικ επιλέγει ημερομηνία.</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1777"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1834"/>
         <source>  Column two: Information. Click selects date.</source>
         <translation type="unfinished">  Δεύτερη Στήλη: Πληροφορίες. Το κλικ επιλέγει ημερομηνία.</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1778"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1835"/>
         <source>    Then Jumps the appropriate tab.</source>
         <translation type="unfinished">    Στη συνέχεια μεταβαίνει στην κατάλληλη καρτέλα.</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1780"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1837"/>
         <source>Wildcard Pattern Matching:</source>
         <translation type="unfinished">Αντιστοίχιση με Μπαλαντέρ:</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1781"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1838"/>
         <source>  Wildcards use 3 characters:</source>
         <translation type="unfinished">  Τα μπαλαντέρ χρησιμοποιούν 3 χαρακτήρες:</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1782"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1839"/>
         <source>  Asterisk</source>
         <translation type="unfinished">  Αστερίσκος</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1783"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1840"/>
         <source>  Question Mark</source>
         <translation type="unfinished">  Ερωτηματικό</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1784"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1841"/>
         <source>  Backslash.</source>
         <translation type="unfinished">  Ανάστροφη κάθετος.</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1785"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1842"/>
         <source>  Asterisk matches any number of characters.</source>
         <translation type="unfinished">  Ο αστερίσκος αντιστοιχεί σε οποιονδήποτε αριθμό χαρακτήρων.</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1786"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1843"/>
         <source>  Question Mark matches a single character.</source>
         <translation type="unfinished">  Το ερωτηματικό αντιστοιχεί σε έναν μόνο χαρακτήρα.</translation>
     </message>
     <message>
-        <location filename="../oscar/dailySearchTab.cpp" line="1787"/>
+        <location filename="../oscar/dailySearchTab.cpp" line="1844"/>
         <source>  Backslash matches next character.</source>
         <translation type="unfinished">  Η ανάστροφη κάθετος αντιστοιχεί στον επόμενο χαρακτήρα.</translation>
+    </message>
+</context>
+<context>
+    <name>DailyToolbar</name>
+    <message>
+        <location filename="../oscar/dailytoolbar.cpp" line="103"/>
+        <location filename="../oscar/dailytoolbar.cpp" line="104"/>
+        <source>Layout</source>
+        <translation type="unfinished">Διάταξη</translation>
+    </message>
+    <message>
+        <location filename="../oscar/dailytoolbar.cpp" line="108"/>
+        <location filename="../oscar/dailytoolbar.cpp" line="109"/>
+        <source>Hint</source>
+        <translation type="unfinished">Υπόδειξη</translation>
     </message>
 </context>
 <context>
@@ -1854,36 +2096,36 @@ Recommended actions:
 <context>
     <name>DateErrorDisplay</name>
     <message>
-        <location filename="../oscar/overview.cpp" line="833"/>
+        <location filename="../oscar/overview.cpp" line="1214"/>
         <source>ERROR
 The start date MUST be before the end date</source>
         <translation type="unfinished">ΣΦΑΛΜΑ
 Η ημερομηνία έναρξης ΠΡΕΠΕΙ να είναι πριν από την ημερομηνία λήξης</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="836"/>
+        <location filename="../oscar/overview.cpp" line="1217"/>
         <source>The entered start date %1 is after the end date %2</source>
         <translation type="unfinished">Η εισαχθείσα ημερομηνία έναρξης %1 είναι μετά την ημερομηνία λήξης %2</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="837"/>
+        <location filename="../oscar/overview.cpp" line="1218"/>
         <source>
 Hint: Change the end date first</source>
         <translation type="unfinished">
 Υπόδειξη: Αλλάξτε πρώτα την ημερομηνία λήξης</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="839"/>
+        <location filename="../oscar/overview.cpp" line="1220"/>
         <source>The entered end date %1 </source>
         <translation type="unfinished">Η εισαχθείσα ημερομηνία λήξης %1 </translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="840"/>
+        <location filename="../oscar/overview.cpp" line="1221"/>
         <source>is before the start date %1</source>
         <translation type="unfinished">είναι πριν από την ημερομηνία έναρξης %1</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="841"/>
+        <location filename="../oscar/overview.cpp" line="1222"/>
         <source>
 Hint: Change the start date first</source>
         <translation type="unfinished">
@@ -1894,252 +2136,570 @@ Hint: Change the start date first</source>
     <name>DeviceTimeCorrectionDialog</name>
     <message>
         <location filename="../oscar/devicetimecorrectiondialog.ui" line="9"/>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="103"/>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="772"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="224"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="928"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1202"/>
         <source>Time Corrections</source>
         <translation type="unfinished">Διορθώσεις Ώρας</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="30"/>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="223"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="35"/>
+        <source>Select Device to Correct</source>
+        <translation type="unfinished">Επιλέξτε συσκευή για διόρθωση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="43"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="321"/>
         <source>Device</source>
         <translation type="unfinished">Συσκευή</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="44"/>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="192"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="57"/>
+        <source>Edit Correction</source>
+        <translation type="unfinished">Επεξεργασία διόρθωσης</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="70"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="356"/>
         <source>—</source>
         <translation type="unfinished">—</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="56"/>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="499"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="82"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="870"/>
         <source>New correction</source>
         <translation type="unfinished">Νέα διόρθωση</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="65"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="91"/>
         <source>Type:</source>
         <translation type="unfinished">Τύπος:</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="69"/>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="226"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="95"/>
         <source>Offset</source>
         <translation type="unfinished">Μετατόπιση</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="70"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="96"/>
         <source>Travel</source>
         <translation type="unfinished">Ταξίδι</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="71"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="97"/>
         <source>DST Change</source>
         <translation type="unfinished">Αλλαγή ώρας θερινής/χειμερινής περιόδου</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="72"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="98"/>
         <source>Device Timezone Misconfiguration</source>
         <translation type="unfinished">Λανθασμένη ρύθμιση ζώνης ώρας συσκευής</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="73"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="99"/>
         <source>Device Reset</source>
         <translation type="unfinished">Επαναφορά συσκευής</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="82"/>
-        <source>Time Adjustment</source>
-        <translation type="unfinished">Ρύθμιση ώρας</translation>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="112"/>
+        <source>Time Correction</source>
+        <translation type="unfinished">Διόρθωση ώρας</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="89"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="164"/>
+        <source>Dates Covered</source>
+        <translation type="unfinished">Ημερομηνίες που καλύπτονται</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="170"/>
+        <source>From:</source>
+        <translation type="unfinished">Από:</translation>
+    </message>
+    <message>
+        <source>Time Adjustment</source>
+        <translation type="obsolete">Ρύθμιση ώρας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="127"/>
         <source>+</source>
         <translation type="unfinished">+</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="96"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="134"/>
         <source>HH:mm:ss</source>
         <translation type="unfinished">HH:mm:ss</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="111"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="149"/>
         <source>Reuse Previous</source>
         <translation type="unfinished">Επαναχρησιμοποίηση προηγούμενου</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="116"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="154"/>
         <source>Reset to Zero</source>
         <translation type="unfinished">Επαναφορά στο μηδέν</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="126"/>
         <source>Apply to date range</source>
-        <translation type="unfinished">Εφαρμογή σε εύρος ημερομηνιών</translation>
+        <translation type="obsolete">Εφαρμογή σε εύρος ημερομηνιών</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="135"/>
         <source>Start:</source>
-        <translation type="unfinished">Αρχή:</translation>
+        <translation type="obsolete">Αρχή:</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="138"/>
         <source>End:</source>
-        <translation type="unfinished">Τέλος:</translation>
+        <translation type="obsolete">Τέλος:</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="143"/>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="150"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="175"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="185"/>
         <source>yyyy-MM-dd</source>
         <translation type="unfinished">yyyy-MM-dd</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="156"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="180"/>
+        <source>To:</source>
+        <translation type="unfinished">Έως:</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="191"/>
         <source>No end</source>
         <translation type="unfinished">Χωρίς τέλος</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="173"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="192"/>
+        <source>The correction continues for every later night</source>
+        <translation type="unfinished">Η διόρθωση συνεχίζεται για κάθε επόμενη νύχτα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="230"/>
         <source>Save</source>
         <translation type="unfinished">Αποθήκευση</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="179"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="236"/>
         <source>Cancel</source>
         <translation type="unfinished">Ακύρωση</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="185"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="242"/>
         <source>Clear</source>
         <translation type="unfinished">Εκκαθάριση</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="197"/>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="704"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="263"/>
+        <source>Saved Corrections</source>
+        <translation type="unfinished">Αποθηκευμένες διορθώσεις</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="277"/>
+        <source>Saved corrections.</source>
+        <translation type="unfinished">Αποθηκευμένες διορθώσεις.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="286"/>
+        <source>Show all devices</source>
+        <translation type="unfinished">Εμφάνιση όλων των συσκευών</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="287"/>
+        <source>List the corrections of every device, not only the selected one.</source>
+        <translation type="unfinished">Εμφάνιση των διορθώσεων κάθε συσκευής, όχι μόνο της επιλεγμένης.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="292"/>
+        <source>Show all days with corrections</source>
+        <translation type="unfinished">Εμφάνιση όλων των ημερών με διορθώσεις</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="293"/>
+        <source>List every saved correction, not only those in force on the day shown in Daily.</source>
+        <translation type="unfinished">Εμφάνιση κάθε αποθηκευμένης διόρθωσης, όχι μόνο όσων ισχύουν την ημέρα που εμφανίζεται στα Καθημερινά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="299"/>
+        <source>Show in Daily</source>
+        <translation type="unfinished">Εμφάνιση στα Καθημερινά</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="300"/>
+        <source>Show the first day the selected correction applies to in the Daily view</source>
+        <translation type="unfinished">Εμφάνιση στην προβολή Καθημερινά της πρώτης ημέρας στην οποία ισχύει η επιλεγμένη διόρθωση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="305"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1115"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1196"/>
         <source>Delete Correction</source>
         <translation type="unfinished">Διαγραφή διόρθωσης</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="214"/>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="106"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="306"/>
+        <source>Delete the selected correction</source>
+        <translation type="unfinished">Διαγραφή της επιλεγμένης διόρθωσης</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="316"/>
+        <source>Click a correction to edit it. Double-click it to show its first day in the Daily view.</source>
+        <translation type="unfinished">Κάντε κλικ σε μια διόρθωση για να την επεξεργαστείτε. Κάντε διπλό κλικ για να εμφανίσετε την πρώτη της ημέρα στην προβολή Καθημερινά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="322"/>
+        <source>From</source>
+        <translation type="unfinished">Από</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="323"/>
+        <source>To</source>
+        <translation type="unfinished">Έως</translation>
+    </message>
+    <message>
         <source>Showing corrections active on —</source>
-        <translation type="unfinished">Εμφάνιση διορθώσεων που ισχύουν στις —</translation>
+        <translation type="obsolete">Εμφάνιση διορθώσεων που ισχύουν στις —</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="215"/>
         <source>font-style: italic; color: #555555;</source>
-        <translation type="unfinished">font-style: italic; color: #555555;</translation>
+        <translation type="obsolete">font-style: italic; color: #555555;</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="224"/>
         <source>Date Range</source>
-        <translation type="unfinished">Εύρος ημερομηνιών</translation>
+        <translation type="obsolete">Εύρος ημερομηνιών</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="225"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="324"/>
         <source>Type</source>
         <translation type="unfinished">Τύπος</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="227"/>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="325"/>
+        <source>Correction</source>
+        <translation type="unfinished">Διόρθωση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.ui" line="326"/>
         <source>Added</source>
         <translation type="unfinished">Προστέθηκε</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.ui" line="243"/>
         <source>color: #cc6600;</source>
-        <translation type="unfinished">color: #cc6600;</translation>
+        <translation type="obsolete">color: #cc6600;</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="90"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="209"/>
         <source>Unsaved Correction</source>
         <translation type="unfinished">Μη αποθηκευμένη Διόρθωση</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="91"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="210"/>
         <source>You have an unsaved correction. Save before moving to %1?</source>
         <translation type="unfinished">Έχετε μια μη αποθηκευμένη διόρθωση. Αποθήκευση πριν τη μετάβαση στο %1;</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="105"/>
         <source>Showing corrections active on %1</source>
-        <translation type="unfinished">Εμφάνιση διορθώσεων που ισχύουν στις %1</translation>
+        <translation type="obsolete">Εμφάνιση διορθώσεων που ισχύουν στις %1</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="136"/>
         <source>Reference</source>
-        <translation type="unfinished">Αναφορά</translation>
+        <translation type="obsolete">Αναφορά</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="142"/>
         <source>Other Devices</source>
-        <translation type="unfinished">Άλλες Συσκευές</translation>
+        <translation type="obsolete">Άλλες Συσκευές</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="284"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="253"/>
+        <source>CPAP devices</source>
+        <translation type="unfinished">Συσκευές CPAP</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="259"/>
+        <source>Other devices</source>
+        <translation type="unfinished">Άλλες συσκευές</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="321"/>
+        <source>No data</source>
+        <translation type="unfinished">Χωρίς δεδομένα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="325"/>
+        <source>Data: %1</source>
+        <translation type="unfinished">Δεδομένα: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="326"/>
+        <source>Data: %1 to %2</source>
+        <translation type="unfinished">Δεδομένα: %1 έως %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="330"/>
+        <source>Corrections: %1</source>
+        <translation type="unfinished">Διορθώσεις: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="330"/>
+        <source>No corrections</source>
+        <translation type="unfinished">Χωρίς διορθώσεις</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="334"/>
+        <source>This device has no data on %1, the day shown in Daily. You can still add corrections for other dates.</source>
+        <translation type="unfinished">Αυτή η συσκευή δεν έχει δεδομένα στις %1, την ημέρα που εμφανίζεται στα Καθημερινά. Μπορείτε όμως να προσθέσετε διορθώσεις για άλλες ημερομηνίες.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="387"/>
+        <source>Drift model</source>
+        <translation type="unfinished">Μοντέλο απόκλισης</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="394"/>
+        <source>from %1 onward</source>
+        <translation type="unfinished">από %1 και μετά</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="395"/>
+        <source>on %1</source>
+        <translation type="unfinished">στις %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="396"/>
+        <source>from %1 to %2</source>
+        <translation type="unfinished">από %1 έως %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="522"/>
         <source>Offset exceeds 24 hours and cannot be displayed precisely.</source>
         <translation type="unfinished">Η μετατόπιση υπερβαίνει τις 24 ώρες και δεν μπορεί να εμφανιστεί με ακρίβεια.</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="290"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="528"/>
         <source>Large offset — consider using a different correction type.</source>
         <translation type="unfinished">Μεγάλη μετατόπιση — εξετάστε τη χρήση διαφορετικού τύπου διόρθωσης.</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="494"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="605"/>
+        <source>no end</source>
+        <translation type="unfinished">χωρίς τέλος</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="607"/>
+        <source>varies</source>
+        <translation type="unfinished">ποικίλλει</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="631"/>
+        <source>No corrections have been saved.</source>
+        <translation type="unfinished">Δεν έχουν αποθηκευτεί διορθώσεις.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="634"/>
+        <source>No corrections for the selected device on %1, the day shown in Daily.</source>
+        <translation type="unfinished">Δεν υπάρχουν διορθώσεις για την επιλεγμένη συσκευή στις %1, την ημέρα που εμφανίζεται στα Καθημερινά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="635"/>
+        <source>No corrections on %1, the day shown in Daily.</source>
+        <translation type="unfinished">Δεν υπάρχουν διορθώσεις στις %1, την ημέρα που εμφανίζεται στα Καθημερινά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="637"/>
+        <source>Corrections for the selected device on %1, the day shown in Daily.</source>
+        <translation type="unfinished">Διορθώσεις για την επιλεγμένη συσκευή στις %1, την ημέρα που εμφανίζεται στα Καθημερινά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="638"/>
+        <source>Corrections on %1, the day shown in Daily.</source>
+        <translation type="unfinished">Διορθώσεις στις %1, την ημέρα που εμφανίζεται στα Καθημερινά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="641"/>
+        <source>No corrections for the selected device.</source>
+        <translation type="unfinished">Δεν υπάρχουν διορθώσεις για την επιλεγμένη συσκευή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="643"/>
+        <source>All corrections for the selected device.</source>
+        <translation type="unfinished">Όλες οι διορθώσεις για την επιλεγμένη συσκευή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="643"/>
+        <source>All saved corrections.</source>
+        <translation type="unfinished">Όλες οι αποθηκευμένες διορθώσεις.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="645"/>
+        <source>Highlighted rows apply to %1, the day shown in Daily.</source>
+        <translation type="unfinished">Οι επισημασμένες γραμμές ισχύουν για %1, την ημέρα που εμφανίζεται στα Καθημερινά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="652"/>
+        <source>Other saved corrections not listed: %1.</source>
+        <translation type="unfinished">Άλλες αποθηκευμένες διορθώσεις που δεν εμφανίζονται: %1.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="742"/>
+        <source>The To date is before the From date.</source>
+        <translation type="unfinished">Η ημερομηνία Έως είναι πριν από την ημερομηνία Από.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="745"/>
+        <source>Enter a time correction for %1.</source>
+        <translation type="unfinished">Εισαγάγετε μια διόρθωση ώρας για %1.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="747"/>
+        <source>A time of zero removes this correction from %1.</source>
+        <translation type="unfinished">Μηδενικός χρόνος αφαιρεί αυτή τη διόρθωση από %1.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="751"/>
+        <source>Shifts %1 by %2 %3.</source>
+        <translation type="unfinished">Μετατοπίζει το %1 κατά %2 %3.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="753"/>
+        <source>These dates do not include %1, the day shown in Daily, so the graphs will not change.</source>
+        <translation type="unfinished">Αυτές οι ημερομηνίες δεν περιλαμβάνουν το %1, την ημέρα που εμφανίζεται στα Καθημερινά, οπότε τα γραφήματα δεν θα αλλάξουν.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="756"/>
+        <source>This device has no data on %1, so the graphs will not change.</source>
+        <translation type="unfinished">Αυτή η συσκευή δεν έχει δεδομένα στις %1, οπότε τα γραφήματα δεν θα αλλάξουν.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="764"/>
+        <source>Total of all corrections for this device on %1: %2</source>
+        <translation type="unfinished">Σύνολο όλων των διορθώσεων για αυτή τη συσκευή στις %1: %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="865"/>
         <source>Drift model — use Drift Analysis dialog to edit</source>
         <translation type="unfinished">Μοντέλο απόκλισης — χρησιμοποιήστε το παράθυρο Ανάλυσης Απόκλισης για επεξεργασία</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="502"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="873"/>
         <source>open</source>
         <translation type="unfinished">ανοικτό</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="504"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="875"/>
         <source>Editing: %1</source>
         <translation type="unfinished">Επεξεργασία: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="689"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="928"/>
+        <source>Failed to save correction.</source>
+        <translation type="unfinished">Η αποθήκευση της διόρθωσης απέτυχε.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="932"/>
+        <source>Correction removed: its time was set to zero.</source>
+        <translation type="unfinished">Η διόρθωση αφαιρέθηκε: ο χρόνος της ορίστηκε στο μηδέν.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="933"/>
+        <source>No correction stored: the time is zero.</source>
+        <translation type="unfinished">Δεν αποθηκεύτηκε διόρθωση: ο χρόνος είναι μηδέν.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="937"/>
+        <source>Saved: %1 of %2 for %3, %4.</source>
+        <translation type="unfinished">Αποθηκεύτηκε: %1 από %2 για %3, %4.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="940"/>
+        <source>It does not apply to %1, the day shown in Daily, so the graphs have not changed.</source>
+        <translation type="unfinished">Δεν ισχύει για %1, την ημέρα που εμφανίζεται στα Καθημερινά, οπότε τα γραφήματα δεν άλλαξαν.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="943"/>
+        <source>This device has no data on %1, so the graphs have not changed.</source>
+        <translation type="unfinished">Αυτή η συσκευή δεν έχει δεδομένα στις %1, οπότε τα γραφήματα δεν άλλαξαν.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1098"/>
         <source>Apply Last Offset</source>
         <translation type="unfinished">Εφαρμογή Τελευταίας Μετατόπισης</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="690"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1099"/>
         <source>No single-night corrections found in the past 7 days.</source>
         <translation type="unfinished">Δεν βρέθηκαν διορθώσεις μεμονωμένης νύχτας τις τελευταίες 7 ημέρες.</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="707"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1107"/>
+        <source>Copied the corrections of %1 to %2 for %3.</source>
+        <translation type="unfinished">Οι διορθώσεις του %1 αντιγράφηκαν στο %2 για %3.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1118"/>
         <source>open-ended</source>
         <translation type="unfinished">ανοικτού τύπου</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="709"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1120"/>
         <source>Delete correction spanning %1 – %2</source>
         <translation type="unfinished">Διαγραφή διόρθωσης που καλύπτει %1 – %2</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="712"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1123"/>
         <source>Close from %1 onward (ends %2, keeps prior dates)</source>
         <translation type="unfinished">Κλείσιμο από %1 και μετά (λήγει %2, διατηρεί προηγούμενες ημερομηνίες)</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="716"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1127"/>
         <source>Remove only %1 (splits into two rows)</source>
         <translation type="unfinished">Αφαίρεση μόνο της %1 (διαχωρισμός σε δύο γραμμές)</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="717"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1128"/>
         <source>Remove entirely (marks all dates undone)</source>
         <translation type="unfinished">Πλήρης αφαίρεση (επισημαίνει όλες τις ημερομηνίες ως αναιρεμένες)</translation>
     </message>
     <message>
-        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="772"/>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1188"/>
+        <source>%1 of %2 for %3, %4</source>
+        <translation type="unfinished">%1 από %2 για %3, %4</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1192"/>
+        <source>Deleted: %1.</source>
+        <translation type="unfinished">Διαγράφηκε: %1.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1197"/>
+        <source>Delete this correction?
+
+%1</source>
+        <translation type="unfinished">Διαγραφή αυτής της διόρθωσης;
+
+%1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1202"/>
         <source>Failed to delete correction.</source>
         <translation type="unfinished">Αποτυχία διαγραφής διόρθωσης.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1214"/>
+        <source>The correction now ends on %1.</source>
+        <translation type="unfinished">Η διόρθωση λήγει τώρα στις %1.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1219"/>
+        <source>%1 was taken out of the correction.</source>
+        <translation type="unfinished">Το %1 αφαιρέθηκε από τη διόρθωση.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1252"/>
+        <source>%1 has no data on the dates this correction covers, so there is nothing to show in Daily.</source>
+        <translation type="unfinished">Το %1 δεν έχει δεδομένα στις ημερομηνίες που καλύπτει αυτή η διόρθωση, οπότε δεν υπάρχει τίποτα να εμφανιστεί στα Καθημερινά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/devicetimecorrectiondialog.cpp" line="1259"/>
+        <source>Daily already shows %1.</source>
+        <translation type="unfinished">Τα Καθημερινά εμφανίζουν ήδη το %1.</translation>
     </message>
 </context>
 <context>
@@ -2468,49 +3028,49 @@ Hint: Change the start date first</source>
     </message>
     <message>
         <location filename="../oscar/exports/exportcsv.ui" line="200"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="130"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="132"/>
         <source>Most Recent Day</source>
         <translation>Η πιο πρόσφατη ημέρα</translation>
     </message>
     <message>
         <location filename="../oscar/exports/exportcsv.ui" line="205"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="133"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="135"/>
         <source>Last Week</source>
         <translation>Την προηγούμενη εβδομάδα</translation>
     </message>
     <message>
         <location filename="../oscar/exports/exportcsv.ui" line="210"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="136"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="138"/>
         <source>Last Fortnight</source>
         <translation>Τελευταίο Δεκαπενθήμερο</translation>
     </message>
     <message>
         <location filename="../oscar/exports/exportcsv.ui" line="215"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="139"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="141"/>
         <source>Last Month</source>
         <translation>Τον προηγούμενο μήνα</translation>
     </message>
     <message>
         <location filename="../oscar/exports/exportcsv.ui" line="220"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="142"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="144"/>
         <source>Last 6 Months</source>
         <translation>Τελευταίοι 6 μήνες</translation>
     </message>
     <message>
         <location filename="../oscar/exports/exportcsv.ui" line="225"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="145"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="147"/>
         <source>Last Year</source>
         <translation>Πέρυσι</translation>
     </message>
     <message>
         <location filename="../oscar/exports/exportcsv.ui" line="230"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="127"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="129"/>
         <source>Everything</source>
         <translation>Τα παντα</translation>
     </message>
     <message>
         <location filename="../oscar/exports/exportcsv.ui" line="235"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="116"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="118"/>
         <source>Custom</source>
         <translation>Εθιμο</translation>
     </message>
@@ -2519,27 +3079,27 @@ Hint: Change the start date first</source>
         <translation type="obsolete">Αναφορά:</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="80"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="81"/>
         <source>Details_</source>
         <translation>Λεπτομέριες_</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="82"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="83"/>
         <source>Sessions_</source>
         <translation>Συνεδρίες_</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="84"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="85"/>
         <source>Summary_</source>
         <translation>Περίληψη_</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="93"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="94"/>
         <source>Select file to export to</source>
         <translation>Επιλέξτε το αρχείο προς εξαγωγή στο</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="94"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="95"/>
         <source>CSV Files (*.csv)</source>
         <translation>Αρχεία CSV (* .csv)</translation>
     </message>
@@ -2599,63 +3159,63 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="obsolete">Ρυθμίσεις Συσκευής</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="190"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="192"/>
         <source>DateTime</source>
         <translation>Ημερομηνία ώρα</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="190"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="196"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="192"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="198"/>
         <source>Session</source>
         <translation>Συνεδρίαση</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="190"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="192"/>
         <source>Event</source>
         <translation>Εκδήλωση</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="190"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="192"/>
         <source>Data/Duration</source>
         <translation>Δεδομένα / Διάρκεια</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="193"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="196"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="195"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="198"/>
         <source>Date</source>
         <translation>Ημερομηνία</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="193"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="195"/>
         <source>Session Count</source>
         <translation>Καταμέτρηση συνόδων</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="193"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="196"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="195"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="198"/>
         <source>Start</source>
         <translation>Αρχή</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="193"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="196"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="195"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="198"/>
         <source>End</source>
         <translation>Τέλος</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="194"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="197"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="196"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="199"/>
         <source>Total Time</source>
         <translation>Συνολικός χρόνος</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="194"/>
-        <location filename="../oscar/exports/exportcsv.cpp" line="197"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="196"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="199"/>
         <source>AHI</source>
         <translation>AHI</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/exportcsv.cpp" line="201"/>
+        <location filename="../oscar/exports/exportcsv.cpp" line="203"/>
         <source> Count</source>
         <translation> μετρώ</translation>
     </message>
@@ -2963,11 +3523,11 @@ Do you want to continue?</source>
     <name>JournalNotesDialog</name>
     <message>
         <location filename="../oscar/exports/journalnotesdialog.ui" line="14"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="83"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="105"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="114"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="120"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="126"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="84"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="106"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="115"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="121"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="127"/>
         <source>Export Journal Notes</source>
         <translation type="unfinished">Εξαγωγή Σημειώσεων Ημερολογίου</translation>
     </message>
@@ -2993,37 +3553,37 @@ Do you want to continue?</source>
     </message>
     <message>
         <location filename="../oscar/exports/journalnotesdialog.ui" line="68"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="196"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="197"/>
         <source>All</source>
         <translation type="unfinished">Όλα</translation>
     </message>
     <message>
         <location filename="../oscar/exports/journalnotesdialog.ui" line="73"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="224"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="225"/>
         <source>Last Week</source>
         <translation type="unfinished">Την προηγούμενη εβδομάδα</translation>
     </message>
     <message>
         <location filename="../oscar/exports/journalnotesdialog.ui" line="78"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="226"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="227"/>
         <source>Last Month</source>
         <translation type="unfinished">Τον προηγούμενο μήνα</translation>
     </message>
     <message>
         <location filename="../oscar/exports/journalnotesdialog.ui" line="83"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="228"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="229"/>
         <source>Last 6 Months</source>
         <translation type="unfinished">Τελευταίοι 6 μήνες</translation>
     </message>
     <message>
         <location filename="../oscar/exports/journalnotesdialog.ui" line="88"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="230"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="231"/>
         <source>Last Year</source>
         <translation type="unfinished">Πέρυσι</translation>
     </message>
     <message>
         <location filename="../oscar/exports/journalnotesdialog.ui" line="93"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="186"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="187"/>
         <source>Custom</source>
         <translation type="unfinished">Προσαρμοσμένο</translation>
     </message>
@@ -3073,69 +3633,69 @@ Do you want to continue?</source>
         <translation type="unfinished">Άκυρο</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="84"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="85"/>
         <source>The start date must not be later than the end date.</source>
         <translation type="unfinished">Η ημερομηνία έναρξης δεν πρέπει να είναι μεταγενέστερη της ημερομηνίας λήξης.</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="90"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="91"/>
         <source>HTML Files (*.html)</source>
         <translation type="unfinished">Αρχεία HTML (*.html)</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="90"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="91"/>
         <source>Markdown Files (*.md)</source>
         <translation type="unfinished">Αρχεία Markdown (*.md)</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="98"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="99"/>
         <source>%1_journal_notes_%2_%3.%4</source>
         <translation type="unfinished">%1_journal_notes_%2_%3.%4</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="115"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="116"/>
         <source>Could not write file:
 %1</source>
         <translation type="unfinished">Αδυναμία εγγραφής αρχείου:
 %1</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="121"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="122"/>
         <source>No journal notes found in this date range.</source>
         <translation type="unfinished">Δεν βρέθηκαν σημειώσεις ημερολογίου σε αυτό το εύρος ημερομηνιών.</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="127"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="128"/>
         <source>Exported notes for %1 day(s).</source>
         <translation type="unfinished">Εξήχθησαν σημειώσεις για %1 ημέρα/ες.</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="130"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="131"/>
         <source>Close</source>
         <translation type="unfinished">Κλείσε</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="201"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="216"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="202"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="217"/>
         <source>No journal notes found for this profile.</source>
         <translation type="unfinished">Δεν βρέθηκαν σημειώσεις ημερολογίου για αυτό το προφίλ.</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="417"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="432"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="492"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="418"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="433"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="493"/>
         <source>Journal Notes</source>
         <translation type="unfinished">Σημειώσεις περιοδικών</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="430"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="490"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="431"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="491"/>
         <source>Journal Notes — %1</source>
         <translation type="unfinished">Σημειώσεις Ημερολογίου — %1</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="435"/>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="494"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="436"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="495"/>
         <source>From %1 to %2</source>
         <translation type="unfinished">Από %1 έως %2</translation>
     </message>
@@ -3156,196 +3716,205 @@ Do you want to continue?</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="561"/>
+        <location filename="../oscar/mainwindow.ui" line="173"/>
         <source>Report Mode</source>
         <translation>Λειτουργία αναφοράς</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="571"/>
+        <location filename="../oscar/mainwindow.ui" line="183"/>
         <source>Standard</source>
         <translation>Πρότυπο</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="584"/>
+        <location filename="../oscar/mainwindow.ui" line="196"/>
         <source>Monthly</source>
         <translation>Μηνιαίο</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="594"/>
+        <location filename="../oscar/mainwindow.ui" line="206"/>
         <source>Date Range</source>
         <translation>Εύρος ημερομηνιών</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="507"/>
-        <location filename="../oscar/mainwindow.ui" line="1009"/>
+        <location filename="../oscar/mainwindow.ui" line="119"/>
         <source>Statistics</source>
         <translation>Στατιστική</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="568"/>
+        <location filename="../oscar/mainwindow.ui" line="180"/>
         <source>Show Standard Report</source>
         <translation type="unfinished">Εμφάνιση Τυπικής Αναφοράς</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="581"/>
+        <location filename="../oscar/mainwindow.ui" line="193"/>
         <source>Show Monthly Report</source>
         <translation type="unfinished">Εμφάνιση Μηνιαίας Αναφοράς</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="591"/>
+        <location filename="../oscar/mainwindow.ui" line="203"/>
         <source>Show Range Report</source>
         <translation type="unfinished">Εμφάνιση Αναφοράς Εύρους</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="622"/>
+        <location filename="../oscar/mainwindow.ui" line="234"/>
         <source>Select Report Date</source>
         <translation type="unfinished">Επιλογή Ημερομηνίας Αναφοράς</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="625"/>
+        <location filename="../oscar/mainwindow.ui" line="237"/>
         <source>Report Date</source>
         <translation type="unfinished">Ημερομηνία Αναφοράς</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="1059"/>
         <source>Daily</source>
-        <translation>Καθημερινά</translation>
+        <translation type="vanished">Καθημερινά</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="1103"/>
         <source>Overview</source>
-        <translation>Συνολική εικόνα</translation>
+        <translation type="vanished">Συνολική εικόνα</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="1147"/>
-        <location filename="../oscar/mainwindow.ui" line="2782"/>
-        <location filename="../oscar/mainwindow.cpp" line="2582"/>
+        <location filename="../oscar/mainwindow.ui" line="1165"/>
+        <location filename="../oscar/mainwindow.cpp" line="3285"/>
         <source>Oximetry</source>
         <translation>Οξυμετρία</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="1197"/>
-        <location filename="../oscar/mainwindow.cpp" line="1408"/>
-        <location filename="../oscar/mainwindow.cpp" line="3537"/>
-        <location filename="../oscar/mainwindow.cpp" line="3569"/>
+        <location filename="../oscar/mainwindow.cpp" line="1541"/>
+        <location filename="../oscar/mainwindow.cpp" line="4290"/>
+        <location filename="../oscar/mainwindow.cpp" line="4322"/>
         <source>Import</source>
         <translation>Εισαγωγή</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="1247"/>
-        <location filename="../oscar/mainwindow.ui" line="2161"/>
+        <location filename="../oscar/mainwindow.ui" line="538"/>
         <source>Help</source>
         <translation>Βοήθεια</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2165"/>
+        <location filename="../oscar/mainwindow.ui" line="542"/>
         <source>Troubleshooting</source>
         <translation>Αντιμετώπιση προβλημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2233"/>
+        <location filename="../oscar/mainwindow.ui" line="611"/>
         <source>Rebuild CPAP Data</source>
         <translation>Επαναδημιουργία δεδομένων CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2310"/>
+        <location filename="../oscar/mainwindow.ui" line="641"/>
+        <source>Correct device clock errors (timezone, travel, DST, reset)</source>
+        <translation type="unfinished">Διόρθωση σφαλμάτων ρολογιού συσκευών (ζώνη ώρας, ταξίδια, θερινή ώρα, επαναφορά)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.ui" line="688"/>
         <source>Show Daily view</source>
         <translation>Εμφάνιση ημερήσιας προβολής</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2321"/>
+        <location filename="../oscar/mainwindow.ui" line="699"/>
         <source>Show Overview view</source>
         <translation>Εμφάνιση προβολής &quot;Επισκόπηση&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2370"/>
+        <location filename="../oscar/mainwindow.ui" line="748"/>
         <source>Maximize window</source>
         <translation>Μεγιστοποίηση παραθύρου</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2392"/>
+        <location filename="../oscar/mainwindow.ui" line="770"/>
         <source>Reset sizes of graphs</source>
         <translation>Επαναφορά μεγεθών γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2452"/>
+        <location filename="../oscar/mainwindow.ui" line="801"/>
+        <source>Online How-To Guide</source>
+        <translation type="unfinished">Διαδικτυακός οδηγός χρήσης</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.ui" line="806"/>
+        <source>OSCAR 2 Reference Manual</source>
+        <translation type="unfinished">Εγχειρίδιο αναφοράς OSCAR 2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.ui" line="835"/>
         <source>Show Right Sidebar</source>
         <translation>Εμφάνιση δεξιάς πλευρικής γραμμής</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2466"/>
+        <location filename="../oscar/mainwindow.ui" line="849"/>
         <source>Show Statistics view</source>
         <translation>Εμφάνιση προβολής στατιστικών στοιχείων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2504"/>
+        <location filename="../oscar/mainwindow.ui" line="887"/>
         <source>New...</source>
         <translation type="unfinished">Νέο...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2507"/>
+        <location filename="../oscar/mainwindow.ui" line="890"/>
         <source>Create a new OSCAR database in a chosen folder</source>
         <translation type="unfinished">Δημιουργία νέας βάσης δεδομένων OSCAR σε επιλεγμένο φάκελο</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2512"/>
+        <location filename="../oscar/mainwindow.ui" line="895"/>
         <source>Open...</source>
         <translation type="unfinished">Άνοιγμα...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2515"/>
+        <location filename="../oscar/mainwindow.ui" line="898"/>
         <source>Open an existing OSCAR database folder</source>
         <translation type="unfinished">Άνοιγμα υπάρχοντος φακέλου βάσης δεδομένων OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2520"/>
+        <location filename="../oscar/mainwindow.ui" line="903"/>
         <source>Delete...</source>
         <translation type="unfinished">Διαγραφή...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2523"/>
+        <location filename="../oscar/mainwindow.ui" line="906"/>
         <source>Permanently delete a non-active OSCAR database</source>
         <translation type="unfinished">Οριστική διαγραφή μη ενεργής βάσης δεδομένων OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2543"/>
-        <location filename="../oscar/mainwindow.cpp" line="2005"/>
+        <location filename="../oscar/mainwindow.ui" line="926"/>
+        <location filename="../oscar/mainwindow.cpp" line="2375"/>
         <source>Purge All Time Corrections</source>
         <translation type="unfinished">Εκκαθάριση Όλων των Διορθώσεων Ώρας</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2573"/>
+        <location filename="../oscar/mainwindow.ui" line="956"/>
         <source>Show Daily Left Sidebar</source>
         <translation>Εμφάνιση ημερήσια αριστερή πλευρική γραμμή</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2590"/>
+        <location filename="../oscar/mainwindow.ui" line="973"/>
         <source>Show Daily Calendar</source>
         <translation>Εμφάνιση ημερήσιου ημερολογίου</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2603"/>
-        <location filename="../oscar/mainwindow.cpp" line="4298"/>
+        <location filename="../oscar/mainwindow.ui" line="986"/>
+        <location filename="../oscar/mainwindow.cpp" line="5047"/>
         <source>Import Journal</source>
         <translation type="unfinished">Εισαγωγή Ημερολογίου</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2624"/>
+        <location filename="../oscar/mainwindow.ui" line="1007"/>
         <source>Share Profile...</source>
         <translation type="unfinished">Κοινή Χρήση Προφίλ...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2627"/>
+        <location filename="../oscar/mainwindow.ui" line="1010"/>
         <source>Prepare profile data for sharing with another OSCAR user</source>
         <translation type="unfinished">Προετοιμασία δεδομένων προφίλ για κοινή χρήση με άλλον χρήστη OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2650"/>
+        <location filename="../oscar/mainwindow.ui" line="1033"/>
         <source>Create zip of CPAP data card</source>
         <translation>Δημιουργία zip της κάρτας δεδομένων CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2655"/>
+        <location filename="../oscar/mainwindow.ui" line="1038"/>
         <source>Create zip of OSCAR diagnostic logs</source>
         <translation type="unfinished">Δημιουργία αρχείου zip με διαγνωστικά αρχεία καταγραφής OSCAR</translation>
     </message>
@@ -3354,42 +3923,42 @@ Do you want to continue?</source>
         <translation type="vanished">Δημιουργία φερμουάρ για όλα τα δεδομένα του OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2702"/>
+        <location filename="../oscar/mainwindow.ui" line="1085"/>
         <source>Report an Issue</source>
         <translation>Αναφέρετε ένα πρόβλημα</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2707"/>
+        <location filename="../oscar/mainwindow.ui" line="1090"/>
         <source>System Information</source>
         <translation>Πληροφορίες συστήματος</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2721"/>
+        <location filename="../oscar/mainwindow.ui" line="1104"/>
         <source>Show Pie Chart on Daily page</source>
         <translation>Εμφάνιση πίνακα πίτας στην ημερήσια σελίδα</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2198"/>
+        <location filename="../oscar/mainwindow.ui" line="576"/>
         <source>Advanced</source>
         <translation>Προχωρημένος</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2751"/>
+        <location filename="../oscar/mainwindow.ui" line="1134"/>
         <source>Show Personal Data</source>
         <translation type="unfinished">Εμφάνιση Προσωπικών Δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2635"/>
+        <location filename="../oscar/mainwindow.ui" line="1018"/>
         <source>Show Performance Information</source>
         <translation>Εμφάνιση πληροφοριών απόδοσης</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2668"/>
+        <location filename="../oscar/mainwindow.ui" line="1051"/>
         <source>CSV Export Wizard</source>
         <translation>Οδηγός εξαγωγής CSV</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2697"/>
+        <location filename="../oscar/mainwindow.ui" line="1080"/>
         <source>Export for Review</source>
         <translation>Εξαγωγή για αναθεώρηση</translation>
     </message>
@@ -3398,419 +3967,416 @@ Do you want to continue?</source>
         <translation type="vanished">Ε&amp;ξοδος</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2302"/>
-        <location filename="../oscar/mainwindow.cpp" line="212"/>
+        <location filename="../oscar/mainwindow.ui" line="680"/>
+        <location filename="../oscar/mainwindow.cpp" line="234"/>
         <source>Exit</source>
         <translation>Εξοδος</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2381"/>
+        <location filename="../oscar/mainwindow.ui" line="759"/>
         <source>Show Debug Pane</source>
         <translation>Εμφάνιση παραθύρου εντοπισμού σφαλμάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2587"/>
+        <location filename="../oscar/mainwindow.ui" line="970"/>
         <source>Daily Calendar</source>
         <translation>Καθημερινό ημερολόγιο</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2570"/>
+        <location filename="../oscar/mainwindow.ui" line="953"/>
         <source>Daily Sidebar</source>
         <translation>Ημερήσια πλευρική γραμμή</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="938"/>
         <source>Navigation</source>
-        <translation>Πλοήγηση</translation>
+        <translation type="vanished">Πλοήγηση</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="1369"/>
+        <location filename="../oscar/mainwindow.ui" line="311"/>
         <source>Bookmarks</source>
         <translation>Σελιδοδείκτες</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2015"/>
+        <location filename="../oscar/mainwindow.ui" line="402"/>
         <source>Records</source>
         <translation>Εγγραφές</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="965"/>
-        <location filename="../oscar/mainwindow.ui" line="2086"/>
-        <location filename="../oscar/mainwindow.ui" line="2297"/>
+        <location filename="../oscar/mainwindow.ui" line="463"/>
+        <location filename="../oscar/mainwindow.ui" line="675"/>
         <source>Profiles</source>
         <translation>Προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2074"/>
+        <location filename="../oscar/mainwindow.ui" line="451"/>
         <source>File</source>
         <translation type="unfinished">Αρχείο</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2078"/>
+        <location filename="../oscar/mainwindow.ui" line="455"/>
         <source>Export Data</source>
         <translation type="unfinished">Εξαγωγή Δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2096"/>
+        <location filename="../oscar/mainwindow.ui" line="473"/>
         <source>Journals</source>
         <translation type="unfinished">Ημερολόγια</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2103"/>
+        <location filename="../oscar/mainwindow.ui" line="480"/>
         <source>Database</source>
         <translation type="unfinished">Βάση Δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2107"/>
+        <location filename="../oscar/mainwindow.ui" line="484"/>
         <source>Recent</source>
         <translation type="unfinished">Πρόσφατα</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2132"/>
+        <location filename="../oscar/mainwindow.ui" line="509"/>
         <source>View</source>
         <translation type="unfinished">Προβολή</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2136"/>
+        <location filename="../oscar/mainwindow.ui" line="513"/>
         <source>Reset Graphs</source>
         <translation type="unfinished">Επαναφορά Γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2194"/>
+        <location filename="../oscar/mainwindow.ui" line="572"/>
         <source>Data</source>
         <translation type="unfinished">Δεδομένα</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2202"/>
+        <location filename="../oscar/mainwindow.ui" line="580"/>
         <source>Purge Oximetry Data</source>
         <translation>Δεδομένα καθαρισμού οξυμετρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2208"/>
+        <location filename="../oscar/mainwindow.ui" line="586"/>
         <source>Purge ALL Device Data</source>
         <translation type="unfinished">Εκκαθάριση ΟΛΩΝ των Δεδομένων Συσκευής</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2213"/>
-        <location filename="../oscar/mainwindow.ui" line="2767"/>
+        <location filename="../oscar/mainwindow.ui" line="591"/>
+        <location filename="../oscar/mainwindow.ui" line="1150"/>
         <source>Purge Current Selected Day</source>
         <translation type="unfinished">Εκκαθάριση Τρέχουσας Επιλεγμένης Ημέρας</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2260"/>
+        <location filename="../oscar/mainwindow.ui" line="638"/>
         <source>Time Corrections...</source>
         <translation type="unfinished">Διορθώσεις Ώρας...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2263"/>
         <source>Adjust device clock errors (timezone, travel, DST, reset)</source>
-        <translation type="unfinished">Ρύθμιση σφαλμάτων ρολογιού συσκευής (ζώνη ώρας, ταξίδι, θερινή ώρα, επαναφορά)</translation>
+        <translation type="obsolete">Ρύθμιση σφαλμάτων ρολογιού συσκευής (ζώνη ώρας, ταξίδι, θερινή ώρα, επαναφορά)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2268"/>
+        <location filename="../oscar/mainwindow.ui" line="646"/>
         <source>Drift Analysis...</source>
         <translation type="unfinished">Ανάλυση Απόκλισης...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2271"/>
+        <location filename="../oscar/mainwindow.ui" line="649"/>
         <source>Analyze and model clock drift over time</source>
         <translation type="unfinished">Ανάλυση και μοντελοποίηση απόκλισης ρολογιού στο χρόνο</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2276"/>
+        <location filename="../oscar/mainwindow.ui" line="654"/>
         <source>Import CPAP Card Data</source>
         <translation type="unfinished">Εισαγωγή Δεδομένων Κάρτας CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2284"/>
+        <location filename="../oscar/mainwindow.ui" line="662"/>
         <source>Import from OSCAR...</source>
         <translation type="unfinished">Εισαγωγή από OSCAR...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2287"/>
+        <location filename="../oscar/mainwindow.ui" line="665"/>
         <source>Import profile from file-based OSCAR</source>
         <translation type="unfinished">Εισαγωγή προφίλ από αρχείο OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2292"/>
-        <location filename="../oscar/mainwindow.cpp" line="1909"/>
+        <location filename="../oscar/mainwindow.ui" line="670"/>
+        <location filename="../oscar/mainwindow.cpp" line="2261"/>
         <source>Preferences</source>
         <translation type="unfinished">Προτιμήσεις</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2307"/>
+        <location filename="../oscar/mainwindow.ui" line="685"/>
         <source>View Daily</source>
         <translation type="unfinished">Προβολή Ημερήσια</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2318"/>
+        <location filename="../oscar/mainwindow.ui" line="696"/>
         <source>View Overview</source>
         <translation type="unfinished">Προβολή Επισκόπησης</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2329"/>
+        <location filename="../oscar/mainwindow.ui" line="707"/>
         <source>View Welcome</source>
         <translation type="unfinished">Προβολή Καλωσορίσματος</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2354"/>
+        <location filename="../oscar/mainwindow.ui" line="732"/>
         <source>Use AntiAliasing</source>
         <translation type="unfinished">Χρήση Αντιολίσθησης</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2359"/>
+        <location filename="../oscar/mainwindow.ui" line="737"/>
         <source>About OSCAR</source>
         <translation type="unfinished">Σχετικά με το OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2367"/>
+        <location filename="../oscar/mainwindow.ui" line="745"/>
         <source>Maximize Toggle</source>
         <translation type="unfinished">Εναλλαγή Μεγιστοποίησης</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2389"/>
+        <location filename="../oscar/mainwindow.ui" line="767"/>
         <source>Reset Graph Heights</source>
         <translation type="unfinished">Επαναφορά Ύψους Γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2397"/>
+        <location filename="../oscar/mainwindow.ui" line="775"/>
         <source>Take Screenshot</source>
         <translation type="unfinished">Λήψη Στιγμιότυπου Οθόνης</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2405"/>
+        <location filename="../oscar/mainwindow.ui" line="783"/>
         <source>Oximetry Wizard</source>
         <translation type="unfinished">Οδηγός οξυμετρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2413"/>
+        <location filename="../oscar/mainwindow.ui" line="791"/>
         <source>Print Report</source>
         <translation type="unfinished">Εκτύπωση Αναφοράς</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2418"/>
+        <location filename="../oscar/mainwindow.ui" line="796"/>
         <source>Edit Profile</source>
         <translation type="unfinished">Επεξεργασία Προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2423"/>
         <source>Online Users Guide</source>
-        <translation type="unfinished">Διαδικτυακός Οδηγός Χρήσης</translation>
+        <translation type="obsolete">Διαδικτυακός Οδηγός Χρήσης</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2428"/>
+        <location filename="../oscar/mainwindow.ui" line="811"/>
         <source>Frequently Asked Questions</source>
         <translation type="unfinished">Συχνές Ερωτήσεις</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2433"/>
+        <location filename="../oscar/mainwindow.ui" line="816"/>
         <source>Automatic Oximetry Cleanup</source>
         <translation type="unfinished">Αυτόματος Καθαρισμός Οξυμετρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2438"/>
+        <location filename="../oscar/mainwindow.ui" line="821"/>
         <source>Change User</source>
         <translation type="unfinished">Αλλαγή Χρήστη</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2449"/>
+        <location filename="../oscar/mainwindow.ui" line="832"/>
         <source>Right Sidebar</source>
         <translation type="unfinished">Δεξιά Πλαϊνή Μπάρα</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2460"/>
-        <location filename="../oscar/mainwindow.ui" line="2463"/>
+        <location filename="../oscar/mainwindow.ui" line="843"/>
+        <location filename="../oscar/mainwindow.ui" line="846"/>
         <source>View Statistics</source>
         <translation>Προβολή στατιστικών στοιχείων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2474"/>
+        <location filename="../oscar/mainwindow.ui" line="857"/>
         <source>Import ZEO Data</source>
         <translation type="unfinished">Εισαγωγή Δεδομένων ZEO</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2479"/>
+        <location filename="../oscar/mainwindow.ui" line="862"/>
         <source>Import Dreem Data</source>
         <translation type="unfinished">Εισαγωγή Δεδομένων Dreem</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2484"/>
+        <location filename="../oscar/mainwindow.ui" line="867"/>
         <source>Import Apple Health Data</source>
         <translation type="unfinished">Εισαγωγή Δεδομένων Apple Health</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2489"/>
+        <location filename="../oscar/mainwindow.ui" line="872"/>
         <source>Import RemStar MSeries Data</source>
         <translation type="unfinished">Εισαγωγή Δεδομένων RemStar MSeries</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2494"/>
+        <location filename="../oscar/mainwindow.ui" line="877"/>
         <source>Sleep Disorder Terms Glossary</source>
         <translation type="unfinished">Γλωσσάριο Όρων Διαταραχών Ύπνου</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2499"/>
+        <location filename="../oscar/mainwindow.ui" line="882"/>
         <source>Change Language</source>
         <translation type="unfinished">Αλλαγή Γλώσσας</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2528"/>
+        <location filename="../oscar/mainwindow.ui" line="911"/>
         <source>Import Somnopose Data</source>
         <translation type="unfinished">Εισαγωγή Δεδομένων Somnopose</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2533"/>
+        <location filename="../oscar/mainwindow.ui" line="916"/>
         <source>Import Viatom/Wellue Data</source>
         <translation type="unfinished">Εισαγωγή Δεδομένων Viatom/Wellue</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2551"/>
+        <location filename="../oscar/mainwindow.ui" line="934"/>
         <source>Show Line Cursor</source>
         <translation type="unfinished">Εμφάνιση Κέρσορα Γραμμής</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2598"/>
+        <location filename="../oscar/mainwindow.ui" line="981"/>
         <source>Export Journal...</source>
         <translation type="unfinished">Εξαγωγή Ημερολογίου...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2608"/>
+        <location filename="../oscar/mainwindow.ui" line="991"/>
         <source>Backup Profile...</source>
         <translation type="unfinished">Δημιουργία αντιγράφου ασφαλείας προφίλ...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2611"/>
+        <location filename="../oscar/mainwindow.ui" line="994"/>
         <source>Back up the current profile to a .oscar file</source>
         <translation type="unfinished">Δημιουργία αντιγράφου ασφαλείας του τρέχοντος προφίλ σε αρχείο .oscar</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2616"/>
+        <location filename="../oscar/mainwindow.ui" line="999"/>
         <source>Restore Profile...</source>
         <translation type="unfinished">Επαναφορά προφίλ...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2619"/>
+        <location filename="../oscar/mainwindow.ui" line="1002"/>
         <source>Restore a profile from a .oscar backup file</source>
         <translation type="unfinished">Επαναφορά προφίλ από αρχείο αντιγράφου ασφαλείας .oscar</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2640"/>
+        <location filename="../oscar/mainwindow.ui" line="1023"/>
         <source>Check database integrity</source>
         <translation type="unfinished">Έλεγχος ακεραιότητας βάσης δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2645"/>
+        <location filename="../oscar/mainwindow.ui" line="1028"/>
         <source>Compress database (rarely needed)</source>
         <translation type="unfinished">Συμπίεση βάσης δεδομένων (σπάνια απαιτείται)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2660"/>
+        <location filename="../oscar/mainwindow.ui" line="1043"/>
         <source>Create zip of OSCAR database</source>
         <translation type="unfinished">Δημιουργία zip της βάσης δεδομένων OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2673"/>
+        <location filename="../oscar/mainwindow.ui" line="1056"/>
         <source>Version 1 CSV Reports...</source>
         <translation type="unfinished">Αναφορές CSV Έκδοση 1...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2676"/>
+        <location filename="../oscar/mainwindow.ui" line="1059"/>
         <source>Export data in OSCAR 1.7.x CSV format</source>
         <translation type="unfinished">Εξαγωγή δεδομένων σε μορφή CSV του OSCAR 1.7.x</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2681"/>
+        <location filename="../oscar/mainwindow.ui" line="1064"/>
         <source>Manage Reports...</source>
         <translation type="unfinished">Διαχείριση αναφορών...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2684"/>
+        <location filename="../oscar/mainwindow.ui" line="1067"/>
         <source>Manage CSV export report definitions</source>
         <translation type="unfinished">Διαχείριση ορισμών αναφοράς εξαγωγής CSV</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2689"/>
+        <location filename="../oscar/mainwindow.ui" line="1072"/>
         <source>Journal Notes...</source>
         <translation type="unfinished">Σημειώσεις ημερολογίου...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2692"/>
+        <location filename="../oscar/mainwindow.ui" line="1075"/>
         <source>Export journal notes for a date range to HTML or Markdown</source>
         <translation type="unfinished">Εξαγωγή σημειώσεων ημερολογίου για εύρος ημερομηνιών σε HTML ή Markdown</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2718"/>
+        <location filename="../oscar/mainwindow.ui" line="1101"/>
         <source>Show Pie Chart</source>
         <translation type="unfinished">Εμφάνιση γραφήματος πίτας</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2729"/>
+        <location filename="../oscar/mainwindow.ui" line="1112"/>
         <source>Standard - CPAP, APAP</source>
         <translation type="unfinished">Τυπικό - CPAP, APAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2732"/>
+        <location filename="../oscar/mainwindow.ui" line="1115"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Standard graph order, good for CPAP, APAP,  Basic BPAP&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Τυπική σειρά γραφημάτων, κατάλληλη για CPAP, APAP, Basic BPAP&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2737"/>
+        <location filename="../oscar/mainwindow.ui" line="1120"/>
         <source>Advanced - BPAP, ASV</source>
         <translation type="unfinished">Για προχωρημένους - BPAP, ASV</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2740"/>
+        <location filename="../oscar/mainwindow.ui" line="1123"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Advanced graph order, good for BPAP w/BU, ASV, AVAPS, IVAPS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Σειρά γραφημάτων για προχωρημένους, κατάλληλη για BPAP w/BU, ASV, AVAPS, IVAPS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2759"/>
+        <location filename="../oscar/mainwindow.ui" line="1142"/>
         <source>Check For Updates</source>
         <translation type="unfinished">Έλεγχος για ενημερώσεις</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2772"/>
+        <location filename="../oscar/mainwindow.ui" line="1155"/>
         <source>Purge Range of Days...</source>
         <translation type="unfinished">Εκκαθάριση εύρους ημερών...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2777"/>
-        <location filename="../oscar/mainwindow.cpp" line="2581"/>
+        <location filename="../oscar/mainwindow.ui" line="1160"/>
+        <location filename="../oscar/mainwindow.cpp" line="3284"/>
         <source>CPAP</source>
         <translation type="unfinished">CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2787"/>
-        <location filename="../oscar/mainwindow.cpp" line="2583"/>
+        <location filename="../oscar/mainwindow.ui" line="1170"/>
+        <location filename="../oscar/mainwindow.cpp" line="3286"/>
         <source>Sleep Stage</source>
         <translation type="unfinished">Φάση ύπνου</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2792"/>
-        <location filename="../oscar/mainwindow.cpp" line="2584"/>
+        <location filename="../oscar/mainwindow.ui" line="1175"/>
+        <location filename="../oscar/mainwindow.cpp" line="3287"/>
         <source>Position</source>
         <translation type="unfinished">Θέση</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2797"/>
-        <location filename="../oscar/mainwindow.cpp" line="2585"/>
+        <location filename="../oscar/mainwindow.ui" line="1180"/>
+        <location filename="../oscar/mainwindow.cpp" line="3288"/>
         <source>All except Notes</source>
         <translation type="unfinished">Όλα εκτός από σημειώσεις</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2802"/>
-        <location filename="../oscar/mainwindow.cpp" line="2586"/>
+        <location filename="../oscar/mainwindow.ui" line="1185"/>
+        <location filename="../oscar/mainwindow.cpp" line="3289"/>
         <source>All including Notes</source>
         <translation type="unfinished">Όλα συμπεριλαμβανομένων των σημειώσεων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2538"/>
+        <location filename="../oscar/mainwindow.ui" line="921"/>
         <source>Current Days</source>
         <translation>Τρέχουσες ημέρες</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="800"/>
-        <location filename="../oscar/mainwindow.cpp" line="3150"/>
+        <location filename="../oscar/mainwindow.cpp" line="855"/>
+        <location filename="../oscar/mainwindow.cpp" line="2201"/>
+        <location filename="../oscar/mainwindow.cpp" line="3903"/>
         <source>Welcome</source>
         <translation>καλως ΗΡΘΑΤΕ</translation>
     </message>
@@ -3819,39 +4385,39 @@ Do you want to continue?</source>
         <translation type="vanished">&amp;Σχετικά με</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1206"/>
-        <location filename="../oscar/mainwindow.cpp" line="2751"/>
+        <location filename="../oscar/mainwindow.cpp" line="1339"/>
+        <location filename="../oscar/mainwindow.cpp" line="3476"/>
         <source>Please wait, importing from backup folder(s)...</source>
         <translation>Περιμένετε, εισάγοντας από το φάκελο ή τα αντίγραφα ασφαλείας ...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1123"/>
+        <location filename="../oscar/mainwindow.cpp" line="1256"/>
         <source>Import Problem</source>
         <translation>Πρόβλημα εισαγωγής</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="210"/>
+        <location filename="../oscar/mainwindow.cpp" line="232"/>
         <source>About</source>
         <translation type="unfinished">Σχετικά</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="388"/>
+        <location filename="../oscar/mainwindow.cpp" line="411"/>
         <source>CSV Export Wizard...</source>
         <translation type="unfinished">Οδηγός Εξαγωγής CSV...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="786"/>
+        <location filename="../oscar/mainwindow.cpp" line="841"/>
         <source>Finishing profile &quot;%1&quot;</source>
         <translation type="unfinished">Ολοκλήρωση προφίλ &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1017"/>
-        <location filename="../oscar/mainwindow.cpp" line="3764"/>
+        <location filename="../oscar/mainwindow.cpp" line="1150"/>
+        <location filename="../oscar/mainwindow.cpp" line="4517"/>
         <source>Importing CPAP data</source>
         <translation type="unfinished">Εισαγωγή δεδομένων CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1123"/>
+        <location filename="../oscar/mainwindow.cpp" line="1256"/>
         <source>Couldn&apos;t find any valid Device Data at
 
 %1</source>
@@ -3860,7 +4426,7 @@ Do you want to continue?</source>
 %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1320"/>
+        <location filename="../oscar/mainwindow.cpp" line="1453"/>
         <source>Please insert your CPAP data card...</source>
         <translation>Εισαγάγετε την κάρτα δεδομένων CPAP ...</translation>
     </message>
@@ -3869,17 +4435,17 @@ Do you want to continue?</source>
         <translation type="vanished">Η πρόσβαση στην εισαγωγή έχει αποκλειστεί κατά τη διάρκεια της επανεκτίμησης.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1443"/>
+        <location filename="../oscar/mainwindow.cpp" line="1576"/>
         <source>Importing Profile </source>
         <translation type="unfinished">Εισαγωγή Προφίλ </translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1480"/>
+        <location filename="../oscar/mainwindow.cpp" line="1613"/>
         <source>Import Complete</source>
         <translation type="unfinished">Η Εισαγωγή Ολοκληρώθηκε</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1481"/>
+        <location filename="../oscar/mainwindow.cpp" line="1614"/>
         <source>Profile &apos;%1&apos; has been successfully imported.
 
 You can now select it from the profile selector.</source>
@@ -3888,31 +4454,61 @@ You can now select it from the profile selector.</source>
 Τώρα μπορείτε να το επιλέξετε από τον επιλογέα προφίλ.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1147"/>
-        <location filename="../oscar/mainwindow.cpp" line="1494"/>
-        <location filename="../oscar/mainwindow.cpp" line="3674"/>
+        <location filename="../oscar/mainwindow.cpp" line="1280"/>
+        <location filename="../oscar/mainwindow.cpp" line="1627"/>
+        <location filename="../oscar/mainwindow.cpp" line="4427"/>
         <source>Import Failed</source>
         <translation type="unfinished">Η Εισαγωγή Απέτυχε</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="729"/>
+        <location filename="../oscar/mainwindow.cpp" line="161"/>
+        <source>Filter bookmarks</source>
+        <translation type="unfinished">Φιλτράρισμα σελιδοδεικτών</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="162"/>
+        <source>Clear the filter</source>
+        <translation type="unfinished">Καθαρισμός του φίλτρου</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="779"/>
         <source>Opening %1</source>
         <translation type="unfinished">Άνοιγμα %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="849"/>
+        <location filename="../oscar/mainwindow.cpp" line="904"/>
         <source>%1 (Profile: %2)%3</source>
         <translation type="unfinished">%1 (Προφίλ: %2)%3</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1048"/>
-        <location filename="../oscar/mainwindow.cpp" line="3621"/>
+        <location filename="../oscar/mainwindow.cpp" line="1038"/>
+        <source>OSCAR cannot draw its window with either of its graphics engines on this computer.</source>
+        <translation type="unfinished">Το OSCAR δεν μπορεί να σχεδιάσει το παράθυρό του με καμία από τις μηχανές γραφικών του σε αυτόν τον υπολογιστή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="1039"/>
+        <source>Please update your graphics driver, then start OSCAR while holding down the Shift key.</source>
+        <translation type="unfinished">Ενημερώστε το πρόγραμμα οδήγησης γραφικών και στη συνέχεια ξεκινήστε το OSCAR κρατώντας πατημένο το πλήκτρο Shift.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="1052"/>
+        <source>OSCAR could not draw its window using the software graphics engine.</source>
+        <translation type="unfinished">Το OSCAR δεν μπόρεσε να σχεδιάσει το παράθυρό του με τη μηχανή γραφικών λογισμικού.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="1053"/>
+        <source>OSCAR will restart using your graphics card&apos;s OpenGL driver.</source>
+        <translation type="unfinished">Το OSCAR θα επανεκκινήσει με το πρόγραμμα οδήγησης OpenGL της κάρτας γραφικών σας.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="1181"/>
+        <location filename="../oscar/mainwindow.cpp" line="4374"/>
         <source>Database Locked</source>
         <translation type="unfinished">Η Βάση Δεδομένων είναι Κλειδωμένη</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1049"/>
-        <location filename="../oscar/mainwindow.cpp" line="3622"/>
+        <location filename="../oscar/mainwindow.cpp" line="1182"/>
+        <location filename="../oscar/mainwindow.cpp" line="4375"/>
         <source>Cannot import data: the OSCAR database is locked by another application.
 
 If you have the database open in a SQLite viewer or editor, please close it and try again.
@@ -3925,8 +4521,8 @@ Error: %1</source>
 Σφάλμα: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1148"/>
-        <location filename="../oscar/mainwindow.cpp" line="3675"/>
+        <location filename="../oscar/mainwindow.cpp" line="1281"/>
+        <location filename="../oscar/mainwindow.cpp" line="4428"/>
         <source>The imported data could not be saved to the database. No data was stored.
 
 If you have the OSCAR database open in another application (e.g., a SQLite viewer or editor), please close it and try again.
@@ -3939,36 +4535,36 @@ Error: %1</source>
 Σφάλμα: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1408"/>
-        <location filename="../oscar/mainwindow.cpp" line="3537"/>
-        <location filename="../oscar/mainwindow.cpp" line="3569"/>
+        <location filename="../oscar/mainwindow.cpp" line="1541"/>
+        <location filename="../oscar/mainwindow.cpp" line="4290"/>
+        <location filename="../oscar/mainwindow.cpp" line="4322"/>
         <source>Please open or create a profile before importing data.</source>
         <translation type="unfinished">Παρακαλώ ανοίξτε ή δημιουργήστε ένα προφίλ πριν από την εισαγωγή δεδομένων.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1460"/>
+        <location filename="../oscar/mainwindow.cpp" line="1593"/>
         <source>Import Cancelled</source>
         <translation type="unfinished">Η εισαγωγή ακυρώθηκε</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1461"/>
+        <location filename="../oscar/mainwindow.cpp" line="1594"/>
         <source>Profile import was cancelled. Any partial data has been removed.</source>
         <translation type="unfinished">Η εισαγωγή προφίλ ακυρώθηκε. Τυχόν μερικά δεδομένα έχουν αφαιρεθεί.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1495"/>
+        <location filename="../oscar/mainwindow.cpp" line="1628"/>
         <source>Failed to import profile:
 %1</source>
         <translation type="unfinished">Αποτυχία εισαγωγής προφίλ:
 %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1571"/>
+        <location filename="../oscar/mainwindow.cpp" line="1704"/>
         <source>Different CPAP Machine Detected</source>
         <translation type="unfinished">Εντοπίστηκε Διαφορετική Συσκευή CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1572"/>
+        <location filename="../oscar/mainwindow.cpp" line="1705"/>
         <source>This SD card is from a different machine than the last one imported into this profile.
 
 Last imported: %1
@@ -3983,54 +4579,84 @@ Are you sure you want to import from this card into this profile?</source>
 Είστε σίγουροι ότι θέλετε να εισαγάγετε από αυτή την κάρτα σε αυτό το προφίλ;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1577"/>
+        <location filename="../oscar/mainwindow.cpp" line="1710"/>
         <source>Continue</source>
         <translation type="unfinished">Συνέχεια</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1591"/>
+        <location filename="../oscar/mainwindow.cpp" line="1724"/>
         <source>CPAP Data Located</source>
         <translation>Τα δεδομένα CPAP βρίσκονται</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1626"/>
+        <location filename="../oscar/mainwindow.cpp" line="1759"/>
         <source>Import Reminder</source>
         <translation>Υπενθύμιση εισαγωγής</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1642"/>
+        <location filename="../oscar/mainwindow.cpp" line="1775"/>
         <source>Find your CPAP data card</source>
         <translation type="unfinished">Βρείτε την κάρτα δεδομένων CPAP σας</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1676"/>
+        <location filename="../oscar/mainwindow.cpp" line="1809"/>
         <source>No supported data was found</source>
         <translation type="unfinished">Δεν βρέθηκαν υποστηριζόμενα δεδομένα</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1699"/>
+        <location filename="../oscar/mainwindow.cpp" line="1832"/>
         <source>Importing Data</source>
         <translation>Εισαγωγή δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1909"/>
-        <location filename="../oscar/mainwindow.cpp" line="1952"/>
-        <location filename="../oscar/mainwindow.cpp" line="1981"/>
+        <location filename="../oscar/mainwindow.cpp" line="2001"/>
+        <source>Switch to the Classic pages</source>
+        <translation type="unfinished">Μετάβαση στις κλασικές σελίδες</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="2001"/>
+        <source>Switch to the Modern pages</source>
+        <translation type="unfinished">Μετάβαση στις σύγχρονες σελίδες</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="2022"/>
+        <source>Switch to light mode</source>
+        <translation type="unfinished">Μετάβαση σε φωτεινή λειτουργία</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="2022"/>
+        <source>Switch to dark mode</source>
+        <translation type="unfinished">Μετάβαση σε σκοτεινή λειτουργία</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="2118"/>
+        <source>No bookmarks yet. Add them on the Daily page.</source>
+        <translation type="unfinished">Δεν υπάρχουν ακόμη σελιδοδείκτες. Προσθέστε τους στη σελίδα Καθημερινά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="2119"/>
+        <source>No bookmarks match the filter.</source>
+        <translation type="unfinished">Κανένας σελιδοδείκτης δεν ταιριάζει με το φίλτρο.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="2261"/>
+        <location filename="../oscar/mainwindow.cpp" line="2316"/>
+        <location filename="../oscar/mainwindow.cpp" line="2351"/>
         <source>Please open or create a profile first.</source>
         <translation type="unfinished">Παρακαλώ ανοίξτε ή δημιουργήστε πρώτα ένα προφίλ.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1952"/>
+        <location filename="../oscar/mainwindow.cpp" line="2316"/>
         <source>Time Corrections</source>
         <translation type="unfinished">Διορθώσεις Ώρας</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1981"/>
+        <location filename="../oscar/mainwindow.cpp" line="2351"/>
         <source>Drift Analysis</source>
         <translation type="unfinished">Ανάλυση Απόκλισης</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2006"/>
+        <location filename="../oscar/mainwindow.cpp" line="2376"/>
         <source>This will permanently delete all time corrections for every device in this profile.
 
 Are you sure?</source>
@@ -4039,164 +4665,184 @@ Are you sure?</source>
 Είστε σίγουροι;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2171"/>
+        <location filename="../oscar/mainwindow.cpp" line="2754"/>
         <source>Choose where to save screenshot</source>
         <translation>Επιλέξτε από πού να αποθηκεύσετε το στιγμιότυπο οθόνης</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2171"/>
+        <location filename="../oscar/mainwindow.cpp" line="2754"/>
         <source>Image files (*.png)</source>
         <translation>Αρχεία εικόνας (*.png)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2246"/>
         <source>The User&apos;s Guide will open in your default browser</source>
-        <translation>Ο οδηγός χρήσης θα ανοίξει στο προεπιλεγμένο πρόγραμμα περιήγησης</translation>
+        <translation type="vanished">Ο οδηγός χρήσης θα ανοίξει στο προεπιλεγμένο πρόγραμμα περιήγησης</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2253"/>
+        <location filename="../oscar/mainwindow.cpp" line="2918"/>
         <source>The FAQ is not yet implemented</source>
         <translation>Οι συνήθεις ερωτήσεις δεν έχουν ακόμη εφαρμοστεί</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2417"/>
-        <location filename="../oscar/mainwindow.cpp" line="2440"/>
+        <location filename="../oscar/mainwindow.cpp" line="3089"/>
+        <location filename="../oscar/mainwindow.cpp" line="3109"/>
         <source>If you can read this, the restart command didn&apos;t work. You will have to do it yourself manually.</source>
         <translation>Εάν μπορείτε να διαβάσετε αυτό, η εντολή επανεκκίνησης δεν λειτούργησε. Θα πρέπει να το κάνετε μόνοι σας με το χέρι.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2587"/>
+        <location filename="../oscar/mainwindow.cpp" line="3161"/>
+        <source>Purging Data</source>
+        <translation type="unfinished">Εκκαθάριση δεδομένων</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="3231"/>
+        <source>Purging data for %1...</source>
+        <translation type="unfinished">Εκκαθάριση δεδομένων για %1...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="3290"/>
         <source>Unknown</source>
         <translation type="unfinished">Αγνωστος</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2592"/>
+        <location filename="../oscar/mainwindow.cpp" line="3295"/>
         <source>Confirm Purge</source>
         <translation type="unfinished">Επιβεβαίωση Εκκαθάρισης</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2593"/>
+        <location filename="../oscar/mainwindow.cpp" line="3296"/>
         <source>&lt;p&gt;Purge &lt;b&gt;%1&lt;/b&gt; data from &lt;b&gt;%2&lt;/b&gt; to &lt;b&gt;%3&lt;/b&gt; (%4 day(s)).&lt;/p&gt;&lt;p&gt;Are you &lt;b&gt;absolutely sure&lt;/b&gt; you want to proceed?&lt;/p&gt;</source>
         <translation type="unfinished">&lt;p&gt;Εκκαθάριση δεδομένων &lt;b&gt;%1&lt;/b&gt; από &lt;b&gt;%2&lt;/b&gt; έως &lt;b&gt;%3&lt;/b&gt; (%4 ημέρα/ες).&lt;/p&gt;&lt;p&gt;Είστε &lt;b&gt;απολύτως σίγουροι&lt;/b&gt; ότι θέλετε να συνεχίσετε;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2607"/>
+        <location filename="../oscar/mainwindow.cpp" line="3314"/>
         <source>Purging data...</source>
         <translation type="unfinished">Εκκαθάριση δεδομένων...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2619"/>
+        <location filename="../oscar/mainwindow.cpp" line="3326"/>
         <source>Purging %1...</source>
         <translation type="unfinished">Εκκαθάριση %1...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2632"/>
+        <location filename="../oscar/mainwindow.cpp" line="3340"/>
         <source>Purge Range of Days</source>
         <translation type="unfinished">Εκκαθάριση Εύρους Ημερών</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2633"/>
+        <location filename="../oscar/mainwindow.cpp" line="3341"/>
         <source>No data was found in the selected date range.</source>
         <translation type="unfinished">Δεν βρέθηκαν δεδομένα στο επιλεγμένο εύρος ημερομηνιών.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2718"/>
+        <location filename="../oscar/mainwindow.cpp" line="3348"/>
+        <location filename="../oscar/mainwindow.cpp" line="3632"/>
+        <source>Updating daily summaries...</source>
+        <translation type="unfinished">Ενημέρωση ημερήσιων συνόψεων...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="3368"/>
+        <location filename="../oscar/mainwindow.cpp" line="3671"/>
+        <source>Refreshing the display...</source>
+        <translation type="unfinished">Ανανέωση της προβολής...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="3436"/>
         <source>OSCAR does not recognize the backup data for the following device:</source>
         <translation type="unfinished">Το OSCAR δεν αναγνωρίζει τα δεδομένα αντιγράφου ασφαλείας για την ακόλουθη συσκευή:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2720"/>
+        <location filename="../oscar/mainwindow.cpp" line="3438"/>
         <source>Rebuilding will delete all of this device&apos;s data, and OSCAR may not be able to restore it from the backup. You would then have to import it again from the SD card or your own backups.</source>
         <translation type="unfinished">Η ανακατασκευή θα διαγράψει όλα τα δεδομένα αυτής της συσκευής και το OSCAR ενδέχεται να μην μπορεί να τα επαναφέρει από το αντίγραφο ασφαλείας. Τότε θα έπρεπε να τα εισαγάγετε ξανά από την κάρτα SD ή από τα δικά σας αντίγραφα ασφαλείας.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2814"/>
+        <location filename="../oscar/mainwindow.cpp" line="3539"/>
         <source>ResMed Oximetry Data</source>
         <translation type="unfinished">Δεδομένα οξυμετρίας ResMed</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2815"/>
+        <location filename="../oscar/mainwindow.cpp" line="3540"/>
         <source>OSCAR now shows the times your ResMed device recorded no SpO2 or pulse reading, such as with the finger out of the sensor, as gaps. Data imported by earlier versions filled those times with the last reading, which can show long SpO2 drops that did not happen.</source>
         <translation type="unfinished">Το OSCAR εμφανίζει πλέον ως κενά τα διαστήματα κατά τα οποία η συσκευή ResMed δεν κατέγραψε καμία μέτρηση SpO2 ή σφυγμού, για παράδειγμα με το δάχτυλο έξω από τον αισθητήρα. Τα δεδομένα που εισήχθησαν από παλαιότερες εκδόσεις γέμιζαν αυτά τα διαστήματα με την τελευταία μέτρηση, κάτι που μπορεί να δείχνει μεγάλες πτώσεις SpO2 που δεν συνέβησαν.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2818"/>
+        <location filename="../oscar/mainwindow.cpp" line="3543"/>
         <source>To correct it, rebuild the data of these devices from OSCAR&apos;s backup, or purge it and import it again from the SD card:</source>
         <translation type="unfinished">Για να το διορθώσετε, ανακατασκευάστε τα δεδομένα αυτών των συσκευών από το αντίγραφο ασφαλείας του OSCAR ή εκκαθαρίστε τα και εισαγάγετέ τα ξανά από την κάρτα SD:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2821"/>
+        <location filename="../oscar/mainwindow.cpp" line="3546"/>
         <source>Rebuild Now</source>
         <translation type="unfinished">Ανακατασκευή τώρα</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2822"/>
+        <location filename="../oscar/mainwindow.cpp" line="3547"/>
         <source>Remind Me Later</source>
         <translation type="unfinished">Υπενθύμιση αργότερα</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2823"/>
+        <location filename="../oscar/mainwindow.cpp" line="3548"/>
         <source>Don&apos;t Remind Me</source>
         <translation type="unfinished">Χωρίς υπενθύμιση</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2985"/>
         <source>No help is available.</source>
-        <translation>Δεν υπάρχει βοήθεια.</translation>
+        <translation type="vanished">Δεν υπάρχει βοήθεια.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3086"/>
+        <location filename="../oscar/mainwindow.cpp" line="3839"/>
         <source>Recalculating summaries</source>
         <translation type="unfinished">Επανυπολογισμός συνόψεων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3188"/>
+        <location filename="../oscar/mainwindow.cpp" line="3941"/>
         <source>Apple Health Import</source>
         <translation type="unfinished">Εισαγωγή Apple Health</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3189"/>
+        <location filename="../oscar/mainwindow.cpp" line="3942"/>
         <source>How much of your Apple Health history should be imported?</source>
         <translation type="unfinished">Πόσο μέρος του ιστορικού σας από το Apple Health πρέπει να εισαχθεί;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3192"/>
+        <location filename="../oscar/mainwindow.cpp" line="3945"/>
         <source>Overlapping CPAP history (recommended)</source>
         <translation type="unfinished">Επικαλυπτόμενο ιστορικό CPAP (προτείνεται)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3194"/>
+        <location filename="../oscar/mainwindow.cpp" line="3947"/>
         <source>Full history</source>
         <translation type="unfinished">Πλήρες ιστορικό</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3216"/>
-        <location filename="../oscar/mainwindow.cpp" line="3285"/>
+        <location filename="../oscar/mainwindow.cpp" line="3969"/>
+        <location filename="../oscar/mainwindow.cpp" line="4038"/>
         <source>%1 (%2 records)</source>
         <translation type="unfinished">%1 (%2 εγγραφές)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3226"/>
+        <location filename="../oscar/mainwindow.cpp" line="3979"/>
         <source>Apple Health Sleep Source</source>
         <translation type="unfinished">Πηγή Ύπνου Apple Health</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3226"/>
+        <location filename="../oscar/mainwindow.cpp" line="3979"/>
         <source>Choose the source for sleep stages:</source>
         <translation type="unfinished">Επιλέξτε την πηγή για τα στάδια ύπνου:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3236"/>
+        <location filename="../oscar/mainwindow.cpp" line="3989"/>
         <source>Reading Apple Health export...</source>
         <translation type="unfinished">Ανάγνωση εξαγωγής Apple Health...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3267"/>
+        <location filename="../oscar/mainwindow.cpp" line="4020"/>
         <source>No matching Apple Watch source</source>
         <translation type="unfinished">Δεν βρέθηκε αντίστοιχη πηγή Apple Watch</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3269"/>
+        <location filename="../oscar/mainwindow.cpp" line="4022"/>
         <source>Imported %1 sleep session(s) and %2 vitals session(s).
 Skipped %3 already-imported night(s).
 Sleep source: %4</source>
@@ -4205,42 +4851,42 @@ Sleep source: %4</source>
 Πηγή ύπνου: %4</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3278"/>
+        <location filename="../oscar/mainwindow.cpp" line="4031"/>
         <source>Vitals sources: %1</source>
         <translation type="unfinished">Πηγές ζωτικών ενδείξεων: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3279"/>
+        <location filename="../oscar/mainwindow.cpp" line="4032"/>
         <source>none</source>
         <translation type="unfinished">καμία</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3290"/>
+        <location filename="../oscar/mainwindow.cpp" line="4043"/>
         <source>Ignored vitals from: %1</source>
         <translation type="unfinished">Αγνοήθηκαν ζωτικά σημεία από: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3294"/>
+        <location filename="../oscar/mainwindow.cpp" line="4047"/>
         <source>Imported weight for %1 day(s).</source>
         <translation type="unfinished">Έγινε εισαγωγή βάρους για %1 ημέρα(ες).</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3297"/>
+        <location filename="../oscar/mainwindow.cpp" line="4050"/>
         <source>Apple Health Import Summary</source>
         <translation type="unfinished">Σύνοψη εισαγωγής Apple Health</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3388"/>
+        <location filename="../oscar/mainwindow.cpp" line="4141"/>
         <source>Failed to restart OSCAR. Please restart it manually.</source>
         <translation type="unfinished">Αποτυχία επανεκκίνησης του OSCAR. Παρακαλώ επανεκκινήστε το χειροκίνητα.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3412"/>
+        <location filename="../oscar/mainwindow.cpp" line="4165"/>
         <source> (active)</source>
         <translation type="unfinished"> (ενεργό)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3422"/>
+        <location filename="../oscar/mainwindow.cpp" line="4175"/>
         <source>(none)</source>
         <translation type="unfinished">(κανένα)</translation>
     </message>
@@ -4259,40 +4905,40 @@ Use File ▸ Database ▸ Open to open an existing database.</source>
 Χρησιμοποιήστε Αρχείο ▸ Βάση Δεδομένων ▸ Άνοιγμα για να ανοίξετε μια υπάρχουσα βάση δεδομένων.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3444"/>
+        <location filename="../oscar/mainwindow.cpp" line="4197"/>
         <source>Select OSCAR Database Folder</source>
         <translation type="unfinished">Επιλογή Φακέλου Βάσης Δεδομένων OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3452"/>
-        <location filename="../oscar/mainwindow.cpp" line="3458"/>
+        <location filename="../oscar/mainwindow.cpp" line="4205"/>
+        <location filename="../oscar/mainwindow.cpp" line="4211"/>
         <source>Open Database</source>
         <translation type="unfinished">Άνοιγμα Βάσης Δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3453"/>
+        <location filename="../oscar/mainwindow.cpp" line="4206"/>
         <source>The selected folder contains OSCAR 1.x data, which OSCAR 2 cannot open directly.</source>
         <translation type="unfinished">Ο επιλεγμένος φάκελος περιέχει δεδομένα OSCAR 1.x, τα οποία το OSCAR 2 δεν μπορεί να ανοίξει απευθείας.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3454"/>
+        <location filename="../oscar/mainwindow.cpp" line="4207"/>
         <source>To bring that data into OSCAR 2, use File ▸ Profiles ▸ Import from OSCAR...</source>
         <translation type="unfinished">Για να μεταφέρετε αυτά τα δεδομένα στο OSCAR 2, χρησιμοποιήστε το Αρχείο ▸ Προφίλ ▸ Εισαγωγή από OSCAR...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3459"/>
+        <location filename="../oscar/mainwindow.cpp" line="4212"/>
         <source>The selected folder does not contain an OSCAR database.
 Please select a folder that contains an oscar.db file.</source>
         <translation type="unfinished">Ο επιλεγμένος φάκελος δεν περιέχει βάση δεδομένων OSCAR.
 Παρακαλώ επιλέξτε έναν φάκελο που περιέχει αρχείο oscar.db.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3482"/>
+        <location filename="../oscar/mainwindow.cpp" line="4235"/>
         <source>Delete Database</source>
         <translation type="unfinished">Διαγραφή Βάσης Δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3483"/>
+        <location filename="../oscar/mainwindow.cpp" line="4236"/>
         <source>There are no inactive databases in the recent list to delete.
 
 Open databases with File ▸ Database ▸ Open first to add them to the recent list.</source>
@@ -4301,53 +4947,58 @@ Open databases with File ▸ Database ▸ Open first to add them to the recent l
 Ανοίξτε βάσεις δεδομένων με Αρχείο ▸ Βάση Δεδομένων ▸ Άνοιγμα πρώτα για να τις προσθέσετε στην πρόσφατη λίστα.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3687"/>
+        <location filename="../oscar/mainwindow.cpp" line="4440"/>
         <source>Import aborted: %1 file(s) already imported were kept</source>
         <translation type="unfinished">Η εισαγωγή διακόπηκε: %1 αρχείο(α) που είχαν ήδη εισαχθεί διατηρήθηκαν</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3831"/>
+        <location filename="../oscar/mainwindow.cpp" line="4584"/>
         <source>Importing %1 data</source>
         <translation type="unfinished">Εισαγωγή δεδομένων %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3944"/>
+        <location filename="../oscar/mainwindow.cpp" line="4697"/>
         <source>Importing data</source>
         <translation type="unfinished">Εισαγωγή δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3945"/>
+        <location filename="../oscar/mainwindow.cpp" line="4698"/>
         <source>Importing data, as requested on the command line...</source>
         <translation type="unfinished">Εισαγωγή δεδομένων, όπως ζητήθηκε από τη γραμμή εντολών...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3958"/>
+        <location filename="../oscar/mainwindow.cpp" line="4711"/>
         <source>Importing %1 data, as requested on the command line...</source>
         <translation type="unfinished">Εισαγωγή δεδομένων %1, όπως ζητήθηκε από τη γραμμή εντολών...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4298"/>
-        <location filename="../oscar/mainwindow.cpp" line="4318"/>
+        <location filename="../oscar/mainwindow.cpp" line="4966"/>
+        <source>Purging oximetry data...</source>
+        <translation type="unfinished">Εκκαθάριση δεδομένων οξυμετρίας...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="5047"/>
+        <location filename="../oscar/mainwindow.cpp" line="5067"/>
         <source>No profile is currently open.</source>
         <translation type="unfinished">Δεν υπάρχει ανοιχτό προφίλ αυτή τη στιγμή.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4318"/>
+        <location filename="../oscar/mainwindow.cpp" line="5067"/>
         <source>Export Journal</source>
         <translation type="unfinished">Εξαγωγή Ημερολογίου</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4330"/>
+        <location filename="../oscar/mainwindow.cpp" line="5079"/>
         <source>%1&apos;s Journal</source>
         <translation>Εφημερίδα της %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4332"/>
+        <location filename="../oscar/mainwindow.cpp" line="5081"/>
         <source>Choose where to save the journal</source>
         <translation>Επιλέξτε πού να αποθηκεύσετε το ημερολόγιο</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4621"/>
+        <location filename="../oscar/mainwindow.cpp" line="5370"/>
         <source>This will compact the database to reclaim unused disk space. It is most useful after deleting profiles.
 
 Current database size: %1
@@ -4364,7 +5015,7 @@ Continue?</source>
 Συνέχεια;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4667"/>
+        <location filename="../oscar/mainwindow.cpp" line="5416"/>
         <source>The database integrity check failed. Compression cannot proceed on a damaged database.
 
 Recommended actions:
@@ -4383,7 +5034,7 @@ For advanced recovery options, see the OSCAR documentation.</source>
 Για προχωρημένες επιλογές ανάκτησης, ανατρέξτε στην τεκμηρίωση του OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4687"/>
+        <location filename="../oscar/mainwindow.cpp" line="5436"/>
         <source>Compressing database, please wait...
 
 This may take several minutes for large databases.</source>
@@ -4392,7 +5043,7 @@ This may take several minutes for large databases.</source>
 Αυτό ενδέχεται να διαρκέσει αρκετά λεπτά για μεγάλες βάσεις δεδομένων.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4759"/>
+        <location filename="../oscar/mainwindow.cpp" line="5508"/>
         <source>Compression succeeded but the database file could not be replaced.
 
 The original database is unchanged.</source>
@@ -4401,22 +5052,22 @@ The original database is unchanged.</source>
 Η αρχική βάση δεδομένων παραμένει αναλλοίωτη.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4775"/>
+        <location filename="../oscar/mainwindow.cpp" line="5524"/>
         <source>The compressed database could not be put in place, and OSCAR could not put the original database back.</source>
         <translation type="unfinished">Η συμπιεσμένη βάση δεδομένων δεν μπόρεσε να τοποθετηθεί στη θέση της και το OSCAR δεν μπόρεσε να επαναφέρει την αρχική βάση δεδομένων.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4777"/>
+        <location filename="../oscar/mainwindow.cpp" line="5526"/>
         <source>Your data is safe in this file:</source>
         <translation type="unfinished">Τα δεδομένα σας είναι ασφαλή σε αυτό το αρχείο:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4778"/>
+        <location filename="../oscar/mainwindow.cpp" line="5527"/>
         <source>OSCAR will now close. Before starting OSCAR again, rename that file to oscar.db.</source>
         <translation type="unfinished">Το OSCAR θα κλείσει τώρα. Πριν ξεκινήσετε ξανά το OSCAR, μετονομάστε αυτό το αρχείο σε oscar.db.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4786"/>
+        <location filename="../oscar/mainwindow.cpp" line="5535"/>
         <source>Compression succeeded but the new file could not be put in place.
 
 The original database has been restored.</source>
@@ -4425,7 +5076,7 @@ The original database has been restored.</source>
 Η αρχική βάση δεδομένων έχει αποκατασταθεί.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4798"/>
+        <location filename="../oscar/mainwindow.cpp" line="5547"/>
         <source>Database compressed successfully.
 
 Before:    %1
@@ -4442,7 +5093,7 @@ OSCAR will restart when you press OK.</source>
 Το OSCAR θα επανεκκινήσει όταν πατήσετε OK.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4807"/>
+        <location filename="../oscar/mainwindow.cpp" line="5556"/>
         <source>Database compressed successfully.
 
 Size: %1
@@ -4459,110 +5110,110 @@ OSCAR will restart when you press OK.</source>
 Το OSCAR θα επανεκκινήσει όταν πατήσετε OK.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4930"/>
+        <location filename="../oscar/mainwindow.cpp" line="5679"/>
         <source>Copy to Clipboard</source>
         <translation type="unfinished">Αντιγραφή στο Πρόχειρο</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4305"/>
-        <location filename="../oscar/mainwindow.cpp" line="4332"/>
+        <location filename="../oscar/mainwindow.cpp" line="5054"/>
+        <location filename="../oscar/mainwindow.cpp" line="5081"/>
         <source>XML Files (*.xml)</source>
         <translation>Αρχεία XML (* .xml)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3692"/>
+        <location filename="../oscar/mainwindow.cpp" line="4445"/>
         <source>There was a problem parsing %1 
 Data File: %2</source>
         <translation type="unfinished">Παρουσιάστηκε πρόβλημα κατά την ανάλυση του %1 
 Αρχείο Δεδομένων: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3696"/>
-        <location filename="../oscar/mainwindow.cpp" line="3699"/>
+        <location filename="../oscar/mainwindow.cpp" line="4449"/>
+        <location filename="../oscar/mainwindow.cpp" line="4452"/>
         <source>There was a problem opening %1 Data File: %2</source>
         <translation type="unfinished">Παρουσιάστηκε πρόβλημα κατά το άνοιγμα του αρχείου δεδομένων %1: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3698"/>
+        <location filename="../oscar/mainwindow.cpp" line="4451"/>
         <source>%1 Data Import of %2 file(s) complete</source>
         <translation type="unfinished">Η εισαγωγή δεδομένων %1 από %2 αρχείο(-α) ολοκληρώθηκε</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3688"/>
-        <location filename="../oscar/mainwindow.cpp" line="3700"/>
+        <location filename="../oscar/mainwindow.cpp" line="4441"/>
+        <location filename="../oscar/mainwindow.cpp" line="4453"/>
         <source>%1 Import Partial Success</source>
         <translation type="unfinished">%1 Μερική Επιτυχία Εισαγωγής</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3702"/>
+        <location filename="../oscar/mainwindow.cpp" line="4455"/>
         <source>%1 Data Import complete</source>
         <translation type="unfinished">Η εισαγωγή δεδομένων %1 ολοκληρώθηκε</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4289"/>
+        <location filename="../oscar/mainwindow.cpp" line="5038"/>
         <source>You must select and open the profile you wish to modify</source>
         <translation type="unfinished">Πρέπει να επιλέξετε και να ανοίξετε το προφίλ που επιθυμείτε να τροποποιήσετε</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4303"/>
+        <location filename="../oscar/mainwindow.cpp" line="5052"/>
         <source>Choose where to read journal</source>
         <translation type="unfinished">Επιλέξτε πού θα διαβαστεί το ημερολόγιο</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4413"/>
+        <location filename="../oscar/mainwindow.cpp" line="5162"/>
         <source>Export review is not yet implemented</source>
         <translation>Η αναθεώρηση εξαγωγής δεν έχει ακόμη εφαρμοστεί</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4423"/>
+        <location filename="../oscar/mainwindow.cpp" line="5172"/>
         <source>Would you like to zip this card?</source>
         <translation>Θα θέλατε να παραλάβετε αυτήν την κάρτα;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4445"/>
-        <location filename="../oscar/mainwindow.cpp" line="4518"/>
-        <location filename="../oscar/mainwindow.cpp" line="4839"/>
+        <location filename="../oscar/mainwindow.cpp" line="5194"/>
+        <location filename="../oscar/mainwindow.cpp" line="5267"/>
+        <location filename="../oscar/mainwindow.cpp" line="5588"/>
         <source>Choose where to save zip</source>
         <translation>Επιλέξτε πού να αποθηκεύσετε το φερμουάρ</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4445"/>
-        <location filename="../oscar/mainwindow.cpp" line="4518"/>
-        <location filename="../oscar/mainwindow.cpp" line="4839"/>
+        <location filename="../oscar/mainwindow.cpp" line="5194"/>
+        <location filename="../oscar/mainwindow.cpp" line="5267"/>
+        <location filename="../oscar/mainwindow.cpp" line="5588"/>
         <source>ZIP files (*.zip)</source>
         <translation>Αρχεία ZIP (* .zip)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4492"/>
-        <location filename="../oscar/mainwindow.cpp" line="4532"/>
+        <location filename="../oscar/mainwindow.cpp" line="5241"/>
+        <location filename="../oscar/mainwindow.cpp" line="5281"/>
         <source>Creating zip...</source>
         <translation>Δημιουργία φερμουάρ ...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4477"/>
+        <location filename="../oscar/mainwindow.cpp" line="5226"/>
         <source>Calculating size...</source>
         <translation>Υπολογισμός μεγέθους ...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4565"/>
-        <location filename="../oscar/mainwindow.cpp" line="4592"/>
-        <location filename="../oscar/mainwindow.cpp" line="4596"/>
+        <location filename="../oscar/mainwindow.cpp" line="5314"/>
+        <location filename="../oscar/mainwindow.cpp" line="5341"/>
+        <location filename="../oscar/mainwindow.cpp" line="5345"/>
         <source>Check Database Integrity</source>
         <translation type="unfinished">Έλεγχος ακεραιότητας βάσης δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4569"/>
-        <location filename="../oscar/mainwindow.cpp" line="4661"/>
+        <location filename="../oscar/mainwindow.cpp" line="5318"/>
+        <location filename="../oscar/mainwindow.cpp" line="5410"/>
         <source>Checking database integrity, please wait...</source>
         <translation type="unfinished">Έλεγχος ακεραιότητας βάσης δεδομένων, παρακαλώ περιμένετε...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4593"/>
+        <location filename="../oscar/mainwindow.cpp" line="5342"/>
         <source>The database integrity check passed. No problems were found.</source>
         <translation type="unfinished">Ο έλεγχος ακεραιότητας της βάσης δεδομένων ολοκληρώθηκε επιτυχώς. Δεν βρέθηκαν προβλήματα.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4597"/>
+        <location filename="../oscar/mainwindow.cpp" line="5346"/>
         <source>The database integrity check found problems. Some data may be missing or corrupted.
 
 The integrity check covers the entire database, which may contain multiple profiles.
@@ -4585,14 +5236,14 @@ For advanced recovery options, see the OSCAR documentation.</source>
 Για προχωρημένες επιλογές ανάκτησης, ανατρέξτε στην τεκμηρίωση του OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4620"/>
-        <location filename="../oscar/mainwindow.cpp" line="4635"/>
-        <location filename="../oscar/mainwindow.cpp" line="4666"/>
-        <location filename="../oscar/mainwindow.cpp" line="4712"/>
-        <location filename="../oscar/mainwindow.cpp" line="4758"/>
-        <location filename="../oscar/mainwindow.cpp" line="4774"/>
-        <location filename="../oscar/mainwindow.cpp" line="4785"/>
-        <location filename="../oscar/mainwindow.cpp" line="4813"/>
+        <location filename="../oscar/mainwindow.cpp" line="5369"/>
+        <location filename="../oscar/mainwindow.cpp" line="5384"/>
+        <location filename="../oscar/mainwindow.cpp" line="5415"/>
+        <location filename="../oscar/mainwindow.cpp" line="5461"/>
+        <location filename="../oscar/mainwindow.cpp" line="5507"/>
+        <location filename="../oscar/mainwindow.cpp" line="5523"/>
+        <location filename="../oscar/mainwindow.cpp" line="5534"/>
+        <location filename="../oscar/mainwindow.cpp" line="5562"/>
         <source>Compress Database</source>
         <translation type="unfinished">Συμπίεση Βάσης Δεδομένων</translation>
     </message>
@@ -4605,7 +5256,7 @@ This may take several minutes. Continue?</source>
         <translation type="obsolete">Αυτό θα συμπιέσει τη βάση δεδομένων για να ανακτηθεί αχρησιμοποίητος χώρος στο δίσκο. Είναι πιο χρήσιμο μετά τη διαγραφή προφίλ.\n\nΤρέχον μέγεθος βάσης δεδομένων: %1\n\nΑυτό μπορεί να διαρκέσει αρκετά λεπτά. Συνέχεια;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4713"/>
+        <location filename="../oscar/mainwindow.cpp" line="5462"/>
         <source>Database compression failed:
 %1</source>
         <translation type="unfinished">Η συμπίεση της βάσης δεδομένων απέτυχε:
@@ -4628,28 +5279,28 @@ No space was reclaimed — the database was already compact.</source>
         <translation type="obsolete">Η βάση δεδομένων συμπιέστηκε επιτυχώς.\n\nΜέγεθος: %1\n\nΔεν ανακτήθηκε χώρος — η βάση δεδομένων ήταν ήδη συμπιεσμένη.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4855"/>
+        <location filename="../oscar/mainwindow.cpp" line="5604"/>
         <source>Unable to create zip: the database is locked by another process.</source>
         <translation type="unfinished">Αδυναμία δημιουργίας zip: η βάση δεδομένων είναι κλειδωμένη από άλλη διεργασία.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4864"/>
+        <location filename="../oscar/mainwindow.cpp" line="5613"/>
         <source>Creating %1.zip...</source>
         <translation type="unfinished">Δημιουργία %1.zip...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4900"/>
+        <location filename="../oscar/mainwindow.cpp" line="5649"/>
         <source>Reporting issues is not yet implemented</source>
         <translation>Τα θέματα αναφοράς δεν έχουν ακόμη εφαρμοστεί</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1676"/>
-        <location filename="../oscar/mainwindow.cpp" line="4911"/>
+        <location filename="../oscar/mainwindow.cpp" line="1809"/>
+        <location filename="../oscar/mainwindow.cpp" line="5660"/>
         <source>OSCAR Information</source>
         <translation>Πληροφορίες OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="398"/>
+        <location filename="../oscar/mainwindow.cpp" line="421"/>
         <source>Help Browser</source>
         <translation>Βοήθεια του προγράμματος περιήγησης</translation>
     </message>
@@ -4658,7 +5309,7 @@ No space was reclaimed — the database was already compact.</source>
         <translation type="vanished">%1 (Προφίλ: %2)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1625"/>
+        <location filename="../oscar/mainwindow.cpp" line="1758"/>
         <source>Please remember to select the root folder or drive letter of your data card, and not a folder inside it.</source>
         <translation>Θυμηθείτε να επιλέξετε τον ριζικό φάκελο ή το γράμμα μονάδας δίσκου της κάρτας δεδομένων σας και όχι έναν φάκελο μέσα σε αυτό.</translation>
     </message>
@@ -4667,12 +5318,12 @@ No space was reclaimed — the database was already compact.</source>
         <translation type="vanished">Ανοίξτε πρώτα ένα προφίλ.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2043"/>
+        <location filename="../oscar/mainwindow.cpp" line="2430"/>
         <source>Check for updates not implemented</source>
         <translation type="unfinished">Ο έλεγχος για ενημερώσεις δεν έχει υλοποιηθεί</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2727"/>
+        <location filename="../oscar/mainwindow.cpp" line="3451"/>
         <source>Are you sure you want to rebuild all CPAP data for the following device:
 
 </source>
@@ -4681,53 +5332,53 @@ No space was reclaimed — the database was already compact.</source>
 </translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2737"/>
+        <location filename="../oscar/mainwindow.cpp" line="3462"/>
         <source>For some reason, OSCAR does not have any backups for the following device:</source>
         <translation type="unfinished">Για κάποιο λόγο, το OSCAR δεν έχει αντίγραφα ασφαλείας για την ακόλουθη συσκευή:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2739"/>
+        <location filename="../oscar/mainwindow.cpp" line="3464"/>
         <source>Provided you have made &lt;i&gt;your &lt;b&gt;own&lt;/b&gt; backups for ALL of your CPAP data&lt;/i&gt;, you can still complete this operation, but you will have to restore from your backups manually.</source>
         <translation>Με την προϋπόθεση ότι έχετε κάνει τα &lt;i&gt; αντίγραφα ασφαλείας &lt;b&gt; δικά σας &lt;/b&gt; για ΟΛΑ τα δεδομένα CPAP &lt;/i&gt;, μπορείτε να ολοκληρώσετε αυτήν την ενέργεια, αλλά θα πρέπει να επαναφέρετε από τα αντίγραφα ασφαλείας σας με μη αυτόματο τρόπο.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2721"/>
-        <location filename="../oscar/mainwindow.cpp" line="2740"/>
+        <location filename="../oscar/mainwindow.cpp" line="3439"/>
+        <location filename="../oscar/mainwindow.cpp" line="3465"/>
         <source>Are you really sure you want to do this?</source>
         <translation>Είστε σίγουροι ότι θέλετε να το κάνετε αυτό;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2754"/>
+        <location filename="../oscar/mainwindow.cpp" line="3479"/>
         <source>Because there are no internal backups to rebuild from, you will have to restore from your own.</source>
         <translation>Επειδή δεν υπάρχουν εσωτερικά αντίγραφα ασφαλείας για την αποκατάσταση, θα πρέπει να αποκαταστήσετε από τη δική σας.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2866"/>
+        <location filename="../oscar/mainwindow.cpp" line="3592"/>
         <source>Note as a precaution, the backup folder will be left in place.</source>
         <translation>Σημειώστε προληπτικά ότι ο φάκελος δημιουργίας αντιγράφων ασφαλείας θα παραμείνει στη θέση του.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2878"/>
+        <location filename="../oscar/mainwindow.cpp" line="3604"/>
         <source>Are you &lt;b&gt;absolutely sure&lt;/b&gt; you want to proceed?</source>
         <translation>Είστε &lt;b&gt; απολύτως σίγουροι &lt;/b&gt; που θέλετε να συνεχίσετε;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3329"/>
+        <location filename="../oscar/mainwindow.cpp" line="4082"/>
         <source>The Glossary will open in your default browser</source>
         <translation>Το Γλωσσάριο θα ανοίξει στο προεπιλεγμένο πρόγραμμα περιήγησης</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4200"/>
+        <location filename="../oscar/mainwindow.cpp" line="4951"/>
         <source>Are you sure you want to delete oximetry data for %1</source>
         <translation>Είστε βέβαιοι ότι θέλετε να διαγράψετε δεδομένα oximetry για %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4209"/>
+        <location filename="../oscar/mainwindow.cpp" line="4960"/>
         <source>&lt;b&gt;Please be aware you can not undo this operation!&lt;/b&gt;</source>
         <translation>&lt;b&gt;Λάβετε υπόψη ότι δεν μπορείτε να αναιρέσετε αυτήν την ενέργεια! &lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4243"/>
+        <location filename="../oscar/mainwindow.cpp" line="4997"/>
         <source>Select the day with valid oximetry data in daily view first.</source>
         <translation>Επιλέξτε την ημέρα με έγκυρα δεδομένα οξυμετρίας σε ημερήσια προβολή πρώτα.</translation>
     </message>
@@ -4736,7 +5387,7 @@ No space was reclaimed — the database was already compact.</source>
         <translation type="vanished">Το προφίλ φόρτωσης &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1119"/>
+        <location filename="../oscar/mainwindow.cpp" line="1252"/>
         <source>Imported %1 CPAP session(s) from
 
 %2</source>
@@ -4745,12 +5396,12 @@ No space was reclaimed — the database was already compact.</source>
 %2</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1119"/>
+        <location filename="../oscar/mainwindow.cpp" line="1252"/>
         <source>Import Success</source>
         <translation>Εισαγωγή επιτυχίας</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1121"/>
+        <location filename="../oscar/mainwindow.cpp" line="1254"/>
         <source>Already up to date with CPAP data at
 
 %1</source>
@@ -4759,12 +5410,12 @@ No space was reclaimed — the database was already compact.</source>
 %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1121"/>
+        <location filename="../oscar/mainwindow.cpp" line="1254"/>
         <source>Up to date</source>
         <translation>Ενημερωμένος</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1327"/>
+        <location filename="../oscar/mainwindow.cpp" line="1460"/>
         <source>Choose a folder</source>
         <translation>Επιλέξτε ένα φάκελο</translation>
     </message>
@@ -4773,27 +5424,27 @@ No space was reclaimed — the database was already compact.</source>
         <translation type="vanished">Δεν έχει επιλεγεί προφίλ για την εισαγωγή.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1412"/>
+        <location filename="../oscar/mainwindow.cpp" line="1545"/>
         <source>Import is already running in the background.</source>
         <translation>Η εισαγωγή εκτελείται ήδη στο παρασκήνιο.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1525"/>
+        <location filename="../oscar/mainwindow.cpp" line="1658"/>
         <source>A %1 file structure for a %2 was located at:</source>
         <translation>Μια δομή αρχείου %1 για ένα %2 βρέθηκε στο:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1527"/>
+        <location filename="../oscar/mainwindow.cpp" line="1660"/>
         <source>A %1 file structure was located at:</source>
         <translation>Μια δομή αρχείου %1 βρισκόταν στη διεύθυνση:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1421"/>
+        <location filename="../oscar/mainwindow.cpp" line="1554"/>
         <source>Would you like to import from this location?</source>
         <translation>Θα θέλατε να εισαγάγετε από αυτήν την τοποθεσία;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1596"/>
+        <location filename="../oscar/mainwindow.cpp" line="1729"/>
         <source>Specify</source>
         <translation>Προσδιορίζω</translation>
     </message>
@@ -4802,64 +5453,79 @@ No space was reclaimed — the database was already compact.</source>
         <translation type="vanished">Η πρόσβαση στις προτιμήσεις έχει αποκλειστεί μέχρι να ολοκληρωθεί ο επανυπολογισμός.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2181"/>
+        <location filename="../oscar/mainwindow.cpp" line="2769"/>
         <source>There was an error saving screenshot to file &quot;%1&quot;</source>
         <translation>Παρουσιάστηκε σφάλμα κατά την αποθήκευση του στιγμιότυπου οθόνης στο αρχείο &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2183"/>
+        <location filename="../oscar/mainwindow.cpp" line="2771"/>
         <source>Screenshot saved to file &quot;%1&quot;</source>
         <translation>Το στιγμιότυπο οθόνης αποθηκεύτηκε στο αρχείο &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2730"/>
+        <location filename="../oscar/mainwindow.cpp" line="2904"/>
+        <source>The How-To Guide will open in your default browser</source>
+        <translation type="unfinished">Ο οδηγός χρήσης θα ανοίξει στο προεπιλεγμένο πρόγραμμα περιήγησης</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="2911"/>
+        <source>The OSCAR 2 Reference Manual will open in your default browser</source>
+        <translation type="unfinished">Το εγχειρίδιο αναφοράς OSCAR 2 θα ανοίξει στο προεπιλεγμένο πρόγραμμα περιήγησης</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="3454"/>
         <source>Please note, that this could result in loss of data if OSCAR&apos;s backups have been disabled.</source>
         <translation>Σημειώστε ότι αυτό θα μπορούσε να οδηγήσει σε απώλεια δεδομένων αν τα αντίγραφα ασφαλείας του OSCAR έχουν απενεργοποιηθεί.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2755"/>
+        <location filename="../oscar/mainwindow.cpp" line="3480"/>
         <source>Would you like to import from your own backups now? (you will have no data visible for this device until you do)</source>
         <translation type="unfinished">Θέλετε να εισαγάγετε από τα δικά σας αντίγραφα ασφαλείας τώρα; (δεν θα έχετε ορατά δεδομένα για αυτή τη συσκευή μέχρι να το κάνετε)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2868"/>
+        <location filename="../oscar/mainwindow.cpp" line="3594"/>
         <source>OSCAR does not have any backups for this device!</source>
         <translation type="unfinished">Το OSCAR δεν έχει αντίγραφα ασφαλείας για αυτή τη συσκευή!</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2869"/>
+        <location filename="../oscar/mainwindow.cpp" line="3595"/>
         <source>Unless you have made &lt;i&gt;your &lt;b&gt;own&lt;/b&gt; backups for ALL of your data for this device&lt;/i&gt;, &lt;font size=+2&gt;you will lose this device&apos;s data &lt;b&gt;permanently&lt;/b&gt;!&lt;/font&gt;</source>
         <translation type="unfinished">Εκτός αν έχετε δημιουργήσει &lt;i&gt;τα &lt;b&gt;δικά&lt;/b&gt; σας αντίγραφα ασφαλείας για ΟΛΑ τα δεδομένα σας για αυτή τη συσκευή&lt;/i&gt;, &lt;font size=+2&gt;θα χάσετε τα δεδομένα αυτής της συσκευής &lt;b&gt;μόνιμα&lt;/b&gt;!&lt;/font&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2875"/>
+        <location filename="../oscar/mainwindow.cpp" line="3601"/>
         <source>You are about to &lt;font size=+2&gt;obliterate&lt;/font&gt; OSCAR&apos;s device database for the following device:&lt;/p&gt;</source>
         <translation type="unfinished">Πρόκειται να &lt;font size=+2&gt;διαγράψετε οριστικά&lt;/font&gt; τη βάση δεδομένων συσκευής του OSCAR για την ακόλουθη συσκευή:&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2932"/>
+        <location filename="../oscar/mainwindow.cpp" line="3615"/>
+        <source>Purging data for %1 %2...</source>
+        <translation type="unfinished">Εκκαθάριση δεδομένων για %1 %2...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.cpp" line="3676"/>
         <source>A file permission error caused the purge process to fail; you will have to delete the following folder manually:</source>
         <translation type="unfinished">Ένα σφάλμα δικαιωμάτων αρχείου προκάλεσε αποτυχία της διαδικασίας εκκαθάρισης· θα πρέπει να διαγράψετε τον ακόλουθο φάκελο χειροκίνητα:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3316"/>
+        <location filename="../oscar/mainwindow.cpp" line="4069"/>
         <source>There was a problem opening MSeries block File: </source>
         <translation>Παρουσιάστηκε πρόβλημα κατά το άνοιγμα του αρχείου MSeries Αρχείο: </translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3320"/>
+        <location filename="../oscar/mainwindow.cpp" line="4073"/>
         <source>MSeries Import complete</source>
         <translation>Η εισαγωγή του MSeries ολοκληρώθηκε</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1594"/>
+        <location filename="../oscar/mainwindow.cpp" line="1727"/>
         <source>Yes</source>
         <translation>Ναí</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1578"/>
-        <location filename="../oscar/mainwindow.cpp" line="1595"/>
-        <location filename="../oscar/mainwindow.cpp" line="2607"/>
+        <location filename="../oscar/mainwindow.cpp" line="1711"/>
+        <location filename="../oscar/mainwindow.cpp" line="1728"/>
+        <location filename="../oscar/mainwindow.cpp" line="3314"/>
         <source>Cancel</source>
         <translation>Ματαíωση</translation>
     </message>
@@ -4867,42 +5533,42 @@ No space was reclaimed — the database was already compact.</source>
 <context>
     <name>MinMaxWidget</name>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2080"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2371"/>
         <source>Auto-Fit</source>
         <translation>Αυτόματη προσαρμογή</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2081"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2372"/>
         <source>Defaults</source>
         <translation>Προεπιλογές</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2082"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2373"/>
         <source>Override</source>
         <translation>Καταπατώ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2083"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2374"/>
         <source>The Y-Axis scaling mode, &apos;Auto-Fit&apos; for automatic scaling, &apos;Defaults&apos; for settings according to manufacturer, and &apos;Override&apos; to choose your own.</source>
         <translation>Ο τρόπος κλιμάκωσης του άξονα Υ, το &apos;Auto-Fit&apos; για αυτόματη κλιμάκωση, &apos;Defaults&apos; για τις ρυθμίσεις σύμφωνα με τον κατασκευαστή και &apos;Override&apos; για να επιλέξετε το δικό σας.</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2089"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2380"/>
         <source>The Minimum Y-Axis value.. Note this can be a negative number if you wish.</source>
         <translation>Η ελάχιστη τιμή αξόνων Y. Σημειώστε ότι αυτό μπορεί να είναι ένας αρνητικός αριθμός εάν το επιθυμείτε.</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2090"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2381"/>
         <source>The Maximum Y-Axis value.. Must be greater than Minimum to work.</source>
         <translation>Η μέγιστη τιμή αξόνων Y .. Πρέπει να είναι μεγαλύτερη από το ελάχιστο για εργασία.</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2125"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2416"/>
         <source>Scaling Mode</source>
         <translation>Λειτουργία κλιμάκωσης</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2147"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2438"/>
         <source>This button resets the Min and Max to match the Auto-Fit</source>
         <translation>Αυτό το κουμπί επαναφέρει τα Min και Max για να ταιριάζει με το Auto-Fit</translation>
     </message>
@@ -5154,8 +5820,8 @@ No space was reclaimed — the database was already compact.</source>
     </message>
     <message>
         <location filename="../oscar/newprofile.ui" line="1067"/>
-        <location filename="../oscar/newprofile.cpp" line="386"/>
         <location filename="../oscar/newprofile.cpp" line="395"/>
+        <location filename="../oscar/newprofile.cpp" line="404"/>
         <source>Next</source>
         <translation type="unfinished">Επόμενο</translation>
     </message>
@@ -5164,7 +5830,7 @@ No space was reclaimed — the database was already compact.</source>
         <translation type="vanished">&amp;Επόμενο</translation>
     </message>
     <message>
-        <location filename="../oscar/newprofile.cpp" line="489"/>
+        <location filename="../oscar/newprofile.cpp" line="498"/>
         <source>Select Country</source>
         <translation>Επιλέξτε χώρα</translation>
     </message>
@@ -5204,22 +5870,22 @@ No space was reclaimed — the database was already compact.</source>
         <translation type="unfinished">Το όνομα &quot;%1&quot; χρησιμοποιείται ήδη από άλλο προφίλ. Παρακαλώ επιλέξτε διαφορετικό όνομα.</translation>
     </message>
     <message>
-        <location filename="../oscar/newprofile.cpp" line="364"/>
+        <location filename="../oscar/newprofile.cpp" line="373"/>
         <source>Rename Failed</source>
         <translation type="unfinished">Αποτυχία μετονομασίας</translation>
     </message>
     <message>
-        <location filename="../oscar/newprofile.cpp" line="365"/>
+        <location filename="../oscar/newprofile.cpp" line="374"/>
         <source>Could not rename the profile directory. Check that no files in the profile are open and that you have write permission.</source>
         <translation type="unfinished">Δεν ήταν δυνατή η μετονομασία του καταλόγου προφίλ. Βεβαιωθείτε ότι δεν υπάρχουν ανοιχτά αρχεία στο προφίλ και ότι διαθέτετε δικαιώματα εγγραφής.</translation>
     </message>
     <message>
-        <location filename="../oscar/newprofile.cpp" line="384"/>
+        <location filename="../oscar/newprofile.cpp" line="393"/>
         <source>Finish</source>
         <translation type="unfinished">Τέλος</translation>
     </message>
     <message>
-        <location filename="../oscar/newprofile.cpp" line="554"/>
+        <location filename="../oscar/newprofile.cpp" line="563"/>
         <source>Close this window</source>
         <translation type="unfinished">Κλείσιμο αυτού του παραθύρου</translation>
     </message>
@@ -5441,11 +6107,15 @@ Note: anonymous sharing may be disabled in your Microsoft account settings.</sou
     </message>
     <message>
         <location filename="../oscar/overview.ui" line="122"/>
+        <location filename="../oscar/overview.cpp" line="454"/>
+        <location filename="../oscar/overview.cpp" line="456"/>
         <source>Custom</source>
         <translation>Επιλέγω</translation>
     </message>
     <message>
         <location filename="../oscar/overview.ui" line="127"/>
+        <location filename="../oscar/overview.cpp" line="454"/>
+        <location filename="../oscar/overview.cpp" line="456"/>
         <source>Snapshot</source>
         <translation type="unfinished">Στιγμιότυπο</translation>
     </message>
@@ -5495,12 +6165,12 @@ Note: anonymous sharing may be disabled in your Microsoft account settings.</sou
         <translation>Γραφικές παραστάσεις</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="153"/>
+        <location filename="../oscar/overview.cpp" line="168"/>
         <source>[Date Widget]</source>
         <translation type="unfinished">[Γραφικό Στοιχείο Ημερομηνίας]</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="279"/>
+        <location filename="../oscar/overview.cpp" line="300"/>
         <source>Respiratory
 Disturbance
 Index</source>
@@ -5509,7 +6179,7 @@ Index</source>
 Δείκτης</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="281"/>
+        <location filename="../oscar/overview.cpp" line="302"/>
         <source>Apnea
 Hypopnea
 Index</source>
@@ -5518,36 +6188,37 @@ Index</source>
 Δείκτης</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="287"/>
+        <location filename="../oscar/overview.cpp" line="311"/>
         <source>Usage</source>
         <translation>Χρήση</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="287"/>
+        <location filename="../oscar/overview.cpp" line="311"/>
         <source>Usage
 (hours)</source>
         <translation>Χρήση
 (ώρες)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="291"/>
+        <location filename="../oscar/overview.cpp" line="317"/>
+        <location filename="../oscar/overview.cpp" line="317"/>
         <source>Session Times</source>
         <translation>Ώρες συνεδρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="299"/>
+        <location filename="../oscar/overview.cpp" line="329"/>
         <source>Total Time in Apnea</source>
         <translation>Συνολικός χρόνος στην άπνοια</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="299"/>
+        <location filename="../oscar/overview.cpp" line="329"/>
         <source>Total Time in Apnea
 (Minutes)</source>
         <translation>Συνολικός χρόνος στην άπνοια
 (Λεπτά)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="363"/>
+        <location filename="../oscar/overview.cpp" line="398"/>
         <source>Body
 Mass
 Index</source>
@@ -5556,514 +6227,1089 @@ Index</source>
 Δείκτης</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="369"/>
+        <location filename="../oscar/overview.cpp" line="405"/>
         <source>How you felt
 (1-10)</source>
         <translation type="unfinished">Πως αισθάνθηκες
 (0-10) {1-10)?}</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.h" line="206"/>
+        <location filename="../oscar/overview.cpp" line="453"/>
+        <source>1 week</source>
+        <translation type="unfinished">1 εβδομάδα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="453"/>
+        <source>2 weeks</source>
+        <translation type="unfinished">2 εβδομάδες</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="453"/>
+        <source>1 month</source>
+        <translation type="unfinished">1 μήνας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="453"/>
+        <source>3 months</source>
+        <translation type="unfinished">3 μήνες</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="454"/>
+        <source>1 year</source>
+        <translation type="unfinished">1 έτος</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="454"/>
+        <location filename="../oscar/overview.cpp" line="456"/>
+        <source>All</source>
+        <translation type="unfinished">Όλα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="456"/>
+        <source>1W</source>
+        <translation type="unfinished">1Ε</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="456"/>
+        <source>2W</source>
+        <translation type="unfinished">2Ε</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="456"/>
+        <source>1M</source>
+        <translation type="unfinished">1Μ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="456"/>
+        <source>3M</source>
+        <translation type="unfinished">3Μ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="456"/>
+        <source>1Y</source>
+        <translation type="unfinished">1Χ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="468"/>
+        <source>Keep the dates now shown as the Custom range</source>
+        <translation type="unfinished">Διατήρηση των ημερομηνιών που εμφανίζονται τώρα ως προσαρμοσμένο εύρος</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="963"/>
+        <source>1 night</source>
+        <translation type="unfinished">1 νύχτα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="963"/>
+        <source>%1 nights</source>
+        <translation type="unfinished">%1 νύχτες</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.h" line="253"/>
         <source>Hide All Graphs</source>
         <translation type="unfinished">Απόκρυψη Όλων των Γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.h" line="207"/>
+        <location filename="../oscar/overview.h" line="254"/>
         <source>Show All Graphs</source>
         <translation type="unfinished">Εμφάνιση Όλων των Γραφημάτων</translation>
     </message>
 </context>
 <context>
+    <name>OverviewDetailsPopup</name>
+    <message>
+        <location filename="../oscar/overviewdetailspopup.cpp" line="110"/>
+        <location filename="../oscar/overviewdetailspopup.cpp" line="111"/>
+        <source>Close</source>
+        <translation type="unfinished">Κλείσε</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewdetailspopup.cpp" line="152"/>
+        <source>No details for this day.</source>
+        <translation type="unfinished">Δεν υπάρχουν λεπτομέρειες για αυτή την ημέρα.</translation>
+    </message>
+</context>
+<context>
+    <name>OverviewStatsRow</name>
+    <message>
+        <location filename="../oscar/overviewstats.cpp" line="163"/>
+        <source>vs previous day</source>
+        <translation type="unfinished">σε σχέση με την προηγούμενη ημέρα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewstats.cpp" line="163"/>
+        <source>vs previous %1 days</source>
+        <translation type="unfinished">σε σχέση με τις προηγούμενες %1 ημέρες</translation>
+    </message>
+</context>
+<context>
     <name>OximeterImport</name>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="61"/>
-        <location filename="../oscar/oximeterimport.cpp" line="44"/>
+        <location filename="../oscar/oximeterimport.cpp" line="147"/>
         <source>Oximeter Import Wizard</source>
         <translation>Οδηγός εισαγωγής οξύμετρου</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="444"/>
         <source>Skip this page next time.</source>
-        <translation>Περάστε αυτή τη σελίδα την επόμενη φορά.</translation>
+        <translation type="vanished">Περάστε αυτή τη σελίδα την επόμενη φορά.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="499"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Please note: &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;First select your correct oximeter type from the pull-down menu below.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Σημείωση: &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Πρώτα επιλέξτε τον σωστό τύπο οξύμετρου από το αναπτυσσόμενο μενού παρακάτω.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="obsolete">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Σημείωση: &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Πρώτα επιλέξτε τον σωστό τύπο οξύμετρου από το αναπτυσσόμενο μενού παρακάτω.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="542"/>
         <source>Where would you like to import from?</source>
-        <translation>Από πού θέλετε να εισάγετε;</translation>
+        <translation type="vanished">Από πού θέλετε να εισάγετε;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="586"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;FIRST Select your Oximeter from these groups:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;ΠΡΩΤΑ Επιλέξτε το Οξύμετρό σας από αυτές τις ομάδες:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="obsolete">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:700;&quot;&gt;ΠΡΩΤΑ Επιλέξτε το Οξύμετρό σας από αυτές τις ομάδες:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="648"/>
         <source>CMS50E/F users, when importing directly, please don&apos;t select upload on your device until OSCAR prompts you to.</source>
-        <translation>Οι χρήστες CMS50E / F, κατά την άμεση εισαγωγή, παρακαλώ μην επιλέξετε μεταφόρτωση στη συσκευή σας μέχρι να σας ζητηθεί από το OSCAR.</translation>
+        <translation type="vanished">Οι χρήστες CMS50E / F, κατά την άμεση εισαγωγή, παρακαλώ μην επιλέξετε μεταφόρτωση στη συσκευή σας μέχρι να σας ζητηθεί από το OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="685"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled, OSCAR will automatically reset your CMS50&apos;s internal clock using your computers current time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Εάν είναι ενεργοποιημένη, το OSCAR θα επαναφέρει αυτόματα το εσωτερικό ρολόι του CMS50 χρησιμοποιώντας τους τρέχοντες χρόνους των υπολογιστών σας.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Εάν είναι ενεργοποιημένη, το OSCAR θα επαναφέρει αυτόματα το εσωτερικό ρολόι του CMS50 χρησιμοποιώντας τους τρέχοντες χρόνους των υπολογιστών σας.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="717"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Here you can enter a 7 character name for this oximeter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Εδώ μπορείτε να εισάγετε ένα όνομα 7 χαρακτήρων για αυτό το οξύμετρο.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Εδώ μπορείτε να εισάγετε ένα όνομα 7 χαρακτήρων για αυτό το οξύμετρο.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="758"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option will erase the imported session from your oximeter after import has completed. &lt;/p&gt;&lt;p&gt;Use with caution,  because if something goes wrong before OSCAR saves your session, you can&apos;t get it back.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Αυτή η επιλογή θα διαγράψει την εισαγωγή από το οξύμετρο σας μετά την ολοκλήρωση της εισαγωγής. &lt;/p&gt;&lt;p&gt;Χρησιμοποιήστε με προσοχή, γιατί αν κάτι πάει στραβά πριν η OSCAR αποθηκεύσει την συνεδρία σας, δεν μπορείτε να την πάρετε πίσω.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Αυτή η επιλογή θα διαγράψει την εισαγωγή από το οξύμετρο σας μετά την ολοκλήρωση της εισαγωγής. &lt;/p&gt;&lt;p&gt;Χρησιμοποιήστε με προσοχή, γιατί αν κάτι πάει στραβά πριν η OSCAR αποθηκεύσει την συνεδρία σας, δεν μπορείτε να την πάρετε πίσω.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="787"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option allows you to import (via cable) from your oximeters internal recordings.&lt;/p&gt;&lt;p&gt;After selecting on this option, old Contec oximeters will require you to use the device&apos;s menu to initiate the upload.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Αυτή η επιλογή σας επιτρέπει να εισάγετε (μέσω καλωδίου) από τις εσωτερικές εγγραφές των oximeters σας.&lt;/p&gt;&lt;p&gt;Μετά την επιλογή αυτής της επιλογής, τα παλαιά οξυμετρικά Contec θα σας ζητήσουν να χρησιμοποιήσετε το μενού της συσκευής για να ξεκινήσετε τη μεταφόρτωση.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Αυτή η επιλογή σας επιτρέπει να εισάγετε (μέσω καλωδίου) από τις εσωτερικές εγγραφές των oximeters σας.&lt;/p&gt;&lt;p&gt;Μετά την επιλογή αυτής της επιλογής, τα παλαιά οξυμετρικά Contec θα σας ζητήσουν να χρησιμοποιήσετε το μενού της συσκευής για να ξεκινήσετε τη μεταφόρτωση.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="829"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If you don&apos;t mind being attached to a running computer overnight, this option provides a useful plethysmogram graph, which gives an indication of heart rhythm, on top of the normal oximetry readings.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Αν δεν σας πειράζει η ύπαρξη ενός συνημμένου σε έναν τρέχοντα υπολογιστή κατά τη διάρκεια της νύχτας, αυτή η επιλογή παρέχει ένα χρήσιμο γράφημα πλεισιοσόγραμμα, το οποίο δίνει ένδειξη για τον καρδιακό ρυθμό, πάνω από τις κανονικές μετρήσεις οξυμετρίας.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Αν δεν σας πειράζει η ύπαρξη ενός συνημμένου σε έναν τρέχοντα υπολογιστή κατά τη διάρκεια της νύχτας, αυτή η επιλογή παρέχει ένα χρήσιμο γράφημα πλεισιοσόγραμμα, το οποίο δίνει ένδειξη για τον καρδιακό ρυθμό, πάνω από τις κανονικές μετρήσεις οξυμετρίας.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="835"/>
         <source>Record attached to computer overnight (provides plethysmogram)</source>
-        <translation>Εγγραφή συνδεδεμένη στον υπολογιστή κατά τη διάρκεια της νύχτας (παρέχει πλεισιοσόγραμμα)</translation>
+        <translation type="vanished">Εγγραφή συνδεδεμένη στον υπολογιστή κατά τη διάρκεια της νύχτας (παρέχει πλεισιοσόγραμμα)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="868"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option allows you to import from data files created by software that came with your Pulse Oximeter, such as SpO2Review.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Αυτή η επιλογή σας επιτρέπει να εισάγετε από αρχεία δεδομένων που δημιουργήθηκαν από το λογισμικό που συνοδεύει το παλμικό οξύμετρο σας, όπως το SpO2Review.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Αυτή η επιλογή σας επιτρέπει να εισάγετε από αρχεία δεδομένων που δημιουργήθηκαν από το λογισμικό που συνοδεύει το παλμικό οξύμετρο σας, όπως το SpO2Review.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="874"/>
         <source>Import from a datafile saved by another program, like SpO2Review</source>
-        <translation>Εισαγωγή από αρχείο δεδομένων αποθηκευμένο από άλλο πρόγραμμα, όπως το SpO2Review</translation>
+        <translation type="vanished">Εισαγωγή από αρχείο δεδομένων αποθηκευμένο από άλλο πρόγραμμα, όπως το SpO2Review</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="918"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Reminder for CPAP users: &lt;/span&gt;&lt;span style=&quot; color:#fb0000;&quot;&gt;Did you remember to import your CPAP sessions first?&lt;br/&gt;&lt;/span&gt;If you forget, you won&apos;t have a valid time to sync this oximetry session to.&lt;br/&gt;To ensure a good sync between devices, always try to start both at the same time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Υπενθύμιση για χρήστες CPAP: &lt;/span&gt;&lt;span style=&quot; color:#fb0000;&quot;&gt;Θυμηθήκατε να εισαγάγετε πρώτα τις συνεδρίες CPAP σας;&lt;br/&gt;&lt;/span&gt;Αν το ξεχάσετε, δεν θα έχετε έγκυρο χρόνο για να συγχρονίσετε αυτή τη συνεδρία οξυμετρίας.&lt;br/&gt;Για να εξασφαλίσετε καλό συγχρονισμό μεταξύ των συσκευών, προσπαθήστε πάντα να τις εκκινείτε ταυτόχρονα.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="obsolete">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Υπενθύμιση για χρήστες CPAP: &lt;/span&gt;&lt;span style=&quot; color:#fb0000;&quot;&gt;Θυμηθήκατε να εισαγάγετε πρώτα τις συνεδρίες CPAP σας;&lt;br/&gt;&lt;/span&gt;Αν το ξεχάσετε, δεν θα έχετε έγκυρο χρόνο για να συγχρονίσετε αυτή τη συνεδρία οξυμετρίας.&lt;br/&gt;Για να εξασφαλίσετε καλό συγχρονισμό μεταξύ των συσκευών, προσπαθήστε πάντα να τις εκκινείτε ταυτόχρονα.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="953"/>
         <source>Please connect your oximeter device</source>
-        <translation>Συνδέστε τη συσκευή οξυμέτρου</translation>
+        <translation type="vanished">Συνδέστε τη συσκευή οξυμέτρου</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="971"/>
         <source>If you can read this, you likely have your oximeter type set wrong in preferences.</source>
-        <translation>Εάν μπορείτε να διαβάσετε αυτό το θέμα, πιθανότατα ο τύπος οξυμέτρου σας έχει ρυθμιστεί λανθασμένα στις προτιμήσεις.</translation>
+        <translation type="vanished">Εάν μπορείτε να διαβάσετε αυτό το θέμα, πιθανότατα ο τύπος οξυμέτρου σας έχει ρυθμιστεί λανθασμένα στις προτιμήσεις.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1000"/>
         <source>Please connect your oximeter device, turn it on, and enter the menu</source>
-        <translation>Συνδέστε τη συσκευή οξυμέτρου, ενεργοποιήστε την και εισέλθετε στο μενού</translation>
+        <translation type="vanished">Συνδέστε τη συσκευή οξυμέτρου, ενεργοποιήστε την και εισέλθετε στο μενού</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1026"/>
         <source>Press Start to commence recording</source>
-        <translation>Πατήστε Έναρξη για να ξεκινήσετε την εγγραφή</translation>
+        <translation type="vanished">Πατήστε Έναρξη για να ξεκινήσετε την εγγραφή</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1071"/>
         <source>Show Live Graphs</source>
-        <translation>Εμφάνιση ζωντανών γραφημάτων</translation>
+        <translation type="vanished">Εμφάνιση ζωντανών γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1101"/>
-        <location filename="../oscar/oximeterimport.ui" line="1353"/>
+        <location filename="../oscar/oximeterimport.ui" line="93"/>
         <source>Duration</source>
         <translation>Διάρκεια</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1774"/>
         <source>Information Page</source>
-        <translation type="unfinished">Σελίδα Πληροφοριών</translation>
+        <translation type="obsolete">Σελίδα Πληροφοριών</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1793"/>
+        <location filename="../oscar/oximeterimport.cpp" line="342"/>
         <source>Cancel</source>
         <translation type="unfinished">Ματαίωση</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1812"/>
         <source>Retry</source>
-        <translation type="unfinished">Επανάληψη</translation>
+        <translation type="obsolete">Επανάληψη</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1831"/>
         <source>Choose Session</source>
-        <translation type="unfinished">Επιλογή Συνεδρίας</translation>
+        <translation type="obsolete">Επιλογή Συνεδρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1850"/>
         <source>End Recording</source>
-        <translation type="unfinished">Τερματισμός Εγγραφής</translation>
+        <translation type="obsolete">Τερματισμός Εγγραφής</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1869"/>
         <source>Sync and Save</source>
-        <translation type="unfinished">Συγχρονισμός και Αποθήκευση</translation>
+        <translation type="obsolete">Συγχρονισμός και Αποθήκευση</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1888"/>
         <source>Save and Finish</source>
-        <translation type="unfinished">Αποθήκευση και Ολοκλήρωση</translation>
+        <translation type="obsolete">Αποθήκευση και Ολοκλήρωση</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1907"/>
-        <location filename="../oscar/oximeterimport.cpp" line="192"/>
         <source>Start</source>
-        <translation type="unfinished">Αρχή</translation>
+        <translation type="obsolete">Αρχή</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1217"/>
         <source>Pulse Rate</source>
-        <translation>Καρδιακός σφυγμός</translation>
+        <translation type="vanished">Καρδιακός σφυγμός</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1309"/>
+        <location filename="../oscar/oximeterimport.ui" line="49"/>
         <source>Multiple Sessions Detected</source>
         <translation>Εντοπίστηκαν πολλαπλές περιόδους σύνδεσης</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1348"/>
+        <location filename="../oscar/oximeterimport.ui" line="88"/>
         <source>Start Time</source>
         <translation>Ωρα έναρξης</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1358"/>
+        <location filename="../oscar/oximeterimport.ui" line="98"/>
         <source>Details</source>
         <translation>Λεπτομέριες</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1375"/>
+        <location filename="../oscar/oximeterimport.ui" line="115"/>
         <source>Import Completed. When did the recording start?</source>
         <translation>Η εισαγωγή ολοκληρώθηκε. Πότε ξεκίνησε η εγγραφή;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1445"/>
+        <location filename="../oscar/oximeterimport.ui" line="185"/>
         <source>Oximeter Starting time</source>
         <translation>Χρόνος έναρξης του οξύμετρου</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1457"/>
+        <location filename="../oscar/oximeterimport.ui" line="197"/>
         <source>I want to use the time reported by my oximeter&apos;s built in clock.</source>
         <translation>Θέλω να χρησιμοποιήσω το χρόνο που αναφέρθηκε από το ενσωματωμένο ρολόι του οξυγονομέτρου μου.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1534"/>
+        <location filename="../oscar/oximeterimport.ui" line="274"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: Syncing to CPAP session starting time will always be more accurate.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Σημείωση: Ο συγχρονισμός με την ώρα έναρξης της περιόδου σύνδεσης CPAP θα είναι πάντα ακριβέστερος.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1555"/>
+        <location filename="../oscar/oximeterimport.ui" line="295"/>
         <source>Choose CPAP session to sync to:</source>
         <translation>Επιλέξτε την περίοδο λειτουργίας CPAP για συγχρονισμό σε:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1675"/>
+        <location filename="../oscar/oximeterimport.ui" line="415"/>
         <source>You can manually adjust the time here if required:</source>
         <translation>Μπορείτε να ρυθμίσετε με μη αυτόματο τρόπο την ώρα εδώ, εάν απαιτείται:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1696"/>
+        <location filename="../oscar/oximeterimport.ui" line="436"/>
         <source>HH:mm:ssap</source>
         <translation>HH:mm:ssap</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="688"/>
         <source>Set device date/time</source>
-        <translation>Ρύθμιση ημερομηνίας / ώρας συσκευής</translation>
+        <translation type="vanished">Ρύθμιση ημερομηνίας / ώρας συσκευής</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="695"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to enable updating the device identifier next import, which is useful for those who have multiple oximeters lying around.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ελέγξτε για να ενεργοποιήσετε την ενημέρωση της επόμενης εισαγωγής του αναγνωριστικού της συσκευής, η οποία είναι χρήσιμη για όσους διαθέτουν πολλαπλά οξυμετρικά όργανα.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ελέγξτε για να ενεργοποιήσετε την ενημέρωση της επόμενης εισαγωγής του αναγνωριστικού της συσκευής, η οποία είναι χρήσιμη για όσους διαθέτουν πολλαπλά οξυμετρικά όργανα.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="698"/>
         <source>Set device identifier</source>
-        <translation>Ορίστε αναγνωριστικό συσκευής</translation>
+        <translation type="vanished">Ορίστε αναγνωριστικό συσκευής</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="761"/>
         <source>Erase session after successful upload</source>
-        <translation>Διαγραφή περιόδου μετά την επιτυχή μεταφόρτωση</translation>
+        <translation type="vanished">Διαγραφή περιόδου μετά την επιτυχή μεταφόρτωση</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="793"/>
         <source>Import directly from a recording on a device</source>
-        <translation>Εισαγάγετε απευθείας από μια εγγραφή σε μια συσκευή</translation>
+        <translation type="vanished">Εισαγάγετε απευθείας από μια εγγραφή σε μια συσκευή</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Reminder for CPAP users: &lt;/span&gt;&lt;span style=&quot; color:#fb0000;&quot;&gt;Did you remember to import your CPAP sessions first?&lt;br/&gt;&lt;/span&gt;If you forget, you won&apos;t have a valid time to sync this oximetry session to.&lt;br/&gt;To a ensure good sync between devices, always try to start both at the same time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Υπενθύμιση για τους χρήστες CPAP: &lt;/span&gt;&lt;span style=&quot; color:#fb0000;&quot;&gt;Θυμήσατε να εισαγάγετε πρώτα τις συνεδρίες CPAP;&lt;br/&gt;&lt;/span&gt;Εάν ξεχάσετε, δεν θα έχετε έγκυρο χρόνο για να συγχρονίσετε αυτή την περίοδο οξυμετρίας.&lt;br/&gt;Για να εξασφαλίσετε καλό συγχρονισμό μεταξύ συσκευών, προσπαθήστε πάντα να ξεκινήσετε και τις δύο ταυτόχρονα.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1325"/>
+        <location filename="../oscar/oximeterimport.ui" line="65"/>
         <source>Please choose which one you want to import into OSCAR</source>
         <translation>Επιλέξτε ποια θέλετε να εισαγάγετε στο OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1399"/>
+        <location filename="../oscar/oximeterimport.ui" line="139"/>
         <source>Day recording (normally would have) started</source>
         <translation type="unfinished">Η ημερήσια εγγραφή (κανονικά θα) είχε ξεκινήσει</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1473"/>
+        <location filename="../oscar/oximeterimport.ui" line="213"/>
         <source>I started this oximeter recording at (or near) the same time as a session on my CPAP device.</source>
         <translation type="unfinished">Ξεκίνησα αυτή την εγγραφή οξυμέτρου την ίδια ώρα (ή κοντά) με μια συνεδρία στη συσκευή CPAP μου.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.ui" line="1502"/>
+        <location filename="../oscar/oximeterimport.ui" line="242"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OSCAR needs a starting time to know where to save this oximetry session to.&lt;/p&gt;&lt;p&gt;Choose one of the following options:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Το OSCAR χρειάζεται χρόνο έναρξης για να μάθει πού να αποθηκεύσει αυτή τη συνεδρία οξυμετρίας. &lt;/P&gt; &lt;p&gt; Επιλέξτε μία από τις παρακάτω επιλογές:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="237"/>
         <source>Scanning for compatible oximeters</source>
-        <translation>Σάρωση για συμβατά οξύμετρα</translation>
+        <translation type="vanished">Σάρωση για συμβατά οξύμετρα</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="269"/>
         <source>Could not detect any connected oximeter devices.</source>
-        <translation>Δεν ήταν δυνατή η ανίχνευση συνδεδεμένων συσκευών οξύμετρου.</translation>
+        <translation type="vanished">Δεν ήταν δυνατή η ανίχνευση συνδεδεμένων συσκευών οξύμετρου.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="277"/>
         <source>Connecting to %1 Oximeter</source>
-        <translation>Σύνδεση στο %1 οξύμετρο</translation>
+        <translation type="vanished">Σύνδεση στο %1 οξύμετρο</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="305"/>
         <source>Renaming this oximeter from &apos;%1&apos; to &apos;%2&apos;</source>
-        <translation>Μετονομάστε αυτό το οξύμετρο από &apos;%1&apos; σε &apos;%2&apos;</translation>
+        <translation type="vanished">Μετονομάστε αυτό το οξύμετρο από &apos;%1&apos; σε &apos;%2&apos;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="308"/>
         <source>Oximeter name is different.. If you only have one and are sharing it between profiles, set the name to the same on both profiles.</source>
-        <translation>Το όνομα του οξυμέτρου είναι διαφορετικό. Εάν έχετε μόνο ένα και το μοιράζεστε μεταξύ των προφίλ, ορίστε το όνομα στην ίδια και στα δύο προφίλ.</translation>
+        <translation type="vanished">Το όνομα του οξυμέτρου είναι διαφορετικό. Εάν έχετε μόνο ένα και το μοιράζεστε μεταξύ των προφίλ, ορίστε το όνομα στην ίδια και στα δύο προφίλ.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="348"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1127"/>
         <source>&quot;%1&quot;, session %2</source>
         <translation>&quot;%1&quot;, περίοδος %2</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="373"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1151"/>
         <source>Nothing to import</source>
         <translation>Τίποτα για εισαγωγή</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="374"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1152"/>
         <source>Your oximeter did not have any valid sessions.</source>
         <translation>Το οξύμετρο σας δεν έχει έγκυρες περιόδους σύνδεσης.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="375"/>
         <source>Close</source>
-        <translation>Κλείσε</translation>
+        <translation type="vanished">Κλείσε</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="378"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1157"/>
         <source>Waiting for %1 to start</source>
         <translation>Αναμονή για την εκκίνηση του %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="379"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1158"/>
         <source>Waiting for the device to start the upload process...</source>
         <translation>Αναμονή της συσκευής να ξεκινήσει τη διαδικασία μεταφόρτωσης ...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="381"/>
         <source>Select upload option on %1</source>
-        <translation>Επιλέξτε επιλογή μεταφόρτωσης στο %1</translation>
+        <translation type="vanished">Επιλέξτε επιλογή μεταφόρτωσης στο %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="382"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1161"/>
         <source>You need to tell your oximeter to begin sending data to the computer.</source>
         <translation>Πρέπει να πείτε στο οξύμετρο σας να αρχίσει να στέλνει δεδομένα στον υπολογιστή.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="383"/>
         <source>Please connect your oximeter, enter it&apos;s menu and select upload to commence data transfer...</source>
-        <translation>Συνδέστε το οξύμετρο σας, εισάγετε το μενού του και επιλέξτε μεταφόρτωση δεδομένων για να ξεκινήσετε τη μεταφορά δεδομένων ...</translation>
+        <translation type="vanished">Συνδέστε το οξύμετρο σας, εισάγετε το μενού του και επιλέξτε μεταφόρτωση δεδομένων για να ξεκινήσετε τη μεταφορά δεδομένων ...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="412"/>
         <source>%1 device is uploading data...</source>
-        <translation>Η συσκευή %1 μεταφορτώνει δεδομένα ...</translation>
+        <translation type="vanished">Η συσκευή %1 μεταφορτώνει δεδομένα ...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="413"/>
         <source>Please wait until oximeter upload process completes. Do not unplug your oximeter.</source>
-        <translation>Περιμένετε μέχρι να ολοκληρωθεί η διαδικασία φόρτωσης του οξυμέτρου. Μην αποσυνδέετε το οξύμετρο.</translation>
+        <translation type="vanished">Περιμένετε μέχρι να ολοκληρωθεί η διαδικασία φόρτωσης του οξυμέτρου. Μην αποσυνδέετε το οξύμετρο.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="432"/>
         <source>Oximeter import completed..</source>
-        <translation>Η εισαγωγή του οξυμέτρου ολοκληρώθηκε ..</translation>
+        <translation type="vanished">Η εισαγωγή του οξυμέτρου ολοκληρώθηκε ..</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="457"/>
+        <location filename="../oscar/oximeterimport.cpp" line="948"/>
         <source>Select a valid oximetry data file</source>
         <translation>Επιλέξτε ένα έγκυρο αρχείο δεδομένων οξυμετρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="457"/>
+        <location filename="../oscar/oximeterimport.cpp" line="947"/>
         <source>Oximetry Files (*.spo *.spor *.spo2 *.SpO2 *.dat)</source>
         <translation>Αρχεία οξυμετρίας (*.spo *.spor *.spo2 *.SpO2 *.dat)</translation>
     </message>
     <message>
+        <location filename="../oscar/oximeterimport.cpp" line="286"/>
+        <source>Viatom/Wellue</source>
+        <translation type="unfinished">Viatom/Wellue</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="287"/>
+        <source>EMAY</source>
+        <translation type="unfinished">EMAY</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="288"/>
+        <source>Contec CMS50F v3.7+</source>
+        <translation type="unfinished">Contec CMS50F v3.7+</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="289"/>
+        <source>Contec CMS50D+/E/F</source>
+        <translation type="unfinished">Contec CMS50D+/E/F</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="290"/>
+        <source>ChoiceMMed MD300W1</source>
+        <translation type="unfinished">ChoiceMMed MD300W1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="291"/>
+        <source>Other oximeter (CSV)</source>
+        <translation type="unfinished">Άλλο οξύμετρο (CSV)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="313"/>
+        <location filename="../oscar/oximeterimport.cpp" line="382"/>
+        <source>Oximeter</source>
+        <translation type="unfinished">Οξύμετρο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="313"/>
+        <location filename="../oscar/oximeterimport.cpp" line="382"/>
+        <source>Method</source>
+        <translation type="unfinished">Μέθοδος</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="313"/>
+        <location filename="../oscar/oximeterimport.cpp" line="382"/>
+        <source>Import</source>
+        <translation type="unfinished">Εισαγωγή</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="313"/>
+        <location filename="../oscar/oximeterimport.cpp" line="384"/>
+        <source>Match to CPAP</source>
+        <translation type="unfinished">Αντιστοίχιση με CPAP</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="339"/>
+        <location filename="../oscar/oximeterimport.cpp" line="447"/>
+        <source>About oximetry in OSCAR</source>
+        <translation type="unfinished">Σχετικά με την οξυμετρία στο OSCAR</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="343"/>
+        <source>Back</source>
+        <translation type="unfinished">Πίσω</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="344"/>
+        <location filename="../oscar/oximeterimport.cpp" line="434"/>
+        <location filename="../oscar/oximeterimport.cpp" line="440"/>
+        <source>Next</source>
+        <translation type="unfinished">Επόμενο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="384"/>
+        <source>Summary</source>
+        <translation type="unfinished">Σύνοψη</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="389"/>
+        <source>USB cable</source>
+        <translation type="unfinished">Καλώδιο USB</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="389"/>
         <location filename="../oscar/oximeterimport.cpp" line="479"/>
+        <source>Bluetooth</source>
+        <translation type="unfinished">Bluetooth</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="390"/>
+        <source>Serial cable</source>
+        <translation type="unfinished">Σειριακό καλώδιο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="390"/>
+        <location filename="../oscar/oximeterimport.cpp" line="484"/>
+        <location filename="../oscar/oximeterimport.cpp" line="485"/>
+        <source>Data files</source>
+        <translation type="unfinished">Αρχεία δεδομένων</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="425"/>
+        <source>Save</source>
+        <translation type="unfinished">Αποθήκευση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="427"/>
+        <source>Finish</source>
+        <translation type="unfinished">Τέλος</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="429"/>
+        <source>Choose files...</source>
+        <translation type="unfinished">Επιλογή αρχείων...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="431"/>
+        <source>Connect</source>
+        <translation type="unfinished">Σύνδεση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="465"/>
+        <source>Which oximeter do you have?</source>
+        <translation type="unfinished">Ποιο οξύμετρο έχετε;</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="470"/>
+        <source>Choose your model. OSCAR remembers it for next time.</source>
+        <translation type="unfinished">Επιλέξτε το μοντέλο σας. Το OSCAR θα το θυμάται για την επόμενη φορά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="476"/>
+        <source>O2Ring, O2Ring S, SleepU, Checkme O2, Wearable O2</source>
+        <translation type="unfinished">O2Ring, O2Ring S, SleepU, Checkme O2, Wearable O2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="477"/>
+        <source>USB cable · Bluetooth · Data files</source>
+        <translation type="unfinished">Καλώδιο USB · Bluetooth · Αρχεία δεδομένων</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="478"/>
+        <source>EMO-80 (Bluetooth sleep oximeter)</source>
+        <translation type="unfinished">EMO-80 (οξύμετρο ύπνου Bluetooth)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="480"/>
+        <source>CMS50F v3.7+, CMS50H, CMS50I, CMS50D+ v4.6, Pulox PO-400/500</source>
+        <translation type="unfinished">CMS50F v3.7+, CMS50H, CMS50I, CMS50D+ v4.6, Pulox PO-400/500</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="481"/>
+        <location filename="../oscar/oximeterimport.cpp" line="483"/>
+        <source>Serial cable · Data files</source>
+        <translation type="unfinished">Σειριακό καλώδιο · Αρχεία δεδομένων</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="482"/>
+        <source>CMS50D+, CMS50E, CMS50F, Pulox PO-200/300</source>
+        <translation type="unfinished">CMS50D+, CMS50E, CMS50F, Pulox PO-200/300</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="484"/>
+        <source>Data files (.dat) saved by its own software</source>
+        <translation type="unfinished">Αρχεία δεδομένων (.dat) που αποθηκεύτηκαν από το δικό του λογισμικό</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="485"/>
+        <source>A CSV file with the date and time, SpO2 and pulse on each row</source>
+        <translation type="unfinished">Ένα αρχείο CSV με ημερομηνία και ώρα, SpO2 και σφυγμό σε κάθε γραμμή</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="548"/>
+        <source>Not sure which one? Plug in your oximeter&apos;s cable: a Viatom/Wellue cable is marked when OSCAR finds it.</source>
+        <translation type="unfinished">Δεν είστε σίγουροι ποιο είναι; Συνδέστε το καλώδιο του οξυμέτρου: ένα καλώδιο Viatom/Wellue επισημαίνεται όταν το εντοπίσει το OSCAR.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="559"/>
+        <source>Cable found</source>
+        <translation type="unfinished">Βρέθηκε καλώδιο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="573"/>
+        <source>How do you want to import?</source>
+        <translation type="unfinished">Πώς θέλετε να κάνετε εισαγωγή;</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="613"/>
+        <source>Through the USB cable</source>
+        <translation type="unfinished">Μέσω του καλωδίου USB</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="614"/>
+        <source>Use the cable that came with the oximeter. Close O2 Insight Pro first.</source>
+        <translation type="unfinished">Χρησιμοποιήστε το καλώδιο που συνόδευε το οξύμετρο. Κλείστε πρώτα το O2 Insight Pro.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="615"/>
+        <source>Over Bluetooth</source>
+        <translation type="unfinished">Μέσω Bluetooth</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="616"/>
+        <source>Through its serial cable</source>
+        <translation type="unfinished">Μέσω του σειριακού του καλωδίου</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="617"/>
+        <source>Set the oximeter&apos;s clock to this computer&apos;s time when connecting</source>
+        <translation type="unfinished">Ρύθμιση του ρολογιού του οξυμέτρου στην ώρα αυτού του υπολογιστή κατά τη σύνδεση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="621"/>
+        <source>From data files</source>
+        <translation type="unfinished">Από αρχεία δεδομένων</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="629"/>
+        <source>Oximeter name (optional):</source>
+        <translation type="unfinished">Όνομα οξυμέτρου (προαιρετικό):</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="631"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1282"/>
+        <source>Oximeter (CSV)</source>
+        <translation type="unfinished">Οξύμετρο (CSV)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="632"/>
+        <source>Leave it empty to keep all CSV imports together. Give each of your oximeters its own name to keep their recordings apart.</source>
+        <translation type="unfinished">Αφήστε το κενό για να μένουν μαζί όλες οι εισαγωγές CSV. Δώστε σε κάθε οξύμετρό σας δικό του όνομα για να μένουν ξεχωριστές οι καταγραφές τους.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="643"/>
+        <source>Accepted format</source>
+        <translation type="unfinished">Αποδεκτή μορφή</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="650"/>
+        <source>One reading per row: date and time, SpO2 (%), pulse (bpm). Any sampling rate works, because each row has its own time.</source>
+        <translation type="unfinished">Μία μέτρηση ανά γραμμή: ημερομηνία και ώρα, SpO2 (%), σφυγμός (bpm). Οποιοσδήποτε ρυθμός δειγματοληψίας λειτουργεί, επειδή κάθε γραμμή έχει τη δική της ώρα.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="652"/>
+        <source>Date and time as &lt;tt&gt;yyyy-MM-dd HH:mm:ss&lt;/tt&gt; (seconds optional; a &quot;T&quot; between date and time is fine). Local time, unless an offset such as &lt;tt&gt;+01:00&lt;/tt&gt; is given.</source>
+        <translation type="unfinished">Ημερομηνία και ώρα ως &lt;tt&gt;yyyy-MM-dd HH:mm:ss&lt;/tt&gt; (τα δευτερόλεπτα είναι προαιρετικά· ένα &quot;T&quot; ανάμεσα σε ημερομηνία και ώρα είναι αποδεκτό). Τοπική ώρα, εκτός αν δοθεί μετατόπιση όπως &lt;tt&gt;+01:00&lt;/tt&gt;.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="654"/>
+        <source>The header is optional. With one, the columns can be in any order, and date and time can be two columns (&quot;Date&quot;, &quot;Time&quot;).</source>
+        <translation type="unfinished">Η κεφαλίδα είναι προαιρετική. Με κεφαλίδα, οι στήλες μπορούν να είναι σε οποιαδήποτε σειρά, και η ημερομηνία και η ώρα μπορούν να είναι δύο στήλες (&quot;Date&quot;, &quot;Time&quot;).</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="656"/>
+        <source>Comma, semicolon or tab between fields.</source>
+        <translation type="unfinished">Κόμμα, ερωτηματικό ή στηλοθέτης ανάμεσα στα πεδία.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="657"/>
+        <source>An empty field or 0 means no reading at that moment.</source>
+        <translation type="unfinished">Ένα κενό πεδίο ή 0 σημαίνει ότι δεν υπάρχει μέτρηση εκείνη τη στιγμή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="658"/>
+        <source>A pause of more than 5 minutes starts a new recording, so one file can hold several nights.</source>
+        <translation type="unfinished">Μια παύση άνω των 5 λεπτών ξεκινά νέα καταγραφή, οπότε ένα αρχείο μπορεί να περιέχει πολλές νύχτες.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="659"/>
+        <source>Files saved with &lt;i&gt;Export as CSV&lt;/i&gt; in Wellue&apos;s O2 Insight Pro import as they are.</source>
+        <translation type="unfinished">Τα αρχεία που αποθηκεύτηκαν με &lt;i&gt;Export as CSV&lt;/i&gt; στο O2 Insight Pro της Wellue εισάγονται όπως είναι.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="686"/>
+        <source>From a CSV file.</source>
+        <translation type="unfinished">Από αρχείο CSV.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="687"/>
+        <source>From your %1 oximeter.</source>
+        <translation type="unfinished">Από το οξύμετρό σας %1.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="699"/>
+        <source>Download straight from the oximeter over the USB cable that came with it, for models that support it. Close Contec&apos;s software first.</source>
+        <translation type="unfinished">Λήψη απευθείας από το οξύμετρο μέσω του καλωδίου USB που το συνόδευε, για τα μοντέλα που το υποστηρίζουν. Κλείστε πρώτα το λογισμικό της Contec.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="701"/>
+        <source>Plug in the oximeter&apos;s USB cable, then choose upload in the oximeter&apos;s menu when OSCAR asks.</source>
+        <translation type="unfinished">Συνδέστε το καλώδιο USB του οξυμέτρου και, όταν σας το ζητήσει το OSCAR, επιλέξτε αποστολή στο μενού του οξυμέτρου.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="713"/>
+        <source>This version of OSCAR can&apos;t read the oximeter&apos;s USB cable.</source>
+        <translation type="unfinished">Αυτή η έκδοση του OSCAR δεν μπορεί να διαβάσει το καλώδιο USB του οξυμέτρου.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="714"/>
+        <source>Cable found, but OSCAR needs your permission to use it; the next page can set that up.</source>
+        <translation type="unfinished">Βρέθηκε καλώδιο, αλλά το OSCAR χρειάζεται την άδειά σας για να το χρησιμοποιήσει· η επόμενη σελίδα μπορεί να τη ρυθμίσει.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="716"/>
+        <source>Cable found on USB.</source>
+        <translation type="unfinished">Βρέθηκε καλώδιο στο USB.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="717"/>
+        <source>No cable found yet. Plug it in; OSCAR waits for it on the next page.</source>
+        <translation type="unfinished">Δεν βρέθηκε ακόμη καλώδιο. Συνδέστε το· το OSCAR θα το περιμένει στην επόμενη σελίδα.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="724"/>
+        <source>Bluetooth is ready.</source>
+        <translation type="unfinished">Το Bluetooth είναι έτοιμο.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="730"/>
+        <source>Put the oximeter in standby and close the Wellue/Viatom app on your phone. The oximeter switches itself off after about two minutes without a connection.</source>
+        <translation type="unfinished">Θέστε το οξύμετρο σε αναμονή και κλείστε την εφαρμογή Wellue/Viatom στο τηλέφωνό σας. Το οξύμετρο απενεργοποιείται μόνο του μετά από περίπου δύο λεπτά χωρίς σύνδεση.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="732"/>
+        <source>Binary data files generated by a Wellue/Viatom app.</source>
+        <translation type="unfinished">Δυαδικά αρχεία δεδομένων που δημιουργήθηκαν από εφαρμογή Wellue/Viatom.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="733"/>
+        <source>Recordings downloaded over the cable or Bluetooth are kept in your profile&apos;s Oximetry_Data folder, so they can be imported again later. OSCAR can set the oximeter&apos;s clock when it connects, which keeps oximetry in step with CPAP data.</source>
+        <translation type="unfinished">Οι καταγραφές που λήφθηκαν μέσω καλωδίου ή Bluetooth φυλάσσονται στον φάκελο Oximetry_Data του προφίλ σας, ώστε να μπορούν να εισαχθούν ξανά αργότερα. Το OSCAR μπορεί να ρυθμίσει το ρολόι του οξυμέτρου κατά τη σύνδεση, ώστε η οξυμετρία να συμβαδίζει με τα δεδομένα CPAP.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="738"/>
+        <source>Switch the oximeter on and close EMAY&apos;s app on your phone.</source>
+        <translation type="unfinished">Ενεργοποιήστε το οξύμετρο και κλείστε την εφαρμογή της EMAY στο τηλέφωνό σας.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="739"/>
+        <source>Recordings OSCAR downloaded earlier (.spo2), in your profile&apos;s Oximetry_Data folder.</source>
+        <translation type="unfinished">Καταγραφές που έλαβε νωρίτερα το OSCAR (.spo2), στον φάκελο Oximetry_Data του προφίλ σας.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="740"/>
+        <source>OSCAR can set the oximeter&apos;s clock when it connects, and never deletes recordings from it. EMAY support was written from EMAY&apos;s app and hasn&apos;t been tried on a device yet: please report how it goes.</source>
+        <translation type="unfinished">Το OSCAR μπορεί να ρυθμίσει το ρολόι του οξυμέτρου κατά τη σύνδεση και δεν διαγράφει ποτέ καταγραφές από αυτό. Η υποστήριξη EMAY γράφτηκε βάσει της εφαρμογής της EMAY και δεν έχει δοκιμαστεί ακόμη σε συσκευή: ενημερώστε μας πώς πήγε.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="745"/>
+        <source>A CSV file with the date and time, SpO2 and pulse on each row (format below).</source>
+        <translation type="unfinished">Ένα αρχείο CSV με ημερομηνία και ώρα, SpO2 και σφυγμό σε κάθε γραμμή (μορφή παρακάτω).</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="746"/>
+        <source>Each recording is stored at its own time, so there is nothing to match to CPAP data. Recordings already in OSCAR are skipped.</source>
+        <translation type="unfinished">Κάθε καταγραφή αποθηκεύεται στη δική της ώρα, οπότε δεν υπάρχει τίποτα για αντιστοίχιση με δεδομένα CPAP. Οι καταγραφές που υπάρχουν ήδη στο OSCAR παραλείπονται.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="750"/>
+        <source>MedView .dat files saved by the ChoiceMMed software.</source>
+        <translation type="unfinished">Αρχεία MedView .dat που αποθηκεύτηκαν από το λογισμικό της ChoiceMMed.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="751"/>
+        <source>If you want to match the recording to CPAP data, import your CPAP data first.</source>
+        <translation type="unfinished">Αν θέλετε να αντιστοιχίσετε την καταγραφή με δεδομένα CPAP, εισαγάγετε πρώτα τα δεδομένα CPAP.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="754"/>
+        <source>Files saved by SpO2Review or a similar program (.spo, .spor, .spo2).</source>
+        <translation type="unfinished">Αρχεία που αποθηκεύτηκαν από το SpO2Review ή παρόμοιο πρόγραμμα (.spo, .spor, .spo2).</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/oximeterimport.cpp" line="802"/>
+        <source>%n recording(s) imported into OSCAR.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="804"/>
+        <source>No recordings were imported. Go back to download them, or check the download&apos;s messages for what went wrong.</source>
+        <translation type="unfinished">Δεν εισήχθησαν καταγραφές. Επιστρέψτε για να τις λάβετε ή δείτε τα μηνύματα της λήψης για να μάθετε τι πήγε στραβά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="806"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1301"/>
+        <source>Nothing was imported</source>
+        <translation type="unfinished">Δεν εισήχθη τίποτα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="867"/>
+        <source>Please wait until the oximeter has finished uploading. Do not unplug it.</source>
+        <translation type="unfinished">Περιμένετε μέχρι το οξύμετρο να ολοκληρώσει την αποστολή. Μην το αποσυνδέσετε.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="897"/>
+        <source>The Viatom/Wellue data files were imported into OSCAR.</source>
+        <translation type="unfinished">Τα αρχεία δεδομένων Viatom/Wellue εισήχθησαν στο OSCAR.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="945"/>
+        <source>Oximetry Files (*.dat)</source>
+        <translation type="unfinished">Αρχεία οξυμετρίας (*.dat)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="946"/>
+        <source>Recordings OSCAR downloaded (*.spo2)</source>
+        <translation type="unfinished">Καταγραφές που έλαβε το OSCAR (*.spo2)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="963"/>
         <source>No Oximetry module could parse the given file:</source>
         <translation>Καμία μονάδα Οξυμετρίας δεν θα μπορούσε να αναλύσει το δεδομένο αρχείο:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="527"/>
+        <location filename="../oscar/oximeterimport.cpp" line="998"/>
+        <source>Try again</source>
+        <translation type="unfinished">Δοκιμάστε ξανά</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1053"/>
+        <source>Looking for the oximeter on its cable...</source>
+        <translation type="unfinished">Αναζήτηση του οξυμέτρου στο καλώδιό του...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1082"/>
+        <source>Connecting to your %1</source>
+        <translation type="unfinished">Σύνδεση με το %1 σας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1091"/>
+        <source>No oximeter was found on a serial cable. Check that it is plugged in and switched on, and that no other program is using it.</source>
+        <translation type="unfinished">Δεν βρέθηκε οξύμετρο σε σειριακό καλώδιο. Ελέγξτε ότι είναι συνδεδεμένο και ενεργοποιημένο και ότι κανένα άλλο πρόγραμμα δεν το χρησιμοποιεί.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1103"/>
+        <source>Connecting to %1...</source>
+        <translation type="unfinished">Σύνδεση με %1...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1160"/>
+        <source>Select upload on your oximeter</source>
+        <translation type="unfinished">Επιλέξτε αποστολή στο οξύμετρό σας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1162"/>
+        <source>Please connect your oximeter, enter its menu and select upload to commence data transfer...</source>
+        <translation type="unfinished">Συνδέστε το οξύμετρό σας, μπείτε στο μενού του και επιλέξτε αποστολή για να ξεκινήσει η μεταφορά δεδομένων...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1184"/>
+        <source>The oximeter did not start sending.</source>
+        <translation type="unfinished">Το οξύμετρο δεν άρχισε να στέλνει.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1191"/>
+        <source>%1 is uploading data...</source>
+        <translation type="unfinished">Το %1 στέλνει δεδομένα...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1192"/>
+        <source>Please wait until the oximeter upload process completes. Do not unplug your oximeter.</source>
+        <translation type="unfinished">Περιμένετε μέχρι να ολοκληρωθεί η αποστολή από το οξύμετρο. Μην αποσυνδέσετε το οξύμετρό σας.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1209"/>
+        <source>Oximeter import completed.</source>
+        <translation type="unfinished">Η εισαγωγή από το οξύμετρο ολοκληρώθηκε.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1227"/>
+        <source>Choose CSV oximetry files</source>
+        <translation type="unfinished">Επιλέξτε αρχεία οξυμετρίας CSV</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1228"/>
+        <source>CSV files (*.csv *.txt);;All files (*)</source>
+        <translation type="unfinished">Αρχεία CSV (*.csv *.txt);;Όλα τα αρχεία (*)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1252"/>
+        <source>%1: %2 more line(s) could not be read</source>
+        <translation type="unfinished">%1: %2 ακόμη γραμμή(ές) δεν διαβάστηκαν</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/oximeterimport.cpp" line="1284"/>
+        <source>%n recording(s) imported into OSCAR as &quot;%1&quot;.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1286"/>
+        <source>No recordings were imported.</source>
+        <translation type="unfinished">Δεν εισήχθησαν καταγραφές.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/oximeterimport.cpp" line="1289"/>
+        <source>%n recording(s) were already in OSCAR.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1292"/>
+        <source>Problems found:</source>
+        <translation type="unfinished">Προβλήματα που βρέθηκαν:</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/oximeterimport.cpp" line="1297"/>
+        <source>... and %n more.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1350"/>
+        <source>These recordings carry their own start time, so there is nothing to match to CPAP data.</source>
+        <translation type="unfinished">Αυτές οι καταγραφές έχουν τη δική τους ώρα έναρξης, οπότε δεν υπάρχει τίποτα για αντιστοίχιση με δεδομένα CPAP.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1357"/>
+        <source>Import finished</source>
+        <translation type="unfinished">Η εισαγωγή ολοκληρώθηκε</translation>
+    </message>
+    <message>
         <source>Live Oximetry Mode</source>
-        <translation>Λειτουργία ζωντανής οξυμετρίας</translation>
+        <translation type="vanished">Λειτουργία ζωντανής οξυμετρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="579"/>
         <source>Live Oximetry Stopped</source>
-        <translation>Η ζωντανή οξυμετρία σταμάτησε</translation>
+        <translation type="vanished">Η ζωντανή οξυμετρία σταμάτησε</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="580"/>
         <source>Live Oximetry import has been stopped</source>
-        <translation>Η εισαγωγή ζωντανής οξυμετρίας έχει σταματήσει</translation>
+        <translation type="vanished">Η εισαγωγή ζωντανής οξυμετρίας έχει σταματήσει</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1144"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1324"/>
         <source>Oximeter Session %1</source>
         <translation>Οξυμετρική συνεδρία %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1189"/>
+        <location filename="../oscar/oximeterimport.cpp" line="449"/>
         <source>OSCAR gives you the ability to track Oximetry data alongside CPAP session data, which can give valuable insight into the effectiveness of CPAP treatment. It will also work standalone with your Pulse Oximeter, allowing you to store, track and review your recorded data.</source>
         <translation>Το OSCAR σάς δίνει τη δυνατότητα να παρακολουθείτε τα δεδομένα οξυμετρίας παράλληλα με τα δεδομένα της συνεδρίας CPAP, τα οποία μπορούν να δώσουν πολύτιμη εικόνα της αποτελεσματικότητας της θεραπείας με CPAP. Θα λειτουργεί επίσης αυτόνομα με το παλμικό οξύμετρο σας, επιτρέποντάς σας να αποθηκεύετε, να παρακολουθείτε και να ελέγχετε τα καταγεγραμμένα δεδομένα σας.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1200"/>
+        <location filename="../oscar/oximeterimport.cpp" line="451"/>
         <source>If you are trying to sync oximetry and CPAP data, please make sure you imported your CPAP sessions first before proceeding!</source>
         <translation>Αν προσπαθείτε να συγχρονίσετε δεδομένα οξυμετρίας και CPAP, βεβαιωθείτε ότι έχετε εισαγάγει πρώτα τις συνεδρίες CPAP πριν προχωρήσετε!</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1203"/>
         <source>For OSCAR to be able to locate and read directly from your Oximeter device, you need to ensure the correct device drivers (eg. USB to Serial UART) have been installed on your computer. For more information about this, %1click here%2.</source>
-        <translation>Για να μπορεί ο OSCAR να εντοπίσει και να διαβαστεί απευθείας από τη συσκευή του οξυμέτρου, πρέπει να βεβαιωθείτε ότι έχουν εγκατασταθεί στον υπολογιστή σας τα σωστά προγράμματα οδήγησης συσκευών (π.χ. USB to Serial UART). Για περισσότερες πληροφορίες σχετικά με αυτό, %1 κάντε κλικ εδώ %2.</translation>
+        <translation type="vanished">Για να μπορεί ο OSCAR να εντοπίσει και να διαβαστεί απευθείας από τη συσκευή του οξυμέτρου, πρέπει να βεβαιωθείτε ότι έχουν εγκατασταθεί στον υπολογιστή σας τα σωστά προγράμματα οδήγησης συσκευών (π.χ. USB to Serial UART). Για περισσότερες πληροφορίες σχετικά με αυτό, %1 κάντε κλικ εδώ %2.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="509"/>
         <source>Oximeter not detected</source>
-        <translation>Δεν ανιχνεύθηκε οξύμετρο</translation>
+        <translation type="vanished">Δεν ανιχνεύθηκε οξύμετρο</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="516"/>
         <source>Couldn&apos;t access oximeter</source>
-        <translation>Δεν ήταν δυνατή η πρόσβαση στο οξύμετρο</translation>
+        <translation type="vanished">Δεν ήταν δυνατή η πρόσβαση στο οξύμετρο</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="530"/>
         <source>Starting up...</source>
-        <translation>Ξεκινώντας...</translation>
+        <translation type="vanished">Ξεκινώντας...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="531"/>
         <source>If you can still read this after a few seconds, cancel and try again</source>
-        <translation>Αν εξακολουθείτε να το διαβάσετε μετά από μερικά δευτερόλεπτα, ακυρώστε και δοκιμάστε ξανά</translation>
+        <translation type="vanished">Αν εξακολουθείτε να το διαβάσετε μετά από μερικά δευτερόλεπτα, ακυρώστε και δοκιμάστε ξανά</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="578"/>
         <source>Live Import Stopped</source>
-        <translation>Η Ζωντανή Εισαγωγή σταμάτησε</translation>
+        <translation type="vanished">Η Ζωντανή Εισαγωγή σταμάτησε</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="631"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1496"/>
         <source>%1 session(s) on %2, starting at %3</source>
         <translation>%1 συνεδρία (ες) στο %2, ξεκινώντας από %3</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="635"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1500"/>
         <source>No CPAP data available on %1</source>
         <translation>Δεν υπάρχουν διαθέσιμα δεδομένα CPAP στο %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="769"/>
         <source>Recording...</source>
-        <translation>Εγγραφή...</translation>
+        <translation type="vanished">Εγγραφή...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="776"/>
         <source>Finger not detected</source>
-        <translation>Δεν εντοπίστηκε δάκτυλο</translation>
+        <translation type="vanished">Δεν εντοπίστηκε δάκτυλο</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="876"/>
         <source>I want to use the time my computer recorded for this live oximetry session.</source>
-        <translation>Θέλω να χρησιμοποιήσω την ώρα που κατέγραψε ο υπολογιστής μου για αυτή τη συνεδρία ζωντανής οξυμετρίας.</translation>
+        <translation type="vanished">Θέλω να χρησιμοποιήσω την ώρα που κατέγραψε ο υπολογιστής μου για αυτή τη συνεδρία ζωντανής οξυμετρίας.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="879"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1394"/>
         <source>I need to set the time manually, because my oximeter doesn&apos;t have an internal clock.</source>
         <translation>Πρέπει να ρυθμίσω την ώρα χειροκίνητα, επειδή το οξύμετρο μου δεν διαθέτει εσωτερικό ρολόι.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="891"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1464"/>
+        <source>it overlaps the recording by %1%.</source>
+        <translation type="unfinished">επικαλύπτει την καταγραφή κατά %1%.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1466"/>
+        <source>its length is closest to the recording&apos;s, on the last night with CPAP data.</source>
+        <translation type="unfinished">η διάρκειά της είναι η πλησιέστερη σε αυτή της καταγραφής, την τελευταία νύχτα με δεδομένα CPAP.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1468"/>
+        <source>Suggested: the CPAP session starting %1, because %2 Choose another below if it isn&apos;t right.</source>
+        <translation type="unfinished">Πρόταση: η συνεδρία CPAP που ξεκινά στις %1, επειδή %2 Επιλέξτε άλλη παρακάτω αν δεν είναι σωστή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="1578"/>
         <source>Something went wrong getting session data</source>
         <translation>Κάτι πήγε στραβά με την απόκτηση δεδομένων συνόδου</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1185"/>
         <source>Welcome to the Oximeter Import Wizard</source>
-        <translation>Καλώς ήλθατε στον Οδηγό εισαγωγής οξύμετρου</translation>
+        <translation type="vanished">Καλώς ήλθατε στον Οδηγό εισαγωγής οξύμετρου</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1187"/>
+        <location filename="../oscar/oximeterimport.cpp" line="448"/>
         <source>Pulse Oximeters are medical devices used to measure blood oxygen saturation. During extended Apnea events and abnormal breathing patterns, blood oxygen saturation levels can drop significantly, and can indicate issues that need medical attention.</source>
         <translation>Τα παλμικά οξύμετρα είναι ιατρικές συσκευές που χρησιμοποιούνται για τη μέτρηση του κορεσμού οξυγόνου στο αίμα. Κατά τη διάρκεια εκτεταμένων περιπτώσεων άπνοιας και μη φυσιολογικών ρυθμών αναπνοής, τα επίπεδα κορεσμού οξυγόνου στο αίμα μπορούν να μειωθούν σημαντικά και μπορεί να υποδεικνύουν ζητήματα που χρειάζονται ιατρική φροντίδα.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1191"/>
         <source>OSCAR is currently compatible with Contec CMS50D+, CMS50E, CMS50F and CMS50I serial oximeters.&lt;br/&gt;(Note: Direct importing from bluetooth models is &lt;span style=&quot; font-weight:600;&quot;&gt;probably not&lt;/span&gt; possible yet)</source>
-        <translation>Το OSCAR είναι συμβατό με τα σειριακά οξύμετρα Contec CMS50D +, CMS50E, CMS50F και CMS50I. &lt;br/&gt; (Σημείωση: Η άμεση εισαγωγή από τα μοντέλα bluetooth είναι πιθανή ακόμα και &lt;/span&gt; &lt;span style = &quot;font-weight: )</translation>
+        <translation type="vanished">Το OSCAR είναι συμβατό με τα σειριακά οξύμετρα Contec CMS50D +, CMS50E, CMS50F και CMS50I. &lt;br/&gt; (Σημείωση: Η άμεση εισαγωγή από τα μοντέλα bluetooth είναι πιθανή ακόμα και &lt;/span&gt; &lt;span style = &quot;font-weight: )</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1193"/>
         <source>You may wish to note, other companies, such as Pulox, simply rebadge Contec CMS50&apos;s under new names, such as the Pulox PO-200, PO-300, PO-400. These should also work.</source>
-        <translation>Μπορεί να θέλετε να σημειώσετε ότι άλλες εταιρείες, όπως το Pulox, απλά αναδιαμορφώνουν το Contec CMS50 με νέα ονόματα, όπως τα Pulox PO-200, PO-300, PO-400. Αυτά θα πρέπει επίσης να λειτουργούν.</translation>
+        <translation type="vanished">Μπορεί να θέλετε να σημειώσετε ότι άλλες εταιρείες, όπως το Pulox, απλά αναδιαμορφώνουν το Contec CMS50 με νέα ονόματα, όπως τα Pulox PO-200, PO-300, PO-400. Αυτά θα πρέπει επίσης να λειτουργούν.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1196"/>
         <source>It also can read from ChoiceMMed MD300W1 oximeter .dat files.</source>
-        <translation>Μπορεί επίσης να διαβάσει από τα αρχεία .dat του οξυμέτρου ChoiceMMed MD300W1.</translation>
+        <translation type="vanished">Μπορεί επίσης να διαβάσει από τα αρχεία .dat του οξυμέτρου ChoiceMMed MD300W1.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1198"/>
+        <location filename="../oscar/oximeterimport.cpp" line="450"/>
         <source>Please remember:</source>
         <translation>Παρακαλώ θυμηθείτε:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1202"/>
         <source>Important Notes:</source>
-        <translation>Σημαντικές σημειώσεις:</translation>
+        <translation type="vanished">Σημαντικές σημειώσεις:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1205"/>
+        <location filename="../oscar/oximeterimport.cpp" line="755"/>
         <source>Contec CMS50D+ devices do not have an internal clock, and do not record a starting time. If you do not have a CPAP session to link a recording to, you will have to enter the start time manually after the import process is completed.</source>
         <translation>Οι συσκευές Contec CMS50D + δεν διαθέτουν εσωτερικό ρολόι και δεν καταγράφουν χρόνο έναρξης. Αν δεν έχετε μια περίοδο λειτουργίας CPAP για να συνδέσετε μια εγγραφή, θα πρέπει να εισαγάγετε την ώρα έναρξης με το χέρι μετά την ολοκλήρωση της διαδικασίας εισαγωγής.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1207"/>
+        <location filename="../oscar/oximeterimport.cpp" line="452"/>
         <source>Even for devices with an internal clock, it is still recommended to get into the habit of starting oximeter records at the same time as CPAP sessions, because CPAP internal clocks tend to drift over time, and not all can be reset easily.</source>
         <translation>Ακόμα και για συσκευές με εσωτερικό ρολόι, συνιστάται ακόμη να έχετε τη συνήθεια να εκκινείτε αρχεία οξυμέτρου ταυτόχρονα με τις συνεδρίες CPAP, επειδή τα εσωτερικά ρολόγια CPAP τείνουν να μετακινούνται με την πάροδο του χρόνου και δεν μπορούν να επαναληφθούν εύκολα όλα.</translation>
     </message>
@@ -6071,49 +7317,40 @@ Index</source>
 <context>
     <name>Oximetry</name>
     <message>
-        <location filename="../oscar/oximetry.ui" line="89"/>
         <source>Date</source>
-        <translation>Ημερομηνία</translation>
+        <translation type="vanished">Ημερομηνία</translation>
     </message>
     <message>
-        <location filename="../oscar/oximetry.ui" line="102"/>
         <source>d/MM/yy h:mm:ss AP</source>
-        <translation>d/MM/yy h:mm:ss AP</translation>
+        <translation type="vanished">d/MM/yy h:mm:ss AP</translation>
     </message>
     <message>
-        <location filename="../oscar/oximetry.ui" line="131"/>
         <source>Reset</source>
-        <translation type="unfinished">Επαναφορά</translation>
+        <translation type="obsolete">Επαναφορά</translation>
     </message>
     <message>
-        <location filename="../oscar/oximetry.ui" line="366"/>
         <source>Open .spo/R File</source>
-        <translation type="unfinished">Άνοιγμα αρχείου .spo/R</translation>
+        <translation type="obsolete">Άνοιγμα αρχείου .spo/R</translation>
     </message>
     <message>
-        <location filename="../oscar/oximetry.ui" line="385"/>
         <source>Serial Import</source>
-        <translation type="unfinished">Εισαγωγή σειριακής θύρας</translation>
+        <translation type="obsolete">Εισαγωγή σειριακής θύρας</translation>
     </message>
     <message>
-        <location filename="../oscar/oximetry.ui" line="398"/>
         <source>Start Live</source>
-        <translation type="unfinished">Έναρξη ζωντανής λήψης</translation>
+        <translation type="obsolete">Έναρξη ζωντανής λήψης</translation>
     </message>
     <message>
-        <location filename="../oscar/oximetry.ui" line="450"/>
         <source>Rescan Ports</source>
-        <translation type="unfinished">Επανασάρωση θυρών</translation>
+        <translation type="obsolete">Επανασάρωση θυρών</translation>
     </message>
     <message>
-        <location filename="../oscar/oximetry.ui" line="245"/>
         <source>Pulse</source>
-        <translation>Σφυγμός</translation>
+        <translation type="vanished">Σφυγμός</translation>
     </message>
     <message>
-        <location filename="../oscar/oximetry.ui" line="421"/>
         <source>Serial Port</source>
-        <translation>Σειριακή θύρα</translation>
+        <translation type="vanished">Σειριακή θύρα</translation>
     </message>
 </context>
 <context>
@@ -7041,7 +8278,7 @@ Intended for support staff and developers.</source>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="2688"/>
         <location filename="../oscar/preferencesdialog.ui" line="2727"/>
-        <location filename="../oscar/preferencesdialog.ui" line="3252"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3362"/>
         <source>Statistics</source>
         <translation>Στατιστική</translation>
     </message>
@@ -7174,7 +8411,27 @@ Try it and see if you like it.</source>
         <translation type="unfinished">Ενεργοποιεί τη Μπάρα Συνεδρίας στα Γραφήματα Σημαιών Συμβάντων, SpO2, Παλμών και Κίνησης</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3221"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3223"/>
+        <source>Colour scheme</source>
+        <translation type="unfinished">Συνδυασμός χρωμάτων</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3231"/>
+        <source>Follow system</source>
+        <translation type="unfinished">Όπως το σύστημα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3236"/>
+        <source>Light</source>
+        <translation type="unfinished">Ελαφρύς</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3241"/>
+        <source>Dark</source>
+        <translation type="unfinished">Σκοτεινό</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3264"/>
         <source>Use Qt&apos;s Fusion theme instead of the platform-native theme.
 Provides a consistent look across platforms.
 OSCAR will restart when you click OK.</source>
@@ -7183,7 +8440,7 @@ OSCAR will restart when you click OK.</source>
 Το OSCAR θα επανεκκινήσει όταν κάνετε κλικ στο OK.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3226"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3269"/>
         <source>Use Fusion theme (OSCAR will restart)</source>
         <translation type="unfinished">Χρήση θέματος Fusion (το OSCAR θα επανεκκινήσει)</translation>
     </message>
@@ -7428,268 +8685,329 @@ This option must be enabled before import, otherwise a purge is required.</sourc
         <translation type="unfinished">Απενεργοποίηση ημερήσιων τίτλων γραφήματος</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3271"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3276"/>
+        <source>Show tooltips, including those on graphs, in your system&apos;s colors instead of OSCAR&apos;s black on yellow.
+Follows high contrast themes, and dark mode if it was on when OSCAR started.</source>
+        <translation type="unfinished">Εμφάνιση των συμβουλών οθόνης, και αυτών στα γραφήματα, με τα χρώματα του συστήματός σας αντί για το μαύρο σε κίτρινο του OSCAR.
+Ακολουθεί τα θέματα υψηλής αντίθεσης και τη σκοτεινή λειτουργία, αν ήταν ενεργή όταν ξεκίνησε το OSCAR.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3280"/>
+        <source>Use system tooltip colors</source>
+        <translation type="unfinished">Χρήση χρωμάτων συστήματος για τις συμβουλές οθόνης</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3287"/>
+        <source>Show the Modern Welcome, Daily and Overview pages. Untick to go back to the Classic pages.</source>
+        <translation type="unfinished">Εμφάνιση των σύγχρονων σελίδων Καλωσόρισμα, Καθημερινά και Συνολική εικόνα. Αποεπιλέξτε για επιστροφή στις κλασικές σελίδες.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3290"/>
+        <source>Use Modern design</source>
+        <translation type="unfinished">Χρήση σύγχρονης σχεδίασης</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3299"/>
+        <source>Welcome card colour</source>
+        <translation type="unfinished">Χρώμα καρτών καλωσορίσματος</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3306"/>
+        <source>Plain: no card colour. By group: tint shows the kind of number. By status: green or red when the night is better or worse than both averages.</source>
+        <translation type="unfinished">Απλό: χωρίς χρώμα στις κάρτες. Κατά ομάδα: η απόχρωση δείχνει το είδος του αριθμού. Κατά κατάσταση: πράσινο ή κόκκινο όταν η νύχτα είναι καλύτερη ή χειρότερη και από τους δύο μέσους όρους.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3310"/>
+        <source>Plain</source>
+        <translation type="unfinished">Απλό</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3315"/>
+        <source>By group</source>
+        <translation type="unfinished">Κατά ομάδα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3320"/>
+        <source>By status</source>
+        <translation type="unfinished">Κατά κατάσταση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="3381"/>
         <source>Every 3rd Line</source>
         <translation type="unfinished">Κάθε 3η Γραμμή</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3276"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3386"/>
         <source>Every 2nd Line</source>
         <translation type="unfinished">Κάθε 2η Γραμμή</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3281"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3391"/>
         <source>Disabled</source>
         <translation type="unfinished">Απενεργοποιημένο</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3305"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3415"/>
         <source> Alternating Color Spacing</source>
         <translation type="unfinished"> Εναλλασσόμενη Απόσταση Χρώματος</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3327"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3437"/>
         <source>Fonts (Application wide settings)</source>
         <translation>Γραμματοσειρές (ρυθμίσεις ευρείας εφαρμογής)</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3362"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3472"/>
         <source>Font</source>
         <translation>Γραμματοσειρά</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3381"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3491"/>
         <source>Size</source>
         <translation>Μέγεθος</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3400"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3510"/>
         <source>Bold  </source>
         <translation>Τολμηρός  </translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3422"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3532"/>
         <source>Italic</source>
         <translation>Πλαίσιο</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3435"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3545"/>
         <source>Application</source>
         <translation>Εφαρμογή</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3499"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3609"/>
         <source>Graph Text</source>
         <translation>Γραφικό κείμενο</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3560"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3670"/>
         <source>Graph Titles</source>
         <translation>Τίτλοι γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3621"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3731"/>
         <source>Big  Text</source>
         <translation>Μεγάλο κείμενο</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3688"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="530"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="662"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3798"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="547"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="679"/>
         <source>Details</source>
         <translation>Λεπτομέριες</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3720"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3830"/>
         <source>Cancel</source>
         <translation type="unfinished">Ματαίωση</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3727"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3837"/>
         <source>Ok</source>
         <translation type="unfinished">Εντάξει</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="525"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="656"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="542"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="673"/>
         <source>Name</source>
         <translation>Ονομα</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="526"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="657"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="543"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="674"/>
         <source>Color</source>
         <translation>Χρώμα</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="528"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="545"/>
         <source>Flag Type</source>
         <translation>Τύπος σημαίας</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="529"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="661"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="546"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="678"/>
         <source>Label</source>
         <translation>Επιγραφή</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="546"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="563"/>
         <source>CPAP Events</source>
         <translation>Εκδηλώσεις CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="547"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="564"/>
         <source>Oximeter Events</source>
         <translation>Οξύμετρο Γεγονότα</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="548"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="565"/>
         <source>Positional Events</source>
         <translation>Θέματα γεγονότων</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="549"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="566"/>
         <source>Sleep Stage Events</source>
         <translation>Εκδηλώσεις ύπνου</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="550"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="567"/>
         <source>Unknown Events</source>
         <translation>Άγνωστα συμβάντα</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="722"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="739"/>
         <source>Double click to change the descriptive name this channel.</source>
         <translation>Κάντε διπλό κλικ για να αλλάξετε το περιγραφικό όνομα αυτού του καναλιού.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="600"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="729"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="617"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="746"/>
         <source>Double click to change the default color for this channel plot/flag/data.</source>
         <translation>Κάντε διπλό κλικ για να αλλάξετε το προεπιλεγμένο χρώμα για αυτό το διάγραμμα / σημαία / δεδομένα του καναλιού.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="2683"/>
         <location filename="../oscar/preferencesdialog.ui" line="2722"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="527"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="658"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="544"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="675"/>
         <source>Overview</source>
         <translation>ΣΦΑΙΡΙΚΗ ΕΙΚΟΝΑ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="89"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="91"/>
         <source>No CPAP devices detected</source>
         <translation type="unfinished">Δεν εντοπίστηκαν συσκευές CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="90"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="92"/>
         <source>Will you be using a ResMed brand device?</source>
         <translation type="unfinished">Θα χρησιμοποιείτε συσκευή της μάρκας ResMed;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="97"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="99"/>
         <source>&lt;p&gt;&lt;b&gt;Please Note:&lt;/b&gt; OSCAR&apos;s advanced session splitting capabilities are not possible with &lt;b&gt;ResMed&lt;/b&gt; devices due to a limitation in the way their settings and summary data is stored, and therefore they have been disabled for this profile.&lt;/p&gt;&lt;p&gt;On ResMed devices, days will &lt;b&gt;split at noon&lt;/b&gt; like in ResMed&apos;s commercial software.&lt;/p&gt;</source>
         <translation type="unfinished">&lt;p&gt;&lt;b&gt;Σημείωση:&lt;/b&gt; Οι προηγμένες δυνατότητες διαχωρισμού συνεδριών του OSCAR δεν είναι δυνατές με συσκευές &lt;b&gt;ResMed&lt;/b&gt; λόγω περιορισμού στον τρόπο αποθήκευσης των ρυθμίσεων και των δεδομένων σύνοψης, και επομένως έχουν απενεργοποιηθεί για αυτό το προφίλ.&lt;/p&gt;&lt;p&gt;Στις συσκευές ResMed, οι ημέρες θα &lt;b&gt;διαχωρίζονται στο μεσημέρι&lt;/b&gt; όπως στο εμπορικό λογισμικό της ResMed.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="246"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1372"/>
         <source>Must enable Permissive Mode (see Clinical Tab)</source>
         <translation type="unfinished">Πρέπει να ενεργοποιηθεί η Επιτρεπτική Λειτουργία (βλ. Καρτέλα Κλινικής)</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="405"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="422"/>
         <source>Rolling (recommended)</source>
         <translation type="unfinished">Κυλιόμενη (συνιστάται)</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="406"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="244"/>
+        <source>Follow system: light or dark as set in your operating system. Light or Dark: always that.
+The moon or sun button at the right end of the tabs also switches between Light and Dark.</source>
+        <translation type="unfinished">Όπως το σύστημα: φωτεινό ή σκοτεινό όπως έχει οριστεί στο λειτουργικό σας σύστημα. Φωτεινό ή Σκοτεινό: πάντα έτσι.
+Το κουμπί φεγγαριού ή ήλιου στο δεξί άκρο των καρτελών εναλλάσσει επίσης μεταξύ Φωτεινού και Σκοτεινού.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="246"/>
+        <source>Follow system: light or dark as set in your operating system. Light or Dark: always that.
+OSCAR will restart when you click OK.</source>
+        <translation type="unfinished">Όπως το σύστημα: φωτεινό ή σκοτεινό όπως έχει οριστεί στο λειτουργικό σας σύστημα. Φωτεινό ή Σκοτεινό: πάντα έτσι.
+Το OSCAR θα επανεκκινήσει όταν κάνετε κλικ στο OK.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="423"/>
         <source>Whole night</source>
         <translation type="unfinished">Όλη η νύχτα</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="407"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="424"/>
         <source>First hour</source>
         <translation type="unfinished">Πρώτη ώρα</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="408"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="425"/>
         <source>Manual</source>
         <translation type="unfinished">Χειροκίνητη</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="592"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="609"/>
         <source>Double click to change the descriptive name the &apos;%1&apos; channel.</source>
         <translation>Κάντε διπλό κλικ για να αλλάξετε το περιγραφικό όνομα το κανάλι &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="605"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="622"/>
         <source>Whether this flag has a dedicated overview chart.</source>
         <translation>Είτε αυτή η σημαία έχει ειδικό χάρτη επισκόπησης.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="615"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="632"/>
         <source>Here you can change the type of flag shown for this event</source>
         <translation>Εδώ μπορείτε να αλλάξετε τον τύπο της σημαίας που εμφανίζεται για αυτό το συμβάν</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="620"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="753"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="637"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="770"/>
         <source>This is the short-form label to indicate this channel on screen.</source>
         <translation>Αυτή είναι η ετικέτα μικρής μορφής για την ένδειξη αυτού του καναλιού στην οθόνη.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="626"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="759"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="643"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="776"/>
         <source>This is a description of what this channel does.</source>
         <translation>Αυτή είναι μια περιγραφή του τι κάνει αυτό το κανάλι.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="659"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="676"/>
         <source>Lower</source>
         <translation>χαμηλότερος</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="660"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="677"/>
         <source>Upper</source>
         <translation>Ανώτερος</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="679"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="696"/>
         <source>CPAP Waveforms</source>
         <translation>CPAP κυματομορφές</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="680"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="697"/>
         <source>Oximeter Waveforms</source>
         <translation>Ομομετρικά κύματα</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="681"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="698"/>
         <source>Positional Waveforms</source>
         <translation>Θέση κυματομορφών</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="682"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="699"/>
         <source>Sleep Stage Waveforms</source>
         <translation>Κυματομορφές φάσης ύπνου</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="738"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="755"/>
         <source>Whether a breakdown of this waveform displays in overview.</source>
         <translation>Είτε υπάρχει ανάλυση της κυματομορφής αυτής σε επισκόπηση.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="743"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="760"/>
         <source>Here you can set the &lt;b&gt;lower&lt;/b&gt; threshold used for certain calculations on the %1 waveform</source>
         <translation>Εδώ μπορείτε να ορίσετε το κατώτατο όριο &lt;b&gt; χαμηλότερο &lt;/b&gt; που χρησιμοποιείται για ορισμένους υπολογισμούς στην κυματομορφή %1</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="748"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="765"/>
         <source>Here you can set the &lt;b&gt;upper&lt;/b&gt; threshold used for certain calculations on the %1 waveform</source>
         <translation>Εδώ μπορείτε να ορίσετε το κατώτατο όριο &lt;b&gt; άνω &lt;/b&gt; που χρησιμοποιείται για ορισμένους υπολογισμούς στην κυματομορφή %1</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="876"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="893"/>
         <source>Data Processing Required</source>
         <translation>Απαιτείται επεξεργασία δεδομένων</translation>
     </message>
@@ -7702,7 +9020,7 @@ Are you sure you want to make these changes?</source>
 Είστε βέβαιοι ότι θέλετε να κάνετε αυτές τις αλλαγές;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="889"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="906"/>
         <source>Data Reindex Required</source>
         <translation>Απαιτείται αναδημιουργία δεδομένων</translation>
     </message>
@@ -7715,12 +9033,12 @@ Are you sure you want to make these changes?</source>
 Είστε βέβαιοι ότι θέλετε να κάνετε αυτές τις αλλαγές;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="896"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="913"/>
         <source>Restart Required</source>
         <translation>Απαιτείται επανεκκίνηση</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="897"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="914"/>
         <source>One or more of the changes you have made will require this application to be restarted, in order for these changes to come into effect.
 
 Would you like do this now?</source>
@@ -7729,27 +9047,27 @@ Would you like do this now?</source>
 Θα θέλατε να το κάνετε τώρα;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1293"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1315"/>
         <source>ResMed S9 devices routinely delete certain data from your SD card older than 7 and 30 days (depending on resolution).</source>
         <translation type="unfinished">Οι συσκευές ResMed S9 διαγράφουν τακτικά ορισμένα δεδομένα από την κάρτα SD που είναι παλαιότερα από 7 και 30 ημέρες (ανάλογα με την ανάλυση).</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1294"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1316"/>
         <source> If you ever need to reimport this data again (whether in OSCAR or ResScan) this data won&apos;t come back.</source>
         <translation> Αν ποτέ χρειαστεί να επανεισάγετε ξανά αυτά τα δεδομένα (είτε στο OSCAR είτε στο ResScan), αυτά τα δεδομένα δεν θα επανέλθουν.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1295"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1317"/>
         <source> If you need to conserve disk space, please remember to carry out manual backups.</source>
         <translation> Εάν θέλετε να εξοικονομήσετε χώρο στο δίσκο, παρακαλούμε να θυμάστε να κάνετε χειροκίνητα αντίγραφα ασφαλείας.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1296"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1318"/>
         <source> Are you sure you want to disable these backups?</source>
         <translation> Είστε βέβαιοι ότι θέλετε να απενεργοποιήσετε αυτά τα αντίγραφα ασφαλείας;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1420"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1462"/>
         <source>Switching off backups is not a good idea, because OSCAR needs these to rebuild the database if errors are found.
 
 </source>
@@ -7758,87 +9076,87 @@ Would you like do this now?</source>
 </translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1421"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1463"/>
         <source>Are you really sure you want to do this?</source>
         <translation>Είστε σίγουροι ότι θέλετε να το κάνετε αυτό;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="74"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="76"/>
         <source>Flag</source>
         <translation>Σημαία</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="51"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="53"/>
         <source>Clinical Mode:</source>
         <translation type="unfinished">Κλινική Λειτουργία:</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="52"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="54"/>
         <source>Reports what is on the data card, all of it including any and all data deselected in the Permissive mode.</source>
         <translation type="unfinished">Αναφέρει ό,τι βρίσκεται στην κάρτα δεδομένων, όλα ανεξαιρέτως, συμπεριλαμβανομένων τυχόν δεδομένων που έχουν αποεπιλεγεί στη Λειτουργία Επιτρεπόμενου.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="53"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="55"/>
         <source>Basically replicates the reports and data stored on the devices data card.</source>
         <translation type="unfinished">Βασικά αναπαράγει τις αναφορές και τα δεδομένα που είναι αποθηκευμένα στην κάρτα δεδομένων της συσκευής.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="54"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="56"/>
         <source>This includes pap devices, oximeters, etc. Compliance reports fall under this mode.</source>
         <translation type="unfinished">Αυτό περιλαμβάνει συσκευές pap, οξύμετρα κ.λπ. Οι αναφορές συμμόρφωσης εμπίπτουν σε αυτή τη λειτουργία.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="55"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="57"/>
         <source>Compliance reports always include all data within the chosen Compliance period, even if otherwise deselected.</source>
         <translation type="unfinished">Οι αναφορές συμμόρφωσης περιλαμβάνουν πάντα όλα τα δεδομένα εντός της επιλεγμένης περιόδου Συμμόρφωσης, ακόμα και αν έχουν αποεπιλεγεί.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="57"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="59"/>
         <source>Permissive Mode:</source>
         <translation type="unfinished">Λειτουργία Επιτρεπόμενου:</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="58"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="60"/>
         <source>Allows user to select which data sets/ sessions to be used for calculations and display.</source>
         <translation type="unfinished">Επιτρέπει στον χρήστη να επιλέξει ποια σύνολα δεδομένων/συνεδρίες θα χρησιμοποιηθούν για υπολογισμούς και εμφάνιση.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="59"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="61"/>
         <source>Additional charts and calculations may be available that are not available from the vendor data.</source>
         <translation type="unfinished">Ενδέχεται να είναι διαθέσιμα επιπλέον γραφήματα και υπολογισμοί που δεν είναι διαθέσιμοι από τα δεδομένα του κατασκευαστή.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="60"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="62"/>
         <source>Enables Custom UserFlags displayed in the statistics Therapy Efficacy section</source>
         <translation type="unfinished">Ενεργοποιεί τις Προσαρμοσμένες Σημαίες Χρήστη που εμφανίζονται στην ενότητα Αποτελεσματικότητας Θεραπείας των στατιστικών</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="61"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="63"/>
         <source>Enables Steady Breathing Event Flags and Waveform (see CPAP tab)</source>
         <translation type="unfinished">Ενεργοποιεί τις Σημαίες Γεγονότων Σταθερής Αναπνοής και το Κυματόγραμμα (βλέπε καρτέλα CPAP)</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="75"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="77"/>
         <source>Minor Flag</source>
         <translation>Μικρή σημαία</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="76"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="78"/>
         <source>Span</source>
         <translation>Σπιθαμή</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="77"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="79"/>
         <source>Always Minor</source>
         <translation>Πάντα Μικρά</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="329"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="346"/>
         <source>Never</source>
         <translation>Ποτέ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="877"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="894"/>
         <source>A data re/decompression procedure is required to apply these changes. This operation may take a couple of minutes to complete.
 
 Are you sure you want to make these changes?</source>
@@ -7847,7 +9165,7 @@ Are you sure you want to make these changes?</source>
 Είστε βέβαιοι ότι θέλετε να κάνετε αυτές τις αλλαγές;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="890"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="907"/>
         <source>A data reindexing procedure is required to apply these changes. This operation may take a couple of minutes to complete.
 
 Are you sure you want to make these changes?</source>
@@ -7856,7 +9174,7 @@ Are you sure you want to make these changes?</source>
 Είστε βέβαιοι ότι θέλετε να κάνετε αυτές τις αλλαγές;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1292"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1314"/>
         <source>This may not be a good idea</source>
         <translation>Αυτό μπορεί να μην είναι μια καλή ιδέα</translation>
     </message>
@@ -8060,79 +9378,86 @@ Are you sure you want to make these changes?</source>
         <translation>Επαναφέρετε το φίλτρο για να δείτε όλα τα προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.ui" line="198"/>
+        <location filename="../oscar/profileselector.ui" line="168"/>
         <source>Version</source>
         <translation>Εκδοχή</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.ui" line="215"/>
+        <location filename="../oscar/profileselector.ui" line="182"/>
+        <location filename="../oscar/profileselector.cpp" line="103"/>
+        <location filename="../oscar/profileselector.cpp" line="508"/>
         <source>Open Profile</source>
         <translation type="unfinished">Άνοιγμα Προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.ui" line="226"/>
+        <location filename="../oscar/profileselector.ui" line="189"/>
+        <location filename="../oscar/profileselector.cpp" line="105"/>
+        <location filename="../oscar/profileselector.cpp" line="509"/>
         <source>Edit Profile</source>
         <translation type="unfinished">Επεξεργασία Προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.ui" line="240"/>
+        <location filename="../oscar/profileselector.ui" line="196"/>
+        <location filename="../oscar/profileselector.cpp" line="107"/>
+        <location filename="../oscar/profileselector.cpp" line="507"/>
         <source>New Profile</source>
         <translation type="unfinished">Νέο Προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.ui" line="258"/>
-        <location filename="../oscar/profileselector.cpp" line="363"/>
+        <location filename="../oscar/profileselector.ui" line="214"/>
+        <location filename="../oscar/profileselector.cpp" line="402"/>
         <source>Profile: None</source>
         <translation>Προφίλ: Κανένα</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.ui" line="278"/>
-        <location filename="../oscar/profileselector.cpp" line="362"/>
+        <location filename="../oscar/profileselector.ui" line="234"/>
+        <location filename="../oscar/profileselector.cpp" line="401"/>
         <source>Please select or create a profile...</source>
         <translation>Επιλέξτε ή δημιουργήστε ένα προφίλ ...</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.ui" line="328"/>
+        <location filename="../oscar/profileselector.ui" line="284"/>
+        <location filename="../oscar/profileselector.cpp" line="109"/>
         <source>Destroy Profile</source>
         <translation>Καταστρέψτε το προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="215"/>
+        <location filename="../oscar/profileselector.cpp" line="272"/>
         <source>Profile</source>
         <translation>Προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="216"/>
+        <location filename="../oscar/profileselector.cpp" line="273"/>
         <source>Ventilator Brand</source>
         <translation>Φίλτρο ανεμιστήρα</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="217"/>
+        <location filename="../oscar/profileselector.cpp" line="274"/>
         <source>Ventilator Model</source>
         <translation>Μοντέλο ανεμιστήρων</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="218"/>
+        <location filename="../oscar/profileselector.cpp" line="275"/>
         <source>Other Data</source>
         <translation>Άλλα δεδομένα</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="219"/>
+        <location filename="../oscar/profileselector.cpp" line="276"/>
         <source>Last Imported</source>
         <translation>Τελευταία εισαγωγή</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="220"/>
+        <location filename="../oscar/profileselector.cpp" line="277"/>
         <source>Name</source>
         <translation>Ονομα</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="264"/>
+        <location filename="../oscar/profileselector.cpp" line="313"/>
         <source>Id: </source>
         <translation type="unfinished">Αναγν.: </translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="361"/>
+        <location filename="../oscar/profileselector.cpp" line="400"/>
         <source>You must create a profile</source>
         <translation>Πρέπει να δημιουργήσετε ένα προφίλ</translation>
     </message>
@@ -8153,12 +9478,12 @@ Are you sure you want to make these changes?</source>
         <translation type="vanished">Ρωτήστε στα φόρουμ πώς να το επαναφέρετε, είναι πραγματικά πολύ εύκολο.</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="505"/>
+        <location filename="../oscar/profileselector.cpp" line="588"/>
         <source>Select a profile first</source>
         <translation>Επιλέξτε πρώτα ένα προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="563"/>
+        <location filename="../oscar/profileselector.cpp" line="646"/>
         <source>The selected profile does not appear to contain any data and cannot be removed by OSCAR</source>
         <translation type="unfinished">Το επιλεγμένο προφίλ δεν φαίνεται να περιέχει δεδομένα και δεν μπορεί να αφαιρεθεί από το OSCAR</translation>
     </message>
@@ -8167,7 +9492,7 @@ Are you sure you want to make these changes?</source>
         <translation type="vanished">Αν προσπαθείτε να διαγράψετε επειδή ξεχάσατε τον κωδικό πρόσβασης, πρέπει είτε να το επαναφέρετε είτε να διαγράψετε το φάκελο προφίλ με μη αυτόματο τρόπο.</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="572"/>
+        <location filename="../oscar/profileselector.cpp" line="655"/>
         <source>You are about to destroy profile &apos;&lt;b&gt;%1&lt;/b&gt;&apos;.</source>
         <translation>Πρόκειται να καταστρέψετε το προφίλ &apos;&lt;b&gt; %1 &lt;/b&gt;&apos;.</translation>
     </message>
@@ -8176,83 +9501,118 @@ Are you sure you want to make these changes?</source>
         <translation type="vanished">Σκεφτείτε προσεκτικά, καθώς αυτό θα διαγράψει ανεπανόρθωτα το προφίλ μαζί με όλα τα &lt;b&gt;δεδομένα αντιγραφής&lt;/b&gt; που είναι αποθηκευμένα κάτω από το &lt;br/&gt;%2.</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="573"/>
+        <location filename="../oscar/profileselector.cpp" line="104"/>
+        <source>Load the selected profile&apos;s data</source>
+        <translation type="unfinished">Φόρτωση των δεδομένων του επιλεγμένου προφίλ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/profileselector.cpp" line="106"/>
+        <source>Change personal, device and doctor details</source>
+        <translation type="unfinished">Αλλαγή προσωπικών στοιχείων, στοιχείων συσκευής και γιατρού</translation>
+    </message>
+    <message>
+        <location filename="../oscar/profileselector.cpp" line="108"/>
+        <source>Set up another person or device</source>
+        <translation type="unfinished">Ρύθμιση άλλου ατόμου ή συσκευής</translation>
+    </message>
+    <message>
+        <location filename="../oscar/profileselector.cpp" line="110"/>
+        <source>Permanently delete the profile and its backups</source>
+        <translation type="unfinished">Οριστική διαγραφή του προφίλ και των αντιγράφων ασφαλείας του</translation>
+    </message>
+    <message>
+        <location filename="../oscar/profileselector.cpp" line="127"/>
+        <source>Version %1</source>
+        <translation type="unfinished">Έκδοση %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/profileselector.cpp" line="461"/>
+        <source>Open</source>
+        <translation type="unfinished">Άνοιγμα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/profileselector.cpp" line="510"/>
+        <source>Close Profile</source>
+        <translation type="unfinished">Κλείσιμο προφίλ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/profileselector.cpp" line="656"/>
         <source>Think carefully, as this will irretrievably delete the profile along with all &lt;b&gt;backup data&lt;/b&gt; stored under&lt;br/&gt;%1.</source>
         <translation type="unfinished">Σκεφτείτε προσεκτικά, καθώς αυτό θα διαγράψει μόνιμα το προφίλ μαζί με όλα τα &lt;b&gt;δεδομένα αντιγράφων ασφαλείας&lt;/b&gt; που είναι αποθηκευμένα στο&lt;br/&gt;%1.</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="574"/>
+        <location filename="../oscar/profileselector.cpp" line="657"/>
         <source>Enter the word &lt;b&gt;DELETE&lt;/b&gt; below (exactly as shown) to confirm.</source>
         <translation>Εισαγάγετε τη λέξη &lt;b&gt;ΔΙΑΓΡΑΦΩ&lt;/b&gt; παρακάτω (ακριβώς όπως φαίνεται) για επιβεβαίωση.</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="582"/>
+        <location filename="../oscar/profileselector.cpp" line="665"/>
         <source>Cancel</source>
         <translation type="unfinished">Ματαίωση</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="583"/>
+        <location filename="../oscar/profileselector.cpp" line="666"/>
         <source>Delete Profile</source>
         <translation type="unfinished">Διαγραφή Προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="594"/>
+        <location filename="../oscar/profileselector.cpp" line="677"/>
         <source>DELETE</source>
         <translation>ΔΙΑΓΡΑΦΩ</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="595"/>
+        <location filename="../oscar/profileselector.cpp" line="678"/>
         <source>Sorry</source>
         <translation>Συγνώμη</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="595"/>
+        <location filename="../oscar/profileselector.cpp" line="678"/>
         <source>You need to enter DELETE in capital letters.</source>
         <translation>Πρέπει να εισάγετε ΔΙΑΓΡΑΦΩ με κεφαλαία γράμματα.</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="609"/>
+        <location filename="../oscar/profileselector.cpp" line="692"/>
         <source>Preparing database for deletion...</source>
         <translation type="unfinished">Προετοιμασία βάσης δεδομένων για διαγραφή...</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="615"/>
+        <location filename="../oscar/profileselector.cpp" line="698"/>
         <source>Deleting profile </source>
         <translation type="unfinished">Διαγραφή προφίλ </translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="640"/>
+        <location filename="../oscar/profileselector.cpp" line="723"/>
         <source>Failed to delete profile from database. The operation has been rolled back.</source>
         <translation type="unfinished">Αποτυχία διαγραφής προφίλ από τη βάση δεδομένων. Η λειτουργία έχει αναιρεθεί.</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="656"/>
+        <location filename="../oscar/profileselector.cpp" line="739"/>
         <source>Deleting backup files...</source>
         <translation type="unfinished">Διαγραφή αρχείων αντιγράφων ασφαλείας...</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="664"/>
+        <location filename="../oscar/profileselector.cpp" line="747"/>
         <source>There was an error deleting the profile directory, you need to manually remove it.</source>
         <translation>Παρουσιάστηκε σφάλμα κατά τη διαγραφή του καταλόγου προφίλ, πρέπει να το καταργήσετε με μη αυτόματο τρόπο.</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="670"/>
-        <location filename="../oscar/profileselector.cpp" line="674"/>
+        <location filename="../oscar/profileselector.cpp" line="753"/>
+        <location filename="../oscar/profileselector.cpp" line="757"/>
         <source>Profile &apos;%1&apos; was successfully deleted</source>
         <translation type="unfinished">Το προφίλ &apos;%1&apos; διαγράφηκε επιτυχώς</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="689"/>
+        <location filename="../oscar/profileselector.cpp" line="772"/>
         <source>%1, %2</source>
         <translation type="unfinished">%1, %2</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="783"/>
+        <location filename="../oscar/profileselector.cpp" line="866"/>
         <source>Name: </source>
         <translation type="unfinished">Όνομα: </translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="805"/>
+        <location filename="../oscar/profileselector.cpp" line="888"/>
         <source>Something went wrong</source>
         <translation type="unfinished">Κάτι πήγε στραβά</translation>
     </message>
@@ -8261,32 +9621,32 @@ Are you sure you want to make these changes?</source>
         <translation type="vanished">Το προφίλ &apos;%1&apos; διαγράφηκε με επιτυχία</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="701"/>
+        <location filename="../oscar/profileselector.cpp" line="784"/>
         <source>Bytes</source>
         <translation>Bytes</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="701"/>
+        <location filename="../oscar/profileselector.cpp" line="784"/>
         <source>KB</source>
         <translation>KB</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="701"/>
+        <location filename="../oscar/profileselector.cpp" line="784"/>
         <source>MB</source>
         <translation>MB</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="701"/>
+        <location filename="../oscar/profileselector.cpp" line="784"/>
         <source>GB</source>
         <translation>GB</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="701"/>
+        <location filename="../oscar/profileselector.cpp" line="784"/>
         <source>TB</source>
         <translation>TB</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="701"/>
+        <location filename="../oscar/profileselector.cpp" line="784"/>
         <source>PB</source>
         <translation>PB</translation>
     </message>
@@ -8299,23 +9659,23 @@ Are you sure you want to make these changes?</source>
         <translation type="vanished">Εκδηλώσεις:</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="746"/>
+        <location filename="../oscar/profileselector.cpp" line="829"/>
         <source>Backups:</source>
         <translation>Δημιουργία αντιγράφων ασφαλείας:</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="747"/>
+        <location filename="../oscar/profileselector.cpp" line="830"/>
         <source>Database (all profiles):</source>
         <translation type="unfinished">Βάση δεδομένων (όλα τα προφίλ):</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="762"/>
-        <location filename="../oscar/profileselector.cpp" line="802"/>
+        <location filename="../oscar/profileselector.cpp" line="845"/>
+        <location filename="../oscar/profileselector.cpp" line="885"/>
         <source>Hide disk usage information</source>
         <translation>Απόκρυψη πληροφοριών χρήσης δίσκου</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="765"/>
+        <location filename="../oscar/profileselector.cpp" line="848"/>
         <source>Show disk usage information</source>
         <translation>Εμφάνιση πληροφοριών χρήσης δίσκου</translation>
     </message>
@@ -8324,27 +9684,27 @@ Are you sure you want to make these changes?</source>
         <translation type="vanished">Ονομα: %1, %2</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="786"/>
+        <location filename="../oscar/profileselector.cpp" line="869"/>
         <source>Phone: %1</source>
         <translation>Τηλέφωνο: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="789"/>
+        <location filename="../oscar/profileselector.cpp" line="872"/>
         <source>Email: &lt;a href=&apos;mailto:%1&apos;&gt;%1&lt;/a&gt;</source>
         <translation>ΗΛΕΚΤΡΟΝΙΚΗ ΔΙΕΥΘΥΝΣΗ: &lt;a href=&apos;mailto:%1&apos;&gt;%1&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="792"/>
+        <location filename="../oscar/profileselector.cpp" line="875"/>
         <source>Address:</source>
         <translation>Διεύθυνση:</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="795"/>
+        <location filename="../oscar/profileselector.cpp" line="878"/>
         <source>No profile information given</source>
         <translation>Δεν έχουν δοθεί πληροφορίες προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/profileselector.cpp" line="798"/>
+        <location filename="../oscar/profileselector.cpp" line="881"/>
         <source>Profile: %1</source>
         <translation>Προφίλ: %1</translation>
     </message>
@@ -8418,192 +9778,227 @@ Are you sure you want to make these changes?</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../oscar/Graphs/MinutesAtPressure.cpp" line="725"/>
-        <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="1189"/>
+        <location filename="../oscar/Graphs/MinutesAtPressure.cpp" line="726"/>
+        <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="1190"/>
         <source>No Data</source>
         <translation>Χωρίς δεδομένα</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gLineOverlay.cpp" line="369"/>
+        <location filename="../oscar/Graphs/gLineOverlay.cpp" line="372"/>
         <source>Events</source>
         <translation>Εκδηλώσεις</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gLineOverlay.cpp" line="367"/>
         <location filename="../oscar/Graphs/gLineOverlay.cpp" line="370"/>
+        <location filename="../oscar/Graphs/gLineOverlay.cpp" line="373"/>
         <source>Duration</source>
         <translation>Διάρκεια</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gLineOverlay.cpp" line="384"/>
+        <location filename="../oscar/Graphs/gLineOverlay.cpp" line="387"/>
         <source>(% %1 in events)</source>
         <translation>(% %1 σε εκδηλώσεις)</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="74"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="413"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="76"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="419"/>
         <source>Jan</source>
         <translation>Ιανουάριο</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="74"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="413"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="76"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="419"/>
         <source>Feb</source>
         <translation>Φεβρουάριος</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="74"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="413"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="76"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="419"/>
         <source>Mar</source>
         <translation>Μάρτιος</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="74"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="413"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="76"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="419"/>
         <source>Apr</source>
         <translation>Απρ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="74"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="413"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="76"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="419"/>
         <source>May</source>
         <translation>Μάης</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="74"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="413"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="76"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="419"/>
         <source>Jun</source>
         <translation>Ιούνιος</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="414"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="77"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="420"/>
         <source>Jul</source>
         <translation>Ιουλ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="414"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="77"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="420"/>
         <source>Aug</source>
         <translation>Αυγ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="414"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="77"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="420"/>
         <source>Sep</source>
         <translation>Σεπ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="414"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="77"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="420"/>
         <source>Oct</source>
         <translation>Οκτ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="414"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="77"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="420"/>
         <source>Nov</source>
         <translation>Νοέμβριος</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="414"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="77"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="420"/>
         <source>Dec</source>
         <translation>Δεκ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="916"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="934"/>
         <source>ft</source>
         <translation>ft</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="917"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="935"/>
         <source>lb</source>
         <translation>lb</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="918"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="936"/>
         <source>oz</source>
         <translation>oz</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="920"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="938"/>
         <source>cmH2O</source>
         <translation>cmH2O</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="223"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="467"/>
         <source>Med.</source>
         <translation>Διάμεσος</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="241"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="485"/>
         <source>Min: %1</source>
         <translation>Ελάχιστη: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="272"/>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="282"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="516"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="526"/>
         <source>Min: </source>
         <translation>Ελάχιστη: </translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="277"/>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="287"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="521"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="531"/>
         <source>Max: </source>
         <translation>Μέγιστη: </translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="306"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="550"/>
         <source>Max: %1</source>
         <translation>Μέγιστη: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="312"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="556"/>
         <source>%1 (%2 days): </source>
         <translation>%1 (%2 ημέρες): </translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="314"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="558"/>
         <source>%1 (%2 day): </source>
         <translation>%1 (%2 ημέρα): </translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="377"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="653"/>
         <source>% in %1</source>
         <translation>% σε %1</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="383"/>
-        <location filename="../oscar/Graphs/gUsageChart.cpp" line="44"/>
-        <location filename="../oscar/SleepLib/common.cpp" line="921"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="659"/>
+        <location filename="../oscar/Graphs/gUsageChart.cpp" line="66"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="939"/>
         <source>Hours</source>
         <translation>Ωρες</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="389"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="665"/>
         <source>Min %1</source>
         <translation>Ελάχιστο %1</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gUsageChart.cpp" line="29"/>
+        <location filename="../oscar/Graphs/gUsageChart.cpp" line="34"/>
+        <source>Below the %1-hour compliance target</source>
+        <translation type="unfinished">Κάτω από τον στόχο συμμόρφωσης των %1 ωρών</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gUsageChart.cpp" line="35"/>
+        <source>Meets the %1-hour compliance target</source>
+        <translation type="unfinished">Επιτυγχάνει τον στόχο συμμόρφωσης των %1 ωρών</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gUsageChart.cpp" line="36"/>
+        <source>Hours of use</source>
+        <translation type="unfinished">Ώρες χρήσης</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gUsageChart.cpp" line="51"/>
         <source>
 Length: %1</source>
         <translation type="unfinished">
 Μήκος: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gUsageChart.cpp" line="95"/>
+        <location filename="../oscar/Graphs/gUsageChart.cpp" line="117"/>
         <source>%1 low usage, %2 no usage, out of %3 days (%4% compliant.) Length: %5 / %6 / %7</source>
         <translation>%1 χαμηλή χρήση, %2 καμία χρήση, εκτός %3 ημέρες (%4% υποχωρητικός). Μήκος: %5 / %6 / %7</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="102"/>
+        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="104"/>
         <source>Sessions: %1 / %2 / %3 Length: %4 / %5 / %6 Longest: %7 / %8 / %9</source>
         <translation>Συνεδρίες: %1 / %2 / %3 Μήκος: %4 / %5 / %6 Μακρύτερα: %7 / %8 / %9</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="221"/>
+        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="122"/>
+        <source>Mask off</source>
+        <translation type="unfinished">Μάσκα απενεργοποιημένη</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="122"/>
+        <source>Mask on</source>
+        <translation type="unfinished">Μάσκα ενεργοποιημένο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="123"/>
+        <source>%1 to %2</source>
+        <translation type="unfinished">%1 έως %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="132"/>
+        <source>Session Times</source>
+        <translation type="unfinished">Ώρες συνεδρίας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="271"/>
         <source>%1
 Length: %3
 Start: %2
@@ -8614,17 +10009,17 @@ Start: %2
 </translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="223"/>
+        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="273"/>
         <source>Mask On</source>
         <translation>Μάσκα ενεργοποιημένο</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="223"/>
+        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="273"/>
         <source>Mask Off</source>
         <translation>Μάσκα απενεργοποιημένη</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="234"/>
+        <location filename="../oscar/Graphs/gSessionTimesChart.cpp" line="284"/>
         <source>%1
 Length: %3
 Start: %2</source>
@@ -8645,111 +10040,121 @@ TTIA: %1</source>
 TTIA: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="922"/>
+        <location filename="../oscar/Graphs/gTTIAChart.cpp" line="87"/>
+        <source>Total time in apnea</source>
+        <translation type="unfinished">Συνολικός χρόνος άπνοιας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gTTIAChart.cpp" line="92"/>
+        <source>Total Time in Apnea</source>
+        <translation type="unfinished">Συνολικός χρόνος στην άπνοια</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/common.cpp" line="940"/>
         <source>Minutes</source>
         <translation>Λεπτά</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="923"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="941"/>
         <source>Seconds</source>
         <translation>Δευτερόλεπτα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="925"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="943"/>
         <source>h</source>
         <translation>h</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="926"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="944"/>
         <source>m</source>
         <translation>m</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="927"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="945"/>
         <source>s</source>
         <translation>s</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="928"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="946"/>
         <source>ms</source>
         <translation>ms</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="929"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="947"/>
         <source>Events/hr</source>
         <translation>Εκδηλώσεις / ώρα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="931"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="949"/>
         <source>Hz</source>
         <translation>Hz</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="932"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="950"/>
         <source>bpm</source>
         <translation>bpm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="934"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="952"/>
         <source>Liters</source>
         <translation>Λίτρα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="935"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="953"/>
         <source>ml</source>
         <translation>ml</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="936"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="954"/>
         <source>Breaths/min</source>
         <translation>Αναπνοές / λεπτό</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="939"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="957"/>
         <source>Severity (0-1)</source>
         <translation>Σοβαρότητα (0-1)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="940"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="958"/>
         <source>Degrees</source>
         <translation>Βαθμοί</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="943"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="961"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2923"/>
         <source>Error</source>
         <translation>Λάθος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="944"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1132"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1133"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1134"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="962"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1163"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1164"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1165"/>
         <source>Warning</source>
         <translation>Προειδοποίηση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="945"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="963"/>
         <source>Information</source>
         <translation>Πληροφορίες</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="946"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="964"/>
         <source>Busy</source>
         <translation>Απασχολημένος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="947"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="965"/>
         <source>Please Note</source>
         <translation>Παρακαλώ σημειώστε</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="951"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="969"/>
         <source>Graphs Switched Off</source>
         <translation>Τα γραφήματα είναι απενεργοποιημένα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="953"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="971"/>
         <source>Sessions Switched Off</source>
         <translation>Οι περίοδοι σύνδεσης απενεργοποιήθηκαν</translation>
     </message>
@@ -8774,166 +10179,178 @@ TTIA: %1</translation>
         <translation type="vanished">&amp;Αποθηκεύσετε</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="963"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="981"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="359"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="359"/>
         <source>BMI</source>
         <translation>BMI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="964"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="982"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="355"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="355"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="355"/>
         <source>Weight</source>
         <translation>Βάρος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="966"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="984"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="230"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="230"/>
         <source>Pulse Rate</source>
         <translation>Καρδιακός σφυγμός</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="968"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="986"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="236"/>
         <source>Plethy</source>
         <translation>Πλήθος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="969"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="987"/>
         <source>Pressure</source>
         <translation>Πίεση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="971"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="989"/>
         <source>Daily</source>
         <translation>Καθημερινά</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="972"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="990"/>
         <source>Profile</source>
         <translation>Προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="973"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="991"/>
         <source>Overview</source>
         <translation>επισκόπηση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="974"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="992"/>
         <source>Oximetry</source>
         <translation>Οξυμετρία</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="976"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="994"/>
         <source>Oximeter</source>
         <translation>Οξύμετρο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="977"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="995"/>
         <source>Event Flags</source>
         <translation>Σημαίες συμβάντων</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="980"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="998"/>
         <source>Default</source>
         <translation>Προκαθορισμένο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="983"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="742"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1032"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1001"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="769"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1063"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2844"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="190"/>
         <source>CPAP</source>
         <translation>CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="984"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1002"/>
         <source>BiPAP</source>
         <translation>BiPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="985"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1003"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2847"/>
         <source>Bi-Level</source>
         <translation>Bi-Level</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="986"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="872"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1004"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="899"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="899"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="899"/>
         <source>EPAP</source>
         <translation>EPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="987"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1005"/>
         <source>EEPAP</source>
         <translation type="unfinished">EEPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="988"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1006"/>
         <source>Min EEPAP</source>
         <translation type="unfinished">Ελάχιστο EEPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="989"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1007"/>
         <source>Max EEPAP</source>
         <translation type="unfinished">Μέγιστο EEPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="990"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="918"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1008"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="945"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="945"/>
         <source>Min EPAP</source>
         <translation>Ελάχιστο EPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="991"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1009"/>
         <source>Max EPAP</source>
         <translation>Μέγιστη EPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="992"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="875"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1010"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="902"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="902"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="902"/>
         <source>IPAP</source>
         <translation>IPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="993"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="921"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1011"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="948"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="948"/>
         <source>Min IPAP</source>
         <translation>Ελάχιστο IPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="994"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="924"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1012"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="951"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="951"/>
         <source>Max IPAP</source>
         <translation>Μέγιστη IPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="995"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1013"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="191"/>
         <source>APAP</source>
         <translation>APAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="996"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1014"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2849"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="197"/>
         <source>ASV</source>
         <translation>ASV</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="997"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1015"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="339"/>
         <source>AVAPS</source>
         <translation>AVAPS</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="998"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1016"/>
         <source>ST/ASV</source>
         <translation>ST/ASV</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1000"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="767"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1018"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="794"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="794"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2908"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2935"/>
         <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="207"/>
@@ -8941,395 +10358,400 @@ TTIA: %1</translation>
         <translation>Υγραντήρας</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1002"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1020"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="182"/>
         <source>H</source>
         <translation>H</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1003"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1021"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="187"/>
         <source>OH</source>
         <translation type="unfinished">ΑΥ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1004"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1022"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="189"/>
         <source>CH</source>
         <translation type="unfinished">ΚΥ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1005"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1023"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="180"/>
         <source>OA</source>
         <translation>OA</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1006"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1024"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="193"/>
         <source>A</source>
         <translation>A</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1008"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1026"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="178"/>
         <source>CA</source>
         <translation>CA</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1009"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1027"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="195"/>
         <source>FL</source>
         <translation>FL</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1010"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1028"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="217"/>
         <source>SA</source>
         <translation>SA</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1011"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1029"/>
         <source>LE</source>
         <translation>LE</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1012"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1030"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="214"/>
         <source>EP</source>
         <translation>EP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1013"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1031"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="199"/>
         <source>VS</source>
         <translation>VS</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1015"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1033"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="201"/>
         <source>VS2</source>
         <translation>VS2</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1016"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1034"/>
         <source>RERA</source>
         <translation>RERA</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1017"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1035"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2835"/>
         <source>PP</source>
         <translation>PP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1018"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1036"/>
         <source>P</source>
         <translation>P</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1019"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1037"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="197"/>
         <source>RE</source>
         <translation>RE</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1020"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1038"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="211"/>
         <source>NR</source>
         <translation>NR</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1021"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1039"/>
         <source>NRI</source>
         <translation>NRI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1022"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1040"/>
         <source>O2</source>
         <translation>O2</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1023"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1041"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2852"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="242"/>
         <source>PC</source>
         <translation>PC</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1024"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1042"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="220"/>
         <source>UF1</source>
         <translation>UF1</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1025"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1043"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="223"/>
         <source>UF2</source>
         <translation>UF2</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1026"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1044"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="226"/>
         <source>UF3</source>
         <translation>UF3</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1028"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1046"/>
         <source>PS</source>
         <translation>PS</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1029"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1047"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="301"/>
         <source>AHI</source>
         <translation>AHI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1030"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1048"/>
         <source>OAHI</source>
         <translation type="unfinished">OAHI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1031"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1049"/>
         <source>CAHI</source>
         <translation type="unfinished">CAHI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1032"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1050"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="310"/>
         <source>RDI</source>
         <translation>RDI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1033"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1051"/>
         <source>AI</source>
         <translation>AI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1034"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1052"/>
         <source>HI</source>
         <translation>HI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1035"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1053"/>
         <source>UAI</source>
         <translation>UAI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1036"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1054"/>
         <source>CAI</source>
         <translation>CAI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1037"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1055"/>
         <source>FLI</source>
         <translation>FLI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1039"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1057"/>
         <source>REI</source>
         <translation>REI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1040"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1058"/>
         <source>EPI</source>
         <translation>EPI</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1042"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1060"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="176"/>
         <source>PB</source>
         <translation>PB</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1046"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1064"/>
         <source>IE</source>
         <translation>IE</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1047"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1065"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="286"/>
         <source>Insp. Time</source>
         <translation>Ώρα εισπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1048"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1066"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="283"/>
         <source>Exp. Time</source>
         <translation>Χρόνος λήξης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1049"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1067"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="289"/>
         <source>Resp. Event</source>
         <translation>Αναπνευστικό συμβάν</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1050"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1068"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="292"/>
         <source>Flow Limitation</source>
         <translation>Περιορισμός ροής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1051"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1069"/>
         <source>Flow Limit</source>
         <translation>Όριο ροής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1052"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1070"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="986"/>
         <source>SensAwake</source>
         <translation>SensAwake</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1053"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1071"/>
         <source>Pat. Trig. Breath</source>
         <translation>Ελαφρό κτύπημα. Κομψός. Αναπνοή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1054"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1072"/>
         <source>Tgt. Min. Vent</source>
         <translation>Στόχευση λεπτών εξαερισμού</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1055"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1073"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="295"/>
         <source>Target Vent.</source>
         <translation>Στόχευση εξαερισμού.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1056"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1074"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="267"/>
         <source>Minute Vent.</source>
         <translation>Λεπτό άνεμο.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1057"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1075"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="261"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="261"/>
         <source>Tidal Volume</source>
         <translation>Παλιρροιακός Όγκος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1058"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1076"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="391"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="270"/>
         <source>Resp. Rate</source>
         <translation>Ρυθμός αναπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1059"/>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2761"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1077"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2764"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="264"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="264"/>
         <source>Snore</source>
         <translation>Ροχαλίζω</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1060"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1078"/>
         <source>Leak</source>
         <translation>Διαρροή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1061"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1079"/>
         <source>Leaks</source>
         <translation>Διαρροές</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1062"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1080"/>
         <source>Large Leak</source>
         <translation>Μεγάλη διαρροή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1063"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1081"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="208"/>
         <source>LL</source>
         <translation>LL</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1064"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1082"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="304"/>
         <source>Total Leaks</source>
         <translation>Συνολικές διαρροές</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1065"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1083"/>
         <source>Unintentional Leaks</source>
         <translation>Μη σκόπιμες διαρροές</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1066"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1084"/>
         <source>MaskPressure</source>
         <translation>Μάσκα Πίεση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1067"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1085"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="252"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="252"/>
         <source>Flow Rate</source>
         <translation>Ρυθμός ροής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1068"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1086"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="372"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="372"/>
         <source>Sleep Stage</source>
         <translation>Φάση ύπνου</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1069"/>
+        <location filename="../oscar/Graphs/gUsageChart.cpp" line="41"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1087"/>
         <source>Usage</source>
         <translation>Χρήση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1070"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1088"/>
         <source>Sessions</source>
         <translation>Συνεδρίες</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1071"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1089"/>
         <source>Pr. Relief</source>
         <translation>Ανακούφιση πίεσης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1081"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1099"/>
         <source>Device</source>
         <translation type="unfinished">Συσκευή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="949"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="967"/>
         <source>No Data Available</source>
         <translation>Δεν υπάρχουν διαθέσιμα δεδομένα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="327"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="345"/>
         <source>App key:</source>
         <translation>Κλειδί εφαρμογής:</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="318"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="336"/>
         <source>Operating system:</source>
         <translation>Λειτουργικό σύστημα:</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="311"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="329"/>
         <source>Built with Qt %1 on %2</source>
         <translation>Κατασκευάστηκε με Qt %1 στο %2</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="319"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="337"/>
         <source>Graphics Engine:</source>
         <translation>Μηχανή γραφικών:</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="320"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="338"/>
         <source>Graphics Engine type:</source>
         <translation>Γραφικά Τύπος κινητήρα:</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="314"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="332"/>
         <source>Compiler:</source>
         <translation type="unfinished">Μεταγλωττιστής:</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="910"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="928"/>
         <source>Software Engine</source>
         <translation>Μηχανή Λογισμικού</translation>
     </message>
@@ -9338,233 +10760,241 @@ TTIA: %1</translation>
         <translation type="vanished">ANGLE / OpenGLES</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="911"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="929"/>
         <source>Desktop OpenGL</source>
         <translation>Desktop OpenGL</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="913"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="931"/>
         <source> m</source>
         <translation> m</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="914"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="932"/>
         <source> cm</source>
         <translation> cm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="915"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="933"/>
         <source>in</source>
         <translation type="unfinished">in</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="919"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="937"/>
         <source>kg</source>
         <translation type="unfinished">kg</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="924"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="942"/>
         <source>milliSeconds</source>
         <translation type="unfinished">χιλιοστά του δευτερολέπτου</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="933"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="951"/>
         <source>l/min</source>
         <translation type="unfinished">l/min</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="950"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="968"/>
         <source>Only Settings and Compliance Data Available</source>
         <translation type="unfinished">Διαθέσιμα Μόνο Δεδομένα Ρυθμίσεων και Συμμόρφωσης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="952"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="970"/>
         <source>Summary Data Only</source>
         <translation type="unfinished">Μόνο Συνοπτικά Δεδομένα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="959"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="977"/>
         <location filename="../oscar/datafolderdialog.cpp" line="233"/>
         <location filename="../oscar/datafolderdialog.cpp" line="280"/>
-        <location filename="../oscar/main.cpp" line="196"/>
+        <location filename="../oscar/main.cpp" line="199"/>
         <source>Cancel</source>
         <translation type="unfinished">Ματαίωση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="960"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="978"/>
         <source>Destroy</source>
         <translation type="unfinished">Καταστροφή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="961"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="979"/>
         <source>Save</source>
         <translation type="unfinished">Αποθήκευση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="965"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="983"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="360"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="360"/>
         <source>Feeling</source>
         <translation type="unfinished">Αίσθηση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1073"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1091"/>
         <source>Bookmarks</source>
         <translation>Σελιδοδείκτες</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1076"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1027"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1029"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="799"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="801"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1094"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1058"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1060"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="881"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="883"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2839"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2841"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="186"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="186"/>
         <location filename="../oscar/SleepLib/loader_plugins/resvent_loader.cpp" line="890"/>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="636"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resvent_loader.cpp" line="890"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="639"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="639"/>
         <source>Mode</source>
         <translation>Τρόπος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1077"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1095"/>
         <source>Model</source>
         <translation>Μοντέλο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1078"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1096"/>
         <source>Brand</source>
         <translation>Μάρκα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1079"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1097"/>
         <source>Serial</source>
         <translation>Αύξων αριθμός</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1080"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1098"/>
         <source>Series</source>
         <translation>Σειρά</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1082"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1100"/>
         <source>Channel</source>
         <translation>Κανάλι</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1083"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1101"/>
         <source>Settings</source>
         <translation>Ρυθμίσεις</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1085"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1103"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="317"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="317"/>
         <source>Inclination</source>
         <translation>Κλίση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1086"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1104"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="314"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="314"/>
         <source>Orientation</source>
         <translation>Προσανατολισμός</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1087"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1105"/>
         <source>Motion</source>
         <translation>Κίνηση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1089"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1107"/>
         <source>Name</source>
         <translation>Ονομα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1090"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1108"/>
         <source>DOB</source>
         <translation>Ημερομηνια γεννησης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1091"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1109"/>
         <source>Phone</source>
         <translation>Τηλέφωνο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1092"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1110"/>
         <source>Address</source>
         <translation>Διεύθυνση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1093"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1111"/>
         <source>Email</source>
         <translation>διεύθυνση ηλεκτρονικού ταχυδρομείου</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1094"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1112"/>
         <source>Patient ID</source>
         <translation>Αναγνωριστικό ασθενούς</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1095"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1113"/>
         <source>Date</source>
         <translation>Ημερομηνία</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1097"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1115"/>
         <source>Bedtime</source>
         <translation>Ωρα ύπνου</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1098"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1116"/>
         <source>Wake-up</source>
         <translation>Ξύπνα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1099"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1117"/>
         <source>Mask Time</source>
         <translation>Μάσκα Ώρα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1100"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="749"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="823"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1118"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="776"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="850"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="202"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="273"/>
         <source>Unknown</source>
         <translation>Αγνωστος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1101"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1119"/>
         <source>None</source>
         <translation>Κανένας</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1102"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1120"/>
         <source>Ready</source>
         <translation>Ετοιμος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1104"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1122"/>
         <source>First</source>
         <translation>Πρώτα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1105"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1123"/>
         <source>Last</source>
         <translation>τελευταίος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1106"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1124"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="361"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="361"/>
         <source>Start</source>
         <translation>Αρχή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1107"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1125"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="362"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="362"/>
         <source>End</source>
         <translation>Τέλος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1108"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1126"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="259"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="367"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="373"/>
@@ -9573,9 +11003,9 @@ TTIA: %1</translation>
         <translation>Επί</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1109"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1045"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1255"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1127"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1076"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1287"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="366"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="372"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="383"/>
@@ -9583,452 +11013,517 @@ TTIA: %1</translation>
         <translation>Μακριά από</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="957"/>
-        <location filename="../oscar/SleepLib/common.cpp" line="1111"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="975"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1129"/>
         <source>Yes</source>
         <translation>Ναί</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="958"/>
-        <location filename="../oscar/SleepLib/common.cpp" line="1112"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="976"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1130"/>
         <source>No</source>
         <translation>Οχι</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1114"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1132"/>
         <source>Min</source>
         <translation>Ελάχιστο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1115"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1133"/>
         <source>Max</source>
         <translation>ανώτατο όριο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1116"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1134"/>
         <source>Med</source>
         <translation>Μεσαίο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1118"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="124"/>
+        <location filename="../oscar/Graphs/gUsageChart.cpp" line="128"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1136"/>
         <source>Average</source>
         <translation>Μέση τιμή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1119"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1137"/>
         <source>Median</source>
         <translation>Διάμεσος</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="227"/>
-        <location filename="../oscar/SleepLib/common.cpp" line="1120"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="471"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1138"/>
         <source>Avg</source>
         <translation>Μέγ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="225"/>
-        <location filename="../oscar/SleepLib/common.cpp" line="1121"/>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="469"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1139"/>
         <source>W-Avg</source>
         <translation>Σταθμισμένος μέσος όρος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2648"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="688"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="504"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2651"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="718"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="519"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="878"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="227"/>
         <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="179"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="160"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="513"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="930"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1322"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="931"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1323"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1821"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2328"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2327"/>
         <source>Getting Ready...</source>
         <translation>Ετοιμάζομαι...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="700"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="731"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="903"/>
         <source>Scanning Files...</source>
         <translation>Σάρωση αρχείων ...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="803"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="512"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="834"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="527"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="911"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="926"/>
-        <location filename="../oscar/mainwindow.cpp" line="3587"/>
+        <location filename="../oscar/mainwindow.cpp" line="4340"/>
         <source>Importing Sessions...</source>
         <translation>Εισαγωγή περιόδων σύνδεσης ...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1031"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1062"/>
         <source>UNKNOWN</source>
         <translation type="unfinished">ΑΓΝΩΣΤΟ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1033"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1064"/>
         <source>APAP (std)</source>
         <translation type="unfinished">APAP (std)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1034"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1065"/>
         <source>APAP (dyn)</source>
         <translation type="unfinished">APAP (dyn)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1035"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1066"/>
         <source>Auto S</source>
         <translation type="unfinished">Auto S</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1036"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1067"/>
         <source>Auto S/T</source>
         <translation type="unfinished">Auto S/T</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1037"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1068"/>
         <source>AcSV</source>
         <translation type="unfinished">AcSV</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1041"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1043"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1072"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1074"/>
         <source>SoftPAP Mode</source>
         <translation type="unfinished">Λειτουργία SoftPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1042"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1073"/>
         <source>Pressure relief during exhalation</source>
         <translation type="unfinished">Ανακούφιση πίεσης κατά την εκπνοή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1046"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1077"/>
         <source>Slight</source>
         <translation type="unfinished">Ελαφρά</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="934"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1047"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="961"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1078"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="285"/>
         <source>Standard</source>
         <translation type="unfinished">Πρότυπο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1051"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1082"/>
         <source>Softstart pressure</source>
         <translation type="unfinished">Πίεση ομαλής εκκίνησης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1052"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1089"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1083"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1120"/>
         <source>Pressure during soft start period</source>
         <translation type="unfinished">Πίεση κατά την περίοδο ομαλής εκκίνησης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1053"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1084"/>
         <source>PSoft</source>
         <translation type="unfinished">PSoft</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1058"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1089"/>
         <source>Softstart minimum pressure</source>
         <translation type="unfinished">Ελάχιστη πίεση ομαλής εκκίνησης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1059"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1090"/>
         <source>Minimum pressure during soft start period</source>
         <translation type="unfinished">Ελάχιστη πίεση κατά την περίοδο ομαλής εκκίνησης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1060"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1091"/>
         <source>PSoftMin</source>
         <translation type="unfinished">PSoftMin</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1065"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1067"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1096"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1098"/>
         <source>Auto start</source>
         <translation type="unfinished">Αυτόματη εκκίνηση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1066"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1097"/>
         <source>Automatically turn on the device by breathing</source>
         <translation type="unfinished">Αυτόματη ενεργοποίηση της συσκευής με την αναπνοή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1074"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1076"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1105"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1107"/>
         <source>Softstart time</source>
         <translation type="unfinished">Χρόνος ομαλής εκκίνησης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1075"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1106"/>
         <source>Length of soft start period</source>
         <translation type="unfinished">Διάρκεια περιόδου ομαλής εκκίνησης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1081"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1112"/>
         <source>Soft start maximum time</source>
         <translation type="unfinished">Μέγιστος χρόνος ομαλής εκκίνησης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1082"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1113"/>
         <source>Maximum length of soft start period</source>
         <translation type="unfinished">Μέγιστη διάρκεια περιόδου ομαλής εκκίνησης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1083"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1114"/>
         <source>Soft start max. time</source>
         <translation type="unfinished">Μέγ. χρόνος ομαλής εκκίνησης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1088"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1090"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1119"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1121"/>
         <source>Soft start pressure</source>
         <translation type="unfinished">Πίεση ομαλής εκκίνησης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1095"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1096"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1097"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1126"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1127"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1128"/>
         <source>PMaxOA</source>
         <translation type="unfinished">PMaxOA</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1102"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1104"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1133"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1135"/>
         <source>EEPAPMin</source>
         <translation type="unfinished">EEPAPMin</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1103"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1134"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="158"/>
         <source>Lower End Expiratory Pressure</source>
         <translation type="unfinished">Κατώτερη τελοεκπνευστική πίεση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1109"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1111"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1140"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1142"/>
         <source>EEPAPMax</source>
         <translation type="unfinished">EEPAPMax</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1110"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1141"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="159"/>
         <source>Higher End Expiratory Pressure</source>
         <translation type="unfinished">Ανώτερη τελοεκπνευστική πίεση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1116"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1117"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1147"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1148"/>
         <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="208"/>
         <source>Humidifier level</source>
         <translation type="unfinished">Επίπεδο υγραντήρα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1125"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1126"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1127"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1156"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1157"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1158"/>
         <source>Tube type</source>
         <translation type="unfinished">Τύπος σωλήνα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1142"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1144"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1174"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1176"/>
         <source>Obstruction level</source>
         <translation type="unfinished">Επίπεδο απόφραξης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1143"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1175"/>
         <source>Obstruction level in percentage</source>
         <translation type="unfinished">Επίπεδο απόφραξης σε ποσοστό</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1151"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1153"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1183"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1185"/>
         <source>rRMVFluctuation</source>
         <translation type="unfinished">rRMVFluctuation</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1152"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1184"/>
         <source>Relative respiratory minute volume fluctuation</source>
         <translation type="unfinished">Σχετική διακύμανση αναπνευστικού λεπτού όγκου</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1160"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1162"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1192"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1194"/>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1476"/>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1478"/>
         <source>rRMV</source>
         <translation type="unfinished">rRMV</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1161"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1193"/>
         <source>Relative respiratory minute volume</source>
         <translation type="unfinished">Σχετικός αναπνευστικός λεπτός όγκος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1167"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1168"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1169"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1199"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1200"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1201"/>
         <source>Measured pressure</source>
         <translation type="unfinished">Μετρούμενη πίεση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1174"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1175"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1176"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1206"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1207"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1208"/>
         <source>Full flow</source>
         <translation type="unfinished">Πλήρης ροή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1189"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1221"/>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1442"/>
         <source>Artefact</source>
         <translation type="unfinished">Τεχνούργημα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1190"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1222"/>
         <source>Irregularity in measured data, that doesn&apos;t represents a breathing event (e.g swallowing, coughing, or speaking)</source>
         <translation type="unfinished">Ανωμαλία στα μετρούμενα δεδομένα, που δεν αντιπροσωπεύει ένα αναπνευστικό συμβάν (π.χ. κατάποση, βήχας ή ομιλία)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1191"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1223"/>
         <source>ART</source>
         <translation type="unfinished">ART</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1196"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1228"/>
         <source>CriticalLeak</source>
         <translation type="unfinished">CriticalLeak</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1197"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1229"/>
         <source>Mask leakage is above a critical threshold</source>
         <translation type="unfinished">Η διαρροή μάσκας είναι πάνω από ένα κρίσιμο όριο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1198"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1230"/>
         <source>CL</source>
         <translation type="unfinished">CL</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1203"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1205"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1235"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1237"/>
         <source>eMO</source>
         <translation type="unfinished">eMO</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1204"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1236"/>
         <source>Epoch (2 mins) with Mild Obstruction</source>
         <translation type="unfinished">Εποχή (2 λεπτά) με Ήπια Απόφραξη</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1211"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1213"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1243"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1245"/>
         <source>eSO</source>
         <translation type="unfinished">eSO</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1212"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1244"/>
         <source>Epoch (2 mins) with Severe Obstruction</source>
         <translation type="unfinished">Εποχή (2 λεπτά) με Σοβαρή Απόφραξη</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1219"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1221"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1251"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1253"/>
         <source>eS</source>
         <translation type="unfinished">eS</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1220"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1252"/>
         <source>Epoch (2 mins) with Snoring</source>
         <translation type="unfinished">Εποχή (2 λεπτά) με Ροχαλητό</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1227"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1229"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1259"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1261"/>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1452"/>
         <source>eFL</source>
         <extracomment>Displayname for &quot;epoch with flowlimitation&quot; on the events-graph - keep this short!</extracomment>
         <translation type="unfinished">eFL</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1228"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1260"/>
         <source>Epoch (2 mins) with Flow Limitation</source>
         <translation type="unfinished">Εποχή (2 λεπτά) με Περιορισμό Ροής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1235"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1267"/>
         <source>Deep Sleep</source>
         <translation type="unfinished">Βαθύς Ύπνος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1236"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1268"/>
         <source>Deep sleep, stable respiration</source>
         <translation type="unfinished">Βαθύς ύπνος, σταθερή αναπνοή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1237"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1269"/>
         <source>DS</source>
         <translation type="unfinished">DS</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1244"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1276"/>
         <source>Timed breath</source>
         <translation type="unfinished">Χρονισμένη αναπνοή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1251"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1252"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1253"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1283"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1284"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1285"/>
         <source>BiSoft Mode</source>
         <translation type="unfinished">BiSoft Mode</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1256"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1288"/>
         <source>BiSoft 1</source>
         <translation type="unfinished">BiSoft 1</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1257"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1289"/>
         <source>BiSoft 2</source>
         <translation type="unfinished">BiSoft 2</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1258"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1290"/>
         <source>TriLevel</source>
         <translation type="unfinished">TriLevel</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1262"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1294"/>
         <source>Humidifier Empty</source>
         <translation type="unfinished">Άδειος υγραντήρας</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1263"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1295"/>
         <source>Humidifier water ran out during therapy</source>
         <translation type="unfinished">Το νερό του υγραντήρα τελείωσε κατά τη θεραπεία</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1264"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1296"/>
         <source>HE</source>
         <translation type="unfinished">HE</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2702"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1302"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1304"/>
+        <source>autoF</source>
+        <translation type="unfinished">autoF</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1303"/>
+        <source>Automatic setting of the backup breathing frequency</source>
+        <translation type="unfinished">Αυτόματη ρύθμιση της εφεδρικής αναπνευστικής συχνότητας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1311"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1313"/>
+        <source>F min</source>
+        <translation type="unfinished">F min</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1312"/>
+        <source>Backup breathing frequency</source>
+        <translation type="unfinished">Εφεδρική αναπνευστική συχνότητα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1318"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1320"/>
+        <source>Ti/T set</source>
+        <translation type="unfinished">Ρυθμισμένο Ti/T</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1319"/>
+        <source>Inspiration time as a share of the breath cycle for backup breaths</source>
+        <translation type="unfinished">Χρόνος εισπνοής ως ποσοστό του αναπνευστικού κύκλου για τις εφεδρικές αναπνοές</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1325"/>
+        <source>Leakage alarm</source>
+        <translation type="unfinished">Συναγερμός διαρροής</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1326"/>
+        <source>The device&apos;s leakage alarm was active</source>
+        <translation type="unfinished">Ο συναγερμός διαρροής της συσκευής ήταν ενεργός</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1327"/>
+        <source>LA</source>
+        <translation type="unfinished">LA</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1332"/>
+        <source>Hypopnea with high leakage</source>
+        <translation type="unfinished">Υπόπνοια με υψηλή διαρροή</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1333"/>
+        <source>Hypopnea scored during very high leakage. Not counted in AHI.</source>
+        <translation type="unfinished">Υπόπνοια που καταγράφηκε κατά τη διάρκεια πολύ υψηλής διαρροής. Δεν προσμετράται στον AHI.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1334"/>
+        <source>HL</source>
+        <translation type="unfinished">HL</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2705"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="340"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="202"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="841"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="972"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1366"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="842"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="973"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1367"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1857"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2380"/>
-        <location filename="../oscar/mainwindow.cpp" line="1060"/>
-        <location filename="../oscar/mainwindow.cpp" line="3632"/>
-        <location filename="../oscar/mainwindow.cpp" line="3970"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2379"/>
+        <location filename="../oscar/mainwindow.cpp" line="1193"/>
+        <location filename="../oscar/mainwindow.cpp" line="4385"/>
+        <location filename="../oscar/mainwindow.cpp" line="4723"/>
         <source>Finishing up...</source>
         <translation>Τελειώνω...</translation>
     </message>
@@ -10090,8 +11585,8 @@ TTIA: %1</translation>
         <translation>22 mm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="691"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="448"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="726"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="462"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="894"/>
         <source>Backing Up Files...</source>
         <translation>Δημιουργία αντιγράφων ασφαλείας αρχείων ...</translation>
@@ -10164,7 +11659,7 @@ TTIA: %1</translation>
         <translation>CPAP-Check</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="743"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="770"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2845"/>
         <source>AutoCPAP</source>
         <translation>AutoCPAP</translation>
@@ -10180,134 +11675,149 @@ TTIA: %1</translation>
         <translation>AutoBiLevel</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="253"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="260"/>
         <source>Import Error - Out of Memory</source>
         <translation type="unfinished">Σφάλμα Εισαγωγής - Εξάντληση Μνήμης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="254"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="261"/>
         <source>Additional memory could not be allocated during the import.</source>
         <translation type="unfinished">Δεν ήταν δυνατή η εκχώρηση επιπλέον μνήμης κατά την εισαγωγή.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="255"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="262"/>
         <source>Please try switching to 64-bit OSCAR or setting your preferences to ignore older sessions.</source>
         <translation type="unfinished">Παρακαλώ δοκιμάστε να μεταβείτε στο 64-bit OSCAR ή ορίστε τις προτιμήσεις σας ώστε να αγνοούνται παλαιότερες συνεδρίες.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="740"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="767"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="767"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="767"/>
         <source>BMC Mode</source>
         <translation type="unfinished">Λειτουργία BMC</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="744"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="771"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2850"/>
         <source>S</source>
         <translation>S</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="745"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="806"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="772"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="888"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2851"/>
         <source>S/T</source>
         <translation>S/T</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="746"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="773"/>
         <source>T</source>
         <translation type="unfinished">T</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="747"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="774"/>
         <source>Titration</source>
         <translation type="unfinished">Βαθμονόμηση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="748"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="775"/>
         <source>AutoS</source>
         <translation type="unfinished">AutoS</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="753"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="780"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="780"/>
         <source>Reslex</source>
         <translation type="unfinished">Reslex</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="753"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="780"/>
         <source>BMC Reslex is an exhalation pressure relief feature</source>
         <translation type="unfinished">Το BMC Reslex είναι μια λειτουργία ανακούφισης πίεσης εκπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="755"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="769"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="829"/>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="649"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="782"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="796"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="856"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="652"/>
         <source>1</source>
         <translation type="unfinished">1</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="756"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="770"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="830"/>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="650"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="783"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="797"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="857"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="653"/>
         <source>2</source>
         <translation type="unfinished">2</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="757"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="771"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="831"/>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="651"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="784"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="798"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="858"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="654"/>
         <source>3</source>
         <translation type="unfinished">3</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="758"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="930"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="785"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="957"/>
         <source>Patient</source>
         <translation type="unfinished">Ασθενής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="762"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="789"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="789"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="789"/>
         <source>Reslex Mode</source>
         <translation type="unfinished">Λειτουργία Reslex</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="772"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="832"/>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="652"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="799"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="859"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="655"/>
         <source>4</source>
         <translation type="unfinished">4</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="773"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="833"/>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="653"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="800"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="860"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="656"/>
         <source>5</source>
         <translation type="unfinished">5</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="777"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="804"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="804"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="804"/>
         <source>SmartA</source>
         <translation type="unfinished">SmartA</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="782"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="809"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="809"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="809"/>
         <source>SmartB</source>
         <translation type="unfinished">SmartB</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="787"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="814"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="814"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="814"/>
         <source>SmartC</source>
         <translation type="unfinished">SmartC</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="802"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="829"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="829"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="829"/>
         <source>Leak Alert</source>
         <translation type="unfinished">Ειδοποίηση Διαρροής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="807"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="834"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="834"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="834"/>
         <source>Air Tube Type</source>
         <translation type="unfinished">Τύπος Σωλήνα Αέρα</translation>
     </message>
@@ -10316,7 +11826,7 @@ TTIA: %1</translation>
         <translation type="obsolete">Κανονικό 22mm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="813"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="840"/>
         <source>Normal 15mm</source>
         <translation type="unfinished">Κανονικό 15mm</translation>
     </message>
@@ -10325,242 +11835,276 @@ TTIA: %1</translation>
         <translation type="obsolete">Θερμαινόμενο 22mm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="812"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="839"/>
         <source>Normal 19mm</source>
         <translation type="unfinished">Κανονικός 19mm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="814"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="841"/>
         <source>Heated 19mm</source>
         <translation type="unfinished">Θερμαινόμενος 19mm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="815"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="842"/>
         <source>Heated 15mm</source>
         <translation type="unfinished">Θερμαινόμενος 15mm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="822"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="849"/>
         <source>Nasal Pillows</source>
         <translation type="unfinished">Ρινικά Μαξιλαράκια</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="827"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="854"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="854"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="854"/>
         <source>Heated Tube Level</source>
         <translation type="unfinished">Επίπεδο Θερμαινόμενου Σωλήνα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="838"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="865"/>
         <source>BmcRampTime</source>
         <translation type="unfinished">Χρόνος Εκκίνησης BmcRamp</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="838"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="846"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="865"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="865"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="873"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="873"/>
         <source>Ramp Time </source>
         <translation type="unfinished">Χρόνος Ανόδου </translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="846"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="873"/>
         <source>BmcRampAuto</source>
         <translation type="unfinished">BmcRampAuto</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="851"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="878"/>
         <source>InitialP</source>
         <translation type="unfinished">InitialP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="851"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="878"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="878"/>
         <source>Initial P</source>
         <translation type="unfinished">Αρχική Π</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="854"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="881"/>
         <source>TreatP</source>
         <translation type="unfinished">TreatP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="854"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="881"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="881"/>
         <source>Treat P</source>
         <translation type="unfinished">Πίεση Θεραπείας</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="857"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="884"/>
         <source>ManualP</source>
         <translation type="unfinished">ManualP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="857"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="884"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="884"/>
         <source>Manual P</source>
         <translation type="unfinished">Χειροκίνητη Π</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="860"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="887"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="887"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="887"/>
         <source>Min APAP</source>
         <translation type="unfinished">Ελάχ APAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="863"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="890"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="890"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="890"/>
         <source>Max APAP</source>
         <translation type="unfinished">Μέγ APAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="866"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="893"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="893"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="893"/>
         <source>Sensitivity</source>
         <translation type="unfinished">Ευαισθησία</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="869"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="896"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="896"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="896"/>
         <source>Initial EPAP</source>
         <translation type="unfinished">Αρχικό EPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="882"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="909"/>
         <source>ISens</source>
         <translation type="unfinished">ISens</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="882"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="909"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="909"/>
         <source>I Sens</source>
         <translation type="unfinished">Ευαισθ Εισπν</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="884"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="895"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="911"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="922"/>
         <source>Very Low</source>
         <translation type="unfinished">Πολύ Χαμηλή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="885"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="896"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="912"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="923"/>
         <source>Low</source>
         <translation type="unfinished">Χαμηλή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="886"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="897"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="913"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="924"/>
         <source>Medium Low</source>
         <translation type="unfinished">Μεσαία Χαμηλή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="887"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="898"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="914"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="925"/>
         <source>Medium</source>
         <translation type="unfinished">Μεσαίο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="888"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="899"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="915"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="926"/>
         <source>Medium High</source>
         <translation type="unfinished">Μεσαία Υψηλή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="889"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="900"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="916"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="927"/>
         <source>High</source>
         <translation type="unfinished">Υψηλή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="890"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="901"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="917"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="928"/>
         <source>Very High</source>
         <translation type="unfinished">Πολύ Υψηλή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="893"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="920"/>
         <source>ESens</source>
         <translation type="unfinished">ESens</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="893"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="920"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="920"/>
         <source>E Sens</source>
         <translation type="unfinished">Ευαισθ Εκπν</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="907"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="934"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="934"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="332"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="332"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="332"/>
         <source>Ti Min</source>
         <translation type="unfinished">Ελάχ Ti</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="910"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="937"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="937"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="328"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="328"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="328"/>
         <source>Ti Max</source>
         <translation type="unfinished">Μέγ Ti</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="913"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="940"/>
         <source>BackupRR</source>
         <translation type="unfinished">BackupRR</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="913"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="940"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="940"/>
         <source>Backup RR</source>
         <translation type="unfinished">Εφεδρικό RR</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="918"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="945"/>
         <source>MinEPAP</source>
         <translation type="unfinished">ΕλάχιστοEPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="921"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="948"/>
         <source>MinIPAP</source>
         <translation type="unfinished">ΕλάχιστοIPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="924"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="951"/>
         <source>MaxIPAP</source>
         <translation type="unfinished">ΜέγιστοIPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="928"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="955"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="955"/>
         <source>Reslex Availability</source>
         <translation type="unfinished">Διαθεσιμότητα Reslex</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="928"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="955"/>
         <source>Reslex setting can be restricted to only clinician menu or may be made available for the user to change</source>
         <translation type="unfinished">Η ρύθμιση Reslex μπορεί να περιοριστεί μόνο στο μενού κλινικού ή να είναι διαθέσιμη για αλλαγή από τον χρήστη</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="929"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="956"/>
         <source>Clinician</source>
         <translation type="unfinished">Κλινικός</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="933"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="960"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="960"/>
         <source>Pres. Response</source>
         <translation type="unfinished">Απόκρ. Πίεσης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="933"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="960"/>
         <source>Shape of the pressure change the device applies as it adjusts</source>
         <translation type="unfinished">Σχήμα της αλλαγής πίεσης που εφαρμόζει η συσκευή καθώς προσαρμόζεται</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="936"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="963"/>
         <source>Fast</source>
         <translation type="unfinished">Γρήγορο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="963"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="63"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="1115"/>
         <source>Reading data...</source>
         <translation type="unfinished">Ανάγνωση δεδομένων...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="979"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="71"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="1187"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="1240"/>
+        <source>BMC Backup</source>
+        <translation type="unfinished">Αντίγραφο ασφαλείας BMC</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="1206"/>
+        <source>Backing up new nights...</source>
+        <translation type="unfinished">Δημιουργία αντιγράφου ασφαλείας των νέων νυχτών...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="993"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="65"/>
         <source>Find sessions to import...</source>
         <translation type="unfinished">Εύρεση περιόδων για εισαγωγή...</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/apex_loader.cpp" line="195"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="1026"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="167"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="1251"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="1364"/>
         <source>Creating data backup...</source>
         <translation type="unfinished">Δημιουργία αντιγράφου ασφαλείας δεδομένων...</translation>
     </message>
@@ -10570,8 +12114,7 @@ TTIA: %1</translation>
         <translation type="unfinished">Ανάγνωση κάρτας Apex Medical...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="1054"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="186"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="1154"/>
         <source>Starting import...</source>
         <translation type="unfinished">Έναρξη εισαγωγής...</translation>
     </message>
@@ -10588,8 +12131,8 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2857"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2859"/>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="659"/>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="661"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="662"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="664"/>
         <source>Flex Mode</source>
         <translation>Λειτουργία Flex</translation>
     </message>
@@ -10619,10 +12162,13 @@ TTIA: %1</translation>
         <translation>P-Flex</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="904"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="931"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="931"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2866"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2890"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2892"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="309"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="309"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="309"/>
         <source>Rise Time</source>
         <translation>Αύξηση χρόνου</translation>
@@ -10640,8 +12186,8 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2873"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2875"/>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="644"/>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="646"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="647"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="649"/>
         <source>Flex Level</source>
         <translation>Επίπεδο Flex</translation>
     </message>
@@ -10936,14 +12482,18 @@ TTIA: %1</translation>
         <translation>12mm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="792"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="819"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="819"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="819"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2989"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2991"/>
         <source>Auto On</source>
         <translation>Auto On</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="797"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="824"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="824"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="824"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2998"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3000"/>
         <source>Auto Off</source>
@@ -10987,13 +12537,13 @@ TTIA: %1</translation>
         <translation>Χρονική αναπνοή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1245"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1277"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3092"/>
         <source>Machine Initiated Breath</source>
         <translation>Μηχανική διέγερση της αναπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1246"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1278"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3093"/>
         <source>TB</source>
         <translation>TB</translation>
@@ -11046,68 +12596,68 @@ TTIA: %1</translation>
         <translation type="unfinished">&lt;i&gt;Τα δεδομένα της παλιάς σας συσκευής θα πρέπει να αναδημιουργηθούν, εφόσον αυτή η λειτουργία αντιγράφου ασφαλείας δεν έχει απενεργοποιηθεί στις προτιμήσεις κατά τη διάρκεια προηγούμενης εισαγωγής δεδομένων.&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="888"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="897"/>
         <source>OSCAR does not yet have any automatic card backups stored for this device.</source>
         <translation>Το OSCAR δεν διαθέτει ακόμη αυτόματα αποθηκευμένα αντίγραφα ασφαλείας για αυτήν τη συσκευή.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="889"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="898"/>
         <source>This means you will need to import this device data again afterwards from your own backups or data card.</source>
         <translation type="unfinished">Αυτό σημαίνει ότι θα χρειαστεί να εισαγάγετε ξανά τα δεδομένα αυτής της συσκευής από τα δικά σας αντίγραφα ασφαλείας ή την κάρτα δεδομένων.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="892"/>
-        <location filename="../oscar/main.cpp" line="601"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="901"/>
+        <location filename="../oscar/main.cpp" line="604"/>
         <source>Important:</source>
         <translation>Σπουδαίος:</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="893"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="902"/>
         <source>If you are concerned, click No to exit, and backup your profile manually, before starting OSCAR again.</source>
         <translation>Εάν ανησυχείτε, κάντε κλικ στο Όχι για να τερματίσετε και να δημιουργήσετε αντίγραφο ασφαλείας του προφίλ σας με μη αυτόματο τρόπο πριν ξεκινήσετε ξανά το OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="894"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="903"/>
         <source>Are you ready to upgrade, so you can run the new version of OSCAR?</source>
         <translation>Είστε έτοιμοι για αναβάθμιση, ώστε να μπορείτε να εκτελέσετε τη νέα έκδοση του OSCAR;</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="897"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="906"/>
         <source>Device Database Changes</source>
         <translation type="unfinished">Αλλαγές στη Βάση Δεδομένων Συσκευών</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="908"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="917"/>
         <source>Sorry, the purge operation failed, which means this version of OSCAR can&apos;t start.</source>
         <translation>Λυπούμαστε, η διαδικασία καθαρισμού απέτυχε, πράγμα που σημαίνει ότι αυτή η έκδοση του OSCAR δεν μπορεί να ξεκινήσει.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="909"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="918"/>
         <source>The device data folder needs to be removed manually.</source>
         <translation type="unfinished">Ο φάκελος δεδομένων συσκευής πρέπει να αφαιρεθεί χειροκίνητα.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="927"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="936"/>
         <source>Would you like to switch on automatic backups, so next time a new version of OSCAR needs to do so, it can rebuild from these?</source>
         <translation>Θα θέλατε να ενεργοποιήσετε τα αυτόματα αντίγραφα ασφαλείας, έτσι ώστε την επόμενη φορά που χρειάζεται μια νέα έκδοση του OSCAR, μπορεί να ξαναδοκιμάσει από αυτά;</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="934"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="943"/>
         <source>OSCAR will now start the import wizard so you can reinstall your %1 data.</source>
         <translation>Το OSCAR θα ξεκινήσει τώρα τον οδηγό εισαγωγής ώστε να μπορέσετε να εγκαταστήσετε ξανά τα δεδομένα σας %1.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="3166"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="3175"/>
         <source>Repairing Respiratory Event Records</source>
         <translation type="unfinished">Επιδιόρθωση εγγραφών αναπνευστικών συμβάντων</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="3325"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="3334"/>
         <source>Repairing BMC Session Times</source>
         <translation type="unfinished">Επιδιόρθωση ωρών συνεδριάσεων BMC</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="3445"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="3454"/>
         <source>Recalculating Oximetry Events</source>
         <translation type="unfinished">Επανυπολογισμός συμβάντων οξυμετρίας</translation>
     </message>
@@ -11120,83 +12670,83 @@ TTIA: %1</translation>
         <translation type="vanished">Χρησιμοποιήστε το διαχειριστή αρχείων για να δημιουργήσετε ένα αντίγραφο του καταλόγου προφίλ σας, στη συνέχεια, στη συνέχεια, κάντε επανεκκίνηση του OSCAR και ολοκληρώστε τη διαδικασία αναβάθμισης.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1058"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1067"/>
         <source>Loading Channel Information</source>
         <translation type="unfinished">Φόρτωση Πληροφοριών Καναλιού</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1064"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1073"/>
         <source>Migrating Journal Data to Database</source>
         <translation type="unfinished">Μεταφορά Δεδομένων Ημερολογίου στη Βάση Δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1080"/>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1115"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1089"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1124"/>
         <source>Calculating Daily Summaries</source>
         <translation type="unfinished">Υπολογισμός Ημερήσιων Συνόψεων</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1536"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1545"/>
         <source>Profile Name Conflict</source>
         <translation type="unfinished">Διένεξη Ονόματος Προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1537"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1546"/>
         <source>A profile named &apos;%1&apos; already exists in the database but its directory is missing.</source>
         <translation type="unfinished">Ένα προφίλ με το όνομα &apos;%1&apos; υπάρχει ήδη στη βάση δεδομένων, αλλά ο κατάλογός του λείπει.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1538"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1547"/>
         <source>You cannot create a new profile with this name.</source>
         <translation type="unfinished">Δεν μπορείτε να δημιουργήσετε νέο προφίλ με αυτό το όνομα.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1539"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1548"/>
         <source>Options:</source>
         <translation type="unfinished">Επιλογές:</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1540"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1549"/>
         <source>1. Choose a different profile name</source>
         <translation type="unfinished">1. Επιλέξτε διαφορετικό όνομα προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1541"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1550"/>
         <source>2. Restore the missing profile directory</source>
         <translation type="unfinished">2. Επαναφέρετε τον κατάλογο του προφίλ που λείπει</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1542"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1551"/>
         <source>3. Use OSCAR&apos;s profile management tools to permanently remove the old profile</source>
         <translation type="unfinished">3. Χρησιμοποιήστε τα εργαλεία διαχείρισης προφίλ του OSCAR για μόνιμη αφαίρεση του παλιού προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1547"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1556"/>
         <source>Profile Already Exists</source>
         <translation type="unfinished">Το Προφίλ Υπάρχει Ήδη</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1548"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1557"/>
         <source>A profile named &apos;%1&apos; already exists and is active.</source>
         <translation type="unfinished">Ένα προφίλ με το όνομα &apos;%1&apos; υπάρχει ήδη και είναι ενεργό.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="1549"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="1558"/>
         <source>Please choose a different name.</source>
         <translation type="unfinished">Παρακαλώ επιλέξτε διαφορετικό όνομα.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="892"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="901"/>
         <source>Once you upgrade, you &lt;font size=+1&gt;cannot&lt;/font&gt; use this profile with the previous version anymore.</source>
         <translation>Μόλις αναβαθμίσετε, &lt;font size=+1&gt; δεν μπορείτε &lt;/font&gt; να χρησιμοποιήσετε πάλι αυτό το προφίλ με την προηγούμενη έκδοση.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="910"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="919"/>
         <source>This folder currently resides at the following location:</source>
         <translation>Αυτός ο φάκελος βρίσκεται αυτή τη στιγμή στην ακόλουθη τοποθεσία:</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="918"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="927"/>
         <source>Rebuilding from %1 Backup</source>
         <translation>Επανακατασκευή από %1 δημιουργία αντιγράφων ασφαλείας</translation>
     </message>
@@ -11247,6 +12797,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="161"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="161"/>
         <source>PS Min</source>
         <translation>PS Min</translation>
     </message>
@@ -11256,6 +12807,7 @@ TTIA: %1</translation>
         <translation>Ελάχιστη υποστήριξη πίεσης</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="162"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="162"/>
         <source>PS Max</source>
         <translation>PS Max</translation>
@@ -11287,6 +12839,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="165"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="165"/>
         <source>Ramp Time</source>
         <translation>Ώρα ράμπας</translation>
     </message>
@@ -11296,6 +12849,7 @@ TTIA: %1</translation>
         <translation>Περίοδος καθυστέρησης Ramp</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="166"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="166"/>
         <source>Ramp Pressure</source>
         <translation>Πίεση ράμπας</translation>
@@ -11307,11 +12861,15 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="168"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="168"/>
         <source>Ramp Event</source>
         <translation>Γεγονός Ramp</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="276"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="276"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="1003"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="1003"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="1003"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="168"/>
         <source>Ramp</source>
@@ -11329,6 +12887,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="323"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="323"/>
         <source>Mask On Time</source>
         <translation>Μάσκα σε ώρα</translation>
     </message>
@@ -11338,6 +12897,7 @@ TTIA: %1</translation>
         <translation>Ο χρόνος ξεκίνησε σύμφωνα με το str.edf</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="326"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="326"/>
         <source>Summary Only</source>
         <translation>Περίληψη μόνο</translation>
@@ -11358,7 +12918,7 @@ TTIA: %1</translation>
         <translation>Ένας μερικώς παρεμποδισμένος αεραγωγός</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1007"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1025"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="191"/>
         <source>UA</source>
         <translation>UA</translation>
@@ -11435,6 +12995,9 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="255"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="255"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="255"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="258"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="258"/>
         <source>Mask Pressure</source>
         <translation>Μάσκα Πίεση</translation>
@@ -11486,6 +13049,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="276"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="276"/>
         <source>Leak Rate</source>
         <translation>Ποσοστό διαρροών</translation>
     </message>
@@ -11500,7 +13064,7 @@ TTIA: %1</translation>
         <translation>Αναλογία μεταξύ του χρόνου εισπνοής και της εκπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="938"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="956"/>
         <source>ratio</source>
         <translation>αναλογία</translation>
     </message>
@@ -11516,6 +13080,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="169"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="169"/>
         <source>Pressure Set</source>
         <translation>Ρύθμιση πίεσης</translation>
     </message>
@@ -11526,6 +13091,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="170"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="170"/>
         <source>IPAP Set</source>
         <translation>Ρύθμιση IPAP</translation>
     </message>
@@ -11535,6 +13101,7 @@ TTIA: %1</translation>
         <translation>Ρύθμιση IPAP</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="171"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="171"/>
         <source>EPAP Set</source>
         <translation>Ρύθμιση EPAP</translation>
@@ -11550,7 +13117,7 @@ TTIA: %1</translation>
         <translation>Μια ανώμαλη περίοδος αναπνοής του Cheyne Stokes</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1041"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1059"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="174"/>
         <source>CSR</source>
         <translation>CSR</translation>
@@ -11639,6 +13206,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="295"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="295"/>
         <source>Target Minute Ventilation</source>
         <translation>Στόχευση λεπτού εξαερισμού</translation>
     </message>
@@ -11704,6 +13272,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="320"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="320"/>
         <source>Movement</source>
         <translation>Κίνηση</translation>
     </message>
@@ -11718,8 +13287,9 @@ TTIA: %1</translation>
         <translation>Η περίοδος CPAP περιέχει μόνο σύνοψη δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1028"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1059"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2840"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="329"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="329"/>
         <source>PAP Mode</source>
         <translation>Λειτουργία PAP</translation>
@@ -11872,6 +13442,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="280"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="280"/>
         <source>I/E Value</source>
         <translation type="unfinished">Τιμή I/E</translation>
     </message>
@@ -11907,6 +13478,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="343"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="343"/>
         <source>Steady Breathing</source>
         <translation type="unfinished">Σταθερή Αναπνοή</translation>
     </message>
@@ -11933,6 +13505,7 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="351"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="356"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="356"/>
         <source>Height</source>
         <translation>Υψος</translation>
     </message>
@@ -11942,6 +13515,7 @@ TTIA: %1</translation>
         <translation>Φυσικό Ύψος</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="357"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="357"/>
         <source>Notes</source>
         <translation>Σημειώσεις</translation>
@@ -11973,10 +13547,13 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="363"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="363"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="363"/>
         <source>Last Updated</source>
         <translation>Τελευταία ενημέρωση</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="365"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="365"/>
         <source>Journal Notes</source>
         <translation>Σημειώσεις περιοδικών</translation>
@@ -11993,6 +13570,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="374"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="374"/>
         <source>Brain Wave</source>
         <translation>Κύμα του εγκεφάλου</translation>
     </message>
@@ -12002,6 +13580,7 @@ TTIA: %1</translation>
         <translation>BrainWave</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="375"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="375"/>
         <source>Awakenings</source>
         <translation>Αφυπνίσεις</translation>
@@ -12013,6 +13592,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="376"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="376"/>
         <source>Morning Feel</source>
         <translation>Πρωινή αίσθηση</translation>
     </message>
@@ -12022,6 +13602,7 @@ TTIA: %1</translation>
         <translation>Πώς νιώσατε το πρωί</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="377"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="377"/>
         <source>Time Awake</source>
         <translation>Ώρα Ξυπνήστε</translation>
@@ -12078,6 +13659,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="381"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="381"/>
         <source>Time to Sleep</source>
         <translation>Ωρα για ύπνο</translation>
     </message>
@@ -12133,6 +13715,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="389"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="389"/>
         <source>Breathing Disturbances</source>
         <translation type="unfinished">Αναπνευστικές Διαταραχές</translation>
     </message>
@@ -12142,6 +13725,7 @@ TTIA: %1</translation>
         <translation type="unfinished">Αριθμός αναπνευστικών διαταραχών ύπνου ανά νύχτα από την Apple</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="390"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="390"/>
         <source>Wrist Temperature</source>
         <translation type="unfinished">Θερμοκρασία Καρπού</translation>
@@ -12153,15 +13737,20 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="397"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="397"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="397"/>
         <source>Pressure Wave</source>
         <translation type="unfinished">Κύμα Πίεσης</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="400"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="400"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="400"/>
         <source>Flow Abnormality</source>
         <translation type="unfinished">Ανωμαλία Ροής</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="403"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="403"/>
         <source>I/E Ratio %</source>
         <translation type="unfinished">Αναλογία I/E %</translation>
@@ -12218,12 +13807,12 @@ TTIA: %1</translation>
         <translation>Κάτω όριο</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1277"/>
+        <location filename="../oscar/main.cpp" line="1301"/>
         <source>As you did not select a data folder, OSCAR will exit.</source>
         <translation>Καθώς δεν επιλέξατε φάκελο δεδομένων, το OSCAR θα εξέλθει.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="157"/>
+        <location filename="../oscar/main.cpp" line="160"/>
         <source>or CANCEL to skip migration.</source>
         <translation>ή ΑΚΥΡΩΣΗ για να παρακάμψετε τη μετάβαση.</translation>
     </message>
@@ -12248,12 +13837,12 @@ TTIA: %1</translation>
         <translation type="vanished">προς το </translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="974"/>
+        <location filename="../oscar/main.cpp" line="990"/>
         <source>OSCAR crashed due to an incompatibility with your graphics hardware.</source>
         <translation type="unfinished">Το OSCAR κατέρρευσε λόγω ασυμβατότητας με το υλικό γραφικών σας.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="975"/>
+        <location filename="../oscar/main.cpp" line="991"/>
         <source>To resolve this, OSCAR has reverted to a slower but more compatible method of drawing.</source>
         <translation type="unfinished">Για να επιλυθεί αυτό, το OSCAR επέστρεψε σε μια πιο αργή αλλά πιο συμβατή μέθοδο σχεδίασης.</translation>
     </message>
@@ -12266,38 +13855,38 @@ TTIA: %1</translation>
         <translation type="obsolete">Το OSCAR μπορεί να αντιγράψει τα παλιά σας δεδομένα σε αυτόν τον φάκελο αργότερα.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="156"/>
+        <location filename="../oscar/main.cpp" line="159"/>
         <source>Choose the OSCAR 1.x data folder to migrate</source>
         <translation type="unfinished">Επιλέξτε τον φάκελο δεδομένων OSCAR 1.x για μετεγκατάσταση</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="172"/>
+        <location filename="../oscar/main.cpp" line="175"/>
         <source>The folder you chose does not contain valid OSCAR 1.x data.</source>
         <translation type="unfinished">Ο φάκελος που επιλέξατε δεν περιέχει έγκυρα δεδομένα OSCAR 1.x.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="173"/>
-        <location filename="../oscar/main.cpp" line="183"/>
+        <location filename="../oscar/main.cpp" line="176"/>
+        <location filename="../oscar/main.cpp" line="186"/>
         <source>You cannot migrate from this folder:</source>
         <translation type="unfinished">Δεν μπορείτε να κάνετε μετεγκατάσταση από αυτόν τον φάκελο:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="182"/>
+        <location filename="../oscar/main.cpp" line="185"/>
         <source>The folder you chose does not contain any OSCAR profiles.</source>
         <translation type="unfinished">Ο φάκελος που επιλέξατε δεν περιέχει προφίλ OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="195"/>
+        <location filename="../oscar/main.cpp" line="198"/>
         <source>Migrating Profiles</source>
         <translation type="unfinished">Μετεγκατάσταση Προφίλ</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="202"/>
+        <location filename="../oscar/main.cpp" line="205"/>
         <source>Migrating OSCAR data</source>
         <translation type="unfinished">Μετεγκατάσταση δεδομένων OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="230"/>
+        <location filename="../oscar/main.cpp" line="233"/>
         <source>Migrating profile: %1
 (%2 of %3)
 
@@ -12308,7 +13897,7 @@ Starting import...</source>
 Έναρξη εισαγωγής...</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="249"/>
+        <location filename="../oscar/main.cpp" line="252"/>
         <source>Cancelling: %1
 (%2 of %3)
 
@@ -12319,7 +13908,7 @@ Cleaning up, please wait...</source>
 Εκκαθάριση, παρακαλώ περιμένετε...</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="265"/>
+        <location filename="../oscar/main.cpp" line="268"/>
         <source>Migrating profile: %1
 (%2 of %3)
 
@@ -12330,260 +13919,260 @@ Cleaning up, please wait...</source>
 %4</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="306"/>
+        <location filename="../oscar/main.cpp" line="309"/>
         <source>Migration cancelled.</source>
         <translation type="unfinished">Η μετεγκατάσταση ακυρώθηκε.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="308"/>
+        <location filename="../oscar/main.cpp" line="311"/>
         <source>The following profile(s) were fully imported before cancellation:</source>
         <translation type="unfinished">Τα ακόλουθα προφίλ εισήχθησαν πλήρως πριν την ακύρωση:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="311"/>
+        <location filename="../oscar/main.cpp" line="314"/>
         <source>No profiles were imported.</source>
         <translation type="unfinished">Δεν εισήχθη κανένα προφίλ.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="314"/>
+        <location filename="../oscar/main.cpp" line="317"/>
         <source>Migration Cancelled</source>
         <translation type="unfinished">Η Μετεγκατάσταση Ακυρώθηκε</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="317"/>
+        <location filename="../oscar/main.cpp" line="320"/>
         <source>Successfully migrated %1 profile(s) in %2 seconds.</source>
         <translation type="unfinished">Επιτυχής μετεγκατάσταση %1 προφίλ σε %2 δευτερόλεπτα.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="320"/>
-        <location filename="../oscar/main.cpp" line="330"/>
+        <location filename="../oscar/main.cpp" line="323"/>
+        <location filename="../oscar/main.cpp" line="333"/>
         <source>Imported profiles:</source>
         <translation type="unfinished">Εισηγμένα προφίλ:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="322"/>
+        <location filename="../oscar/main.cpp" line="325"/>
         <source>Migration Complete</source>
         <translation type="unfinished">Η μετεγκατάσταση ολοκληρώθηκε</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="325"/>
+        <location filename="../oscar/main.cpp" line="328"/>
         <source>Migrated %1 profile(s) successfully, but %2 profile(s) failed in %3 seconds.</source>
         <translation type="unfinished">Μετεγκαταστάθηκαν επιτυχώς %1 προφίλ, αλλά %2 προφίλ απέτυχαν σε %3 δευτερόλεπτα.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="333"/>
+        <location filename="../oscar/main.cpp" line="336"/>
         <source>Failed profiles:</source>
         <translation type="unfinished">Αποτυχημένα προφίλ:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="336"/>
+        <location filename="../oscar/main.cpp" line="339"/>
         <source>Migration Partially Complete</source>
         <translation type="unfinished">Η μετεγκατάσταση ολοκληρώθηκε εν μέρει</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="339"/>
+        <location filename="../oscar/main.cpp" line="342"/>
         <source>Failed to migrate any profiles. All %1 profile(s) failed.</source>
         <translation type="unfinished">Αποτυχία μετεγκατάστασης οποιουδήποτε προφίλ. Όλα τα %1 προφίλ απέτυχαν.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="342"/>
+        <location filename="../oscar/main.cpp" line="345"/>
         <source>Migration Failed</source>
         <translation type="unfinished">Η μετεγκατάσταση απέτυχε</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="598"/>
+        <location filename="../oscar/main.cpp" line="601"/>
         <source>OSCAR %1 needs to upgrade its database from version %2 to version %3.</source>
         <translation type="unfinished">Το OSCAR %1 πρέπει να αναβαθμίσει τη βάση δεδομένων του από την έκδοση %2 στην έκδοση %3.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="602"/>
+        <location filename="../oscar/main.cpp" line="605"/>
         <source>Once upgraded, this database &lt;font size=+1&gt;cannot&lt;/font&gt; be opened by earlier versions of OSCAR, and the upgrade cannot be undone.</source>
         <translation type="unfinished">Μόλις αναβαθμιστεί, αυτή η βάση δεδομένων &lt;font size=+1&gt;δεν μπορεί&lt;/font&gt; να ανοιχθεί από παλαιότερες εκδόσεις του OSCAR, και η αναβάθμιση δεν μπορεί να αναιρεθεί.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="604"/>
+        <location filename="../oscar/main.cpp" line="607"/>
         <source>&lt;b&gt;Back up and upgrade&lt;/b&gt; first saves a complete copy of the current database in %1, so you can go back to it if needed.</source>
         <translation type="unfinished">Η επιλογή &lt;b&gt;Δημιουργία αντιγράφου ασφαλείας και αναβάθμιση&lt;/b&gt; αποθηκεύει πρώτα ένα πλήρες αντίγραφο της τρέχουσας βάσης δεδομένων στο %1, ώστε να μπορείτε να επιστρέψετε σε αυτήν αν χρειαστεί.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="606"/>
+        <location filename="../oscar/main.cpp" line="609"/>
         <source>&lt;b&gt;Exit&lt;/b&gt; leaves the database unchanged, so you can back it up yourself before starting OSCAR again.</source>
         <translation type="unfinished">Η επιλογή &lt;b&gt;Έξοδος&lt;/b&gt; αφήνει τη βάση δεδομένων αμετάβλητη, ώστε να μπορείτε να κάνετε εσείς οι ίδιοι αντίγραφο ασφαλείας πριν ξεκινήσετε ξανά το OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="608"/>
+        <location filename="../oscar/main.cpp" line="611"/>
         <source>Are you ready to upgrade?</source>
         <translation type="unfinished">Είστε έτοιμοι για την αναβάθμιση;</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="610"/>
+        <location filename="../oscar/main.cpp" line="613"/>
         <source>Database Upgrade Required</source>
         <translation type="unfinished">Απαιτείται Αναβάθμιση Βάσης Δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="611"/>
+        <location filename="../oscar/main.cpp" line="614"/>
         <source>Back up and upgrade</source>
         <translation type="unfinished">Δημιουργία αντιγράφου ασφαλείας και αναβάθμιση</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="612"/>
+        <location filename="../oscar/main.cpp" line="615"/>
         <source>Upgrade</source>
         <translation type="unfinished">Αναβάθμιση</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="259"/>
-        <location filename="../oscar/main.cpp" line="613"/>
-        <location filename="../oscar/main.cpp" line="665"/>
+        <location filename="../oscar/main.cpp" line="616"/>
+        <location filename="../oscar/main.cpp" line="668"/>
         <source>Exit</source>
         <translation type="unfinished">Εξοδος</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="628"/>
+        <location filename="../oscar/main.cpp" line="631"/>
         <source>Upgrading Database</source>
         <translation type="unfinished">Αναβάθμιση Βάσης Δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="649"/>
+        <location filename="../oscar/main.cpp" line="652"/>
         <source>Backing up the database to %1...</source>
         <translation type="unfinished">Δημιουργία αντιγράφου ασφαλείας της βάσης δεδομένων στο %1...</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="661"/>
+        <location filename="../oscar/main.cpp" line="664"/>
         <source>Database Backup Failed</source>
         <translation type="unfinished">Η Δημιουργία Αντιγράφου Ασφαλείας της Βάσης Δεδομένων Απέτυχε</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="662"/>
+        <location filename="../oscar/main.cpp" line="665"/>
         <source>OSCAR could not save a copy of the database:</source>
         <translation type="unfinished">Το OSCAR δεν μπόρεσε να αποθηκεύσει ένα αντίγραφο της βάσης δεδομένων:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="663"/>
+        <location filename="../oscar/main.cpp" line="666"/>
         <source>You can upgrade without a backup, or exit and back up the database yourself first.</source>
         <translation type="unfinished">Μπορείτε να κάνετε αναβάθμιση χωρίς αντίγραφο ασφαλείας, ή να κάνετε έξοδο και να δημιουργήσετε εσείς οι ίδιοι αντίγραφο ασφαλείας της βάσης δεδομένων πρώτα.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="664"/>
+        <location filename="../oscar/main.cpp" line="667"/>
         <source>Upgrade without backup</source>
         <translation type="unfinished">Αναβάθμιση χωρίς αντίγραφο ασφαλείας</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="678"/>
+        <location filename="../oscar/main.cpp" line="681"/>
         <source>Upgrading database from version %1 to version %2...</source>
         <translation type="unfinished">Αναβάθμιση βάσης δεδομένων από την έκδοση %1 στην έκδοση %2...</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="685"/>
+        <location filename="../oscar/main.cpp" line="688"/>
         <source>Upgrading database from version %1 to version %2 (step %3 of %4)...</source>
         <translation type="unfinished">Αναβάθμιση βάσης δεδομένων από την έκδοση %1 στην έκδοση %2 (βήμα %3 από %4)...</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="696"/>
+        <location filename="../oscar/main.cpp" line="699"/>
         <source>OSCAR could not upgrade your database from version %1 to version %2.</source>
         <translation type="unfinished">Το OSCAR δεν μπόρεσε να αναβαθμίσει τη βάση δεδομένων σας από την έκδοση %1 στην έκδοση %2.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="699"/>
+        <location filename="../oscar/main.cpp" line="702"/>
         <source>The copy made before the upgrade is unchanged:</source>
         <translation type="unfinished">Το αντίγραφο που δημιουργήθηκε πριν από την αναβάθμιση παραμένει αμετάβλητο:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="702"/>
+        <location filename="../oscar/main.cpp" line="705"/>
         <source>Each completed step has been kept, and OSCAR will try the remaining steps the next time it starts. If the problem persists, restore the database from a backup or delete oscar.db and re-import your CPAP data.</source>
         <translation type="unfinished">Κάθε βήμα που ολοκληρώθηκε έχει διατηρηθεί και το OSCAR θα προσπαθήσει να εκτελέσει τα υπόλοιπα βήματα την επόμενη φορά που θα ξεκινήσει. Εάν το πρόβλημα παραμένει, επαναφέρετε τη βάση δεδομένων από ένα αντίγραφο ασφαλείας ή διαγράψτε το oscar.db και επανεισάγετε τα δεδομένα CPAP σας.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="704"/>
+        <location filename="../oscar/main.cpp" line="707"/>
         <source>OSCAR will now close.</source>
         <translation type="unfinished">Το OSCAR θα κλείσει τώρα.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="705"/>
+        <location filename="../oscar/main.cpp" line="708"/>
         <source>Database Upgrade Failed</source>
         <translation type="unfinished">Η Αναβάθμιση της Βάσης Δεδομένων Απέτυχε</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1096"/>
+        <location filename="../oscar/main.cpp" line="1112"/>
         <source>OSCAR is set up to run as a portable application, but cannot write to its settings folder:</source>
         <translation type="unfinished">Το OSCAR είναι ρυθμισμένο να εκτελείται ως φορητή εφαρμογή, αλλά δεν μπορεί να γράψει στον φάκελο ρυθμίσεών του:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1098"/>
+        <location filename="../oscar/main.cpp" line="1114"/>
         <source>Copy the OSCAR folder to a location you can write to, such as a USB drive, or remove %1 from it to run OSCAR normally.</source>
         <translation type="unfinished">Αντιγράψτε τον φάκελο του OSCAR σε μια θέση όπου μπορείτε να γράψετε, όπως μια μονάδα USB, ή αφαιρέστε το %1 από αυτόν για να εκτελείτε το OSCAR κανονικά.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1117"/>
+        <location filename="../oscar/main.cpp" line="1133"/>
         <source>OSCAR Portable</source>
         <translation type="unfinished">OSCAR Portable</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1118"/>
+        <location filename="../oscar/main.cpp" line="1134"/>
         <source>The &quot;%1&quot; folder is inside a folder named after the download:</source>
         <translation type="unfinished">Ο φάκελος «%1» βρίσκεται μέσα σε φάκελο που έχει το όνομα της λήψης:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1120"/>
+        <location filename="../oscar/main.cpp" line="1136"/>
         <source>OSCAR keeps your data and settings in a &quot;%1&quot; folder next to &quot;%2&quot;, so they would be kept in that folder too, and a newer version of OSCAR Portable extracted the same way would not find them.</source>
         <translation type="unfinished">Το OSCAR διατηρεί τα δεδομένα και τις ρυθμίσεις σας σε φάκελο «%1» δίπλα στο «%2», οπότε θα διατηρούνταν κι αυτά σε εκείνον τον φάκελο, και μια νεότερη έκδοση του OSCAR Portable που αποσυμπιέζεται με τον ίδιο τρόπο δεν θα τα έβρισκε.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1123"/>
+        <location filename="../oscar/main.cpp" line="1139"/>
         <source>We recommend that you quit, move the &quot;%1&quot; folder to %2, and start OSCAR from there.</source>
         <translation type="unfinished">Συνιστούμε να κάνετε έξοδο, να μετακινήσετε τον φάκελο «%1» στο %2 και να ξεκινάτε το OSCAR από εκεί.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1125"/>
+        <location filename="../oscar/main.cpp" line="1141"/>
         <source>Quit</source>
         <translation type="unfinished">Έξοδος</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1126"/>
+        <location filename="../oscar/main.cpp" line="1142"/>
         <source>Continue Here</source>
         <translation type="unfinished">Συνέχεια εδώ</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1197"/>
+        <location filename="../oscar/main.cpp" line="1221"/>
         <source>Your graphics hardware does not support the version of OpenGL that OSCAR needs.</source>
         <translation type="unfinished">Το υλικό γραφικών σας δεν υποστηρίζει την έκδοση του OpenGL που απαιτεί το OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1198"/>
+        <location filename="../oscar/main.cpp" line="1222"/>
         <source>OSCAR will restart using a slower but more compatible method of drawing.</source>
         <translation type="unfinished">Το OSCAR θα επανεκκινήσει χρησιμοποιώντας μια πιο αργή αλλά πιο συμβατή μέθοδο σχεδίασης.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1210"/>
+        <location filename="../oscar/main.cpp" line="1234"/>
         <source>OSCAR was unable to restart itself. Please start OSCAR again.</source>
         <translation type="unfinished">Το OSCAR δεν μπόρεσε να επανεκκινηθεί από μόνο του. Παρακαλώ ξεκινήστε ξανά το OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1276"/>
+        <location filename="../oscar/main.cpp" line="1300"/>
         <source>OSCAR will exit without changing your data folder.</source>
         <translation type="unfinished">Το OSCAR θα τερματιστεί χωρίς να αλλάξει τον φάκελο δεδομένων σας.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1301"/>
+        <location filename="../oscar/main.cpp" line="1325"/>
         <source>Locate your OSCAR 2 data folder</source>
         <translation type="unfinished">Εντοπίστε τον φάκελο δεδομένων OSCAR 2</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1312"/>
+        <location filename="../oscar/main.cpp" line="1336"/>
         <source>This folder contains OSCAR 1.x data, not OSCAR 2 data.</source>
         <translation type="unfinished">Αυτός ο φάκελος περιέχει δεδομένα OSCAR 1.x, όχι δεδομένα OSCAR 2.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1313"/>
+        <location filename="../oscar/main.cpp" line="1337"/>
         <source>This folder does not contain an OSCAR 2 database.</source>
         <translation type="unfinished">Αυτός ο φάκελος δεν περιέχει βάση δεδομένων OSCAR 2.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1314"/>
+        <location filename="../oscar/main.cpp" line="1338"/>
         <source>Not an OSCAR 2 data folder</source>
         <translation type="unfinished">Δεν είναι φάκελος δεδομένων OSCAR 2</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1316"/>
+        <location filename="../oscar/main.cpp" line="1340"/>
         <source>Choose another folder, or Cancel to return to the previous screen.</source>
         <translation type="unfinished">Επιλέξτε έναν άλλο φάκελο, ή Ακύρωση για επιστροφή στην προηγούμενη οθόνη.</translation>
     </message>
@@ -12604,7 +14193,7 @@ Cleaning up, please wait...</source>
         <translation type="vanished">Επιλέξτε ή δημιουργήστε ένα νέο φάκελο για δεδομένα OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1278"/>
+        <location filename="../oscar/main.cpp" line="1302"/>
         <source>Next time you run OSCAR, you will be asked again.</source>
         <translation>Την επόμενη φορά που θα εκτελέσετε το OSCAR, θα σας ζητηθεί ξανά.</translation>
     </message>
@@ -12617,92 +14206,92 @@ Cleaning up, please wait...</source>
         <translation type="vanished">Την επόμενη φορά που θα εκτελέσετε το OSCAR, θα σας ζητηθεί ξανά.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1332"/>
+        <location filename="../oscar/main.cpp" line="1356"/>
         <source>Data directory:</source>
         <translation>Κατάλογος δεδομένων:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1334"/>
+        <location filename="../oscar/main.cpp" line="1358"/>
         <source>Portable mode:</source>
         <translation type="unfinished">Φορητή λειτουργία:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1335"/>
+        <location filename="../oscar/main.cpp" line="1359"/>
         <source>settings in %1</source>
         <translation type="unfinished">ρυθμίσεις στο %1</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1336"/>
+        <location filename="../oscar/main.cpp" line="1360"/>
         <source>Database schema:</source>
         <translation type="unfinished">Σχήμα βάσης δεδομένων:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1343"/>
+        <location filename="../oscar/main.cpp" line="1367"/>
         <source>Unable to create the OSCAR data folder at</source>
         <translation type="unfinished">Δεν είναι δυνατή η δημιουργία του φακέλου δεδομένων OSCAR στο</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1356"/>
+        <location filename="../oscar/main.cpp" line="1380"/>
         <source>Unable to write to OSCAR data directory</source>
         <translation type="unfinished">Δεν είναι δυνατή η εγγραφή στον κατάλογο δεδομένων OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1357"/>
+        <location filename="../oscar/main.cpp" line="1381"/>
         <source>Error code</source>
         <translation type="unfinished">Κωδικός σφάλματος</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1358"/>
+        <location filename="../oscar/main.cpp" line="1382"/>
         <source>OSCAR cannot continue and is exiting.</source>
         <translation type="unfinished">Το OSCAR δεν μπορεί να συνεχίσει και τερματίζεται.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1385"/>
+        <location filename="../oscar/main.cpp" line="1409"/>
         <source>This OSCAR database folder is already open in another instance of OSCAR.</source>
         <translation type="unfinished">Αυτός ο φάκελος βάσης δεδομένων OSCAR είναι ήδη ανοιχτός σε άλλη παρουσία του OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1386"/>
+        <location filename="../oscar/main.cpp" line="1410"/>
         <source>Folder:</source>
         <translation type="unfinished">Φάκελος:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1387"/>
+        <location filename="../oscar/main.cpp" line="1411"/>
         <source>Close the other OSCAR instance before opening this database.</source>
         <translation type="unfinished">Κλείστε την άλλη παρουσία OSCAR πριν ανοίξετε αυτή τη βάση δεδομένων.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1389"/>
+        <location filename="../oscar/main.cpp" line="1413"/>
         <source>(Other instance process ID: %1)</source>
         <translation type="unfinished">(Αναγνωριστικό διεργασίας άλλης παρουσίας: %1)</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1401"/>
+        <location filename="../oscar/main.cpp" line="1425"/>
         <source>Unable to write to debug log. You can still use the debug pane (Help/Troubleshooting/Show Debug Pane) but the debug log will not be written to disk.</source>
         <translation type="unfinished">Δεν είναι δυνατή η εγγραφή στο αρχείο καταγραφής εντοπισμού σφαλμάτων. Μπορείτε ακόμα να χρησιμοποιήσετε το παράθυρο εντοπισμού σφαλμάτων (Βοήθεια/Αντιμετώπιση προβλημάτων/Εμφάνιση παραθύρου εντοπισμού σφαλμάτων), αλλά το αρχείο καταγραφής δεν θα αποθηκευτεί στο δίσκο.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1431"/>
+        <location filename="../oscar/main.cpp" line="1455"/>
         <source>Database Error</source>
         <translation type="unfinished">Σφάλμα βάσης δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1471"/>
+        <location filename="../oscar/main.cpp" line="1495"/>
         <source>Check Database Integrity</source>
         <translation type="unfinished">Έλεγχος ακεραιότητας βάσης δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1467"/>
+        <location filename="../oscar/main.cpp" line="1491"/>
         <source>Checking database integrity, please wait...</source>
         <translation type="unfinished">Έλεγχος ακεραιότητας βάσης δεδομένων, παρακαλώ περιμένετε...</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1498"/>
+        <location filename="../oscar/main.cpp" line="1522"/>
         <source>Database Integrity Warning</source>
         <translation type="unfinished">Προειδοποίηση ακεραιότητας βάσης δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1499"/>
+        <location filename="../oscar/main.cpp" line="1523"/>
         <source>OSCAR detected that the previous session ended unexpectedly, and the database integrity check found problems.
 
 Some data may be missing or corrupted.
@@ -12741,29 +14330,29 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation type="obsolete">Κάντε κλικ στο [OK] για να μεταβείτε στην επόμενη οθόνη ή στο [Όχι] αν δεν επιθυμείτε να χρησιμοποιήσετε δεδομένα OSCAR 1.x.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1670"/>
+        <location filename="../oscar/main.cpp" line="1696"/>
         <source>Version &quot;%1&quot; is invalid, cannot continue!</source>
         <translation>Η έκδοση &quot;%1&quot; δεν είναι έγκυρη, δεν μπορεί να συνεχιστεί!</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1679"/>
+        <location filename="../oscar/main.cpp" line="1705"/>
         <source>The version of OSCAR you are running (%1) is OLDER than the one used to create this data (%2).</source>
         <translation>Η έκδοση του OSCAR που εκτελείτε (%1) είναι παλαιότερη από αυτή που χρησιμοποιήθηκε για τη δημιουργία αυτών των δεδομένων (%2).</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1683"/>
+        <location filename="../oscar/main.cpp" line="1709"/>
         <source>It is likely that doing this will cause data corruption, are you sure you want to do this?</source>
         <translation>Είναι πιθανό ότι αυτό θα προκαλέσει καταστροφή δεδομένων, είστε σίγουροι ότι θέλετε να το κάνετε αυτό;</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="942"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="960"/>
         <source>Question</source>
         <translation>Ερώτηση</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1275"/>
-        <location filename="../oscar/main.cpp" line="1342"/>
-        <location filename="../oscar/main.cpp" line="1361"/>
+        <location filename="../oscar/main.cpp" line="1299"/>
+        <location filename="../oscar/main.cpp" line="1366"/>
+        <location filename="../oscar/main.cpp" line="1385"/>
         <source>Exiting</source>
         <translation>Έξοδος</translation>
     </message>
@@ -12772,71 +14361,71 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation type="vanished">Είστε βέβαιοι ότι θέλετε να χρησιμοποιήσετε αυτόν τον φάκελο;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="457"/>
+        <location filename="../oscar/mainwindow.cpp" line="504"/>
         <source>OSCAR Reminder</source>
         <translation>Υπενθύμιση OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="457"/>
+        <location filename="../oscar/mainwindow.cpp" line="504"/>
         <source>Don&apos;t forget to place your datacard back in your CPAP device</source>
         <translation type="unfinished">Μην ξεχάσετε να τοποθετήσετε ξανά την κάρτα δεδομένων σας στη συσκευή CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="679"/>
+        <location filename="../oscar/mainwindow.cpp" line="727"/>
         <source>You can only work with one instance of an individual OSCAR profile at a time.</source>
         <translation>Μπορείτε να εργαστείτε μόνο με μια εμφάνιση ενός μεμονωμένου προφίλ OSCAR τη φορά.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="680"/>
+        <location filename="../oscar/mainwindow.cpp" line="728"/>
         <source>If you are using cloud storage, make sure OSCAR is closed and syncing has completed first on the other computer before proceeding.</source>
         <translation>Εάν χρησιμοποιείτε χώρο αποθήκευσης στο νέφος, βεβαιωθείτε ότι το OSCAR είναι κλειστό και ότι ο συγχρονισμός έχει ολοκληρωθεί πρώτα στον άλλο υπολογιστή πριν προχωρήσετε.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="731"/>
+        <location filename="../oscar/mainwindow.cpp" line="781"/>
         <source>Loading profile &quot;%1&quot;...</source>
         <translation>Το προφίλ φόρτωσης &quot;%1&quot; ...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1356"/>
+        <location filename="../oscar/mainwindow.cpp" line="1489"/>
         <source>Chromebook file system detected, but no removable device found
 </source>
         <translation type="unfinished">Εντοπίστηκε σύστημα αρχείων Chromebook, αλλά δεν βρέθηκε αφαιρούμενη συσκευή
 </translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1357"/>
+        <location filename="../oscar/mainwindow.cpp" line="1490"/>
         <source>You must share your SD card with Linux using the ChromeOS Files program</source>
         <translation type="unfinished">Πρέπει να μοιραστείτε την κάρτα SD σας με το Linux χρησιμοποιώντας το πρόγραμμα Αρχεία του ChromeOS</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3055"/>
+        <location filename="../oscar/mainwindow.cpp" line="3808"/>
         <source>Recompressing Session Files</source>
         <translation type="unfinished">Επανασυμπίεση Αρχείων Συνεδρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4455"/>
+        <location filename="../oscar/mainwindow.cpp" line="5204"/>
         <source>Please select a location for your zip other than the data card itself!</source>
         <translation>Επιλέξτε μια τοποθεσία για το φερμουάρ σας εκτός από την ίδια την κάρτα δεδομένων!</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4504"/>
-        <location filename="../oscar/mainwindow.cpp" line="4556"/>
-        <location filename="../oscar/mainwindow.cpp" line="4890"/>
+        <location filename="../oscar/mainwindow.cpp" line="5253"/>
+        <location filename="../oscar/mainwindow.cpp" line="5305"/>
+        <location filename="../oscar/mainwindow.cpp" line="5639"/>
         <source>Unable to create zip!</source>
         <translation>Δεν είναι δυνατή η δημιουργία φερμουάρ!</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1334"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1356"/>
         <source>Are you sure you want to reset all your channel colors and settings to defaults?</source>
         <translation>Είστε βέβαιοι ότι θέλετε να επαναφέρετε όλα τα χρώματα και τις ρυθμίσεις των καναλιών σας στις προεπιλογές;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1355"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1397"/>
         <source>Are you sure you want to reset all your oximetry settings to defaults?</source>
         <translation type="unfinished">Είστε βέβαιοι ότι θέλετε να επαναφέρετε όλες τις ρυθμίσεις οξυμετρίας στις προεπιλογές;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1462"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1504"/>
         <source>Are you sure you want to reset all your waveform channel colors and settings to defaults?</source>
         <translation>Είστε βέβαιοι ότι θέλετε να επαναφέρετε όλα τα χρώματα καναλιών κυματομορφών και τις ρυθμίσεις σας στις προεπιλογές;</translation>
     </message>
@@ -12942,32 +14531,32 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation>Σελίδα %1 του %2</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="957"/>
+        <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="958"/>
         <source>Days: %1</source>
         <translation>Ημέρες: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="1064"/>
+        <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="1065"/>
         <source>(Sess: %1)</source>
         <translation>(Sess: %1)</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="1072"/>
+        <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="1073"/>
         <source>Bedtime: %1</source>
         <translation>Ώρα για ύπνο: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="1074"/>
+        <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="1075"/>
         <source>Waketime: %1</source>
         <translation>Διάρκεια: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="1182"/>
+        <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="1183"/>
         <source>(Summary Only)</source>
         <translation>(Μόνο περίληψη)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="678"/>
+        <location filename="../oscar/mainwindow.cpp" line="726"/>
         <source>There is a lockfile already present for this profile &apos;%1&apos;, claimed on &apos;%2&apos;.</source>
         <translation>Υπάρχει ήδη κλειδωμένο αρχείο κλειδώματος για αυτό το προφίλ &apos;%1&apos;, το οποίο αξιώνεται στο &apos;%2&apos;.</translation>
     </message>
@@ -12987,60 +14576,60 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation>Auto Bi-επίπεδο (μεταβλητό PS)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/day.cpp" line="1485"/>
-        <location filename="../oscar/SleepLib/day.cpp" line="1509"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1477"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1501"/>
         <source>ERROR:NOT AVAILABLE</source>
         <translation type="unfinished">ΣΦΑΛΜΑ: ΔΕΝ ΕΙΝΑΙ ΔΙΑΘΕΣΙΜΟ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/day.cpp" line="1534"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1526"/>
         <source>varies</source>
         <translation type="unfinished">ποικίλλει</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/day.cpp" line="1586"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1578"/>
         <source>n/a</source>
         <translation>n/a</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/day.cpp" line="1603"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1595"/>
         <source>Fixed %1 (%2)</source>
         <translation>Σταθερό %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/day.cpp" line="1606"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1598"/>
         <source>Min %1 Max %2 (%3)</source>
         <translation>Ελάχιστο %1 Μέγιστο %2 (%3)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/day.cpp" line="1610"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1602"/>
         <source>EPAP %1 IPAP %2 (%3)</source>
         <translation>EPAP %1 IPAP %2 (%3)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/day.cpp" line="1614"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1606"/>
         <source>PS %1 over %2-%3 (%4)</source>
         <translation>PS %1 πάνω από %2-%3 (%4)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/day.cpp" line="1619"/>
-        <location filename="../oscar/SleepLib/day.cpp" line="1633"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1611"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1625"/>
         <source>Min EPAP %1 Max IPAP %2 PS %3-%4 (%5)</source>
         <translation>Ελάχιστο EPAP %1 Μέγιστο IPAP %2 PS %3-%4 (%5)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/day.cpp" line="1624"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1616"/>
         <source>Min EEPAP %1 Max EEPAP %2 PDIFF %3-%4 (%5)</source>
         <translation type="unfinished">Ελάχ. EEPAP %1 Μέγ. EEPAP %2 PDIFF %3-%4 (%5)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/day.cpp" line="1629"/>
-        <location filename="../oscar/SleepLib/day.cpp" line="1650"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1621"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1642"/>
         <source>EPAP %1 PS %2-%3 (%4)</source>
         <translation>EPAP %1 PS %2-%3 (%4)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/day.cpp" line="1643"/>
+        <location filename="../oscar/SleepLib/day.cpp" line="1635"/>
         <source>EPAP %1-%2 PS %3-%4 (%5)</source>
         <translation type="unfinished">EPAP %1-%2 PS %3-%4 (%5)</translation>
     </message>
@@ -13085,6 +14674,7 @@ You may continue, but some data may be incomplete or incorrect.</source>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/cms50_loader.h" line="41"/>
+        <location filename="../oscar/SleepLib/loader_plugins/cms50_loader.h" line="41"/>
         <source>CMS50</source>
         <translation>CMS50</translation>
     </message>
@@ -13101,7 +14691,7 @@ You may continue, but some data may be incomplete or incorrect.</source>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/icon_loader.h" line="87"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.h" line="251"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.h" line="252"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="67"/>
         <location filename="../oscar/notifyMessageBox.cpp" line="17"/>
         <source></source>
@@ -13168,12 +14758,13 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation>S9</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.h" line="136"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.h" line="167"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.h" line="96"/>
         <source>EPR: </source>
         <translation>EPR: </translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/somnopose_loader.h" line="39"/>
         <location filename="../oscar/SleepLib/loader_plugins/somnopose_loader.h" line="39"/>
         <source>Somnopose</source>
         <translation>Somnopose</translation>
@@ -13199,109 +14790,108 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation type="unfinished">Zeo Sleep Manager</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gFlagsLine.cpp" line="205"/>
-        <location filename="../oscar/Graphs/gFlagsLine.cpp" line="215"/>
+        <location filename="../oscar/Graphs/gFlagsLine.cpp" line="206"/>
+        <location filename="../oscar/Graphs/gFlagsLine.cpp" line="216"/>
         <source>Selection Length</source>
         <translation type="unfinished">Μήκος Επιλογής</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gFlagsLine.cpp" line="272"/>
+        <location filename="../oscar/Graphs/gFlagsLine.cpp" line="278"/>
         <source>Database Outdated
 Please Rebuild CPAP Data</source>
         <translation>Η βάση δεδομένων είναι ξεπερασμένη
 Παρακαλούμε ξαναχτίστε τα δεδομένα CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gFlagsLine.cpp" line="457"/>
+        <location filename="../oscar/Graphs/gFlagsLine.cpp" line="463"/>
         <source> (%2 min, %3 sec)</source>
         <translation> (%2 λεπτά, %3 δευτερόλεπτα)</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gFlagsLine.cpp" line="459"/>
+        <location filename="../oscar/Graphs/gFlagsLine.cpp" line="465"/>
         <source> (%3 sec)</source>
         <translation> (%3 δευτερόλεπτα)</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="433"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="482"/>
         <source>Pop out Graph</source>
         <translation>Αναδύστε το γράφημα</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="513"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="552"/>
         <source>The popout window is full. You should capture the existing
 popout window, delete it, then pop out this graph again.</source>
         <translation type="unfinished">Το αναδυόμενο παράθυρο είναι πλήρες. Θα πρέπει να καταγράψετε το υπάρχον
 αναδυόμενο παράθυρο, να το διαγράψετε και στη συνέχεια να αναδύσετε ξανά αυτό το γράφημα.</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="1502"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="1758"/>
         <source>There is no data to graph</source>
         <translation>Δεν υπάρχουν δεδομένα στο γράφημα</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="1623"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="1880"/>
         <source>d MMM yyyy [ %1 - %2 ]</source>
         <translation>d MMM yyyy [ %1 - %2 ]</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="1499"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="1755"/>
         <source>Your machine doesn&apos;t record data to graph in Daily View</source>
         <translation type="unfinished">Η συσκευή σας δεν καταγράφει δεδομένα για γράφημα στην Ημερήσια Προβολή</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2345"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2638"/>
         <source>Hide All Events</source>
         <translation>Απόκρυψη όλων των συμβάντων</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2346"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2639"/>
         <source>Show All Events</source>
         <translation>Εμφάνιση όλων των συμβάντων</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2688"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="805"/>
         <source>Unpin %1 Graph</source>
         <translation>Απελευθερώστε το %1 γράφημα</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2690"/>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2767"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="807"/>
         <source>Popout %1 Graph</source>
         <translation>Αναφορά %1 Γραφή</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2769"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="806"/>
         <source>Pin %1 Graph</source>
         <translation>Pin %1 Γράφημα</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/MinutesAtPressure.cpp" line="714"/>
-        <location filename="../oscar/Graphs/gLineChart.cpp" line="1035"/>
+        <location filename="../oscar/Graphs/MinutesAtPressure.cpp" line="715"/>
+        <location filename="../oscar/Graphs/gLineChart.cpp" line="1105"/>
         <source>Plots Disabled</source>
         <translation>Τα οικόπεδα είναι απενεργοποιημένα</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gLineChart.cpp" line="1111"/>
+        <location filename="../oscar/Graphs/gLineChart.cpp" line="1181"/>
         <source>Duration %1:%2:%3</source>
         <translation>Διάρκεια %1:%2:%3</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gLineChart.cpp" line="1112"/>
+        <location filename="../oscar/Graphs/gLineChart.cpp" line="1182"/>
         <source>AHI %1</source>
         <translation>AHI %1</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gdailysummary.cpp" line="150"/>
+        <location filename="../oscar/Graphs/gdailysummary.cpp" line="151"/>
         <source>Relief: %1</source>
         <translation>Ανακούφιση: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gdailysummary.cpp" line="156"/>
+        <location filename="../oscar/Graphs/gdailysummary.cpp" line="157"/>
         <source>Hours: %1h, %2m, %3s</source>
         <translation>Ωρες: %1h, %2m, %3s</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gdailysummary.cpp" line="243"/>
+        <location filename="../oscar/Graphs/gdailysummary.cpp" line="244"/>
         <source>Machine Information</source>
         <translation>Πληροφορίες μηχανής</translation>
     </message>
@@ -13316,61 +14906,61 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>CMS50F</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2671"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2674"/>
         <source>Backing up files...</source>
         <translation type="unfinished">Δημιουργία αντιγράφων ασφαλείας αρχείων...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2678"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2681"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="251"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="181"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="536"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="951"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2352"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="952"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2351"/>
         <source>Reading data files...</source>
         <translation type="unfinished">Ανάγνωση αρχείων δεδομένων...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2743"/>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2745"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2746"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2748"/>
         <source>SmartFlex Mode</source>
         <translation>Λειτουργία SmartFlex</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2744"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2747"/>
         <source>Intellipap pressure relief mode.</source>
         <translation>Λειτουργία ανακούφισης πίεσης Intellipap.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2750"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2753"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="208"/>
         <source>Ramp Only</source>
         <translation>Μόνο Ramp</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2751"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2754"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="209"/>
         <source>Full Time</source>
         <translation>Πλήρης απασχόληση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2754"/>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2756"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2757"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2759"/>
         <source>SmartFlex Level</source>
         <translation>Επίπεδο SmartFlex</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2755"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2758"/>
         <source>Intellipap pressure relief level.</source>
         <translation>Επίπεδο ανακούφισης πίεσης Intellipap.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2762"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2765"/>
         <source>Snoring event.</source>
         <translation type="unfinished">Συμβάν ροχαλητού.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2763"/>
+        <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2766"/>
         <source>SN</source>
         <translation type="unfinished">ΡΧ</translation>
     </message>
@@ -13380,7 +14970,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Εντοπισμός αρχείων STR.edf ...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="1154"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="1176"/>
         <source>Cataloguing EDF Files...</source>
         <translation>Καταλογογράφηση αρχείων EDF ...</translation>
     </message>
@@ -13397,7 +14987,7 @@ popout window, delete it, then pop out this graph again.</source>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="186"/>
         <location filename="../oscar/SleepLib/loader_plugins/resvent_loader.cpp" line="890"/>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="636"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="639"/>
         <source>CPAP Mode</source>
         <translation>Λειτουργία CPAP</translation>
     </message>
@@ -13418,6 +15008,8 @@ popout window, delete it, then pop out this graph again.</source>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="205"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="205"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="992"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="992"/>
         <source>EPR</source>
         <translation>EPR</translation>
@@ -13434,6 +15026,8 @@ popout window, delete it, then pop out this graph again.</source>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="213"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="213"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="998"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="998"/>
         <source>EPR Level</source>
         <translation>Επίπεδο EPR</translation>
@@ -13473,6 +15067,8 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Επίπεδο υγραντήρα</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="304"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="304"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="304"/>
         <source>Rise Time Enable</source>
         <translation type="unfinished">Ενεργοποίηση Χρόνου Ανόδου</translation>
@@ -13659,9 +15255,10 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="unfinished">Η συσκευή ξεκινά αυτόματα με την αναπνοή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="767"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1119"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="794"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1150"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2938"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="234"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="234"/>
         <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="209"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="1012"/>
@@ -13671,6 +15268,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Επίπεδο υγρασίας</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="239"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="239"/>
         <source>Temperature</source>
         <translation>Θερμοκρασία</translation>
@@ -13702,6 +15300,7 @@ popout window, delete it, then pop out this graph again.</source>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="250"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="250"/>
         <source>Antibacterial Filter</source>
         <translation>Αντιβακτηριακό φίλτρο</translation>
     </message>
@@ -13711,6 +15310,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Πρόσβαση ασθενούς</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="256"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="256"/>
         <source>Essentials</source>
         <translation type="unfinished">Essentials</translation>
@@ -13722,21 +15322,26 @@ popout window, delete it, then pop out this graph again.</source>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="262"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="262"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="262"/>
         <source>Climate Control</source>
         <translation>Ελεγχος του κλίματος</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="933"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="265"/>
         <source>Manual</source>
         <translation>Εγχειρίδιο</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="283"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="283"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="283"/>
         <source>Response</source>
         <translation type="unfinished">Response</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="935"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="962"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="286"/>
         <source>Soft</source>
         <translation type="unfinished">Soft</translation>
@@ -13758,6 +15363,8 @@ popout window, delete it, then pop out this graph again.</source>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="295"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="295"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="295"/>
         <source>Patient View</source>
         <translation type="unfinished">Προβολή Ασθενούς</translation>
     </message>
@@ -13776,27 +15383,33 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="obsolete">RiseEnable</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="904"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="931"/>
         <source>RiseTime</source>
         <translation type="unfinished">RiseTime</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="312"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="312"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="312"/>
         <source>Cycle</source>
         <translation type="unfinished">Κύκλος</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="929"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="931"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="320"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="320"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="320"/>
         <source>Trigger</source>
         <translation type="unfinished">Ενεργοποίηση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="910"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="937"/>
         <source>TiMax</source>
         <translation type="unfinished">TiMax</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="907"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="934"/>
         <source>TiMin</source>
         <translation type="unfinished">TiMin</translation>
     </message>
@@ -13811,24 +15424,28 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="unfinished">Φαίνεται αρκετά παρόμοια με άλλες συσκευές που μπορεί να λειτουργεί, αλλά οι προγραμματιστές θα ήθελαν ένα αντίγραφο .zip της κάρτας SD αυτής της συσκευής για να βεβαιωθούν ότι λειτουργεί με το OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="1239"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="1261"/>
         <source>Backing up EDF Files...</source>
         <translation type="unfinished">Δημιουργία αντιγράφων ασφαλείας αρχείων EDF...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="1427"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="1449"/>
         <source>Parsing STR.edf records...</source>
         <translation>Ανάλυση αρχείων STR.edf ...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="1110"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="1128"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="934"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2949"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3040"/>
         <source>Auto</source>
         <translation>Αυτο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="819"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="846"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="846"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="846"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="268"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="268"/>
         <source>Mask</source>
         <translation>Μάσκα</translation>
@@ -13844,13 +15461,13 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Μαξιλάρια</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="820"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="847"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="271"/>
         <source>Full Face</source>
         <translation>ΟΛΟΚΛΗΡΟ ΠΡΟΣΩΠΟ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="821"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="848"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="272"/>
         <source>Nasal</source>
         <translation>Ρινικός</translation>
@@ -13868,14 +15485,14 @@ popout window, delete it, then pop out this graph again.</source>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.h" line="112"/>
         <source>SOMNObalance</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">SOMNObalance</translation>
     </message>
     <message>
         <source>SOMNOsoft2</source>
         <translation type="vanished">SOMNOsoft2</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="393"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="478"/>
         <source>Snapshot %1</source>
         <translation>Στιγμιότυπο %1</translation>
     </message>
@@ -13890,7 +15507,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>CMS50E/F</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/machine.cpp" line="760"/>
+        <location filename="../oscar/SleepLib/machine.cpp" line="768"/>
         <source>Loading %1 data for %2...</source>
         <translation>Φόρτωση δεδομένων %1 για %2 ...</translation>
     </message>
@@ -13919,7 +15536,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="vanished">Φόρτωση δεδομένων περίληψης</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/machine.cpp" line="1077"/>
+        <location filename="../oscar/SleepLib/machine.cpp" line="1088"/>
         <source>Loading %1 sessions from database...</source>
         <translation type="unfinished">Φόρτωση %1 συνεδριών από τη βάση δεδομένων...</translation>
     </message>
@@ -13969,16 +15586,17 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="unfinished">Τα παντα</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2175"/>
+        <location filename="../oscar/statistics.cpp" line="2168"/>
         <source>Not available for all devices in this period</source>
         <translation type="unfinished">Δεν είναι διαθέσιμο για όλες τις συσκευές σε αυτήν την περίοδο</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="772"/>
+        <location filename="../oscar/overview.cpp" line="1153"/>
         <source>Loading summaries</source>
         <translation>Φόρτωση περιλήψεων</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/dreem_loader.h" line="37"/>
         <location filename="../oscar/SleepLib/loader_plugins/dreem_loader.h" line="37"/>
         <source>Dreem</source>
         <translation>Dreem</translation>
@@ -13999,99 +15617,99 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Τα εισαγόμενα δεδομένα ενδέχεται να μην είναι απολύτως ακριβή, οπότε οι προγραμματιστές θα ήθελαν ένα αντίγραφο των αρχείων Viatom να βεβαιωθεί ότι η OSCAR χειρίζεται σωστά τα δεδομένα.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="257"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="263"/>
         <source>The imported data for the session starting %1 may be incomplete or incorrect.</source>
         <translation type="unfinished">Τα εισαγόμενα δεδομένα για τη συνεδρία που ξεκινά στις %1 ενδέχεται να είναι ελλιπή ή εσφαλμένα.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="264"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="270"/>
         <source>Dead battery</source>
         <translation type="unfinished">Αποφορτισμένη μπαταρία</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="265"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="271"/>
         <source>Your Viatom device registered a dead battery during operation.</source>
         <translation type="unfinished">Η συσκευή Viatom κατέγραψε αποφορτισμένη μπαταρία κατά τη λειτουργία.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="467"/>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="469"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="473"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="475"/>
         <source>O2 Score</source>
         <translation type="unfinished">Βαθμολογία O2</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="468"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="474"/>
         <source>Oxygen score calculated by the oximeter (0-10)</source>
         <translation type="unfinished">Βαθμολογία οξυγόνου που υπολογίστηκε από το οξύμετρο (0-10)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="473"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="479"/>
         <source>3% SpO2 drops</source>
         <translation type="unfinished">Πτώσεις SpO2 κατά 3%</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="474"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="480"/>
         <source>Number of SpO2 drops of 3% or more counted by the oximeter</source>
         <translation type="unfinished">Αριθμός πτώσεων SpO2 κατά 3% ή περισσότερο που μέτρησε το οξύμετρο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="475"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="481"/>
         <source>3% drops</source>
         <translation type="unfinished">Πτώσεις 3%</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="479"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="485"/>
         <source>4% SpO2 drops</source>
         <translation type="unfinished">Πτώσεις SpO2 κατά 4%</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="480"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="486"/>
         <source>Number of SpO2 drops of 4% or more counted by the oximeter</source>
         <translation type="unfinished">Αριθμός πτώσεων SpO2 κατά 4% ή περισσότερο που μέτρησε το οξύμετρο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="481"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="487"/>
         <source>4% drops</source>
         <translation type="unfinished">Πτώσεις 4%</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="485"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="491"/>
         <source>Time below 90% SpO2</source>
         <translation type="unfinished">Χρόνος με SpO2 κάτω από 90%</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="486"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="492"/>
         <source>Time with SpO2 below 90% according to the oximeter</source>
         <translation type="unfinished">Χρόνος με SpO2 κάτω από 90% σύμφωνα με το οξύμετρο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="487"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="493"/>
         <source>Time &lt; 90%</source>
         <translation type="unfinished">Χρόνος &lt; 90%</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="491"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="497"/>
         <source>Asleep time</source>
         <translation type="unfinished">Χρόνος ύπνου</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="492"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="498"/>
         <source>Time asleep according to the oximeter</source>
         <translation type="unfinished">Χρόνος ύπνου σύμφωνα με το οξύμετρο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="493"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="499"/>
         <source>Asleep</source>
         <translation type="unfinished">Ύπνος</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="497"/>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="499"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="503"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="505"/>
         <source>Steps</source>
         <translation type="unfinished">Βήματα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="498"/>
+        <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.cpp" line="504"/>
         <source>Steps counted by the oximeter during the recording</source>
         <translation type="unfinished">Βήματα που μέτρησε το οξύμετρο κατά την καταγραφή</translation>
     </message>
@@ -14157,7 +15775,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="unfinished">Έλεγχος για ενημερώσεις OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/checkupdates.cpp" line="282"/>
+        <location filename="../oscar/checkupdates.cpp" line="285"/>
         <source>Unable to check for updates. Please try again later.</source>
         <translation type="unfinished">Αδυναμία ελέγχου για ενημερώσεις. Παρακαλώ δοκιμάστε ξανά αργότερα.</translation>
     </message>
@@ -14176,17 +15794,18 @@ popout window, delete it, then pop out this graph again.</source>
 %2 σφάλματα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.h" line="251"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.h" line="174"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.h" line="252"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.h" line="179"/>
         <source>Löwenstein</source>
         <translation type="unfinished">Löwenstein</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.h" line="251"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.h" line="252"/>
         <source>Prisma Smart</source>
         <translation type="unfinished">Prisma Smart</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/resvent_loader.cpp" line="905"/>
         <location filename="../oscar/SleepLib/loader_plugins/resvent_loader.cpp" line="905"/>
         <source>iPR</source>
         <translation type="unfinished">iPR</translation>
@@ -14197,6 +15816,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="unfinished">Resvent Exhale Pressure Relief</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/resvent_loader.cpp" line="912"/>
         <location filename="../oscar/SleepLib/loader_plugins/resvent_loader.cpp" line="912"/>
         <source>iPR Level</source>
         <translation type="unfinished">iPR Level</translation>
@@ -14234,6 +15854,7 @@ popout window, delete it, then pop out this graph again.</source>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="1011"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="1011"/>
         <source>Humidity</source>
         <translation type="unfinished">Υγρασία</translation>
     </message>
@@ -14248,24 +15869,24 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="unfinished">Αυτή η σελίδα σε άλλες γλώσσες:</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3371"/>
-        <location filename="../oscar/overview.cpp" line="488"/>
+        <location filename="../oscar/daily.cpp" line="3420"/>
+        <location filename="../oscar/overview.cpp" line="857"/>
         <source>%1 Graphs</source>
         <translation type="unfinished">Γραφήματα %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3375"/>
-        <location filename="../oscar/overview.cpp" line="492"/>
+        <location filename="../oscar/daily.cpp" line="3424"/>
+        <location filename="../oscar/overview.cpp" line="861"/>
         <source>%1 of %2 Graphs</source>
         <translation type="unfinished">%1 από %2 Γραφήματα</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3412"/>
+        <location filename="../oscar/daily.cpp" line="3461"/>
         <source>%1 Event Types</source>
         <translation type="unfinished">%1 Τύποι Συμβάντων</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3416"/>
+        <location filename="../oscar/daily.cpp" line="3465"/>
         <source>%1 of %2 Event Types</source>
         <translation type="unfinished">%1 από %2 Τύποι Συμβάντων</translation>
     </message>
@@ -14275,40 +15896,40 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="unfinished">Η ειδοποίηση λήγει σε %1 δευτερόλεπτα.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.h" line="71"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.h" line="72"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.h" line="25"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.h" line="75"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.h" line="76"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.h" line="26"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.h" line="27"/>
         <source>BMC</source>
         <translation type="unfinished">BMC</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="645"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="648"/>
         <source>vREM pressure relief mode.</source>
         <translation type="unfinished">Λειτουργία ανακούφισης πίεσης vREM.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="654"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="657"/>
         <source>6</source>
         <translation type="unfinished">6</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="655"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="658"/>
         <source>7</source>
         <translation type="unfinished">7</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="660"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="663"/>
         <source>vREM pressure relief setting.</source>
         <translation type="unfinished">Ρύθμιση ανακούφισης πίεσης vREM.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.h" line="66"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.h" line="61"/>
         <source>vREM</source>
         <translation type="unfinished">vREM</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.h" line="66"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.h" line="61"/>
         <source>vREM one</source>
         <translation type="unfinished">vREM one</translation>
     </message>
@@ -14384,32 +16005,32 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="unfinished">Το προφίλ διαγράφηκε επιτυχώς</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="117"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="113"/>
         <source>BMC G3X — Untested Firmware</source>
         <translation type="unfinished">BMC G3X — Μη δοκιμασμένο Firmware</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="118"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="114"/>
         <source>Your BMC G3X device is running firmware &quot;%1&quot;, which has not been tested with this version of OSCAR.</source>
         <translation type="unfinished">Η συσκευή σας BMC G3X εκτελεί firmware &quot;%1&quot;, το οποίο δεν έχει δοκιμαστεί με αυτήν την έκδοση του OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="119"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="115"/>
         <source>It may be similar enough to known firmware versions that import works correctly, but the OSCAR developers would like a .zip copy of this device&apos;s SD card to verify support. Import will continue.</source>
         <translation type="unfinished">Μπορεί να είναι αρκετά παρόμοιο με γνωστές εκδόσεις firmware ώστε η εισαγωγή να λειτουργεί σωστά, αλλά οι προγραμματιστές του OSCAR θα ήθελαν ένα αντίγραφο .zip της κάρτας SD αυτής της συσκευής για επαλήθευση της υποστήριξης. Η εισαγωγή θα συνεχιστεί.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="139"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="137"/>
         <source>BMC G3X — Untested Model</source>
         <translation type="unfinished">BMC G3X — Μη δοκιμασμένο Μοντέλο</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="140"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="138"/>
         <source>Your BMC G3X device model &quot;%1&quot; has not been tested with this version of OSCAR.</source>
         <translation type="unfinished">Το μοντέλο &quot;%1&quot; της συσκευής σας BMC G3X δεν έχει δοκιμαστεί με αυτήν την έκδοση του OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="141"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmcg3x_loader.cpp" line="139"/>
         <source>It may be similar enough to known models that import works correctly, but the OSCAR developers would like a .zip copy of this device&apos;s SD card to verify support. Import will continue.</source>
         <translation type="unfinished">Μπορεί να είναι αρκετά παρόμοιο με γνωστά μοντέλα ώστε η εισαγωγή να λειτουργεί σωστά, αλλά οι προγραμματιστές του OSCAR θα ήθελαν ένα αντίγραφο .zip της κάρτας SD αυτής της συσκευής για επαλήθευση της υποστήριξης. Η εισαγωγή θα συνεχιστεί.</translation>
     </message>
@@ -14430,86 +16051,106 @@ Dreem data must be formatted as a semicolon-delimited CSV file. Please ensure yo
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="378"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="501"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1199"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1200"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1668"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2151"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2595"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2150"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2594"/>
         <source>Import Error</source>
         <translation type="unfinished">Σφάλμα εισαγωγής</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="379"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="502"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1200"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1201"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1669"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2152"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2596"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2151"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2595"/>
         <source>This device Record cannot be imported in this profile.</source>
         <translation type="unfinished">Αυτή η Εγγραφή συσκευής δεν μπορεί να εισαχθεί σε αυτό το προφίλ.</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="380"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="503"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1201"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1202"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1670"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2153"/>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2597"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2152"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2596"/>
         <source>The Day records overlap with already existing content.</source>
         <translation type="unfinished">Οι εγγραφές Ημέρας επικαλύπτονται με ήδη υπάρχον περιεχόμενο.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1345"/>
+        <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1346"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1842"/>
         <source>Reading session directories...</source>
         <translation type="unfinished">Ανάγνωση καταλόγων συνεδρίας...</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="320"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="321"/>
         <source>Feelings: %1/100</source>
         <translation type="unfinished">Αίσθηση: %1/100</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="322"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="323"/>
         <source>Feelings: %1/10</source>
         <translation type="unfinished">Αίσθηση: %1/10</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="327"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="328"/>
         <source>Weight: %1 kg</source>
         <translation type="unfinished">Βάρος: %1 kg</translation>
     </message>
     <message>
-        <location filename="../oscar/exports/journalnotesdialog.cpp" line="329"/>
+        <location filename="../oscar/exports/journalnotesdialog.cpp" line="330"/>
         <source>Weight: %1 lbs</source>
         <translation type="unfinished">Βάρος: %1 lbs</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gPressureChart.cpp" line="303"/>
+        <location filename="../oscar/Graphs/gPressureChart.cpp" line="226"/>
+        <source>Lowest pressure</source>
+        <translation type="unfinished">Χαμηλότερη πίεση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gPressureChart.cpp" line="227"/>
+        <source>Highest pressure</source>
+        <translation type="unfinished">Υψηλότερη πίεση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gPressureChart.cpp" line="228"/>
+        <source>The middle of the night&apos;s pressures</source>
+        <translation type="unfinished">Το μέσο των πιέσεων της νύχτας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gPressureChart.cpp" line="229"/>
+        <source>At or below this %1% of the time</source>
+        <translation type="unfinished">Σε αυτή την τιμή ή κάτω από αυτή το %1% του χρόνου</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gPressureChart.cpp" line="336"/>
         <source>Peak Pressure</source>
         <translation type="unfinished">Μέγιστη Πίεση</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSleepStageChart.cpp" line="34"/>
+        <location filename="../oscar/Graphs/gSleepStageChart.cpp" line="35"/>
         <source>Awake</source>
         <translation type="unfinished">Ξύπνιος</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSleepStageChart.cpp" line="35"/>
+        <location filename="../oscar/Graphs/gSleepStageChart.cpp" line="36"/>
         <source>REM</source>
         <translation type="unfinished">REM</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSleepStageChart.cpp" line="36"/>
+        <location filename="../oscar/Graphs/gSleepStageChart.cpp" line="37"/>
         <source>Light</source>
         <translation type="unfinished">Ελαφρύς</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSleepStageChart.cpp" line="37"/>
+        <location filename="../oscar/Graphs/gSleepStageChart.cpp" line="38"/>
         <source>Deep</source>
         <translation type="unfinished">Βαθύς</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gSleepStageChart.cpp" line="272"/>
+        <location filename="../oscar/Graphs/gSleepStageChart.cpp" line="273"/>
         <source>Duration: %1</source>
         <translation type="unfinished">Διάρκεια: %1</translation>
     </message>
@@ -14588,13 +16229,13 @@ Dreem data must be formatted as a semicolon-delimited CSV file. Please ensure yo
         <translation type="unfinished">22 mm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="775"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="940"/>
         <source>Reading %1 card...</source>
         <translation type="unfinished">Ανάγνωση κάρτας %1...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.h" line="92"/>
-        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.h" line="93"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.h" line="94"/>
+        <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.h" line="95"/>
         <source>Sefam</source>
         <translation type="unfinished">Sefam</translation>
     </message>
@@ -14755,201 +16396,211 @@ Dreem data must be formatted as a semicolon-delimited CSV file. Please ensure yo
         <translation type="unfinished">Παράλειψη μεταφοράς</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="800"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="882"/>
         <source>Ventilation mode</source>
         <translation type="unfinished">Λειτουργία αερισμού</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="804"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="886"/>
         <source>Mode %1</source>
         <translation type="unfinished">Λειτουργία %1</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="807"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="889"/>
+        <source>autoS/T</source>
+        <translation type="unfinished">autoS/T</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="890"/>
         <source>MPVp</source>
         <translation type="unfinished">MPVp</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="810"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="893"/>
         <source>Therapy program</source>
         <translation type="unfinished">Πρόγραμμα θεραπείας</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="811"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="894"/>
         <source>Therapy program in use</source>
         <translation type="unfinished">Πρόγραμμα θεραπείας σε χρήση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="812"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="895"/>
         <source>Program</source>
         <translation type="unfinished">Πρόγραμμα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="816"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="818"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="899"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="901"/>
         <source>Backup rate</source>
         <translation type="unfinished">Εφεδρική συχνότητα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="817"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="900"/>
         <source>Breath rate below which the device delivers timed breaths</source>
         <translation type="unfinished">Αναπνευστική συχνότητα κάτω από την οποία η συσκευή χορηγεί χρονομετρημένες αναπνοές</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="822"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="905"/>
         <source>Inspiration time</source>
         <translation type="unfinished">Χρόνος εισπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="823"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="906"/>
         <source>Inspiration time of a timed breath</source>
         <translation type="unfinished">Χρόνος εισπνοής μιας χρονομετρημένης αναπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="824"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="907"/>
         <source>Ti</source>
         <translation type="unfinished">Ti</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="828"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="911"/>
         <source>Minimum inspiration time</source>
         <translation type="unfinished">Ελάχιστος χρόνος εισπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="829"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="912"/>
         <source>Shortest inspiration the device allows</source>
         <translation type="unfinished">Η συντομότερη εισπνοή που επιτρέπει η συσκευή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="830"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="913"/>
         <source>Ti min</source>
         <translation type="unfinished">Ti ελάχ.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="834"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="917"/>
         <source>Maximum inspiration time</source>
         <translation type="unfinished">Μέγιστος χρόνος εισπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="835"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="918"/>
         <source>Longest inspiration the device allows</source>
         <translation type="unfinished">Η μακρύτερη εισπνοή που επιτρέπει η συσκευή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="836"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="919"/>
         <source>Ti max</source>
         <translation type="unfinished">Ti μέγ.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="840"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="923"/>
         <source>Inspiratory trigger</source>
         <translation type="unfinished">Σκανδαλισμός εισπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="841"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="924"/>
         <source>Inspiratory trigger sensitivity level</source>
         <translation type="unfinished">Επίπεδο ευαισθησίας του σκανδαλισμού εισπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="842"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="925"/>
         <source>Insp. trigger</source>
         <translation type="unfinished">Σκανδ. εισπν.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="846"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="930"/>
+        <source>Whether the breath triggers are set manually or automatically</source>
+        <translation type="unfinished">Αν οι σκανδάλες αναπνοής ρυθμίζονται χειροκίνητα ή αυτόματα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="937"/>
         <source>Expiratory trigger</source>
         <translation type="unfinished">Σκανδαλισμός εκπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="847"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="938"/>
         <source>Expiratory trigger, as a percentage of peak inspiratory flow</source>
         <translation type="unfinished">Σκανδαλισμός εκπνοής, ως ποσοστό της μέγιστης εισπνευστικής ροής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="848"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="939"/>
         <source>Exp. trigger</source>
         <translation type="unfinished">Σκανδ. εκπν.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="852"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="943"/>
         <source>Inspiratory rise</source>
         <translation type="unfinished">Άνοδος εισπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="853"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="944"/>
         <source>Speed of the pressure rise at the start of inspiration</source>
         <translation type="unfinished">Ταχύτητα ανόδου της πίεσης στην αρχή της εισπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="854"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="945"/>
         <source>Insp. rise</source>
         <translation type="unfinished">Άνοδος εισπν.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="860"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="862"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="951"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="953"/>
         <source>ePC</source>
         <translation type="unfinished">ePC</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="861"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="952"/>
         <source>Epoch (2 mins) with premature cycling</source>
         <translation type="unfinished">Εποχή (2 λεπτά) με πρόωρη εναλλαγή</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="867"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="958"/>
         <source>Disconnection</source>
         <translation type="unfinished">Αποσύνδεση</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="868"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="959"/>
         <source>The breathing circuit was disconnected</source>
         <translation type="unfinished">Το αναπνευστικό κύκλωμα αποσυνδέθηκε</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="869"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="960"/>
         <source>DC</source>
         <translation type="unfinished">DC</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="873"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="964"/>
         <source>Sudden decline of leakage</source>
         <translation type="unfinished">Αιφνίδια μείωση διαρροής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="874"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="965"/>
         <source>Leakage dropped suddenly, as when a mouth leak closes</source>
         <translation type="unfinished">Η διαρροή μειώθηκε αιφνίδια, όπως όταν κλείνει μια διαρροή από το στόμα</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="875"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="966"/>
         <source>SEL</source>
         <translation type="unfinished">SEL</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="879"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="970"/>
         <source>Expiratory fall</source>
         <translation type="unfinished">Πτώση εκπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="880"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="971"/>
         <source>Speed of the pressure fall at the start of expiration</source>
         <translation type="unfinished">Ταχύτητα πτώσης της πίεσης στην αρχή της εκπνοής</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="881"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="972"/>
         <source>Exp. fall</source>
         <translation type="unfinished">Πτώση εκπν.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.h" line="175"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.h" line="180"/>
         <source>prisma VENT</source>
         <translation type="unfinished">prisma VENT</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="161"/>
         <source>SoftPAP: </source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">SoftPAP: </translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="595"/>
@@ -14965,7 +16616,7 @@ Dreem data must be formatted as a semicolon-delimited CSV file. Please ensure yo
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1445"/>
         <source>Art</source>
         <extracomment>Displayname on the events-graph - keep this short!</extracomment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Art</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1449"/>
@@ -14991,7 +16642,7 @@ Dreem data must be formatted as a semicolon-delimited CSV file. Please ensure yo
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1459"/>
         <source>eSN</source>
         <extracomment>Displayname for &quot;epoch with snoring&quot; on the events-graph - keep this short!</extracomment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">eSN</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1462"/>
@@ -15007,7 +16658,7 @@ Dreem data must be formatted as a semicolon-delimited CSV file. Please ensure yo
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1465"/>
         <source>emO</source>
         <extracomment>Displayname for &quot;epoch with mild obstruction&quot; on the graph-legend - keep this short!</extracomment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">emO</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1468"/>
@@ -15023,7 +16674,7 @@ Dreem data must be formatted as a semicolon-delimited CSV file. Please ensure yo
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1471"/>
         <source>esO</source>
         <extracomment>Displayname for &quot;epoch with severe Obstruction&quot; on the events-graph - keep this short!</extracomment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">esO</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1477"/>
@@ -15119,7 +16770,7 @@ Dreem data must be formatted as a semicolon-delimited CSV file. Please ensure yo
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1548"/>
         <source>cmH2O/s</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">cmH2O/s</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1551"/>
@@ -15173,8 +16824,10 @@ Dreem data must be formatted as a semicolon-delimited CSV file. Please ensure yo
         <translation type="unfinished">Δείχνει ποιες πληροφορίες αποθηκεύονται αυτόματα στην κάρτα SD μετά από κάθε συνεδρία</translation>
     </message>
     <message>
+        <location filename="../oscar/Graphs/gUsageChart.cpp" line="134"/>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1589"/>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1599"/>
+        <location filename="../oscar/overviewstats.cpp" line="97"/>
         <source>Compliance</source>
         <translation type="unfinished">Συμμόρφωση</translation>
     </message>
@@ -15244,6 +16897,118 @@ Displayname</extracomment>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1630"/>
         <source>Firmware Version</source>
         <translation type="unfinished">Έκδοση υλικολογισμικού</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gAHIChart.cpp" line="194"/>
+        <source>%1 /h</source>
+        <translation type="unfinished">%1 /ώρα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gAHIChart.cpp" line="197"/>
+        <source>%1 events · %2% of %3</source>
+        <translation type="unfinished">%1 συμβάντα · %2% του %3</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gAHIChart.cpp" line="214"/>
+        <source>Events per hour, over %1 of use</source>
+        <translation type="unfinished">Συμβάντα ανά ώρα, σε %1 χρήσης</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_archive.cpp" line="344"/>
+        <source>and %n more</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_archive.cpp" line="463"/>
+        <source>%n night(s) in the backup could not be read and were restored without detailed graphs. If the SD card still holds them, import the card and then rebuild again to get the graphs back.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_archive.cpp" line="468"/>
+        <source>%n night(s) in the backup have no matching index record and were not imported.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_archive.cpp" line="614"/>
+        <source>%n night(s) now have detailed graphs that this backup cannot restore (%1 to %2). After rebuilding they will show events and statistics only.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_archive.cpp" line="621"/>
+        <source>This backup holds only the most recent contents of the SD card. Older nights that now have detailed graphs will show events and statistics only after rebuilding.</source>
+        <translation type="unfinished">Αυτό το αντίγραφο ασφαλείας περιέχει μόνο το πιο πρόσφατο περιεχόμενο της κάρτας SD. Οι παλαιότερες νύχτες που έχουν τώρα λεπτομερή γραφήματα θα εμφανίζουν μόνο συμβάντα και στατιστικά μετά την ανακατασκευή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_archive.cpp" line="632"/>
+        <source>This backup holds no detailed graph data. After rebuilding, every night will show events and statistics only.</source>
+        <translation type="unfinished">Αυτό το αντίγραφο ασφαλείας δεν περιέχει λεπτομερή δεδομένα γραφημάτων. Μετά την ανακατασκευή, κάθε νύχτα θα εμφανίζει μόνο συμβάντα και στατιστικά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_archive.cpp" line="638"/>
+        <source>This backup holds detailed graph data from %1 on. Earlier nights will show events and statistics only after rebuilding.</source>
+        <translation type="unfinished">Αυτό το αντίγραφο ασφαλείας περιέχει λεπτομερή δεδομένα γραφημάτων από %1 και μετά. Οι προηγούμενες νύχτες θα εμφανίζουν μόνο συμβάντα και στατιστικά μετά την ανακατασκευή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_archive.cpp" line="655"/>
+        <source>Files left by an earlier, unfinished backup of this device could not be read. They were moved to the &quot;%1&quot; folder inside its Backup folder; nothing was deleted.</source>
+        <translation type="unfinished">Αρχεία που άφησε ένα προηγούμενο, ημιτελές αντίγραφο ασφαλείας αυτής της συσκευής δεν ήταν δυνατό να διαβαστούν. Μετακινήθηκαν στον φάκελο &quot;%1&quot; μέσα στον φάκελο Backup της· δεν διαγράφηκε τίποτα.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_archive.cpp" line="659"/>
+        <source>OSCAR could not finish converting this device&apos;s earlier backup to the new format, so the nights from this import have not been backed up yet. The imported data itself is not affected. OSCAR will try again at the next import; if this message keeps appearing, check that the disk holding OSCAR&apos;s data has free space and that the backup files can be read.</source>
+        <translation type="unfinished">Το OSCAR δεν μπόρεσε να ολοκληρώσει τη μετατροπή του προηγούμενου αντιγράφου ασφαλείας αυτής της συσκευής στη νέα μορφή, οπότε οι νύχτες από αυτή την εισαγωγή δεν έχουν ακόμη αντίγραφο ασφαλείας. Τα ίδια τα εισαγόμενα δεδομένα δεν επηρεάζονται. Το OSCAR θα δοκιμάσει ξανά στην επόμενη εισαγωγή· αν αυτό το μήνυμα συνεχίσει να εμφανίζεται, ελέγξτε ότι ο δίσκος με τα δεδομένα του OSCAR έχει ελεύθερο χώρο και ότι τα αρχεία αντιγράφων ασφαλείας μπορούν να διαβαστούν.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_archive.cpp" line="661"/>
+        <source>OSCAR could not bring this device&apos;s backup up to date. The imported data itself is not affected. OSCAR will try again at the next import; if this message keeps appearing, check that the disk holding OSCAR&apos;s data has free space.</source>
+        <translation type="unfinished">Το OSCAR δεν μπόρεσε να ενημερώσει το αντίγραφο ασφαλείας αυτής της συσκευής. Τα ίδια τα εισαγόμενα δεδομένα δεν επηρεάζονται. Το OSCAR θα δοκιμάσει ξανά στην επόμενη εισαγωγή· αν αυτό το μήνυμα συνεχίσει να εμφανίζεται, ελέγξτε ότι ο δίσκος με τα δεδομένα του OSCAR έχει ελεύθερο χώρο.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewstats.cpp" line="50"/>
+        <source>no change</source>
+        <translation type="unfinished">καμία αλλαγή</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewstats.cpp" line="86"/>
+        <source>events/hour</source>
+        <translation type="unfinished">συμβάντα/ώρα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewstats.cpp" line="89"/>
+        <source>Average usage</source>
+        <translation type="unfinished">Μέση χρήση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewstats.cpp" line="91"/>
+        <source>hours/night</source>
+        <translation type="unfinished">ώρες/νύχτα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewstats.cpp" line="99"/>
+        <source>% (%1 of %2 days)</source>
+        <translation type="unfinished">% (%1 από %2 ημέρες)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewstats.cpp" line="102"/>
+        <source>Leak rate (%1)</source>
+        <translation type="unfinished">Ποσοστό διαρροών (%1)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewstats.cpp" line="112"/>
+        <source>Pressure (%1)</source>
+        <translation type="unfinished">Πίεση (%1)</translation>
     </message>
 </context>
 <context>
@@ -16748,552 +18513,552 @@ Common tables: daily_summaries, session_summaries, sessions, machines, session_s
 <context>
     <name>SaveGraphLayoutSettings</name>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="120"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="131"/>
         <source>Manage Save Layout Settings</source>
         <translation type="unfinished">Διαχείριση Αποθήκευσης Ρυθμίσεων Διάταξης</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="129"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="130"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="292"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="140"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="141"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="311"/>
         <source>Add</source>
         <translation type="unfinished">Προσθήκη</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="129"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="140"/>
         <source>Add Feature inhibited. The maximum number of Items has been exceeded.</source>
         <translation type="unfinished">Η Προσθήκη είναι απενεργοποιημένη. Ο μέγιστος αριθμός στοιχείων έχει υπερβληθεί.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="130"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="141"/>
         <source>creates new copy of current settings.</source>
         <translation type="unfinished">Δημιουργεί νέο αντίγραφο των τρεχουσών ρυθμίσεων.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="131"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="307"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="142"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="326"/>
         <source>Restore</source>
         <translation type="unfinished">Επαναφορά</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="131"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="142"/>
         <source>Restores saved settings from selection.</source>
         <translation type="unfinished">Επαναφέρει αποθηκευμένες ρυθμίσεις από την επιλογή.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="132"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="311"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="143"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="330"/>
         <source>Rename</source>
         <translation type="unfinished">Μετονομασία</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="132"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="143"/>
         <source>Renames the selection. Must edit existing name then press enter.</source>
         <translation type="unfinished">Μετονομάζει την επιλογή. Πρέπει να επεξεργαστείτε το υπάρχον όνομα και στη συνέχεια να πατήσετε Enter.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="133"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="315"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="144"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="334"/>
         <source>Update</source>
         <translation type="unfinished">Ενημέρωση</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="133"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="144"/>
         <source>Updates the selection with current settings.</source>
         <translation type="unfinished">Ενημερώνει την επιλογή με τις τρέχουσες ρυθμίσεις.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="134"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="321"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="145"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="340"/>
         <source>Delete</source>
         <translation type="unfinished">Διαγραφή</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="134"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="323"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="145"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="342"/>
         <source>Deletes the selection.</source>
         <translation type="unfinished">Διαγράφει την επιλογή.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="135"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="147"/>
         <source>Expanded Help menu.</source>
         <translation type="unfinished">Αναπτυγμένο μενού Βοήθειας.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="178"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="197"/>
         <source>Exits the dialog menu.</source>
         <translation type="unfinished">Έξοδος από το μενού διαλόγου.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="188"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="207"/>
         <source>Help Menu - Manage Layout Settings</source>
         <translation type="unfinished">Μενού Βοήθειας - Διαχείριση Ρυθμίσεων Διάταξης</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="231"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="250"/>
         <source>Basic Hints</source>
         <translation type="unfinished">Βασικές Υποδείξεις</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="234"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="253"/>
         <source>Key Sequence</source>
         <translation type="unfinished">Ακολουθία Πλήκτρων</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="234"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="290"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="253"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="309"/>
         <source>Description</source>
         <translation type="unfinished">Περιγραφή</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="235"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="254"/>
         <source>MouseWheel</source>
         <translation type="unfinished">Τροχός Ποντικιού</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="235"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="254"/>
         <source>Scrolls unpinned Graphs</source>
         <translation type="unfinished">Κύλιση μη καρφιτσωμένων Γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="236"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="255"/>
         <source>Ctrl + MouseWheel</source>
         <translation type="unfinished">Ctrl + Τροχός Ποντικιού</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="236"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="239"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="255"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="258"/>
         <source>Zooms Time Selection</source>
         <translation type="unfinished">Μεγέθυνση Επιλογής Χρόνου</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="237"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="256"/>
         <source>LeftMouse dragDrop</source>
         <translation type="unfinished">Αριστερό Κλικ Ποντικιού σύρσιμο/απόθεση</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="237"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="256"/>
         <source>Defines Time Selection</source>
         <translation type="unfinished">Ορισμός Επιλογής Χρόνου</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="238"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="257"/>
         <source>RightMouse dragDrop</source>
         <translation type="unfinished">Δεξί Κλικ Ποντικιού σύρσιμο/απόθεση</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="238"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="240"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="242"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="257"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="259"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="261"/>
         <source>Moves Time Selection</source>
         <translation type="unfinished">Μετακίνηση Επιλογής Χρόνου</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="239"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="258"/>
         <source>Ctrl + (right/left)MouseClick</source>
         <translation type="unfinished">Ctrl + (δεξί/αριστερό) Κλικ Ποντικιού</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="240"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="259"/>
         <source> (right/left)MouseClick</source>
         <translation type="unfinished"> (δεξί/αριστερό) Κλικ Ποντικιού</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="242"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="261"/>
         <source>(right/left) Arrow (Ctrl =&gt; faster)</source>
         <translation type="unfinished">Βέλος (δεξιά/αριστερά) (Ctrl =&gt; ταχύτερα)</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="243"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="262"/>
         <source>Up/Down Arrow</source>
         <translation type="unfinished">Βέλος Πάνω/Κάτω</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="243"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="262"/>
         <source>Scrolls graphs</source>
         <translation type="unfinished">Κύλιση γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="244"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="263"/>
         <source>Up/Down Arrow+Focus</source>
         <translation type="unfinished">Βέλος Πάνω/Κάτω+Εστίαση</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="244"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="263"/>
         <source>Zooms graphs</source>
         <translation type="unfinished">Μεγέθυνση γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="247"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="266"/>
         <source>Graph Layout Hints</source>
         <translation type="unfinished">Υποδείξεις Διάταξης Γραφήματος</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="250"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="269"/>
         <source>Double Click Graph Title</source>
         <translation type="unfinished">Διπλό Κλικ στον Τίτλο Γραφήματος</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="250"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="269"/>
         <source>Toggles Pinning</source>
         <translation type="unfinished">Εναλλαγή Καρφιτσώματος</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="251"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="270"/>
         <source>Daily:Double Click Y-axis label</source>
         <translation type="unfinished">Ημερήσιο: Διπλό Κλικ στην ετικέτα άξονα Y</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="251"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="270"/>
         <source>Toggle Time Selection Auto Zoom</source>
         <translation type="unfinished">Εναλλαγή Αυτόματης Μεγέθυνσης Επιλογής Χρόνου</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="252"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="271"/>
         <source>DragDrop Graph Title</source>
         <translation type="unfinished">Τίτλος Γραφήματος Μεταφοράς/Απόθεσης</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="252"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="271"/>
         <source>Reorders Graph layout</source>
         <translation type="unfinished">Αναδιατάσσει τη διάταξη Γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="253"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="272"/>
         <source>DragDrop graph’s bottom line</source>
         <translation type="unfinished">Κάτω γραμμή γραφήματος Μεταφοράς/Απόθεσης</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="253"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="272"/>
         <source>Changes Size of Graphs</source>
         <translation type="unfinished">Αλλάζει το Μέγεθος των Γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="254"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="273"/>
         <source>Layout Button (next to Graph Button)</source>
         <translation type="unfinished">Κουμπί Διάταξης (δίπλα στο Κουμπί Γραφήματος)</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="254"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="273"/>
         <source>Save / Restore Graph Layouts</source>
         <translation type="unfinished">Αποθήκευση / Επαναφορά Διατάξεων Γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="257"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="276"/>
         <source>Daily Graph Hints</source>
         <translation type="unfinished">Υποδείξεις Ημερήσιου Γραφήματος</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="260"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="279"/>
         <source>Click on date</source>
         <translation type="unfinished">Κλικ στην ημερομηνία</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="260"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="279"/>
         <source>Toggle Calendar on/off</source>
         <translation type="unfinished">Εναλλαγή Ημερολογίου ενεργό/ανενεργό</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="261"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="280"/>
         <source>Detailed: Click on colored event</source>
         <translation type="unfinished">Λεπτομερές: Κλικ σε χρωματιστό συμβάν</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="261"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="280"/>
         <source>Jump to event tab with event opened</source>
         <translation type="unfinished">Μετάβαση στην καρτέλα συμβάντος με ανοιχτό το συμβάν</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="262"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="281"/>
         <source>Detailed: Click on a session (at bottom)</source>
         <translation type="unfinished">Λεπτομερές: Κλικ σε μια συνεδρία (στο κάτω μέρος)</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="262"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="281"/>
         <source>Toggle session disable / enable session</source>
         <translation type="unfinished">Εναλλαγή απενεργοποίησης / ενεργοποίησης συνεδρίας</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="263"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="282"/>
         <source>Event: Click on an event</source>
         <translation type="unfinished">Συμβάν: Κλικ σε ένα συμβάν</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="263"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="282"/>
         <source>Time Selection 3 min before event 20 sec after</source>
         <translation type="unfinished">Επιλογή Χρόνου 3 λεπτά πριν το συμβάν 20 δευτερόλεπτα μετά</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="264"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="283"/>
         <source>Bookmark</source>
         <translation type="unfinished">Σελιδοδείκτης</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="264"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="283"/>
         <source>Save current Time Selection</source>
         <translation type="unfinished">Αποθήκευση τρέχουσας Επιλογής Χρόνου</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="265"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="284"/>
         <source>Search Tab</source>
         <translation type="unfinished">Καρτέλα Αναζήτησης</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="265"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="284"/>
         <source>Search data base</source>
         <translation type="unfinished">Αναζήτηση στη βάση δεδομένων</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="268"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="287"/>
         <source>Miscellaneous Hints</source>
         <translation type="unfinished">Διάφορες Υποδείξεις</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="271"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="290"/>
         <source>OverView: Shift Click on a date</source>
         <translation type="unfinished">ΕπισκόπησηΠατήστε Shift+Κλικ σε μια ημερομηνία</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="271"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="290"/>
         <source>Jumps to date in the Daily Tab</source>
         <translation type="unfinished">Μεταβαίνει στην ημερομηνία στην Καρτέλα Ημέρας</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="272"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="291"/>
         <source>Daily: Event (bottom left corner) </source>
         <translation type="unfinished">Ημερήσια: Συμβάν (κάτω αριστερή γωνία) </translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="272"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="291"/>
         <source>Select Events to view</source>
         <translation type="unfinished">Επιλογή Συμβάντων για προβολή</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="273"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="292"/>
         <source>Graph / Chart (bottom right corner)</source>
         <translation type="unfinished">Γράφημα / Διάγραμμα (κάτω δεξιά γωνία)</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="273"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="292"/>
         <source>Selects graphs to view</source>
         <translation type="unfinished">Επιλέγει γραφήματα για προβολή</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="282"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="301"/>
         <source>This feature manages the saving and restoring of Layout Settings.</source>
         <translation type="unfinished">Αυτή η λειτουργία διαχειρίζεται την αποθήκευση και την επαναφορά των Ρυθμίσεων Διάταξης.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="284"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="303"/>
         <source>Layout Settings control the layout of a graph or chart.</source>
         <translation type="unfinished">Οι Ρυθμίσεις Διάταξης ελέγχουν τη διάταξη ενός γραφήματος ή διαγράμματος.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="286"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="305"/>
         <source>Different Layouts Settings can be saved and later restored.</source>
         <translation type="unfinished">Διαφορετικές Ρυθμίσεις Διάταξης μπορούν να αποθηκευτούν και να επαναφερθούν αργότερα.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="288"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="307"/>
         <source>Button</source>
         <translation type="unfinished">Κουμπί</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="294"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="313"/>
         <source>Creates a copy of the current Layout Settings.</source>
         <translation type="unfinished">Δημιουργεί ένα αντίγραφο των τρεχουσών Ρυθμίσεων Διάταξης.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="296"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="315"/>
         <source>The default description is the current date.</source>
         <translation type="unfinished">Η προεπιλεγμένη περιγραφή είναι η τρέχουσα ημερομηνία.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="298"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="317"/>
         <source>The description may be changed.</source>
         <translation type="unfinished">Η περιγραφή μπορεί να αλλαχθεί.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="300"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="319"/>
         <source>The Add button will be grayed out when maximum number is reached.</source>
         <translation type="unfinished">Το κουμπί Προσθήκη θα εμφανίζεται γκριζαρισμένο όταν επιτευχθεί ο μέγιστος αριθμός.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="303"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="322"/>
         <source>Other Buttons</source>
         <translation type="unfinished">Άλλα Κουμπιά</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="305"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="324"/>
         <source>Grayed out when there are no selections</source>
         <translation type="unfinished">Εμφανίζεται γκριζαρισμένο όταν δεν υπάρχουν επιλογές</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="309"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="328"/>
         <source>Loads the Layout Settings from the selection. Stays Open</source>
         <translation type="unfinished">Φορτώνει τις Ρυθμίσεις Διάταξης από την επιλογή. Παραμένει Ανοιχτό</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="313"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="332"/>
         <source>Modify the description of the selection. Same as a double click.</source>
         <translation type="unfinished">Τροποποιεί την περιγραφή της επιλογής. Ίδιο με διπλό κλικ.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="317"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="336"/>
         <source>Saves the current Layout Settings to the selection.</source>
         <translation type="unfinished">Αποθηκεύει τις τρέχουσες Ρυθμίσεις Διάταξης στην επιλογή.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="319"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="325"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="338"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="344"/>
         <source>Prompts for confirmation.</source>
         <translation type="unfinished">Ζητά επιβεβαίωση.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="327"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="346"/>
         <source>Control</source>
         <translation type="unfinished">Έλεγχος</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="329"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="348"/>
         <source>Exit</source>
         <translation type="unfinished">Εξοδος</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="331"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="350"/>
         <source>(Red circle with a white &quot;X&quot;.) Returns to OSCAR menu.</source>
         <translation type="unfinished">(Κόκκινος κύκλος με λευκό &quot;X&quot;.) Επιστρέφει στο μενού OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="333"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="352"/>
         <source>Return</source>
         <translation type="unfinished">Επιστροφή</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="335"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="354"/>
         <source>Next to Exit icon. Only in Help Menu. Returns to Layout menu.</source>
         <translation type="unfinished">Δίπλα στο εικονίδιο Εξόδου. Μόνο στο Μενού Βοήθειας. Επιστρέφει στο μενού Διάταξης.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="337"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="356"/>
         <source>Escape Key</source>
         <translation type="unfinished">Πλήκτρο Escape</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="339"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="358"/>
         <source>Exit the Help or Layout menu.</source>
         <translation type="unfinished">Έξοδος από το μενού Βοήθειας ή Διάταξης.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="341"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="360"/>
         <source>Layout Settings</source>
         <translation type="unfinished">Ρυθμίσεις Διάταξης</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="343"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="362"/>
         <source>* Name</source>
         <translation type="unfinished">* Όνομα</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="345"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="364"/>
         <source>* Pinning</source>
         <translation type="unfinished">* Καρφίτσωμα</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="347"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="366"/>
         <source>* Plots Enabled</source>
         <translation type="unfinished">* Ενεργοποιημένα Γραφήματα</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="349"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="368"/>
         <source>* Height</source>
         <translation type="unfinished">* Ύψος</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="351"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="370"/>
         <source>* Order</source>
         <translation type="unfinished">* Σειρά</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="353"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="372"/>
         <source>* Event Flags</source>
         <translation type="unfinished">* Σημαίες Συμβάντων</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="355"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="374"/>
         <source>* Dotted Lines</source>
         <translation type="unfinished">* Διακεκομμένες Γραμμές</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="357"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="376"/>
         <source>* Height Options</source>
         <translation type="unfinished">* Επιλογές Ύψους</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="359"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="378"/>
         <source>General Information</source>
         <translation type="unfinished">Γενικές Πληροφορίες</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="361"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="380"/>
         <source>Maximum description size = 80 characters.	</source>
         <translation type="unfinished">Μέγιστο μέγεθος περιγραφής = 80 χαρακτήρες.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="363"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="382"/>
         <source>Maximum Saved Layout Settings = 30.	</source>
         <translation type="unfinished">Μέγιστες Αποθηκευμένες Ρυθμίσεις Διάταξης = 30.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="365"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="384"/>
         <source>Saved Layout Settings can be accessed by all profiles.</source>
         <translation type="unfinished">Στις Αποθηκευμένες Ρυθμίσεις Διάταξης μπορούν να έχουν πρόσβαση όλα τα προφίλ.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="367"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="386"/>
         <source>Layout Settings only control the layout of a graph or chart.</source>
         <translation type="unfinished">Οι Ρυθμίσεις Διάταξης ελέγχουν μόνο τη διάταξη ενός γραφήματος ή διαγράμματος.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="369"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="388"/>
         <source>They do not contain any other data.</source>
         <translation type="unfinished">Δεν περιέχουν άλλα δεδομένα.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="371"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="390"/>
         <source>They do not control if a graph is displayed or not.</source>
         <translation type="unfinished">Δεν ελέγχουν αν ένα γράφημα εμφανίζεται ή όχι.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="373"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="392"/>
         <source>Layout Settings for daily and overview are managed independently.</source>
         <translation type="unfinished">Οι Ρυθμίσεις Διάταξης για ημερήσια και συνολική προβολή διαχειρίζονται ανεξάρτητα.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="503"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="528"/>
         <source>Maximum number of Items exceeded.</source>
         <translation type="unfinished">Υπέρβαση μέγιστου αριθμού στοιχείων.</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="509"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="518"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="527"/>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="556"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="534"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="543"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="552"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="577"/>
         <source>No Item Selected</source>
         <translation type="unfinished">Δεν επιλέχθηκε στοιχείο</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="510"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="535"/>
         <source>Ok to Update?</source>
         <translation type="unfinished">Εκτέλεση Ενημέρωσης;</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="557"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="578"/>
         <source>Ok To Delete?</source>
         <translation type="unfinished">Εκτέλεση Διαγραφής;</translation>
     </message>
     <message>
-        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="790"/>
+        <location filename="../oscar/saveGraphLayoutSettings.cpp" line="808"/>
         <source>Graph Short-Cuts Help</source>
         <translation type="unfinished">Βοήθεια Συντομεύσεων Γραφήματος</translation>
     </message>
@@ -17301,12 +19066,12 @@ Common tables: daily_summaries, session_summaries, sessions, machines, session_s
 <context>
     <name>SessionBar</name>
     <message>
-        <location filename="../oscar/sessionbar.cpp" line="247"/>
+        <location filename="../oscar/sessionbar.cpp" line="263"/>
         <source>%1h %2m</source>
         <translation>%1h %2m</translation>
     </message>
     <message>
-        <location filename="../oscar/sessionbar.cpp" line="287"/>
+        <location filename="../oscar/sessionbar.cpp" line="333"/>
         <source>No Sessions Present</source>
         <translation>Δεν υπάρχουν Συνεδρίες</translation>
     </message>
@@ -17739,7 +19504,7 @@ Make sure you trust the recipient before sharing this data.</source>
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="757"/>
-        <location filename="../oscar/statistics.cpp" line="1857"/>
+        <location filename="../oscar/statistics.cpp" line="1851"/>
         <source>CPAP Usage</source>
         <translation>Χρήση CPAP</translation>
     </message>
@@ -17934,59 +19699,59 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation type="unfinished">Η Βάση Δεδομένων έχει %1 ημέρες δεδομένων %2, μεταξύ %3 και %4</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1860"/>
+        <location filename="../oscar/statistics.cpp" line="1854"/>
         <source>Total Days: %1</source>
         <translation type="unfinished">Σύνολο Ημερών: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1861"/>
+        <location filename="../oscar/statistics.cpp" line="1855"/>
         <source>Days Not Used: %1</source>
         <translation type="unfinished">Ημέρες Χωρίς Χρήση: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1863"/>
+        <location filename="../oscar/statistics.cpp" line="1857"/>
         <source>Days Used: %1</source>
         <translation>Ημέρες που χρησιμοποιήθηκαν: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1864"/>
+        <location filename="../oscar/statistics.cpp" line="1858"/>
         <source>Days %1 %2 %3%</source>
         <translation type="unfinished">Ημέρες %1 %2 %3%</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1865"/>
-        <location filename="../oscar/statistics.cpp" line="1866"/>
+        <location filename="../oscar/statistics.cpp" line="1859"/>
+        <location filename="../oscar/statistics.cpp" line="1860"/>
         <source>Days %1 %2 Hours: %3</source>
         <translation type="unfinished">Ημέρες %1 %2 Ώρες: %3</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1889"/>
+        <location filename="../oscar/statistics.cpp" line="1883"/>
         <source>Days %1 of 5 or greater: %2</source>
         <translation type="unfinished">Ημέρες %1 από 5 ή περισσότερο: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1896"/>
+        <location filename="../oscar/statistics.cpp" line="1890"/>
         <source>Best %1</source>
         <translation type="unfinished">Καλύτερο %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1900"/>
-        <location filename="../oscar/statistics.cpp" line="1913"/>
+        <location filename="../oscar/statistics.cpp" line="1894"/>
+        <location filename="../oscar/statistics.cpp" line="1907"/>
         <source>Date: %1 %2: %3</source>
         <translation type="unfinished">Ημερομηνία: %1 %2: %3</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1906"/>
+        <location filename="../oscar/statistics.cpp" line="1900"/>
         <source>Worst %1</source>
         <translation type="unfinished">Χειρότερο %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2096"/>
+        <location filename="../oscar/statistics.cpp" line="2090"/>
         <source>Best Device Setting</source>
         <translation type="unfinished">Καλύτερη Ρύθμιση Συσκευής</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2108"/>
+        <location filename="../oscar/statistics.cpp" line="2102"/>
         <source>Worst Device Setting</source>
         <translation type="unfinished">Χειρότερη Ρύθμιση Συσκευής</translation>
     </message>
@@ -18007,89 +19772,89 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation type="vanished">Χειρότερη AHI</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1944"/>
+        <location filename="../oscar/statistics.cpp" line="1938"/>
         <source>Best Flow Limitation</source>
         <translation>Καλύτερος περιορισμός ροής</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1948"/>
-        <location filename="../oscar/statistics.cpp" line="1961"/>
+        <location filename="../oscar/statistics.cpp" line="1942"/>
+        <location filename="../oscar/statistics.cpp" line="1955"/>
         <source>Date: %1 FL: %2</source>
         <translation>Ημερομηνία: %1 FL: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1954"/>
+        <location filename="../oscar/statistics.cpp" line="1948"/>
         <source>Worst Flow Limitation</source>
         <translation>Περιορισμός χειρότερης ροής</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1966"/>
+        <location filename="../oscar/statistics.cpp" line="1960"/>
         <source>No Flow Limitation on record</source>
         <translation>Δεν υπάρχει Περιορισμός ροής</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1987"/>
+        <location filename="../oscar/statistics.cpp" line="1981"/>
         <source>Worst Large Leaks</source>
         <translation>Χειρότερες μεγάλες διαρροές</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1995"/>
+        <location filename="../oscar/statistics.cpp" line="1989"/>
         <source>Date: %1 Leak: %2%</source>
         <translation>Ημερομηνία: %1 Διαρροή: %2%</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2001"/>
+        <location filename="../oscar/statistics.cpp" line="1995"/>
         <source>No Large Leaks on record</source>
         <translation>Δεν υπάρχουν μεγάλες διαρροές στο αρχείο</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2024"/>
+        <location filename="../oscar/statistics.cpp" line="2018"/>
         <source>Worst CSR</source>
         <translation>Χειρότερη CSR</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2032"/>
+        <location filename="../oscar/statistics.cpp" line="2026"/>
         <source>Date: %1 CSR: %2%</source>
         <translation>Ημερομηνία: %1 CSR: %2%</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2037"/>
+        <location filename="../oscar/statistics.cpp" line="2031"/>
         <source>No CSR on record</source>
         <translation>Δεν υπάρχει CSR στην εγγραφή</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2054"/>
+        <location filename="../oscar/statistics.cpp" line="2048"/>
         <source>Worst PB</source>
         <translation>Χειρότερη PB</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2062"/>
+        <location filename="../oscar/statistics.cpp" line="2056"/>
         <source>Date: %1 PB: %2%</source>
         <translation>Ημερομηνία: %1 PB: %2%</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2067"/>
+        <location filename="../oscar/statistics.cpp" line="2061"/>
         <source>No PB on record</source>
         <translation>Δεν υπάρχει αρχείο PB</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2075"/>
+        <location filename="../oscar/statistics.cpp" line="2069"/>
         <source>Want more information?</source>
         <translation>Θέλετε περισσότερες πληροφορίες;</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2076"/>
+        <location filename="../oscar/statistics.cpp" line="2070"/>
         <source>OSCAR needs all summary data loaded to calculate best/worst data for individual days.</source>
         <translation>Το OSCAR χρειάζεται όλα τα συγκεντρωτικά δεδομένα που έχουν φορτωθεί για να υπολογίσουν τα καλύτερα / χειρότερα δεδομένα για μεμονωμένες ημέρες.</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2077"/>
+        <location filename="../oscar/statistics.cpp" line="2071"/>
         <source>Please enable Pre-Load Summaries checkbox in preferences to make sure this data is available.</source>
         <translation>Ενεργοποιήστε το πλαίσιο ελέγχου Pre-Load Summaries στις προτιμήσεις για να βεβαιωθείτε ότι τα δεδομένα αυτά είναι διαθέσιμα.</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2099"/>
-        <location filename="../oscar/statistics.cpp" line="2111"/>
+        <location filename="../oscar/statistics.cpp" line="2093"/>
+        <location filename="../oscar/statistics.cpp" line="2105"/>
         <source>Date: %1 - %2</source>
         <translation>Ημερομηνία: %1 - %2</translation>
     </message>
@@ -18098,8 +19863,8 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation type="vanished">AHI: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2103"/>
-        <location filename="../oscar/statistics.cpp" line="2115"/>
+        <location filename="../oscar/statistics.cpp" line="2097"/>
+        <location filename="../oscar/statistics.cpp" line="2109"/>
         <source>Total Hours: %1</source>
         <translation>Συνολικές ώρες: %1</translation>
     </message>
@@ -18345,9 +20110,13 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation type="unfinished">Οδηγίες Χρονικής Ευθυγράμμισης</translation>
     </message>
     <message>
-        <location filename="../oscar/timealignmentwelcomedialog.cpp" line="37"/>
         <source>&lt;h3&gt;Time Alignment Instructions&lt;/h3&gt;&lt;p&gt;All devices should be aligned to the CPAP timeline as the reference. Apply corrections in this order:&lt;/p&gt;&lt;ol&gt;&lt;li&gt;&lt;b&gt;Correct the CPAP device first&lt;/b&gt; &amp;mdash; fix any timezone misconfigurations, DST offsets, or travel adjustments.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Adjust other devices&lt;/b&gt; &amp;mdash; apply the same DST or travel corrections to any additional devices.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Fine-tune alignment&lt;/b&gt; &amp;mdash; apply offsets to bring all devices into sync with the CPAP data.&lt;/li&gt;&lt;/ol&gt;&lt;p&gt;For precise alignment, use short-duration events as reference points. The most reliable markers are those associated with physical movement, such as sudden irregular changes in flow rate, sleep stage transitions, and movement spikes. An example of these events is shown below.&lt;/p&gt;</source>
-        <translation type="unfinished">&lt;h3&gt;Οδηγίες Χρονικής Ευθυγράμμισης&lt;/h3&gt;&lt;p&gt;Όλες οι συσκευές θα πρέπει να ευθυγραμμίζονται με τη χρονολογική ακολουθία του CPAP ως σημείο αναφοράς. Εφαρμόστε τις διορθώσεις με την εξής σειρά:&lt;/p&gt;&lt;ol&gt;&lt;li&gt;&lt;b&gt;Διορθώστε πρώτα τη συσκευή CPAP&lt;/b&gt; &amp;mdash; διορθώστε τυχόν λανθασμένες ρυθμίσεις ζώνης ώρας, μετατοπίσεις θερινής ώρας ή προσαρμογές ταξιδιού.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Ρυθμίστε τις υπόλοιπες συσκευές&lt;/b&gt; &amp;mdash; εφαρμόστε τις ίδιες διορθώσεις θερινής ώρας ή ταξιδιού σε τυχόν πρόσθετες συσκευές.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Λεπτομερής ευθυγράμμιση&lt;/b&gt; &amp;mdash; εφαρμόστε μετατοπίσεις για να συγχρονίσετε όλες τις συσκευές με τα δεδομένα CPAP.&lt;/li&gt;&lt;/ol&gt;&lt;p&gt;Για ακριβή ευθυγράμμιση, χρησιμοποιήστε συμβάντα μικρής διάρκειας ως σημεία αναφοράς. Οι πιο αξιόπιστοι δείκτες είναι αυτοί που σχετίζονται με σωματική κίνηση, όπως αιφνίδιες ανώμαλες μεταβολές στη ροή αέρα, μεταβάσεις σταδίων ύπνου και αιχμές κίνησης. Ένα παράδειγμα αυτών των συμβάντων εμφανίζεται παρακάτω.&lt;/p&gt;</translation>
+        <translation type="obsolete">&lt;h3&gt;Οδηγίες Χρονικής Ευθυγράμμισης&lt;/h3&gt;&lt;p&gt;Όλες οι συσκευές θα πρέπει να ευθυγραμμίζονται με τη χρονολογική ακολουθία του CPAP ως σημείο αναφοράς. Εφαρμόστε τις διορθώσεις με την εξής σειρά:&lt;/p&gt;&lt;ol&gt;&lt;li&gt;&lt;b&gt;Διορθώστε πρώτα τη συσκευή CPAP&lt;/b&gt; &amp;mdash; διορθώστε τυχόν λανθασμένες ρυθμίσεις ζώνης ώρας, μετατοπίσεις θερινής ώρας ή προσαρμογές ταξιδιού.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Ρυθμίστε τις υπόλοιπες συσκευές&lt;/b&gt; &amp;mdash; εφαρμόστε τις ίδιες διορθώσεις θερινής ώρας ή ταξιδιού σε τυχόν πρόσθετες συσκευές.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Λεπτομερής ευθυγράμμιση&lt;/b&gt; &amp;mdash; εφαρμόστε μετατοπίσεις για να συγχρονίσετε όλες τις συσκευές με τα δεδομένα CPAP.&lt;/li&gt;&lt;/ol&gt;&lt;p&gt;Για ακριβή ευθυγράμμιση, χρησιμοποιήστε συμβάντα μικρής διάρκειας ως σημεία αναφοράς. Οι πιο αξιόπιστοι δείκτες είναι αυτοί που σχετίζονται με σωματική κίνηση, όπως αιφνίδιες ανώμαλες μεταβολές στη ροή αέρα, μεταβάσεις σταδίων ύπνου και αιχμές κίνησης. Ένα παράδειγμα αυτών των συμβάντων εμφανίζεται παρακάτω.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <location filename="../oscar/timealignmentwelcomedialog.cpp" line="37"/>
+        <source>&lt;h3&gt;Time Alignment Instructions&lt;/h3&gt;&lt;p&gt;All devices should be aligned to the CPAP timeline as the reference. Apply corrections in this order:&lt;/p&gt;&lt;ol&gt;&lt;li&gt;&lt;b&gt;Correct the CPAP device first&lt;/b&gt; &amp;mdash; fix any timezone misconfigurations, DST offsets, or travel time differences.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Correct the other devices&lt;/b&gt; &amp;mdash; apply the same DST or travel corrections to any additional devices.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Fine-tune alignment&lt;/b&gt; &amp;mdash; apply offsets to bring all devices into sync with the CPAP data.&lt;/li&gt;&lt;/ol&gt;&lt;p&gt;For precise alignment, use short-duration events as reference points. The most reliable markers are those associated with physical movement, such as sudden irregular changes in flow rate, sleep stage transitions, and movement spikes. An example of these events is shown below.&lt;/p&gt;</source>
+        <translation type="unfinished">&lt;h3&gt;Οδηγίες χρονικής ευθυγράμμισης&lt;/h3&gt;&lt;p&gt;Όλες οι συσκευές πρέπει να ευθυγραμμίζονται με τη χρονογραμμή του CPAP ως αναφορά. Εφαρμόστε τις διορθώσεις με αυτή τη σειρά:&lt;/p&gt;&lt;ol&gt;&lt;li&gt;&lt;b&gt;Διορθώστε πρώτα τη συσκευή CPAP&lt;/b&gt; &amp;mdash; διορθώστε τυχόν λανθασμένες ρυθμίσεις ζώνης ώρας, μετατοπίσεις θερινής ώρας ή διαφορές ώρας λόγω ταξιδιού.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Διορθώστε τις άλλες συσκευές&lt;/b&gt; &amp;mdash; εφαρμόστε τις ίδιες διορθώσεις θερινής ώρας ή ταξιδιού σε τυχόν πρόσθετες συσκευές.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Λεπτομερής ευθυγράμμιση&lt;/b&gt; &amp;mdash; εφαρμόστε μετατοπίσεις ώστε όλες οι συσκευές να συγχρονιστούν με τα δεδομένα CPAP.&lt;/li&gt;&lt;/ol&gt;&lt;p&gt;Για ακριβή ευθυγράμμιση, χρησιμοποιήστε σύντομα συμβάντα ως σημεία αναφοράς. Οι πιο αξιόπιστοι δείκτες είναι όσοι σχετίζονται με σωματική κίνηση, όπως ξαφνικές ακανόνιστες αλλαγές στη ροή, μεταβάσεις μεταξύ φάσεων ύπνου και κορυφές κίνησης. Ένα παράδειγμα τέτοιων συμβάντων εμφανίζεται παρακάτω.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../oscar/timealignmentwelcomedialog.cpp" line="67"/>
@@ -18363,6 +20132,816 @@ Make sure you trust the recipient before sharing this data.</source>
         <location filename="../oscar/timealignmentwelcomedialog.cpp" line="84"/>
         <source>Continue</source>
         <translation type="unfinished">Συνέχεια</translation>
+    </message>
+</context>
+<context>
+    <name>UiKit</name>
+    <message>
+        <location filename="../oscar/uikit/comparison.cpp" line="59"/>
+        <source>same</source>
+        <translation type="unfinished">ίδιο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uikit/formatting.cpp" line="20"/>
+        <source>%1h %2m</source>
+        <translation type="unfinished">%1h %2m</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uikit/formatting.cpp" line="35"/>
+        <source>%1s</source>
+        <translation type="unfinished">%1δ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uikit/formatting.cpp" line="38"/>
+        <source>%1m %2s</source>
+        <translation type="unfinished">%1λ %2δ</translation>
+    </message>
+</context>
+<context>
+    <name>ViatomBle</name>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_availability.cpp" line="72"/>
+        <source>This build of OSCAR has no Bluetooth support</source>
+        <translation type="unfinished">Αυτή η έκδοση του OSCAR δεν υποστηρίζει Bluetooth</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_availability.cpp" line="74"/>
+        <source>No Bluetooth adapter found</source>
+        <translation type="unfinished">Δεν βρέθηκε προσαρμογέας Bluetooth</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_availability.cpp" line="76"/>
+        <source>Bluetooth is turned off</source>
+        <translation type="unfinished">Το Bluetooth είναι απενεργοποιημένο</translation>
+    </message>
+</context>
+<context>
+    <name>ViatomBle::ClassicDialect</name>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="26"/>
+        <source>The device refused the request for its information.</source>
+        <translation type="unfinished">Η συσκευή απέρριψε το αίτημα για τις πληροφορίες της.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="30"/>
+        <source>The device&apos;s information could not be read.</source>
+        <translation type="unfinished">Οι πληροφορίες της συσκευής δεν ήταν δυνατό να διαβαστούν.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="37"/>
+        <source>The device did not answer. It may need an encrypted connection, which OSCAR does not support yet.</source>
+        <translation type="unfinished">Η συσκευή δεν απάντησε. Ίσως χρειάζεται κρυπτογραφημένη σύνδεση, την οποία το OSCAR δεν υποστηρίζει ακόμη.</translation>
+    </message>
+</context>
+<context>
+    <name>ViatomBle::ClassicUsbDialect</name>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="78"/>
+        <source>The device refused the opening request.</source>
+        <translation type="unfinished">Η συσκευή απέρριψε το αίτημα ανοίγματος.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="85"/>
+        <source>The device did not answer over USB. Check that the cable is plugged in firmly and that the oximeter is switched on.</source>
+        <translation type="unfinished">Η συσκευή δεν απάντησε μέσω USB. Ελέγξτε ότι το καλώδιο είναι καλά συνδεδεμένο και ότι το οξύμετρο είναι ενεργοποιημένο.</translation>
+    </message>
+</context>
+<context>
+    <name>ViatomBle::Device</name>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_device.cpp" line="160"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_device.cpp" line="482"/>
+        <source>The device disconnected.</source>
+        <translation type="unfinished">Η συσκευή αποσυνδέθηκε.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_device.cpp" line="160"/>
+        <source>The device disconnected while connecting.</source>
+        <translation type="unfinished">Η συσκευή αποσυνδέθηκε κατά τη σύνδεση.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_device.cpp" line="167"/>
+        <source>Bluetooth error: %1</source>
+        <translation type="unfinished">Σφάλμα Bluetooth: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_device.cpp" line="172"/>
+        <source>The device did not respond. Make sure it is awake and not connected to the phone app.</source>
+        <translation type="unfinished">Η συσκευή δεν ανταποκρίθηκε. Βεβαιωθείτε ότι είναι ενεργή και όχι συνδεδεμένη με την εφαρμογή του τηλεφώνου.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_device.cpp" line="191"/>
+        <source>This device does not offer the Viatom data service OSCAR expected. It may be a model OSCAR cannot download from yet.</source>
+        <translation type="unfinished">Αυτή η συσκευή δεν προσφέρει την υπηρεσία δεδομένων Viatom που ανέμενε το OSCAR. Ίσως είναι μοντέλο από το οποίο το OSCAR δεν μπορεί ακόμη να κάνει λήψη.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_device.cpp" line="198"/>
+        <source>The Viatom data service could not be opened.</source>
+        <translation type="unfinished">Δεν ήταν δυνατό να ανοίξει η υπηρεσία δεδομένων Viatom.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_device.cpp" line="207"/>
+        <source>The Viatom data service reported an error (%1).</source>
+        <translation type="unfinished">Η υπηρεσία δεδομένων Viatom ανέφερε σφάλμα (%1).</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_device.cpp" line="235"/>
+        <source>The Viatom data service is missing its characteristics.</source>
+        <translation type="unfinished">Από την υπηρεσία δεδομένων Viatom λείπουν τα χαρακτηριστικά της.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_device.cpp" line="255"/>
+        <source>Notifications cannot be enabled on this device.</source>
+        <translation type="unfinished">Δεν είναι δυνατή η ενεργοποίηση ειδοποιήσεων σε αυτή τη συσκευή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_device.cpp" line="485"/>
+        <source>The Bluetooth connection failed: %1</source>
+        <translation type="unfinished">Η σύνδεση Bluetooth απέτυχε: %1</translation>
+    </message>
+</context>
+<context>
+    <name>ViatomBle::Downloader</name>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="84"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="323"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="355"/>
+        <source>Cancelled</source>
+        <translation type="unfinished">Ακυρώθηκε</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="212"/>
+        <source>The device refused the new time.</source>
+        <translation type="unfinished">Η συσκευή απέρριψε τη νέα ώρα.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="306"/>
+        <source>The device refused to open the file (code 0x%1).</source>
+        <translation type="unfinished">Η συσκευή αρνήθηκε να ανοίξει το αρχείο (κωδικός 0x%1).</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="313"/>
+        <source>The device&apos;s reply did not include the file size.</source>
+        <translation type="unfinished">Η απάντηση της συσκευής δεν περιείχε το μέγεθος του αρχείου.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="327"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="350"/>
+        <source>Could not write %1: %2</source>
+        <translation type="unfinished">Δεν ήταν δυνατή η εγγραφή του %1: %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="346"/>
+        <source>The device reported an error while sending the file.</source>
+        <translation type="unfinished">Η συσκευή ανέφερε σφάλμα κατά την αποστολή του αρχείου.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="348"/>
+        <source>The device sent an empty block before the end of the file.</source>
+        <translation type="unfinished">Η συσκευή έστειλε κενό μπλοκ πριν από το τέλος του αρχείου.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="385"/>
+        <source>Received %1 bytes, but the device announced %2.</source>
+        <translation type="unfinished">Λήφθηκαν %1 byte, αλλά η συσκευή είχε ανακοινώσει %2.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="390"/>
+        <source>Could not rename %1 to %2.</source>
+        <translation type="unfinished">Δεν ήταν δυνατή η μετονομασία του %1 σε %2.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="447"/>
+        <source>The device did not answer the request to set its clock.</source>
+        <translation type="unfinished">Η συσκευή δεν απάντησε στο αίτημα ρύθμισης του ρολογιού της.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="453"/>
+        <source>The device did not answer the request to open the file.</source>
+        <translation type="unfinished">Η συσκευή δεν απάντησε στο αίτημα ανοίγματος του αρχείου.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_downloader.cpp" line="456"/>
+        <source>The device stopped sending the file.</source>
+        <translation type="unfinished">Η συσκευή σταμάτησε να στέλνει το αρχείο.</translation>
+    </message>
+</context>
+<context>
+    <name>ViatomBle::EmayDownloader</name>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/emay.cpp" line="311"/>
+        <source>The oximeter didn&apos;t send its details (status %1).</source>
+        <translation type="unfinished">Το οξύμετρο δεν έστειλε τα στοιχεία του (κατάσταση %1).</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/emay.cpp" line="344"/>
+        <source>The oximeter&apos;s list of recordings could not be read.</source>
+        <translation type="unfinished">Η λίστα καταγραφών του οξυμέτρου δεν ήταν δυνατό να διαβαστεί.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/emay.cpp" line="362"/>
+        <location filename="../oscar/SleepLib/viatomble/emay.cpp" line="367"/>
+        <source>the oximeter refused (status %1)</source>
+        <translation type="unfinished">το οξύμετρο αρνήθηκε (κατάσταση %1)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/emay.cpp" line="419"/>
+        <source>the oximeter didn&apos;t answer</source>
+        <translation type="unfinished">το οξύμετρο δεν απάντησε</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/emay.cpp" line="423"/>
+        <source>the oximeter stopped sending</source>
+        <translation type="unfinished">το οξύμετρο σταμάτησε να στέλνει</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/emay.cpp" line="431"/>
+        <source>The oximeter didn&apos;t answer. Check that it is switched on and close to the computer, and that EMAY&apos;s phone app isn&apos;t connected to it.</source>
+        <translation type="unfinished">Το οξύμετρο δεν απάντησε. Ελέγξτε ότι είναι ενεργοποιημένο και κοντά στον υπολογιστή και ότι η εφαρμογή τηλεφώνου της EMAY δεν είναι συνδεδεμένη με αυτό.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/emay.cpp" line="476"/>
+        <source>not on the oximeter</source>
+        <translation type="unfinished">δεν υπάρχει στο οξύμετρο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/emay.cpp" line="510"/>
+        <source>cancelled</source>
+        <translation type="unfinished">ακυρώθηκε</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/emay.cpp" line="516"/>
+        <source>the recording is empty</source>
+        <translation type="unfinished">η καταγραφή είναι κενή</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/emay.cpp" line="524"/>
+        <location filename="../oscar/SleepLib/viatomble/emay.cpp" line="531"/>
+        <source>could not write %1</source>
+        <translation type="unfinished">δεν ήταν δυνατή η εγγραφή του %1</translation>
+    </message>
+</context>
+<context>
+    <name>ViatomBle::O2RingSDialect</name>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="170"/>
+        <source>The device refused the encrypted connection (code %1).</source>
+        <translation type="unfinished">Η συσκευή απέρριψε την κρυπτογραφημένη σύνδεση (κωδικός %1).</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="173"/>
+        <source>The device refused the request for its information (code %1).</source>
+        <translation type="unfinished">Η συσκευή απέρριψε το αίτημα για τις πληροφορίες της (κωδικός %1).</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="175"/>
+        <source>The device refused the request for its list of recordings (code %1).</source>
+        <translation type="unfinished">Η συσκευή απέρριψε το αίτημα για τη λίστα καταγραφών της (κωδικός %1).</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="183"/>
+        <source>The device&apos;s answer to the encrypted connection could not be understood.</source>
+        <translation type="unfinished">Η απάντηση της συσκευής στην κρυπτογραφημένη σύνδεση δεν ήταν κατανοητή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="191"/>
+        <source>The device&apos;s information could not be read.</source>
+        <translation type="unfinished">Οι πληροφορίες της συσκευής δεν ήταν δυνατό να διαβαστούν.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="204"/>
+        <source>The device did not answer, neither to plain requests nor to the request for an encrypted connection.</source>
+        <translation type="unfinished">Η συσκευή δεν απάντησε ούτε στα απλά αιτήματα ούτε στο αίτημα για κρυπτογραφημένη σύνδεση.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="208"/>
+        <source>The device did not answer the request for its information.</source>
+        <translation type="unfinished">Η συσκευή δεν απάντησε στο αίτημα για τις πληροφορίες της.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_dialect.cpp" line="210"/>
+        <source>The device did not answer the request for its list of recordings.</source>
+        <translation type="unfinished">Η συσκευή δεν απάντησε στο αίτημα για τη λίστα καταγραφών της.</translation>
+    </message>
+</context>
+<context>
+    <name>ViatomBle::Scanner</name>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_scanner.cpp" line="173"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_scanner.cpp" line="179"/>
+        <source>OSCAR is not allowed to use Bluetooth. You can allow it in the system&apos;s privacy settings.</source>
+        <translation type="unfinished">Δεν επιτρέπεται στο OSCAR η χρήση Bluetooth. Μπορείτε να το επιτρέψετε στις ρυθμίσεις απορρήτου του συστήματος.</translation>
+    </message>
+</context>
+<context>
+    <name>ViatomBle::UsbLink</name>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="420"/>
+        <source>Could not open %1: %2</source>
+        <translation type="unfinished">Δεν ήταν δυνατό να ανοίξει το %1: %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="441"/>
+        <source>The USB cable is in use by another program, or by a virtual machine.</source>
+        <translation type="unfinished">Το καλώδιο USB χρησιμοποιείται από άλλο πρόγραμμα ή από εικονική μηχανή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="442"/>
+        <source>Could not claim the USB cable: %1</source>
+        <translation type="unfinished">Δεν ήταν δυνατή η δέσμευση του καλωδίου USB: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="464"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="630"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="887"/>
+        <source>The USB cable did not accept its setup: %1</source>
+        <translation type="unfinished">Το καλώδιο USB δεν αποδέχτηκε τη ρύθμισή του: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="487"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="506"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="650"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="662"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="842"/>
+        <source>The USB cable stopped working: %1</source>
+        <translation type="unfinished">Το καλώδιο USB σταμάτησε να λειτουργεί: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="488"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="842"/>
+        <source>unplugged</source>
+        <translation type="unfinished">αποσυνδέθηκε</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="529"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="540"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="715"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="924"/>
+        <source>Could not send to the USB cable: %1</source>
+        <translation type="unfinished">Δεν ήταν δυνατή η αποστολή στο καλώδιο USB: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="601"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="869"/>
+        <source>The USB cable is in use by another program, such as O2 Insight Pro. Close it and try again.</source>
+        <translation type="unfinished">Το καλώδιο USB χρησιμοποιείται από άλλο πρόγραμμα, όπως το O2 Insight Pro. Κλείστε το και δοκιμάστε ξανά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="602"/>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="870"/>
+        <source>Could not open the USB cable: %1</source>
+        <translation type="unfinished">Δεν ήταν δυνατό να ανοίξει το καλώδιο USB: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="705"/>
+        <source>timed out</source>
+        <translation type="unfinished">λήξη χρονικού ορίου</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="856"/>
+        <source>The USB cable is no longer connected.</source>
+        <translation type="unfinished">Το καλώδιο USB δεν είναι πλέον συνδεδεμένο.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="862"/>
+        <source>Could not open the USB cable.</source>
+        <translation type="unfinished">Δεν ήταν δυνατό να ανοίξει το καλώδιο USB.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/viatomble/viatomble_usb.cpp" line="954"/>
+        <source>This version of OSCAR can&apos;t use the USB cable.</source>
+        <translation type="unfinished">Αυτή η έκδοση του OSCAR δεν μπορεί να χρησιμοποιήσει το καλώδιο USB.</translation>
+    </message>
+</context>
+<context>
+    <name>ViatomImportPanel</name>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="120"/>
+        <source>Bluetooth search failed: %1</source>
+        <translation type="unfinished">Η αναζήτηση Bluetooth απέτυχε: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="136"/>
+        <source>&lt;h3&gt;Choose your oximeter&lt;/h3&gt;</source>
+        <translation type="unfinished">&lt;h3&gt;Επιλέξτε το οξύμετρό σας&lt;/h3&gt;</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="141"/>
+        <location filename="../oscar/viatomimportpanel.cpp" line="250"/>
+        <source>Search again</source>
+        <translation type="unfinished">Νέα αναζήτηση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="143"/>
+        <location filename="../oscar/viatomimportpanel.cpp" line="282"/>
+        <source>Connect</source>
+        <translation type="unfinished">Σύνδεση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="149"/>
+        <source>Set the oximeter&apos;s clock to this computer&apos;s time when connecting</source>
+        <translation type="unfinished">Ρύθμιση του ρολογιού του οξυμέτρου στην ώρα αυτού του υπολογιστή κατά τη σύνδεση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="157"/>
+        <source>Allow OSCAR to use the cable...</source>
+        <translation type="unfinished">Να επιτραπεί στο OSCAR να χρησιμοποιεί το καλώδιο...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="158"/>
+        <source>Installs a rule that lets you use the oximeter&apos;s USB cable (%1). You are asked for your password once.</source>
+        <translation type="unfinished">Εγκαθιστά έναν κανόνα που σας επιτρέπει να χρησιμοποιείτε το καλώδιο USB του οξυμέτρου (%1). Ο κωδικός πρόσβασής σας ζητείται μία φορά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="181"/>
+        <source>&lt;h3&gt;Choose recordings to download&lt;/h3&gt;</source>
+        <translation type="unfinished">&lt;h3&gt;Επιλέξτε καταγραφές για λήψη&lt;/h3&gt;</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="189"/>
+        <source>Download again recordings already downloaded</source>
+        <translation type="unfinished">Νέα λήψη καταγραφών που έχουν ήδη ληφθεί</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="199"/>
+        <source>Import into OSCAR as files arrive</source>
+        <translation type="unfinished">Εισαγωγή στο OSCAR καθώς φτάνουν τα αρχεία</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="207"/>
+        <location filename="../oscar/viatomimportpanel.cpp" line="284"/>
+        <source>Download</source>
+        <translation type="unfinished">Λήψη</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="229"/>
+        <source>&lt;h3&gt;Downloading&lt;/h3&gt;</source>
+        <translation type="unfinished">&lt;h3&gt;Λήψη&lt;/h3&gt;</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="236"/>
+        <source>Cancel download</source>
+        <translation type="unfinished">Ακύρωση λήψης</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="240"/>
+        <source>Stopping after the current block...</source>
+        <translation type="unfinished">Διακοπή μετά το τρέχον μπλοκ...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="246"/>
+        <source>Choose more recordings</source>
+        <translation type="unfinished">Επιλογή περισσότερων καταγραφών</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="263"/>
+        <source>This recording:</source>
+        <translation type="unfinished">Αυτή η καταγραφή:</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="265"/>
+        <source>All selected recordings:</source>
+        <translation type="unfinished">Όλες οι επιλεγμένες καταγραφές:</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="286"/>
+        <source>Next</source>
+        <translation type="unfinished">Επόμενο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="345"/>
+        <source>(unnamed)</source>
+        <translation type="unfinished">(χωρίς όνομα)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="347"/>
+        <source>   signal %1 dBm</source>
+        <translation type="unfinished">   σήμα %1 dBm</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="368"/>
+        <source>No oximeter on a USB cable, and Bluetooth can&apos;t be used: %1</source>
+        <translation type="unfinished">Δεν υπάρχει οξύμετρο σε καλώδιο USB και το Bluetooth δεν μπορεί να χρησιμοποιηθεί: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="369"/>
+        <source>Choose your oximeter and click Connect. (Bluetooth can&apos;t be used: %1)</source>
+        <translation type="unfinished">Επιλέξτε το οξύμετρό σας και κάντε κλικ στο Σύνδεση. (Το Bluetooth δεν μπορεί να χρησιμοποιηθεί: %1)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="374"/>
+        <source>Searching for oximeters...</source>
+        <translation type="unfinished">Αναζήτηση οξυμέτρων...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="392"/>
+        <source>Checkme O2 on the USB cable   %1</source>
+        <translation type="unfinished">Checkme O2 στο καλώδιο USB   %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="393"/>
+        <source>Viatom/Wellue oximeter on the USB cable   %1</source>
+        <translation type="unfinished">Οξύμετρο Viatom/Wellue στο καλώδιο USB   %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="396"/>
+        <source>   (no permission)</source>
+        <translation type="unfinished">   (χωρίς άδεια)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="415"/>
+        <source>Waiting for your password...</source>
+        <translation type="unfinished">Αναμονή για τον κωδικό πρόσβασής σας...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="422"/>
+        <source>Done: OSCAR can now use the cable.</source>
+        <translation type="unfinished">Έγινε: το OSCAR μπορεί πλέον να χρησιμοποιεί το καλώδιο.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="429"/>
+        <source>Not changed: the password prompt was cancelled.</source>
+        <translation type="unfinished">Χωρίς αλλαγή: το αίτημα κωδικού πρόσβασης ακυρώθηκε.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="431"/>
+        <source>The permission could not be set up (%1). %2</source>
+        <translation type="unfinished">Δεν ήταν δυνατή η ρύθμιση της άδειας (%1). %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="432"/>
+        <source>exit code %1</source>
+        <translation type="unfinished">κωδικός εξόδου %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="453"/>
+        <source>Waiting for the oximeter on its USB cable. Plug in the cable; if the oximeter is already on it, take it off the cable and put it back.</source>
+        <translation type="unfinished">Αναμονή για το οξύμετρο στο καλώδιο USB του. Συνδέστε το καλώδιο· αν το οξύμετρο είναι ήδη σε αυτό, βγάλτε το από το καλώδιο και βάλτε το ξανά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="466"/>
+        <source>OSCAR needs your permission to use the oximeter&apos;s USB cable. Click &quot;Allow OSCAR to use the cable&quot;; you are asked for your password once.</source>
+        <translation type="unfinished">Το OSCAR χρειάζεται την άδειά σας για να χρησιμοποιήσει το καλώδιο USB του οξυμέτρου. Κάντε κλικ στο «Να επιτραπεί στο OSCAR να χρησιμοποιεί το καλώδιο»· ο κωδικός πρόσβασής σας ζητείται μία φορά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="470"/>
+        <location filename="../oscar/viatomimportpanel.cpp" line="570"/>
+        <source>Choose your oximeter and click Connect.</source>
+        <translation type="unfinished">Επιλέξτε το οξύμετρό σας και κάντε κλικ στο Σύνδεση.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="489"/>
+        <source>: not supported yet</source>
+        <translation type="unfinished">: δεν υποστηρίζεται ακόμη</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="494"/>
+        <source>   (used last time)</source>
+        <translation type="unfinished">   (χρησιμοποιήθηκε την τελευταία φορά)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="524"/>
+        <source>This oximeter uses Contec&apos;s Bluetooth protocol, which OSCAR can&apos;t download from yet.</source>
+        <translation type="unfinished">Αυτό το οξύμετρο χρησιμοποιεί το πρωτόκολλο Bluetooth της Contec, από το οποίο το OSCAR δεν μπορεί ακόμη να κάνει λήψη.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="557"/>
+        <source>Still searching for oximeters...</source>
+        <translation type="unfinished">Η αναζήτηση οξυμέτρων συνεχίζεται...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="567"/>
+        <source>No oximeter found. Check that it is switched on or in standby, close to the computer, and not connected to a phone app, then search again.</source>
+        <translation type="unfinished">Δεν βρέθηκε οξύμετρο. Ελέγξτε ότι είναι ενεργοποιημένο ή σε αναμονή, κοντά στον υπολογιστή και όχι συνδεδεμένο με εφαρμογή τηλεφώνου, και αναζητήστε ξανά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="638"/>
+        <location filename="../oscar/viatomimportpanel.cpp" line="645"/>
+        <source>The device disconnected: %1</source>
+        <translation type="unfinished">Η συσκευή αποσυνδέθηκε: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="659"/>
+        <source>Another program seems to be using the oximeter&apos;s USB cable, such as O2 Insight Pro. Close it for a reliable download.</source>
+        <translation type="unfinished">Φαίνεται ότι άλλο πρόγραμμα χρησιμοποιεί το καλώδιο USB του οξυμέτρου, όπως το O2 Insight Pro. Κλείστε το για αξιόπιστη λήψη.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="671"/>
+        <source>Connecting to the USB cable...</source>
+        <translation type="unfinished">Σύνδεση με το καλώδιο USB...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="677"/>
+        <source>Connecting to %1...</source>
+        <translation type="unfinished">Σύνδεση με %1...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="690"/>
+        <source>Connected. Reading the list of recordings...</source>
+        <translation type="unfinished">Συνδέθηκε. Ανάγνωση της λίστας καταγραφών...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="701"/>
+        <source>Could not connect: %1</source>
+        <translation type="unfinished">Δεν ήταν δυνατή η σύνδεση: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="762"/>
+        <source>%1 h %2 min</source>
+        <translation type="unfinished">%1 ώρ. %2 λεπτά</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="763"/>
+        <source>%1 min</source>
+        <translation type="unfinished">%1 λεπτά</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="764"/>
+        <source>The oximeter&apos;s clock was %1 fast.</source>
+        <translation type="unfinished">Το ρολόι του οξυμέτρου πήγαινε %1 μπροστά.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="764"/>
+        <source>The oximeter&apos;s clock was %1 slow.</source>
+        <translation type="unfinished">Το ρολόι του οξυμέτρου πήγαινε %1 πίσω.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="767"/>
+        <source>Recordings already on it are timed by the old clock; Data &gt; Time Corrections can shift them after import.</source>
+        <translation type="unfinished">Οι καταγραφές που υπάρχουν ήδη σε αυτό έχουν χρονοσήμανση με το παλιό ρολόι· το Δεδομένα &gt; Διορθώσεις Ώρας μπορεί να τις μετατοπίσει μετά την εισαγωγή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="771"/>
+        <source>Setting the oximeter&apos;s clock...</source>
+        <translation type="unfinished">Ρύθμιση του ρολογιού του οξυμέτρου...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="779"/>
+        <source>Its clock has been set to this computer&apos;s time.</source>
+        <translation type="unfinished">Το ρολόι του ρυθμίστηκε στην ώρα αυτού του υπολογιστή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="782"/>
+        <source>Its clock could not be set: %1</source>
+        <translation type="unfinished">Δεν ήταν δυνατή η ρύθμιση του ρολογιού του: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="793"/>
+        <source>Model %1</source>
+        <translation type="unfinished">Μοντέλο %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="796"/>
+        <source>serial number %1</source>
+        <translation type="unfinished">σειριακός αριθμός %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="799"/>
+        <source>battery %1</source>
+        <translation type="unfinished">μπαταρία %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="802"/>
+        <source>firmware %1</source>
+        <translation type="unfinished">υλικολογισμικό %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="806"/>
+        <source>Files are saved in %1</source>
+        <translation type="unfinished">Τα αρχεία αποθηκεύονται στο %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="813"/>
+        <source>   already downloaded</source>
+        <translation type="unfinished">   έχει ήδη ληφθεί</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="825"/>
+        <source>There are no recordings on this device.</source>
+        <translation type="unfinished">Δεν υπάρχουν καταγραφές σε αυτή τη συσκευή.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/viatomimportpanel.cpp" line="826"/>
+        <source>%n recording(s) on the device.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="833"/>
+        <source>Stopped: %1</source>
+        <translation type="unfinished">Διακόπηκε: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="858"/>
+        <source>Tick the recordings you want to download.</source>
+        <translation type="unfinished">Επιλέξτε τις καταγραφές που θέλετε να λάβετε.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="877"/>
+        <source>Downloading. Keep the oximeter close to the computer.</source>
+        <translation type="unfinished">Λήψη σε εξέλιξη. Κρατήστε το οξύμετρο κοντά στον υπολογιστή.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="900"/>
+        <source>Downloaded %1</source>
+        <translation type="unfinished">Λήφθηκε το %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="907"/>
+        <source>    imported into OSCAR</source>
+        <translation type="unfinished">    εισήχθη στο OSCAR</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="910"/>
+        <source>    could not be imported; the file is kept</source>
+        <translation type="unfinished">    δεν ήταν δυνατή η εισαγωγή· το αρχείο διατηρείται</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="919"/>
+        <source>Skipped %1: already downloaded</source>
+        <translation type="unfinished">Παραλείφθηκε το %1: έχει ήδη ληφθεί</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="927"/>
+        <source>    imported the saved copy into OSCAR (if it was already there, it is unchanged)</source>
+        <translation type="unfinished">    το αποθηκευμένο αντίγραφο εισήχθη στο OSCAR (αν υπήρχε ήδη, παραμένει αμετάβλητο)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="930"/>
+        <source>    the saved copy could not be imported</source>
+        <translation type="unfinished">    δεν ήταν δυνατή η εισαγωγή του αποθηκευμένου αντιγράφου</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="939"/>
+        <source>Failed %1: %2</source>
+        <translation type="unfinished">Απέτυχε το %1: %2</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/viatomimportpanel.cpp" line="950"/>
+        <source>%n downloaded</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/viatomimportpanel.cpp" line="952"/>
+        <source>%n already downloaded</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/viatomimportpanel.cpp" line="955"/>
+        <source>%n failed</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/viatomimportpanel.cpp" line="958"/>
+        <source>%n imported</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/viatomimportpanel.cpp" line="960"/>
+        <source>%n could not be imported</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="963"/>
+        <source>Download cancelled: %1.</source>
+        <translation type="unfinished">Η λήψη ακυρώθηκε: %1.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="963"/>
+        <source>Finished: %1.</source>
+        <translation type="unfinished">Ολοκληρώθηκε: %1.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="966"/>
+        <source>Files are in %1.</source>
+        <translation type="unfinished">Τα αρχεία βρίσκονται στο %1.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="972"/>
+        <source>Oximeter Download</source>
+        <translation type="unfinished">Λήψη από οξύμετρο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/viatomimportpanel.cpp" line="973"/>
+        <source>A download is in progress. Stop it?</source>
+        <translation type="unfinished">Μια λήψη βρίσκεται σε εξέλιξη. Να διακοπεί;</translation>
     </message>
 </context>
 <context>
@@ -18434,16 +21013,19 @@ Make sure you trust the recipient before sharing this data.</source>
     </message>
     <message>
         <location filename="../oscar/welcome.cpp" line="204"/>
+        <location filename="../oscar/welcomepage.cpp" line="80"/>
         <source>last night</source>
         <translation>την προηγούμενη νύχτα</translation>
     </message>
     <message>
         <location filename="../oscar/welcome.cpp" line="206"/>
+        <location filename="../oscar/welcomepage.cpp" line="79"/>
         <source>today</source>
         <translation type="unfinished">σήμερα</translation>
     </message>
     <message>
         <location filename="../oscar/welcome.cpp" line="207"/>
+        <location filename="../oscar/welcomepage.cpp" line="82"/>
         <source>%2 days ago</source>
         <translation>Πρίν %2 μέρες</translation>
     </message>
@@ -18518,6 +21100,7 @@ Make sure you trust the recipient before sharing this data.</source>
     </message>
     <message>
         <location filename="../oscar/welcome.cpp" line="205"/>
+        <location filename="../oscar/welcomepage.cpp" line="81"/>
         <source>1 day ago</source>
         <translation type="unfinished">1 ημέρα πριν</translation>
     </message>
@@ -18553,8 +21136,335 @@ Make sure you trust the recipient before sharing this data.</source>
     </message>
     <message>
         <location filename="../oscar/welcome.cpp" line="371"/>
+        <location filename="../oscar/welcomepage.cpp" line="485"/>
         <source>No CPAP data has been imported yet.</source>
         <translation>Δεν έχουν εισαχθεί ακόμα δεδομένα CPAP.</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomeMetrics</name>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="272"/>
+        <location filename="../oscar/welcomemetrics.cpp" line="374"/>
+        <source>events/hr</source>
+        <translation type="unfinished">συμβάντα/ώρα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="273"/>
+        <source>Respiratory Disturbance Index</source>
+        <translation type="unfinished">Δείκτης αναπνευστικών διαταραχών</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="273"/>
+        <source>Apnea-Hypopnea Index</source>
+        <translation type="unfinished">Δείκτης άπνοιας-υπόπνοιας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="296"/>
+        <source>total</source>
+        <translation type="unfinished">σύνολο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="324"/>
+        <source>Averages compare IPAP.</source>
+        <translation type="unfinished">Οι μέσοι όροι συγκρίνουν το IPAP.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="341"/>
+        <source>Average · %1 %2</source>
+        <translation type="unfinished">Μέσος όρος · %1 %2</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/welcomemetrics.cpp" line="358"/>
+        <source>%n episode(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="359"/>
+        <source>%1% of the night</source>
+        <translation type="unfinished">%1% της νύχτας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="375"/>
+        <source>Flow limitation events per hour</source>
+        <translation type="unfinished">Συμβάντα περιορισμού ροής ανά ώρα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="377"/>
+        <source>%1 of the flow limitation signal</source>
+        <translation type="unfinished">%1 του σήματος περιορισμού ροής</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="386"/>
+        <source>mask on/off</source>
+        <translation type="unfinished">μάσκα φορεμένη/βγαλμένη</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="393"/>
+        <source>Longest %1</source>
+        <translation type="unfinished">Μεγαλύτερο %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="413"/>
+        <source>Time used</source>
+        <translation type="unfinished">Χρόνος χρήσης</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="415"/>
+        <source>Events</source>
+        <translation type="unfinished">Εκδηλώσεις</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="416"/>
+        <source>Pressure</source>
+        <translation type="unfinished">Πίεση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="417"/>
+        <source>Leak rate</source>
+        <translation type="unfinished">Ποσοστό διαρροών</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="418"/>
+        <source>Large leaks</source>
+        <translation type="unfinished">Μεγάλες διαρροές</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="419"/>
+        <source>Flow limitation</source>
+        <translation type="unfinished">Περιορισμός ροής</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="420"/>
+        <source>Sessions</source>
+        <translation type="unfinished">Συνεδρίες</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomemetrics.cpp" line="421"/>
+        <source>Oximetry</source>
+        <translation type="unfinished">Οξυμετρία</translation>
+    </message>
+</context>
+<context>
+    <name>WelcomePage</name>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="185"/>
+        <source>Welcome to the Open Source CPAP Analysis Reporter</source>
+        <translation type="unfinished">Καλώς ήλθατε στον Αναλυτή ανάλυσης CPAP ανοιχτού κώδικα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="187"/>
+        <source>What would you like to do?</source>
+        <translation type="unfinished">Τι θα ήθελες να κάνεις?</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="200"/>
+        <source>Import CPAP data</source>
+        <translation type="unfinished">Εισαγωγή δεδομένων CPAP</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="200"/>
+        <source>Read your device&apos;s SD card</source>
+        <translation type="unfinished">Ανάγνωση της κάρτας SD της συσκευής σας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="203"/>
+        <source>Oximetry wizard</source>
+        <translation type="unfinished">Οδηγός οξυμετρίας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="203"/>
+        <source>Import pulse oximeter data</source>
+        <translation type="unfinished">Εισαγωγή δεδομένων παλμικού οξυμέτρου</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="206"/>
+        <source>Daily view</source>
+        <translation type="unfinished">Προβολή Καθημερινά</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="206"/>
+        <source>One night in detail</source>
+        <translation type="unfinished">Μία νύχτα αναλυτικά</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="211"/>
+        <source>Overview</source>
+        <translation type="unfinished">Συνολική εικόνα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="211"/>
+        <source>Trends across nights</source>
+        <translation type="unfinished">Τάσεις σε πολλές νύχτες</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="216"/>
+        <source>Statistics</source>
+        <translation type="unfinished">Στατιστικά</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="216"/>
+        <source>Summary tables</source>
+        <translation type="unfinished">Συνοπτικοί πίνακες</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="221"/>
+        <source>Insights</source>
+        <translation type="unfinished">Παρατηρήσεις</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="221"/>
+        <source>Patterns and highlights</source>
+        <translation type="unfinished">Μοτίβα και σημεία που ξεχωρίζουν</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="222"/>
+        <source>Coming later</source>
+        <translation type="unfinished">Έρχεται αργότερα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="245"/>
+        <source>Warning: ResMed S9 SD cards need to be locked before inserting them into your computer. Some operating systems write index files to the card without asking, which can make the card unreadable by your CPAP device.</source>
+        <translation type="unfinished">Προειδοποίηση: Οι κάρτες SD του ResMed S9 πρέπει να κλειδώνονται πριν τοποθετηθούν στον υπολογιστή. Ορισμένα λειτουργικά συστήματα γράφουν αρχεία ευρετηρίου στην κάρτα χωρίς να ρωτήσουν, κάτι που μπορεί να κάνει την κάρτα μη αναγνώσιμη από τη συσκευή CPAP σας.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="277"/>
+        <source>Your most recent night on the %1</source>
+        <translation type="unfinished">Η πιο πρόσφατη νύχτα σας με το %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="288"/>
+        <source>Mode: %1</source>
+        <translation type="unfinished">Τρόπος: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="302"/>
+        <source>7-day avg</source>
+        <translation type="unfinished">Μ.Ο. 7 ημερών</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="303"/>
+        <source>30-day avg</source>
+        <translation type="unfinished">Μ.Ο. 30 ημερών</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="334"/>
+        <source>% SpO₂ (%1)</source>
+        <translation type="unfinished">% SpO₂ (%1)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="335"/>
+        <source>Lowest SpO₂ %1%</source>
+        <translation type="unfinished">Χαμηλότερο SpO₂ %1%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="340"/>
+        <source>Pulse %1 %2</source>
+        <translation type="unfinished">Σφυγμός %1 %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="359"/>
+        <source>MMMM d</source>
+        <comment>date format for the cards heading</comment>
+        <translation type="unfinished">d MMMM</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="360"/>
+        <source>%1 compared with your averages</source>
+        <translation type="unfinished">%1 σε σύγκριση με τους μέσους όρους σας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="362"/>
+        <source>Better than average</source>
+        <translation type="unfinished">Καλύτερα από τον μέσο όρο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="363"/>
+        <source>Worse than average</source>
+        <translation type="unfinished">Χειρότερα από τον μέσο όρο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="364"/>
+        <source>Neither better nor worse</source>
+        <translation type="unfinished">Ούτε καλύτερα ούτε χειρότερα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="365"/>
+        <source>Choose which cards to show</source>
+        <translation type="unfinished">Επιλέξτε ποιες κάρτες θα εμφανίζονται</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="371"/>
+        <source>Breathing</source>
+        <translation type="unfinished">Αναπνοή</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="372"/>
+        <source>Mask and pressure</source>
+        <translation type="unfinished">Μάσκα και πίεση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="373"/>
+        <source>Usage</source>
+        <translation type="unfinished">Χρήση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="392"/>
+        <source>All cards are hidden. Use the gear button to choose cards to show.</source>
+        <translation type="unfinished">Όλες οι κάρτες είναι κρυφές. Χρησιμοποιήστε το κουμπί με το γρανάζι για να επιλέξετε κάρτες προς εμφάνιση.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="401"/>
+        <source>Welcome Page Cards</source>
+        <translation type="unfinished">Κάρτες σελίδας καλωσορίσματος</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="403"/>
+        <source>Show these cards on the Welcome page:</source>
+        <translation type="unfinished">Εμφάνιση αυτών των καρτών στη σελίδα καλωσορίσματος:</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="413"/>
+        <source>Cards are only shown when your device records that information.</source>
+        <translation type="unfinished">Οι κάρτες εμφανίζονται μόνο όταν η συσκευή σας καταγράφει αυτές τις πληροφορίες.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="440"/>
+        <source>Let&apos;s get your first night into OSCAR</source>
+        <translation type="unfinished">Ας φέρουμε την πρώτη σας νύχτα στο OSCAR</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="444"/>
+        <source>Check your preferences</source>
+        <translation type="unfinished">Ελέγξτε τις προτιμήσεις σας</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="445"/>
+        <source>Some options in File › Preferences affect how data is imported. Some are set for you when a ResMed device is detected.</source>
+        <translation type="unfinished">Ορισμένες επιλογές στο Αρχείο › Προτιμήσεις επηρεάζουν τον τρόπο εισαγωγής των δεδομένων. Ορισμένες ρυθμίζονται για εσάς όταν εντοπιστεί συσκευή ResMed.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="447"/>
+        <source>Insert your SD card</source>
+        <translation type="unfinished">Τοποθετήστε την κάρτα SD</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="448"/>
+        <source>Use a card reader, then choose Import CPAP data above. OSCAR finds the card for you.</source>
+        <translation type="unfinished">Χρησιμοποιήστε έναν αναγνώστη καρτών και επιλέξτε Εισαγωγή δεδομένων CPAP παραπάνω. Το OSCAR θα βρει την κάρτα για εσάς.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="449"/>
+        <source>Give it a few minutes</source>
+        <translation type="unfinished">Δώστε του λίγα λεπτά</translation>
+    </message>
+    <message>
+        <location filename="../oscar/welcomepage.cpp" line="450"/>
+        <source>The first import reads your whole history and can take a few minutes. Later imports are quick.</source>
+        <translation type="unfinished">Η πρώτη εισαγωγή διαβάζει όλο το ιστορικό σας και μπορεί να διαρκέσει λίγα λεπτά. Οι επόμενες εισαγωγές είναι γρήγορες.</translation>
     </message>
 </context>
 <context>
@@ -18571,37 +21481,37 @@ Make sure you trust the recipient before sharing this data.</source>
 <context>
     <name>gGraph</name>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="608"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="716"/>
         <source>Double click Y-axis: Return to AUTO-FIT Scaling</source>
         <translation type="unfinished">Διπλό κλικ στον άξονα Υ: Επιστροφή στην κλιμάκωση ΑΥΤΟΜΑΤΗΣ ΠΡΟΣΑΡΜΟΓΗΣ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="610"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="718"/>
         <source>Double click Y-axis: Return to DEFAULT Scaling</source>
         <translation type="unfinished">Διπλό κλικ στον άξονα Υ: Επιστροφή στην ΠΡΟΕΠΙΛΕΓΜΕΝΗ κλιμάκωση</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="612"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="720"/>
         <source>Double click Y-axis: Return to OVERRIDE Scaling</source>
         <translation type="unfinished">Διπλό κλικ στον άξονα Υ: Επιστροφή στην κλιμάκωση ΠΑΡΑΚΑΜΨΗΣ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="615"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="723"/>
         <source>Double click Y-axis: For Dynamic Scaling</source>
         <translation type="unfinished">Διπλό κλικ στον άξονα Υ: Για Δυναμική Κλιμάκωση</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="619"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="727"/>
         <source>Double click Y-axis: Select DEFAULT Scaling</source>
         <translation type="unfinished">Διπλό κλικ στον άξονα Υ: Επιλογή ΠΡΟΕΠΙΛΕΓΜΕΝΗΣ κλιμάκωσης</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="621"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="729"/>
         <source>Double click Y-axis: Select AUTO-FIT Scaling</source>
         <translation type="unfinished">Διπλό κλικ στον άξονα Υ: Επιλογή κλιμάκωσης ΑΥΤΟΜΑΤΗΣ ΠΡΟΣΑΡΜΟΓΗΣ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="875"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="983"/>
         <source>%1 days</source>
         <translation>%1 ημέρες</translation>
     </message>
@@ -18609,17 +21519,17 @@ Make sure you trust the recipient before sharing this data.</source>
 <context>
     <name>gGraphView</name>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="438"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="487"/>
         <source>100% zoom level</source>
         <translation>100% επίπεδο ζουμ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="440"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="489"/>
         <source>Restore X-axis zoom to 100% to view entire selected period.</source>
         <translation>Επαναφέρετε το ζουμ του άξονα Χ σε 100% για να δείτε ολόκληρη την επιλεγμένη περίοδο.</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="442"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="491"/>
         <source>Restore X-axis zoom to 100% to view entire day&apos;s data.</source>
         <translation>Επαναφέρετε το ζουμ του άξονα Χ σε 100% για να δείτε τα δεδομένα ολόκληρης της ημέρας.</translation>
     </message>
@@ -18632,57 +21542,140 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation type="vanished">Επαναφέρει όλες τις γραφικές παραστάσεις σε ομοιόμορφο ύψος και προεπιλεγμένη σειρά.</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="444"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="493"/>
         <source>Reset Graph Heights</source>
         <translation type="unfinished">Επαναφορά Ύψους Γραφημάτων</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="445"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="494"/>
         <source>Resets all graphs to a uniform height.</source>
         <translation type="unfinished">Επαναφέρει όλα τα γραφήματα σε ομοιόμορφο ύψος.</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="448"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="497"/>
         <source>Y-Axis</source>
         <translation>Άξονας Υ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="449"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="498"/>
         <source>Plots</source>
         <translation>σύρω</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="453"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="502"/>
         <source>CPAP Overlays</source>
         <translation>Επικάλυψη CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="456"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="505"/>
         <source>Oximeter Overlays</source>
         <translation>Επικάλυψη οξυμέτρου</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="459"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="508"/>
         <source>Dotted Lines</source>
         <translation>Γραμμωμένες Γραμμές</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="1866"/>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="1917"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="726"/>
+        <source>Display</source>
+        <translation type="unfinished">Εμφάνιση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="730"/>
+        <source>Close</source>
+        <translation type="unfinished">Κλείσε</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="734"/>
+        <source>Y-axis</source>
+        <translation type="unfinished">Άξονας Υ</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="735"/>
+        <source>Auto scale</source>
+        <translation type="unfinished">Αυτόματη κλίμακα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="737"/>
+        <source>Default scale</source>
+        <translation type="unfinished">Προεπιλεγμένη κλίμακα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="746"/>
+        <source>Dynamic scale</source>
+        <translation type="unfinished">Δυναμική κλίμακα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="754"/>
+        <source>Override scale...</source>
+        <translation type="unfinished">Παράκαμψη κλίμακας...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="757"/>
+        <source>Overlays</source>
+        <translation type="unfinished">Επικαλύψεις</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="778"/>
+        <source>Reset graph heights</source>
+        <translation type="unfinished">Επαναφορά υψών γραφημάτων</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="780"/>
+        <source>Unpin</source>
+        <translation type="unfinished">Ξεκαρφίτσωμα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="780"/>
+        <source>Pin</source>
+        <translation type="unfinished">Καρφίτσωμα</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="782"/>
+        <source>Pop out</source>
+        <translation type="unfinished">Σε ξεχωριστό παράθυρο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="785"/>
+        <source>Remove clone</source>
+        <translation type="unfinished">Αφαιρέστε τον κλώνο</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="785"/>
+        <source>Clone</source>
+        <translation type="unfinished">Κλωνοποίηση</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="787"/>
+        <source>100% zoom</source>
+        <translation type="unfinished">Ζουμ 100%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2154"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2207"/>
         <source>Double click title to pin / unpin
 Click and drag to reorder graphs</source>
         <translation>Κάντε διπλό κλικ στον τίτλο για να ενεργοποιήσετε / αποσυνδέσετε
 Κάντε κλικ και σύρετε για να αναδιατάξετε τα γραφήματα</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2160"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2451"/>
         <source>Remove Clone</source>
         <translation>Αφαιρέστε τον κλώνο</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2163"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2454"/>
         <source>Clone %1 Graph</source>
         <translation>Κλώνος %1 Γράφημα</translation>
+    </message>
+</context>
+<context>
+    <name>gSummaryChart</name>
+    <message>
+        <location filename="../oscar/Graphs/gSummaryChart.cpp" line="359"/>
+        <source>Details</source>
+        <translation type="unfinished">Λεπτομέριες</translation>
     </message>
 </context>
 </TS>
