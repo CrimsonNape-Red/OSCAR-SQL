@@ -8749,3 +8749,30 @@ were dropped, so any time under a minute showed as `0:00`.
 - Only oximeters imported by the Viatom loader have these rows; the figures are the device's
   own, summed over the day's enabled sessions.
 - Checked by compiling only at the time of writing.
+
+---
+
+## 2026-11-20 - Viatom oximeter download: device-info error messages were never translated (GitLab #412)
+
+**Files:** `oscar/SleepLib/viatomble/viatomble_dialect.h`
+
+**Symptom:** The 13 messages the download dialects produce when a device refuses or doesn't
+answer a request ("The device refused the request for its information." and the like) were
+always shown in English, whatever the catalogue held for them.
+
+**Root cause:** Only the base class `ViatomBle::Dialect` declared `Q_DECLARE_TR_FUNCTIONS`, so
+`tr()` in `ClassicDialect`, `ClassicUsbDialect` and `O2RingSDialect` looked each string up in
+the context `ViatomBle::Dialect`. lupdate files a class's strings under that class's own
+name, so the three contexts in the catalogues were never consulted and the lookup context
+held nothing.
+
+**Fix:** Each of the three subclasses declares `Q_DECLARE_TR_FUNCTIONS` with its own name. The
+catalogue contexts are unchanged, so translations already drafted for them now take effect.
+
+**Non-obvious:**
+- lupdate reports this as "Class '...' lacks Q_OBJECT macro"; the warning is the only sign of
+  it, since the strings look correctly catalogued.
+- The same warning for `CsvOximetry` is harmless: that is a namespace with its own `tr()`
+  calling `QCoreApplication::translate("CsvOximetry", ...)`, which is the context lupdate uses.
+- Checked by compiling and by re-running lupdate (warnings gone, no catalogue change); not
+  checked in a running translated build.

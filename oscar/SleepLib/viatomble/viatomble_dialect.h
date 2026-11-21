@@ -71,6 +71,11 @@ class Dialect
 //! SleepU, Checkme O2, O2Ring, ...: plain text, replies don't name their command.
 class ClassicDialect : public Dialect
 {
+    // Each dialect declares its own translation context: lupdate files a class's strings
+    // under that class's name, so inheriting Dialect's tr() would look them up in a
+    // context that holds none of them.
+    Q_DECLARE_TR_FUNCTIONS(ViatomBle::ClassicDialect)
+
   public:
     QList<Reply> feed(const QByteArray &chunk) override { return m_splitter.feed(chunk); }
     void clearBuffer() override { m_splitter.clear(); }
@@ -97,6 +102,8 @@ class ClassicDialect : public Dialect
  */
 class ClassicUsbDialect : public ClassicDialect
 {
+    Q_DECLARE_TR_FUNCTIONS(ViatomBle::ClassicUsbDialect)
+
   public:
     enum InfoStep { Hello, Info };
 
@@ -119,6 +126,8 @@ class ClassicUsbDialect : public ClassicDialect
  */
 class O2RingSDialect : public Dialect
 {
+    Q_DECLARE_TR_FUNCTIONS(ViatomBle::O2RingSDialect)
+
   public:
     enum InfoStep { PlainInfo, PlainFileList, Handshake, EncryptedInfo, EncryptedFileList };
 
