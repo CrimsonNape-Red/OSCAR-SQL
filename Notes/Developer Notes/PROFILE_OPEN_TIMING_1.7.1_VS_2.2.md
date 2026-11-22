@@ -99,14 +99,56 @@ removed afterwards):
 
 - **Defer the histograms.** They feed `Day::percentile`, `Day::hasData` /
   `Day::channelHasData`, the time-above/below-threshold figures and the range percentiles in
-  `profiles.cpp`. Which pages ask for these while a profile opens has not been traced, so the
-  saving is unknown until it is.
+  `profiles.cpp`. The next section traces which pages ask for them while a profile opens; what
+  a deferred load would cost in practice has not been measured.
 - **Batching is not an obvious win for the histograms.** Fetching them with one query per
   device instead of one per session was slower in a direct SQLite test (3.0 s against 1.6 s).
   The cost is the row volume, not the number of queries.
 - **The smaller tables** (channels, settings, summary, slices, session lookup: about 1.4 s
   together) are where per-query overhead matters: reusing prepared statements, one query per
   device, and passing on the row `findByMachine` already has. Not measured.
+
+## Which pages read the histograms at open
+
+**Result:** four things read them while a profile opens, and the Statistics report is by far
+the biggest. Together they read only a small part of the 2.1 million rows that are loaded.
+
+Every place that reads `m_valuesummary` / `m_timesummary` was given a temporary counter, tagged
+by `OpenProfile` stage and then by tab. The profile was opened and each tab visited in turn
+(counters removed afterwards). Of 3,206 sessions:
+
+| When | Who reads | Sessions / days touched | Channels |
+|---|---|---|---|
+| Creating the Welcome page | `Day::percentile` via `welcomemetrics.cpp` | 76 / 31 | Leak, Pressure, EPAP, FLG |
+| Daily page loading its last day | `Day::percentile` for the details panel | 2 / 1 | 48 |
+| Statistics report, generated from `Daily::Load` | `Profile::calcPercentile` and time over leak redline (`Statistics`, `SC_MEDIAN` / `SC_90P` / above-threshold rows) | 1,693 / 648 | Leak, Pressure, FLG |
+| Just after open, in the event loop | Overview stats row (`overviewstats.cpp`), shown range plus the range before it | 299 / 117 | Leak, Pressure |
+| Creating the Overview page and its graphs | nothing | — | — |
+
+`Day::channelHasData` also checks whether a histogram exists while the Welcome page (the same
+31 days) and the Daily page (7 days) are created.
+
+After open, by tab:
+
+- **Overview:** the pressure chart reads IPAP and EPAP for the 59 visible days (169 sessions)
+  when the tab is first shown.
+- **Daily:** only "is there data" checks for the shown day.
+- **Statistics:** nothing; the report was already built during open.
+
+What this means for deferring the load:
+
+- **Statistics sets the cost.** The test profile uses a custom report range of 659 days, which
+  is why the report reaches 648 days of data. In standard mode it covers at most the last year.
+- **Rows actually needed at open are few.** The Statistics range holds 1,036,143 histogram rows
+  (49% of the profile's) across all channels, but only 150,229 (7%) for the three channels the
+  report reads.
+- **So the grain matters.** Loading a whole session's histograms on first touch would still
+  read about half the rows for this profile; loading per channel would read under a tenth.
+- **Statistics is rebuilt on every `Daily::Load`** (there is a FIXME on it), so a deferred load
+  must keep what it reads or each date change would pay again.
+
+Not measured: the union of sessions across the four readers, and the time a deferred load would
+take. The percentages are row counts from the database, not timings.
 
 ## Caveats
 
