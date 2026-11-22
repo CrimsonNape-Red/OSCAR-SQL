@@ -70,18 +70,10 @@ extern bool openOk;
     #define wheelEventPos( id )   id ->position()
     #define wheelEventX( id )     id ->position().x()
     #define wheelEventY( id )     id ->position().y()
-    #define wheelEventDelta( id ) id ->angleDelta().y()
-
-    #define isWheelEventVertical( id )  id ->angleDelta().x()==0
-    #define isWheelEventHorizontal( id )  id ->angleDelta().y()==0
 #else
     #define wheelEventPos( id )   id ->pos()
     #define wheelEventX( id )     id ->x()
     #define wheelEventY( id )     id ->y()
-    #define wheelEventDelta( id ) id ->delta()
-
-    #define isWheelEventVertical( id )  id ->orientation() == Qt::Vertical
-    #define isWheelEventHorizontal( id )  id ->orientation() == Qt::Horizontal
 #endif
 
 extern MainWindow *mainwin;
@@ -3372,10 +3364,17 @@ void gGraphView::wheelEvent(QWheelEvent *event)
     if (m_button_down)
         return;
 
+    // A wheel event carries movement on both axes. Windows reports a touchpad swipe as
+    // separate vertical and horizontal events, each with the other axis at zero; macOS
+    // reports both axes in one event. The larger axis decides what the event means, and
+    // the pan distance must come from that same axis (GitLab #413).
+    const QPoint angle = event->angleDelta();
+    const bool horizontal = qAbs(angle.x()) > qAbs(angle.y());
+
     if (event->modifiers() == Qt::NoModifier) {
         int scrollDampening = AppSetting->scrollDampening();
 
-        if (isWheelEventVertical(event)) { // Vertical Scrolling
+        if (!horizontal) { // Vertical Scrolling
             if (horizScrollTime.elapsed() < scrollDampening) {
                 return;
             }
@@ -3481,7 +3480,9 @@ void gGraphView::wheelEvent(QWheelEvent *event)
         double xx = (graph->max_x - graph->min_x);
         double zoom = 240.0;
 
-        int delta = wheelEventDelta(event);
+        // Only horizontal events reach here. Positive x means "scroll left" in Qt, which
+        // moves the view to earlier times, the same as a horizontal scroll bar would.
+        int delta = angle.x();
 
         if (delta > 0) {
             graph->min_x -= (xx / zoom) * (float)abs(delta);

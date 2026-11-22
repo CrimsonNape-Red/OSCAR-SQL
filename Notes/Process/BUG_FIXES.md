@@ -8776,3 +8776,29 @@ catalogue contexts are unchanged, so translations already drafted for them now t
   calling `QCoreApplication::translate("CsvOximetry", ...)`, which is the context lupdate uses.
 - Checked by compiling and by re-running lupdate (warnings gone, no catalogue change); not
   checked in a running translated build.
+
+---
+
+## 2026-11-22 - Two-finger sideways swipe on a touchpad no longer panned the graphs (GitLab #413)
+
+**Files:** `oscar/Graphs/gGraphView.cpp`, `oscar/Graphs/gGraphView.h`
+
+**Symptom:** A two-finger horizontal swipe on a laptop touchpad (or a tilt wheel) did nothing
+on the Daily graphs. Only the arrow keys panned in time.
+
+**Root cause:** `gGraphView::wheelEvent` recognised the event as horizontal but took the pan
+distance from `angleDelta().y()`. Windows reports a horizontal swipe with the vertical axis at
+zero, so the graphs panned by nothing. The mistake dates from the 2023 replacement of Qt's
+obsolete `QWheelEvent::delta()`, which had returned the movement along whichever axis moved.
+
+**Fix:** The event is horizontal when its horizontal movement is the larger of the two (what
+`delta()`/`orientation()` did), and the pan distance comes from `angleDelta().x()`. The three
+macros that carried the wrong axis were removed from `gGraphView.cpp`.
+
+**Non-obvious:**
+- The same code is in 1.7.1, so builds of it against Qt 5.15 or later have the same fault.
+- macOS sends both axes in one event. Before the fix any sideways component made the event
+  horizontal and the graphs panned by the *vertical* component; a mostly-vertical swipe now
+  scrolls the graph list instead.
+- Checked on a Windows 11 touchpad: sideways swipe pans in the expected direction, vertical
+  swipe scrolls the graph list, Ctrl + swipe zooms. Not checked on macOS or Linux.

@@ -726,7 +726,12 @@ public:
     void mouseReleaseEvent(QMouseEvent *event) override;
     //! \brief Mouse Button Double Click Event somewhere in main gGraphArea, propagates to the individual graphs
     void mouseDoubleClickEvent(QMouseEvent *event) override;
-    //! \brief Mouse Wheel Event somewhere in main gGraphArea, propagates to the individual graphs
+    /*! \brief Mouse wheel or touchpad scroll somewhere in the main graph area.
+
+        With no modifier key, a vertical movement scrolls the list of graphs and a horizontal
+        movement (a two-finger sideways swipe, or a tilt wheel) pans the graphs in time. An
+        event is treated as horizontal when its horizontal movement is the larger of the two.
+        With Ctrl held, the event is passed to the graph under the pointer, which zooms. */
     void wheelEvent(QWheelEvent *event) override;
     //! \brief Keyboard event while main gGraphArea has focus.
     void keyPressEvent(QKeyEvent *event) override;
