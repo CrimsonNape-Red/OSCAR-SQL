@@ -60,6 +60,54 @@ defers work to a background thread after opening.
 A trial run on a second, smaller profile (3.5 GB in 1.7.1) showed the same first-open pattern:
 47.1 s for 1.7.1 against 5.2 s for the development build.
 
+## Why the development build spends 3 s loading sessions
+
+**Cause:** opening a profile eagerly reads every session's per-channel value histograms, 2.1
+million rows for this profile, and that alone is about half of the 3 s. It is not a missing
+index (every query uses one, checked with `EXPLAIN QUERY PLAN`) and not disk I/O (the data was
+cached).
+
+`Machine::LoadSessionsFromDatabase` calls `Session::LoadFromDatabase` once per session, which
+runs six queries: 3,206 sessions, 19,236 queries. Each step was timed with temporary
+`QElapsedTimer` accumulators in the app (one warm run, 3.15 s in the loop; the timers were
+removed afterwards):
+
+| Step in `Session::LoadFromDatabase` | Time | Rows read |
+|---|---|---|
+| Value/time histograms (`session_channel_values`) | 1,533 ms | 2,112,086 |
+| Channel statistics (`session_channels`) | 545 ms | 59,163 |
+| Settings (`session_settings`) | 377 ms | 49,766 |
+| Summary row (`session_summaries`) | 276 ms | 3,206 |
+| Session row lookup (`sessions`) | 150 ms | 3,206 |
+| Slices (`session_slices`) | 86 ms | 0 |
+| `AddSession` + the initial session list | 88 ms | — |
+
+- **Histograms:** about 660 rows per session, mostly Te, Ti, Pressure, EPAP, RespRate and
+  MinuteVent (74–153 distinct values per session each). Most of the 1.5 s is fetching the
+  rows; inserting them into the nested hashes is about 0.2 s. The per-row timers add some
+  overhead of their own to these two figures.
+- **Fixed cost per query:** the slices query returns nothing for this profile yet costs 27 µs
+  a call, and each call prepares its statement afresh. Across 19,236 queries that is roughly
+  0.5 s, spread through the other rows of the table.
+- **Redundant lookup:** the session row lookup re-reads a row that `findByMachine` fetched a
+  moment earlier.
+- **Why 1.7.1 is faster warm:** it reads only each device's `Summaries.xml.gz` at open and
+  loads a session's histograms when a day needs them. That lazy loading is the same work that
+  cost it 58 s on the uncached open.
+
+### Candidates, not yet verified
+
+- **Defer the histograms.** They feed `Day::percentile`, `Day::hasData` /
+  `Day::channelHasData`, the time-above/below-threshold figures and the range percentiles in
+  `profiles.cpp`. Which pages ask for these while a profile opens has not been traced, so the
+  saving is unknown until it is.
+- **Batching is not an obvious win for the histograms.** Fetching them with one query per
+  device instead of one per session was slower in a direct SQLite test (3.0 s against 1.6 s).
+  The cost is the row volume, not the number of queries.
+- **The smaller tables** (channels, settings, summary, slices, session lookup: about 1.4 s
+  together) are where per-query overhead matters: reusing prepared statements, one query per
+  device, and passing on the row `findByMachine` already has. Not measured.
+
 ## Caveats
 
 - **"First open" is not a controlled cold start.** There was no reboot or cache flush. The 1.7.1
