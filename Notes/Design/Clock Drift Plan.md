@@ -170,8 +170,8 @@ Toolbar: add Align `QPushButton` to the Daily bottom toolbar near `graphCombo` i
 | `oscar/daily.ui` | Add Align `QPushButton` near `graphCombo`. |
 | `oscar/session_alignment_dialog.{h,cpp,ui}` | New files — modeless dialog per §above. |
 | `oscar/oscar.pro` | Register the three new files (SOURCES/HEADERS/FORMS). |
-| `Notes/DATABASE_SCHEMA_REFERENCE.md` | Document `machine_time_offsets` table and bump schema to v15. |
-| `Notes/BUG_FIXES.md` | Log the four 1.7.1 patch bugs and their 2.0 fixes. |
+| `Notes/Database/DATABASE_SCHEMA_REFERENCE.md` | Document `machine_time_offsets` table and bump schema to v15. |
+| `Notes/Process/BUG_FIXES.md` | Log the four 1.7.1 patch bugs and their 2.0 fixes. |
 | `Htmldocs/release_notes.html` | Ask before editing (per project convention). |
 
 ## Critical files to read before implementation

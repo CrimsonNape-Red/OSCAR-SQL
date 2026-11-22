@@ -1661,7 +1661,7 @@ per-session files for the host software to discover.
 original Format C decode handled only modes `0x00` (CPAP) and `0x06` (APAP);
 the five BiPAP-class modes (S / T / ST / VGPS / AUTOS = `0x01-0x05`) fell
 through to `MODE_UNKNOWN` and `pressure` was read from byte `0x0C`, which
-is zero on BiPAP records. Fix shipped 2026-05-21 — see `Notes/BUG_FIXES.md`
+is zero on BiPAP records. Fix shipped 2026-05-21 — see `Notes/Process/BUG_FIXES.md`
 and GitLab issue #178. **IPAP / EPAP are LE `u16 * 10` at record offsets
 `0x02-0x03` and `0x04-0x05`** (confirmed against the Yuwell BreathCare
 vendor app: 15-min ramp from IPAP 8.5 / EPAP 4.5 to IPAP 16 / EPAP 12,

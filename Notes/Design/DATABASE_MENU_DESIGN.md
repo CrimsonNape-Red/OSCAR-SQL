@@ -217,7 +217,7 @@ longer exists or no longer contains `oscar.db`).
 
 - Add a brief entry to user-facing release notes describing the new
   Database submenu.
-- Add to `Notes/BUG_FIXES.md` only if any preexisting bugs surface during
+- Add to `Notes/Process/BUG_FIXES.md` only if any preexisting bugs surface during
   the work.
 
 **Step 8 — schema**
@@ -239,7 +239,7 @@ None. The DB schema does not change.
   `database_manager`); add to `oscar/oscar.pro`.
 - `oscar/database/database_manager.cpp` — log the active DB path on
   initialize.
-- `Notes/BUG_FIXES.md` — only if needed.
+- `Notes/Process/BUG_FIXES.md` — only if needed.
 
 ---
 

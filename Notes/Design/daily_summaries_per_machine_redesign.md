@@ -65,7 +65,7 @@ So the existing rows are *not* "combined per profile/date" the way every
 caller intends; they're "per CPAP machine, but happen to be one per date
 because a profile rarely has two CPAPs". This works by accident and
 contradicts the schema documentation
-(`Notes/DATABASE_SCHEMA_REFERENCE.md` line 859: "machine_id ... NULL=combined").
+(`Notes/Database/DATABASE_SCHEMA_REFERENCE.md` line 859: "machine_id ... NULL=combined").
 
 ### 2.3 Latent bug: the read-side helpers can't find the rows they wrote
 `findByProfileAndDate(profileId, date, machineId = 0)` translates
@@ -170,7 +170,7 @@ backup. No query edits required.
   `MIN(date)` / `MAX(date)`. Survives the column drop unchanged.
 - `oscar/exportcsv.cpp:439,466,491,515` — `SELECT ds.<named columns> FROM
   daily_summaries ds`. None reference `machine_id`. No edits required.
-- `Notes/USEFUL_QUERIES.sql:313` — table-name reference only. No edit.
+- `Notes/Database/USEFUL_QUERIES.sql:313` — table-name reference only. No edit.
 - `oscar/sqleditor.ui:45` — help text mentioning the table. No edit.
 
 ### 3.7 Backup / Restore
@@ -196,7 +196,7 @@ backup. No query edits required.
   move it earlier, though there's no benefit.
 
 ### 3.8 Documentation
-- `Notes/DATABASE_SCHEMA_REFERENCE.md`
+- `Notes/Database/DATABASE_SCHEMA_REFERENCE.md`
   - Update title block "Schema Version" to 16 (currently says 15).
   - Add v16 entry to the version-history table.
   - Update the `daily_summaries` `CREATE TABLE` block, data dictionary,
@@ -207,8 +207,8 @@ backup. No query edits required.
   - Update the ER diagram block: the `machines (1) ─< daily_summaries (N)`
     edge goes away; only the `profiles (1) ─< daily_summaries (N)` edge
     remains.
-- `Notes/Database-ER-Diagram.png` — regenerate.
-- `Notes/BUG_FIXES.md` — log under a 2026-04 entry.
+- `Notes/Database/Database-ER-Diagram.png` — regenerate.
+- `Notes/Process/BUG_FIXES.md` — log under a 2026-04 entry.
 
 ## 4. Risk register
 

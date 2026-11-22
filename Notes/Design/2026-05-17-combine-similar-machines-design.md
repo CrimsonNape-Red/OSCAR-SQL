@@ -123,7 +123,7 @@ separate print-path change is needed.
 - No change to the **Device Information** table on the Statistics page;
   it continues to show one row per physical device with serial numbers.
 - No backport to OSCAR 1.7.1.
-- No `Notes/BUG_FIXES.md` entry — this is a feature, not a bug fix.
+- No `Notes/Process/BUG_FIXES.md` entry — this is a feature, not a bug fix.
 - No Preferences UI logic to grey out `includeSerial` when Combine is ON;
   the interaction is "silently ignored", per design decision.
 - No persistence of the combine-mode flag inside the cache header

@@ -600,7 +600,7 @@ void testReadCheck();           // both: archive of 3 nights, one segment corrup
   from the changed files.
 - [ ] **Step 4: Verify on real cards** in the scratch data folder (a new profile; never a
   real one). Record the session count and total waveform hours for the device after each
-  step from the database (queries in `Notes/database/USEFUL_QUERIES.sql`).
+  step from the database (queries in `Notes/Database/USEFUL_QUERIES.sql`).
   1. G3X series (three images of one device at increasing fill): import oldest, middle,
      newest. Expected: after each import the Backup folder holds `archive.json`,
      `Segments/` with one file per waveform night seen so far, the index files, and no

@@ -6,7 +6,7 @@
 
 **Architecture:** Pure additive change. New boolean preference (`STR_AS_CombineSimilarMachines`, default false) stored via `AppSetting`. New `QCheckBox` in the Appearance / Other Visual Settings group of `preferencesdialog.ui`. The merge predicate in `Statistics::updateRXChanges()` is widened from `rx.machine == mach` to `rx.machine->brand() == mach->brand()` when the preference is on. The Device column rendering in `Statistics::GenerateRXChanges()` switches to `rx.machine->brand()` when on. Cache (`RXChanges.cache`) is invalidated by file deletion on toggle, reusing the existing pattern from `mainwindow.cpp`.
 
-**Tech Stack:** Qt 6, C++17, QtCreator (developer-driven incremental builds — no automated UI tests). Spec: `Notes/2026-05-17-combine-similar-machines-design.md`.
+**Tech Stack:** Qt 6, C++17, QtCreator (developer-driven incremental builds — no automated UI tests). Spec: `Notes/Design/2026-05-17-combine-similar-machines-design.md`.
 
 ---
 
@@ -342,7 +342,7 @@ OSCAR's policy (from `CLAUDE.md`) is to keep commit messages concise — one-lin
 
 - [ ] **Step 7.3:** Do **not** push. Pushing is a separate, explicit user request per project rule.
 
-- [ ] **Step 7.4:** Do **not** add a `Notes/BUG_FIXES.md` entry — this is a feature, not a bug fix.
+- [ ] **Step 7.4:** Do **not** add a `Notes/Process/BUG_FIXES.md` entry — this is a feature, not a bug fix.
 
 - [ ] **Step 7.5:** `Htmldocs/release_notes.html` was not modified by this feature. Per project rule, ask the user whether they'd like to add a release-note line for this feature before considering the work fully done.
 

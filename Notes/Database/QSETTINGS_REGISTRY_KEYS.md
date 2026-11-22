@@ -153,4 +153,4 @@ Most user-visible preferences (AHI display mode, graph colours, machine settings
 are stored in the **SQLite database** (`oscar.db`) via `AppPreferencesRepository`,
 `ProfileRepository`, and related classes. Dialog state for Backup, Restore,
 Journal Notes Export, and Report Exporter is also persisted in the database.
-See `Notes/DATABASE_SCHEMA_REFERENCE.md` for the full schema.
+See `Notes/Database/DATABASE_SCHEMA_REFERENCE.md` for the full schema.

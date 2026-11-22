@@ -5710,7 +5710,7 @@ main Viatom path) and `ParseFilePOD2` (the POD2 path).
 `oscar/database/daily_summary_repository.{h,cpp}`,
 `oscar/database/backup/profile_restore.cpp`,
 `oscar/SleepLib/profiles.cpp`, `oscar/mainwindow.cpp`,
-`Notes/DATABASE_SCHEMA_REFERENCE.md`
+`Notes/Database/DATABASE_SCHEMA_REFERENCE.md`
 
 **Symptom:** None visible to users — but the schema was internally
 inconsistent and three repository finders were unreachable from any call
@@ -6020,7 +6020,7 @@ for all past and future column removals without needing per-migration restore pa
 
 **Files:** `oscar/newprofile.ui`, `oscar/newprofile.cpp`, `oscar/SleepLib/profiles.h`,
 `oscar/database/user_info_repository.{h,cpp}`, `oscar/database/database_schema.{h,cpp}`,
-`Notes/DATABASE_SCHEMA_REFERENCE.md`
+`Notes/Database/DATABASE_SCHEMA_REFERENCE.md`
 
 The "DST Zone" checkbox in the New Profile dialog was stored and persisted to the
 `user_info.dst_enabled` database column, but was never read by any loader, timestamp

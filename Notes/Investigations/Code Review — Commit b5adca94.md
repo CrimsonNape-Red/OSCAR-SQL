@@ -85,8 +85,8 @@ Code Review — Commit b5adca94
     was never defined anywhere in the tree, so no behavior change.
   - BUG_FIXES.md entry is excellent — root causes #1–#4 spelled out clearly with file/function. This is the kind of
     entry that makes future me happy.
-  - New Notes/QUERY_PULSE_P95.sql is helpful for verification but should probably get a one-liner in
-    Notes/HOW_TO_USE_QUERIES.md so it's discoverable.
+  - New Notes/Database/QUERY_PULSE_P95.sql is helpful for verification but should probably get a one-liner in
+    Notes/Database/HOW_TO_USE_QUERIES.md so it's discoverable.
 
 ---
   Recommendation

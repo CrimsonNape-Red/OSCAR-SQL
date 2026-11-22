@@ -292,7 +292,7 @@ change.
 **Step 7 — release notes & bug log discipline**
 
 - Document the one-time migration in user-facing release notes.
-- Add an entry in `Notes/BUG_FIXES.md` only if any preexisting bugs surface
+- Add an entry in `Notes/Process/BUG_FIXES.md` only if any preexisting bugs surface
   during the work.
 
 **Step 8 — schema**
@@ -310,7 +310,7 @@ None. The DB schema does not change. No migration needed inside the DB.
   `oscar.pro`)
 - `oscar/database/database_manager.cpp` — minor: log the active-DB name on
   initialize
-- `Notes/BUG_FIXES.md` — only if needed
+- `Notes/Process/BUG_FIXES.md` — only if needed
 
 I would skip the in-process switch for v1 and revisit only if
 `RestartApplication` proves annoying in real support use.

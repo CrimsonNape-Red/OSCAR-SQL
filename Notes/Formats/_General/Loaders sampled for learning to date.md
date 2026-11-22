@@ -8,7 +8,7 @@
   8. Yuwell YH-550A (Format A, summary-only) — yuwell_loader
   9. Yuwell YH-680B (Format D, summary-only) — yuwell_loader
 
-Plus the AeonMed AS100 Auto from the earlier session, written up separately in Notes/AEONMED_AS100_CARD_ANALYSIS.md (not yet in the fingerprints doc).
+Plus the AeonMed AS100 Auto from the earlier session, written up separately in Notes/Formats/Aeonmed/AEONMED_AS100_CARD_ANALYSIS.md (not yet in the fingerprints doc).
 
   **Loaders not yet sampled** (from the CPAP-focused list we agreed on earlier):
 
