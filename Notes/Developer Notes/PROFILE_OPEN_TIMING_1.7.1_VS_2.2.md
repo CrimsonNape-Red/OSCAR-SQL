@@ -190,6 +190,40 @@ Limits of the prototype, which a real implementation would have to deal with:
   queries.
 - **One profile, with a 659-day Statistics range.** A standard one-year report reads less.
 
+## Would a cache file like 1.7.1's help?
+
+**Not in the 1.7.1 form.** What makes 1.7.1 quick at open is how little its cache file holds,
+not the file itself, and the database already gives the same thing faster.
+
+- **What 1.7.1's file is.** `Summaries.xml.gz` is only a session index: id, start, end,
+  enabled, an events flag, and the lists of channel and setting ids (`Machine::LoadSummary` /
+  `SaveSummaryCache`). It holds no statistics, settings values or histograms. Those live in one
+  summary file per session and are read later, when a page needs that day. That later reading
+  is the 58 s it paid on the uncached open.
+- **The 2.x equivalent already exists.** The same index is the `sessions` table; reading it for
+  all 3,206 sessions took 34 ms. A 1.7.1-style file would duplicate that and save nothing.
+- **A fuller cache is a different idea.** A file holding everything `Session::LoadFromDatabase`
+  reads could plausibly cut the remaining 1.7 s of session loading. That is not measured, and
+  it means two copies of the truth: the file would need invalidating on import, purge, session
+  enable/disable, recalculation, restore, schema migration, and any edit made to the database
+  outside OSCAR. `daily_summaries` is this kind of cached rollup and has already produced
+  staleness bugs (GitLab #239, #286).
+
+Suggested order instead:
+
+1. **Defer the histograms.** The measured win: about 1.3 s and 80 MB, with no second store.
+2. **Cut the cost of the other five queries.** Each query pays a fixed cost of about 27 µs
+   (roughly 0.5 s across all 19,236). The app also takes 3–5 times longer than a bare SQLite
+   client to read the same channel and settings rows (545 ms against about 175 ms for
+   channels). Where that extra time goes has not been traced.
+3. **Consider loading per-session detail lazily**, which is the part of 1.7.1's design that
+   actually made it fast. It needs the same kind of trace as the histograms got, since
+   Statistics and Overview may ask for most of it at open anyway.
+
+One case where a cache file might genuinely win is a cold start: a small file reads
+sequentially, while the database pages are scattered through a 19.7 GB file. That is untested;
+the first-open figure here (8.4 s) was not a controlled cold start.
+
 ## Caveats
 
 - **"First open" is not a controlled cold start.** There was no reboot or cache flush. The 1.7.1
