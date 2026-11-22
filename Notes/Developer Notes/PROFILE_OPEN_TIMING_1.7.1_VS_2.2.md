@@ -99,8 +99,8 @@ removed afterwards):
 
 - **Defer the histograms.** They feed `Day::percentile`, `Day::hasData` /
   `Day::channelHasData`, the time-above/below-threshold figures and the range percentiles in
-  `profiles.cpp`. The next section traces which pages ask for them while a profile opens; what
-  a deferred load would cost in practice has not been measured.
+  `profiles.cpp`. The next two sections trace which pages ask for them while a profile opens
+  and measure a per-channel deferred load with a prototype.
 - **Batching is not an obvious win for the histograms.** Fetching them with one query per
   device instead of one per session was slower in a direct SQLite test (3.0 s against 1.6 s).
   The cost is the row volume, not the number of queries.
@@ -147,8 +147,48 @@ What this means for deferring the load:
 - **Statistics is rebuilt on every `Daily::Load`** (there is a FIXME on it), so a deferred load
   must keep what it reads or each date change would pay again.
 
-Not measured: the union of sessions across the four readers, and the time a deferred load would
-take. The percentages are row counts from the database, not timings.
+Not measured: the union of sessions across the four readers. The percentages are row counts
+from the database, not timings; the next section has the timings.
+
+## What a per-channel deferred load saves
+
+**Result:** about 1.3 s of the 3.9 s profile open on the test profile (roughly a third), and
+about 80 MB of memory.
+
+Measured with a throwaway prototype, not kept in the tree: one exe that loads histograms either
+eagerly (today's behaviour) or per session and channel on first read, switched by an
+environment variable. `Session::LoadFromDatabase` skips the histogram query, and every reader
+listed above first asks the session to fetch that one channel. Six alternating warm runs each,
+medians:
+
+| | Eager (today) | Deferred per channel | Change |
+|---|---|---|---|
+| Launch to GUI idle | 5.60 s | 4.40 s | −1.2 s |
+| Profile open itself | 3.91 s | 2.64 s | −1.3 s |
+| Loading sessions | 3.28 s | 1.69 s | −1.6 s |
+| Building the pages | 0.65 s | 0.92 s | +0.3 s |
+| CPU time | 4.6 s | 3.4 s | −1.2 s |
+| Working set | 484 MB | 406 MB | −78 MB |
+| Private memory | 407 MB | 328 MB | −79 MB |
+
+- **What moved to the pages:** the deferred run made 5,576 small queries for 152,413 rows (7%
+  of the 2.1 million), taking about 230 ms. Nearly all of that is the Statistics report.
+- **Results match:** the Statistics report and records box were byte-identical in the two
+  modes. The Welcome, Daily and Overview output was not compared.
+- **What is left:** loading sessions still takes 1.7 s, which is the other five queries per
+  session.
+
+Limits of the prototype, which a real implementation would have to deal with:
+
+- **Presence checks load the data.** `Day::hasData`, `Day::channelHasData` and
+  `RangeFigures::hasDetail` fetch a channel's histogram just to answer yes or no.
+- **Store path untested.** `Session::StoreToDatabase` replaces the session's channel rows, so
+  the prototype loads every remaining histogram first. No session was re-stored in these runs.
+- **Clearing paths not handled.** The two places that clear a session's histograms along with
+  its other statistics (one in `mainwindow.cpp`, one in `session_split.cpp`) were left alone.
+- **Later tab visits not timed.** The Overview tab's first show would add a few hundred small
+  queries.
+- **One profile, with a 659-day Statistics range.** A standard one-year report reads less.
 
 ## Caveats
 
