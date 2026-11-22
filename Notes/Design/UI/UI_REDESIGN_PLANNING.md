@@ -77,7 +77,7 @@ The current Welcome page is already self-contained: `welcome.cpp/.h/.ui`, create
 ### Keep the bookkeeping separate
 
 - Put design notes and the progress log on the branch only (this folder). Don't add experiment
-  entries to `Notes/Developer Notes/BUG_FIXES.md`, because that file changes constantly on
+  entries to `Notes/Process/BUG_FIXES.md`, because that file changes constantly on
   master and would conflict.
 - In GitLab, tag related issues with a label such as `ui-redesign`.
 - Merge master into `ui-next` rather than rebasing, since the branch is pushed.

@@ -29,7 +29,7 @@ struct SessionSummaryData
     
     // Primary metrics. An absent optional is stored as SQL NULL and means "not
     // applicable to this device" (schema v19, GitLab #261); see
-    // Notes/specs/2026-09-14-oh-ch-capability-gating-design.md §5.2. ahi is always present.
+    // Notes/Design/2026-09-14-oh-ch-capability-gating-design.md §5.2. ahi is always present.
     double ahi = 0.0;                            // Apnea-Hypopnea Index
     std::optional<double> rdi;                   // Respiratory Disturbance Index; NULL unless the device reports RERA
     std::optional<double> oahi;                  // Obstructive AHI (v18); NULL unless the device splits hypopneas by mechanism
@@ -124,7 +124,7 @@ public:
     /*!
      * \brief Rebuild every metric column of session_summaries from session_channels.
      *
-     * Applies the NULL rule of Notes/specs/2026-09-14-oh-ch-capability-gating-design.md
+     * Applies the NULL rule of Notes/Design/2026-09-14-oh-ch-capability-gating-design.md
      * §5.2 to rows that already exist: a count column is NULL when the row's machine has
      * never reported the channel (no session_channels row with count > 0 on any of its
      * sessions), else the session's count or 0; ahi is the sum of session_channels.cph

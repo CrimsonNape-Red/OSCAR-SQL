@@ -8,7 +8,7 @@
  *
  * The class knows no card format and does not use the profile. A loader decides what a
  * record is and supplies its bytes; this class owns the layout and the rules for when a
- * record is stored, skipped or replaced. Design: Notes/specs/
+ * record is stored, skipped or replaced. Design: Notes/Design/
  * 2026-11-19-ring-buffer-backup-archive-design.md (GitLab #380).
  *
  * Copyright (c) 2026 The OSCAR Team

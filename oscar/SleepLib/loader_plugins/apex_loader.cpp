@@ -1,7 +1,7 @@
 /* Apex Medical XT Auto Loader Implementation
  *
  * Native import for the Apex XT Auto raw APAPDATA format. See
- * Notes/loaders/Apex/APEX_LOADER_DESIGN.md for the complete design.
+ * Notes/Formats/Apex/APEX_LOADER_DESIGN.md for the complete design.
  *
  * Copyright (c) 2026 The OSCAR Team
  *

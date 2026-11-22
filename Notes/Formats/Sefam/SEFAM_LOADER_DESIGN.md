@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-03
 **Status:** approved design, not yet implemented.
-**Format reference:** `Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md` — the container,
+**Format reference:** `Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md` — the container,
 waveform scalings, event taxonomy and settings records are all decoded there and
 validated against the manufacturer's *Sefam Analyze* report for the same card.
 This document covers only how that format becomes an OSCAR loader.
@@ -408,7 +408,7 @@ record-level splitting would leak sentinel values into the data.
 hypopnea channel, and both existing loaders that face this — BMC G3X
 (`bmcG3xDataParsing.cpp`) and Prisma (`prisma_loader.cpp:414`) — fold both into
 `CPAP_Hypopnea`. Sefam follows that precedent for consistency. See
-`Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md` for the taxonomy, which records the
+`Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md` for the taxonomy, which records the
 distinction even though OSCAR discards it. Revisiting this across all three
 loaders, probably by adding a general central-hypopnea channel, is a known
 deferred decision and is deliberately **not** attempted here — a Sefam-only

@@ -1,8 +1,8 @@
 /* SEFAM Loader Implementation
  *
  * Detects and imports SEFAM CPAP SD cards. See sefam_loader.h for the class
- * interface, Notes/loaders/SEFAM_LOADER_DESIGN.md for the design rationale and
- * Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md for the card format.
+ * interface, Notes/Formats/Sefam/SEFAM_LOADER_DESIGN.md for the design rationale and
+ * Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md for the card format.
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -46,7 +46,7 @@ using SefamParsing::ChannelSpec;
     the tooltip.
 
     Remove these once the per-event extent is recovered — Y17 is the suspected
-    source. See Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md, open problem 1.
+    source. See Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md, open problem 1.
     @{ */
 constexpr qint64 kObstructiveHypopneaPlacementMs = 16000;   //!< Vendor mean, 16 s
 constexpr qint64 kCentralHypopneaPlacementMs     = 15000;   //!< Vendor mean, 15 s

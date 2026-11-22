@@ -123,7 +123,7 @@ the confirmed 0.16.
 ---
 
 Two OSCAR bugs were found and fixed while investigating this card — see
-`Notes/Developer Notes/BUG_FIXES.md` (2026-07-29). Note that the second one interacts with
+`Notes/Process/BUG_FIXES.md` (2026-07-29). Note that the second one interacts with
 this document:
 
 1. Zero-valued leak samples were discarded before storage, inflating every leak statistic

@@ -70,3 +70,6 @@ doxydoc
 
 # Local planning docs (not for the repo)
 /docs/
+
+# Private developer material: anonymizers, checksum notes, sample manifest (never in the repo)
+/DevPrivate

@@ -5,7 +5,7 @@
  * card formats; CardArchive knows the storage rules; the functions here walk the card's
  * records and move what is new from one to the other.
  *
- * Design: Notes/specs/2026-11-19-ring-buffer-backup-archive-design.md
+ * Design: Notes/Design/2026-11-19-ring-buffer-backup-archive-design.md
  *
  * Copyright (c) 2026 The OSCAR Team
  *

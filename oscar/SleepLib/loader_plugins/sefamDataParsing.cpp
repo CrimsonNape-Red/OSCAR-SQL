@@ -1,7 +1,7 @@
 /* SEFAM SD Card Data Parsing Implementation
  *
  * Decodes the SEFAM card container. See sefamDataParsing.h for the interface
- * and Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md for the format itself.
+ * and Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md for the format itself.
  *
  * Copyright (c) 2026 The OSCAR Team
  *

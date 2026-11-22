@@ -13,7 +13,7 @@ clicked. `Overview` opens an `OverviewDetailsPopup` (new widget) from rows each 
 
 **Tech Stack:** C++17, Qt 6 Widgets/QPainter, QtTest via `tests/AutoTest.h`.
 
-**Spec:** `Notes/UI Redesign/OVERVIEW_PAGE_DESIGN.md`
+**Spec:** `Notes/Design/UI/OVERVIEW_PAGE_DESIGN.md`
 
 ## Global Constraints
 

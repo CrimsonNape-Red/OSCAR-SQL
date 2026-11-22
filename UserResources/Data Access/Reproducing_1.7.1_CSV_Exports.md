@@ -130,7 +130,7 @@ Per-sample data in 2.0 lives in two storage models:
 Python can reach what SQL can't, because it can decompress and unpack the BLOBs.
 No Qt or OSCAR build required. A script has been written:
 
-> **`Notes/Database/oscar_details_csv.py`** — standalone, read-only,
+> **`UserResources/Data Access/oscar_details_csv.py`** — standalone, read-only,
 > stdlib-only (`sqlite3` / `zlib` / `array`). Reproduces 1.7.1's Details export
 > exactly.
 
@@ -311,7 +311,7 @@ PATH?" — never bundle an interpreter.
   waveform/flag samples live in compressed `event_data` BLOBs that SQL cannot
   unpack.
 - **Chosen solution:** a standalone, read-only Python script
-  (`Notes/Database/oscar_details_csv.py`) that decodes the BLOBs and reproduces
+  (`UserResources/Data Access/oscar_details_csv.py`) that decodes the BLOBs and reproduces
   1.7.1's Details output exactly. Higher resolution is left to user-written
   scripts.
 - **C++ option:** the legacy in-memory walk ports cleanly as a separate,

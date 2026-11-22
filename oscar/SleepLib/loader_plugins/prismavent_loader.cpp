@@ -2,7 +2,7 @@
  *
  * Imports SD cards written by Löwenstein (formerly Weinmann) prisma VENT home
  * ventilators. See prismavent_loader.h for the card layout and
- * Notes/loaders/PRISMA_VENT_CARD_ANALYSIS.md for the format analysis.
+ * Notes/Formats/Lowenstein/PRISMA_VENT_CARD_ANALYSIS.md for the format analysis.
  *
  * Copyright (c) 2026 The OSCAR Team
  *

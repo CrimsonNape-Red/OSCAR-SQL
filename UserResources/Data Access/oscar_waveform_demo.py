@@ -4,7 +4,7 @@
 # Demonstrator: read OSCAR's SQLite database and plot the Flow Rate and
 # Pressure waveforms for the latest OSCAR day of a given profile.
 #
-# Spec: Notes/python_waveform_demo_spec.md
+# Spec: UserResources/Data Access/python_waveform_demo_spec.md
 #
 # Comments are intentionally verbose: this script's job is to teach readers
 # how to talk to the OSCAR database, not to be production-terse.

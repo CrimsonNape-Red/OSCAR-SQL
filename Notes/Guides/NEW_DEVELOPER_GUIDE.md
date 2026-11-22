@@ -215,7 +215,7 @@ original card.
 | `mseries_loader` | Respironics M-Series (file import from *Data* menu) |
 | `icon_loader`, `sleepstyle_loader` | Fisher & Paykel ICON and SleepStyle |
 | `intellipap_loader` | DeVilbiss IntelliPAP and DV6 |
-| `prisma_loader`, `weinmann_loader` | Löwenstein / Weinmann prisma line; Weinmann SOMNO-series (`WM_DATA.TDF`, see `Notes/Developer Notes/WEINMANN_LOADER.md`) |
+| `prisma_loader`, `weinmann_loader` | Löwenstein / Weinmann prisma line; Weinmann SOMNO-series (`WM_DATA.TDF`, see `Notes/Formats/Lowenstein/WEINMANN_LOADER.md`) |
 | `resvent_loader` | Resvent iBreeze and Hoffrichter Point 3 |
 | `bmc_loader`, `bmcg3x_loader` (+ `*DataParsing`) | BMC legacy formats and BMC G3/G3X `.00x` format |
 | `apex_loader` | Apex Medical XT |
@@ -234,7 +234,7 @@ through `SleepLib/viatomble/` and `viatomimportpanel.cpp`.
 
 **Rule:** a change to one loader must not affect any other loader unless that is the
 explicit goal. Card formats and detection fingerprints are documented in
-`Notes/loaders/`.
+`Notes/Formats/`.
 
 ---
 
@@ -306,16 +306,16 @@ sample-data identifiers in it.
 
 | Path | What's there |
 |------|--------------|
-| `Notes/Developer Notes/BUG_FIXES.md` | Log of every non-trivial bug fix: symptom, root cause, fix. Search it before debugging something that looks familiar. |
-| `Notes/Developer Notes/ARCHITECTURE.md` | Deeper architecture walkthrough: startup, import pipeline, data model, graphs, repositories, and how to add a schema migration. |
-| `Notes/Developer Notes/DATABASE_INTEGRATION_GUIDE.md`, `SIGNALS_AND_SLOTS_GUIDE.md`, `PERFORMANCE_INSTRUMENTATION_GUIDE.md` | How-to guides for specific subsystems. |
+| `Notes/Process/BUG_FIXES.md` | Log of every non-trivial bug fix: symptom, root cause, fix. Search it before debugging something that looks familiar. |
+| `Notes/Guides/ARCHITECTURE.md` | Deeper architecture walkthrough: startup, import pipeline, data model, graphs, repositories, and how to add a schema migration. |
+| `Notes/Guides/DATABASE_INTEGRATION_GUIDE.md`, `SIGNALS_AND_SLOTS_GUIDE.md`, `PERFORMANCE_INSTRUMENTATION_GUIDE.md` | How-to guides for specific subsystems. |
 | `Notes/Database/DATABASE_SCHEMA_REFERENCE.md` | Every table and column, with version history. |
 | `Notes/Database/Database-ER-Diagram.png`, `USEFUL_QUERIES.sql`, `HOW_TO_USE_QUERIES.md`, `DATA_DICTIONARY.md` | Schema diagram and ready-made SQL. |
-| `Notes/Accessing OSCAR Data/` | Reading `oscar.db` from Python, including decoding `event_data` BLOBs. |
-| `Notes/loaders/` | Per-brand SD-card analyses, `SD_CARD_FINGERPRINTS.md`, `LOADER_DETECTION_PATTERNS.md`. |
-| `Notes/specs/`, `Notes/plans/` | Dated design specs and implementation plans for features. |
+| `UserResources/Data Access/` | Reading `oscar.db` from Python, including decoding `event_data` BLOBs. |
+| `Notes/Formats/` | Per-brand SD-card analyses; `_General/` holds `SD_CARD_FINGERPRINTS.md` and `LOADER_DETECTION_PATTERNS.md`. |
+| `Notes/Design/` | Dated design specs and implementation plans for features. |
 | `Notes/Wiki/` | Backup of the user-facing wiki pages, useful for seeing the user's view. |
-| `Notes/Getting Started with OSCAR 2.0.md` | User-facing introduction to 2.0. |
+| `UserResources/Getting Started/Getting Started with OSCAR 2.0.md` | User-facing introduction to 2.0. |
 | `Notes/temp/` | Older notes that were moved out of the way. |
 
 ---

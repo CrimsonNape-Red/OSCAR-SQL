@@ -12,7 +12,7 @@
 ///
 /// All multi-byte integers are little-endian unless otherwise stated.
 ///
-/// See Notes/loaders/G3X/BMC_G3X_EVT_FORMAT.md and BMC_G3X_00X_FORMAT.md for detailed
+/// See Notes/Formats/BMC/G3X/BMC_G3X_EVT_FORMAT.md and BMC_G3X_00X_FORMAT.md for detailed
 /// offset maps and confidence levels for each field.
 ///
 /// Copyright (c) 2026 The OSCAR Team
@@ -2290,7 +2290,7 @@ void BmcG3xData::ParseIdxRecords(const QByteArray& idxBytes)
 /// only today's values, so relying on it relabels every historical night with them.  One
 /// reference card has Min EPAP at 8.5 on its early nights and 7.5 now.
 ///
-/// Field map (see Notes/loaders/G3X/BMC_G3X_SET_FORMAT.md).  Contributed by an external
+/// Field map (see Notes/Formats/BMC/G3X/BMC_G3X_SET_FORMAT.md).  Contributed by an external
 /// reverse engineer and validated 15/15 against a PAP-Link readout, then re-checked here
 /// against a second card in a different mode.  Pressures are u16 LE, hundredths of cmH2O.
 ///

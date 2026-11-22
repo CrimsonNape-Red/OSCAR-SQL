@@ -1,7 +1,7 @@
 /* Apex Medical XT Auto SD Card Data Parsing Implementation
  *
  * Decodes the Apex Medical XT Auto card format. See apexDataParsing.h for the
- * interface and Notes/loaders/Apex/APEX_XT_AUTO_CARD_ANALYSIS.md for the format
+ * interface and Notes/Formats/Apex/APEX_XT_AUTO_CARD_ANALYSIS.md for the format
  * itself.
  *
  * Copyright (c) 2026 The OSCAR Team
@@ -47,7 +47,7 @@ bool decodeApfRecord(const quint8 *record, ApfRecord &out)
     out.start = start;
     out.end   = end;
 
-    // Offsets per Notes/loaders/Apex/APEX_XT_AUTO_CARD_ANALYSIS.md section 2.
+    // Offsets per Notes/Formats/Apex/APEX_XT_AUTO_CARD_ANALYSIS.md section 2.
     out.rawMaxPressure  = record[0x10];
     out.rawMinPressure  = record[0x11];
     out.initialPressure = record[0x0F] / 2.0f;

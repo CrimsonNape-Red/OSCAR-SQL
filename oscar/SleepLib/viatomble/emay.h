@@ -24,7 +24,7 @@ namespace ViatomBle {
 class Link;
 
 /*! \brief The EMAY EMO-80's Bluetooth LE protocol, worked out from EMAY's Android app
- *  (see Notes/loaders/EMAY_EMO80_BLE.md). Not yet tried on a device.
+ *  (see Notes/Formats/Oximeters/EMAY_EMO80_BLE.md). Not yet tried on a device.
  *
  *  Frames are "E2 cmd type lenHi lenLo payload E3 xor" in both directions; xor covers
  *  everything between E2 and E3. Requests have type '/', acknowledgements type 'O'.

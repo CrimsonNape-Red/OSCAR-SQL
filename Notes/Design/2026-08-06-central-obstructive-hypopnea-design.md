@@ -23,7 +23,7 @@ differs from it.
 - **Two extra defects fixed** beyond §4.10's one, both required for the identity to hold:
   the summary-only AHI fallback in `Session::StoreSummaryToDatabase()` (it computed RDI),
   and `Session::LoadFromDatabase()` dropping `unclassified_count` on reload. See
-  `Notes/Developer Notes/BUG_FIXES.md`, 2026-08-14.
+  `Notes/Process/BUG_FIXES.md`, 2026-08-14.
 - **Printed report** (§3.3) shows `OHI=`/`CHI=` only when the day actually has OH or CH
   data, rather than printing `0.00` for every other device. `OAHI=`/`CAHI=` always show.
 - **Daily sidebar** (§5.4) shows OAHI and CAHI on one line directly beneath the AHI banner.
@@ -206,7 +206,7 @@ later — pre-v18 rows have 0 in the new columns by design (§4.9a) and will fai
 |---|---|---|
 | 6.1 | `docs/system_reports.orf` | 8 queries reference `hypopnea_count` (lines 36, 70-74, 95-99, 136, 168-171, 193-196, 216-219, 392-400). Add OH/CH/A count columns; add `all_apnea_count` to every hand-rolled AHI/RDI sum (a pre-existing omission, §4.10); surface OAHI/CAHI from the new stored columns for per-row reports, and from the counts for the aggregating (weekly/monthly) ones, matching how `ahi` is already handled |
 | 6.2 | `exports/exportcsv.cpp` | No change (uses `ahiChannels`) — verify header/column count in all three report modes |
-| 6.3 | `Notes/Database/oscar_details_csv.py`, `Notes/Accessing OSCAR Data/*.md` | Update the documented channel set |
+| 6.3 | `UserResources/Data Access/oscar_details_csv.py`, `UserResources/Data Access/*.md` | Update the documented channel set |
 
 ---
 

@@ -20,7 +20,7 @@ branch `vihealth-dev`.
 
 - **Decisions (2026-10-27):** the app key is embedded in the source; no test device is
   available here, so a tester with an O2Ring S builds the branch.
-  `Notes/loaders/VIATOM_BLE_TESTING.md` is their guide.
+  `Notes/Formats/Oximeters/VIATOM_BLE_TESTING.md` is their guide.
 - **Code:**
   - `viatomble_o2rings` holds the frames, handshake, payloads and parsers, all pure
     functions.

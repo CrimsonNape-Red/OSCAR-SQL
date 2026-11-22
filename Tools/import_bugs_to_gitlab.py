@@ -3,7 +3,7 @@
 Import BUG_FIXES.md entries as closed GitLab issues.
 
 Usage:
-    python Notes/import_bugs_to_gitlab.py --token YOUR_GITLAB_PAT [--dry-run]
+    python Tools/import_bugs_to_gitlab.py --token YOUR_GITLAB_PAT [--dry-run]
 
 Requires a GitLab personal access token with `api` scope.
 Create one at: https://gitlab.com/-/user_settings/personal_access_tokens
@@ -168,7 +168,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--token",   required=True, help="GitLab personal access token (api scope)")
-    ap.add_argument("--md",      default="Notes/BUG_FIXES.md", help="Path to BUG_FIXES.md")
+    ap.add_argument("--md",      default="Notes/Process/BUG_FIXES.md", help="Path to BUG_FIXES.md")
     ap.add_argument("--dry-run", action="store_true", help="Preview only; make no API calls")
     args = ap.parse_args()
 

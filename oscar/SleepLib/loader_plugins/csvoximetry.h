@@ -21,7 +21,7 @@ class Session;
 /*! \brief Oximetry from a CSV file: a date and time, SpO2 and pulse on each row.
  *
  *  Each row carries its own time, so any sampling rate works, including an irregular
- *  one. See Notes/loaders/CSV_OXIMETRY.md for the format:
+ *  one. See Notes/Formats/Oximeters/CSV_OXIMETRY.md for the format:
  *
  *      DateTime,SpO2,Pulse
  *      2026-11-02 02:24:12,97,58

@@ -1830,7 +1830,7 @@ bool DatabaseSchema::migrateV17ToV18(QSqlDatabase& db)
  * Migrate database from schema version 18 to 19
  *
  * No column changes. Applies the NULL convention of
- * Notes/specs/2026-09-14-oh-ch-capability-gating-design.md (GitLab #261) to rows that
+ * Notes/Design/2026-09-14-oh-ch-capability-gating-design.md (GitLab #261) to rows that
  * already exist:
  *  - session_summaries: SessionSummariesRepository::rebuildFromChannels() for every
  *    machine. This also carries the #285 recompute of ahi/rdi/oahi/cahi from

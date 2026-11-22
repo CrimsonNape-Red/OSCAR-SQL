@@ -8,7 +8,7 @@
 
 **Tech Stack:** C++17, Qt 6.10.2, SQLite via QtSql. No new dependencies.
 
-**Spec:** `Notes/specs/2026-09-14-oh-ch-capability-gating-design.md` (GitLab #261)
+**Spec:** `Notes/Design/2026-09-14-oh-ch-capability-gating-design.md` (GitLab #261)
 
 **Execution status (2026-09-15):** all ten tasks executed on branch `oh-ch-gating`; the SQL
 checks in Tasks 4, 6 and 10 were run against a copy of the test database and pass. Task 6's
@@ -46,7 +46,7 @@ Channel ids used in SQL (from `schema.cpp`): ClearAirway 4097 (0x1001), Obstruct
 | `oscar/daily.cpp`, `oscar/reports.cpp` | machine gate on OAHI/CAHI (and OHI/CHI) |
 | `oscar/statistics.cpp` | row gate and per-cell `"-"` |
 | `oscar/docs/system_reports.orf`, `Notes/Database/USEFUL_QUERIES.sql` | NULL-safe sums |
-| `Notes/Database/DATABASE_SCHEMA_REFERENCE.md`, `DATABASE_SCHEMA.md`, `Notes/Developer Notes/BUG_FIXES.md` | documentation |
+| `Notes/Database/DATABASE_SCHEMA_REFERENCE.md`, `DATABASE_SCHEMA.md`, `Notes/Process/BUG_FIXES.md` | documentation |
 
 ---
 
@@ -164,7 +164,7 @@ Build target `test` in QtCreator (`CONFIG+=test`). Expected: compile error — `
 
     //! \brief True once the device has scored an obstructive or central hypopnea, i.e. it
     //! splits hypopneas by mechanism and OAHI/CAHI are meaningful for it. Derived from
-    //! the data, never declared by a loader. See Notes/specs/2026-09-14-oh-ch-capability-gating-design.md.
+    //! the data, never declared by a loader. See Notes/Design/2026-09-14-oh-ch-capability-gating-design.md.
     inline bool reportsHypopneaMechanism() const {
         return hasReportedEvents(CPAP_ObstructiveHypopnea) || hasReportedEvents(CPAP_CentralHypopnea);
     }
@@ -234,7 +234,7 @@ void Machine::noteReportedChannels(Session * sess)
 `session_summaries_repository.h` — add `#include <optional>`; replace the metric members:
 ```cpp
     // Primary metrics. NULL (nullopt) means "not applicable to this device" — see
-    // Notes/specs/2026-09-14-oh-ch-capability-gating-design.md §5.2. ahi is always present.
+    // Notes/Design/2026-09-14-oh-ch-capability-gating-design.md §5.2. ahi is always present.
     double ahi = 0.0;                            // Apnea-Hypopnea Index
     std::optional<double> rdi;                   // Respiratory Disturbance Index; NULL unless the device reports RERA
     std::optional<double> oahi;                  // Obstructive AHI (v18); NULL unless the device splits hypopneas
@@ -476,7 +476,7 @@ Add `#include "SleepLib/machine.h"` if `Machine` is only forward-declared there.
     /*!
      * \brief Rebuild every metric column of session_summaries from session_channels.
      *
-     * Applies the NULL rule of Notes/specs/2026-09-14-oh-ch-capability-gating-design.md
+     * Applies the NULL rule of Notes/Design/2026-09-14-oh-ch-capability-gating-design.md
      * §5.2 to rows that already exist: a count column is NULL when the row's machine has
      * never reported the channel (no session_channels row with count > 0 on any of its
      * sessions), else the session's count or 0; ahi is the sum of session_channels.cph
@@ -711,7 +711,7 @@ Delete the `backfills[]` array and its loop and the "recomputed session_summarie
  * Migrate database from schema version 18 to 19
  *
  * No column changes. Applies the NULL convention of
- * Notes/specs/2026-09-14-oh-ch-capability-gating-design.md to rows that already exist:
+ * Notes/Design/2026-09-14-oh-ch-capability-gating-design.md to rows that already exist:
  *  - session_summaries: SessionSummariesRepository::rebuildFromChannels() for every
  *    machine. This also carries the #285 recompute of ahi/rdi/oahi/cahi from
  *    session_channels.cph, which v18 used to do and which v18 tester databases missed.
@@ -1019,7 +1019,7 @@ These must be defined before `StatisticsRow::value()` and before the constructor
 - Modify: `Notes/Database/USEFUL_QUERIES.sql:280-300` (identity check)
 - Modify: `Notes/Database/DATABASE_SCHEMA_REFERENCE.md:26-48` (version table), `:797-870` and `:875-940` (column tables)
 - Modify: `Notes/Database/DATABASE_SCHEMA.md:48` (version table)
-- Modify: `Notes/Developer Notes/BUG_FIXES.md` (append)
+- Modify: `Notes/Process/BUG_FIXES.md` (append)
 
 - [ ] **Step 1: `system_reports.orf` — mechanical rule**
 

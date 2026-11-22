@@ -45,7 +45,7 @@ const QString prismavent_class_name = "PrismaVent";
 
 /*! \name prisma VENT settings channels
     Session settings taken from the active therapy program in parameter.xml.
-    See Notes/loaders/PRISMA_VENT_CARD_ANALYSIS.md for how each was identified.
+    See Notes/Formats/Lowenstein/PRISMA_VENT_CARD_ANALYSIS.md for how each was identified.
     @{ */
 extern ChannelID PrismaVent_Mode;            //!< Raw TherapyMode value; only S/T, autoS/T and MPVp are named.
 extern ChannelID PrismaVent_Program;         //!< Active therapy program, 1-3.

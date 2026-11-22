@@ -18,7 +18,7 @@
 
 // The classic protocol spoken by the SleepU, Checkme O2, O2Ring and their relatives
 // (the ViHealth SDK's OxyCommonBleInterface; first ported to Qt in oxytool).
-// See Notes/specs/2026-10-27-viatom-ble-import-design.md.
+// See Notes/Design/2026-10-27-viatom-ble-import-design.md.
 namespace ViatomBle {
 
 // GATT service and characteristics

@@ -19,7 +19,7 @@
 // The protocol of the O2Ring S, SC, SF, SP and relatives (the ViHealth SDK's
 // OxyIIBleInterface, which uses Lepu's generic LpBleCmd commands for recordings).
 // Decoded from the SDK only; see "Protocol: phase 2" in
-// Notes/specs/2026-10-27-viatom-ble-import-design.md.
+// Notes/Design/2026-10-27-viatom-ble-import-design.md.
 namespace ViatomBle {
 namespace O2RingS {
 

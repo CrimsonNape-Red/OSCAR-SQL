@@ -46,7 +46,7 @@ class Scanner;
  *  The Oximetry Wizard's import step for these oximeters: choose a device, choose
  *  recordings, download. Files are kept in <profile folder>/Oximetry_Data/<serial>/ and,
  *  if the user wants, each one is imported as soon as it has arrived.
- *  See Notes/specs/2026-10-27-viatom-ble-import-design.md.
+ *  See Notes/Design/2026-10-27-viatom-ble-import-design.md.
  */
 class ViatomImportPanel : public QWidget
 {

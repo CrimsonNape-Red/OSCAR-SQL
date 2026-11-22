@@ -7,7 +7,7 @@
  *
  * Neither file carries a checksum, CRC, or compression of any kind. This
  * module deliberately contains no OSCAR types. The format is fully specified
- * in Notes/loaders/Apex/APEX_XT_AUTO_CARD_ANALYSIS.md; keeping the decode layer
+ * in Notes/Formats/Apex/APEX_XT_AUTO_CARD_ANALYSIS.md; keeping the decode layer
  * free of SleepLib dependencies lets it be reasoned about and tested on its
  * own.
  *

@@ -4,7 +4,7 @@
 **Date:** 2026-08-08
 **Scope:** `oscar/SleepLib/loader_plugins/apex_loader.{h,cpp}`,
 `oscar/SleepLib/loader_plugins/apexDataParsing.{h,cpp}`,
-`oscar/tests/apextests.{h,cpp}`, the three notes under `Notes/loaders/Apex/`,
+`oscar/tests/apextests.{h,cpp}`, the three notes under `Notes/Formats/Apex/`,
 and the integration edits to `main.cpp`, `oscar.pro`, `Resources.qrc`.
 
 **Method:** static review only. The loader was not run and no Apex sample data
@@ -489,7 +489,7 @@ comment explaining that a relaxed count means an invisible graph — which is ho
 this got through the first time. Confirmed against a real card: before the
 change the Leak Rate graph appeared on exactly one of nine sessions, the one
 with no shortfall; after it, on all nine. Logged in
-`Notes/Developer Notes/BUG_FIXES.md`.
+`Notes/Process/BUG_FIXES.md`.
 
 ---
 

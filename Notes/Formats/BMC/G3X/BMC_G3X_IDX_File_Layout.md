@@ -235,14 +235,14 @@ night's packets come from its segment (`BmcG3xData::OpenWaveSpans()`), and a nig
 no segment is imported from the event stream alone, as an overwritten night is. A Backup
 folder that still holds `.00x` files is a full card copy from an earlier version of OSCAR
 and is converted on the next import. Design and rules:
-`Notes/specs/2026-11-19-ring-buffer-backup-archive-design.md`.
+`Notes/Design/2026-11-19-ring-buffer-backup-archive-design.md`.
 
 If the logic that decides which bytes belong to a night changes, raise
 `kBmcG3xCaptureRule` in the same change (see section 12.5 of that design).
 
 ### Waveform Packet Layout (2048 bytes)
 
-See `Notes/G3X/BMC_G3X_00X_FORMAT.md` for the full field map and confidence levels.
+See `Notes/Formats/BMC/G3X/BMC_G3X_00X_FORMAT.md` for the full field map and confidence levels.
 Key offsets used by the current parser:
 
 | Offset | Size | Type | Field | Notes |
@@ -299,7 +299,7 @@ Records without magic `0xAE, 0xAA` at bytes 0–1 are skipped.
 
 ### EVT Message Types
 
-See `Notes/G3X/BMC_G3X_EVT_FORMAT.md` for full details and confidence levels.
+See `Notes/Formats/BMC/G3X/BMC_G3X_EVT_FORMAT.md` for full details and confidence levels.
 
 For respiratory events (0x01–0x0A), **value2** is duration in **milliseconds**
 (confirmed 2026-03-25). Duration is clamped to 10–180 seconds for all types except 0x09

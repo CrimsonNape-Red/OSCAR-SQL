@@ -32,7 +32,7 @@ struct DailySummaryData {
     
     // Respiratory events. An absent optional is stored as SQL NULL and means "not
     // applicable to this day's device" (schema v19, GitLab #261); see
-    // Notes/specs/2026-09-14-oh-ch-capability-gating-design.md §5.2. ahi is always present.
+    // Notes/Design/2026-09-14-oh-ch-capability-gating-design.md §5.2. ahi is always present.
     double ahi = 0.0;
     std::optional<double> rdi;                   // NULL unless the device reports RERA
     std::optional<double> oahi;                  // Obstructive AHI (v18); NULL unless the device splits hypopneas by mechanism

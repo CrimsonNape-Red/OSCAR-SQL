@@ -24,7 +24,7 @@ An import stores only nights the archive does not hold; a rebuild reads the inde
 night from its segment. Measured on sample cards: an unchanged card imports in 4–6 s, the backup of a
 3.9 GB G3X card is 1.39 GB, and a fresh data folder importing only the Backup folder gets identical
 sessions. The design, the rules and the measurements are in
-`Notes/specs/2026-11-19-ring-buffer-backup-archive-design.md`.
+`Notes/Design/2026-11-19-ring-buffer-backup-archive-design.md`.
 
 **Non-obvious:**
 - The Backup folder is no longer a card image, so the vendor program cannot open it.
@@ -317,7 +317,7 @@ volume integrated from the flow waveform runs 3-12% above minute ventilation on 
   to the known models.
 - `G3xLeakScaleTenthsPerRawUnit()` applied the G3 factor of 0.16 to the P5. It now uses 0.10, as
   on the E5, confirmed by the device's own nightly leak statistics (see
-  `Notes/loaders/G3X/leak_field_analysis.md`).
+  `Notes/Formats/BMC/G3X/leak_field_analysis.md`).
 - `ParseMachineInfo()` took the first version token in the `.log`, which is the oldest version
   on a device updated since its log began (reported `P5-1.02.04.01`, device runs
   `P5-1.02.05.10`). It now scans the whole log and reports the newest. This also applies to G3
@@ -539,7 +539,7 @@ sessions actually handed to the database.
 ## 2026-10-27 - SEFAM S.Box: no events or settings on a well-used device (GitLab #354)
 
 **Files:** `oscar/SleepLib/loader_plugins/sefamDataParsing.cpp/.h`,
-`oscar/SleepLib/loader_plugins/sefam_loader.cpp`, `Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md`
+`oscar/SleepLib/loader_plugins/sefam_loader.cpp`, `Notes/Formats/Sefam/SEFAM_SBOX_CARD_ANALYSIS.md`
 
 **Symptom:** An S.Box AUTO (firmware A020200) imported its waveforms, but every night had
 AHI 0.00, no event flags and PAP mode "Unknown". The device's own display showed AHI 1–2.
@@ -590,7 +590,7 @@ now runs 01:23:23–07:10:34.
 ## 2026-10-21 - Weinmann SOMNObalance e: incomplete import, wrong events and statistics
 
 **Files:** `oscar/SleepLib/loader_plugins/weinmann_loader.cpp/.h`, `oscar/daily.cpp`,
-`Notes/Developer Notes/WEINMANN_LOADER.md`
+`Notes/Formats/Lowenstein/WEINMANN_LOADER.md`
 
 **Symptom:** A SOMNObalance e card imported only the first 5 detailed nights, all under one
 hard-coded serial number. The 60 usage days of week data were never imported. Events were
@@ -669,7 +669,7 @@ the IT duration exactly. This also applies to nights on older cards whose wavefo
 overwritten.
 
 The card's `.dat` file holds 10 Hz flow and mask pressure for the most recent ~11 h of
-therapy. It is decoded in `Notes/G3X/BMC_G3X_DAT_FORMAT.md` but not imported: the EVT-only
+therapy. It is decoded in `Notes/Formats/BMC/G3X/BMC_G3X_DAT_FORMAT.md` but not imported: the EVT-only
 import already shows the same data as PAP-Link.
 >>>>>>> upstream/master
 
@@ -1459,7 +1459,7 @@ channel for the first time after rows exist has its earlier rows rebuilt from
 `session_channels`. `system_reports.orf` sums were `COALESCE`d — `SUM()` over an all-NULL
 group is `NULL`, which would have blanked every ResMed profile's RDI.
 
-Design: `Notes/specs/2026-09-14-oh-ch-capability-gating-design.md`.
+Design: `Notes/Design/2026-09-14-oh-ch-capability-gating-design.md`.
 
 ---
 
@@ -1832,7 +1832,7 @@ raises the untested-device notice: no manufacturer report exists for a Néa, and
 mode is unresolved. That card ran a flat 7.0 cmH₂O for eight months while its minimum and
 maximum fields read 4.0 and 20.0, and no field in the settings record marks the change; the
 loader's hard-coded `MODE_APAP` is wrong for that period and cannot yet be fixed from the
-card. Recorded in `Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md`, "The Néa Auto".
+card. Recorded in `Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md`, "The Néa Auto".
 
 ## 2026-08-26 — BMC G3X/E5 showed two Reslex settings the device does not have
 
@@ -2095,7 +2095,7 @@ code 2 records reproduce the vendor report exactly (ramp 4.0/45 min, 20.0/4.0, C
 mask leak 36) and pick up the last record's changes to CC+ 3 and 34 lpm, plus the
 humidifier history 4 → 5 → 4 → 7. All 467 S.Box archive blocks decode a mask leak of
 36 lpm with none out of range. Full analysis in
-`Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md`.
+`Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md`.
 
 ---
 
@@ -2417,7 +2417,7 @@ distinctly high (22.0 vs 11.2) for the reason above. That gap is a difference in
 definition, not in the underlying signal.
 
 **Confidence: medium** — one card, one night, one PAP-Link readout. See
-`Notes/loaders/G3X/leak_field_analysis.md` for the full calibration table. A second E5
+`Notes/Formats/BMC/G3X/leak_field_analysis.md` for the full calibration table. A second E5
 sample would confirm whether 0.10 is exact.
 
 ---
@@ -2442,7 +2442,7 @@ which is why mask type, tube type, auto on/off and ramp all showed as defaults. 
 
 **Fix:** new `ApplySetFileSettings()` decodes the `.set` file and overrides the inference.
 Format decode and cross-validation are documented in
-`Notes/loaders/G3X/BMC_G3X_SET_FORMAT.md`. The active mode is read from `SS[0x1C]`, and the
+`Notes/Formats/BMC/G3X/BMC_G3X_SET_FORMAT.md`. The active mode is read from `SS[0x1C]`, and the
 **last** `TS` block carrying that mode is authoritative (the file holds a stale snapshot
 first, then the live per-mode table — PAP-Link matched the last block, not the first).
 
@@ -2528,7 +2528,7 @@ instead of 200 packets from one. On the reference card that gives 18.7% aggregat
 per-day figures ranging 6.0%–46.0%), a stable and correct 0x52A for all 19 nights. The
 selection is now logged with `qDebug()` unconditionally — once per import, not per day.
 
-**Not a regression of the 0x568 analysis:** `Notes/loaders/G3X/leak_field_analysis.md`
+**Not a regression of the 0x568 analysis:** `Notes/Formats/BMC/G3X/leak_field_analysis.md`
 concluded that 0x568 is not unintentional leak and that unintentional leak is unrecoverable
 for SC.74+ firmware. That still holds. The E5 is unaffected by it because its 0x52A field
 is **live**, so it has genuine unintentional leak available.
@@ -2579,7 +2579,7 @@ containing a debug log carried no record of the condition.
 **Follow-up (2026-07-29):** the same report noted that device settings differed from
 PAP-Link (mode shown as AutoCPAP rather than AutoS, wrong max pressure, missing PS). That
 was a separate defect — the G3X parser never read the `.set` file — and is fixed in the
-2026-07-29 entry above; see `Notes/loaders/G3X/BMC_G3X_SET_FORMAT.md` for the format decode.
+2026-07-29 entry above; see `Notes/Formats/BMC/G3X/BMC_G3X_SET_FORMAT.md` for the format decode.
 
 ---
 
@@ -7166,7 +7166,7 @@ gain 0.1, the same step the card uses, so sub-0.1 detail recovered by averaging
 is rounded away and the value toggles between adjacent tenths. A smoother
 variant (three cascaded 6 s boxcars, gain 0.01) was built and measured, but the
 visible gain was slight against a 7.1x increase in `session_channel_values`
-rows, so it was not kept. See `Notes/loaders/SEFAM_LOADER_DESIGN.md` §6 for the
+rows, so it was not kept. See `Notes/Formats/Sefam/SEFAM_LOADER_DESIGN.md` §6 for the
 measurements, so they need not be re-derived.
 
 ## 2026-08-04 - SEFAM: blower-off periods counted as therapy (usage time and average pressure)
@@ -7398,7 +7398,7 @@ blocks, one per session, each an 88-byte big-endian header followed by one 6-byt
 record per minute. The header carries per-type event counts and the settings in force
 for that session; the per-minute record carries mean pressure, four two-bit event
 counters, and snore and flow-limitation counts. Format and evidence are in
-`Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md`.
+`Notes/Formats/Sefam/SEFAM_SBOX_CARD_ANALYSIS.md`.
 
 **Fix:** `SefamParsing::readMemoryImage()` decodes the archive, and `SefamLoader::Open()`
 matches its tail to the session directories by minute count and applies the result -
@@ -8150,7 +8150,7 @@ used them. The installer now removes the MinGW runtime DLLs left by earlier inst
 
 **Files:** `oscar/SleepLib/loader_plugins/sefam_loader.cpp`, `sefam_loader.h`, `sefamDataParsing.cpp`,
 `sefamDataParsing.h`, `oscar/tests/sefamtests.cpp`, `sefamtests.h` (new), `oscar/oscar.pro`,
-`Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md`
+`Notes/Formats/Sefam/SEFAM_SBOX_CARD_ANALYSIS.md`
 
 **Symptom:** The first of two sessions in a night didn't appear in OSCAR, though Sefam Analyze showed it.
 Purging the day and importing again gave the same result.
@@ -8421,7 +8421,7 @@ event list is created only when a session has a snore.
 **Non-obvious:**
 - The identification rests on a contributor's patched-record test in PAP-Link, later confirmed by
   the contributor with a newer PAP-Link version, plus a device-side check: the IDX day record holds a per-hour index at IT `0x4E` that equals the `0x0B` count / hours
-  x 10 on 215 of 219 nights across four cards. See `Notes/loaders/G3X/BMC_G3X_EVT_FORMAT.md` §3c.
+  x 10 on 215 of 219 nights across four cards. See `Notes/Formats/BMC/G3X/BMC_G3X_EVT_FORMAT.md` §3c.
 - A PAP-Link comparison on device-written records (23 bars for 23 records) showed the timestamp is
   the snore's start and `value2` its duration in ms. The duration is not imported; VS stays a
   point flag.

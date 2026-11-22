@@ -23,7 +23,7 @@
   `invalidateRange()` call is needed.
 - The QTest for the capability set lives in `oscar/tests/machinetests.{h,cpp}` (new file, in
   the `test` build only).
-**Builds on:** `Notes/specs/2026-08-06-central-obstructive-hypopnea-design.md` (schema v18,
+**Builds on:** `Notes/Design/2026-08-06-central-obstructive-hypopnea-design.md` (schema v18,
 OH/CH channels, OAHI/CAHI), issue #285 (`session_summaries` indices = events / mask-on hours)
 
 ## Goal

@@ -3,7 +3,7 @@
  * Covers sessions that exist only in the memory image's archive: decoding each
  * block's start time and leak, choosing which blocks to import, and the session
  * built from one. Archive images here are synthetic byte-level fixtures; see
- * Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md for the format.
+ * Notes/Formats/Sefam/SEFAM_SBOX_CARD_ANALYSIS.md for the format.
  *
  * Copyright (c) 2026 The OSCAR Team
  *

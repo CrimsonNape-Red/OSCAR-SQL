@@ -7,7 +7,7 @@
 from the card files and cross-checked it against several years of real device
 exports and the vendor software's own CSV/PDF reports.
 This document covers only the raw device format. See
-`Notes/loaders/Apex/APEX_LOADER_DESIGN.md` for
+`Notes/Formats/Apex/APEX_LOADER_DESIGN.md` for
 how it becomes an OSCAR loader.
 
 ---

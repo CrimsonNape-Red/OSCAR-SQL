@@ -14,7 +14,7 @@ drives both, and the two `Open()` functions call it.
 **Tech Stack:** C++17, Qt 6 (QtCore: `QJsonDocument`, `QSaveFile`, `QCryptographicHash`),
 existing `gCompress()`/`gUncompress()` from `SleepLib/common.h`, QtTest.
 
-**Spec:** `Notes/specs/2026-11-19-ring-buffer-backup-archive-design.md` (GitLab #380)
+**Spec:** `Notes/Design/2026-11-19-ring-buffer-backup-archive-design.md` (GitLab #380)
 
 ## Global Constraints
 
@@ -717,12 +717,12 @@ void testNightsNotInArchiveEmpty(); // empty archive -> all nights returned; no 
 ### Task 8: Documentation
 
 **Files:**
-- Modify: `Notes/specs/2026-11-19-ring-buffer-backup-archive-design.md` (status, and an
+- Modify: `Notes/Design/2026-11-19-ring-buffer-backup-archive-design.md` (status, and an
   "As built" section listing any deviation from the design)
-- Modify: `Notes/loaders/Luna/BMC_Legacy_File_Formats.md` §3.5 and
-  `Notes/loaders/G3X/BMC_G3X_IDX_File_Layout.md` "Waveform Files": one paragraph each on
+- Modify: `Notes/Formats/BMC/Luna/BMC_Legacy_File_Formats.md` §3.5 and
+  `Notes/Formats/BMC/G3X/BMC_G3X_IDX_File_Layout.md` "Waveform Files": one paragraph each on
   how OSCAR's Backup folder stores these files and where the design is.
-- Modify: `Notes/Developer Notes/BUG_FIXES.md`: an entry for #380 in the file's existing
+- Modify: `Notes/Process/BUG_FIXES.md`: an entry for #380 in the file's existing
   format (symptom, root cause, fix, non-obvious points: backup is no longer a card image;
   first import after upgrade converts the old mirror; no loader version change; nights
   overwritten before the archive existed cannot be restored and the rebuild prompt says

@@ -8,7 +8,7 @@
 
 **Tech Stack:** C++17, Qt 6.10.2 Widgets (no new Qt modules), qmake, OSCAR's `AutoTest` unit-test target (`CONFIG+=test`).
 
-**Spec:** `Notes/UI Redesign/WELCOME_PILOT_DESIGN.md`. Visual reference: `Notes/UI Redesign/Welcome_Concept.html` (With data, By status, Light). Source of the mockup's CSS values: the `:root` block at the top of that file.
+**Spec:** `Notes/Design/UI/WELCOME_PILOT_DESIGN.md`. Visual reference: `Notes/Design/UI/Welcome_Concept.html` (With data, By status, Light). Source of the mockup's CSS values: the `:root` block at the top of that file.
 
 ## Global Constraints
 
@@ -20,7 +20,7 @@
 - No schema changes, no loader changes, no edits under `oscar/SleepLib/thirdparty`.
 - All user-visible text through `tr()`. Do not run lupdate.
 - New files get the module description header, "Copyright (c) 2026 The OSCAR Team", GPL notice, and Doxygen comments (see `oscar/tests/portablemodetests.h` for the header form). Add every new file to `oscar/oscar.pro` (tests to the `test {}` section).
-- Don't add entries to `Notes/Developer Notes/BUG_FIXES.md`.
+- Don't add entries to `Notes/Process/BUG_FIXES.md`.
 - Commits: one-line subject plus 2–3 sentence body, lines ≤ 90 chars, no Co-Authored-By. Write the message to a temp file, `git commit -F`, check `git log -1 --pretty=%B`. Ask the user before each commit and before any push.
 - Build with the `build-oscar` skill after QtCreator's active project is set to `C:\OSCAR\OSCAR-next\oscar\oscar.pro`. Unit tests: build with `CONFIG+=test`, run `.\test.exe` (exit code = number of failures).
 
@@ -211,6 +211,6 @@ Layout, top to bottom, inside a `QScrollArea` on `Page` background with `PagePad
 
 ### Task 7: Hand-off
 
-- [ ] **Step 1:** In `Notes/UI Redesign/UI_REDESIGN_PLANNING.md`, add a short "Pilot status" line (what's built, where), and list anything left for testers to judge.
+- [ ] **Step 1:** In `Notes/Design/UI/UI_REDESIGN_PLANNING.md`, add a short "Pilot status" line (what's built, where), and list anything left for testers to judge.
 - [ ] **Step 2:** Ask the user to test on macOS and Linux (macOS painting speed with card shadows, #235). If shadows are slow, replace `QGraphicsDropShadowEffect` in `MetricCard` with painted shadows.
 - [ ] **Step 3:** With the user's OK: merge `welcome-pilot` into `ui-next` (`git merge --no-ff`), push `ui-next`.

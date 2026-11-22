@@ -23,7 +23,7 @@ constexpr int kBmcExtendedWaveformSamples = 50;
 /// (GitLab #393).  The fit is empirical: packet-mean samples against the set pressure in
 /// the same packet, on two G2S A20 machines.  It has not been checked against a measured
 /// reference, so the intercept may be out by about ±0.5 cmH2O.
-/// See Notes/loaders/Luna/BMC_Legacy_File_Formats.md, section 3.2.1.
+/// See Notes/Formats/BMC/Luna/BMC_Legacy_File_Formats.md, section 3.2.1.
 /// @{
 
 /// Gain of the samples returned by BmcG2sPressureWaveToHundredths(): hundredths of cmH2O.

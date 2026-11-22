@@ -321,7 +321,7 @@ listed in `Backup/archive.json`; the `.USR`, `.idx`, `.evt`, `.log` and `.set` f
 kept as they are on the card. A rebuild from backup reads the index files as usual and
 takes each night's packets from its segment. A Backup folder that still holds `.nnn`
 files is a full card copy from an earlier version of OSCAR and is converted on the next
-import. Design and rules: `Notes/specs/2026-11-19-ring-buffer-backup-archive-design.md`.
+import. Design and rules: `Notes/Design/2026-11-19-ring-buffer-backup-archive-design.md`.
 
 If the logic that decides which packets belong to a night changes, raise
 `kBmcLegacyCaptureRule` in the same change (see section 12.5 of that design).

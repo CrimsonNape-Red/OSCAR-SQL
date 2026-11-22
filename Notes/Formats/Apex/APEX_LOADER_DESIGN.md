@@ -1,7 +1,7 @@
 # Apex Medical XT Auto loader — design spec
 
 **Status:** implemented; contributor-validated against private device data.
-**Format reference:** `Notes/loaders/Apex/APEX_XT_AUTO_CARD_ANALYSIS.md` — the file
+**Format reference:** `Notes/Formats/Apex/APEX_XT_AUTO_CARD_ANALYSIS.md` — the file
 layout, ring-buffer arithmetic, and field encodings are decoded and validated
 there. This document covers only how that format becomes an OSCAR loader.
 

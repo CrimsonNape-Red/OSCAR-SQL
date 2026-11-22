@@ -14,7 +14,7 @@ pixel row, and the tall page is painted over it.
 
 **Tech Stack:** C++17, Qt 6 Widgets (Qt 6.4 through 6.12), QtTest.
 
-**Spec:** `Notes/specs/2026-11-16-daily-tall-screenshot-design.md`
+**Spec:** `Notes/Design/2026-11-16-daily-tall-screenshot-design.md`
 
 ## Global Constraints
 
@@ -403,7 +403,7 @@ bar is always black text on white (`DelayedScreenshot()`: `pixmap.fill(Qt::white
 
 **Files:**
 - Modify: `oscar/mainwindow.cpp` (`DelayedScreenshot()`, the header block, lines ~2693-2708)
-- Modify: `Notes/Developer Notes/BUG_FIXES.md`
+- Modify: `Notes/Process/BUG_FIXES.md`
 
 - [ ] **Step 1:** Ask the user whether to open a GitLab issue for this (bug-fix workflow); note
   the IID if one is made.
@@ -412,7 +412,7 @@ bar is always black text on white (`DelayedScreenshot()`: `pixmap.fill(Qt::white
 - [ ] **Step 3: Build the app; manual check** — a screenshot in light mode has the header as
   before; in dark mode the header is dark with light text, matching the window below it. Check
   one tall capture and one ordinary capture (Overview).
-- [ ] **Step 4:** Log the fix in `Notes/Developer Notes/BUG_FIXES.md`.
+- [ ] **Step 4:** Log the fix in `Notes/Process/BUG_FIXES.md`.
 - [ ] **Step 5: Commit** (ask first; `Closes #IID` in the body if an issue was opened).
 
 ---

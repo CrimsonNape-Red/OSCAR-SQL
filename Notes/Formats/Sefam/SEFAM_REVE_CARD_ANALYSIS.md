@@ -141,7 +141,7 @@ only in the printed logo. That was taken as supporting evidence at the time; the
 first Néa card then confirmed it at the format level.
 
 **Loader:** `sefam_loader.cpp` / `sefamDataParsing.cpp`, added 2026-08-03 from
-this analysis. Design: `Notes/loaders/SEFAM_LOADER_DESIGN.md`. **Awaiting testing
+this analysis. Design: `Notes/Formats/Sefam/SEFAM_LOADER_DESIGN.md`. **Awaiting testing
 by a real user** — everything below was verified against this one card and the
 manufacturer's report for it.
 
@@ -151,7 +151,7 @@ different device class. That entry's guess that the obfuscation key is `0x9F` is
 **wrong**; see below. Its "~100 byte header" estimate is also wrong (it is 71).
 
 The S.Box is now documented in its own right in
-`Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md`. It differs from this device more
+`Notes/Formats/Sefam/SEFAM_SBOX_CARD_ANALYSIS.md`. It differs from this device more
 than the shared platform suggests: no `.LOG` at all, the short 38-byte header
 with no UTC epoch, 25 Hz instead of 10 Hz on four channels, and an unencrypted
 memory image. **Do not carry a conclusion from one model to the other without

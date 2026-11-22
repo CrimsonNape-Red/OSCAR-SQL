@@ -8,8 +8,8 @@
 
 **Tech Stack:** C++17, Qt 6.10.2, QtCreator incremental builds.
 
-**Design spec:** `Notes/loaders/SEFAM_LOADER_DESIGN.md`
-**Format reference:** `Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md`
+**Design spec:** `Notes/Formats/Sefam/SEFAM_LOADER_DESIGN.md`
+**Format reference:** `Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md`
 
 ## Global Constraints
 
@@ -22,7 +22,7 @@
 - Never modify anything under `oscar/SleepLib/thirdparty`.
 - **This loader must not change the behaviour of any other loader.** No edits to shared files beyond the additive `oscar.pro` entries and the `main.cpp` registration line.
 - No unit tests — the QtTest harness is not used in this workflow. Each task ends with a manual verification step run in QtCreator.
-- Log non-trivial fixes to `Notes/Developer Notes/BUG_FIXES.md` (applies to defects found during implementation, not to the initial feature work).
+- Log non-trivial fixes to `Notes/Process/BUG_FIXES.md` (applies to defects found during implementation, not to the initial feature work).
 
 ## Build note
 
@@ -104,7 +104,7 @@ Gets a compiling, registered loader that recognises a SEFAM card. Everything aft
  * stored, so descrambling a body corrupts it and fails every checksum.
  *
  * This module deliberately contains no OSCAR types. The card format is fully
- * specified in Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md and validated against
+ * specified in Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md and validated against
  * the manufacturer's analyzer output; keeping the decode layer free of SleepLib
  * dependencies lets it be reasoned about on its own.
  *
@@ -1289,7 +1289,7 @@ Then confirm event placement against the manufacturer's rendering: open
 an apnea's position against the same time in OSCAR's Daily view. If OSCAR's events sit
 one event-duration later than the vendor's, timestamps are starts not ends — change
 `AddEvent(when, ...)` to `AddEvent(when + duration, ...)` for codes 3 and 4 and note it
-in `Notes/Developer Notes/BUG_FIXES.md`.
+in `Notes/Process/BUG_FIXES.md`.
 
 - [ ] **Step 6: Commit**
 

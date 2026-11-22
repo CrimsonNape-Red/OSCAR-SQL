@@ -1,7 +1,7 @@
 /* Apex Medical XT Auto Decode-Layer Unit Tests
  *
  * Synthetic byte-level fixtures covering the .APF/.APE decode layer described
- * in Notes/loaders/Apex/APEX_XT_AUTO_CARD_ANALYSIS.md. No OSCAR Machine/Session
+ * in Notes/Formats/Apex/APEX_XT_AUTO_CARD_ANALYSIS.md. No OSCAR Machine/Session
  * objects are involved - everything here exercises ApexParsing directly.
  *
  * Copyright (c) 2026 The OSCAR Team

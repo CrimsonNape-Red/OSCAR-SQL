@@ -16,7 +16,7 @@ unchanged by comparing it for every day of the test profiles before and after.
 **Tech Stack:** C++17, Qt 6.12 widgets + QPainter, MSVC 2022, qmake/jom. Unit tests: QtTest suites
 under `oscar/tests` (`DECLARE_TEST`), listed in `oscar/oscar.pro`.
 
-**Spec:** `Notes/UI Redesign/DAILY_PAGE_DESIGN.md` (mockup linked there).
+**Spec:** `Notes/Design/UI/DAILY_PAGE_DESIGN.md` (mockup linked there).
 
 ## Global Constraints
 
@@ -382,7 +382,7 @@ under `oscar/tests` (`DECLARE_TEST`), listed in `oscar/oscar.pro`.
 ### Task 11: Whole-page verification and notes
 
 **Files:**
-- Modify: `Notes/UI Redesign/DAILY_PAGE_DESIGN.md` (record the two on-screen judgements and any
+- Modify: `Notes/Design/UI/DAILY_PAGE_DESIGN.md` (record the two on-screen judgements and any
   ruling that changed the design)
 
 - [ ] Step 1: Harness passes in light and dark: ordinary night, two-session night, each other

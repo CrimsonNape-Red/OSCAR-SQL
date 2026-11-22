@@ -4,7 +4,7 @@
  * real card from the folder named by the OSCAR_PRISMAVENT_CARD environment
  * variable and is skipped when it is unset, since sample cards carry device
  * serial numbers and cannot be committed. Its expected values are those of the
- * single VENT50-C night described in Notes/loaders/PRISMA_VENT_CARD_ANALYSIS.md.
+ * single VENT50-C night described in Notes/Formats/Lowenstein/PRISMA_VENT_CARD_ANALYSIS.md.
  *
  * Copyright (c) 2026 The OSCAR Team
  *

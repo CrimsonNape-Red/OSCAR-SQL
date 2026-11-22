@@ -133,7 +133,7 @@ class Machine
     //! \brief True once the device has scored an obstructive or central hypopnea, i.e. it
     //! splits hypopneas by mechanism and OAHI/CAHI are meaningful for it. Derived from
     //! the data, never declared by a loader (GitLab #261). See
-    //! Notes/specs/2026-09-14-oh-ch-capability-gating-design.md.
+    //! Notes/Design/2026-09-14-oh-ch-capability-gating-design.md.
     inline bool reportsHypopneaMechanism() const {
         return hasReportedEvents(CPAP_ObstructiveHypopnea) || hasReportedEvents(CPAP_CentralHypopnea);
     }

@@ -9,7 +9,7 @@
  * stored, so descrambling a body corrupts it and fails every checksum.
  *
  * This module deliberately contains no OSCAR types. The card format is fully
- * specified in Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md and validated against
+ * specified in Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md and validated against
  * the manufacturer's analyzer output; keeping the decode layer free of SleepLib
  * dependencies lets it be reasoned about on its own.
  *
@@ -140,7 +140,7 @@ struct LogRecord
     \brief Event codes, confirmed against the manufacturer's analyzer output.
 
     Counts over the validated 159 h card matched the manufacturer's per-session
-    figures for every code below. See Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md. */
+    figures for every code below. See Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md. */
 enum LogCode {
     kLogSettingsChange   = 2,       //!< Carries therapy settings in payload.
     kLogObstructiveApnea = 3,       //!< arg = duration in 0.1 s.
@@ -184,7 +184,7 @@ enum LogCode {
     and no controlled change can reach it: the model whose settings the vendor
     software can write does not record this byte at all.
 
-    See Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md, sections "Humidifier level —
+    See Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md, sections "Humidifier level —
     byte 22", "Theoretical mask leak — byte 10" and "Comfort Control Plus —
     byte 21". */
 struct Settings
@@ -257,7 +257,7 @@ struct MinuteRecord
     in the <serial>.RAM memory image, as a contiguous chain of these blocks —
     one per session, oldest first, for as far back as the archive's ring buffer
     reaches (kArchiveRingLength). See
-    Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md.
+    Notes/Formats/Sefam/SEFAM_SBOX_CARD_ANALYSIS.md.
 
     The counts below are the device's own totals. They are reproduced exactly by
     summing the corresponding per-minute fields, verified on every block of both

@@ -6,8 +6,8 @@ against the **observed** layout of an existing format, not just the minimum
 sentinel each loader's `Detect()` requires.
 
 Companion docs:
-- `Notes/loaders/LOADER_DETECTION_PATTERNS.md` — general detection strategies and per-loader sentinels.
-- `Notes/loaders/AEONMED_AS100_CARD_ANALYSIS.md` — example of comparing a new card against this catalogue.
+- `Notes/Formats/_General/LOADER_DETECTION_PATTERNS.md` — general detection strategies and per-loader sentinels.
+- `Notes/Formats/Aeonmed/AEONMED_AS100_CARD_ANALYSIS.md` — example of comparing a new card against this catalogue.
 
 Convention for each entry:
 - Top-level tree (sizes in bytes for exactness).
@@ -4566,7 +4566,7 @@ settings record.
 payload a whole number of records, every session id unique and in order, three
 sessions truncating on a torn final record. Thirty-one settings records, against
 eleven on the Rêve card — which is why this sample settled two questions the Rêve
-never could. See `Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md`, "The Néa Auto".
+never could. See `Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md`, "The Néa Auto".
 
 `1265R` is deliberately **not** on `sefamModelIsValidated()`'s list, so it still
 raises `deviceIsUntested()`: no manufacturer report exists for a Néa, and the
@@ -4772,7 +4772,7 @@ FLW: 9c 8f 8d 90 8e 8d 89 8c ed 8d 8b 8b 89 8d 8a 8b
 >
 > Full decode of the container, the header fields, the record framing, the
 > confirmed flow/pressure/leak scalings, and the open questions on events and
-> settings: **`Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md`** (SEFAM Rêve Auto,
+> settings: **`Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md`** (SEFAM Rêve Auto,
 > model code `1279R` — same firmware platform as the S.Box AUTO documented here).
 
 ### `BKP` and `RAM` files at serial level
@@ -4793,7 +4793,7 @@ therapy settings block in the clear.
 Not consumed by any loader, and it should stay that way — it records what was
 *sent*, not what the device accepted, and is present only when someone happened to
 write settings. **Treat it as personal data**: it exposes a named patient's
-prescription. Decoded byte map in `Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md`.
+prescription. Decoded byte map in `Notes/Formats/Sefam/SEFAM_SBOX_CARD_ANALYSIS.md`.
 
 ### Recording-duration anomaly
 
@@ -4815,7 +4815,7 @@ matches sample count.
 > **Superseded — the loader was built on 2026-08-03.** The list below was the
 > pre-implementation estimate and is kept only to show what the analysis
 > anticipated. For what was actually built, read
-> `Notes/loaders/SEFAM_LOADER_DESIGN.md`. Two items below turned out wrong: the
+> `Notes/Formats/Sefam/SEFAM_LOADER_DESIGN.md`. Two items below turned out wrong: the
 > XOR covers the header only (not the whole file), and `.Y17`/`.NSD` are not
 > merely "ignorable" — `Y17` is the suspected home of the hypopnea durations the
 > log omits.
@@ -4867,8 +4867,8 @@ matches sample count.
 > Several guesses above were settled by later work and are **wrong**: the XOR key
 > is `0xBF`, not `0x9F`, and it covers the header only; the header is 71 or 38
 > bytes, not "~100"; and the loader exists. See
-> `Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md` and
-> `Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md`.
+> `Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md` and
+> `Notes/Formats/Sefam/SEFAM_SBOX_CARD_ANALYSIS.md`.
 
 ### Second S.Box model seen — `1200R`
 
@@ -4897,7 +4897,7 @@ containing a **patient-identification field and that patient's therapy
 settings**. Nothing in OSCAR should read it, but be aware it exists before
 archiving or sharing a card image.
 
-Full format and evidence: `Notes/loaders/SEFAM_SBOX_CARD_ANALYSIS.md`.
+Full format and evidence: `Notes/Formats/Sefam/SEFAM_SBOX_CARD_ANALYSIS.md`.
 
 ---
 

@@ -33,7 +33,7 @@
  *    different letter on another computer.
  *
  * initialize() must run before the first QSettings object is created. See
- * Notes/Developer Notes/PORTABLE_MODE_DESIGN.md.
+ * Notes/Design/PORTABLE_MODE_DESIGN.md.
  */
 namespace PortableMode
 {

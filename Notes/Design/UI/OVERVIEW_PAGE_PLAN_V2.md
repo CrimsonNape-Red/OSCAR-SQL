@@ -15,7 +15,7 @@ shared date axis) is added as separate widgets that drive Overview's existing sl
 **Tech Stack:** C++17, Qt 6.12 widgets + QPainter, MSVC 2022, qmake/jom. Unit tests: QtTest suites
 under `oscar/tests` (`DECLARE_TEST`).
 
-**Spec:** `Notes/UI Redesign/OVERVIEW_PAGE_DESIGN_V2.md` (mockup linked there).
+**Spec:** `Notes/Design/UI/OVERVIEW_PAGE_DESIGN_V2.md` (mockup linked there).
 
 ## Global Constraints
 
@@ -325,7 +325,7 @@ in the previous range → no change line.
 ### Task 9: Whole-page verification and notes
 
 **Files:**
-- Modify: `Notes/UI Redesign/OVERVIEW_PAGE_DESIGN_V2.md` (move confirmed items out of "Proposed";
+- Modify: `Notes/Design/UI/OVERVIEW_PAGE_DESIGN_V2.md` (move confirmed items out of "Proposed";
   record any ruling that changed a proposal)
 
 - [ ] Step 1: Harness passes in light and dark for 2 weeks, 3 months and 1 year: grabs of the

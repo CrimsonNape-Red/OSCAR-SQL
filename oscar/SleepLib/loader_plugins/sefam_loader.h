@@ -46,7 +46,7 @@ const QString sefam_class_name = "SefamLoader";
     and mask leak have each been checked day by day against the vendor
     software's own settings table. What is missing is a manufacturer report of
     the kind the other two entries rest on, and a comparison that has been run
-    to completion. See Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md, "The Néa
+    to completion. See Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md, "The Néa
     Auto". */
 inline bool sefamModelIsValidated(const QString &modelCode)
 {
@@ -58,7 +58,7 @@ inline bool sefamModelIsValidated(const QString &modelCode)
 /*! \name SEFAM accessory settings
     The settings decoded from the card's therapy-settings record. Each was pinned
     by a controlled single-setting change written through the vendor software, or
-    by a manufacturer report; see Notes/loaders/SEFAM_REVE_CARD_ANALYSIS.md. The
+    by a manufacturer report; see Notes/Formats/Sefam/SEFAM_REVE_CARD_ANALYSIS.md. The
     heated tube level is the one the analyzer prints that is still unconfirmed.
     @{ */
 extern ChannelID SEFAM_HumidLevel;    //!< Humidifier level, 0 = off. Not on the S.Box.

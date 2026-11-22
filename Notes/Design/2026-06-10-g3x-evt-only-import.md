@@ -504,7 +504,7 @@ The raw pressure values in `BmcPressureSnapshot` are in hundredths of cmH2O (e.g
 
 - [ ] **Step 6: Log the fix**
 
-  Append an entry to `Notes/Developer Notes/BUG_FIXES.md`:
+  Append an entry to `Notes/Process/BUG_FIXES.md`:
 
   ```
   ## 2026-06-10 — BMC G3X: EVT-only import for PapLink-synced cards
