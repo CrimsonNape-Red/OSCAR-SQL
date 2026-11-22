@@ -190,6 +190,47 @@ Limits of the prototype, which a real implementation would have to deal with:
   queries.
 - **One profile, with a 659-day Statistics range.** A standard one-year report reads less.
 
+## Where the rest of the row-reading time goes
+
+**Result:** date parsing. Converting each row's `created_at` text into a `QDateTime` takes
+about 0.59 s of the 1.4 s spent on the five non-histogram queries, and nothing in the code
+reads the result.
+
+Each step inside the five per-session queries was timed with temporary accumulators (one warm
+open, milliseconds; timers removed afterwards):
+
+| Query | Total | Date parsing | Prepare | Execute | Row fetch | Other conversions | Rest |
+|---|---|---|---|---|---|---|---|
+| Channel statistics (59,163 rows) | 525 | 272 | 50 | 75 | 66 | 23 | 39 |
+| Settings (49,766 rows) | 372 | 236 | 24 | 36 | 42 | 10 | 24 |
+| Summary row | 273 | 44 | 70 | 86 | 1 | 31 | 41 |
+| Session row lookup | 147 | 35 | 37 | 51 | 1 | 2 | 21 |
+| Slices (0 rows) | 81 | 0 | 35 | 37 | 0 | 0 | 9 |
+| **All five** | **1,398** | **587** | **216** | **285** | **110** | **66** | **134** |
+
+- **Date parsing:** every row's `created_at` (and `updated_at` where present) goes through
+  `query.value(n).toDateTime()`, at about 4.6 µs per conversion. The values are stored as text
+  (`YYYY-MM-DD HH:MM:SS`). A search of the code found only assignments to the
+  `createdAt` / `updatedAt` fields of the session structs (`SessionData`, `SessionChannelData`,
+  `SessionSettingData`, `SessionSummaryData`), no reads. Why Qt takes 4.6 µs per conversion
+  was not looked into.
+- **Confirmed by switching it off:** skipping those conversions in the same exe cut session
+  loading from 3.02 s to 2.36 s (−0.66 s).
+- **Prepare:** each query prepares its statement afresh, about 13 µs each, 0.22 s over 16,030
+  queries.
+- **Forward-only queries:** `setForwardOnly(true)` trimmed the execute step by about 0.06 s;
+  with date parsing also off, loading came to 2.27 s. On its own it was within run-to-run
+  noise.
+- **Not the cause:** filling the session's hashes from the rows takes only 26 ms, and reading
+  the summary columns by name only 31 ms.
+
+With date parsing gone the app reads the channel rows in about 236 ms, against 175 ms for a
+bare SQLite client, so the gap noted earlier is essentially explained.
+
+Deferring the histograms (about −1.6 s on loading) and dropping the date parsing (−0.66 s)
+should stack, taking the 3.0 s load to roughly 1 s. That is arithmetic; the two were not run
+together.
+
 ## Would a cache file like 1.7.1's help?
 
 **Not in the 1.7.1 form.** What makes 1.7.1 quick at open is how little its cache file holds,
@@ -212,10 +253,9 @@ not the file itself, and the database already gives the same thing faster.
 Suggested order instead:
 
 1. **Defer the histograms.** The measured win: about 1.3 s and 80 MB, with no second store.
-2. **Cut the cost of the other five queries.** Each query pays a fixed cost of about 27 µs
-   (roughly 0.5 s across all 19,236). The app also takes 3–5 times longer than a bare SQLite
-   client to read the same channel and settings rows (545 ms against about 175 ms for
-   channels). Where that extra time goes has not been traced.
+2. **Cut the cost of the other five queries.** Stop parsing `created_at` / `updated_at` on
+   load (measured: −0.66 s), then look at the per-query prepare and execute cost (about 0.5 s
+   across the five queries). See the previous section.
 3. **Consider loading per-session detail lazily**, which is the part of 1.7.1's design that
    actually made it fast. It needs the same kind of trace as the histograms got, since
    Statistics and Overview may ask for most of it at open anyway.
