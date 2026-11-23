@@ -21,6 +21,37 @@
 /// them.  This is not the loader's data version and forces no rebuild.
 constexpr int kBmcG3xCaptureRule = 1;
 
+/// @brief Converts one stored G3X pressure-wave sample to the value OSCAR plots.
+///
+/// The pressure wave (packet offset 0x380) is the source of the Mask Pressure graph.  Its
+/// samples are signed 16-bit, in hundredths of cmH2O.
+///
+/// @param raw  The sample as stored, read as a signed 16-bit value.
+/// @return The sample limited to 0..4000 (0 to 40.00 cmH2O).
+qint16 BmcG3xPressureWaveToHundredths(qint16 raw);
+
+/// @brief EPAP and IPAP stored for one G3X waveform packet, in hundredths of cmH2O.
+///        Zero means "no sample for this packet".
+struct BmcG3xPacketPressure
+{
+    int epapHundredths = 0;
+    int ipapHundredths = 0;
+};
+
+/// @brief Chooses the pressures stored for one G3X waveform packet.
+///
+/// A packet normally carries its own pressure trend (0x76C EPAP, 0x76E IPAP).  A packet
+/// whose trend is zero takes the pressure last known from the event stream or the index
+/// instead.  Either way the result is in hundredths of cmH2O, the unit the G3X loader's
+/// pressure channels are stored in.
+///
+/// @param trendEpap  Packet field 0x76C; zero when the packet carries no trend.
+/// @param trendIpap  Packet field 0x76E.
+/// @param knownEpap  EPAP last known from elsewhere, hundredths of cmH2O; zero if none.
+/// @param knownIpap  IPAP last known from elsewhere, hundredths of cmH2O; zero if none.
+BmcG3xPacketPressure BmcG3xPacketPressureHundredths(int trendEpap, int trendIpap,
+                                                    int knownEpap, int knownIpap);
+
 class BmcG3xData : public BmcDataParser
 {
 public:

@@ -43,7 +43,7 @@ Confidence legend:
 | `0x182` | `100×2` | `int16 LE[]` | **Total machine-output flow** = tidal + unintentional leak + intentional (vent) leak; 100 × int16 LE. Same waveform shape as `0x56E` but with a slowly-varying positive DC offset. Regression (R²=0.84, within-packet diff std ~6 raw units — essentially DC): `0x182 ≈ 0x56E + 1.009×leak_raw(0x52A) + 0.128×pressure_raw(0x76E) + 87.6`. The three terms correspond to the three flow components: (1) tidal flow (`0x56E`); (2) unintentional leak (`0x52A`, coeff ≈1.0, same raw units); (3) intentional vent leak — the pressure-dependent term `0.128×pressure_raw + 87.6` gives ≈22 L/min at 4 cmH₂O and ≈39 L/min at 12 cmH₂O, consistent with typical mask vent specs (20 L/min at 4 cmH₂O, 40 L/min at 12 cmH₂O). Not used — `0x56E` (tidal only, zero-baseline) is preferred. | Low |
 | `0x24A` | `100×2` | `int16 LE[]` | **Mask Pressure** waveform, 100 samples at 100 Hz; loaded as `CPAP_MaskPressure`. On BiPAP devices this waveform spans the full IPAP–EPAP swing within each breath cycle (e.g. 902–1075 raw on a 9/10 cmH₂O BiPAP device), providing sub-second resolution of the pressure waveform. This is the source of any higher-resolution pressure appearance in OSCAR graphs — not the 5-sample-per-second scalar blocks. | Medium |
 | `0x312` | `50×2` | `uint16 LE[]` | **Unknown waveform**, 50 samples; large DC offset (~15 000 raw); oscillates in phase with mask pressure (median per-packet corr 0.81 vs MaskPressure, 0.96 vs Flow); always positive; nearly identical to `0x3E4`. Likely a second pressure-like or flow-derived signal at 50 Hz. Not loaded. | Low |
-| `0x380` | `50×2` | `uint16 LE[]` | **Pressure Wave** waveform, 50 samples at 50 Hz; loaded as `BMC_PressureWave`. Like `0x24A`, shows full IPAP–EPAP swing on BiPAP devices (e.g. 887–1022 raw on a 9/10 cmH₂O device). | Medium |
+| `0x380` | `50×2` | `int16 LE[]` | **Pressure Wave** waveform, 50 samples at 50 Hz; loaded as `BMC_PressureWave`. Like `0x24A`, shows full IPAP–EPAP swing on BiPAP devices (e.g. 887–1022 raw on a 9/10 cmH₂O device). **Signed:** while the machine starts or the mask is off it reads slightly below zero (−1 to −125 seen on a G3 B20A, i.e. down to −1.25 cmH₂O). The loader stores those as zero (GitLab #419). | Medium |
 | `0x3E4` | `50×2` | `uint16 LE[]` | **Raw differential-pressure (flow sensor) ADC output**, 50 samples; uint16 with DC bias ~16 000 (sensor mid-rail); AC amplitude scales with flow (r=0.985 per-packet vs flow, r=0.157 vs PressureWave); DC offset drifts slowly over the night tracking sleep/pressure state. Packet-to-packet correlation with `0x312` is 0.979 (slightly lower than vs flow), with per-packet differences std=319 and max=5079 — two tap points or calibration paths for the same sensor. **Not** a flow-abnormality block: investigated as a possible analogue of the legacy BMC loader's flow-abnormality block (which immediately follows the Pressure Wave in that format — same relative offset relationship), but confirmed to be a flow waveform, not event flags. Not loaded. | Low |
 | `0x52A` | 2 | `uint16 LE` | **Unintentional leak rate** (firmware SC.72 / user version G3-2.11.x only); `raw × 0.16 = L/min`. Confirmed for JCCPAP (Luna G3X, config `110A40113`). **Zero (unused) in firmware SC.74+** (e.g. Kavolodin G3 A20, config `880A40383`). OSCAR selects 0x52A or 0x568 automatically by sampling the first 200 packets of each day. See also `0x568`. | Medium |
 | `0x52C` | 2 | `uint16 LE` | **Tidal Volume in millilitres**, gain 1.0; range 0–2559 observed. Updated once per breath (see §5a). Scale confirmed 2026-08-12 against `0x52E`/`0x530` — see §5a. | High |
@@ -118,7 +118,7 @@ The parser reads three waveform arrays from each packet and resamples them all t
 | Region | Offset | Source samples | Output samples | Raw type | Clamp | Exported |
 |--------|--------|---------------:|---------------:|----------|-------|---------|
 | Flow Rate | `0x56E` | 100 | 50 | `int16 LE` | ±2000 | Yes |
-| Pressure Wave | `0x380` | 50 | 50 | `uint16 LE` | ≤4000 | **No** (`ExportPressureWaveform() = false`) |
+| Pressure Wave | `0x380` | 50 | 50 | `int16 LE` | 0–4000 | **No** (`ExportPressureWaveform() = false`) |
 | Mask Pressure | `0x24A` | 100 | 50 | `int16 LE` | [0, 4000] | Yes |
 
 Resampling is direct indexed decimation (nearest sample, no anti-alias filter).
@@ -295,6 +295,8 @@ The raw hundredths value is stored directly (no quantisation). `PressureChannelG
 
 **EVT 0x42 fallback:**
 The `.evt` file's `0x42` therapy-pressure snapshot records are still parsed and merged into the waveform state machine by timestamp. When the pressure-trend override is active, these serve only as a seed — they prime the initial pressure state before the first waveform packet arrives and provide a fallback if the trend field is zero (e.g. machine-off packets).
+
+A zero trend field does occur: on a G3 B20A card, 1 of about 154,000 packets, the first packet of a session. The fallback value is stored in hundredths of cmH2O like the trend. Until GitLab #419 it was left in the legacy half-cmH2O unit, so a fallback of 4.00 cmH2O was stored as 8 and became a session minimum of 0.08 cmH2O. No packet on that card carries a non-zero trend below 4.00 cmH2O.
 
 Set `kG3xUsePressureTrendForPressureChannel = false` to revert to EVT-only pressure (step-wise updates from `0x42` snapshots).
 

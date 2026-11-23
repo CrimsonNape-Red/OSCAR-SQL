@@ -4,6 +4,39 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-23 - BMC G3X: Mask Pressure maximum of 40.00 and Pressure minimum of 0.08 cmH2O (GitLab #419, items 3 and 6.2)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`BmcG3xPressureWaveToHundredths()`,
+`BmcG3xPacketPressureHundredths()`, both new, and their callers), `bmcG3xDataParsing.h`,
+`oscar/tests/bmcg3xwaveformtests.cpp/.h` (new), `oscar/oscar.pro`
+
+**Symptom:** Some sessions showed a Mask Pressure maximum of exactly 40.00 cmH2O, which flattened the
+graph. Some showed a Pressure / IPAP minimum of 0.08 and an EPAP minimum of 0.12 cmH2O.
+
+**Root cause:** Two separate defects in how a waveform packet is read.
+- The pressure wave at `0x380` is signed, and reads slightly below zero while the machine starts or
+  the mask is off (-0.01 to -1.25 cmH2O on a G3 B20A). It was read as unsigned, so those samples were
+  65535 downwards and were limited to the 40.00 ceiling.
+- A packet's pressure normally comes from its trend fields (`0x76C` / `0x76E`). When they are zero, the
+  packet kept the fallback pressure in the legacy half-cmH2O unit while the channel is stored in
+  hundredths, so 4.00 cmH2O was stored as 8 and shown as 0.08. On the sample card this is one packet,
+  the first of a session.
+
+**Fix:** The pressure wave is read as signed and limited to 0..40.00 cmH2O. The fallback pressure is
+stored in hundredths. Importing the sample card gives Mask Pressure maxima of 6.15 to 16.36 and a
+Pressure minimum of 4.0 on every session.
+
+**Non-obvious:**
+- The report attributed the 0.08 to an implausible value in the trend fields and proposed a range
+  check. The card has no such value: every packet's trend is either zero or at least 4.00 cmH2O. No
+  range check was added.
+- The same unit correction already existed for the single packet made when a night has no waveform
+  packets at all (`ReadDateSession()`, "Override the half-cmH2O values"); the per-packet path lacked it.
+- Nights already imported keep the old values until they are re-imported. No loader data version was
+  changed.
+
+---
+
 ## 2026-11-23 - BMC G3X: AutoS pressure support shown as 0.0 on the G3 B20A, and heated tube level always Off (GitLab #419, items 1 and 2)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`BmcG3xData::DecodeTsBlock()`),

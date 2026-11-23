@@ -1038,7 +1038,8 @@ test {
         tests/daylabelstests.cpp \
         tests/sessiongaptests.cpp \
         tests/dailydetailstests.cpp \
-        tests/bmcg3xsettingstests.cpp
+        tests/bmcg3xsettingstests.cpp \
+        tests/bmcg3xwaveformtests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -1090,7 +1091,8 @@ test {
         tests/daylabelstests.h \
         tests/sessiongaptests.h \
         tests/dailydetailstests.h \
-        tests/bmcg3xsettingstests.h
+        tests/bmcg3xsettingstests.h \
+        tests/bmcg3xwaveformtests.h
 }
 
 macx {

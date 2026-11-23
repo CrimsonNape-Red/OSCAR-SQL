@@ -73,7 +73,7 @@ constexpr int kLegacyWaveformPacketSize = 0x100;
 // Waveform packet — high-resolution sample region layout
 // ------------------------------------------------------------
 // Flow region: 100 int16 LE samples (200 bytes) at 0x56E.
-// Pressure wave region: 50 uint16 LE samples (100 bytes) at 0x380.
+// Pressure wave region: 50 int16 LE samples (100 bytes) at 0x380.
 //   0x24A (100 samples) was tried but values were large/noisy; 0x380 confirmed as mask pressure source.
 // Output is resampled to kBmcExtendedWaveformSamples (50) per packet.
 
@@ -83,7 +83,8 @@ constexpr int    kG3xFlowRegionOffset      = 0x56E;
 constexpr int    kG3xFlowRegionSampleCount = 100;
 constexpr qint16 kG3xFlowRawClamp          = 2000;
 
-/// Pressure wave / mask pressure region: 50 × uint16 LE at 0x380.
+/// Pressure wave / mask pressure region: 50 × int16 LE at 0x380 (signed: it reads slightly
+/// below zero with the mask off — see BmcG3xPressureWaveToHundredths()).
 /// Confirmed as the G3X mask pressure source — output looks correct in OSCAR.
 /// 0x24A (100 samples) was tried but produced large/noisy values and is not used.
 constexpr int    kG3xPressureWaveRegionOffset      = 0x380;
@@ -726,11 +727,11 @@ void ApplyFlowWaveformFromG3xPacket(const QByteArray& waveformPacket,
         legacyPacket->Flow[i]     = rawFlow / 10.0f;
 
         // --- Pressure wave (0x380) ---
-        // Decoded as unsigned 16-bit; values in the 400–1600 range (pressure-like, slowly varying).
+        // Signed 16-bit, hundredths of cmH2O; values in the 400–1600 range during therapy
+        // (pressure-like, slowly varying), limited to 0..40.00 cmH2O.
         const int srcPressure = (i * (kG3xPressureWaveRegionSampleCount - 1)) / (kG3xWaveformOutputSampleCount - 1);
-        const qint16 rawPressureWave = static_cast<qint16>(qMin(
-            static_cast<int>(kG3xPressureWaveRawClamp),
-            ReadUInt16LEPtr(packetData, kG3xPressureWaveRegionOffset + (srcPressure * 2))));
+        const qint16 rawPressureWave = BmcG3xPressureWaveToHundredths(
+            ReadInt16LEPtr(packetData, kG3xPressureWaveRegionOffset + (srcPressure * 2)));
         legacyPacket->Raw.PressureWave[i] = rawPressureWave;
         legacyPacket->PressureWave[i]     = rawPressureWave;
 
@@ -767,6 +768,35 @@ bool HasG3xDataFiles(const QString& basePath)
 }
 
 } // end anonymous namespace
+
+/*
+  The samples are signed. While the machine starts, or with the mask off, the sensor reads
+  slightly below zero (-0.01 to -1.25 cmH2O on a G3 B20A). Read as unsigned, those were
+  65535 downwards and were limited to 40.00 cmH2O, which set the Mask Pressure maximum and
+  flattened the graph (GitLab #419). Below zero is stored as zero, like the 0x24A region.
+*/
+qint16 BmcG3xPressureWaveToHundredths(qint16 raw)
+{
+    return qBound<qint16>(qint16(0), raw, kG3xPressureWaveRawClamp);
+}
+
+BmcG3xPacketPressure BmcG3xPacketPressureHundredths(int trendEpap, int trendIpap,
+                                                    int knownEpap, int knownIpap)
+{
+    BmcG3xPacketPressure pressure;
+    if (trendEpap > 0) {
+        pressure.epapHundredths = trendEpap;
+        pressure.ipapHundredths = trendIpap;
+    } else {
+        // The packet built by BuildLegacyCompatiblePacket() holds these in the legacy
+        // half-cmH2O unit.  Left as they were, a known 4.00 cmH2O was stored as 8 and
+        // shown as 0.08 cmH2O, which became the session's minimum pressure (GitLab #419).
+        // Seen on the first packet of a session, whose trend fields are still zero.
+        pressure.epapHundredths = knownEpap;
+        pressure.ipapHundredths = knownIpap;
+    }
+    return pressure;
+}
 
 // ============================================================
 // BmcG3xData — public interface
@@ -1682,13 +1712,17 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
 
             // Override Pressure / IPAP / EPAP with waveform pressure trend values.
             // 0x76C → EPAP, 0x76E → IPAP (identical in CPAP mode).
-            if (kG3xUsePressureTrendForPressureChannel && rawPressureTrend > 0) {
+            if (kG3xUsePressureTrendForPressureChannel) {
                 // Store hundredths of cmH2O directly; PressureChannelGain() returns 0.01
                 // in the G3X loader so the displayed value is raw / 100 = cmH2O.
-                legacyPacket.Raw.EPAP = static_cast<qint16>(rawPressureTrend);
-                legacyPacket.Raw.IPAP = static_cast<qint16>(rawPressureTrendIPAP);
-                legacyPacket.EPAP     = rawPressureTrend     / 100.0f;
-                legacyPacket.IPAP     = rawPressureTrendIPAP / 100.0f;
+                const BmcG3xPacketPressure pressure = BmcG3xPacketPressureHundredths(
+                    rawPressureTrend, rawPressureTrendIPAP,
+                    currentValues.hasEPAP ? currentValues.epapHundredths : 0,
+                    currentValues.hasIPAP ? currentValues.ipapHundredths : 0);
+                legacyPacket.Raw.EPAP = static_cast<qint16>(pressure.epapHundredths);
+                legacyPacket.Raw.IPAP = static_cast<qint16>(pressure.ipapHundredths);
+                legacyPacket.EPAP     = pressure.epapHundredths / 100.0f;
+                legacyPacket.IPAP     = pressure.ipapHundredths / 100.0f;
             }
 
             // Copy flow and pressure-wave waveform regions into the output packet.
