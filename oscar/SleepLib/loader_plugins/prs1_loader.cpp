@@ -2849,7 +2849,9 @@ void PRS1Loader::initChannels()
     chan->addOption(PRS1_MODE_ASV,       QObject::tr("ASV"));
     chan->addOption(PRS1_MODE_S,         QObject::tr("S"));
     chan->addOption(PRS1_MODE_ST,        QObject::tr("S/T"));
-    chan->addOption(PRS1_MODE_PC,        QObject::tr("PC"));
+    // Disambiguated from the "PC" short label for Pulse Change (common.cpp, schema.cpp),
+    // which shared one catalogue entry with this mode name.  See GitLab #417.
+    chan->addOption(PRS1_MODE_PC,        QObject::tr("PC", "Ventilator mode name (Pressure Control), not Pulse Change"));
     chan->addOption(PRS1_MODE_ST_AVAPS,  QObject::tr("S/T - AVAPS"));
     chan->addOption(PRS1_MODE_PC_AVAPS,  QObject::tr("PC - AVAPS"));
 

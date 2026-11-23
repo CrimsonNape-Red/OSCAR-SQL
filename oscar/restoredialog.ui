@@ -155,7 +155,7 @@
            <string/>
           </property>
           <property name="styleSheet">
-           <string>color: gray; font-size: small;</string>
+           <string notr="true">color: gray; font-size: small;</string>
           </property>
          </widget>
         </item>

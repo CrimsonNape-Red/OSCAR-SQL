@@ -8863,3 +8863,46 @@ stops.
   line ends and was not affected. The Classic look draws its outlines another way.
 - Checked: a unit test that paints a bar and looks at the row under it (failed before the
   change, passes after).
+
+---
+
+## 2026-11-23 - Translation: source strings that could not be translated correctly (GitLab #417)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmc_loader.cpp`,
+`oscar/SleepLib/loader_plugins/prs1_loader.cpp`, `oscar/driftanalysisdialog.ui`,
+`oscar/restoredialog.ui`
+
+**Symptom:** Reported against the Chinese translation, but the causes are in the source and
+affect every language. Pulse Change showed the translation of a Philips mode name. BMC Reslex
+Mode always showed "Full Time" in English. BMC "Ramp Time" had its own translation, with a
+trailing space, apart from the standard one. Translators were offered program identifiers
+(`BmcRampTime`, `TiMin`, ...) and style sheets as text to translate.
+
+**Root cause and fix:**
+- `QObject::tr("PC")` was one catalogue entry for two meanings: the Pulse Change short label
+  (`common.cpp`, `schema.cpp`) and the Philips ventilator mode (`prs1_loader.cpp`). The mode
+  name now carries a disambiguation comment, so it is a separate entry. The plain entry stays
+  with Pulse Change because the existing translations that differ from "PC" (Spanish,
+  Italian, Brazilian Portuguese) abbreviate Pulse Change.
+- BMC Reslex Mode option 0 was a bare `"Full Time"`; it is now `QObject::tr("Full Time")`, a
+  string the catalogues already hold.
+- BMC ramp channels used `QObject::tr("Ramp Time ")` with a trailing space; now "Ramp Time".
+- Fourteen BMC setting channels passed the channel code through `tr()` as the full name
+  (`BmcRampTime`, `BmcRampAuto`, `InitialP`, `TreatP`, `ManualP`, `ISens`, `ESens`,
+  `RiseTime`, `TiMin`, `TiMax`, `BackupRR`, `MinEPAP`, `MinIPAP`, `MaxIPAP`). The full name
+  is now the same text as the label, which is already translated.
+- Three `styleSheet` properties in the two `.ui` files lacked `notr="true"`.
+
+**Non-obvious:**
+- No new translatable text except the disambiguated "PC". The identifiers, "Ramp Time " and
+  the three style sheets leave the catalogues at the next `lupdate`.
+- A profile stores each channel's full name, label and description in the database, and the
+  stored copy wins over the program's text unless the language setting changed since it was
+  saved (`Profile::loadChannelsFromDatabase()`). So an existing profile keeps the old channel
+  names, including old translations of them, until the user presses Reset Defaults on
+  Preferences > Events or switches language and back. Option names (mode names,
+  "Full Time") are not affected: the program's text wins for those.
+- The Time Corrections dialog was on the reporter's list; its style sheets are already set in
+  code and no longer in the catalogue.
+- Checked: compiles; the generated `ui_*.h` files set the three style sheets without
+  `translate()`. Not checked in a running OSCAR.
