@@ -52,6 +52,18 @@ struct BmcG3xPacketPressure
 BmcG3xPacketPressure BmcG3xPacketPressureHundredths(int trendEpap, int trendIpap,
                                                     int knownEpap, int knownIpap);
 
+/// @brief Carries the last pressure of an events-only session through to its end.
+///
+/// A night without waveform has only the event stream's pressure records, and the device
+/// writes one only when the pressure changes.  After the last change the pressure holds,
+/// but nothing in the list said for how long, so the time at that pressure was left out
+/// of the session's pressure statistics.  This adds a copy of the last record one second
+/// before the session ends.
+///
+/// @param snapshots   The session's pressure records, in time order; changed in place.
+/// @param sessionEnd  When the session ends.
+void BmcG3xHoldLastPressureToEnd(QList<BmcPressureSnapshot>& snapshots, const QDateTime& sessionEnd);
+
 class BmcG3xData : public BmcDataParser
 {
 public:

@@ -439,6 +439,7 @@ to need it.
 - All `0x42` records within the day's time window are collected, sorted by timestamp, and merged into the waveform packet stream in timestamp order.
 - If no `0x42` records are found in the IDX day slice, a ±12-hour fallback scan is performed across the full EVT file.
 - **Note:** With `kG3xUsePressureTrendForPressureChannel = true` (current default), the `CPAP_Pressure`/`CPAP_IPAP`/`CPAP_EPAP` channels are overridden by the per-packet PressureTrend values (0x76C/0x76E from the waveform packet). The `0x42` values remain in the state machine and are used only when no PressureTrend is available (e.g. to seed initial pressure before the first waveform packet).
+- **A `0x42` record is written only when the pressure changes.** On a night without waveform these records are the whole pressure channel, and after the last one the pressure holds until the session ends. On a 7.1 hour CPAP night at 7.00 cmH2O with a ramp, all nine records fall inside the ramp. The parser therefore repeats the last record one second before the session's end (GitLab #419); without it the time at the final pressure had no weight, and the night read average 5.30 / median 5.27 / 95% 6.47 against PAP-Link's 6.9 / 7.0 / 7.0. With it OSCAR reads 6.94 / 7.0 / 7.0.
 - **TODO:** Update the EVT parser to read EPAP from `value2` and IPAP from `unk1e`, so bilevel devices display correct IPAP/EPAP channels rather than the same value for both.
 
 ---

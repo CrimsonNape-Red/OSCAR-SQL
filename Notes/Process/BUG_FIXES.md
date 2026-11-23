@@ -4,11 +4,39 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-23 - BMC G3X: pressure statistics too low on a night without waveform (GitLab #419, item 6.1)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`BmcG3xHoldLastPressureToEnd()`, new, called
+from `ReadDateSession()`), `bmcG3xDataParsing.h`, `oscar/tests/bmcg3xpressuretests.cpp/.h` (renamed from
+`bmcg3xwaveformtests`), `oscar/oscar.pro`
+
+**Symptom:** A 7.1 hour CPAP night at 7.00 cmH2O, imported from events only, showed Pressure average
+5.30, median 5.27 and 95% 6.47. PAP-Link shows 6.9, 7.0 and 7.0.
+
+**Root cause:** Without waveform, the pressure channel is built from the event stream's pressure records
+(type `0x42`), and the device writes one only when the pressure changes. All nine records of that night
+fall inside the 15 minute ramp. The statistics weight each value by the time until the next one, so the
+last value, held for the remaining 6.9 hours, had no weight.
+
+**Fix:** The last pressure record of such a session is repeated one second before the session ends.
+The night now reads average 6.94, median 7.0, 95% 7.0, maximum 7.0.
+
+**Non-obvious:**
+- Only sessions built from the event stream's start/stop markers are affected. The session made when a
+  night has no markers already had a start and an end record. Nights with waveform take their pressure
+  from the packets, a code path this change does not touch.
+- The stored `avg` column is the plain mean of the samples (5.78 here) and stays low by nature; the
+  time-weighted `wavg` is the one that matches PAP-Link.
+- Nights already imported keep the old values until they are re-imported. No loader data version was
+  changed.
+
+---
+
 ## 2026-11-23 - BMC G3X: Mask Pressure maximum of 40.00 and Pressure minimum of 0.08 cmH2O (GitLab #419, items 3 and 6.2)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`BmcG3xPressureWaveToHundredths()`,
 `BmcG3xPacketPressureHundredths()`, both new, and their callers), `bmcG3xDataParsing.h`,
-`oscar/tests/bmcg3xwaveformtests.cpp/.h` (new), `oscar/oscar.pro`
+`oscar/tests/bmcg3xpressuretests.cpp/.h` (new; first committed as `bmcg3xwaveformtests`), `oscar/oscar.pro`
 
 **Symptom:** Some sessions showed a Mask Pressure maximum of exactly 40.00 cmH2O, which flattened the
 graph. Some showed a Pressure / IPAP minimum of 0.08 and an EPAP minimum of 0.12 cmH2O.

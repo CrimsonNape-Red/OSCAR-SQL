@@ -1,8 +1,8 @@
-/* BMC G3X Waveform Packet Unit Tests
+/* BMC G3X Pressure Unit Tests
  *
- * Tests how values read from a BMC G3X waveform packet are turned into the samples OSCAR
- * stores: the pressure wave behind the Mask Pressure graph, and the pressures stored for
- * a packet (#419).
+ * Tests how the BMC G3X parser turns what the card holds into the pressures OSCAR stores:
+ * the pressure wave behind the Mask Pressure graph, the pressures stored for a waveform
+ * packet, and the pressure records of a night that has events only (#419).
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -10,12 +10,12 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
-#ifndef BMCG3XWAVEFORMTESTS_H
-#define BMCG3XWAVEFORMTESTS_H
+#ifndef BMCG3XPRESSURETESTS_H
+#define BMCG3XPRESSURETESTS_H
 
 #include "AutoTest.h"
 
-class BmcG3xWaveformTests : public QObject
+class BmcG3xPressureTests : public QObject
 {
     Q_OBJECT
 
@@ -32,8 +32,14 @@ private slots:
     void testPacketPressureWithoutTrendIsInHundredths();
     //! \brief A packet without a trend and with no known pressure stores no sample
     void testPacketPressureWithNothingKnownIsEmpty();
+    //! \brief The last pressure of an events-only session is repeated just before its end
+    void testLastPressureHeldToSessionEnd();
+    //! \brief Nothing is added when the last pressure record is already at the session's end
+    void testNoHoldWhenLastPressureIsAtEnd();
+    //! \brief A session with no pressure records gets none
+    void testNoHoldWithoutPressureRecords();
 };
 
-DECLARE_TEST(BmcG3xWaveformTests)
+DECLARE_TEST(BmcG3xPressureTests)
 
-#endif // BMCG3XWAVEFORMTESTS_H
+#endif // BMCG3XPRESSURETESTS_H

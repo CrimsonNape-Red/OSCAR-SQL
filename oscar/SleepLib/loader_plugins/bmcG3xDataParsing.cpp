@@ -798,6 +798,19 @@ BmcG3xPacketPressure BmcG3xPacketPressureHundredths(int trendEpap, int trendIpap
     return pressure;
 }
 
+void BmcG3xHoldLastPressureToEnd(QList<BmcPressureSnapshot>& snapshots, const QDateTime& sessionEnd)
+{
+    // Same closing time as the no-marker session built in ReadDateSession(), and as the
+    // session's own last moment (BmcLoaderTask sets it to EndTimestamp - 1 s).
+    const QDateTime closing = sessionEnd.addSecs(-1);
+    if (snapshots.isEmpty() || snapshots.last().Timestamp >= closing) {
+        return;
+    }
+    BmcPressureSnapshot held = snapshots.last();
+    held.Timestamp = closing;
+    snapshots.append(held);
+}
+
 // ============================================================
 // BmcG3xData — public interface
 // ============================================================
@@ -1390,6 +1403,7 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
                         s->PressureSnapshots.append(snap);
                     }
                 }
+                BmcG3xHoldLastPressureToEnd(s->PressureSnapshots, s->EndTimestamp);
                 dateSession.Sessions.append(s);
             }
         } else {
