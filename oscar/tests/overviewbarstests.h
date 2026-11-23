@@ -25,6 +25,7 @@ private slots:
     void testOutlineColour();
     void testLightBarHasThinBlackOutline();
     void testClosedOutlineRunsAlongBottom();
+    void testOpenOutlineStopsAtBottom();
     void testPlainFillLighterAboveThreePixels();
     void testTopIsFlatWithRoundedCorners();
     void testContrastingText();

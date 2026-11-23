@@ -153,7 +153,9 @@ void paintSegment(QPainter &p, const QRectF &r, const QColor &c, bool top, bool 
     p.setRenderHint(QPainter::Antialiasing, true);
     p.fillPath(filled, brush);
     if (outlined) {
-        p.setPen(QPen(outlineColour(dark), 1));
+        // Flat ends: the default square ends run half a pixel past the bottom of an open
+        // outline, which showed as short legs sticking out under the axis line
+        p.setPen(QPen(outlineColour(dark), 1, Qt::SolidLine, Qt::FlatCap));
         p.setBrush(Qt::NoBrush);
         p.drawPath(closed ? filled : path);
     }

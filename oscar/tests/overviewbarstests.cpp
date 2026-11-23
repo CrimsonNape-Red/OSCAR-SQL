@@ -160,6 +160,22 @@ void OverviewBarsTests::testClosedOutlineRunsAlongBottom()
     QVERIFY(black(0, 15));
 }
 
+void OverviewBarsTests::testOpenOutlineStopsAtBottom()
+{
+    // The lines up the sides end where the bar ends. Running on past it, they stuck out under
+    // the axis line the bar stands on, like the legs of a staple.
+    QImage img(40, 40, QImage::Format_ARGB32);
+    img.fill(Qt::white);
+    {
+        QPainter p(&img);
+        paintSegment(p, QRectF(0, 0, 40, 30), QColor(0x40, 0x80, 0xff), true, true);
+    }
+    QCOMPARE(img.pixel(0, 30), QColor(Qt::white).rgba());
+    QCOMPARE(img.pixel(39, 30), QColor(Qt::white).rgba());
+    QVERIFY(qGray(img.pixel(0, 29)) < 40);      // and they do reach the bottom
+    QVERIFY(qGray(img.pixel(39, 29)) < 40);
+}
+
 void OverviewBarsTests::testPlainFillLighterAboveThreePixels()
 {
     QImage img(10, 10, QImage::Format_ARGB32);

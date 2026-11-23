@@ -8837,3 +8837,29 @@ the end of an import that was not cancelled (`BmcLoader::importFromFolder()`, sh
   of a ResMed, a BMC and a BMC G3X card with a stored purge date each started at that date,
   left the column NULL afterwards and added no duplicate sessions. The purge command itself,
   followed by a restart and an import, was confirmed in the GUI on Windows after the fix.
+
+---
+
+## 2026-11-22 - Overview: bar outlines stuck out below the zero line (GitLab #416)
+
+**Files:** `oscar/Graphs/overviewbars.cpp`, `oscar/tests/overviewbarstests.cpp/.h`
+
+**Symptom:** On the Overview page in the Modern look, each bar's thin outline ran one pixel
+past the bottom of the bar, so two short legs showed under the zero line and the bars looked
+stapled to the axis. Clearest in dark mode, where the outline is light grey.
+
+**Root cause:** `OverviewBars::paintSegment()` draws the outline of a bar that stands on the
+axis as an open path: up one side, across the top, down the other. The pen had Qt's default
+square line ends, which extend half the pen width past each end of the path, here past the
+bottom of the bar.
+
+**Fix:** The outline pen has flat ends (`Qt::FlatCap`), so the side lines stop where the bar
+stops.
+
+**Non-obvious:**
+- Half a pixel on paper became a whole pixel on screen: the graphs are painted through
+  OpenGL, which fills a pixel or leaves it, and the bar's bottom falls on a pixel boundary.
+- A closed outline (a session in Session Times, the sample bar in the Details popup) has no
+  line ends and was not affected. The Classic look draws its outlines another way.
+- Checked: a unit test that paints a bar and looks at the row under it (failed before the
+  change, passes after).
