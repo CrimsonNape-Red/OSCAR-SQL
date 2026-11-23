@@ -1257,6 +1257,14 @@ int BmcLoader::importFromFolder(const QString & dirpath, Machine * mach, const Q
 
     //When everything is imported, we can finish up and return the number of new sessions imported.
 
+    // The purge date made this import start at a purged day. That is done now, so later
+    // imports start at the last day again. It is kept after a cancelled import, which may
+    // not have reached the purged day. The date is stored with the device (GitLab #415),
+    // so leaving it set would make every later import start there. (Shared with BMC G3X.)
+    if (!isAborted()) {
+        mach->clearPurgeDate();
+    }
+
     mach->Save();
 
     QCoreApplication::processEvents();

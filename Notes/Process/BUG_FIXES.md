@@ -8802,3 +8802,38 @@ macros that carried the wrong axis were removed from `gGraphView.cpp`.
   scrolls the graph list instead.
 - Checked on a Windows 11 touchpad: sideways swipe pans in the expected direction, vertical
   swipe scrolls the graph list, Ctrl + swipe zooms. Not checked on macOS or Linux.
+
+---
+
+## 2026-11-22 - Purge date was lost when OSCAR restarted, so a purged day was not re-imported (GitLab #415)
+
+**Files:** `oscar/SleepLib/machine.cpp`, `oscar/SleepLib/machine.h`,
+`oscar/database/machine_repository.cpp/.h`, `oscar/SleepLib/loader_plugins/bmc_loader.cpp`,
+`oscar/tests/machinepurgedatetests.cpp/.h` (new), `oscar/oscar.pro`
+
+**Symptom:** Purge a day that is not the device's last day, close and restart OSCAR, import the
+card: the purged day stays empty. Importing in the same session as the purge worked.
+
+**Root cause:** The purge date tells the next import how far back to start. It was kept only in
+memory. For a device that already has a database row, `Profile::storeMachinesToDatabase()` and
+`Machine::SaveToDatabase()` both return early, and the two places that do update the row
+(`Machine::setInfo()`, the import's last-imported update) write back the purge date they just
+read from the database. OSCAR 1.7 wrote it to `machines.xml` with the rest of the device list,
+so the fault came in with the move to the database.
+
+**Fix:** `Machine::setPurgeDate()` writes the date to the device's row when it changes, through
+the new `MachineRepository::updatePurgeDate()`, which touches that column only.
+`clearPurgeDate()` goes through the same function, so the date the ResMed loader clears after
+an import is cleared in the database too. The BMC and BMC G3X loaders now clear it as well, at
+the end of an import that was not cancelled (`BmcLoader::importFromFolder()`, shared by both).
+
+**Non-obvious:**
+- The ResMed, BMC and BMC G3X loaders read the purge date. Until now only ResMed cleared it
+  after an import. For BMC a purge date stayed until OSCAR closed (in 1.7, for ever, in
+  `machines.xml`); once stored it would have made every later import start at that date.
+- A database written before the fix never holds a purge date, so nothing needs repairing. A
+  day purged and lost before the fix is recovered by purging an earlier day and importing.
+- Checked: unit tests (set, clear, other columns untouched, no database row); batch imports
+  of a ResMed, a BMC and a BMC G3X card with a stored purge date each started at that date,
+  left the column NULL afterwards and added no duplicate sessions. The purge command itself,
+  followed by a restart and an import, was not run in the GUI.

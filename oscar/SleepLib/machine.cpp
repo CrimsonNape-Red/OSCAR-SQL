@@ -696,6 +696,26 @@ void Machine::setInfo(MachineInfo inf)
     }
 }
 
+void Machine::setPurgeDate(QDate value)
+{
+    if (info.purgeDate == value) {
+        return;         // nothing to store, e.g. clearing a date that was never set
+    }
+    info.purgeDate = value;
+
+    // Like an identity change in setInfo(), nothing else writes this back for a device that
+    // already has a database row: Profile::storeMachinesToDatabase() and SaveToDatabase()
+    // both skip such devices. Left in memory only, the date was lost when OSCAR closed, and
+    // the next import did not go back to the purged day (GitLab #415).
+    if (m_database_id > 0) {
+        MachineRepository repo;
+        if (!repo.updatePurgeDate(m_database_id, info.purgeDate)) {
+            qWarning() << "Machine::setPurgeDate(): could not store the purge date for"
+                       << info.loadername << info.serial;
+        }
+    }
+}
+
 QString toHexid(quint32 id) { return QString("%1").arg(id,8,16,QLatin1Char('0')); };
 QString Machine::hexid() { return toHexid((qint32)m_id);};
 

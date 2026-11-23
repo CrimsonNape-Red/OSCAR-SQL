@@ -1009,6 +1009,7 @@ test {
         tests/zeotests.cpp \
         tests/applehealthtests.cpp \
         tests/machinetests.cpp \
+        tests/machinepurgedatetests.cpp \
         tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp \
         tests/cardarchivetests.cpp \
@@ -1059,6 +1060,7 @@ test {
         tests/zeotests.h \
         tests/applehealthtests.h \
         tests/machinetests.h \
+        tests/machinepurgedatetests.h \
         tests/portablemodetests.h \
         tests/sessionsplittests.h \
         tests/cardarchivetests.h \

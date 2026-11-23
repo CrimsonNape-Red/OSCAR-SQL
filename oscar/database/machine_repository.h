@@ -146,6 +146,14 @@ public:
     bool update(const MachineData& data);
 
     /*!
+     * \brief Store a machine's purge date, leaving every other column as it is
+     * \param id Database primary key of the machine
+     * \param purgeDate The purge date; an invalid date clears the stored one (NULL)
+     * \return true if successful, false otherwise
+     */
+    bool updatePurgeDate(qint64 id, const QDate& purgeDate);
+
+    /*!
      * \brief Delete a machine from database
      * \param id Database primary key of machine to delete
      * \return true if successful, false otherwise

@@ -375,6 +375,48 @@ bool MachineRepository::update(const MachineData& data)
 }
 
 /*
+ * Store a machine's purge date
+ *
+ * Parameters:
+ *   id        - Database primary key
+ *   purgeDate - The purge date; an invalid date clears the stored one
+ *
+ * Returns: true if successful, false otherwise
+ *
+ * Writes the purge_date column only, so a caller does not have to read the row first
+ * and cannot overwrite another column with a stale value.
+ */
+bool MachineRepository::updatePurgeDate(qint64 id, const QDate& purgeDate)
+{
+    if (id == 0) {
+        qWarning() << "MachineRepository::updatePurgeDate() - invalid id (0)";
+        return false;
+    }
+
+    QSqlQuery query(database());
+    query.prepare("UPDATE machines SET purge_date = :purge_date WHERE id = :id");
+    // A null QVariant stores NULL, which reads back as "no purge date".
+    query.bindValue(":purge_date",
+                    purgeDate.isValid() ? QVariant(purgeDate.toString(Qt::ISODate)) : QVariant());
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        qWarning() << "MachineRepository::updatePurgeDate() failed:" << query.lastError().text();
+        DatabaseManager::instance().checkQueryError("MachineRepository::updatePurgeDate", query);
+        return false;
+    }
+
+    if (query.numRowsAffected() == 0) {
+        qWarning() << "MachineRepository::updatePurgeDate() - no machine found with id" << id;
+        return false;
+    }
+
+    qDebug() << "MachineRepository::updatePurgeDate(): machine id" << id << "purge date"
+             << (purgeDate.isValid() ? purgeDate.toString(Qt::ISODate) : QStringLiteral("cleared"));
+    return true;
+}
+
+/*
  * Delete a machine from database
  *
  * Parameters:

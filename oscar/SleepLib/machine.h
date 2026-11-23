@@ -219,8 +219,15 @@ class Machine
     inline void setSerial(QString value) { info.serial = value; }
     inline void setType(MachineType type) { info.type = type; }
     inline void setCap(quint32 value) { info.cap = value; }
-    inline void setPurgeDate(QDate value) {info.purgeDate = value; }
-    inline void clearPurgeDate() {info.purgeDate = QDate(); }
+    /*! \brief Sets the date the next import should go back to, and stores it.
+
+        A purge sets this so that the purged day is read from the card again. The date is
+        written to the device's database row at once, so that it survives a restart of
+        OSCAR (GitLab #415). A device that has no row yet keeps it in memory; it is stored
+        with the rest of the device when the row is created. */
+    void setPurgeDate(QDate value);
+    //! \brief Removes the purge date, in memory and in the database. Called after an import.
+    inline void clearPurgeDate() { setPurgeDate(QDate()); }
 
     //! \brief Returns the database primary key for this machine
     inline qint64 getDatabaseId() const { return m_database_id; }
