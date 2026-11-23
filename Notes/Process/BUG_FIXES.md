@@ -8836,4 +8836,4 @@ the end of an import that was not cancelled (`BmcLoader::importFromFolder()`, sh
 - Checked: unit tests (set, clear, other columns untouched, no database row); batch imports
   of a ResMed, a BMC and a BMC G3X card with a stored purge date each started at that date,
   left the column NULL afterwards and added no duplicate sessions. The purge command itself,
-  followed by a restart and an import, was not run in the GUI.
+  followed by a restart and an import, was confirmed in the GUI on Windows after the fix.
