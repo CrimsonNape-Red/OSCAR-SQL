@@ -41,6 +41,33 @@ ChannelID BMC_RESLEX_MODE, BMC_RESLEX_PATIENT;
 const QDate baseDate(2010 , 1, 1);
 
 
+BmcReplacementPlan BmcPlanNightReplacement(const QList<BmcSessionSpan> & incoming,
+                                           const QList<BmcSessionSpan> & stored)
+{
+    BmcReplacementPlan plan;
+
+    // A night that arrives with waveform is the better copy: replace as before.
+    for (const BmcSessionSpan & in : incoming) {
+        if (in.hasWaveform) {
+            return plan;
+        }
+    }
+
+    for (const BmcSessionSpan & have : stored) {
+        if (!have.hasWaveform) {
+            continue;
+        }
+        plan.keepStored.insert(have.id);
+        for (const BmcSessionSpan & in : incoming) {
+            if (in.startMs <= have.endMs && have.startMs <= in.endMs) {
+                plan.skipIncoming.insert(in.id);
+            }
+        }
+    }
+    return plan;
+}
+
+
 /*
   Import Task - This is the primary part of the loader: where sessions are added to OSCAR
     with machine settings, waveforms etc.
@@ -62,6 +89,66 @@ void BmcLoaderTask::run()
             return (baseDate.daysTo(this->bmcLink->UsrSession.StartTimestamp.date()) * 64) + index;
         };
 
+        // A card that was formatted holds the device's recent nights as events only. Such a
+        // night must not replace a stored night that has waveform (GitLab #419): work out
+        // which stored sessions stay and which sessions on the card are left out.
+        QList<BmcSessionSpan> incomingSpans;
+        bool incomingHasWaveform = false;
+        for (int j = 0; j < bmcDateSession.Sessions.length(); ++j) {
+            BmcSession* bmcSession = bmcDateSession.Sessions.at(j);
+            if (!bmcSession ||
+                (bmcSession->Waveforms.isEmpty() &&
+                 bmcSession->RespiratoryEvents.isEmpty() &&
+                 bmcSession->PressureSnapshots.isEmpty())) {
+                continue;
+            }
+            BmcSessionSpan span;
+            span.id          = computeSessionId(bmcSession, j);
+            span.startMs     = bmcSession->StartTimestamp.toMSecsSinceEpoch();
+            span.endMs       = bmcSession->EndTimestamp.addSecs(-1).toMSecsSinceEpoch();
+            span.hasWaveform = !bmcSession->Waveforms.isEmpty();
+            incomingHasWaveform = incomingHasWaveform || span.hasWaveform;
+            incomingSpans.append(span);
+        }
+
+        BmcReplacementPlan replacementPlan;
+        if (!incomingSpans.isEmpty() && !incomingHasWaveform) {
+            qint64 nightStartMs = std::numeric_limits<qint64>::max();
+            qint64 nightEndMs = std::numeric_limits<qint64>::min();
+            for (const BmcSessionSpan & span : incomingSpans) {
+                nightStartMs = std::min(nightStartMs, span.startMs);
+                nightEndMs = std::max(nightEndMs, span.endMs);
+            }
+
+            QList<BmcSessionSpan> storedSpans;
+            {
+                QMutexLocker locker(&bmcLoader->sessionMutex);
+                for (auto it = mach->sessionlist.constBegin(); it != mach->sessionlist.constEnd(); ++it) {
+                    Session* stored = it.value();
+                    if (!stored || stored->realFirst() <= 0 || stored->realLast() <= 0 ||
+                        stored->realFirst() > nightEndMs || stored->realLast() < nightStartMs) {
+                        continue;
+                    }
+                    BmcSessionSpan span;
+                    span.id          = it.key();
+                    span.startMs     = stored->realFirst();
+                    span.endMs       = stored->realLast();
+                    // The stored sample count of the flow channel: above zero means a
+                    // waveform was imported (see BmcStoredNights()). No event data is loaded.
+                    span.hasWaveform = stored->count(CPAP_FlowRate) > 0;
+                    storedSpans.append(span);
+                }
+            }
+            replacementPlan = BmcPlanNightReplacement(incomingSpans, storedSpans);
+            if (!replacementPlan.keepStored.isEmpty()) {
+                qDebug() << "BmcLoaderTask::run() -"
+                         << this->bmcLink->UsrSession.StartTimestamp.date().toString(Qt::ISODate)
+                         << "is on the card as events only; kept" << replacementPlan.keepStored.size()
+                         << "stored session(s) that have waveform, left out"
+                         << replacementPlan.skipIncoming.size() << "session(s) from the card";
+            }
+        }
+
         qint64 importStartMs = std::numeric_limits<qint64>::max();
         qint64 importEndMs = std::numeric_limits<qint64>::min();
         QSet<SessionID> plannedSessionIds;
@@ -73,6 +160,9 @@ void BmcLoaderTask::run()
             if (bmcSession->Waveforms.isEmpty() &&
                 bmcSession->RespiratoryEvents.isEmpty() &&
                 bmcSession->PressureSnapshots.isEmpty()) {
+                continue;
+            }
+            if (replacementPlan.skipIncoming.contains(computeSessionId(bmcSession, j))) {
                 continue;
             }
 
@@ -100,6 +190,9 @@ void BmcLoaderTask::run()
                     const bool isPlannedReplacement = plannedSessionIds.contains(existingSessionId);
                     if (!overlapsImportWindow || isPlannedReplacement) {
                         continue;
+                    }
+                    if (replacementPlan.keepStored.contains(existingSessionId)) {
+                        continue;   // has waveform; the card has this night as events only
                     }
 
                     if (sessionRepo.remove(dbSession.id)) {
@@ -134,6 +227,9 @@ void BmcLoaderTask::run()
                     }
                     if (removedSessionIds.contains(existingSession->session())) {
                         continue;
+                    }
+                    if (replacementPlan.keepStored.contains(existingSession->session())) {
+                        continue;   // has waveform; the card has this night as events only
                     }
 
                     const qint64 existingStartMs = existingSession->realFirst();
@@ -184,6 +280,10 @@ void BmcLoaderTask::run()
             if (bmcSession->Waveforms.isEmpty() &&
                 bmcSession->RespiratoryEvents.isEmpty() &&
                 bmcSession->PressureSnapshots.isEmpty())
+                continue;
+
+            // Events only on the card, and a stored session with waveform covers it.
+            if (replacementPlan.skipIncoming.contains(sessionID))
                 continue;
 
             //Import the session

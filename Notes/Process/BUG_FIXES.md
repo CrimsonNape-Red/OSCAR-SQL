@@ -4,6 +4,38 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-23 - BMC: importing a formatted card replaced a stored waveform night with an events-only one (GitLab #419, item 4)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmc_loader.cpp` (`BmcPlanNightReplacement()`, new, and
+`BmcLoaderTask::run()`), `bmc_loader.h`, `oscar/tests/bmcnightreplacementtests.cpp/.h` (new), `oscar/oscar.pro`
+
+**Symptom:** After the SD card was formatted, the device wrote its recent nights back to the new card
+from its own memory, without waveform. Importing that card replaced the last imported night, which was
+stored with waveform and oximetry, by a session holding events only. The graphs of that night were gone.
+
+**Root cause:** An import re-reads the last imported day (and any day from a purge date onwards) and
+replaces what is stored for those hours. `BmcLoaderTask::run()` did so without looking at what either
+side held.
+
+**Fix:** When none of the night's sessions on the card has waveform, stored sessions that do have
+waveform are kept, and the card's sessions that overlap them are not imported. A session on the card
+that overlaps none of them is still imported. A night that arrives with waveform replaces the stored
+one exactly as before. Checked with two cards made from a sample: the night with waveform, then the
+same night with its waveform range zeroed in the index. Before the fix the 7.78 hour session with
+1,401,400 flow samples became one with none; after it the session is unchanged.
+
+**Non-obvious:**
+- `BmcLoaderTask` is shared, so the rule applies to legacy BMC cards as well as G3X.
+- "Has waveform" is a stored flow sample count above zero, the same test as `BmcStoredNights()`.
+- The stored sessions are found in memory (`Machine::sessionlist`). A database row with no session in
+  memory cannot be judged and is handled as before.
+- Limitation: if the stored session was imported while it was still being recorded, and the card's
+  events-only copy holds the whole session, the copy overlaps the stored one and is left out, so the
+  part recorded after that import is not added.
+- The decision is written to the debug log; the user is not told.
+
+---
+
 ## 2026-11-23 - BMC G3X: pressure statistics too low on a night without waveform (GitLab #419, item 6.1)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`BmcG3xHoldLastPressureToEnd()`, new, called

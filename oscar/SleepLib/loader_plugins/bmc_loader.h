@@ -20,6 +20,42 @@ class BmcLoader;
 class BmcDataLink;
 class BmcDataParser;
 
+/*! \struct BmcSessionSpan
+    \brief One session's time span and whether it holds waveform, for BmcPlanNightReplacement().
+ */
+struct BmcSessionSpan {
+    SessionID id = 0;           //!< OSCAR session id
+    qint64 startMs = 0;         //!< first moment, ms since the epoch
+    qint64 endMs = 0;           //!< last moment, ms since the epoch
+    bool hasWaveform = false;   //!< true when the session holds flow waveform
+};
+
+/*! \struct BmcReplacementPlan
+    \brief What the import of one night leaves alone. Empty for an ordinary import.
+ */
+struct BmcReplacementPlan {
+    QSet<SessionID> keepStored;     //!< stored sessions that are not removed
+    QSet<SessionID> skipIncoming;   //!< sessions on the card that are not imported
+};
+
+/*! \brief Decides whether a night on the card may replace what is stored for the same hours.
+
+    An import re-reads the last imported day and replaces what is stored for it. That is
+    right when the card still holds the night's waveform. A card that was formatted has the
+    device's recent nights written back to it as events only; importing one of those must
+    not replace a stored night that has waveform (GitLab #419).
+
+    When any session in \a incoming has waveform the plan is empty and the night is replaced
+    as before. Otherwise every session in \a stored that has waveform is kept, and each
+    session in \a incoming that overlaps one of them is skipped. A session on the card that
+    overlaps none of them (a later one, recorded after the stored ones) is still imported.
+
+    \param incoming The night's sessions as read from the card.
+    \param stored   The device's stored sessions around the same time.
+ */
+BmcReplacementPlan BmcPlanNightReplacement(const QList<BmcSessionSpan> & incoming,
+                                           const QList<BmcSessionSpan> & stored);
+
 class BmcLoaderTask: public ImportTask
 {
 public:
