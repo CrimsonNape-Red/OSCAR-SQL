@@ -2789,14 +2789,12 @@ Hint: Change the start date first</source>
         <translation type="unfinished">アクティブなドリフトモデル: なし</translation>
     </message>
     <message>
-        <location filename="../oscar/driftanalysisdialog.ui" line="101"/>
         <source>font-style: italic; color: #555555;</source>
-        <translation type="unfinished">font-style: italic; color: #555555;</translation>
+        <translation type="obsolete">font-style: italic; color: #555555;</translation>
     </message>
     <message>
-        <location filename="../oscar/driftanalysisdialog.ui" line="108"/>
         <source>color: #cc6600; font-weight: bold;</source>
-        <translation type="unfinished">color: #cc6600; font-weight: bold;</translation>
+        <translation type="obsolete">color: #cc6600; font-weight: bold;</translation>
     </message>
     <message>
         <location filename="../oscar/driftanalysisdialog.cpp" line="78"/>
@@ -3812,8 +3810,8 @@ Do you want to continue?</source>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="1541"/>
-        <location filename="../oscar/mainwindow.cpp" line="4290"/>
-        <location filename="../oscar/mainwindow.cpp" line="4322"/>
+        <location filename="../oscar/mainwindow.cpp" line="4297"/>
+        <location filename="../oscar/mainwindow.cpp" line="4329"/>
         <source>Import</source>
         <translation>インポート</translation>
     </message>
@@ -4285,7 +4283,7 @@ Do you want to continue?</source>
     </message>
     <message>
         <location filename="../oscar/mainwindow.ui" line="986"/>
-        <location filename="../oscar/mainwindow.cpp" line="5047"/>
+        <location filename="../oscar/mainwindow.cpp" line="5054"/>
         <source>Import Journal</source>
         <translation type="unfinished">ジャーナルをインポート</translation>
     </message>
@@ -4417,7 +4415,7 @@ Do you want to continue?</source>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="855"/>
         <location filename="../oscar/mainwindow.cpp" line="2201"/>
-        <location filename="../oscar/mainwindow.cpp" line="3903"/>
+        <location filename="../oscar/mainwindow.cpp" line="3910"/>
         <source>Welcome</source>
         <translation>ようこそ</translation>
     </message>
@@ -4449,13 +4447,13 @@ Do you want to continue?</source>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="1181"/>
-        <location filename="../oscar/mainwindow.cpp" line="4374"/>
+        <location filename="../oscar/mainwindow.cpp" line="4381"/>
         <source>Database Locked</source>
         <translation type="unfinished">データベースがロックされています</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="1182"/>
-        <location filename="../oscar/mainwindow.cpp" line="4375"/>
+        <location filename="../oscar/mainwindow.cpp" line="4382"/>
         <source>Cannot import data: the OSCAR database is locked by another application.
 
 If you have the database open in a SQLite viewer or editor, please close it and try again.
@@ -4478,7 +4476,7 @@ Error: %1</source>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="1281"/>
-        <location filename="../oscar/mainwindow.cpp" line="4428"/>
+        <location filename="../oscar/mainwindow.cpp" line="4435"/>
         <source>The imported data could not be saved to the database. No data was stored.
 
 If you have the OSCAR database open in another application (e.g., a SQLite viewer or editor), please close it and try again.
@@ -4497,8 +4495,8 @@ OSCARデータベースを別のアプリケーション（例：SQLiteビュー
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="1541"/>
-        <location filename="../oscar/mainwindow.cpp" line="4290"/>
-        <location filename="../oscar/mainwindow.cpp" line="4322"/>
+        <location filename="../oscar/mainwindow.cpp" line="4297"/>
+        <location filename="../oscar/mainwindow.cpp" line="4329"/>
         <source>Please open or create a profile before importing data.</source>
         <translation type="unfinished">データをインポートする前に、プロファイルを開くか作成してください。</translation>
     </message>
@@ -4692,53 +4690,53 @@ Are you sure?</source>
         <translation type="vanished">ヘルプがありません。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3941"/>
+        <location filename="../oscar/mainwindow.cpp" line="3948"/>
         <source>Apple Health Import</source>
         <translation type="unfinished">Apple Healthインポート</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3942"/>
+        <location filename="../oscar/mainwindow.cpp" line="3949"/>
         <source>How much of your Apple Health history should be imported?</source>
         <translation type="unfinished">Apple Healthの履歴のどの範囲をインポートしますか？</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3945"/>
+        <location filename="../oscar/mainwindow.cpp" line="3952"/>
         <source>Overlapping CPAP history (recommended)</source>
         <translation type="unfinished">CPAP履歴と重複する期間 (推奨)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3947"/>
+        <location filename="../oscar/mainwindow.cpp" line="3954"/>
         <source>Full history</source>
         <translation type="unfinished">全履歴</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3969"/>
-        <location filename="../oscar/mainwindow.cpp" line="4038"/>
+        <location filename="../oscar/mainwindow.cpp" line="3976"/>
+        <location filename="../oscar/mainwindow.cpp" line="4045"/>
         <source>%1 (%2 records)</source>
         <translation type="unfinished">%1 (%2件のレコード)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3979"/>
+        <location filename="../oscar/mainwindow.cpp" line="3986"/>
         <source>Apple Health Sleep Source</source>
         <translation type="unfinished">Apple Healthの睡眠データソース</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3979"/>
+        <location filename="../oscar/mainwindow.cpp" line="3986"/>
         <source>Choose the source for sleep stages:</source>
         <translation type="unfinished">睡眠ステージのソースを選択してください:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3989"/>
+        <location filename="../oscar/mainwindow.cpp" line="3996"/>
         <source>Reading Apple Health export...</source>
         <translation type="unfinished">Apple Healthエクスポートを読み込み中...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4020"/>
+        <location filename="../oscar/mainwindow.cpp" line="4027"/>
         <source>No matching Apple Watch source</source>
         <translation type="unfinished">一致するApple Watchのソースがありません</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4022"/>
+        <location filename="../oscar/mainwindow.cpp" line="4029"/>
         <source>Imported %1 sleep session(s) and %2 vitals session(s).
 Skipped %3 already-imported night(s).
 Sleep source: %4</source>
@@ -4747,42 +4745,42 @@ Sleep source: %4</source>
 睡眠ソース: %4</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4031"/>
+        <location filename="../oscar/mainwindow.cpp" line="4038"/>
         <source>Vitals sources: %1</source>
         <translation type="unfinished">バイタルソース: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4032"/>
+        <location filename="../oscar/mainwindow.cpp" line="4039"/>
         <source>none</source>
         <translation type="unfinished">なし</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4043"/>
+        <location filename="../oscar/mainwindow.cpp" line="4050"/>
         <source>Ignored vitals from: %1</source>
         <translation type="unfinished">%1 からのバイタルを無視しました</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4047"/>
+        <location filename="../oscar/mainwindow.cpp" line="4054"/>
         <source>Imported weight for %1 day(s).</source>
         <translation type="unfinished">%1日分の体重をインポートしました。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4050"/>
+        <location filename="../oscar/mainwindow.cpp" line="4057"/>
         <source>Apple Health Import Summary</source>
         <translation type="unfinished">Apple ヘルスインポートの概要</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4141"/>
+        <location filename="../oscar/mainwindow.cpp" line="4148"/>
         <source>Failed to restart OSCAR. Please restart it manually.</source>
         <translation type="unfinished">OSCARの再起動に失敗しました。手動で再起動してください。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4165"/>
+        <location filename="../oscar/mainwindow.cpp" line="4172"/>
         <source> (active)</source>
         <translation type="unfinished"> (アクティブ)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4175"/>
+        <location filename="../oscar/mainwindow.cpp" line="4182"/>
         <source>(none)</source>
         <translation type="unfinished">(なし)</translation>
     </message>
@@ -4801,40 +4799,40 @@ Use File ▸ Database ▸ Open to open an existing database.</source>
 既存のデータベースを開くには、ファイル ▸ データベース ▸ 開く を使用してください。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4197"/>
+        <location filename="../oscar/mainwindow.cpp" line="4204"/>
         <source>Select OSCAR Database Folder</source>
         <translation type="unfinished">OSCARデータベースフォルダーの選択</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4205"/>
-        <location filename="../oscar/mainwindow.cpp" line="4211"/>
+        <location filename="../oscar/mainwindow.cpp" line="4212"/>
+        <location filename="../oscar/mainwindow.cpp" line="4218"/>
         <source>Open Database</source>
         <translation type="unfinished">データベースを開く</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4206"/>
+        <location filename="../oscar/mainwindow.cpp" line="4213"/>
         <source>The selected folder contains OSCAR 1.x data, which OSCAR 2 cannot open directly.</source>
         <translation type="unfinished">選択されたフォルダにはOSCAR 1.xのデータが含まれていますが、OSCAR 2ではこれを直接開くことができません。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4207"/>
+        <location filename="../oscar/mainwindow.cpp" line="4214"/>
         <source>To bring that data into OSCAR 2, use File ▸ Profiles ▸ Import from OSCAR...</source>
         <translation type="unfinished">そのデータをOSCAR 2に取り込むには、ファイル ▸ プロファイル ▸ OSCARからインポート... を使用してください。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4212"/>
+        <location filename="../oscar/mainwindow.cpp" line="4219"/>
         <source>The selected folder does not contain an OSCAR database.
 Please select a folder that contains an oscar.db file.</source>
         <translation type="unfinished">選択したフォルダーにはOSCARデータベースが含まれていません。
 oscar.dbファイルが含まれているフォルダーを選択してください。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4235"/>
+        <location filename="../oscar/mainwindow.cpp" line="4242"/>
         <source>Delete Database</source>
         <translation type="unfinished">データベースの削除</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4236"/>
+        <location filename="../oscar/mainwindow.cpp" line="4243"/>
         <source>There are no inactive databases in the recent list to delete.
 
 Open databases with File ▸ Database ▸ Open first to add them to the recent list.</source>
@@ -4843,68 +4841,68 @@ Open databases with File ▸ Database ▸ Open first to add them to the recent l
 先にファイル ▸ データベース ▸ 開く でデータベースを開き、最近のリストに追加してください。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4440"/>
+        <location filename="../oscar/mainwindow.cpp" line="4447"/>
         <source>Import aborted: %1 file(s) already imported were kept</source>
         <translation type="unfinished">インポートは中止されました: すでにインポート済みのファイル %1 個は保持されました</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4584"/>
+        <location filename="../oscar/mainwindow.cpp" line="4591"/>
         <source>Importing %1 data</source>
         <translation type="unfinished">%1 のデータをインポート中</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4697"/>
+        <location filename="../oscar/mainwindow.cpp" line="4704"/>
         <source>Importing data</source>
         <translation type="unfinished">データをインポート中</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4698"/>
+        <location filename="../oscar/mainwindow.cpp" line="4705"/>
         <source>Importing data, as requested on the command line...</source>
         <translation type="unfinished">コマンドラインの指定に従ってデータをインポート中...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4711"/>
+        <location filename="../oscar/mainwindow.cpp" line="4718"/>
         <source>Importing %1 data, as requested on the command line...</source>
         <translation type="unfinished">コマンドラインの指定に従って %1 のデータをインポート中...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4966"/>
+        <location filename="../oscar/mainwindow.cpp" line="4973"/>
         <source>Purging oximetry data...</source>
         <translation type="unfinished">オキシメトリデータを消去しています...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5038"/>
+        <location filename="../oscar/mainwindow.cpp" line="5045"/>
         <source>You must select and open the profile you wish to modify</source>
         <translation>変更したいプロフィールを選んで開いてください</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5047"/>
-        <location filename="../oscar/mainwindow.cpp" line="5067"/>
+        <location filename="../oscar/mainwindow.cpp" line="5054"/>
+        <location filename="../oscar/mainwindow.cpp" line="5074"/>
         <source>No profile is currently open.</source>
         <translation type="unfinished">現在開いているプロファイルがありません。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5052"/>
+        <location filename="../oscar/mainwindow.cpp" line="5059"/>
         <source>Choose where to read journal</source>
         <translation type="unfinished">日誌の読み込み場所を選択</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5067"/>
+        <location filename="../oscar/mainwindow.cpp" line="5074"/>
         <source>Export Journal</source>
         <translation type="unfinished">日誌のエクスポート</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5079"/>
+        <location filename="../oscar/mainwindow.cpp" line="5086"/>
         <source>%1&apos;s Journal</source>
         <translation>%1のジャーナル</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5081"/>
+        <location filename="../oscar/mainwindow.cpp" line="5088"/>
         <source>Choose where to save the journal</source>
         <translation>ジャーナルの保存先を選んでください</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5370"/>
+        <location filename="../oscar/mainwindow.cpp" line="5377"/>
         <source>This will compact the database to reclaim unused disk space. It is most useful after deleting profiles.
 
 Current database size: %1
@@ -4921,7 +4919,7 @@ Continue?</source>
 続行しますか？</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5416"/>
+        <location filename="../oscar/mainwindow.cpp" line="5423"/>
         <source>The database integrity check failed. Compression cannot proceed on a damaged database.
 
 Recommended actions:
@@ -4940,7 +4938,7 @@ For advanced recovery options, see the OSCAR documentation.</source>
 高度な復元オプションについては、OSCARのドキュメントを参照してください。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5436"/>
+        <location filename="../oscar/mainwindow.cpp" line="5443"/>
         <source>Compressing database, please wait...
 
 This may take several minutes for large databases.</source>
@@ -4949,7 +4947,7 @@ This may take several minutes for large databases.</source>
 大きなデータベースの場合、数分かかることがあります。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5508"/>
+        <location filename="../oscar/mainwindow.cpp" line="5515"/>
         <source>Compression succeeded but the database file could not be replaced.
 
 The original database is unchanged.</source>
@@ -4958,22 +4956,22 @@ The original database is unchanged.</source>
 元のデータベースは変更されていません。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5524"/>
+        <location filename="../oscar/mainwindow.cpp" line="5531"/>
         <source>The compressed database could not be put in place, and OSCAR could not put the original database back.</source>
         <translation type="unfinished">圧縮したデータベースを配置できず、OSCAR は元のデータベースを戻すこともできませんでした。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5526"/>
+        <location filename="../oscar/mainwindow.cpp" line="5533"/>
         <source>Your data is safe in this file:</source>
         <translation type="unfinished">データは次のファイルに安全に保存されています:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5527"/>
+        <location filename="../oscar/mainwindow.cpp" line="5534"/>
         <source>OSCAR will now close. Before starting OSCAR again, rename that file to oscar.db.</source>
         <translation type="unfinished">OSCAR を終了します。OSCAR を再起動する前に、そのファイルの名前を oscar.db に変更してください。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5535"/>
+        <location filename="../oscar/mainwindow.cpp" line="5542"/>
         <source>Compression succeeded but the new file could not be put in place.
 
 The original database has been restored.</source>
@@ -4982,7 +4980,7 @@ The original database has been restored.</source>
 元のデータベースは復元されました。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5547"/>
+        <location filename="../oscar/mainwindow.cpp" line="5554"/>
         <source>Database compressed successfully.
 
 Before:    %1
@@ -4999,7 +4997,7 @@ OSCAR will restart when you press OK.</source>
 OKを押すとOSCARが再起動します。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5556"/>
+        <location filename="../oscar/mainwindow.cpp" line="5563"/>
         <source>Database compressed successfully.
 
 Size: %1
@@ -5016,71 +5014,71 @@ OSCAR will restart when you press OK.</source>
 OKを押すとOSCARが再起動します。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5679"/>
+        <location filename="../oscar/mainwindow.cpp" line="5686"/>
         <source>Copy to Clipboard</source>
         <translation type="unfinished">クリップボードにコピー</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5054"/>
-        <location filename="../oscar/mainwindow.cpp" line="5081"/>
+        <location filename="../oscar/mainwindow.cpp" line="5061"/>
+        <location filename="../oscar/mainwindow.cpp" line="5088"/>
         <source>XML Files (*.xml)</source>
         <translation>XMLファイル (*.xml)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5162"/>
+        <location filename="../oscar/mainwindow.cpp" line="5169"/>
         <source>Export review is not yet implemented</source>
         <translation>レビューのエクスポートはまだ実装されていません</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5172"/>
+        <location filename="../oscar/mainwindow.cpp" line="5179"/>
         <source>Would you like to zip this card?</source>
         <translation>このカードをZIP圧縮しますか？</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5194"/>
-        <location filename="../oscar/mainwindow.cpp" line="5267"/>
-        <location filename="../oscar/mainwindow.cpp" line="5588"/>
+        <location filename="../oscar/mainwindow.cpp" line="5201"/>
+        <location filename="../oscar/mainwindow.cpp" line="5274"/>
+        <location filename="../oscar/mainwindow.cpp" line="5595"/>
         <source>Choose where to save zip</source>
         <translation>ZIPファイルの保存先を選んでください</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5194"/>
-        <location filename="../oscar/mainwindow.cpp" line="5267"/>
-        <location filename="../oscar/mainwindow.cpp" line="5588"/>
+        <location filename="../oscar/mainwindow.cpp" line="5201"/>
+        <location filename="../oscar/mainwindow.cpp" line="5274"/>
+        <location filename="../oscar/mainwindow.cpp" line="5595"/>
         <source>ZIP files (*.zip)</source>
         <translation>ZIPファイル(*.zip)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5241"/>
-        <location filename="../oscar/mainwindow.cpp" line="5281"/>
+        <location filename="../oscar/mainwindow.cpp" line="5248"/>
+        <location filename="../oscar/mainwindow.cpp" line="5288"/>
         <source>Creating zip...</source>
         <translation>ZIPファイルを作成しています…</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5226"/>
+        <location filename="../oscar/mainwindow.cpp" line="5233"/>
         <source>Calculating size...</source>
         <translation>サイズを計算しています…</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5314"/>
-        <location filename="../oscar/mainwindow.cpp" line="5341"/>
-        <location filename="../oscar/mainwindow.cpp" line="5345"/>
+        <location filename="../oscar/mainwindow.cpp" line="5321"/>
+        <location filename="../oscar/mainwindow.cpp" line="5348"/>
+        <location filename="../oscar/mainwindow.cpp" line="5352"/>
         <source>Check Database Integrity</source>
         <translation type="unfinished">データベースの整合性チェック</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5318"/>
-        <location filename="../oscar/mainwindow.cpp" line="5410"/>
+        <location filename="../oscar/mainwindow.cpp" line="5325"/>
+        <location filename="../oscar/mainwindow.cpp" line="5417"/>
         <source>Checking database integrity, please wait...</source>
         <translation type="unfinished">データベースの整合性をチェックしています。しばらくお待ちください...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5342"/>
+        <location filename="../oscar/mainwindow.cpp" line="5349"/>
         <source>The database integrity check passed. No problems were found.</source>
         <translation type="unfinished">データベースの整合性チェックに合格しました。問題は見つかりませんでした。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5346"/>
+        <location filename="../oscar/mainwindow.cpp" line="5353"/>
         <source>The database integrity check found problems. Some data may be missing or corrupted.
 
 The integrity check covers the entire database, which may contain multiple profiles.
@@ -5103,14 +5101,14 @@ For advanced recovery options, see the OSCAR documentation.</source>
 高度な復元オプションについては、OSCARのドキュメントを参照してください。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5369"/>
-        <location filename="../oscar/mainwindow.cpp" line="5384"/>
-        <location filename="../oscar/mainwindow.cpp" line="5415"/>
-        <location filename="../oscar/mainwindow.cpp" line="5461"/>
-        <location filename="../oscar/mainwindow.cpp" line="5507"/>
-        <location filename="../oscar/mainwindow.cpp" line="5523"/>
-        <location filename="../oscar/mainwindow.cpp" line="5534"/>
-        <location filename="../oscar/mainwindow.cpp" line="5562"/>
+        <location filename="../oscar/mainwindow.cpp" line="5376"/>
+        <location filename="../oscar/mainwindow.cpp" line="5391"/>
+        <location filename="../oscar/mainwindow.cpp" line="5422"/>
+        <location filename="../oscar/mainwindow.cpp" line="5468"/>
+        <location filename="../oscar/mainwindow.cpp" line="5514"/>
+        <location filename="../oscar/mainwindow.cpp" line="5530"/>
+        <location filename="../oscar/mainwindow.cpp" line="5541"/>
+        <location filename="../oscar/mainwindow.cpp" line="5569"/>
         <source>Compress Database</source>
         <translation type="unfinished">データベースの圧縮</translation>
     </message>
@@ -5123,7 +5121,7 @@ This may take several minutes. Continue?</source>
         <translation type="obsolete">データベースを圧縮して未使用のディスク領域を解放します。プロファイルを削除した後に最も効果的です。\n\n現在のデータベースサイズ: %1\n\n数分かかる場合があります。続行しますか？</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5462"/>
+        <location filename="../oscar/mainwindow.cpp" line="5469"/>
         <source>Database compression failed:
 %1</source>
         <translation type="unfinished">データベースの圧縮に失敗しました:
@@ -5146,23 +5144,23 @@ No space was reclaimed — the database was already compact.</source>
         <translation type="obsolete">データベースの圧縮が完了しました。\n\nサイズ: %1\n\n領域は解放されませんでした — データベースはすでに圧縮済みです。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5604"/>
+        <location filename="../oscar/mainwindow.cpp" line="5611"/>
         <source>Unable to create zip: the database is locked by another process.</source>
         <translation type="unfinished">ZIPファイルを作成できません：データベースが別のプロセスによってロックされています。</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5613"/>
+        <location filename="../oscar/mainwindow.cpp" line="5620"/>
         <source>Creating %1.zip...</source>
         <translation type="unfinished">%1.zipを作成中...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5649"/>
+        <location filename="../oscar/mainwindow.cpp" line="5656"/>
         <source>Reporting issues is not yet implemented</source>
         <translation>問題の報告はまだ実装されていません</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="1809"/>
-        <location filename="../oscar/mainwindow.cpp" line="5660"/>
+        <location filename="../oscar/mainwindow.cpp" line="5667"/>
         <source>OSCAR Information</source>
         <translation>OSCAR情報</translation>
     </message>
@@ -5192,7 +5190,7 @@ No space was reclaimed — the database was already compact.</source>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="1150"/>
-        <location filename="../oscar/mainwindow.cpp" line="4517"/>
+        <location filename="../oscar/mainwindow.cpp" line="4524"/>
         <source>Importing CPAP data</source>
         <translation type="unfinished">CPAPデータをインポート中</translation>
     </message>
@@ -5218,7 +5216,7 @@ You can now select it from the profile selector.</source>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="1280"/>
         <location filename="../oscar/mainwindow.cpp" line="1627"/>
-        <location filename="../oscar/mainwindow.cpp" line="4427"/>
+        <location filename="../oscar/mainwindow.cpp" line="4434"/>
         <source>Import Failed</source>
         <translation type="unfinished">インポート失敗</translation>
     </message>
@@ -5412,51 +5410,51 @@ You can now select it from the profile selector.</source>
         <translation type="unfinished">サマリーを再計算中</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4082"/>
+        <location filename="../oscar/mainwindow.cpp" line="4089"/>
         <source>The Glossary will open in your default browser</source>
         <translation>デフォルトのブラウザで用語集が開きます</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4445"/>
+        <location filename="../oscar/mainwindow.cpp" line="4452"/>
         <source>There was a problem parsing %1 
 Data File: %2</source>
         <translation type="unfinished">%1 の解析中に問題が発生しました
 データファイル：%2</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4449"/>
-        <location filename="../oscar/mainwindow.cpp" line="4452"/>
+        <location filename="../oscar/mainwindow.cpp" line="4456"/>
+        <location filename="../oscar/mainwindow.cpp" line="4459"/>
         <source>There was a problem opening %1 Data File: %2</source>
         <translation>データファイル %2 で %1 を開く際に問題が発生しました</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4451"/>
+        <location filename="../oscar/mainwindow.cpp" line="4458"/>
         <source>%1 Data Import of %2 file(s) complete</source>
         <translation>%1 データインポート %2 個のファイルのインポート完了</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4441"/>
-        <location filename="../oscar/mainwindow.cpp" line="4453"/>
+        <location filename="../oscar/mainwindow.cpp" line="4448"/>
+        <location filename="../oscar/mainwindow.cpp" line="4460"/>
         <source>%1 Import Partial Success</source>
         <translation>%1 インポートが部分的に成功</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4455"/>
+        <location filename="../oscar/mainwindow.cpp" line="4462"/>
         <source>%1 Data Import complete</source>
         <translation>%1 データインポート完了</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4951"/>
+        <location filename="../oscar/mainwindow.cpp" line="4958"/>
         <source>Are you sure you want to delete oximetry data for %1</source>
         <translation>%1のオキシメーターのデータを消去しますか</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4960"/>
+        <location filename="../oscar/mainwindow.cpp" line="4967"/>
         <source>&lt;b&gt;Please be aware you can not undo this operation!&lt;/b&gt;</source>
         <translation>&lt;b&gt;この操作を取り消すことはできません!&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4997"/>
+        <location filename="../oscar/mainwindow.cpp" line="5004"/>
         <source>Select the day with valid oximetry data in daily view first.</source>
         <translation>日次ビューから正しいオキシメーターのデータを選択してください。</translation>
     </message>
@@ -5548,12 +5546,12 @@ Data File: %2</source>
         <translation>ご自分のバックアップからインポートしますか？（インポートするまでこのデバイスのデータは見ることができません。）</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4069"/>
+        <location filename="../oscar/mainwindow.cpp" line="4076"/>
         <source>There was a problem opening MSeries block File: </source>
         <translation>MSeriesブロックファイルを開く際に問題が発生しました: </translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4073"/>
+        <location filename="../oscar/mainwindow.cpp" line="4080"/>
         <source>MSeries Import complete</source>
         <translation>MSeries インポート完了</translation>
     </message>
@@ -5573,42 +5571,42 @@ Data File: %2</source>
 <context>
     <name>MinMaxWidget</name>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2371"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2363"/>
         <source>Auto-Fit</source>
         <translation>自動で合わせる</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2372"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2364"/>
         <source>Defaults</source>
         <translation>デフォルト</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2373"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2365"/>
         <source>Override</source>
         <translation>書き換える</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2374"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2366"/>
         <source>The Y-Axis scaling mode, &apos;Auto-Fit&apos; for automatic scaling, &apos;Defaults&apos; for settings according to manufacturer, and &apos;Override&apos; to choose your own.</source>
         <translation>Y軸のスケーリングモードでは &#x3000;「自動で合わせる」を選ぶと自動的に拡大縮小されます。「デフォルト」は機器製造元の設定に合わせる場合、「書き換える」は自身の設定をする場合に選びます。</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2380"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2372"/>
         <source>The Minimum Y-Axis value.. Note this can be a negative number if you wish.</source>
         <translation>Y軸の最低値  必要があればこの値に負の値を設定することができます。</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2381"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2373"/>
         <source>The Maximum Y-Axis value.. Must be greater than Minimum to work.</source>
         <translation>Y軸の最大値  最低値より大きくなければいけません。</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2416"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2408"/>
         <source>Scaling Mode</source>
         <translation>スケーリングモード</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2438"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2430"/>
         <source>This button resets the Min and Max to match the Auto-Fit</source>
         <translation>このボタンは最小と最大を自動で合わせる設定と同じにします</translation>
     </message>
@@ -7467,62 +7465,62 @@ Index</source>
         <translation>SD カードのバックアップを圧縮する (最初のインポートは遅くなりますが、バックアップが小さくなります）</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1633"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1635"/>
         <source>Regard days with under this usage as &quot;noncompliant&quot;. 4 hours is usually considered compliant.</source>
         <translation>この日数以下は「違反」とみなします。 通常、4 時間は準拠していると見なされます。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1039"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1041"/>
         <source>Flow Restriction</source>
         <translation>流量制限</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1076"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1078"/>
         <source>Percentage of restriction in airflow from the median value. 
 A value of 20% works well for detecting apneas. </source>
         <translation>中央値からの流量制限のパーセンテージ。
 20% の値は、無呼吸の検出に適しています。 </translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1097"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1099"/>
         <source>Duration of airflow restriction</source>
         <translation>気流制限の時間</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="980"/>
-        <location filename="../oscar/preferencesdialog.ui" line="1100"/>
-        <location filename="../oscar/preferencesdialog.ui" line="1826"/>
-        <location filename="../oscar/preferencesdialog.ui" line="1928"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2009"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2048"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1102"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1828"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1930"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2011"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2050"/>
         <source>s</source>
         <translatorcomment>If this is &quot;plural&quot; s, Japanese nouns do not conjugate when it is plural</translatorcomment>
         <translation>秒</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1136"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1138"/>
         <source>Event Duration</source>
         <translation>イベント期間</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1194"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1196"/>
         <source>Adjusts the amount of data considered for each point in the AHI/Hour graph.
 Defaults to 60 minutes.. Highly recommend it&apos;s left at this value.</source>
         <translation>AHI/時のグラフで対象とするデータの量を調整します。
 デフォルトは60分です。この値のままを強くお勧めします。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1198"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1200"/>
         <source> minutes</source>
         <translation> 分</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1237"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1239"/>
         <source>Reset the counter to zero at beginning of each (time) window.</source>
         <translation>それぞれの（時間）の範囲の最初でカウンターをゼロにリセットする。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1240"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1242"/>
         <source>Zero Reset</source>
         <translation>ゼロにリセット</translation>
     </message>
@@ -7546,50 +7544,50 @@ Defaults to 60 minutes.. Highly recommend it&apos;s left at this value.</source>
         <translation type="vanished">yyyy MMMM dd</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1253"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1255"/>
         <source>User definable threshold considered large leak</source>
         <translation>大きな漏れとして扱うユーザー定義可能なしきい値</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1220"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1222"/>
         <source>Whether to show the leak redline in the leak graph</source>
         <translation>漏れのグラフに漏れの赤い線を表示する</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2174"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2253"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2176"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2255"/>
         <source>Search</source>
         <translation>検索</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1090"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1092"/>
         <source>Show in Event Breakdown Piechart</source>
         <translation>イベント毎円グラフで表示する</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2074"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2076"/>
         <source>Percentage drop in oxygen saturation</source>
         <translation>酸素飽和度低下のパーセンテージ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2038"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2040"/>
         <source>Pulse</source>
         <translation>脈拍</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2058"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2060"/>
         <source>Sudden change in Pulse Rate of at least this amount</source>
         <translation>この範囲での突然の脈拍数の変化</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1918"/>
-        <location filename="../oscar/preferencesdialog.ui" line="1951"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2061"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1920"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1953"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2063"/>
         <source> bpm</source>
         <translation> bpm</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2006"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2008"/>
         <source>Minimum duration of drop in oxygen saturation</source>
         <translation>酸素飽和度低下の最低の期間</translation>
     </message>
@@ -7602,22 +7600,22 @@ Defaults to 60 minutes.. Highly recommend it&apos;s left at this value.</source>
         <translation type="vanished">この値以下の小さなオキシメトリーのデータのかたまりは破棄されます。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1295"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1297"/>
         <source>Changes to the following settings need a restart, but not a recalc.</source>
         <translation>以下の設定の変更は、再計算ではなく、再起動が必要です。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1298"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1300"/>
         <source>Preferred Calculation Methods</source>
         <translation>計算方法の設定</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1327"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1329"/>
         <source>Middle Calculations</source>
         <translation>中間計算</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1341"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1343"/>
         <source>Upper Percentile</source>
         <translation>上位パーセンタイル</translation>
     </message>
@@ -7677,44 +7675,44 @@ Defaults to 60 minutes.. Highly recommend it&apos;s left at this value.</source>
         <translation>注: 線形計算方法が使用されます。 これらの値を変更するには、再計算が必要です。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1165"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1167"/>
         <source>General CPAP and Related Settings</source>
         <translation>一般的な CPAP および関連の設定</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1174"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1176"/>
         <source>Enable Unknown Events Channels</source>
         <translation>不明なイベント チャネルを有効にする</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1273"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1275"/>
         <source>AHI</source>
         <extracomment>Apnea Hypopnea Index</extracomment>
         <translation>AHI</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1278"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1280"/>
         <source>RDI</source>
         <extracomment>Respiratory Disturbance Index</extracomment>
         <translation>RDI</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1181"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1183"/>
         <source>AHI/Hour Graph Time Window</source>
         <translation>AHI/時グラフ 時間ウインドウ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1230"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1232"/>
         <source>Preferred major event index</source>
         <translation>主なイベントインデックスの設定</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1636"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1638"/>
         <source>Compliance defined as</source>
         <translation>コンプライアンスの定義</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1223"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1225"/>
         <source>Flag leaks over threshold</source>
         <translation>しきい値を超える漏れを指摘する</translation>
     </message>
@@ -7731,72 +7729,72 @@ Defaults to 60 minutes.. Highly recommend it&apos;s left at this value.</source>
         <translation type="vanished">時間</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1304"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1306"/>
         <source>For consistency, ResMed users should use 95% here,
 as this is the only value available on summary-only days.</source>
         <translation>一貫性を保つため、ResMed ユーザーはここを 95% としてください。
 概要のみの日にはこれが唯一の値です。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1355"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1357"/>
         <source>Median is recommended for ResMed users.</source>
         <translation>ResMedユーザーには中央値を推奨します。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1359"/>
-        <location filename="../oscar/preferencesdialog.ui" line="1422"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1361"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1424"/>
         <source>Median</source>
         <translation>中央値</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1364"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1366"/>
         <source>Weighted Average</source>
         <translation>加重平均</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1369"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1371"/>
         <source>Normal Average</source>
         <translation>単純平均</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1393"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1395"/>
         <source>True Maximum</source>
         <translation>真の最大値</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1398"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1400"/>
         <source>99% Percentile</source>
         <translation>99% パーセンタイル</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1334"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1336"/>
         <source>Maximum Calcs</source>
         <translation>最大の計算</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2323"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2325"/>
         <source>General Settings</source>
         <translation>一般設定</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3150"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3152"/>
         <source>Daily view navigation buttons will skip over days without data records</source>
         <translation>日時表示のボタンはデータが記録されていない日を飛ばします</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3153"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3155"/>
         <source>Skip over Empty Days</source>
         <translation>データのない日を飛ばす</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2344"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2346"/>
         <source>Allow use of multiple CPU cores where available to improve performance. 
 Mainly affects the importer.</source>
         <translation>性能向上のために複数の CPU コアを使うことを許可する 
 主にデータをインポートする際に影響があります。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2348"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2350"/>
         <source>Enable Multithreading</source>
         <translation>マルチスレッディングを有効にする</translation>
     </message>
@@ -7811,22 +7809,22 @@ Mainly affects the importer.</source>
         <translation>インポート中に SD カードのバックアップを作成する （自己責任でこれをオフにしてください！）</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1389"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1391"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;True maximum is the maximum of the data set.&lt;/p&gt;&lt;p&gt;99th percentile filters out the rarest outliers.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;True maximum is the maximum of the data set.&lt;/p&gt;&lt;p&gt;99th percentile filters out the rarest outliers.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1407"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1409"/>
         <source>Combined Count divided by Total Hours</source>
         <translation>合計カウントを合計時間で割った値</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1412"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1414"/>
         <source>Time Weighted average of Indices</source>
         <translation>インデックスの時間加重平均</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1417"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1419"/>
         <source>Standard average of indices</source>
         <translation>インデックスの標準平均</translation>
     </message>
@@ -7836,33 +7834,33 @@ Mainly affects the importer.</source>
         <translation>カスタム CPAP ユーザー イベントのフラグ設定</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2151"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2153"/>
         <source>Events</source>
         <translation>イベント</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2217"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2296"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2219"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2298"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Warning: &lt;/span&gt;Just because you can, does not mean it&apos;s good practice.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;警告: &lt;/span&gt;出来るということだけで、良いやり方とは言えません。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2230"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2232"/>
         <source>Waveforms</source>
         <translation>波形</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2000"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2002"/>
         <source>Flag rapid changes in oximetry stats</source>
         <translation>オキシメトリーの統計の急な変化にフラグをつける</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1899"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1901"/>
         <source>Other oximetry options</source>
         <translation>その他のオキシメトリーのオプション</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1938"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1940"/>
         <source>Discard segments under</source>
         <translation>以下のセグメントを破棄</translation>
     </message>
@@ -7909,22 +7907,31 @@ If you&apos;ve got a new computer with a small solid state disk, this is a good 
         <translation>20 cmH2O</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1763"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1000"/>
+        <source>This experimental option attempts to use OSCAR&apos;s event flagging system to improve device detected event positioning.
+
+It only applies to device events that have a duration, and only while duplicates near device events are not allowed. The changed positions and durations are saved with your data: turning the option off does not restore them, only purging and re-importing the data does.</source>
+        <translation type="unfinished">この実験的なオプションは、OSCAR のイベント フラグ システムを使用して、デバイスで検出されたイベントの位置を改善しようとします。
+
+持続時間のあるデバイス イベントにのみ適用され、デバイス イベント付近の重複が許可されていない場合にのみ有効です。変更された位置と持続時間はデータとともに保存されます。オプションをオフにしても元に戻らず、データを消去して再インポートした場合にのみ元に戻ります。</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.ui" line="1765"/>
         <source>Oximetry Settings</source>
         <translation type="unfinished">オキシメーター設定</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1787"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1789"/>
         <source>SpO2 Drop Baseline</source>
         <translation type="unfinished">SpO2 低下のベースライン</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1793"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1795"/>
         <source>Method</source>
         <translation type="unfinished">方式</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1803"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1805"/>
         <source>The SpO2 level that drops are measured from.
 Rolling: the average of the readings just before, so the baseline follows slow changes through the night (recommended).
 Whole night / First hour: one value for the session, from the percentile set below.
@@ -7935,22 +7942,22 @@ Manual: the fixed value set below.</source>
 手動: 下で設定した固定値。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1813"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1815"/>
         <source>Rolling window</source>
         <translation type="unfinished">移動ウィンドウの長さ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1823"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1825"/>
         <source>How far back the rolling baseline looks. Readings already part of a drop are left out.</source>
         <translation type="unfinished">移動ウィンドウのベースラインがさかのぼる範囲です。すでに低下の一部となっている測定値は除外されます。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1842"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1844"/>
         <source>Baseline percentile</source>
         <translation type="unfinished">ベースラインのパーセンタイル</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1852"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1854"/>
         <source>For the Whole night and First hour methods: the baseline is the SpO2 level the readings are at or below for this share of the time.
 The 50th percentile (the median) suits most nights.
 Higher percentiles cope better with nights spent mostly desaturated, but on steady nights they count normal variation as drops.</source>
@@ -7959,169 +7966,169 @@ Higher percentiles cope better with nights spent mostly desaturated, but on stea
 パーセンタイルを高くすると、大半を低酸素状態で過ごした夜にうまく対応できますが、安定した夜では通常の変動を低下として数えてしまいます。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1857"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1859"/>
         <source>th</source>
         <translation type="unfinished">パーセンタイル</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1873"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1875"/>
         <source>Manual baseline</source>
         <translation type="unfinished">手動ベースライン</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1883"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1885"/>
         <source>The fixed baseline used by the Manual method. This may be useful when the automatic baselines are not typical of your data, or to compare days more easily.</source>
         <translation type="unfinished">手動方式で使用する固定ベースラインです。自動ベースラインがデータに合わない場合や、日ごとの比較を容易にしたい場合に役立ちます。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1905"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1907"/>
         <source>Where the SpO2 Lower Threshold line is drawn on the SpO2 graph. Turn the line on from the graph&apos;s right-click menu, under Dotted Lines.</source>
         <translation type="unfinished">SpO2 グラフ上で SpO2 下限しきい値の線を引く位置です。線はグラフの右クリックメニューの「点線」から表示できます。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1915"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1917"/>
         <source>Where the Pulse Lower Threshold line is drawn on the Pulse graph. Turn the line on from the graph&apos;s right-click menu, under Dotted Lines.</source>
         <translation type="unfinished">脈拍グラフ上で脈拍下限しきい値の線を引く位置です。線はグラフの右クリックメニューの「点線」から表示できます。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1925"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1927"/>
         <source>When running Data → Automatic Oximetry Cleanup, segments of oximetry data shorter than this are discarded.</source>
         <translation type="unfinished">データ → オキシメーターを自動でクリーンアップする を実行すると、これより短いオキシメーターデータの区間は破棄されます。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1948"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1950"/>
         <source>Where the Pulse Upper Threshold line is drawn on the Pulse graph. Turn the line on from the graph&apos;s right-click menu, under Dotted Lines.</source>
         <translation type="unfinished">脈拍グラフ上で脈拍上限しきい値の線を引く位置です。線はグラフの右クリックメニューの「点線」から表示できます。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1961"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1963"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SpO&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt; Lower Threshold&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SpO&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt; 下限しきい値&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1971"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1973"/>
         <source>Pulse Lower Threshold</source>
         <translation type="unfinished">脈拍下限しきい値</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1981"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1983"/>
         <source>Pulse Upper Threshold</source>
         <translation type="unfinished">脈拍上限しきい値</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2045"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2047"/>
         <source>Time window within which the pulse rate must change by at least the amount set</source>
         <translation type="unfinished">脈拍数が少なくとも設定した量だけ変化しなければならない時間枠</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2355"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2357"/>
         <source>Show Remove Card reminder notification on OSCAR shutdown</source>
         <translation>OSCAR終了時にカードを外すリマインダーを表示する</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2482"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2484"/>
         <source>Check for new version every</source>
         <translation>更新の確認を次の日数毎に行う</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2505"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2507"/>
         <source>days.</source>
         <translation>日。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2535"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2537"/>
         <source>Last Checked For Updates: </source>
         <translation>前回の更新確認： </translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2548"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2550"/>
         <source>TextLabel</source>
         <translation>テキストラベル</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2573"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2575"/>
         <source>I want to be notified of test versions. (Advanced users only please.)</source>
         <translation>テストバージョンについて通知してほしい（上級ユーザーのみ）</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2645"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2647"/>
         <source>Graph Settings</source>
         <translation>グラフ設定</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2661"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2663"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Which tab to open on loading a profile. (Note: It will default to Profile if OSCAR is set to not open a profile on startup)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;プロフィール読み込み時に開くタブ（注: OSCARが起動時にプロフィールを開く設定になっていない場合には、プロフィールになります。)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2919"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2921"/>
         <source>Bar Tops</source>
         <translation>積み上げ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2924"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2926"/>
         <source>Line Chart</source>
         <translation>折れ線</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3014"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3016"/>
         <source>Overview Linecharts</source>
         <translation>概要 - 折れ線</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2412"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2414"/>
         <source>Try changing this from the default setting (Desktop OpenGL) if you experience rendering problems with OSCAR&apos;s graphs.</source>
         <translation>OSCARのグラフのレンダリングに省略時の設定（Desktop OpenGL）で問題がある場合、本設定を変更してください。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2959"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2961"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This makes scrolling when zoomed in easier on sensitive bidirectional TouchPads&lt;/p&gt;&lt;p&gt;50ms is recommended value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;この設定を行うと、敏感な双方向タッチパッドでズームインしたときのスクロールが容易になります&lt;/p&gt;&lt;p&gt;推奨値は、50 ミリ秒です。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2853"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2855"/>
         <source>How long you want the tooltips to stay visible.</source>
         <translation>ツールチップの表示される時間。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2841"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2843"/>
         <source>Scroll Dampening</source>
         <translation>スクロール減衰</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2831"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2833"/>
         <source>Tooltip Timeout</source>
         <translation>ツールチップタイムアウト</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2938"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2940"/>
         <source>Default display height of graphs in pixels</source>
         <translation>省略時のグラフの高さ（ピクセル）</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2911"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2913"/>
         <source>Graph Tooltips</source>
         <translation>グラフツールチップ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2787"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2789"/>
         <source>The visual method of displaying waveform overlay flags.
 </source>
         <translation>波形にフラグを重ねる表示方法。
 </translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2792"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2794"/>
         <source>Standard Bars</source>
         <translation>標準バー</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2797"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2799"/>
         <source>Top Markers</source>
         <translation>トップマーカー</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2745"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2747"/>
         <source>Graph Height</source>
         <translation>グラフの高さ</translation>
     </message>
@@ -8196,32 +8203,32 @@ Higher percentiles cope better with nights spent mostly desaturated, but on stea
         <translation>マスクは 4 cmH2O ｍｐレートでで空気を排出します</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1256"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1258"/>
         <source> l/min</source>
         <translation> リットル/分</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1348"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1350"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cumulative Indices&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;累積指数&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1455"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1457"/>
         <source>Permissive Mode MUST be enabled.  See Clinical Tab </source>
         <translation type="unfinished">許可モードを有効にする必要があります。「臨床」タブを参照してください </translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1458"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1460"/>
         <source>Steady Breathing event flags and waveform - Experimental</source>
         <translation type="unfinished">安定呼吸イベントフラグと波形 - 実験的機能</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1482"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1484"/>
         <source>Enable Steady Breathing;</source>
         <translation type="unfinished">安定呼吸を有効にする;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1503"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1505"/>
         <source>Steady Breathing (SB) is based on Flow Rate.
 Creates a waveform and SPAN events using CPAP flow rate.
 Works only when Steady Breathing is enabled and CPAP data is (re)imported.  </source>
@@ -8230,44 +8237,44 @@ CPAPフローレートを使用して波形とSPANイベントを作成します
 安定呼吸が有効で、CPAPデータが（再）インポートされている場合にのみ機能します。  </translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1518"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1520"/>
         <source>Settings for Events Tab</source>
         <translation type="unfinished">イベントタブの設定</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1524"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1526"/>
         <source>Event postcontext size</source>
         <translation type="unfinished">イベントの事後コンテキストサイズ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1531"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1533"/>
         <source>Extra context shown after occurrence under Daily view Events tab</source>
         <translation type="unfinished">デイリービューのイベントタブで発生後に表示される追加コンテキスト</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1534"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1536"/>
         <source> Seconds</source>
         <translation type="unfinished"> 秒</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1553"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1555"/>
         <source>Combine events into consolidated node in tree under Daily view Events tab</source>
         <translation type="unfinished">デイリービューのイベントタブのツリーで、イベントを統合ノードにまとめる</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1556"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1558"/>
         <source>Consolidate event types</source>
         <translation type="unfinished">イベントタイプを統合する</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1684"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1686"/>
         <source>Clinical Mode does not allow disabled sessions.
 Disabled Session are not used for graphing or Statistics.</source>
         <translation type="unfinished">臨床モードでは無効なセッションは使用できません。
 無効なセッションはグラフや統計に使用されません。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1701"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1703"/>
         <source>Permissive Mode allows disabled sessions.
 Disabled Sessions are used for graphing and Statistics.</source>
         <translation type="unfinished">許可モードでは無効なセッションが使用できます。
@@ -8292,7 +8299,7 @@ It may also be useful to provide easier comparison between days.</source>
         <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SpO&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt;が次より低いときにフラグする&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2134"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2136"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -8315,134 +8322,134 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans&apos;; font-size:10pt;&quot;&gt;シリアルインポート処理では、前夜の最初のCPAPセッションの開始時刻を使用します。（最初にCPAPデータをインポートしてください！）&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2362"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2364"/>
         <source>Use MessageBox to display Notifications</source>
         <translation type="unfinished">MessageBoxを使用して通知を表示する</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2369"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2371"/>
         <source>Always save screenshots in the OSCAR Data folder</source>
         <translation>OSCARのデータフォルダに常にスクリーンショットを保管する</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2376"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2378"/>
         <source>Adds New, Open, Recent, and Delete items to File &gt; Database.
 Intended for support staff and developers.</source>
         <translation type="unfinished">ファイル＞データベースに「新規」「開く」「最近」「削除」項目を追加します。
 サポートスタッフおよび開発者向けです。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2380"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2382"/>
         <source>Add database menu items</source>
         <translation type="unfinished">データベースメニュー項目を追加</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2434"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2436"/>
         <source>Check For Updates</source>
         <translation>更新の確認</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2449"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2451"/>
         <source>You are using a test version of OSCAR. Test versions check for updates automatically at least once every seven days.  You may set the interval to less than seven days.</source>
         <translation>テストバージョンのOSCARをお使いです。テストバージョンは7日毎に最低1回更新がないかチェックします。7日より短い間隔に設定することができます。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2467"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2469"/>
         <source>Automatically check for updates</source>
         <translation>自動的に更新を確認</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2489"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2491"/>
         <source>How often OSCAR should check for updates.</source>
         <translation>OSCARが更新版を確認する間隔です。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2570"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2572"/>
         <source>If you are interested in helping test new features and bugfixes early, click here.</source>
         <translation>もしテストや新機能、バグの修正などのご興味がある場合は、ここをクリックしてください。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2586"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2588"/>
         <source>If you would like to help test early versions of OSCAR, please see the Wiki page about testing OSCAR.  We welcome everyone who would like to test OSCAR, help develop OSCAR, and help with translations to existing or new languages. https://www.sleepfiles.com/OSCAR</source>
         <translation>OSCARの開発中のバージョンの試験のお手伝いをなさりたい方は、OSCARの試験についてのWikiページをご覧下さい。OSCARを試験なさりたい方、OSCARを開発なさりたい方、既存あるいは新規の言語に対応する翻訳をお手伝いいただける方などを歓迎いたします。 https://www.sleepfiles.com/OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2651"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2653"/>
         <source>On Opening</source>
         <translation>オープン時</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2664"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2668"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2666"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2670"/>
         <source>Profile</source>
         <translation>プロフィール</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2673"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2712"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2675"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2714"/>
         <source>Welcome</source>
         <translation>ようこそ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2678"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2717"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2680"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2719"/>
         <source>Daily</source>
         <translation>日次</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2688"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2727"/>
-        <location filename="../oscar/preferencesdialog.ui" line="3362"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2690"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2729"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3364"/>
         <source>Statistics</source>
         <translation>統計</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2696"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2698"/>
         <source>Switch Tabs</source>
         <translation>タブの切り替え</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2707"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2709"/>
         <source>No change</source>
         <translation>変更なし</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2735"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2737"/>
         <source>After Import</source>
         <translation>インポート後</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2761"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2763"/>
         <source>Overlay Flags</source>
         <translation>オーバーレイフラグ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2771"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2773"/>
         <source>Line Thickness</source>
         <translation>線の太さ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2807"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2809"/>
         <source>The pixel thickness of line plots</source>
         <translation>折れ線グラフのピクセル単位の太さ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3024"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3026"/>
         <source>Grid Line Darkness</source>
         <translation type="unfinished">グリッド線の濃さ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3036"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3038"/>
         <source>Controls the darkness of the horizontal grid lines on graphs. Higher values make the lines more visible. Default is 64.</source>
         <translation type="unfinished">グラフの水平グリッド線の濃さを調整します。値が大きいほど線が見やすくなります。デフォルトは64です。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3097"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3099"/>
         <source>Other Visual Settings</source>
         <translation>その他の表示設定</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3103"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3105"/>
         <source>Anti-Aliasing applies smoothing to graph plots.. 
 Certain plots look more attractive with this on. 
 This also affects printed reports.
@@ -8455,97 +8462,97 @@ Try it and see if you like it.</source>
 試してみて気に入るかどうか確認してください。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3110"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3112"/>
         <source>Use Anti-Aliasing</source>
         <translation>アンチエイリアシングを使う</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3117"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3119"/>
         <source>Makes certain plots look more &quot;square waved&quot;.</source>
         <translation>特定のプロットをより「方形波」状に見せます。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3120"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3122"/>
         <source>Square Wave Plots</source>
         <translation>方形波プロット</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3130"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3132"/>
         <source>Pixmap caching is a graphics acceleration technique. May cause problems with font drawing in graph display area on your platform.</source>
         <translation>Pixmap キャッシングは、グラフィックスの描画を速くする技術です。お使いの環境によってはグラフ表示領域でのフォント描画で問題が発生する可能性があります。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3133"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3135"/>
         <source>Use Pixmap Caching</source>
         <translation>Pixmap キャッシングを使う</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3140"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3142"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;These features have recently been pruned. They will come back later. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;これらの機能は最近削除されました。 将来のバージョンで実装される予定です。 &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3143"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3145"/>
         <source>Animations &amp;&amp; Fancy Stuff</source>
         <translation>アニメーション &amp;&amp; ファンシーなもの</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3160"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3162"/>
         <source>Whether to allow changing yAxis scales by double clicking on yAxis labels</source>
         <translation>Y軸のラベルをダブルクリックした際Y軸がスケールすることを許すことを許可するかどうか</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3163"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3165"/>
         <source>Allow YAxis Scaling</source>
         <translation>Y軸のスケールを許可する</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3170"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3172"/>
         <source>Combine machines with same capabilities in Changes to Device Settings report</source>
         <translation type="unfinished">デバイス設定の変更レポートで同じ機能を持つ機器を統合する</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3173"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3175"/>
         <source>Combine similar machines</source>
         <translation type="unfinished">類似機器を統合する</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3183"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3185"/>
         <source>Include Serial Number</source>
         <translation>シリアル番号を含める</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3200"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3202"/>
         <source>For multiple sessions, displays a thin gray bar for each session at the top of the Event Flags, SpO2, Pulse, and Movement graphs.</source>
         <translation type="unfinished">複数セッションの場合、イベントフラグ、SpO2、脈拍、動作グラフの上部に各セッションの細いグレーのバーを表示します。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3203"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3205"/>
         <source>Enables SessionBar in Event Flags, SpO2, Pulse, and Movement Graphs</source>
         <translation type="unfinished">イベントフラグ、SpO2、脈拍、動作グラフでSessionBarを有効にする</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3223"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3225"/>
         <source>Colour scheme</source>
         <translation type="unfinished">配色</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3231"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3233"/>
         <source>Follow system</source>
         <translation type="unfinished">システムに従う</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3236"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3238"/>
         <source>Light</source>
         <translation type="unfinished">浅い睡眠</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3241"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3243"/>
         <source>Dark</source>
         <translation type="unfinished">ダーク</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3264"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3266"/>
         <source>Use Qt&apos;s Fusion theme instead of the platform-native theme.
 Provides a consistent look across platforms.
 OSCAR will restart when you click OK.</source>
@@ -8554,59 +8561,59 @@ OSCAR will restart when you click OK.</source>
 OKをクリックするとOSCARが再起動します。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3269"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3271"/>
         <source>Use Fusion theme (OSCAR will restart)</source>
         <translation type="unfinished">Fusionテーマを使用する（OSCARが再起動します）</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3276"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3278"/>
         <source>Show tooltips, including those on graphs, in your system&apos;s colors instead of OSCAR&apos;s black on yellow.
 Follows high contrast themes, and dark mode if it was on when OSCAR started.</source>
         <translation type="unfinished">グラフ上のものも含め、ツールチップを OSCAR の黄色地に黒ではなくシステムの色で表示します。
 ハイコントラストテーマ、および OSCAR 起動時に有効だったダークモードに従います。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3280"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3282"/>
         <source>Use system tooltip colors</source>
         <translation type="unfinished">システムのツールチップの色を使用</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3287"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3289"/>
         <source>Show the Modern Welcome, Daily and Overview pages. Untick to go back to the Classic pages.</source>
         <translation type="unfinished">モダンなようこそ、日次、概要ページを表示します。チェックを外すとクラシックページに戻ります。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3290"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3292"/>
         <source>Use Modern design</source>
         <translation type="unfinished">モダンデザインを使用</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3299"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3301"/>
         <source>Welcome card colour</source>
         <translation type="unfinished">ようこそカードの色</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3306"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3308"/>
         <source>Plain: no card colour. By group: tint shows the kind of number. By status: green or red when the night is better or worse than both averages.</source>
         <translation type="unfinished">プレーン: カードに色なし。グループ別: 色合いで数値の種類を示します。状態別: その夜が両方の平均より良い場合は緑、悪い場合は赤。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3310"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3312"/>
         <source>Plain</source>
         <translation type="unfinished">プレーン</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3315"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3317"/>
         <source>By group</source>
         <translation type="unfinished">グループ別</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3320"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3322"/>
         <source>By status</source>
         <translation type="unfinished">状態別</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2406"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2408"/>
         <source>Graphics Engine (Requires Restart)</source>
         <translation>グラフィックエンジン（再起動が必要）</translation>
     </message>
@@ -8685,55 +8692,54 @@ This option must be enabled before import, otherwise a purge is required.</sourc
 このオプションは、インポートの前に有効にする必要があります。もしくは、いったんパージが必要になります。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1000"/>
         <source>This experimental option attempts to use OSCAR&apos;s event flagging system to improve device detected event positioning.</source>
-        <translation>この実験的なオプションは、OSCAR のイベント フラグ システムを使用して、デバイスで検出されたイベントの位置を改善しようとします。</translation>
+        <translation type="vanished">この実験的なオプションは、OSCAR のイベント フラグ システムを使用して、デバイスで検出されたイベントの位置を改善しようとします。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1003"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1005"/>
         <source>Resync Device Detected Events (Experimental)</source>
         <translation>デバイスが検出したイベントの再同期 (実験的)</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1057"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1059"/>
         <source>Custom flagging is an experimental method of detecting events missed by the device. They are not included in AHI. They are also displayed in the Statistics Tab using the Permissive mode (see Clinical tab).</source>
         <translation>カスタムフラグの機能は、デバイスが検出できなかったイベントを検出する実験的な手法です。AHI には含まれていません。また、選択モードを利用してる場合、統計のタブにも表示されます。（クリニカルのタブをご参考下さい）.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1123"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1125"/>
         <source>Allow duplicates near device events.</source>
         <translation>デバイス イベント付近の重複を許可する。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1171"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1173"/>
         <source>Show flags for device detected events that haven&apos;t been identified yet.</source>
         <translation>まだ識別されていないデバイス検出イベントのフラグを表示します。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1436"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1438"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note: &lt;/span&gt;Due to summary design limitations, ResMed devices do not support changing these settings.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;注: &lt;/span&gt;概要設計上の制限により、ResMed デバイスはこれらの設定の変更をサポートしていません。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1582"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1584"/>
         <source>Clinical</source>
         <translation>クリニカル</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1609"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1611"/>
         <source>Clinical Settings</source>
         <translation>クリニカル設定</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1665"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2112"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2204"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2283"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1667"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2114"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2206"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2285"/>
         <source>Reset Defaults</source>
         <translation>標準設定にリセット</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1678"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1680"/>
         <source>Select  Oscar Operating Mode </source>
         <translation>OSCAR の動作モードを選択 </translation>
     </message>
@@ -8742,7 +8748,7 @@ This option must be enabled before import, otherwise a purge is required.</sourc
         <translation type="vanished">クリニカルモードでは無効にされたセッションは利用できません。\n無効なセッションはグラフや統計の作成に利用されません。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1688"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1690"/>
         <source>Clinical Mode</source>
         <translation>クリニカルモード</translation>
     </message>
@@ -8751,17 +8757,17 @@ This option must be enabled before import, otherwise a purge is required.</sourc
         <translation type="vanished">選択モードでは、無効なセッションを扱うことができます。\n無効なセッションはグラフや統計の作成に利用されます。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1705"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1707"/>
         <source>Permissive Mode</source>
         <translation>選択モード</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1715"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1717"/>
         <source> Hours</source>
         <translation> 時間</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="1742"/>
+        <location filename="../oscar/preferencesdialog.ui" line="1744"/>
         <source>Oximetry</source>
         <translation>オキシメーター</translation>
     </message>
@@ -8792,27 +8798,27 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans&apos;; font-size:10pt;&quot;&gt;シアルインポートを行った場合、昨晩のデータから開始時刻を求めます。(先にCPAPのデータのインポートを行ってください！）&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2309"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2311"/>
         <source>General</source>
         <translation>一般</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2616"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2618"/>
         <source>Appearance</source>
         <translation>表示</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3180"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3182"/>
         <source>Whether to include device serial number on device settings changes report</source>
         <translation>デバイス設定変更レポートにデバイスのシリアル番号を含めるかどうか</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3190"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3192"/>
         <source>Print reports in black and white, which can be more legible on non-color printers</source>
         <translation>レポートを白黒で印刷します。これにより、カラー以外のプリンターでも読みやすくなります</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3193"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3195"/>
         <source>Print reports in black and white (monochrome)</source>
         <translation>レポートを白黒（モノクロ）で印刷する</translation>
     </message>
@@ -8825,12 +8831,12 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">イベントフラググラフでセッションバーを有効にします</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3210"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3212"/>
         <source>Needed for high Resolution displays where title overwrites labels</source>
         <translation type="unfinished">タイトルがラベルに重なる高解像度ディスプレイで必要です</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3213"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3215"/>
         <source>Disable daily graph titles</source>
         <translation type="unfinished">日別グラフのタイトルを無効にする</translation>
     </message>
@@ -8843,151 +8849,151 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">高精細モードを有効にする</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3381"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3383"/>
         <source>Every 3rd Line</source>
         <translation type="unfinished">3行おき</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3386"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3388"/>
         <source>Every 2nd Line</source>
         <translation type="unfinished">2行おき</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3391"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3393"/>
         <source>Disabled</source>
         <translation type="unfinished">無効</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3415"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3417"/>
         <source> Alternating Color Spacing</source>
         <translation type="unfinished"> 交互カラーの間隔</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3437"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3439"/>
         <source>Fonts (Application wide settings)</source>
         <translation>フォント (アプリケーション全体の設定)</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3472"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3474"/>
         <source>Font</source>
         <translation>フォント</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3491"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3493"/>
         <source>Size</source>
         <translation>サイズ</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3510"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3512"/>
         <source>Bold  </source>
         <translation>太字  </translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3532"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3534"/>
         <source>Italic</source>
         <translation>イタリック</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3545"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3547"/>
         <source>Application</source>
         <translation>アプリケーション</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3609"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3611"/>
         <source>Graph Text</source>
         <translation>グラフの文字</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3670"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3672"/>
         <source>Graph Titles</source>
         <translation>グラフのタイトル</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3731"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3733"/>
         <source>Big  Text</source>
         <translation>大きな文字</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3798"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="547"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="679"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3800"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="553"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="685"/>
         <source>Details</source>
         <translation>詳細</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3830"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3832"/>
         <source>Cancel</source>
         <translation>キャンセル</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="3837"/>
+        <location filename="../oscar/preferencesdialog.ui" line="3839"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="542"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="673"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="548"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="679"/>
         <source>Name</source>
         <translation>名前</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="543"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="674"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="549"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="680"/>
         <source>Color</source>
         <translation>色</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="545"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="551"/>
         <source>Flag Type</source>
         <translation>フラグの種類</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="546"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="678"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="552"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="684"/>
         <source>Label</source>
         <translation>ラベル</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="563"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="569"/>
         <source>CPAP Events</source>
         <translation>CPAPイベント</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="564"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="570"/>
         <source>Oximeter Events</source>
         <translation>オキシメーターイベント</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="565"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="571"/>
         <source>Positional Events</source>
         <translation>位置イベント</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="566"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="572"/>
         <source>Sleep Stage Events</source>
         <translation>睡眠段階のイベント</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="567"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="573"/>
         <source>Unknown Events</source>
         <translation>未知のイベント</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="739"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="745"/>
         <source>Double click to change the descriptive name this channel.</source>
         <translation>ダブルクリックして、このチャネルのわかりやすい名前に変更します。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="617"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="746"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="623"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="752"/>
         <source>Double click to change the default color for this channel plot/flag/data.</source>
         <translation>ダブルクリックして、このチャネルのプロット、フラグ、データのデフォルトの色を変更します。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.ui" line="2683"/>
-        <location filename="../oscar/preferencesdialog.ui" line="2722"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="544"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="675"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2685"/>
+        <location filename="../oscar/preferencesdialog.ui" line="2724"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="550"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="681"/>
         <source>Overview</source>
         <translation>概要</translation>
     </message>
@@ -9017,12 +9023,12 @@ p, li { white-space: pre-wrap; }
         <translation>&lt;p&gt;&lt;b&gt;ご注意:&lt;/b&gt; OSCAR の高度なセッション分割機能は、&lt;b&gt;ResMed&lt;/b&gt; デバイスでは設定と概要データの保存方法に制限があるため使用できません。そのため、このプロファイルでは無効になっています。&lt;/p&gt;&lt;p&gt;ResMed デバイスでは、ResMed の商用ソフトウェアと同様に、&lt;b&gt;正午に 1 日が分割されます&lt;/b&gt;。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1372"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1403"/>
         <source>Must enable Permissive Mode (see Clinical Tab)</source>
         <translation type="unfinished">パーミッシブモードを有効にする必要があります（クリニカルタブを参照）</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="422"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="428"/>
         <source>Rolling (recommended)</source>
         <translation type="unfinished">移動ウィンドウ(推奨)</translation>
     </message>
@@ -9041,94 +9047,122 @@ OSCAR will restart when you click OK.</source>
 OK をクリックすると OSCAR が再起動します。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="423"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="429"/>
         <source>Whole night</source>
         <translation type="unfinished">一晩全体</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="424"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="430"/>
         <source>First hour</source>
         <translation type="unfinished">最初の 1 時間</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="425"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="431"/>
         <source>Manual</source>
         <translation type="unfinished">手動</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="609"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="615"/>
         <source>Double click to change the descriptive name the &apos;%1&apos; channel.</source>
         <translation>ダブルクリックして、&apos;%1&apos; チャネルをわかりやすい名前に変更します。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="622"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="628"/>
         <source>Whether this flag has a dedicated overview chart.</source>
         <translation>このフラグに専用の概要チャートがあるかどうか。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="632"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="638"/>
         <source>Here you can change the type of flag shown for this event</source>
         <translation>ここで、このイベントについて表示されるフラグのタイムを変更できます</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="637"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="770"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="643"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="776"/>
         <source>This is the short-form label to indicate this channel on screen.</source>
         <translation>これは、画面上でこのチャネルを示す短い形式のラベルです。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="643"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="776"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="649"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="782"/>
         <source>This is a description of what this channel does.</source>
         <translation>これは、このチャネルの機能の説明です。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="676"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="682"/>
         <source>Lower</source>
         <translation>下限</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="677"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="683"/>
         <source>Upper</source>
         <translation>上限</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="696"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="702"/>
         <source>CPAP Waveforms</source>
         <translation>CPAP波形</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="697"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="703"/>
         <source>Oximeter Waveforms</source>
         <translation>オキシメーター波形</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="698"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="704"/>
         <source>Positional Waveforms</source>
         <translation>位置波形</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="699"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="705"/>
         <source>Sleep Stage Waveforms</source>
         <translation>睡眠の段階波形</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="755"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="761"/>
         <source>Whether a breakdown of this waveform displays in overview.</source>
         <translation>この波形の内訳を概要に表示するかどうか。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="760"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="766"/>
         <source>Here you can set the &lt;b&gt;lower&lt;/b&gt; threshold used for certain calculations on the %1 waveform</source>
         <translation>ここで、%1 波形の特定の計算に使用される&lt;b&gt;下限&lt;/b&gt;のしきい値を設定できます</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="765"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="771"/>
         <source>Here you can set the &lt;b&gt;upper&lt;/b&gt; threshold used for certain calculations on the %1 waveform</source>
         <translation>ここで、%1 波形の特定の計算に使用される&lt;b&gt;上限&lt;/b&gt;のしきい値を設定できます</translation>
     </message>
     <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="884"/>
         <location filename="../oscar/preferencesdialog.cpp" line="893"/>
+        <source>Resync Device Detected Events</source>
+        <translation type="unfinished">デバイスが検出したイベントの再同期</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="885"/>
+        <source>Resyncing moves device detected events and changes their durations, and the changes are saved with your data.
+
+Turning this option off later will not restore the original positions and durations. Only purging the data and re-importing it from the SD card or OSCAR&apos;s backup will.
+
+Are you sure you want to turn it on?</source>
+        <translation type="unfinished">再同期すると、デバイスが検出したイベントが移動され、その持続時間が変更されます。変更はデータとともに保存されます。
+
+後でこのオプションをオフにしても、元の位置と持続時間は復元されません。復元するには、データを消去し、SD カードまたは OSCAR のバックアップから再インポートする必要があります。
+
+オンにしてもよろしいですか？</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="894"/>
+        <source>Device detected events that have already been resynced keep their changed positions and durations.
+
+To restore them, purge the data and re-import it from the SD card or OSCAR&apos;s backup.</source>
+        <translation type="unfinished">すでに再同期されたデバイス検出イベントは、変更された位置と持続時間を保持します。
+
+元に戻すには、データを消去し、SD カードまたは OSCAR のバックアップから再インポートしてください。</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="924"/>
         <source>Data Processing Required</source>
         <translation>データの処理が必要です</translation>
     </message>
@@ -9141,7 +9175,7 @@ Are you sure you want to make these changes?</source>
 これらの変更を行ってもよろしいですか?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="906"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="937"/>
         <source>Data Reindex Required</source>
         <translation>データの再インデックスが必要</translation>
     </message>
@@ -9154,12 +9188,12 @@ Are you sure you want to make these changes?</source>
 これらの変更を行ってもよろしいですか?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="913"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="944"/>
         <source>Restart Required</source>
         <translation>再起動が必要</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="914"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="945"/>
         <source>One or more of the changes you have made will require this application to be restarted, in order for these changes to come into effect.
 
 Would you like do this now?</source>
@@ -9168,27 +9202,27 @@ Would you like do this now?</source>
 今すぐ再起動しますか？</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1315"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1346"/>
         <source>ResMed S9 devices routinely delete certain data from your SD card older than 7 and 30 days (depending on resolution).</source>
         <translation>ResMed S9 デバイスは、SD カードから 7 日および 30 日より古い特定のデータを定期的に削除します (解像度によって異なります)。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1316"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1347"/>
         <source> If you ever need to reimport this data again (whether in OSCAR or ResScan) this data won&apos;t come back.</source>
         <translation> このデータを再度再インポートする必要が生じた場合 (OSCAR か ResScan かに関係なく)、このデータは戻ってきません。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1317"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1348"/>
         <source> If you need to conserve disk space, please remember to carry out manual backups.</source>
         <translation> ディスク容量を節約する必要がある場合は、忘れずに手動バックアップを実行してください。</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1318"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1349"/>
         <source> Are you sure you want to disable these backups?</source>
         <translation> これらのバックアップを無効にしてもよろしいですか?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1462"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1493"/>
         <source>Switching off backups is not a good idea, because OSCAR needs these to rebuild the database if errors are found.
 
 </source>
@@ -9197,7 +9231,7 @@ Would you like do this now?</source>
 </translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1463"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1494"/>
         <source>Are you really sure you want to do this?</source>
         <translation>本当に実行しても良いですか？</translation>
     </message>
@@ -9267,7 +9301,7 @@ Would you like do this now?</source>
         <translation>行わない</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="894"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="925"/>
         <source>A data re/decompression procedure is required to apply these changes. This operation may take a couple of minutes to complete.
 
 Are you sure you want to make these changes?</source>
@@ -9276,7 +9310,7 @@ Are you sure you want to make these changes?</source>
 これらの変更を行ってもよろしいですか?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="907"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="938"/>
         <source>A data reindexing procedure is required to apply these changes. This operation may take a couple of minutes to complete.
 
 Are you sure you want to make these changes?</source>
@@ -9285,7 +9319,7 @@ Are you sure you want to make these changes?</source>
 これらの変更を行ってもよろしいですか?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1314"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1345"/>
         <source>This may not be a good idea</source>
         <translation>あまり良い考えではありません</translation>
     </message>
@@ -10237,7 +10271,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="961"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2923"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2925"/>
         <source>Error</source>
         <translation>エラー</translation>
     </message>
@@ -10410,6 +10444,7 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/common.cpp" line="1008"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="945"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="945"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="945"/>
         <source>Min EPAP</source>
         <translation>Min EPAP</translation>
     </message>
@@ -10430,11 +10465,13 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/common.cpp" line="1011"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="948"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="948"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="948"/>
         <source>Min IPAP</source>
         <translation>Min IPAP</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1012"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="951"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="951"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="951"/>
         <source>Max IPAP</source>
@@ -10468,8 +10505,8 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/common.cpp" line="1018"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="794"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="794"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2908"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2935"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2910"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2937"/>
         <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="207"/>
         <source>Humidifier</source>
         <translation>加湿器</translation>
@@ -10585,7 +10622,6 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1041"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2852"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="242"/>
         <source>PC</source>
         <translation>PC</translation>
@@ -11259,7 +11295,7 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="527"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="911"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="926"/>
-        <location filename="../oscar/mainwindow.cpp" line="4340"/>
+        <location filename="../oscar/mainwindow.cpp" line="4347"/>
         <source>Importing Sessions...</source>
         <translation>セッションをインポート中...</translation>
     </message>
@@ -11684,65 +11720,65 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1857"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2379"/>
         <location filename="../oscar/mainwindow.cpp" line="1193"/>
-        <location filename="../oscar/mainwindow.cpp" line="4385"/>
-        <location filename="../oscar/mainwindow.cpp" line="4723"/>
+        <location filename="../oscar/mainwindow.cpp" line="4392"/>
+        <location filename="../oscar/mainwindow.cpp" line="4730"/>
         <source>Finishing up...</source>
         <translation>終了中...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2881"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2883"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2885"/>
         <source>Flex Lock</source>
         <translation>フレックスロック</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2882"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2884"/>
         <source>Whether Flex settings are available to you.</source>
         <translation>Flex設定が利用できるかどうか。</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2891"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2893"/>
         <source>Amount of time it takes to transition from EPAP to IPAP, the higher the number the slower the transition</source>
         <translation>EPAPからIPAPに移行するためにの時間で、より大きな数字がゆっくりとした移行です</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2897"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2899"/>
         <source>Rise Time Lock</source>
         <translation>立ち上がり時間ロック</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2898"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2900"/>
         <source>Whether Rise Time settings are available to you.</source>
         <translation>立ち上がり時間設定が利用できるかどうか。</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2899"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2901"/>
         <source>Rise Lock</source>
         <translation>立ち上がりロック</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2953"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2954"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2955"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2956"/>
         <source>Mask Resistance Setting</source>
         <translation>マスク抵抗設定</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2955"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2957"/>
         <source>Mask Resist.</source>
         <translation>マスク抵抗.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2963"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2965"/>
         <source>Hose Diam.</source>
         <translation>ホース径.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2966"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2968"/>
         <source>15mm</source>
         <translation>15mm</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2965"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2967"/>
         <source>22mm</source>
         <translation>22mm</translation>
     </message>
@@ -11978,51 +12014,45 @@ TTIA: %1</translation>
         <translation type="unfinished">加熱チューブレベル</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="865"/>
         <source>BmcRampTime</source>
-        <translation type="unfinished">BmcランプTime</translation>
+        <translation type="obsolete">BmcランプTime</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="865"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="865"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="873"/>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="873"/>
         <source>Ramp Time </source>
-        <translation type="unfinished">ランプタイム </translation>
+        <translation type="obsolete">ランプタイム </translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="873"/>
         <source>BmcRampAuto</source>
-        <translation type="unfinished">BmcランプAuto</translation>
+        <translation type="obsolete">BmcランプAuto</translation>
+    </message>
+    <message>
+        <source>InitialP</source>
+        <translation type="obsolete">InitialP</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="878"/>
-        <source>InitialP</source>
-        <translation type="unfinished">InitialP</translation>
-    </message>
-    <message>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="878"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="878"/>
         <source>Initial P</source>
         <translation type="unfinished">初期圧</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="881"/>
         <source>TreatP</source>
-        <translation type="unfinished">TreatP</translation>
+        <translation type="obsolete">TreatP</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="881"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="881"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="881"/>
         <source>Treat P</source>
         <translation type="unfinished">治療圧</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="884"/>
         <source>ManualP</source>
-        <translation type="unfinished">ManualP</translation>
+        <translation type="obsolete">ManualP</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="884"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="884"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="884"/>
         <source>Manual P</source>
@@ -12057,11 +12087,11 @@ TTIA: %1</translation>
         <translation type="unfinished">初期EPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="909"/>
         <source>ISens</source>
-        <translation type="unfinished">ISens</translation>
+        <translation type="obsolete">ISens</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="909"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="909"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="909"/>
         <source>I Sens</source>
@@ -12110,17 +12140,18 @@ TTIA: %1</translation>
         <translation type="unfinished">非常に高い</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="920"/>
         <source>ESens</source>
-        <translation type="unfinished">ESens</translation>
+        <translation type="obsolete">ESens</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="920"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="920"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="920"/>
         <source>E Sens</source>
         <translation type="unfinished">Eセンス</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="934"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="934"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="934"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="332"/>
@@ -12132,6 +12163,7 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="937"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="937"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="937"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="328"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="328"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="328"/>
@@ -12139,30 +12171,27 @@ TTIA: %1</translation>
         <translation type="unfinished">Ti 最大</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="940"/>
         <source>BackupRR</source>
-        <translation type="unfinished">バックアップRR</translation>
+        <translation type="obsolete">バックアップRR</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="940"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="940"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="940"/>
         <source>Backup RR</source>
         <translation type="unfinished">バックアップ RR</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="945"/>
         <source>MinEPAP</source>
-        <translation type="unfinished">最小EPAP</translation>
+        <translation type="obsolete">最小EPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="948"/>
         <source>MinIPAP</source>
-        <translation type="unfinished">最小IPAP</translation>
+        <translation type="obsolete">最小IPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="951"/>
         <source>MaxIPAP</source>
-        <translation type="unfinished">最大IPAP</translation>
+        <translation type="obsolete">最大IPAP</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="955"/>
@@ -12235,54 +12264,55 @@ TTIA: %1</translation>
         <translation type="unfinished">インポートを開始しています...</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2853"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2855"/>
         <source>S/T - AVAPS</source>
         <translation>S/T - AVAPS</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2854"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2856"/>
         <source>PC - AVAPS</source>
         <translation>PC - AVAPS</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2857"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2859"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2861"/>
         <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="662"/>
         <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="664"/>
         <source>Flex Mode</source>
         <translation>フレックスモード</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2858"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2860"/>
         <source>PRS1 pressure relief mode.</source>
         <translation>PRS1圧力リリーフモード。</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2862"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2864"/>
         <source>C-Flex</source>
         <translation>C-Flex</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2863"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2865"/>
         <source>C-Flex+</source>
         <translation>C-Flex+</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2864"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2866"/>
         <source>A-Flex</source>
         <translation>A-Flex</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2865"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2867"/>
         <source>P-Flex</source>
         <translation>P-Flex</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="931"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="931"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2866"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2890"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="931"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2868"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2892"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2894"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="309"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="309"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="309"/>
@@ -12290,301 +12320,307 @@ TTIA: %1</translation>
         <translation>立ち上がり時間</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2867"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2869"/>
         <source>Bi-Flex</source>
         <translation>Bi-Flex</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2869"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2871"/>
         <source>Flex</source>
         <translation>Flex</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2873"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2875"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2877"/>
         <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="647"/>
         <location filename="../oscar/SleepLib/loader_plugins/vrem_loader.cpp" line="649"/>
         <source>Flex Level</source>
         <translation>Flexレベル</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2874"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2876"/>
         <source>PRS1 pressure relief setting.</source>
         <translation>PRS1圧力リリーフ設定。</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2922"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2924"/>
         <source>Passover</source>
         <translation>加熱なし加湿器</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2944"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2946"/>
         <source>Target Time</source>
         <translation>目標時間</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2945"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2947"/>
         <source>PRS1 Humidifier Target Time</source>
         <translation>PRS1加湿器目標時間</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2946"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2948"/>
         <source>Hum. Tgt Time</source>
         <translation>加湿器目標時間</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2971"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2973"/>
         <source>Tubing Type Lock</source>
         <translation>チューブの種類のロック</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2972"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2974"/>
         <source>Whether tubing type settings are available to you.</source>
         <translation>チューブ タイプの設定を使用できるかどうか。</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2973"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2975"/>
         <source>Tube Lock</source>
         <translation>チューブロック</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2980"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2982"/>
         <source>Mask Resistance Lock</source>
         <translation>マスク抵抗ロック</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2981"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2983"/>
         <source>Whether mask resistance settings are available to you.</source>
         <translation>マスク抵抗設定が利用できるかどうか。</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2982"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2984"/>
         <source>Mask Res. Lock</source>
         <translation>マスク抵抗ロック</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2990"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2992"/>
         <source>A few breaths automatically starts device</source>
         <translation>少し息をすると機器が自動で動き始めます</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2999"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3001"/>
         <source>Device automatically switches off</source>
         <translation>デバイスは自動で電源が切れます</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3008"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3010"/>
         <source>Whether or not device allows Mask checking.</source>
         <translation>デバイスがマスク チェックを許可するかどうかを示します。</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3025"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3027"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3029"/>
         <source>Ramp Type</source>
         <translation>ランプの種類</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3026"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3028"/>
         <source>Type of ramp curve to use.</source>
         <translation>使用するランプカーブの種類。</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3029"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3031"/>
         <source>Linear</source>
         <translation>線形</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3030"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3032"/>
         <source>SmartRamp</source>
         <translation>スマートランプ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3031"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3033"/>
         <source>Ramp+</source>
         <translation>ランプ+</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3035"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3037"/>
         <source>Backup Breath Mode</source>
         <translation>バックアップ呼吸モード</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3036"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3038"/>
         <source>The kind of backup breath rate in use: none (off), automatic, or fixed</source>
         <translation>使用中のバックアップ呼吸数の種類: なし (オフ)、自動、または固定</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3037"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3039"/>
         <source>Breath Rate</source>
         <translation>呼吸レート</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3041"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3043"/>
         <source>Fixed</source>
         <translation>固定</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3045"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3047"/>
         <source>Fixed Backup Breath BPM</source>
         <translation>固定バックアップ呼吸 BPM</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3046"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3048"/>
         <source>Minimum breaths per minute (BPM) below which a timed breath will be initiated</source>
         <translation>1 分あたりの最小呼吸数 (BPM) を下回ると、時間指定された呼吸が開始されます</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3047"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3049"/>
         <source>Breath BPM</source>
         <translation>ブレスBPM</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3052"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3054"/>
         <source>Timed Inspiration</source>
         <translation>計測された吸気</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3053"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3055"/>
         <source>The time that a timed breath will provide IPAP before transitioning to EPAP</source>
         <translation>The time that a timed breath will provide IPAP before transitioning to EPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3054"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3056"/>
         <source>Timed Insp.</source>
         <translatorcomment>Nothing is omitted in Japanese, so there is no dot at the end.</translatorcomment>
         <translation>計測された吸気</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3059"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3061"/>
         <source>Auto-Trial Duration</source>
         <translation>自動試行時間</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3061"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3063"/>
         <source>Auto-Trial Dur.</source>
         <translation>自動試行時間.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3066"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3068"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3070"/>
         <source>EZ-Start</source>
         <translation>EZ-Start</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3067"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3069"/>
         <source>Whether or not EZ-Start is enabled</source>
         <translation>EZ-Startrが有効かどうか</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3075"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3077"/>
         <source>Variable Breathing</source>
         <translation>不規則な呼吸 (Variable Breathing)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3076"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3078"/>
         <source>UNCONFIRMED: Possibly variable breathing, which are periods of high deviation from the peak inspiratory flow trend</source>
         <translation>呼吸が不規則に変動している可能性があります。これは、ピーク吸気フロートレンドから大きく逸脱している期間です</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3085"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3087"/>
         <source>A period during a session where the device could not detect flow.</source>
         <translation>デバイスがフローを検出できなかったセッション中の期間。</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3099"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3101"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3103"/>
         <source>Peak Flow</source>
         <translation>ピークフロー</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3100"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3102"/>
         <source>Peak flow during a 2-minute interval</source>
         <translation>2分毎のピークフロー</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2906"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2908"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="226"/>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.cpp" line="1484"/>
         <source>Humidifier Status</source>
         <translation>加湿器の状況</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2907"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2854"/>
+        <source>PC</source>
+        <comment>Ventilator mode name (Pressure Control), not Pulse Change</comment>
+        <translation type="unfinished">PC</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2909"/>
         <source>PRS1 humidifier connected?</source>
         <translation>PRS1加湿器は接続されていますか？</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2910"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2912"/>
         <source>Disconnected</source>
         <translation>切断されました</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2911"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2913"/>
         <source>Connected</source>
         <translation>接続されました</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2915"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2917"/>
         <source>Humidification Mode</source>
         <translation>加湿モード</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2916"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2918"/>
         <source>PRS1 Humidification Mode</source>
         <translation>PRS1 加湿器モード</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2917"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2919"/>
         <source>Humid. Mode</source>
         <translation>加湿モード</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2919"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2921"/>
         <source>Fixed (Classic)</source>
         <translation>固定（クラシック）</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2920"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2922"/>
         <source>Adaptive (System One)</source>
         <translation>アダプティブ (システム 1)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2921"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2923"/>
         <source>Heated Tube</source>
         <translation>加熱チューブ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2927"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2929"/>
         <source>Tube Temperature</source>
         <translation>チューブ温度</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2928"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2930"/>
         <source>PRS1 Heated Tube Temperature</source>
         <translation>PRS1 加熱チューブ温度</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2929"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2931"/>
         <source>Tube Temp.</source>
         <translation>チューブ温度.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2936"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2938"/>
         <source>PRS1 Humidifier Setting</source>
         <translation>PRS1 加湿器設定</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2961"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2963"/>
         <source>Hose Diameter</source>
         <translation>ホース径</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2962"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2964"/>
         <source>Diameter of primary CPAP hose</source>
         <translation>主の CPAP のホースの直径</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2967"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2969"/>
         <source>12mm</source>
         <translation>12mm</translation>
     </message>
@@ -12592,8 +12628,8 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="819"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="819"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="819"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2989"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2991"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2993"/>
         <source>Auto On</source>
         <translation>自動オン</translation>
     </message>
@@ -12601,57 +12637,57 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="824"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="824"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="824"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2998"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3000"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3002"/>
         <source>Auto Off</source>
         <translation>自動オフ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3007"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3009"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3011"/>
         <source>Mask Alert</source>
         <translation>マスクアラート</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3016"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3018"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3020"/>
         <source>Show AHI</source>
         <translation>AHIを表示</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3017"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3019"/>
         <source>Whether or not device shows AHI via built-in display.</source>
         <translation>デバイスが内蔵画面にAHIを表示するかどうか。</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3060"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3062"/>
         <source>The number of days in the Auto-CPAP trial period, after which the device will revert to CPAP</source>
         <translation>デバイスが CPAP に戻るまでの Auto-CPAP 試用期間の日数</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3084"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3086"/>
         <source>Breathing Not Detected</source>
         <translation>呼吸が検出されない</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3086"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3088"/>
         <source>BND</source>
         <translation>BND</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3091"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3093"/>
         <source>Timed Breath</source>
         <translation>呼吸時間</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1277"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3092"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3094"/>
         <source>Machine Initiated Breath</source>
         <translation>機械による呼吸</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1278"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3093"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3095"/>
         <source>TB</source>
         <translation>TB</translation>
     </message>
@@ -12940,6 +12976,12 @@ TTIA: %1</translation>
         <translation>治療最大圧力</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="865"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="865"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="865"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="873"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="873"/>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="873"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="165"/>
         <location filename="../oscar/SleepLib/schema.cpp" line="165"/>
         <source>Ramp Time</source>
@@ -14538,29 +14580,29 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation>セッションファイルの再圧縮</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5204"/>
+        <location filename="../oscar/mainwindow.cpp" line="5211"/>
         <source>Please select a location for your zip other than the data card itself!</source>
         <translation>データ カード自体以外の zip の場所を選択してください！</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="5253"/>
-        <location filename="../oscar/mainwindow.cpp" line="5305"/>
-        <location filename="../oscar/mainwindow.cpp" line="5639"/>
+        <location filename="../oscar/mainwindow.cpp" line="5260"/>
+        <location filename="../oscar/mainwindow.cpp" line="5312"/>
+        <location filename="../oscar/mainwindow.cpp" line="5646"/>
         <source>Unable to create zip!</source>
         <translation>zip を作成できません!</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1356"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1387"/>
         <source>Are you sure you want to reset all your channel colors and settings to defaults?</source>
         <translation>すべてのチャンネルの色と設定をデフォルトにリセットしてもよろしいですか?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1397"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1428"/>
         <source>Are you sure you want to reset all your oximetry settings to defaults?</source>
         <translation>すべてのオキシメトリーの設定をデフォルトにリセットしてもよろしいですか?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1504"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1535"/>
         <source>Are you sure you want to reset all your waveform channel colors and settings to defaults?</source>
         <translation>すべての波形チャンネルの色と設定をデフォルトにリセットしてもよろしいですか?</translation>
     </message>
@@ -14949,55 +14991,55 @@ CPAPデータを再構築してください</translation>
         <translation> (%3 秒)</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="482"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="474"/>
         <source>Pop out Graph</source>
         <translation>グラフをポップアウトする</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="552"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="544"/>
         <source>The popout window is full. You should capture the existing
 popout window, delete it, then pop out this graph again.</source>
         <translation>ポップアウト ウィンドウがいっぱいです。 既存のものをキャプチャする必要があります
 ウィンドウをポップアウトし、それを削除してから、このグラフを再度ポップアウトします。</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="1755"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="1747"/>
         <source>Your machine doesn&apos;t record data to graph in Daily View</source>
         <translation>お使いのマシンは、日次ビューのグラフ作成に必要なデータを記録しません</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="1758"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="1750"/>
         <source>There is no data to graph</source>
         <translation>グラフに表示するデータがありません</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="1880"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="1872"/>
         <source>d MMM yyyy [ %1 - %2 ]</source>
         <translatorcomment>Japanese usually go with year, month, day in YYYY-MM-DD format.</translatorcomment>
         <translation>日 月 年 [ %1 - %2 ]</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2638"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2630"/>
         <source>Hide All Events</source>
         <translation>すべてのイベントを隠す</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2639"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2631"/>
         <source>Show All Events</source>
         <translation>すべてイベントを表示する</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="805"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="797"/>
         <source>Unpin %1 Graph</source>
         <translation>%1 グラフの固定を解除</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="807"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="799"/>
         <source>Popout %1 Graph</source>
         <translation>%1 のグラフをポップアウトする</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="806"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="798"/>
         <source>Pin %1 Graph</source>
         <translation>%1 グラフを固定</translation>
     </message>
@@ -15075,6 +15117,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>ランプのみ</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="790"/>
         <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2754"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="209"/>
         <source>Full Time</source>
@@ -15230,9 +15273,8 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="vanished">ライズ有効</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="931"/>
         <source>RiseTime</source>
-        <translation>ライズ時間</translation>
+        <translation type="vanished">ライズ時間</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="312"/>
@@ -15251,14 +15293,12 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>トリガー</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="937"/>
         <source>TiMax</source>
-        <translation>TiMax</translation>
+        <translation type="vanished">TiMax</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="934"/>
         <source>TiMin</source>
-        <translation>TiMin</translation>
+        <translation type="vanished">TiMin</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="637"/>
@@ -15301,7 +15341,7 @@ popout window, delete it, then pop out this graph again.</source>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="794"/>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1150"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2938"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2940"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="234"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="234"/>
         <location filename="../oscar/SleepLib/loader_plugins/sefam_loader.cpp" line="209"/>
@@ -15580,8 +15620,8 @@ popout window, delete it, then pop out this graph again.</source>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1128"/>
         <location filename="../oscar/SleepLib/loader_plugins/prismavent_loader.cpp" line="934"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2949"/>
-        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3040"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2951"/>
+        <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3042"/>
         <source>Auto</source>
         <translation>自動</translation>
     </message>
@@ -15651,7 +15691,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>CMS50E/F</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/machine.cpp" line="768"/>
+        <location filename="../oscar/SleepLib/machine.cpp" line="788"/>
         <source>Loading %1 data for %2...</source>
         <translation>%2 の %1 データを読み込んでいます...</translation>
     </message>
@@ -15680,7 +15720,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation type="vanished">概要データを読み込んでいます</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/machine.cpp" line="1088"/>
+        <location filename="../oscar/SleepLib/machine.cpp" line="1119"/>
         <source>Loading %1 sessions from database...</source>
         <translation type="unfinished">データベースから%1セッションを読み込んでいます...</translation>
     </message>
@@ -18283,9 +18323,8 @@ Create it?</source>
         <translation type="unfinished">ダウンロード</translation>
     </message>
     <message>
-        <location filename="../oscar/restoredialog.ui" line="158"/>
         <source>color: gray; font-size: small;</source>
-        <translation type="unfinished">color: gray; font-size: small;</translation>
+        <translation type="obsolete">color: gray; font-size: small;</translation>
     </message>
     <message>
         <location filename="../oscar/restoredialog.ui" line="180"/>
@@ -21665,17 +21704,17 @@ Make sure you trust the recipient before sharing this data.</source>
 <context>
     <name>gGraphView</name>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="487"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="479"/>
         <source>100% zoom level</source>
         <translation>100% 表示</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="489"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="481"/>
         <source>Restore X-axis zoom to 100% to view entire selected period.</source>
         <translation>選択した範囲すべてのデータを表示するためX 軸にの拡大率に 100% に戻す。</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="491"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="483"/>
         <source>Restore X-axis zoom to 100% to view entire day&apos;s data.</source>
         <translation>一日全体のデータを表示するためX 軸にの拡大率に 100% に戻す。</translation>
     </message>
@@ -21688,130 +21727,130 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation type="vanished">すべてのグラフをデフォルトの高さと順序に戻す。</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="493"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="485"/>
         <source>Reset Graph Heights</source>
         <translation type="unfinished">グラフの高さをリセット</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="494"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="486"/>
         <source>Resets all graphs to a uniform height.</source>
         <translation type="unfinished">すべてのグラフを均一な高さにリセットします。</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="497"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="489"/>
         <source>Y-Axis</source>
         <translation>Y軸</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="498"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="490"/>
         <source>Plots</source>
         <translation>プロット</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="502"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="494"/>
         <source>CPAP Overlays</source>
         <translation>CPAPオーバーレイ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="505"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="497"/>
         <source>Oximeter Overlays</source>
         <translation>オキシメーターオーバーレイ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="508"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="500"/>
         <source>Dotted Lines</source>
         <translation>点線</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="726"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="718"/>
         <source>Display</source>
         <translation type="unfinished">表示</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="730"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="722"/>
         <source>Close</source>
         <translation type="unfinished">閉じる</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="734"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="726"/>
         <source>Y-axis</source>
         <translation type="unfinished">Y軸</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="735"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="727"/>
         <source>Auto scale</source>
         <translation type="unfinished">自動スケール</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="737"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="729"/>
         <source>Default scale</source>
         <translation type="unfinished">デフォルトのスケール</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="746"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="738"/>
         <source>Dynamic scale</source>
         <translation type="unfinished">動的スケール</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="754"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="746"/>
         <source>Override scale...</source>
         <translation type="unfinished">スケールを指定...</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="757"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="749"/>
         <source>Overlays</source>
         <translation type="unfinished">オーバーレイ</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="778"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="770"/>
         <source>Reset graph heights</source>
         <translation type="unfinished">グラフの高さをリセット</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="780"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="772"/>
         <source>Unpin</source>
         <translation type="unfinished">固定を解除</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="780"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="772"/>
         <source>Pin</source>
         <translation type="unfinished">固定</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="782"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="774"/>
         <source>Pop out</source>
         <translation type="unfinished">別ウィンドウで表示</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="785"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="777"/>
         <source>Remove clone</source>
         <translation type="unfinished">複製を削除</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="785"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="777"/>
         <source>Clone</source>
         <translation type="unfinished">複製</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="787"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="779"/>
         <source>100% zoom</source>
         <translation type="unfinished">100% ズーム</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2154"/>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2207"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2146"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2199"/>
         <source>Double click title to pin / unpin
 Click and drag to reorder graphs</source>
         <translation>タイトルをダブルクリックして固定 / 固定解除
 クリックしてドラッグでグラフの順序変更</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2451"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2443"/>
         <source>Remove Clone</source>
         <translation>複製を削除</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraphView.cpp" line="2454"/>
+        <location filename="../oscar/Graphs/gGraphView.cpp" line="2446"/>
         <source>Clone %1 Graph</source>
         <translation>%1 のグラフを複製</translation>
     </message>
