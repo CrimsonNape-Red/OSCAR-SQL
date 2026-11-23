@@ -54,6 +54,7 @@ protected:
 private:
 #ifdef UNITTEST_MODE
     friend class BmcArchiveTests;
+    friend class BmcG3xSettingsTests;
 #endif
 
     struct G3xDayEntry

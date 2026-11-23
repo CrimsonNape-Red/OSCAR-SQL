@@ -205,6 +205,21 @@ All pressure fields are **u16 LE, hundredths of cmH₂O**. Field positions are
 | 0x1A | **Rise time, milliseconds** (u16) | 300 | 300 ms ✓ |
 | 0x2A | PS | 3.50 | 3.5 ✓ |
 
+**PS or Min IPAP, never both (GitLab #419).** AutoS holds PS fixed, so
+`Min IPAP = Min EPAP + PS` and the device needs to store only one of them. Which one
+depends on the firmware, and follows what its settings screen offers:
+
+| Device | 0x14 | 0x2A | PAP-Link shows |
+|---|---|---|---|
+| E5 B25A Plus | 0 | PS | PS |
+| G3 B20A (G3-2.12.x) | Min IPAP | 0 | Min IPAP |
+
+Checked on a G3 B20A against PAP-Link: `0x0E` = 700, `0x14` = 900, `0x16` = 2000 reads
+Min EPAP 7.0, Min IPAP 9.0, Max IPAP 20.0. On every AutoS night of the sample cards
+available (E5 B25A Plus and G3 B20A), exactly one of the two fields is non-zero. The
+loader takes PS from `0x2A` when it is non-zero, and otherwise Min IPAP from `0x14` when
+that lies within Min EPAP..Max IPAP, deriving the other value.
+
 **Rise time (0x1A)** was initially mis-read as a pressure (300 → "3.00 cmH₂O"). It is
 milliseconds. Two independent checks:
 
@@ -243,11 +258,24 @@ block in `.set`. Both use this same layout.
 | 0x82 | u8 | Ramp Time | minutes; `0`=Off; **Auto if `flags & 0x01`** |
 | 0x86 | u8 | Reslex | `0`=Off, else 1–3 |
 | 0x87 | u8 | Humidifier | `0`=Off, else 1–5; **Auto if `flags & 0x04`** |
-| **0x8A** | u8 | **Flags** | bit0 Ramp=Auto, bit2 Humidifier=Auto, bit5 I Sens=Auto, bit6 E Sens=Auto |
+| 0x88 | u8 | Heated Tube Level | 0–5; **Auto if `flags & 0x08`**; see below |
+| **0x8A** | u8 | **Flags** | bit0 Ramp=Auto, bit2 Humidifier=Auto, bit3 Heated Tube=Auto, bit5 I Sens=Auto, bit6 E Sens=Auto |
 | 0x8C | u8 | Auto On | `0`=Off, `1`=On |
 | 0x8D | u8 | Auto Off | `0`=Off, `1`=On |
 | 0x8E | u8 | Mask Type | `0`=Full Face, `1`=Nasal, `2`=Nasal Pillows, `3`=Other |
 | 0xB3 | u8 | Leak Alert | `0`=Off, `1`=On |
+
+**Heated tube level (0x88)** — confirmed for levels 3 and 4 against PAP-Link on a
+G3 B20A with a 19 mm heated tube (GitLab #419): two nights with the same humidifier
+level (4) carry 3 and 4 here, and PAP-Link's "Heated Tubing" reads 3 and 4. Cards with
+an unheated tube carry a value here as well (5 on those seen), so the level only means
+something when the air tube type at `0x8F` is heated.
+
+**Heated Tube = Auto is bit 3 of the flags byte (`0x08`)** — confirmed against PAP-Link
+on a G3 A20 (GitLab #419). Two nights with flags `0x0C` read "Humidifier: Auto" and
+"Heated Tubing: Auto"; one stores 3 at `0x88` and the other 5, so the stored level is
+not what is shown when the bit is set. The bit is clear on the G3 B20A nights above,
+where PAP-Link shows the level.
 
 ### Mode (0x08)
 
@@ -263,12 +291,13 @@ All pressures are u16 LE in hundredths of cmH₂O.
 | Min APAP / Min EPAP | 0x0E | | ✓ | | ✓ |
 | Max APAP | 0x10 | | ✓ | | |
 | IPAP | 0x12 | | | ✓ | |
+| Min IPAP (G3 B20A; zero on E5) | 0x14 | | | | ✓ |
 | Max IPAP | 0x16 | | | | ✓ |
 | Initial P / Initial EPAP | 0x18 | ✓ | ✓ | ✓ | ✓ |
 | Rise Time (u16, **ms**) | 0x1A | | | ✓ | ✓ |
 | Ti Min (u8, ×0.1 s) | 0x1E | | | ✓ | |
 | Ti Max (u8, ×0.1 s) | 0x20 | | | ✓ | |
-| Pressure Support | 0x2A | | | | ✓ |
+| Pressure Support (E5; zero on G3 B20A) | 0x2A | | | | ✓ |
 | I Sens (u8) | 0x30 | | | ✓ | ✓ |
 | E Sens (u8) | 0x31 | | | ✓ | ✓ |
 | Pres. Response (u8) | 0x32 | | ✓ | | ✓ |
@@ -301,8 +330,9 @@ variants carry a valid block checksum.
 
 - **Smart PS is not stored.** Derive it: `PS = [0x72] - [0x6E]`, i.e. Smart Min IPAP
   minus Smart Min EPAP. On the reference block 13.50 - 11.50 = 2.00, matching PAP-Link's
-  "Smart PS 2.0 cmH₂O". This is the mirror of the main block, where Min IPAP is the
-  derived value and PS is stored at `0x2A`.
+  "Smart PS 2.0 cmH₂O". On this device (E5 B25A Plus) that is the mirror of the main
+  block, where Min IPAP is the derived value and PS is stored at `0x2A`. The G3 B20A
+  main block stores Min IPAP instead (see Mode 6 above).
 - **`0x6A` is patch-proven**, not merely value-matched: changing it from `03 B6` (9.50)
   to `04 4C` (11.00) in an AutoCPAP record moved PAP-Link's "Smart P" from 9.5 to 11.0
   and left Smart Min P and Smart Max P untouched. The rest of the table is confirmed by

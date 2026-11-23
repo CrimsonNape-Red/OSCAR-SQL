@@ -2296,20 +2296,21 @@ void BmcG3xData::ParseIdxRecords(const QByteArray& idxBytes)
 ///
 ///   0x08 mode (0 CPAP, 1 AutoCPAP, 2 S, 6 AutoS)
 ///   0x0A Treat P / EPAP        0x0E Min APAP / Min EPAP    0x10 Max APAP
-///   0x12 IPAP                  0x16 Max IPAP               0x18 Initial P / Initial EPAP
+///   0x12 IPAP                  0x14 Min IPAP (G3 B20A)     0x16 Max IPAP
+///   0x18 Initial P / Initial EPAP
 ///   0x1A rise time (ms)        0x1E Ti Min (x0.1s)         0x20 Ti Max (x0.1s)
-///   0x2A pressure support      0x30 I Sens                 0x31 E Sens
+///   0x2A pressure support (E5) 0x30 I Sens                 0x31 E Sens
 ///   0x32 pressure response     0x34 backup RR              0x36 Smart C/A/B
 ///   0x82 ramp minutes          0x86 Reslex                 0x87 humidifier
-///   0x8A auto flags            0x8C auto on                0x8D auto off
-///   0x8E mask type             0xB3 leak alert
+///   0x88 heated tube level     0x8A auto flags             0x8C auto on
+///   0x8D auto off              0x8E mask type              0x8F air tube type
+///   0xB3 leak alert
 ///
 /// The 0x8A flags byte carries the "Auto" states that have no numeric encoding:
-/// bit0 ramp, bit2 humidifier, bit5 I Sens, bit6 E Sens.
+/// bit0 ramp, bit2 humidifier, bit3 heated tube, bit5 I Sens, bit6 E Sens.
 ///
-/// Air tube type is deliberately **not** set: no offset for it is known in this layout, and
-/// BmcMachineSettings::AirTubeType defaults to a value that is itself a real option
-/// ("Normal 19mm"), so publishing it would present a guess as though it were a reading.
+/// Air tube type (0x8F) and heated tube level (0x88) were found later than the rest of
+/// the map; each is described where it is read, at the end of the function.
 ///
 /// @param ts       The 256-byte block; must start with the ASCII tag "TS".
 /// @param settings Populated in place; untouched if the block is rejected.
@@ -2383,10 +2384,22 @@ bool BmcG3xData::DecodeTsBlock(const QByteArray& ts, BmcMachineSettings& setting
         settings.AutoS_MinEPAP     = u16(0x0E) / 100.0f;
         settings.AutoS_MaxIPAP     = u16(0x16) / 100.0f;
         if (pressureOk(u16(0x18))) settings.AutoS_InitialEPAP = u16(0x18) / 100.0f;
-        settings.AutoS_PS          = u16(0x2A) / 100.0f;
         // AutoS holds PS fixed while EPAP floats, so minimum IPAP is exactly
-        // min EPAP + PS.  Derived: no confirmed field carries it.
-        settings.AutoS_MinIPAP     = settings.AutoS_MinEPAP + settings.AutoS_PS;
+        // min EPAP + PS.  Firmware stores one of the pair and leaves the other field
+        // zero, matching what its own settings screen offers: the E5 B25A Plus stores
+        // PS (0x2A), the G3 B20A stores Min IPAP (0x14).  Both checked against PAP-Link;
+        // see GitLab #419 for the G3 B20A.  A Min IPAP outside Min EPAP..Max IPAP is
+        // not a reading, and leaves PS at zero ("not known") as before.
+        if (u16(0x2A) > 0) {
+            settings.AutoS_PS      = u16(0x2A) / 100.0f;
+            settings.AutoS_MinIPAP = settings.AutoS_MinEPAP + settings.AutoS_PS;
+        } else if (u16(0x14) >= u16(0x0E) && u16(0x14) <= u16(0x16)) {
+            settings.AutoS_MinIPAP = u16(0x14) / 100.0f;
+            settings.AutoS_PS      = (u16(0x14) - u16(0x0E)) / 100.0f;
+        } else {
+            settings.AutoS_PS      = 0.0f;
+            settings.AutoS_MinIPAP = settings.AutoS_MinEPAP;
+        }
         settings.AutoS_RiseTime    = riseSecs();
         settings.AutoS_ISENS       = sens(u8(0x30), (flags & 0x20) != 0);
         settings.AutoS_ESENS       = sens(u8(0x31), (flags & 0x40) != 0);
@@ -2433,6 +2446,24 @@ bool BmcG3xData::DecodeTsBlock(const QByteArray& ts, BmcMachineSettings& setting
     if (rawTube >= 0 && rawTube <= 3) {
         settings.AirTubeType      = static_cast<BmcAirTubeType>(rawTube);
         settings.AirTubeTypeKnown = true;
+    }
+
+    // Heated tube level (0x88), the byte after the humidifier level: 0–5, the options
+    // registered on BMC_HEATEDTUBE_LEVEL.  Levels 3 and 4 were checked against PAP-Link
+    // on a G3 B20A (GitLab #419); before that the field was not read and every
+    // heated-tube night was reported as "Off".  Cards with an unheated tube carry a
+    // value here too (5 on those seen), so bmc_loader.cpp publishes it only for a
+    // heated tube.
+    //
+    // Bit 3 of the 0x8A flags means "Auto", as bit 2 does for the humidifier, and takes
+    // the place of the stored level: on a G3 A20 with flags 0x0C, PAP-Link shows "Auto"
+    // on a night that stores 3 and on one that stores 5.  Option 6 is registered as
+    // "Auto" on BMC_HEATEDTUBE_LEVEL.
+    const int rawTubeLevel = u8(0x88);
+    if (flags & 0x08) {
+        settings.HeatedTubeLevel = 6;
+    } else if (rawTubeLevel <= 5) {
+        settings.HeatedTubeLevel = rawTubeLevel;
     }
 
     return true;

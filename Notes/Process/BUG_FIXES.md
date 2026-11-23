@@ -4,6 +4,37 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-23 - BMC G3X: AutoS pressure support shown as 0.0 on the G3 B20A, and heated tube level always Off (GitLab #419, items 1 and 2)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`BmcG3xData::DecodeTsBlock()`),
+`bmcG3xDataParsing.h`, `oscar/tests/bmcg3xsettingstests.cpp/.h` (new), `oscar/oscar.pro`
+
+**Symptom:** On a G3 B20A in AutoS mode, Daily's Device Settings showed PS 0.0 and Min IPAP equal to
+Min EPAP, and Statistics listed "PS 0.0 over 7.0-20.0". Every night with a heated tube showed Heated
+Tube Level "Off".
+
+**Root cause:** Two fields of the per-night settings block were not read.
+- AutoS firmware stores either pressure support or minimum IPAP and leaves the other field zero. The
+  decoder knew only the PS field (`0x2A`), which the E5 B25A Plus fills. The G3 B20A fills minimum
+  IPAP (`0x14`) instead.
+- The heated tube level (`0x88`) and its Auto flag (`0x8A` bit 3) were never read on G3X, so the
+  published value was the struct default.
+
+**Fix:** PS is taken from `0x2A` when it is non-zero; otherwise minimum IPAP is taken from `0x14`
+when it lies within Min EPAP..Max IPAP, and PS is the difference. The heated tube level is read from
+`0x88` (0–5), or is "Auto" when flags bit 3 is set. All of it was checked against PAP-Link: two nights
+of a G3 B20A card (Min IPAP 9.0, heated tube 3 and 4) and two nights of a G3 A20 card (heated tube
+Auto). Batch imports of a G3 B20A and a G3 A20 card store the same values.
+
+**Non-obvious:**
+- Nights already imported keep the old values. No loader data version was changed, so they are
+  corrected only by a rebuild from backup or a purge and re-import.
+- With the Auto flag set the stored level is not what the device reports: PAP-Link shows "Auto" on a
+  night that stores 3 and on one that stores 5. See `Notes/Formats/BMC/G3X/BMC_G3X_SET_FORMAT.md`.
+- The other items of #419 are not part of this fix.
+
+---
+
 ## 2026-11-20 - BMC card backup recopied the whole card on every import and kept only the last card (GitLab #380)
 
 **Files:** `oscar/SleepLib/card_archive.cpp/.h` (new), `oscar/SleepLib/loader_plugins/bmc_archive.cpp/.h`
