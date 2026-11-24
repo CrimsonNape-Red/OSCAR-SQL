@@ -1268,17 +1268,28 @@ int main(int argc, char *argv[]) {
     // tool). Opening it as it is would make DatabaseManager create a new, empty oscar.db
     // without a word, and the user's data would appear to have vanished (GitLab #316).
     // An empty folder is not a loss: it is a new data folder and carries on as before.
-    const bool databaseMissing = !firstRun && classifyDataFolder(GetAppData()) == DataFolderStatus::Other;
+    const DataFolderStatus recordedStatus = firstRun ? DataFolderStatus::Missing : classifyDataFolder(GetAppData());
+    const bool databaseMissing = recordedStatus == DataFolderStatus::Other;
     if (databaseMissing)
         qWarning().noquote() << "Data folder" << GetAppData() << "exists but has no oscar.db";
 
-    if (!force_data_dir && (firstRun || databaseMissing || !QDir(GetAppData()).exists())) {
+    // A recorded or --datadir folder holding OSCAR 1.x data (and no oscar.db) cannot be
+    // used as it is: DatabaseManager would create an empty oscar.db among the 1.x files,
+    // and the migration offer below would never fire because the folder is not empty
+    // (GitLab #201). Send the user to create or find an OSCAR 2 folder instead.
+    const bool oscar1Folder = recordedStatus == DataFolderStatus::Oscar1;
+    if (oscar1Folder)
+        qWarning().noquote() << "Data folder" << GetAppData() << "holds OSCAR 1.x data, not an OSCAR 2 database";
+
+    if (!force_data_dir && (firstRun || databaseMissing || oscar1Folder || !QDir(GetAppData()).exists())) {
         // Either a first run, or the recorded folder or its database has gone (moved,
         // deleted, drive or cloud mirror not mounted). Creating a folder and finding one
         // are separate paths: the single "choose or create" picker used before led many
         // users to hand back the intended parent folder, putting the database in Documents.
         if (batchMode) {
-            if (databaseMissing)
+            if (oscar1Folder)
+                qCritical().noquote() << "Main: Data folder" << GetAppData() << "holds OSCAR 1.x data. Specify an OSCAR 2 data folder, or run OSCAR interactively to migrate.";
+            else if (databaseMissing)
                 qCritical().noquote() << "Main: Data folder" << GetAppData() << "has no oscar.db. Run OSCAR interactively to resolve this.";
             else
                 qCritical() << "Main: No OSCAR data folder configured. Please specify --datadir <path> or run OSCAR interactively first.";
@@ -1292,12 +1303,13 @@ int main(int argc, char *argv[]) {
         QString chosen;
 
         while (chosen.isEmpty()) {
-            const StartupChoice choice = databaseMissing ? showDatabaseMissingChoice(missingPath)
+            const StartupChoice choice = oscar1Folder    ? showOscar1FolderChoice(missingPath)
+                                       : databaseMissing ? showDatabaseMissingChoice(missingPath)
                                                          : showStartupChoice(missingPath);
 
             if (choice == StartupChoice::Cancel) {
                 QMessageBox::information(nullptr, QObject::tr("Exiting"),
-                                         (databaseMissing ? QObject::tr("OSCAR will exit without changing your data folder.")
+                                         ((databaseMissing || oscar1Folder) ? QObject::tr("OSCAR will exit without changing your data folder.")
                                                           : QObject::tr("As you did not select a data folder, OSCAR will exit.")) + "\n" +
                                          QObject::tr("Next time you run OSCAR, you will be asked again."));
                 return 0;

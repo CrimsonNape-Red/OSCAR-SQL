@@ -4,6 +4,28 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-24 - A data folder holding OSCAR 1.x data got a new empty oscar.db, no migration offer (GitLab #201)
+
+**Files:** `oscar/main.cpp`, `oscar/datafolderdialog.cpp/.h`
+
+**Symptom:** When the recorded data folder, or a `--datadir` folder, held OSCAR 1.x data and no
+`oscar.db`, OSCAR opened it as it was: an empty `oscar.db` appeared among the 1.x files and the
+migration offer never came, because it only fires for an empty folder.
+
+**Root cause:** The startup check classified the folder but only acted on `Other` (database missing,
+#316). `Oscar1` fell through to the "folder already exists" path.
+
+**Fix:** An `Oscar1` folder now leads to a new "OSCAR 1.x Data Folder" dialog: Create an OSCAR 2 data
+folder (the new, empty folder then gets the migration offer), Find an existing one, or Exit without
+changing settings. Batch mode logs a critical error and exits with code 1.
+
+**Non-obvious:**
+- The first-run path the issue described was already closed: the create dialog rejects 1.x and
+  non-empty folders. The gap that remained was a recorded or `--datadir` folder.
+- File ▸ Database ▸ Open already refused 1.x folders (`mainwindow.cpp`).
+
+---
+
 ## 2026-11-24 - F&P ICON humidifier setting was written to channel 0 (GitLab #264)
 
 **Files:** `oscar/SleepLib/loader_plugins/icon_loader.cpp/.h`

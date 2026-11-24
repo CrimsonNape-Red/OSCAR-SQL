@@ -266,6 +266,29 @@ StartupChoice showDatabaseMissingChoice(const QString& folder)
     }
 }
 
+StartupChoice showOscar1FolderChoice(const QString& folder)
+{
+    const QString text =
+        QObject::tr("This folder contains OSCAR 1.x data, not an OSCAR 2 database:") +
+        "\n\n" + QDir::toNativeSeparators(folder) + "\n\n" +
+        QObject::tr("OSCAR 1.x and 2.x cannot use the same data folder as the data structures are different.") + "\n\n" +
+        QObject::tr("Choose Create to make a new OSCAR 2 data folder; you will then be offered to migrate your OSCAR 1.x data into it.") + " " +
+        QObject::tr("If your OSCAR 2 data folder is somewhere else, choose Find.") + "\n\n" +
+        QObject::tr("Your OSCAR 1.x data folder will not be changed.");
+
+    SetupChoiceDialog dialog(QObject::tr("OSCAR 1.x Data Folder"), text,
+                             { QObject::tr("Create OSCAR 2 data folder"),
+                               QObject::tr("Find my OSCAR 2 data folder"),
+                               QObject::tr("Exit") });
+    dialog.exec();
+
+    switch (dialog.choice()) {
+    case 0:  return StartupChoice::FirstUse;
+    case 1:  return StartupChoice::FindExisting;
+    default: return StartupChoice::Cancel;
+    }
+}
+
 MigrationChoice showMigrationChoice()
 {
     QString text = QObject::tr("OSCAR 2 uses a different data folder than OSCAR 1.x, so it cannot share the folder used by OSCAR 1.x.") + " " +

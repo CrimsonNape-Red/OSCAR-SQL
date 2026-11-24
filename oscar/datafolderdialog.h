@@ -85,6 +85,18 @@ StartupChoice showStartupChoice(const QString& missingPath);
  */
 StartupChoice showDatabaseMissingChoice(const QString& folder);
 
+/*!
+ * \brief Show the "OSCAR 1.x Data Folder" dialog for a data folder that holds OSCAR 1.x data.
+ * \param folder The recorded or --datadir folder: it holds Preferences.xml and Profiles/,
+ *               but no oscar.db.
+ * \return FirstUse (create a new OSCAR 2 folder, after which migration is offered),
+ *         FindExisting, or Cancel.
+ *
+ * Opening such a folder as it is would create a new, empty oscar.db among the 1.x files
+ * and never offer migration, because the folder is not empty (GitLab #201).
+ */
+StartupChoice showOscar1FolderChoice(const QString& folder);
+
 /*! \brief Outcome of the migration choice dialog. */
 enum class MigrationChoice {
     Migrate,    //!< Select an OSCAR 1.x folder and migrate its profiles.
