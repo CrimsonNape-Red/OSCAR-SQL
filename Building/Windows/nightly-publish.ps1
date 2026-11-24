@@ -26,8 +26,8 @@
 #   5. Set the build date, build ids and download links in the page; commit and push.
 #   6. Delete the packages the page no longer links to.
 #
-# Download links in the page are <a data-dl="KEY" href="...">file name</a>; this script
-# rewrites the whole element. Keys: Win64, Win64-Portable, macOS-universal, checksums, and
+# Download links in the page are <a data-dl="KEY" ...>...</a>; this script rewrites the whole
+# element (a "btn" link becomes an icon plus the file name). Keys: Win64, Win64-Portable, macOS-universal, checksums, and
 # <Distro>_<arch>-Qt6 for each Linux package (e.g. Debian12_amd64-Qt6).
 #
 # Needs a GitLab token with api scope in the GITLAB_TOKEN environment variable.
@@ -233,12 +233,27 @@ function Publish-File([string]$name, [string]$version, [string]$path, $existing)
     Log "  Uploaded $file -> $name/$version"
 }
 
-# Replaces every <a data-dl="$key" ...>...</a> in $html.
+# Replaces every <a data-dl="$key" ...>...</a> in $html, keeping its class. A download
+# button (class "btn") gets the download icon and the file name in a span; any other link
+# gets plain text.
 function Set-PageLink([string]$html, [string]$key, [string]$url, [string]$text) {
-    $pattern = '<a data-dl="' + [regex]::Escape($key) + '"[^>]*>[^<]*</a>'
+    $pattern = '(?s)<a data-dl="' + [regex]::Escape($key) + '"([^>]*)>.*?</a>'
     if ($html -notmatch $pattern) { Fail "Page has no <a data-dl=`"$key`">" }
-    $a = '<a data-dl="' + $key + '" href="' + $url + '">' + $text + '</a>'
-    return [regex]::Replace($html, $pattern, { param($m) $a })
+    $evaluator = {
+        param($m)
+        $cls = ''
+        if ($m.Groups[1].Value -match 'class="([^"]*)"') { $cls = $Matches[1] }
+        if ($cls -match '\bbtn\b') {
+            '<a data-dl="' + $key + '" class="' + $cls + '" href="' + $url + '" download>' +
+            '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16"/></svg>' +
+            '<span translate="no">' + $text + '</span></a>'
+        } elseif ($cls) {
+            '<a data-dl="' + $key + '" class="' + $cls + '" href="' + $url + '">' + $text + '</a>'
+        } else {
+            '<a data-dl="' + $key + '" href="' + $url + '">' + $text + '</a>'
+        }
+    }
+    return [regex]::Replace($html, $pattern, $evaluator)
 }
 
 try {
