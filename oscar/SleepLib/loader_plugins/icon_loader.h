@@ -38,6 +38,8 @@ class FPIcon: public CPAP
 
 const int fpicon_load_buffer_size = 1024 * 1024;
 
+extern ChannelID FPIcon_HumidSetting;   //!< Humidifier setting from the summary record (raw value)
+
 
 const QString fpicon_class_name = STR_MACH_FPIcon;
 
@@ -80,6 +82,9 @@ class FPIconLoader : public CPAPLoader
 
     //! \brief Registers this MachineLoader with the master list, so F&P Icon data can load
     static void Register();
+
+    //! \brief Registers the ICON-specific settings channels (humidifier setting)
+    virtual void initChannels() override;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Now for some CPAPLoader overrides

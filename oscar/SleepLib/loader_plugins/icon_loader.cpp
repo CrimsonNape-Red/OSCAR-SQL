@@ -804,7 +804,7 @@ bool FPIconLoader::OpenSummary(Machine *mach, const QString & filename)
                 sess->settings[CPAP_Pressure] = p1 / 10.0;
             }
 
-            sess->settings[CPAP_HumidSetting] = x2;
+            sess->settings[FPIcon_HumidSetting] = x2;
             Sessions[ts] = sess;
 
             addSession(sess);
@@ -988,6 +988,35 @@ bool FPIconLoader::OpenDetail(Machine *mach, const QString & filename)
     }
 
     return 1;
+}
+
+ChannelID FPIcon_HumidSetting = 0;
+
+/*! \brief Register the ICON-specific settings channels.
+
+    The humidifier setting used to be written to CPAP_HumidSetting, which
+    resolves through schema::channel["HumidSet"]. Nothing registers a channel
+    of that name, so it is the empty channel (id 0) and the setting was lost
+    (GitLab #264). This gives it a channel of its own, the same pattern the
+    other loaders use.
+
+    No run-once guard: schema::resetChannels() destroys every channel and
+    re-invokes initChannels() on each loader, and ChannelList::add() already
+    rejects duplicate ids.
+
+    The meaning of the raw values is not documented, so no options are named
+    and Daily shows the number as stored. */
+void FPIconLoader::initChannels()
+{
+    using namespace schema;
+
+    // 0xe6xx is unused by every other loader — see the "Ensure your channel ID
+    // is unique" note in schema.cpp.
+    // The displayed label is the one every other loader uses — see GitLab #263.
+    channel.add(GRP_CPAP, new Channel(FPIcon_HumidSetting = 0xe600, SETTING, MT_CPAP, SESSION,
+                                      "FPIcon_HumidSetting", QObject::tr("Humidifier"),
+                                      QObject::tr("Humidifier setting"),
+                                      QObject::tr("Humidity Level"), "", INTEGER, Qt::black));
 }
 
 bool fpicon_initialized = false;

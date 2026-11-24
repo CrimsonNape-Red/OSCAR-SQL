@@ -4,6 +4,27 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-24 - F&P ICON humidifier setting was written to channel 0 (GitLab #264)
+
+**Files:** `oscar/SleepLib/loader_plugins/icon_loader.cpp/.h`
+
+**Symptom:** ICON sessions never showed a humidifier setting.
+
+**Root cause:** `OpenSummary()` stored it in `CPAP_HumidSetting`, which `schema.cpp` resolves through
+`schema::channel["HumidSet"]`. No channel of that name is registered, so the lookup returns the empty
+channel (id 0) and the value went nowhere useful.
+
+**Fix:** The ICON loader now has an `initChannels()` that registers `FPIcon_HumidSetting` (0xe600,
+INTEGER, label "Humidity Level" as in #263), and the summary parser writes to it. No options are named
+because the meaning of the raw values is not documented.
+
+**Non-obvious:**
+- `CPAP_HumidSetting` is still defined and still resolves to id 0; nothing else writes to it.
+- Existing ICON sessions get the setting only after a re-import; `fpicon_data_version` was not bumped.
+- Not tested against ICON data: no sample card is available.
+
+---
+
 ## 2026-11-24 - Build fixes for MinGW and Linux-to-Windows cross-compiling (MR !67)
 
 **Files:** `oscar/Graphs/gSummaryChart.cpp`, `oscar/daily.cpp`,
