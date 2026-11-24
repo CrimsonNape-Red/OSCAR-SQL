@@ -54,6 +54,7 @@ class Day
     EventDataType rangePercentile(ChannelID code, float p, qint64 st, qint64 et);
 
     //! \brief Returns the count of all this days sessions' events for this day
+    //! May be fractional when summary-only sessions contribute estimated counts (index x hours).
     EventDataType count(ChannelID code);
 
     //! \brief Returns the Minimum of all this sessions' events for this day

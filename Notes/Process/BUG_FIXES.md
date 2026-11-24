@@ -4,6 +4,27 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-24 - Day::count warned about fractional counts on ResMed summary-only days (GitLab #236)
+
+**Files:** `oscar/SleepLib/day.cpp/.h`
+
+**Symptom:** The debug log filled with lines such as `Day::count for code 4099 returning 2.785`
+while daily summaries were calculated, mostly during imports and migrations.
+
+**Root cause:** ResMed STR-only sessions get estimated counts (`index x hours` in
+`StoreSummaryStatistics()`), which are fractional by design. `Day::count()` warned whenever the day
+total was not a whole number, so every such day produced a warning.
+
+**Fix:** The check now runs per session and skips summary-only sessions. A fractional count from a
+session with detail data still logs, with the session id.
+
+**Non-obvious:**
+- The storage question raised in the issue was settled by #287: every INTEGER count column is
+  written with `qRound()`, and `session_channels.cph` keeps the exact rate.
+- The fractional value is still returned, so AHI on summary-only days matches the machine's STR value.
+
+---
+
 ## 2026-11-24 - A data folder holding OSCAR 1.x data got a new empty oscar.db, no migration offer (GitLab #201)
 
 **Files:** `oscar/main.cpp`, `oscar/datafolderdialog.cpp/.h`
