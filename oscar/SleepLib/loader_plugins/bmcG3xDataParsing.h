@@ -52,6 +52,15 @@ struct BmcG3xPacketPressure
 BmcG3xPacketPressure BmcG3xPacketPressureHundredths(int trendEpap, int trendIpap,
                                                     int knownEpap, int knownIpap);
 
+/// @brief Reads the leak rate from one G3X waveform packet, in tenths of L/min.
+///
+/// The field and its scale are the same on every firmware this parser reads (G3, E5, P5):
+/// the uint16 at 0x52A, one raw unit being 0.1 L/min.
+///
+/// @param packet  One 2048-byte waveform packet.
+/// @return Leak in tenths of L/min, limited to 0..5000; 0 for a packet that is too short.
+int BmcG3xPacketLeakTenths(const QByteArray& packet);
+
 /// @brief Carries the last pressure of an events-only session through to its end.
 ///
 /// A night without waveform has only the event stream's pressure records, and the device
@@ -164,16 +173,8 @@ private:
     QList<G3xDayEntry> dayEntries;
     BmcMachineInfo machineInfo;
 
-    /// Waveform offset the leak channel is read from (0x52A or 0x568).  Which field a
-    /// device populates is a property of its firmware, not of any individual night, so
-    /// this is resolved once per device and reused for every day of the import.
-    /// -1 means "not yet resolved".
-    int leakFieldOffsetCache = -1;
-
     /// Number of .00x files in the waveform ring, from the IDX header.
     int waveFileCount = 63;
-
-    int ResolveLeakFieldOffset();
 
     static bool DecodeTsBlock(const QByteArray& ts, BmcMachineSettings& settings);
     bool ApplySetFileSettings(BmcMachineSettings& settings) const;

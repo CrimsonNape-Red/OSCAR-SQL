@@ -45,7 +45,7 @@ Confidence legend:
 | `0x312` | `50×2` | `uint16 LE[]` | **Unknown waveform**, 50 samples; large DC offset (~15 000 raw); oscillates in phase with mask pressure (median per-packet corr 0.81 vs MaskPressure, 0.96 vs Flow); always positive; nearly identical to `0x3E4`. Likely a second pressure-like or flow-derived signal at 50 Hz. Not loaded. | Low |
 | `0x380` | `50×2` | `int16 LE[]` | **Pressure Wave** waveform, 50 samples at 50 Hz; loaded as `BMC_PressureWave`. Like `0x24A`, shows full IPAP–EPAP swing on BiPAP devices (e.g. 887–1022 raw on a 9/10 cmH₂O device). **Signed:** while the machine starts or the mask is off it reads slightly below zero (−1 to −125 seen on a G3 B20A, i.e. down to −1.25 cmH₂O). The loader stores those as zero (GitLab #419). | Medium |
 | `0x3E4` | `50×2` | `uint16 LE[]` | **Raw differential-pressure (flow sensor) ADC output**, 50 samples; uint16 with DC bias ~16 000 (sensor mid-rail); AC amplitude scales with flow (r=0.985 per-packet vs flow, r=0.157 vs PressureWave); DC offset drifts slowly over the night tracking sleep/pressure state. Packet-to-packet correlation with `0x312` is 0.979 (slightly lower than vs flow), with per-packet differences std=319 and max=5079 — two tap points or calibration paths for the same sensor. **Not** a flow-abnormality block: investigated as a possible analogue of the legacy BMC loader's flow-abnormality block (which immediately follows the Pressure Wave in that format — same relative offset relationship), but confirmed to be a flow waveform, not event flags. Not loaded. | Low |
-| `0x52A` | 2 | `uint16 LE` | **Unintentional leak rate** (firmware SC.72 / user version G3-2.11.x only); `raw × 0.16 = L/min`. Confirmed for JCCPAP (Luna G3X, config `110A40113`). **Zero (unused) in firmware SC.74+** (e.g. Kavolodin G3 A20, config `880A40383`). OSCAR selects 0x52A or 0x568 automatically by sampling the first 200 packets of each day. See also `0x568`. | Medium |
+| `0x52A` | 2 | `uint16 LE` | **Unintentional leak rate**; `raw × 0.10 = L/min`. The leak field on every firmware examined (G3-2.11.x, G3-2.12.x, E5, P5); see §5. A mostly-zero field is a well-sealed mask, not a dead field. | High |
 | `0x52C` | 2 | `uint16 LE` | **Tidal Volume in millilitres**, gain 1.0; range 0–2559 observed. Updated once per breath (see §5a). Scale confirmed 2026-08-12 against `0x52E`/`0x530` — see §5a. | High |
 | `0x52E` | 2 | `uint16 LE` | **Minute Ventilation in tenths of L/min**, gain 0.1. Equals a 60-second moving average of `0x52C × 0x530 / 100`. Scale confirmed 2026-08-12 — see §5a. | High |
 | `0x530` | 2 | `uint16 LE` | **Respiratory Rate**, breaths/min; range 0–29 bpm observed, mean ~15 | High |
@@ -59,7 +59,7 @@ Confidence legend:
 | `0x55A` | `2×2` | `uint16 LE[]` | 2 intra-packet samples; unsigned range [0, 43947], mean ≈ 3525, ≈78% nonzero. No significant correlation with flow or pressure. Function unknown. | Low |
 | `0x55E` | `3×2` | `uint16 LE[]` | 3 intra-packet samples (0x55E, 0x560, 0x562); unsigned range [0, 65535], mean ≈ 7510, ≈78% nonzero. No significant correlation with flow or pressure. Function unknown. | Low |
 | `0x564` | `2×2` | `uint16 LE[]` | 2 intra-packet samples (0x564, 0x566); unsigned range [0, 65535], mean ≈ 25657, 100% nonzero. Function unknown. | Low |
-| `0x568` | 2 | `uint16 LE` | **Total mask leak rate** (present in all observed firmware versions); `raw × 0.16 = L/min`. Baseline ~15–17 L/min (intentional vent), with spikes to 100–350 L/min on mask repositioning / removal. **Primary leak source for firmware SC.74+** (Kavolodin/Patient2, config `880A40383`) where `0x52A` is always zero. In firmware SC.72 (JCCPAP), both fields are populated but uncorrelated (r ≈ 0.05), indicating they measure different quantities (0x52A = unintentional leak; 0x568 = total). OSCAR selects this field automatically when 0x52A is found to be unpopulated. The earlier hypothesis of an "inverse-RR" signal was incorrect. | Medium |
+| `0x568` | 1 | `uint8` | **Not a field of its own.** The last byte of the 5-byte array `0x564..0x568`; the byte after it starts another 5-byte array, `0x569..0x56D`, a counter that runs during an event. A `uint16` read here was once used as an "alternate leak" for G3-2.12.x firmware and produced a flat ~15.7 L/min baseline with spikes in steps of 40.96 L/min (GitLab #403). Not used. | High |
 | `0x56A` | 2 | `uint16 LE` | **Hypopnea/flow-limitation duration counter** — part of a 4-stage shift register at bytes `0x56A`–`0x56D` (newest→oldest: `0x56D`, `0x56C`, `0x56B`, `0x56A`); counter increments each second while a reduced-ventilation event is in progress; value 1 = first second, 2 = second second, etc. (max observed: 8). ~150 events/night; median duration 4 s, max 55 s. During events: **tidal volume drops ~33%** (median 539→321 raw), RR drops from 13.4→11.6 bpm, APAP pressure rises (44% of events trigger subsequent boost). Flow waveform shape and HF content are **identical** to normal — the machine detects reduced ventilation (not waveform shape change). The lag byte (`0x56A`, i.e. `pkt[0x56A]`) is 1 packet behind the lead byte (`0x56B`, the high byte of this uint16). See also `0x56C`. Not yet loaded. | Low |
 | `0x56C` | 2 | `uint16 LE` | Continuation of the 4-stage shift register at `0x56A`; the `0x56C` word (bytes `0x56C`=lo, `0x56D`=hi) leads the `0x56A` word by 1 packet. `0x56D` (hi byte) is the most current byte — it updates first on increment/reset. Functionally carries the same counter as `0x56A`; not needed in addition to `0x56A` once the correct byte is chosen. | Low |
 | `0x56E` | `100×2` | `int16 LE[]` | **Flow Rate** waveform, 100 samples; correct shape and zero baseline | High |
@@ -136,7 +136,7 @@ The following single-value fields are read from every packet and stored as `EVL_
 | `CPAP_Pressure` | `0x76E` | See §6 | Hundredths cmH2O stored directly in `Raw.IPAP`; `PressureChannelGain()` = 0.01 → 0.01 cmH2O resolution |
 | `CPAP_IPAP` | `0x76E` | See §6 | Same as `CPAP_Pressure` |
 | `CPAP_EPAP` | `0x76C` | See §6 | Identical to IPAP in CPAP mode |
-| `CPAP_Leak` | `0x52A` or `0x568` | `uint16 LE` × 1.6 = tenths L/min; gain 0.1 → L/min | Offset selected at runtime by Phase 3.5 probe: 0x52A for fw SC.72, 0x568 for fw SC.74+. See §5. |
+| `CPAP_Leak` | `0x52A` | `uint16 LE` × 1.0 = tenths L/min; gain 0.1 → L/min | Same field and scale on every firmware. See §5. |
 | `CPAP_TidalVolume` | `0x52C` | `uint16 LE`, gain 1.0 | Millilitres; confirmed 2026-08-12 (§5a). Current gain is correct. |
 | `CPAP_MinuteVent` | `0x52E` | `uint16 LE` × 0.1 | L/min; confirmed 2026-08-12 (§5a). Current gain is correct. |
 | `CPAP_RespRate` | `0x530` | `uint16 LE`, gain 1.0 | Breaths/min |
@@ -151,25 +151,26 @@ The following single-value fields are read from every packet and stored as `EVL_
 
 ## 5) Leak Field and Scale
 
-### Field selection (firmware-dependent)
+### Field
 
-Two firmware builds have been observed:
+Leak is read from `0x52A` on every firmware. There is no selection (GitLab #403).
 
-| Config code (IDX 0x48) | SC firmware (IDX 0x0345) | User version | Leak field | Signal |
-|------------------------|--------------------------|--------------|------------|--------|
-| `110A40113` (JCCPAP/Luna G3X) | `G3-2.SC.72.01` | G3-2.11.x | **`0x52A`** | Unintentional (mask-fit) leak |
-| `880A40383` (Kavolodin G3 A20) | `G3-2.SC.74.03` | G3-2.12.x | **`0x568`** | Total mask leak (incl. intentional vent) |
+Until 2026-11 the loader chose between `0x52A` and a `uint16` at `0x568`: by firmware version (`G3-2.11.x` / `SC.72` → `0x52A`, any other `G3-2.` → `0x568`), or, for an unrecognised version, by sampling packets and taking `0x568` when fewer than 10% had a non-zero `0x52A`. Both rules rested on one card (internal build `G3-2.SC.74.03`) whose `0x52A` was non-zero in 0.33% of packets. That card was not available to re-examine. A mostly-zero field is not a dead one: a G3 A20 card with 0.9% non-zero packets has a device-reported mean leak of 0.2 L/min for the same night, so the mask simply sealed well. Where the field really is all zero, the loader stores no leak channel at all.
 
-In firmware SC.74+, `0x52A` is always zero and `0x568` carries a continuous total-mask-leak signal (baseline ~15–17 L/min = intentional vent, with spikes to 100–350 L/min on mask repositioning). In firmware SC.72, both `0x52A` and `0x568` are populated but are uncorrelated (r ≈ 0.05); `0x52A` is used as the confirmed unintentional leak source.
+`0x568` is not a leak field. It is the last byte of one 5-byte array, and a `uint16` read there takes its high byte from the first byte of the next array, an event counter. Hence the flat baseline near 15.7 L/min (the first array's median, 98 × 0.16) and a jump of 40.96 L/min (256 × 0.16) for each count, which gave some 180 false large-leak flags a night on a G3 B20A.
 
-**OSCAR selection rule** (Phase 3.5 in `ReadDateSession()`): the firmware version string is checked first — `G3-2.11.x` / `SC.72` → `0x52A`; any other `G3-2.` prefix → `0x568`. If the firmware version is unavailable, the first 200 packets of the day are sampled: if fewer than 10% have non-zero `0x52A`, the alternate field `0x568` is used for the entire day.
+| Evidence | `0x52A` non-zero | Scale implied by the device's nightly statistics |
+|---|---|---|
+| G3 B20A, `G3-2.12.55.05`, 7 nights | 97–99.5% of packets | 0.082–0.098 (mean); 0.098 / 0.100 / 0.097 on the night with most leak |
+| G3 A20, `G3-2.11.03.12`, about 40 nights | mostly 60–100% | 0.09–0.10 |
+| G3 A20, second card, `G3-2.11.03.12`, 1 night | 0.9% | device mean 0.2 L/min: too little leak to calibrate |
 
 ### Scale
 
-Default: `raw × 0.16 = L/min` (applies to both `0x52A` and `0x568`; equivalently `raw × 1.6` tenths of L/min).
+`raw × 0.10 = L/min` on every platform (equivalently `raw × 1.0` tenths of L/min). The device's nightly leak statistics are in the IDX IT block (`0x90` maximum, `0x92` mean, `0x94` 95th percentile, `0x96` median, tenths of L/min), and PAP-Link displays those. The G3 used 0.16 until 2026-11, which read 60% high.
 
 The scale factor can be overridden via the environment variable `OSCAR_BMC_G3X_LEAK_SCALE`:
-- Set to the L/min-per-raw value (e.g. `0.16`).
+- Set to the L/min-per-raw value (e.g. `0.10`).
 - The code multiplies by 10 internally to produce tenths of L/min for storage.
 
 In OSCAR the `CPAP_Leak` EventList uses gain `0.1`, so the stored raw value is in tenths of L/min (gain × stored = displayed L/min).
@@ -319,7 +320,7 @@ BMC firmware writes the same `uint16` value into two consecutive `uint16` slots 
 - Flow Rate waveform (`0x56E`)
 - Mask Pressure waveform (`0x24A`)
 - Pressure Wave waveform (`0x380`) — stored in `BmcWaveformPacket.PressureWave` but not exported to OSCAR channels (`ExportPressureWaveform() = false`)
-- Leak (`0x52A` fw SC.72, or `0x568` fw SC.74+; selected per §5)
+- Leak (`0x52A`; see §5)
 - Tidal Volume (`0x52C`)
 - Minute Ventilation (`0x52E`)
 - Respiratory Rate (`0x530`)
@@ -344,7 +345,7 @@ BMC firmware writes the same `uint16` value into two consecutive `uint16` slots 
 2. Semantic meaning of `0x546` (range 512–1023, bounded counter or bitfield?).
 3. Whether any additional paired `uint16` instances exist beyond `0x76C`/`0x76E`.
 4. Whether `0x76C`/`0x76E` represent titrated target pressure, smoothed actual pressure, or something else.
-5. Whether the leak scale of 0.16 L/min per raw unit holds across all firmware versions and device models.
+5. ~~Whether the leak scale of 0.16 L/min per raw unit holds across all firmware versions and device models.~~ Settled: it is 0.10 on all of them (GitLab #403, §5).
 6. Function of the sparse flag fields at `0x54E` and `0x768`.
 7. Identity of `0x674`–`0x67C` — pressure-range scalar (400–822), slowly varying, not tracking PT76E step changes; possibly actual mask pressure vs commanded pressure.
 8. Identity of `0x78A`/`0x78E` — slowly varying integers whose relationship to `0x792` is **device-specific**: on the original device they sum to 71 = `0x792`; on JCCPAP their sum (≈73) does not equal `0x792` (63). I:E ratio `0x78A / 0x78E ≈ 1.09` (not ≈2.0 typical for CPAP), ruling out patient Ti/Te. Likely algorithm timing or triggering parameters; function unconfirmed.

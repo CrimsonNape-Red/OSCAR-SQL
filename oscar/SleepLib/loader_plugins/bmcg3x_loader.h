@@ -100,7 +100,7 @@ public:
         // No sustained flow anywhere — use full session start.
         return bmcSession->StartTimestamp.toMSecsSinceEpoch();
     }
-    // Leak is now sourced from waveform packet offset 0x52A (raw × 0.16 → L/min).
+    // Leak is sourced from waveform packet offset 0x52A (raw × 0.10 → L/min).
     // The old EVT-based leak source (0x0C) was discarded; see bmcG3xDataParsing.cpp.
     virtual bool ExportLeakRate() const override { return true; }
     /// 0x074 and 0x07E are not confirmed Ti/Te: their sum is near-constant

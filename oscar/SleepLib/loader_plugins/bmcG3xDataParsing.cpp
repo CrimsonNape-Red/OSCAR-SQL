@@ -115,19 +115,16 @@ constexpr int kG3xOffsetPressureSeed = 0x00A;
 constexpr int kG3xOffsetInspirationTime = 0x074;
 constexpr int kG3xOffsetExpirationTime  = 0x07E;
 
-/// Leak rate (offset 0x52A). Scale: raw × G3xLeakScaleTenthsPerRawUnit() → tenths of L/min.
-/// Confirmed for firmware G3-2.11.x (Luna G3X; internal build G3-2.SC.72.01).  The scale
-/// is platform-dependent — see G3xLeakScaleTenthsPerRawUnit(), which returns a smaller
-/// factor for E5 firmware.  Reports unintentional (mask-fit) leak; ~0 for intentional vent.
+/// Leak rate (offset 0x52A), uint16.  Scale: raw × G3xLeakScaleTenthsPerRawUnit() → tenths
+/// of L/min.  Reports unintentional (mask-fit) leak; ~0 for intentional vent.  This is the
+/// leak field on every firmware examined: G3-2.11.x, G3-2.12.x, E5 and P5.
+///
+/// Offset 0x568 was once read as an "alternate leak" for G3-2.12.x firmware.  It is not a
+/// field at all: a uint16 there joins the last byte of one 5-byte array (0x564..0x568) to
+/// the first byte of the next (0x569..0x56D, a counter that runs during an event).  That
+/// gave a flat baseline near 15.7 L/min and spikes in steps of 40.96 L/min at every event,
+/// and with them some 180 false large-leak flags a night (GitLab #403).
 constexpr int kG3xOffsetLeak = 0x52A;
-
-/// Alternate leak rate (offset 0x568). Present in all known firmware versions.
-/// In firmware G3-2.11.x (JCCPAP) this field exists but differs from 0x52A (r≈0.05);
-/// its baseline (~16 L/min) appears to reflect intentional vent flow.
-/// In firmware G3-2.12.x+ (e.g. Kavolodin G3 A20), 0x52A is always zero and 0x568 is
-/// the only available continuous leak signal (~15–17 L/min baseline at 0.16 scale).
-/// Selected automatically at runtime when 0x52A is found to be essentially unpopulated.
-constexpr int kG3xOffsetAlternateLeak = 0x568;
 
 /// Tidal volume (offset 0x52C). Scale factor not yet determined; stored raw.
 constexpr int kG3xOffsetTidalVolume = 0x52C;
@@ -289,7 +286,7 @@ struct G3xDiagRow
     int RawPressureSeed       = 0; ///< 0x00A — instantaneous pressure, hundredths cmH2O
     int RawUnknown074         = 0; ///< 0x074 — unknown; not confirmed Ti
     int RawUnknown07E         = 0; ///< 0x07E — unknown; not confirmed Te
-    int RawLeak               = 0; ///< 0x52A (fw SC.72) or 0x568 (fw SC.74+); selected by Phase 3.5 probe
+    int RawLeak               = 0; ///< 0x52A
     int RawTidalVolume        = 0; ///< 0x52C (scale TBD)
     int RawMinuteVentilation  = 0; ///< 0x52E (scale TBD)
     int RawRespiratoryRate    = 0; ///< 0x530 — breaths/min
@@ -343,17 +340,21 @@ bool IsReasonablePressureHundredths(int pressureHundredths)
     return pressureHundredths >= 400 && pressureHundredths <= 3500;
 }
 
-/// @brief Default leak scale, in tenths of L/min per raw unit (raw × 0.16 = L/min).
+/// @brief Leak scale, in tenths of L/min per raw unit (raw × 0.10 = L/min), for every
+///        platform this parser reads: G3, E5 and P5.
 ///
-/// Calibrated against PAP-Link on a Luna G3X (config `110A40113`, firmware G3-2.SC.72.01)
-/// and applied to the whole G3 platform.  OSCAR's CPAP_Leak EventList stores tenths of
-/// L/min and applies a display gain of 0.1, hence 1.6 rather than 0.16.
-constexpr double kG3xLeakScaleDefaultTenths = 1.6;
-
-/// @brief Leak scale for the E5 and P5 platforms, in tenths of L/min per raw unit
-///        (raw × 0.10 = L/min).
+/// OSCAR's CPAP_Leak EventList stores tenths of L/min and applies a display gain of 0.1,
+/// hence 1.0 rather than 0.10.
 ///
-/// The G3-derived 0.16 overstates leak on the E5 by roughly 60%.  Derived from a PAP-Link
+/// **G3 (GitLab #403).**  The G3 used 0.16 until 2026-11, from a PAP-Link comparison on one
+/// G3-2.SC.72 card.  The device's own nightly leak statistics in the IDX (IT block +0x92
+/// mean, +0x94 95th percentile, +0x96 median) say 0.10: on a G3 B20A (G3-2.12.55.05) seven
+/// nights give 0.082–0.098 from the mean, and the night with the most leak (mean 47 L/min,
+/// so the least rounding) gives 0.098 / 0.100 / 0.097 for mean / median / 95th percentile.
+/// A G3 A20 (G3-2.11.03.12) card gives 0.091–0.096, and on the original calibration card
+/// 0.10 reproduces the IDX figures that PAP-Link displays.  At 0.16 leak read 60% high.
+///
+/// **E5.**  Derived from a PAP-Link
 /// readout of an E5 B25A Plus reference card for one night, using the two measures that do
 /// not depend on how the two programs define percentiles or handle mask-off periods:
 ///
@@ -372,31 +373,23 @@ constexpr double kG3xLeakScaleDefaultTenths = 1.6;
 /// **Confidence: medium** — one card, one night, one PAP-Link readout.  A second E5 sample
 /// would settle whether 0.10 is exact or merely close.
 ///
-/// The P5 platform uses the same factor, and there it is **confirmed**: a P5 B20A Plus card
-/// stores the device's own nightly leak statistics in the IDX (IT block +0x92 mean, +0x94
-/// 95th percentile, +0x96 median, in tenths of L/min).  Over the 38 nights with a mean of at
-/// least 1 L/min, those imply median scales of 0.0998, 0.0988 and 0.1011.
-constexpr double kG3xLeakScaleE5Tenths = 1.0;
+/// **P5.**  Confirmed from the IDX statistics of a P5 B20A Plus card: over the 38 nights
+/// with a mean of at least 1 L/min, they imply median scales of 0.0998, 0.0988 and 0.1011.
+constexpr double kG3xLeakScaleTenths = 1.0;
 
-/// @brief Returns the leak scale factor for @p firmwareVersion: raw → tenths of L/min.
+/// @brief Returns the leak scale factor: raw → tenths of L/min.
 ///
-/// Applies to both leak field offsets (0x52A and 0x568).  Override for any device via the
-/// OSCAR_BMC_G3X_LEAK_SCALE environment variable (env value is in L/min per raw unit; the
-/// code multiplies by 10 internally).
-double G3xLeakScaleTenthsPerRawUnit(const QString& firmwareVersion)
+/// Override via the OSCAR_BMC_G3X_LEAK_SCALE environment variable (the value is in L/min
+/// per raw unit; the code multiplies by 10).  The variable is read once: this is called
+/// for every packet.
+double G3xLeakScaleTenthsPerRawUnit()
 {
-    bool ok = false;
-    const QByteArray envValue = qgetenv("OSCAR_BMC_G3X_LEAK_SCALE");
-    const double envScale = envValue.toDouble(&ok);
-    if (ok && envScale > 0.0 && envScale < 10.0) {
-        return envScale * 10.0;
-    }
-    // Platform is the token before the first '-' in the version string ("E5-1.02.05.02").
-    if (firmwareVersion.startsWith(QLatin1String("E5"), Qt::CaseInsensitive) ||
-        firmwareVersion.startsWith(QLatin1String("P5"), Qt::CaseInsensitive)) {
-        return kG3xLeakScaleE5Tenths;
-    }
-    return kG3xLeakScaleDefaultTenths;
+    static const double scale = []() {
+        bool ok = false;
+        const double envScale = qgetenv("OSCAR_BMC_G3X_LEAK_SCALE").toDouble(&ok);
+        return (ok && envScale > 0.0 && envScale < 10.0) ? envScale * 10.0 : kG3xLeakScaleTenths;
+    }();
+    return scale;
 }
 
 /// @brief Converts a raw leak field value to tenths of L/min using @p scaleTenthsPerRaw.
@@ -796,6 +789,15 @@ BmcG3xPacketPressure BmcG3xPacketPressureHundredths(int trendEpap, int trendIpap
         pressure.ipapHundredths = knownIpap;
     }
     return pressure;
+}
+
+int BmcG3xPacketLeakTenths(const QByteArray& packet)
+{
+    if (packet.size() < kG3xOffsetLeak + 2) {
+        return 0;
+    }
+    return ConvertG3xLeakRawToTenths(ReadUInt16LEPtr(packet.constData(), kG3xOffsetLeak),
+                                     G3xLeakScaleTenthsPerRawUnit());
 }
 
 void BmcG3xHoldLastPressureToEnd(QList<BmcPressureSnapshot>& snapshots, const QDateTime& sessionEnd)
@@ -1544,16 +1546,6 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
         currentValues.epapHundredths  = 400;
     }
 
-    // ---- Phase 3.5: Select which leak offset to use ----
-    //
-    // Resolved once per device (see ResolveLeakFieldOffset) rather than per day: which
-    // field the firmware populates cannot change from one night to the next.
-    const int leakFieldOffset = ResolveLeakFieldOffset();
-    // The raw→L/min scale is platform-dependent: the G3-calibrated 0.16 overstates leak
-    // on the E5 by roughly 60%.  See G3xLeakScaleTenthsPerRawUnit().
-    const double leakScaleTenthsPerRaw =
-        G3xLeakScaleTenthsPerRawUnit(dateSession.MachineInfo.FirmwareVersion);
-
     // ---- Phase 4: Iterate waveform packets ----
 
 #ifdef BMCDEBUG
@@ -1644,9 +1636,8 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
             // ---- Read vitals directly from this waveform packet ----
             const char* packetData = waveformPacket.constData();
 
-            // Leak: offset selected in Phase 3.5 (0x52A for fw SC.72, 0x568 for fw SC.74+).
-            const int rawLeak     = ReadUInt16LEPtr(packetData, leakFieldOffset);
-            const int leakTenths  = ConvertG3xLeakRawToTenths(rawLeak, leakScaleTenthsPerRaw);
+            // Leak (0x52A), the same field and scale on every firmware (GitLab #403).
+            const int leakTenths  = BmcG3xPacketLeakTenths(waveformPacket);
 
             // Tidal volume (0x52C): raw stored directly; scale factor TBD.
             const int rawTidalVolume = ReadUInt16LEPtr(packetData, kG3xOffsetTidalVolume);
@@ -1756,7 +1747,7 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
                 row.RawPressureSeed            = packetPressureSeedHundredths > 0 ? packetPressureSeedHundredths : 0;
                 row.RawUnknown074              = ReadUInt16LEPtr(packetData, kG3xOffsetInspirationTime);
                 row.RawUnknown07E              = ReadUInt16LEPtr(packetData, kG3xOffsetExpirationTime);
-                row.RawLeak                    = rawLeak;
+                row.RawLeak                    = ReadUInt16LEPtr(packetData, kG3xOffsetLeak);
                 row.RawTidalVolume             = rawTidalVolume;
                 row.RawMinuteVentilation       = rawMinuteVentilation;
                 row.RawRespiratoryRate         = rawRespiratoryRate;
@@ -1884,7 +1875,7 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
                  << "out_of_order_packets" << outOfOrderPacketCount
                  << "stale_window_packets" << staleWindowPacketCount
                  << "evt42_updates"        << evtPressureUpdateCount
-                 << "leak_scale"           << leakScaleTenthsPerRaw
+                 << "leak_scale"           << G3xLeakScaleTenthsPerRawUnit()
                  << "raw_ipap_min_halfcm"  << waveformRawIpapMin
                  << "raw_ipap_max_halfcm"  << waveformRawIpapMax
                  << "mode"                 << static_cast<int>(dateSession.MacineSettings.Mode)
@@ -2587,102 +2578,6 @@ bool BmcG3xData::ApplySetFileSettings(BmcMachineSettings& settings) const
     qDebug() << "BmcG3xData: .set fallback settings, active mode" << activeMode
              << (decoded ? "- decoded" : "- rejected, keeping inferred settings");
     return decoded;
-}
-
-/// @brief Decides which waveform offset the leak channel is read from, once per device.
-///
-/// Firmware SC.72 (user version G3-2.11.x) populates 0x52A with unintentional leak.
-/// Firmware SC.74+ (user version G3-2.12.x+) leaves 0x52A at zero and uses 0x568.
-/// Selection is by firmware version string where recognised, otherwise by sampling
-/// packets: if fewer than 10% carry a non-zero 0x52A the field is treated as dead and
-/// 0x568 is used instead.
-///
-/// The sampling is deliberately spread over up to @c kProbeDays days and takes far more
-/// packets than the previous implementation, which probed only the first 200 packets of
-/// the day currently being read.  That was both too small a sample and the wrong scope:
-/// on the E5 B25A Plus reference card the non-zero fraction hovers near the 10% threshold
-/// (11.5%–25% on most nights, but 3%–5% on four of nineteen), so the per-day probe
-/// selected a *different* field on those four nights.  Because 0x568 carries a ~15.7 L/min
-/// pressure-independent baseline while 0x52A sits near zero, the leak graph jumped between
-/// two unrelated signals from one night to the next on the same device and mask.
-///
-/// @return kG3xOffsetLeak (0x52A) or kG3xOffsetAlternateLeak (0x568).
-int BmcG3xData::ResolveLeakFieldOffset()
-{
-    if (leakFieldOffsetCache >= 0) {
-        return leakFieldOffsetCache;
-    }
-
-    const QString fwVer = ReadMachineInfo().FirmwareVersion;
-    if (fwVer.contains(QLatin1String("G3-2.11.")) || fwVer.contains(QLatin1String(".SC.72"))) {
-        leakFieldOffsetCache = kG3xOffsetLeak;          // SC.72 / G3-2.11.x
-        qDebug() << "BmcG3xData: leak field 0x52A selected by firmware version" << fwVer;
-        return leakFieldOffsetCache;
-    }
-    if (fwVer.startsWith(QLatin1String("G3-2."))) {
-        leakFieldOffsetCache = kG3xOffsetAlternateLeak; // G3-2.12.x+ / SC.74+
-        qDebug() << "BmcG3xData: leak field 0x568 selected by firmware version" << fwVer;
-        return leakFieldOffsetCache;
-    }
-
-    // Firmware not recognised (e.g. the E5 platform) — sample the data itself.
-    constexpr int kProbeDays            = 5;
-    constexpr int kProbePacketsPerDay   = 2000;
-    int probeTotal      = 0;
-    int probeNonZero52A = 0;
-    int daysProbed      = 0;
-
-    for (const G3xDayEntry& entry : dayEntries) {
-        if (daysProbed >= kProbeDays) {
-            break;
-        }
-        if (entry.WaveLength == 0) {
-            continue;
-        }
-        // Probe through the same spans the import reads, so this works on the card and on
-        // a night archive alike.
-        int packetsThisDay = 0;
-        std::vector<WaveSpan> probeSpans = OpenWaveSpans(entry);
-        for (WaveSpan& probeSpan : probeSpans) {
-            if (packetsThisDay >= kProbePacketsPerDay) {
-                break;
-            }
-            probeSpan.device->seek(probeSpan.start);
-            qint64 cursor = probeSpan.start;
-            while (packetsThisDay < kProbePacketsPerDay &&
-                   cursor + kG3xWaveformPacketSize <= probeSpan.end) {
-                const QByteArray probePkt = probeSpan.device->read(kG3xWaveformPacketSize);
-                cursor += kG3xWaveformPacketSize;
-                if (probePkt.size() < static_cast<int>(kG3xWaveformPacketSize)) {
-                    break;
-                }
-                if (static_cast<unsigned char>(probePkt[0]) != 0xAD ||
-                    static_cast<unsigned char>(probePkt[1]) != 0xAA) {
-                    continue;
-                }
-                if (ReadUInt16LEPtr(probePkt.constData(), kG3xOffsetLeak) > 0) {
-                    ++probeNonZero52A;
-                }
-                ++packetsThisDay;
-                ++probeTotal;
-            }
-        }
-        if (packetsThisDay > 0) {
-            ++daysProbed;
-        }
-    }
-
-    leakFieldOffsetCache = (probeTotal > 0 && probeNonZero52A < probeTotal / 10)
-                               ? kG3xOffsetAlternateLeak
-                               : kG3xOffsetLeak;
-
-    qDebug() << "BmcG3xData: leak field"
-             << (leakFieldOffsetCache == kG3xOffsetLeak ? "0x52A" : "0x568")
-             << "selected by probe (firmware" << fwVer << "not recognised) -"
-             << probeNonZero52A << "of" << probeTotal << "packets non-zero at 0x52A across"
-             << daysProbed << "day(s)";
-
-    return leakFieldOffsetCache;
 }
 
 /// @brief Reads the waveform ring geometry (file size × file count) from the IDX header.

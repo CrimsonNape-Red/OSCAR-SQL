@@ -3,8 +3,45 @@
 
 **Date:** 2026-03-26
 **Author:** Reverse-engineering investigation
-**Status:** Open — awaiting decision on OSCAR implementation
+**Status:** Closed 2026-11-24 — leak is read from 0x52A at 0.10 on every firmware (GitLab #403)
 **Updated:** 2026-07-29 — third machine added (E5 B25A Plus); see "Update" below
+
+---
+
+## Update 2026-11-24 — resolved: 0x52A at 0.10 everywhere (GitLab #403)
+
+Sample cards from the reporter (G3 B20A, `G3-2.12.55.05`, seven nights with waveform, about
+181,000 packets) settle the two points left open on 2026-11-19.
+
+**0x52A is populated on G3-2.12 firmware:** non-zero in 97–99.5% of packets on every night.
+
+**The scale is 0.10.** Raw 0x52A against the IDX statistics:
+
+| Night | Raw mean / median / 95th | IDX mean / median / 95th (L/min) | Implied scale |
+|---|---|---|---|
+| 2026-03-27 | 481.4 / 501 / 1026 | 47.4 / 50.0 / 100.0 | 0.098 / 0.100 / 0.097 |
+| 2026-10-11 | 30.7 / 20 / 99 | 2.7 / 2.0 / 9.0 | 0.088 / 0.100 / 0.091 |
+| 2026-11-18 | 94.2 / 67 / 198 | 8.7 / 6.0 / 19.0 | 0.092 / 0.090 / 0.096 |
+| 2026-11-19 | 33.6 / 23 / 126 | 2.8 / 2.0 / 11.0 | 0.083 / 0.087 / 0.087 |
+| 2026-11-21 | 47.8 / 36 / 132 | 4.3 / 3.0 / 14.0 | 0.090 / 0.083 / 0.106 |
+
+The IDX stores median and 95th percentile in whole L/min, so low-leak nights round coarsely;
+the first row, with the most leak, is the best calibration. A G3 A20 `G3-2.11.03.12` card gives
+0.09–0.10 over about 40 nights. A second G3 A20 card on the same firmware has 0.9% non-zero
+packets on its one night with waveform, and the device itself reports a mean leak of 0.2 L/min
+for it: a well-sealed mask, not a dead field.
+
+**Not re-examined:** the card behind the original "0x52A is always zero on SC.74+" finding
+(internal build `G3-2.SC.74.03`, 0.33% non-zero). It was not available. Its leak now comes from
+0x52A like every other card, so it will read near zero where it used to show the 0x568 artefact.
+
+**Changed in OSCAR.** `ResolveLeakFieldOffset()` and its sampling are removed; leak is always
+0x52A, and the G3 scale is 0.10 like the E5 and P5. Imported with the fix, the three nights
+above read mean / median / 95th of 48.1 / 50.1 / 102.6, 3.1 / 2.0 / 9.9 and 9.4 / 6.7 / 19.8
+L/min. Large-leak spans on them number 5, 7 and 15, against about 180 a night before.
+
+OSCAR's figures run slightly above the device's because the device leaves the first and last
+seconds of a session (mask on, mask off) out of its statistics.
 
 ---
 

@@ -257,21 +257,20 @@ Key offsets used by the current parser:
 | 0x24A | 200 B | int16 LE × 100 | MaskPressure | 100 samples; clamped to [0, 4000]; resampled to 50 output samples |
 | 0x380 | 100 B | uint16 LE × 50 | PressureWave | 50 samples; clamped ≤4000; not exported (`ExportPressureWaveform = false`) |
 | 0x510 | — | — | FlowAbnormality | Zeroed — pending further validation; not exported |
-| 0x52A | 2 | uint16 LE | Leak | Firmware SC.72 / G3-2.11.x only; unintentional leak; raw × 1.6 = tenths L/min |
+| 0x52A | 2 | uint16 LE | Leak | Unintentional leak, every firmware; raw × 1.0 = tenths L/min |
 | 0x52C | 2 | uint16 LE | TidalVolume | Raw; scale factor TBD |
 | 0x52E | 2 | uint16 LE | MinuteVentilation | Raw; scale factor TBD |
 | 0x530 | 2 | uint16 LE | RespiratoryRate | Breaths/min |
 | 0x56E | 200 B | int16 LE × 100 | Flow | 100 samples; clamped ±2000; scaled /10.0; resampled to 50 output samples |
-| 0x568 | 2 | uint16 LE | AlternateLeak | Firmware SC.74+ / G3-2.12.x+; total mask leak; raw × 1.6 = tenths L/min |
+| 0x568 | 1 | uint8 | (not leak) | Last byte of the array 0x564..0x568; formerly misread as a uint16 "alternate leak" (GitLab #403); not used |
 | 0x76C | 2 | uint16 LE | PressureTrendEPAP | Hundredths cmH2O; drives `CPAP_EPAP` |
 | 0x76E | 2 | uint16 LE | PressureTrendIPAP | Hundredths cmH2O; drives `CPAP_Pressure` / `CPAP_IPAP` |
 
 All waveform arrays are resampled to 50 output samples.
 
-**Leak source selection:** Firmware version string is checked first — G3-2.11.x / SC.72 uses
-offset 0x52A (unintentional leak); G3-2.12.x+ (any other `G3-2.` prefix) uses 0x568 (total
-mask leak). If the firmware version string is unavailable, the first 200 waveform packets are
-sampled: if fewer than 10% have non-zero 0x52A, the alternate field 0x568 is used. EVT records
+**Leak source:** offset 0x52A on every firmware, at 0.10 L/min per raw unit (GitLab #403). The
+earlier selection between 0x52A and 0x568 by firmware version or by sampling is gone: 0x568 is
+not a leak field. See `BMC_G3X_00X_FORMAT.md` §5. EVT records
 `0x0C` and `0x42` are **not** used as leak sources.
 
 **Timing fields (0x074, 0x07E):** Confirmed **not** patient Ti/Te — their sum is near-constant
@@ -329,9 +328,9 @@ see `BMC_G3X_EVT_FORMAT.md` §2a).
 | 0x43 | Unknown (~10-min cadence; not decoded) | — |
 | 0x44 | PB timestamp (secondary; used only if 0x09 absent; no duration) | — |
 
-**Leak source:** Sourced from waveform packet offset `0x52A` (firmware SC.72 / G3-2.11.x) or
-`0x568` (firmware SC.74+ / G3-2.12.x+). See the waveform packet section above for the
-selection rule. EVT records are not used as a leak source.
+**Leak source:** Sourced from waveform packet offset `0x52A` on every firmware. See the
+waveform packet section above.
+EVT records are not used as a leak source.
 
 ---
 

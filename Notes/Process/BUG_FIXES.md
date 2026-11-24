@@ -4,6 +4,43 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-24 - BMC G3X: leak read from the wrong bytes on G3-2.12 firmware, and 60% high on all G3 (GitLab #403)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`BmcG3xPacketLeakTenths()`, new;
+`G3xLeakScaleTenthsPerRawUnit()`; `ResolveLeakFieldOffset()` removed), `bmcG3xDataParsing.h`,
+`bmcg3x_loader.h` (comment), `oscar/tests/bmcg3xleaktests.cpp/.h` (new), `oscar/oscar.pro`
+
+**Symptom:** On a G3 B20A with firmware G3-2.12.55.05 the leak graph sat at a flat 15.7 L/min, whatever
+the mask did, with spikes of up to 418 L/min at every apnea, and some 180 false large-leak flags a
+night. On other G3 devices leak read about 60% higher than the device's own figures.
+
+**Root cause:** Two defects.
+- For any `G3-2.` firmware other than 2.11, leak was read as a `uint16` at `0x568`. Those two bytes are
+  the last byte of one 5-byte array and the first byte of the next, an event counter. The rule came
+  from one card whose real leak field was almost always zero.
+- The G3 scale was 0.16 L/min per raw unit, from a comparison on one card. The device's own nightly
+  statistics, which PAP-Link displays, give 0.10.
+
+**Fix:** Leak is read from `0x52A` on every firmware, at 0.10. The choice between two fields, and the
+packet sampling behind it, are removed. Checked on seven nights of a G3 B20A (G3-2.12.55.05) and about
+40 of a G3 A20 (G3-2.11.03.12). Three imported nights read mean / median / 95% of 48.1 / 50.1 / 102.6,
+3.1 / 2.0 / 9.9 and 9.4 / 6.7 / 19.8 L/min, against the device's 47.4 / 50.0 / 100.0, 2.7 / 2.0 / 9.0 and
+8.7 / 6.0 / 19.0. They have 5, 7 and 15 large-leak spans.
+
+**Non-obvious:**
+- Leak drops by about 37% for every G3 user, and the large-leak time with it. E5 and P5 are unchanged.
+- A leak field that is mostly zero is a well-sealed mask, not a dead field: one G3 A20 night with 0.9%
+  non-zero packets has a device-reported mean of 0.2 L/min. A field that is all zero still yields no
+  leak channel (`BmcLoader::setSessionWaveforms()`).
+- The card behind the old rule (internal build G3-2.SC.74.03) was not available to re-check.
+- OSCAR's figures run slightly above the device's, which leaves the first and last seconds of a session
+  out of its statistics.
+- `OSCAR_BMC_G3X_LEAK_SCALE` still overrides the scale, and is now read once per run.
+- Nights already imported keep the old values until they are re-imported. No loader data version was
+  changed.
+
+---
+
 ## 2026-11-24 - BMC G3X: Manual P showed the Treat P value (GitLab #421)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`BmcG3xData::DecodeTsBlock()`),
