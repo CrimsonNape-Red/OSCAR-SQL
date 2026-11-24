@@ -1,6 +1,8 @@
 #define TEST_MACROS_ENABLEDoff
 #include <test_macros.h>
 
+#include <vector>
+
 #include <QApplication>
 #include <QString>
 #include <QDateTime>
@@ -29,12 +31,7 @@
 
 #include <QTextStream>
 #include <QListWidget>
-#include <regex>
-#include <string>
-#include <vector>
 #include <QQueue>
-#include <iostream>
-#include <fstream>
 
 
 #ifdef DEBUG_EFFICIENCY

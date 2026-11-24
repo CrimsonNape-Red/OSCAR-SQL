@@ -10,7 +10,7 @@
 #define TEST_MACROS_ENABLEDoff
 #include "test_macros.h"
 
-#include <math.h>
+#include <cmath>
 #include <QLabel>
 #include <QDateTime>
 #include <QTimeZone>
@@ -977,7 +977,8 @@ QString gSummaryChart::durationInMinutesToHhMmSs(double duration) {
 
 QString gSummaryChart::durationInSecondsToHhMmSs(double duration) {
     // ensure that a negative duration is supported (could potentially occur when start and end occur in different timezones without compensation)
-    double duration_abs = abs(duration);
+    // std::abs (not bare abs): MinGW's headers make plain abs(double) ambiguous between int/double overloads.
+    double duration_abs = std::abs(duration);
     int seconds_abs = static_cast<int>(0.5 + duration_abs);
     int daily_hours_abs = seconds_abs / 3600;
     QString result;

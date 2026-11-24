@@ -4,6 +4,31 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-24 - Build fixes for MinGW and Linux-to-Windows cross-compiling (MR !67)
+
+**Files:** `oscar/Graphs/gSummaryChart.cpp`, `oscar/daily.cpp`,
+`oscar/SleepLib/loader_plugins/vrem_loader.cpp`, `oscar/oscar.pro`
+
+**Symptom:** Some MinGW toolchains failed on an ambiguous `abs()` and on a libstdc++ "redeclared
+with different access" error in `vrem_loader.cpp`. A Linux host cross-compiling for Windows ran
+`cmd`, `xcopy` and `python` from `oscar.pro` and used a `lrelease.exe` path that does not exist.
+
+**Root cause:** Bare `abs()` on a `double` collides with MinGW's non-standard `<math.h>` overload.
+`vrem_loader.cpp` included `<regex>` (unused) after Qt's headers. `oscar.pro` used `win32`, which
+tests the *target*, for commands that depend on the *build host*.
+
+**Fix:** `std::abs`; the unused standard headers dropped from `vrem_loader.cpp` (only `<vector>`
+stays); host-dependent blocks test `equals(QMAKE_HOST.os, Windows)`; `lrelease` is found with
+`qtPrepareTool(LRELEASE, lrelease, , system)`.
+
+**Non-obvious:**
+- `qtPrepareTool` without the `system` argument quotes the path for make. On a MinGW kit with
+  Git's `sh.exe` on PATH that is sh-style single quotes, which `system()` (run through cmd)
+  rejects, so qmake aborted with "Failed to run". `LRELEASE` is only used in `system()`.
+- Target-only `win32` blocks (DEFINES, LIBS) stay as they are.
+
+---
+
 ## 2026-11-24 - Device properties were stored only when the device was first created (GitLab #420)
 
 **Files:** `oscar/SleepLib/machine.cpp/.h` (`Machine::storeProperties()`, new; `mergeProperties()`, new;

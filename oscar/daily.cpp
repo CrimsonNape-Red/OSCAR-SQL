@@ -2581,7 +2581,7 @@ void Daily::set_JournalWeightValue(QDate& date, double kg) {
 
     if (journal->settings.contains(Journal_Weight)) {
         QVariant old = journal->settings[Journal_Weight];
-        if (abs(old.toDouble() - kg) < zeroD  && kg > zeroD) {
+        if (std::abs(old.toDouble() - kg) < zeroD  && kg > zeroD) {
             // No change to weight - skip
             return ;
         }

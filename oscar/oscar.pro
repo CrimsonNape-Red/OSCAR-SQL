@@ -121,7 +121,8 @@ GIT_INFO_FILE = $$relative_path($$_PRO_FILE_PWD_/git_info.h, $$OUT_PWD)
 gitinfotarget.target = $$GIT_INFO_FILE
 gitinfotarget.depends = FORCE
 
-win32 {
+# QMAKE_HOST.os (not win32, the *target*): a Linux host cross-compiling for win32 has no cmd.exe/xcopy.
+equals(QMAKE_HOST.os, Windows) {
     system("cmd /c \"$$_PRO_FILE_PWD_/update_gitinfo.bat\"")
     message("Updating gitinfo.h for Windows build")
     gitinfotarget.commands = "cmd /c \"$$_PRO_FILE_PWD_/update_gitinfo.bat\""
@@ -140,7 +141,7 @@ QMAKE_EXTRA_TARGETS += gitinfotarget
 # Regenerate exports/system_report_strings.cpp from docs/system_reports.orf when the .orf changes.
 orf_strings.target  = $$_PRO_FILE_PWD_/exports/system_report_strings.cpp
 orf_strings.depends = $$_PRO_FILE_PWD_/docs/system_reports.orf
-win32 {
+equals(QMAKE_HOST.os, Windows) {
     orf_strings.commands = python $$_PRO_FILE_PWD_/../Tools/gen_system_report_strings.py
 } else {
     orf_strings.commands = python3 $$_PRO_FILE_PWD_/../Tools/gen_system_report_strings.py
@@ -221,9 +222,9 @@ TRANSLATIONS = $$files($$PWD/../Translations/*.ts)
 # every Qt-internal string (QFileDialog labels, standard dialog buttons) stays in English.
 EXTRA_TRANSLATIONS = $$files($$PWD/../Translations/qt/*.ts)
 
-# qtPrepareTool(LRELEASE, lrelease)
-LRELEASE = $$[QT_INSTALL_BINS]/lrelease
-win32: LRELEASE = $${LRELEASE}.exe
+# qtPrepareTool (not QT_INSTALL_BINS+win32): resolves the build-machine's lrelease and adds
+# .exe only when the build machine itself is Windows, so cross-compiling from Linux works.
+qtPrepareTool(LRELEASE, lrelease, , system)
 
 ALL_TRANSLATIONS = $${TRANSLATIONS} $${EXTRA_TRANSLATIONS}
 
@@ -279,7 +280,7 @@ macx {
 
     TRANS_FILES = $${TRANSLATIONS_FILES}
 
-    win32 {
+    equals(QMAKE_HOST.os, Windows) {
         TRANS_FILES_WIN = $${TRANS_FILES}
         TRANS_FILES_WIN ~= s,/,\\,g
         DDIR ~= s,/,\\,g
