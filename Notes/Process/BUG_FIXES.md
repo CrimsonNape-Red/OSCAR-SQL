@@ -4,6 +4,26 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-24 - Profiles screen showed the wrong device when two share a loader (GitLab #344)
+
+**Files:** `oscar/mainwindow.cpp`, `oscar/SleepLib/machine.cpp/.h`
+
+**Symptom:** After importing a new device of the same brand (e.g. an AirSense 11 replacing an
+AirSense 10), the Profiles screen could keep showing the old model.
+
+**Root cause:** `importCPAP()` and `importNonCPAPFiles()` stamped `last_imported` on every device of
+the import's loader, not just the ones that received sessions. All devices of that brand got the
+same time, and the selector's tie went to whichever model `findByProfile()` sorted first.
+
+**Fix:** `Machine` counts the new sessions `AddSession()` accepts (`sessionsAddedCount()`, atomic,
+database loads excluded). Both import paths snapshot the counts before `Open()` and stamp only devices
+whose count went up. This covers loaders that call `AddSession()` directly as well as ImportContext.
+
+**Non-obvious:**
+- Existing databases keep their tied stamps until the next import of the right device.
+
+---
+
 ## 2026-11-24 - Day::count warned about fractional counts on ResMed summary-only days (GitLab #236)
 
 **Files:** `oscar/SleepLib/day.cpp/.h`

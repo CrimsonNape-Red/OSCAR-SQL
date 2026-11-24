@@ -161,6 +161,9 @@ bool Machine::AddSession(Session *s, bool allowOldSessions)
     const QList<Session *> pieces = allowOldSessions ? QList<Session *>() : splitAtDayBoundaries(s);
 
     const bool added = addSessionImpl(s, allowOldSessions, false);
+    if (added && !allowOldSessions) {
+        m_sessionsAdded.ref();
+    }
     for (Session *piece : pieces) {
         addSessionImpl(piece, false, true);
     }

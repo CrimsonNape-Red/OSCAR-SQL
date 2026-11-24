@@ -18,6 +18,7 @@
 #include <QRunnable>
 #include <QThread>
 #include <QMutex>
+#include <QAtomicInt>
 #include <QSemaphore>
 
 #include <functional>
@@ -165,6 +166,15 @@ class Machine
         \a s, which keeps the earliest part and its session ID.
         */
     bool AddSession(Session *s, bool allowOldSessions=false);
+
+    /*! rief Number of new sessions this device has accepted since it was loaded.
+
+        Counts AddSession() calls from imports (allowOldSessions false) that were accepted,
+        so the import code can tell which devices received sessions and stamp
+        last_imported on those alone (GitLab #344). Sessions loaded from the database
+        (allowOldSessions true) are not counted.
+        */
+    int sessionsAddedCount() const { return m_sessionsAdded.loadRelaxed(); }
 
     //! \brief Find the date this session belongs in, according to profile settings
     QDate pickDate(qint64 start);
@@ -342,6 +352,10 @@ class Machine
     //! Guards m_reportedChannels: AddSession() is called from loader worker threads
     //! (ResMed, BMC), while the summary writers read the set (GitLab #313).
     mutable QMutex m_reportedChannelsMutex;
+
+    //! New sessions accepted by AddSession(); see sessionsAddedCount(). Atomic because
+    //! loader worker threads call AddSession().
+    QAtomicInt m_sessionsAdded;
 
     QString m_summaryPath;
     QString m_eventsPath;

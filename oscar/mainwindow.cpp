@@ -1121,6 +1121,38 @@ class ImportRunning
   private:
     int &m_counter;
 };
+
+// How many new sessions each of the profile's devices had accepted before an import.
+QHash<Machine*, int> sessionsAddedBefore(Profile* profile)
+{
+    QHash<Machine*, int> counts;
+    for (Machine* m : profile->GetMachines()) {
+        counts.insert(m, m->sessionsAddedCount());
+    }
+    return counts;
+}
+
+// Stamp last_imported on the devices that accepted sessions since  before was taken,
+// and only those. Stamping every device the loader handles gave two devices of the same
+// brand the same time, so the Profiles screen showed whichever model sorted first
+// (GitLab #344). A device created by the import is missing from  before and counts
+// from 0. Runs inside the import transaction so the stamp commits with the sessions.
+void stampImportedMachines(Profile* profile, const QHash<Machine*, int>& before)
+{
+    const QDateTime now = QDateTime::currentDateTime();
+    MachineRepository repo;
+    for (Machine* m : profile->GetMachines()) {
+        if (m->sessionsAddedCount() <= before.value(m, 0) || m->getDatabaseId() <= 0) {
+            continue;
+        }
+        m->info.lastimported = now;
+        MachineData data = repo.findById(m->getDatabaseId());
+        if (data.id > 0) {
+            data.lastImported = now.toString(Qt::ISODate);
+            repo.update(data);
+        }
+    }
+}
 }
 
 int MainWindow::importCPAP(ImportPath import, const QString &message, bool silent)
@@ -1187,6 +1219,7 @@ int MainWindow::importCPAP(ImportPath import, const QString &message, bool silen
     }
 
     import.loader->resetDailySummariesCalculated();
+    const QHash<Machine*, int> addedBefore = sessionsAddedBefore(p_profile);
     int c = import.loader->Open(import.path);
 
     if (progdlg) {
@@ -1213,23 +1246,11 @@ int MainWindow::importCPAP(ImportPath import, const QString &message, bool silen
         p_profile->calculateDailySummaries();
     }
 
-    // Update lastImported timestamp for the machine(s) just imported.
-    // This must happen inside the transaction so the update commits atomically with the sessions.
-    // (Some loaders call mach->AddSession() directly, bypassing finishAddingSessions/ImportContext,
-    //  so this is the only reliable place to stamp the import time for all loaders.)
+    // Update lastImported for the device(s) that received sessions. Some loaders call
+    // mach->AddSession() directly, bypassing ImportContext, so this is the one place
+    // that covers every loader.
     if (c > 0) {
-        QDateTime now = QDateTime::currentDateTime();
-        MachineRepository repo;
-        for (Machine* m : p_profile->GetMachines()) {
-            if (m->loaderName() == import.loader->loaderName() && m->getDatabaseId() > 0) {
-                m->info.lastimported = now;
-                MachineData data = repo.findById(m->getDatabaseId());
-                if (data.id > 0) {
-                    data.lastImported = now.toString(Qt::ISODate);
-                    repo.update(data);
-                }
-            }
-        }
+        stampImportedMachines(p_profile, addedBefore);
     }
 
     // Commit the transaction after all import operations are complete
@@ -4386,6 +4407,7 @@ bool MainWindow::importNonCPAPFiles(MachineLoader &loader, const QStringList &fi
         return false;
     }
 
+    const QHash<Machine*, int> addedBefore = sessionsAddedBefore(p_profile);
     int res = loader.Open(files);
 
     if (progress) {
@@ -4395,18 +4417,7 @@ bool MainWindow::importNonCPAPFiles(MachineLoader &loader, const QStringList &fi
     ctx->Commit();
 
     if (res > 0) {
-        QDateTime now = QDateTime::currentDateTime();
-        MachineRepository repo;
-        for (Machine* m : p_profile->GetMachines()) {
-            if (m->loaderName() == loader.loaderName() && m->getDatabaseId() > 0) {
-                m->info.lastimported = now;
-                MachineData data = repo.findById(m->getDatabaseId());
-                if (data.id > 0) {
-                    data.lastImported = now.toString(Qt::ISODate);
-                    repo.update(data);
-                }
-            }
-        }
+        stampImportedMachines(p_profile, addedBefore);
     }
 
     QString commitError;
