@@ -248,6 +248,16 @@ class Machine
     //! \brief Save this machine to the database
     bool SaveToDatabase();
 
+    /*! \brief Writes info.properties into this device's database row, merged with what is
+        stored there.
+
+        Keys in info.properties replace stored ones; stored keys the loader does not supply
+        (capabilities, and timeoffsets or purgedate carried over from OSCAR 1.x) are kept.
+        Nothing is written when the merge changes nothing, so it is cheap to call after
+        every import. A device without a database row is left alone (GitLab #420).
+        \return false if the row could not be read or written, true otherwise. */
+    bool storeProperties();
+
     void setLoaderName(QString value);
 
     //! \brief The channels of the given type(s) this device has data for, in ascending channel id

@@ -154,6 +154,17 @@ public:
     bool updatePurgeDate(qint64 id, const QDate& purgeDate);
 
     /*!
+     * \brief Store a machine's properties JSON, leaving every other column as it is
+     * \param id Database primary key of the machine
+     * \param properties The complete properties JSON object, as compact text
+     * \return true if successful, false otherwise
+     *
+     * The caller merges with the stored value first (see Machine::storeProperties()):
+     * this writes \a properties as given.
+     */
+    bool updateProperties(qint64 id, const QString& properties);
+
+    /*!
      * \brief Delete a machine from database
      * \param id Database primary key of machine to delete
      * \return true if successful, false otherwise

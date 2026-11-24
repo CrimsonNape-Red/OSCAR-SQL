@@ -18,6 +18,8 @@
 #include <QThreadPool>
 #include <QFile>
 #include <QDataStream>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 
 #include <QDialog>
@@ -654,6 +656,27 @@ static bool applyIdentityTo(MachineData & data, const MachineInfo & info, Machin
     return changed;
 }
 
+/*! \brief Merge a device's in-memory properties into its stored properties object.
+    \param stored The stored properties; updated in place.
+    \param props  The properties a loader has reported (Machine::info.properties).
+    \return true when \a stored changed and must be written back.
+
+    A key in \a props replaces the stored value; a stored key absent from \a props is kept,
+    since some stored keys (capabilities, and timeoffsets or purgedate from OSCAR 1.x) never
+    come from a loader. Values are compared as text because the in-memory copy is text: a
+    stored number such as capabilities is left alone when its text form is unchanged. */
+static bool mergeProperties(QJsonObject & stored, const QHash<QString, QString> & props)
+{
+    bool changed = false;
+    for (auto it = props.cbegin(); it != props.cend(); ++it) {
+        const QJsonValue current = stored.value(it.key());
+        if (!current.isUndefined() && current.toVariant().toString() == it.value()) continue;
+        stored[it.key()] = it.value();
+        changed = true;
+    }
+    return changed;
+}
+
 /*! \brief True when \a a and \a b differ in any field applyIdentityTo() would write. */
 static bool identityDiffers(const MachineInfo & a, const MachineInfo & b)
 {
@@ -694,6 +717,39 @@ void Machine::setInfo(MachineInfo inf)
             }
         }
     }
+
+    // Properties (firmware version, model codes) are stored separately: update() does not
+    // write them, and a loader's set must be merged with the stored keys (GitLab #420).
+    if (m_database_id > 0 && oldInfo.properties != info.properties) {
+        storeProperties();
+    }
+}
+
+bool Machine::storeProperties()
+{
+    if (m_database_id <= 0) return true;
+
+    MachineRepository repo;
+    const MachineData data = repo.findById(m_database_id);
+    if (data.id <= 0) return false;
+
+    QJsonObject stored;
+    if (!data.properties.isEmpty()) {
+        const QJsonDocument doc = QJsonDocument::fromJson(data.properties.toUtf8());
+        if (!doc.isObject()) {
+            // Never replace a value we cannot read with a partial one.
+            qWarning() << "Machine::storeProperties(): unreadable stored properties for"
+                       << info.loadername << info.serial << "- left unchanged";
+            return false;
+        }
+        stored = doc.object();
+    }
+
+    if (!mergeProperties(stored, info.properties)) return true;
+
+    qDebug() << "Machine::storeProperties(): storing properties for" << info.loadername << info.serial;
+    return repo.updateProperties(m_database_id,
+                                 QString::fromUtf8(QJsonDocument(stored).toJson(QJsonDocument::Compact)));
 }
 
 void Machine::setPurgeDate(QDate value)
@@ -1237,6 +1293,7 @@ bool Machine::SaveToDatabase()
                      << "model:" << existing.model << "->" << updateData.model;
             repo.update(updateData);
         }
+        storeProperties();
 
         qDebug() << "Machine::SaveToDatabase(): Found existing machine"
                  << info.serial << "in profile" << profile->user->userName()
@@ -1259,8 +1316,13 @@ bool Machine::SaveToDatabase()
     data.loaderName = info.loadername;
     data.lastImported = info.lastimported.toString(Qt::ISODate);
 
-    // Store capabilities in properties field (JSON format)
-    data.properties = QString("{\"capabilities\":%1}").arg(info.cap);
+    // Properties field (JSON): the capabilities plus whatever the loader reported, so a row
+    // created here holds the same set as one created by Profile::storeMachinesToDatabase()
+    // (GitLab #420).
+    QJsonObject props;
+    props[QStringLiteral("capabilities")] = static_cast<qint64>(info.cap);
+    mergeProperties(props, info.properties);
+    data.properties = QString::fromUtf8(QJsonDocument(props).toJson(QJsonDocument::Compact));
 
     qint64 newId = repo.create(data);
     if (newId < 0) {

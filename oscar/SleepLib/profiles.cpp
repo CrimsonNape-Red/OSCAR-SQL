@@ -347,7 +347,10 @@ bool Profile::loadMachinesFromDatabase()
             if (doc.isObject()) {
                 QJsonObject props = doc.object();
                 for (auto it = props.begin(); it != props.end(); ++it) {
-                    info.properties[it.key()] = it.value().toString();
+                    // toVariant() first: toString() gives "" for a number such as
+                    // capabilities, which a later Machine::storeProperties() would then
+                    // write back over the stored value (GitLab #420).
+                    info.properties[it.key()] = it.value().toVariant().toString();
                 }
             }
         }
@@ -528,9 +531,11 @@ bool Profile::storeMachinesToDatabase()
 
     // Update/insert each machine
     for (Machine* m : m_machlist) {
-        // Skip if machine already has a database ID (already saved by Machine::SaveToDatabase)
+        // A machine with a database ID already has its row (Machine::SaveToDatabase). Only its
+        // properties may still need storing: some loaders (ResMed, Intellipap) write them into
+        // info.properties directly, and this runs after every import (GitLab #420).
         if (m->getDatabaseId() > 0) {
-            qDebug() << "Profile::storeMachinesToDatabase: Machine" << m->serial() << m->brand() << m->model() << "already in database with ID" << m->getDatabaseId();
+            m->storeProperties();
             continue;
         }
         
@@ -579,6 +584,8 @@ bool Profile::storeMachinesToDatabase()
             machineRepo.update(machineData);
             // IMPORTANT: Set the database ID so the machine knows it's already in DB
             m->setDatabaseId(existing.id);
+            // update() leaves the properties column alone; merge them in separately.
+            m->storeProperties();
         } else {
             // Insert new
             qint64 newId = machineRepo.create(machineData);

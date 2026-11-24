@@ -417,6 +417,46 @@ bool MachineRepository::updatePurgeDate(qint64 id, const QDate& purgeDate)
 }
 
 /*
+ * Store a machine's properties JSON
+ *
+ * Parameters:
+ *   id         - Database primary key
+ *   properties - The complete properties JSON object, as compact text
+ *
+ * Returns: true if successful, false otherwise
+ *
+ * Writes the properties column only. update() leaves this column alone on purpose:
+ * several callers build or reuse a MachineData whose properties may be stale or empty,
+ * and properties need merging with the stored keys rather than replacing (GitLab #420).
+ */
+bool MachineRepository::updateProperties(qint64 id, const QString& properties)
+{
+    if (id == 0) {
+        qWarning() << "MachineRepository::updateProperties() - invalid id (0)";
+        return false;
+    }
+
+    QSqlQuery query(database());
+    query.prepare("UPDATE machines SET properties = :properties WHERE id = :id");
+    query.bindValue(":properties", properties);
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        qWarning() << "MachineRepository::updateProperties() failed:" << query.lastError().text();
+        DatabaseManager::instance().checkQueryError("MachineRepository::updateProperties", query);
+        return false;
+    }
+
+    if (query.numRowsAffected() == 0) {
+        qWarning() << "MachineRepository::updateProperties() - no machine found with id" << id;
+        return false;
+    }
+
+    qDebug() << "MachineRepository::updateProperties(): machine id" << id;
+    return true;
+}
+
+/*
  * Delete a machine from database
  *
  * Parameters:

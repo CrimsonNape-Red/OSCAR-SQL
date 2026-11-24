@@ -1010,6 +1010,7 @@ test {
         tests/applehealthtests.cpp \
         tests/machinetests.cpp \
         tests/machinepurgedatetests.cpp \
+        tests/machinepropertiestests.cpp \
         tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp \
         tests/cardarchivetests.cpp \
@@ -1065,6 +1066,7 @@ test {
         tests/applehealthtests.h \
         tests/machinetests.h \
         tests/machinepurgedatetests.h \
+        tests/machinepropertiestests.h \
         tests/portablemodetests.h \
         tests/sessionsplittests.h \
         tests/cardarchivetests.h \

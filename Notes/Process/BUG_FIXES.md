@@ -4,6 +4,39 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-24 - Device properties were stored only when the device was first created (GitLab #420)
+
+**Files:** `oscar/SleepLib/machine.cpp/.h` (`Machine::storeProperties()`, new; `mergeProperties()`, new;
+`setInfo()`, `SaveToDatabase()`), `oscar/SleepLib/profiles.cpp` (`storeMachinesToDatabase()`,
+`loadMachinesFromDatabase()`), `oscar/database/machine_repository.cpp/.h` (`updateProperties()`, new),
+`oscar/tests/machinepropertiestests.cpp/.h` (new), `oscar/oscar.pro`
+
+**Symptom:** A device's `properties` (firmware version, model codes) in the `machines` table never
+changed after the row was created, and rows created by `Machine::SaveToDatabase()` held only
+`{"capabilities":N}`. No user-visible effect is known: loaders read these values from the card.
+
+**Root cause:** Four gaps. `MachineRepository::update()` has no `properties` column; `setInfo()` did
+not look at properties; `SaveToDatabase()` wrote only the capabilities when creating a row; and
+`Profile::storeMachinesToDatabase()` skipped every device that already had a row. ResMed and
+Intellipap also write `info.properties` directly, so a `setInfo()` hook alone would miss them.
+
+**Fix:** `Machine::storeProperties()` reads the stored JSON, merges the in-memory set into it and
+writes it with the new `updateProperties()` only if something changed. It runs from `setInfo()` when
+properties change, from both branches of `SaveToDatabase()` (a new row now gets capabilities plus the
+loader's set), and from `storeMachinesToDatabase()` for devices that already have a row, which runs
+after every import. Stored keys the loader does not supply (`capabilities`, and `timeoffsets` /
+`purgedate` from OSCAR 1.x) are kept.
+
+**Non-obvious:**
+- `update()` was deliberately left without `properties`: several callers build a `MachineData` from
+  scratch or from a stale read, and would empty or overwrite the column.
+- Loading used `QJsonValue::toString()`, which gives `""` for a number, so `capabilities` came back
+  empty in memory. Writing would then have replaced it with `""`. Loading now goes through
+  `toVariant()`, and the merge compares as text so a stored number is left as a number.
+- A stored value that is not a JSON object is left untouched rather than replaced.
+
+---
+
 ## 2026-11-24 - BMC G3X: leak read from the wrong bytes on G3-2.12 firmware, and 60% high on all G3 (GitLab #403)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`BmcG3xPacketLeakTenths()`, new;
