@@ -1,8 +1,8 @@
 /* BMC G3X Device Settings Unit Tests
  *
  * Tests the decoding of the BMC G3X "TS" (therapy settings) block: the AutoS pressure
- * support / minimum IPAP pair, which different firmware stores in different fields, and
- * the heated tube level (#419).
+ * support / minimum IPAP pair, which different firmware stores in different fields, the
+ * heated tube level (#419), and the CPAP Manual P setting (#421).
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -20,6 +20,8 @@ namespace {
 
 // Offsets within the 256-byte TS block (see Notes/Formats/BMC/G3X/BMC_G3X_SET_FORMAT.md).
 constexpr int kMode        = 0x08;
+constexpr int kTreatP      = 0x0A;
+constexpr int kManualP     = 0x0C;
 constexpr int kMinEpap     = 0x0E;
 constexpr int kMinIpap     = 0x14;
 constexpr int kMaxIpap     = 0x16;
@@ -46,6 +48,19 @@ QByteArray autoSBlock(int minEpap, int maxIpap)
     ts[kMode] = static_cast<char>(BmcMode::AutoS);
     putU16(ts, kMinEpap, minEpap);
     putU16(ts, kMaxIpap, maxIpap);
+    return ts;
+}
+
+//! \brief A CPAP settings block with the given pressures (hundredths of cmH2O) and every
+//!        other field zero
+QByteArray cpapBlock(int treatP, int manualP)
+{
+    QByteArray ts(0x100, '\0');
+    ts[0] = 'T';
+    ts[1] = 'S';
+    ts[kMode] = static_cast<char>(BmcMode::CPAP);
+    putU16(ts, kTreatP, treatP);
+    putU16(ts, kManualP, manualP);
     return ts;
 }
 
@@ -162,4 +177,31 @@ void BmcG3xSettingsTests::testHumidifierAutoLeavesHeatedTubeLevel()
     QVERIFY(decode(ts, settings));
     QCOMPARE(settings.HumidifierLevel, quint8(6));
     QCOMPARE(settings.HeatedTubeLevel, 4);
+}
+
+void BmcG3xSettingsTests::testCpapManualPIsItsOwnField()
+{
+    // Checked by changing the field on a card: with Treat P 7.0 stored and this field set
+    // to 9.00, the vendor program shows Treat P 7.0 and Manual P 9.0.
+    BmcMachineSettings settings;
+    QVERIFY(decode(cpapBlock(700, 900), settings));
+    QCOMPARE(settings.CPAP_TreatP, 7.0f);
+    QCOMPARE(settings.CPAP_ManualP, 9.0f);
+}
+
+void BmcG3xSettingsTests::testCpapManualPZeroIsNotTreatP()
+{
+    // What every card seen so far holds: the vendor program shows Treat P 11.0 and
+    // Manual P 0.0 for such a night. Manual P used to be given the Treat P value.
+    BmcMachineSettings settings;
+    QVERIFY(decode(cpapBlock(1100, 0), settings));
+    QCOMPARE(settings.CPAP_TreatP, 11.0f);
+    QCOMPARE(settings.CPAP_ManualP, 0.0f);
+}
+
+void BmcG3xSettingsTests::testCpapManualPOutOfRangeIgnored()
+{
+    BmcMachineSettings settings;
+    QVERIFY(decode(cpapBlock(700, 5000), settings));
+    QCOMPARE(settings.CPAP_ManualP, 0.0f);
 }

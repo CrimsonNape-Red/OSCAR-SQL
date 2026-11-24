@@ -179,8 +179,16 @@ All pressure fields are **u16 LE, hundredths of cmH₂O**. Field positions are
 ### Mode 0 — CPAP
 | Offset | Meaning | E5 B25A Plus | G3 A20 |
 |---|---|---:|---:|
-| 0x0A | Set pressure | 8.00 | 15.00 |
+| 0x0A | Set pressure (Treat P) | 8.00 | 15.00 |
+| 0x0C | Manual P | 0 | 0 |
 | 0x18 | Initial pressure | 4.00 | 15.00 |
+
+**Manual P (0x0C) is patch-proven (GitLab #421).** The field is zero on every night of
+every card examined, in every mode, so it could not be found by matching values. On a copy
+of a G3 B20A CPAP night (Treat P 7.00) it was set to 9.00 and the block checksum
+recomputed: PAP-Link then shows Manual P 9.0 with Treat P still 7.0. PAP-Link shows the two
+as separate settings (Treat P 11.0, Manual P 0.0 on a G3 A20 night); the loader had been
+giving Manual P the Treat P value.
 
 ### Mode 1 — AutoCPAP
 | Offset | Meaning | E5 B25A Plus | G3 A20 |
@@ -288,6 +296,7 @@ All pressures are u16 LE in hundredths of cmH₂O.
 | Field | Offset | CPAP | AutoCPAP | S | AutoS |
 |---|---|:-:|:-:|:-:|:-:|
 | Treat P / EPAP | 0x0A | ✓ | | ✓ | |
+| Manual P | 0x0C | ✓ | | | |
 | Min APAP / Min EPAP | 0x0E | | ✓ | | ✓ |
 | Max APAP | 0x10 | | ✓ | | |
 | IPAP | 0x12 | | | ✓ | |

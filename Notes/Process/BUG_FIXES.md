@@ -4,6 +4,33 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-24 - BMC G3X: Manual P showed the Treat P value (GitLab #421)
+
+**Files:** `oscar/SleepLib/loader_plugins/bmcG3xDataParsing.cpp` (`BmcG3xData::DecodeTsBlock()`),
+`oscar/tests/bmcg3xsettingstests.cpp/.h`
+
+**Symptom:** For a G3X device in CPAP mode, Daily's Device Settings listed the same pressure three
+times: Pressure, Treat P and Manual P. PAP-Link shows Treat P and Manual P as separate settings
+(11.0 and 0.0 on one night checked).
+
+**Root cause:** The location of Manual P in the settings block was not known, and the decoder set it
+from the Treat P field (`0x0A`).
+
+**Fix:** Manual P is read from its own field, `0x0C`. The field is zero on every card examined, so it
+was found by changing it: on a copy of a CPAP night with 9.00 stored there and the block checksum
+recomputed, PAP-Link shows Manual P 9.0 and Treat P unchanged. Importing that copy stores Manual P 9.0;
+importing the original stores 0.0.
+
+**Non-obvious:**
+- Pressure and Treat P still show the same value. They are the same setting under OSCAR's standard
+  label and the vendor's; whether to show both is left open on the issue.
+- A night whose index record has no settings block still gets Manual P from the inferred pressure
+  (`ReadDateSession()`, two places). No such night is in the samples.
+- Nights already imported keep the old value until they are re-imported. No loader data version was
+  changed.
+
+---
+
 ## 2026-11-23 - BMC: importing a formatted card replaced a stored waveform night with an events-only one (GitLab #419, item 4)
 
 **Files:** `oscar/SleepLib/loader_plugins/bmc_loader.cpp` (`BmcPlanNightReplacement()`, new, and

@@ -1,8 +1,8 @@
 /* BMC G3X Device Settings Unit Tests
  *
  * Tests the decoding of the BMC G3X "TS" (therapy settings) block: the AutoS pressure
- * support / minimum IPAP pair, which different firmware stores in different fields, and
- * the heated tube level (#419).
+ * support / minimum IPAP pair, which different firmware stores in different fields, the
+ * heated tube level (#419), and the CPAP Manual P setting (#421).
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -43,6 +43,12 @@ private slots:
     void testHeatedTubeAuto();
     //! \brief The humidifier's Auto flag does not make the heated tube Auto
     void testHumidifierAutoLeavesHeatedTubeLevel();
+    //! \brief CPAP mode: Manual P is read from its own field, not from Treat P
+    void testCpapManualPIsItsOwnField();
+    //! \brief CPAP mode: a Manual P of zero stays zero
+    void testCpapManualPZeroIsNotTreatP();
+    //! \brief CPAP mode: a Manual P above any real pressure is not a reading
+    void testCpapManualPOutOfRangeIgnored();
 };
 
 DECLARE_TEST(BmcG3xSettingsTests)

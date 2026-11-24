@@ -2343,7 +2343,8 @@ void BmcG3xData::ParseIdxRecords(const QByteArray& idxBytes)
 /// against a second card in a different mode.  Pressures are u16 LE, hundredths of cmH2O.
 ///
 ///   0x08 mode (0 CPAP, 1 AutoCPAP, 2 S, 6 AutoS)
-///   0x0A Treat P / EPAP        0x0E Min APAP / Min EPAP    0x10 Max APAP
+///   0x0A Treat P / EPAP        0x0C Manual P (CPAP)        0x0E Min APAP / Min EPAP
+///   0x10 Max APAP
 ///   0x12 IPAP                  0x14 Min IPAP (G3 B20A)     0x16 Max IPAP
 ///   0x18 Initial P / Initial EPAP
 ///   0x1A rise time (ms)        0x1E Ti Min (x0.1s)         0x20 Ti Max (x0.1s)
@@ -2397,7 +2398,12 @@ bool BmcG3xData::DecodeTsBlock(const QByteArray& ts, BmcMachineSettings& setting
         if (!pressureOk(u16(0x0A))) return false;
         settings.Mode         = BmcMode::CPAP;
         settings.CPAP_TreatP  = u16(0x0A) / 100.0f;
-        settings.CPAP_ManualP = u16(0x0A) / 100.0f;
+        // Manual P has its own field (0x0C).  It used to be given the Treat P value, so
+        // the two always agreed; PAP-Link shows them apart (Treat P 11.0, Manual P 0.0).
+        // The offset was found by changing it on a card: with 9.00 stored here PAP-Link
+        // shows Manual P 9.0 and Treat P unchanged (GitLab #421).  Zero is what every
+        // card seen so far holds.  Above 35 cmH2O is not a reading.
+        settings.CPAP_ManualP = (u16(0x0C) <= 3500) ? u16(0x0C) / 100.0f : 0.0f;
         if (pressureOk(u16(0x18))) settings.CPAP_InitialP = u16(0x18) / 100.0f;
         settings.CPAP_SmartC  = u8(0x36) != 0;
         break;
