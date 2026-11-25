@@ -1,6 +1,6 @@
 # OSCAR Database Schema Reference
 **Version:** Schema Version 20
-**Last Updated:** 2026 Q3
+**Last Updated:** 2026 Q4
 **Database Type:** SQLite
 
 ---
@@ -407,7 +407,9 @@ LEFT JOIN profile_channel_overrides o
 
 **Preference-driven thresholds.** Four thresholds are driven by profile preferences and are never stored as overrides: `CPAP_Leak` upper, `OXI_Pulse` lower and upper, and `OXI_SPO2` lower. For these the view shows the code default; the real value is in `profile_preferences`.
 
-**channels_legacy** - transitional. Exactly the columns of the v5-v19 `channels` table. It holds the old per-profile rows (from the v19 to v20 migration, or from restoring a backup made before v20) until OSCAR converts them into overrides. The conversion runs at startup, when profiles are scanned: a stored value equal to today's default is dropped, a name OSCAR has shipped before is dropped, and anything else (a real rename, a changed colour, threshold or flag) becomes an override. Converted rows are deleted; rows for channels the running build does not know stay. The table is normally empty after the first start of v20. It exists only to carry old data through that conversion, so do not build anything on it.
+**Empty until the first start of a v20 build.** `channel_defaults` is filled by OSCAR at startup, from the running build's code, not by the v19 to v20 migration. Between that migration and the first completed start of a v20 build the view therefore returns no rows. A profile whose rows are still in `channels_legacy` (not yet converted) shows the code defaults in the view until it is converted.
+
+**channels_legacy** - transitional. Exactly the columns of the v5-v19 `channels` table. It holds the old per-profile rows (from the v19 to v20 migration, or from restoring a backup made before v20) until OSCAR converts them into overrides. The conversion runs at startup, when profiles are scanned: a stored value equal to today's default is dropped, a name OSCAR has shipped before is dropped, and anything else (a real rename, a changed colour, threshold or flag) becomes an override. Converted rows are deleted; rows for channels the running build does not know stay. If the bundled list of shipped names cannot be loaded, nothing is converted and every row stays for a later start. Until its rows are converted, a profile shows the code defaults in the `channels` view. The table is normally empty after the first start of v20. It exists only to carry old data through that conversion, so do not build anything on it.
 
 ```sql
 CREATE TABLE channels_legacy (
@@ -1504,6 +1506,6 @@ is defensive only.
 
 ---
 
-**Document Version:** 8.1
+**Document Version:** 8.2
 **Schema Version:** 20
 **Generated:** 2026 Q2

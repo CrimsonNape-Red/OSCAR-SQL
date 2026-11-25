@@ -42,6 +42,10 @@ conversion. Preferences marks customized channels and can reset a single channel
   from a user's choice and is kept as an override. Preferences can reset it.
 - Schema reference updated in `Notes/Database/DATABASE_SCHEMA_REFERENCE.md`; the ER diagram still
   shows the old `channels` table and needs regenerating.
+- Found in the final review: with Git's `core.autocrlf=true` a checkout can give the names list CRLF line
+  ends; the loader kept the CR on every name, and the conversion would have kept every old default as
+  a rename. The loader now drops a trailing CR, `.gitattributes` pins the file to `eol=lf`, and the
+  conversion refuses to run (rows stay parked) unless the list passes a size-and-sentinel check.
 
 ---
 

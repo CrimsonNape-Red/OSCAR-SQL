@@ -65,6 +65,13 @@ idx_channel_options_channel ON channel_options(channel_id)
 idx_channel_options_lookup ON channel_options(channel_id, option_key)
 ```
 
+> **Note (2026-11-25, schema v20):** `channels` is a view from v20, not a table, and the
+> three `idx_channels_*` indexes above were dropped. Channel data is now held in
+> `channel_defaults`, `profile_channel_overrides` and the transitional `channels_legacy` (index
+> `idx_channels_legacy_profile`); the last two cascade with their profile. The
+> `channels` rows in the diagram and tables below describe v19 and earlier. See
+> `DATABASE_SCHEMA_REFERENCE.md`, section 13.
+
 ### Daily Summaries Indexes ⭐ NEW IN v6 (profile_machine index dropped in v16)
 ```sql
 idx_daily_summaries_profile_date ON daily_summaries(profile_id, date)

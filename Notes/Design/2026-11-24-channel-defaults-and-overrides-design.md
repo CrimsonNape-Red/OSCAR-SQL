@@ -156,17 +156,20 @@ changes have been rare; Preferences can reset it.
 
 ### The list of names OSCAR has shipped
 
-A developer tool in `Tools/` walks the git history of `Translations/*.ts` and collects
-every source string and every translation that has ever been a channel full name, label
-or description, in any language. The result is bound into the application as a resource.
+A developer tool, `Tools/gen_shipped_channel_names.py`, builds the list from the git
+history. Its source strings are the current channel defaults (full names, labels and
+descriptions, in English) plus every `tr()` literal the channel-defining files
+(`schema.cpp`, `common.cpp`, the loader plugins) have ever held, at every location those
+files have had, including literals still present. Its translations are every translation
+any `Translations/*.ts` file has ever paired with one of those source strings. The result
+is bound into the application as a resource.
 
 - It is frozen at the v20 release: `channels_legacy`, old backups and `channels.dat` can
   only hold names written by pre-v20 builds, so it never needs regenerating afterwards.
-- Measured across the 64 release tags and 31 languages: about 32,000 retired translations
-  in total for all of OSCAR's strings (about 21,000 for source strings of 40 characters or
-  fewer, roughly 0.8 MB uncompressed). The channel-only subset is much smaller. How to
-  restrict it to channel strings, whether to match per language, and the file format are
-  left to the builder; if lineage is uncertain, include the string.
+- As built: 24,914 lines, about 0.9 MB (UTF-8, one name per line), matched in any
+  language. Before converting anything OSCAR checks that the loaded list holds at least
+  20,000 names and four fixed sentinels (English and Chinese); if not, nothing is converted
+  and the old rows stay parked for a later start.
 - To cover test builds between releases, the tool should scan every commit that touched
   the translation files or the channel definitions, not only tags.
 - Consequences of a miss: a name absent from the list is kept as an override (stale but
