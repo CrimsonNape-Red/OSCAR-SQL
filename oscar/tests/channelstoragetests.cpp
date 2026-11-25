@@ -22,6 +22,7 @@
 #include "SleepLib/preferences.h"
 #include "SleepLib/profiles.h"
 #include "SleepLib/schema.h"
+#include "database/channel_options_repository.h"
 #include "database/channel_repository.h"
 #include "database/database_manager.h"
 #include "database/database_schema.h"
@@ -291,6 +292,33 @@ void ChannelStorageTests::testScanWritesPristineDefaults()                // Rev
     QCOMPARE(scalar(QString("SELECT label FROM channel_defaults WHERE channel_id=%1").arg(CPAP_Obstructive)).toString(),
              c.defaults().label);
     QCOMPARE(scalar("SELECT COUNT(*) FROM channel_defaults").toInt(), int(schema::channel.channels.size()));
+}
+
+// Stored option labels fill only channels that define none in code; code labels win (#333).
+void ChannelStorageTests::testStoredOptionsFillOnlyChannelsWithoutCodeOptions()
+{
+    schema::Channel &plain = schema::channel[CPAP_Obstructive];
+    schema::Channel &mode = schema::channel[CPAP_Mode];
+    QVERIFY(plain.m_options.isEmpty());
+    QVERIFY(!mode.m_options.isEmpty());
+    const int key = mode.m_options.constBegin().key();
+    const QString codeLabel = mode.m_options.value(key);
+
+    ChannelOptionsRepository optionsRepo;
+    QVERIFY(optionsRepo.saveBatch(CPAP_Obstructive, { { 1, QStringLiteral("StoredOption") } }));
+    QVERIFY(optionsRepo.saveBatch(CPAP_Mode, { { key, codeLabel + QStringLiteral(" (stored)") } }));
+
+    p_profile->loadChannels();
+    const QString plainOption = plain.m_options.value(1);
+    const QString modeLabel = mode.m_options.value(key);
+
+    // Leave nothing behind for other tests.
+    plain.m_options.clear();
+    QVERIFY(optionsRepo.deleteByChannel(CPAP_Obstructive));
+    QVERIFY(optionsRepo.deleteByChannel(CPAP_Mode));
+
+    QCOMPARE(plainOption, QStringLiteral("StoredOption"));
+    QCOMPARE(modeLabel, codeLabel);
 }
 
 void ChannelStorageTests::cleanupTestCase()

@@ -2765,7 +2765,8 @@ bool Profile::migrateChannelsToDatabase(const QString& channelsDatDir)
  * Loads the profile's channel settings: every channel back to its code defaults, then
  * the profile's overrides on top, matched by channel id or, failing that, by code. An
  * override row for a channel this build does not know is skipped (and kept in the
- * database). Finally the preference-driven thresholds are re-applied.
+ * database). Channels with no option labels in code take any stored in channel_options.
+ * Finally the preference-driven thresholds are re-applied.
  */
 void Profile::loadChannels()
 {
@@ -2789,6 +2790,18 @@ void Profile::loadChannels()
         qDebug() << "Profile: Applied" << rows.size() << "channel overrides";
     } else {
         qWarning() << "Profile: Cannot load channel overrides, profile not in database";
+    }
+
+    // Option labels (e.g. mode names) are defined by the loaders and only
+    // mirrored here, so the code's labels win: a renamed or retranslated
+    // label would otherwise never replace the copy saved by an older build.
+    // Stored labels are used only for a channel that defines none in code (#333).
+    // channel_options is global, so this applies to every channel in the registry.
+    ChannelOptionsRepository optionsRepo;
+    for (schema::Channel *chan : std::as_const(schema::channel.channels)) {
+        if (chan->m_options.isEmpty() && optionsRepo.hasOptions(chan->id())) {
+            chan->m_options = optionsRepo.getOptionsHash(chan->id());
+        }
     }
 
     resetOxiChannelPref();

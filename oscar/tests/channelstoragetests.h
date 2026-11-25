@@ -49,6 +49,7 @@ private slots:
     void testPreferenceThresholdAndSettingNotStored();
     void testSecondProfileDoesNotInheritOverrides();
     void testScanWritesPristineDefaults();
+    void testStoredOptionsFillOnlyChannelsWithoutCodeOptions();
 
     void cleanupTestCase();
 
