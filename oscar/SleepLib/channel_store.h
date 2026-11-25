@@ -29,23 +29,40 @@ namespace ChannelStore {
     \return false if the database is not open or the write failed. */
 bool syncDefaults();
 
+/*! \brief The registry channel a stored row (an override or a channels_legacy row) belongs
+    to, or nullptr if none.
+    The stored id is tried first. When the id is unknown, or names a channel whose code is
+    not the stored code (the id has since been given to another channel), the stored code
+    decides; as the OSCAR 1.x channels.dat reader did, a known code wins over the id. When
+    the code is unknown too, a known id is used (the code may have been renamed).
+    \param channelId The stored channel id.
+    \param channelCode The stored channel code; may be empty. */
+schema::Channel *findChannel(ChannelID channelId, const QString &channelCode);
+
 /*! \brief Converts the channels_legacy rows of every profile into overrides.
-    Each row is matched to a channel of the registry by id, or by channel_code when the id is
-    unknown or names a channel with a different code, and classified against that channel's
-    code defaults (ChannelOverrides::classifyLegacy). The non-empty results are stored as
-    override rows under the registry's id and code; an override row the profile already has
-    for that channel wins. Matched rows are deleted; a row matching no channel stays and is
-    tried again on a later run. Each converted profile gets STR_PREF_ChannelsDatImported, so
-    a channels.dat left in its folder is never imported over the converted values.
+    Each row is matched to a channel of the registry with findChannel() and classified
+    against that channel's code defaults (ChannelOverrides::classifyLegacy). The non-empty
+    results are stored as override rows under the registry's id and code; an override row
+    the profile already has for that channel wins. Matched rows are deleted; a row matching
+    no channel stays and is tried again on a later run. Each converted profile gets
+    STR_PREF_ChannelsDatImported, so a channels.dat left in its folder is never imported over
+    the converted values.
     One transaction per profile: a profile whose conversion fails is left exactly as it was
     and the others still convert. No schema::Channel value is changed (the defaults snapshot
     is taken first for channels that have none, see schema::snapshotDefaults()).
+    Each profile's result is logged (qInfo), with each name dropped as shipped (qDebug):
+    once the legacy rows are deleted, that log is the only record of what was dropped.
     \param wasShipped Says whether a name is one OSCAR once shipped (a default, not a rename).
+           Empty (the default) means the bundled list, ShippedChannelNames::contains(). With
+           the bundled list nothing is converted unless ShippedChannelNames::isUsable(): the
+           error is logged, every row stays in channels_legacy for a later start, and every
+           profile with rows is reported in \p failedProfiles. A lookup given by the caller
+           is used as it is.
     \param failedProfiles If given, receives the ids of the profiles whose conversion failed
-           and was rolled back (their rows are still in channels_legacy).
+           and was rolled back, or was not tried (their rows are still in channels_legacy).
     \return The number of legacy rows that matched a channel and were removed, whether or not
             they produced an override. */
-int convertLegacyRows(const ChannelOverrides::ShippedLookup &wasShipped = &ShippedChannelNames::contains,
+int convertLegacyRows(const ChannelOverrides::ShippedLookup &wasShipped = ChannelOverrides::ShippedLookup(),
                       QSet<qint64> *failedProfiles = nullptr);
 
 } // namespace ChannelStore

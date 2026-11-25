@@ -346,7 +346,9 @@ bool ChannelRepository::insertLegacy(qint64 profileId, const QList<ChannelData> 
     }
 
     QSqlQuery query(db);
-    query.prepare("INSERT INTO channels_legacy (profile_id, channel_id, channel_code, type, enabled,"
+    // OR REPLACE: a row still parked for the same profile and channel id (for example
+    // after a failed conversion of a channels.dat import) is replaced, not a reason to fail.
+    query.prepare("INSERT OR REPLACE INTO channels_legacy (profile_id, channel_id, channel_code, type, enabled,"
                   " default_color, fullname, label, description, lower_threshold,"
                   " lower_threshold_color, upper_threshold, upper_threshold_color, show_in_overview)"
                   " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");

@@ -107,7 +107,10 @@ public:
     //! \brief The channels_legacy rows of profile \p profileId, ordered by channel id.
     QList<ChannelData> findLegacy(qint64 profileId);
 
-    //! \brief Inserts \p rows into channels_legacy for profile \p profileId, in one transaction.
+    /**
+     * @brief Inserts \p rows into channels_legacy for profile \p profileId, in one transaction.
+     * A row the profile already has for the same channel id is replaced.
+     */
     bool insertLegacy(qint64 profileId, const QList<ChannelData> &rows);
 
     //! \brief Deletes the channels_legacy rows whose primary keys are \p rowIds.

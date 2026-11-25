@@ -106,6 +106,18 @@ QVariant ChannelStorageTests::scalar(const QString &sql)
     return query.next() ? query.value(0) : QVariant();
 }
 
+void ChannelStorageTests::makeV19Shape()
+{
+    exec("DROP VIEW channels");
+    exec("ALTER TABLE channels_legacy RENAME TO channels");
+    exec("DROP INDEX IF EXISTS idx_channels_legacy_profile");
+    exec("DROP TABLE channel_defaults");
+    exec("DROP TABLE profile_channel_overrides");
+    exec("CREATE INDEX IF NOT EXISTS idx_channels_profile ON channels(profile_id)");
+    exec("CREATE INDEX IF NOT EXISTS idx_channels_code ON channels(channel_code)");
+    exec("CREATE INDEX IF NOT EXISTS idx_channels_lookup ON channels(profile_id, channel_id)");
+}
+
 int ChannelStorageTests::overrideCount()
 {
     return scalar(QString("SELECT COUNT(*) FROM profile_channel_overrides WHERE profile_id = %1")
@@ -127,17 +139,40 @@ void ChannelStorageTests::testFreshSchemaIsV20()
 // The v19 -> v20 migration keeps the old per-profile rows, unconverted, in channels_legacy.
 void ChannelStorageTests::testMigrationParksOldRows()
 {
-    // Put the database back into its v19 shape, with one old row.
-    exec("DROP VIEW channels");
-    exec("ALTER TABLE channels_legacy RENAME TO channels");
-    exec("DROP TABLE channel_defaults");
-    exec("DROP TABLE profile_channel_overrides");
+    // Put the database back into its v19 shape, with its three indexes and one old row,
+    // and upgrade it through the real entry point.
+    makeV19Shape();
     exec(QString("INSERT INTO channels (profile_id, channel_id, channel_code, label) VALUES (%1, 60001, 'TestChan', 'MyOA')").arg(m_profileId));
-    QVERIFY(DatabaseSchema::migrateV19ToV20(db()));
+    QVERIFY(DatabaseSchema::setSchemaVersion(db(), 19));
+    QVERIFY(DatabaseSchema::upgradeSchema(db(), 19, {}));
+    QCOMPARE(DatabaseSchema::getSchemaVersion(db()), 20);
     QCOMPARE(scalar("SELECT label FROM channels_legacy WHERE channel_id=60001").toString(), QString("MyOA"));
     QCOMPARE(scalar("SELECT type FROM sqlite_master WHERE name='channels'").toString(), QString("view"));
+    for (const char *index : { "idx_channels_profile", "idx_channels_code", "idx_channels_lookup" }) {
+        QCOMPARE(scalar(QString("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name='%1'").arg(index)).toInt(), 0);
+    }
     QCOMPARE(scalar("SELECT COUNT(*) FROM profile_channel_overrides").toInt(), 0);
     exec("DELETE FROM channels_legacy");
+}
+
+// The rename does not re-point a user's own view at channels_legacy: it keeps reading
+// "channels", which is now the view (review M2).
+void ChannelStorageTests::testMigrationLeavesUserViewsAlone()
+{
+    makeV19Shape();
+    exec("CREATE VIEW user_view AS SELECT channel_code FROM channels");
+    const bool migrated = DatabaseSchema::migrateV19ToV20(db());
+    const QString sql = scalar("SELECT sql FROM sqlite_master WHERE type='view' AND name='user_view'").toString();
+    QSqlQuery select(db());
+    const bool selectWorks = select.exec("SELECT COUNT(*) FROM user_view");
+    select.finish();
+    const int legacyAlter = scalar("PRAGMA legacy_alter_table").toInt();
+    exec("DROP VIEW user_view");
+
+    QVERIFY(migrated);
+    QVERIFY2(sql.contains("FROM channels") && !sql.contains("channels_legacy"), qPrintable(sql));
+    QVERIFY2(selectWorks, qPrintable(select.lastError().text()));
+    QCOMPARE(legacyAlter, 0);          // the previous setting is back
 }
 
 // The channels view returns the override where one is set and the default elsewhere.
@@ -208,6 +243,22 @@ void ChannelStorageTests::testLegacyRowsAndProfileDelete()
     QCOMPARE(rows.size(), 1);
     QVERIFY(repo.deleteLegacy({ rows[0].id }));
     QVERIFY(repo.profilesWithLegacyRows().isEmpty());
+}
+
+// A row still parked for the same channel does not make a later insert fail: it is
+// replaced (review M3).
+void ChannelStorageTests::testInsertLegacyReplacesParkedRow()
+{
+    ChannelRepository repo;
+    ChannelData first; first.channelId = 60001; first.channelCode = "TestChan"; first.label = "First";
+    ChannelData second = first; second.label = "Second";
+    QVERIFY(repo.insertLegacy(m_profileId, { first }));
+    const bool replaced = repo.insertLegacy(m_profileId, { second });
+    const auto rows = repo.findLegacy(m_profileId);
+    exec(QString("DELETE FROM channels_legacy WHERE profile_id = %1").arg(m_profileId));
+    QVERIFY(replaced);
+    QCOMPARE(rows.size(), 1);
+    QCOMPARE(rows[0].label, QString("Second"));
 }
 
 // ---------------------------------------------------------------------------
@@ -283,14 +334,58 @@ void ChannelStorageTests::testSecondProfileDoesNotInheritOverrides()      // Rev
     QCOMPARE(c.label(), QString("MyOA"));
 }
 
+// An override stored under an id this build does not know is matched by its code.
+void ChannelStorageTests::testLoadMatchesOverrideByCode()
+{
+    schema::Channel &oa = schema::channel[CPAP_Obstructive];
+    ChannelOverrideRow moved; moved.channelId = 61003; moved.channelCode = oa.code(); moved.values.label = QString("Zz Moved Zz");
+    QVERIFY(ChannelRepository().replaceOverrides(m_profileId, { moved }, { 61003 }, { oa.code() }));
+    p_profile->loadChannels();
+    QCOMPARE(oa.label(), QString("Zz Moved Zz"));
+}
+
+// After that load, a save stores the override once, under the registry's id: the row under
+// the old id is deleted by its code.
+void ChannelStorageTests::testSaveRewritesMovedOverrideUnderRegistryId()
+{
+    schema::Channel &oa = schema::channel[CPAP_Obstructive];
+    ChannelOverrideRow moved; moved.channelId = 61003; moved.channelCode = oa.code(); moved.values.label = QString("Zz Moved Zz");
+    QVERIFY(ChannelRepository().replaceOverrides(m_profileId, { moved }, { 61003 }, { oa.code() }));
+    p_profile->loadChannels();
+    p_profile->saveChannels();
+    const auto rows = ChannelRepository().findOverrides(m_profileId);
+    QCOMPARE(rows.size(), 1);
+    QCOMPARE(rows[0].channelId, ChannelID(CPAP_Obstructive));
+    QCOMPARE(rows[0].values.label.value(), QString("Zz Moved Zz"));
+}
+
+// An override stored under an id that now belongs to another channel goes to the channel
+// its code names, as in the conversion (review M1).
+void ChannelStorageTests::testLoadPrefersCodeOverReassignedId()
+{
+    schema::Channel &oa = schema::channel[CPAP_Obstructive];
+    schema::Channel &hy = schema::channel[CPAP_Hypopnea];
+    ChannelOverrideRow row; row.channelId = hy.id(); row.channelCode = oa.code(); row.values.label = QString("Zz Reassigned Zz");
+    QVERIFY(ChannelRepository().replaceOverrides(m_profileId, { row }, { hy.id() }, { oa.code() }));
+    p_profile->loadChannels();
+    QCOMPARE(oa.label(), QString("Zz Reassigned Zz"));
+    QCOMPARE(hy.label(), hy.defaults().label);
+}
+
 // syncDefaults() writes the code defaults, never a profile's live values.
 void ChannelStorageTests::testScanWritesPristineDefaults()                // Review Focus 2
 {
     schema::Channel &c = schema::channel[CPAP_Obstructive];
+    const schema::ChanType codeType = c.type();
     c.setLabel("MyOA");                       // an open profile's override is in memory
-    QVERIFY(ChannelStore::syncDefaults());
+    c.setType(schema::SPAN);                  // a Flag Type changed in Preferences
+    const bool synced = ChannelStore::syncDefaults();
+    c.setType(codeType);
+    QVERIFY(synced);
     QCOMPARE(scalar(QString("SELECT label FROM channel_defaults WHERE channel_id=%1").arg(CPAP_Obstructive)).toString(),
              c.defaults().label);
+    QCOMPARE(scalar(QString("SELECT type FROM channel_defaults WHERE channel_id=%1").arg(CPAP_Obstructive)).toInt(),
+             int(codeType));
     QCOMPARE(scalar("SELECT COUNT(*) FROM channel_defaults").toInt(), int(schema::channel.channels.size()));
 }
 

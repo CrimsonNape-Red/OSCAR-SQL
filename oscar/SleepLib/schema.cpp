@@ -539,6 +539,7 @@ void Channel::snapshotDefaults()
     m_defaults.lowerThresholdColor = m_lowerThresholdColor;
     m_defaults.upperThresholdColor = m_upperThresholdColor;
     m_defaults.showInOverview = m_showInOverview;
+    m_defaults.type = m_type;
     m_hasDefaults = true;
 }
 

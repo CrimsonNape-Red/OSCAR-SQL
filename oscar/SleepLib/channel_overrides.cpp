@@ -133,7 +133,11 @@ Values classifyLegacy(const schema::Channel &chan, const ChannelData &legacy,
     }
     Values stored;
     stored.enabled = legacy.enabled;
-    stored.color = legacy.defaultColor;
+    // A NULL or unparsable stored colour is invalid; it would compare as #000000 and be
+    // written back as NULL, so it is not an override.
+    if (legacy.defaultColor.isValid()) {
+        stored.color = legacy.defaultColor;
+    }
     stored.fullname = legacy.fullname;
     stored.label = legacy.label;
     stored.description = legacy.description;

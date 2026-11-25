@@ -13,6 +13,8 @@
 #ifndef SHIPPED_CHANNEL_NAMES_H
 #define SHIPPED_CHANNEL_NAMES_H
 
+#include <QByteArray>
+#include <QSet>
 #include <QString>
 
 //! \brief Lookup in the generated list of channel names OSCAR has shipped.
@@ -28,6 +30,25 @@ namespace ShippedChannelNames {
     The list is loaded on first use. An empty \p name is never in the list.
     \param name The text to look up, compared exactly (case and spacing matter). */
 bool contains(const QString &name);
+
+/*! \brief Parses the bytes of the names list into a set of names.
+    The data is UTF-8, one name per line. A line may end in LF or CRLF (a checkout with
+    Windows line endings must not add a CR to every name). Within a line, two backslashes
+    stand for one backslash and backslash-n for a newline. Empty lines are skipped, so the
+    set never holds an empty string.
+    \param data The file contents.
+    \return The names; empty for empty \p data. */
+QSet<QString> parse(const QByteArray &data);
+
+/*! \brief Returns true if the loaded list looks complete and correctly decoded.
+    Converting the pre-v20 channel rows is irreversible, and it treats a name missing from the
+    list as a user rename. A missing, truncated or wrongly decoded resource would otherwise
+    be mistaken for "OSCAR never shipped any of these names" and turn every old default into
+    a permanent override. The check is fixed, not measured against the running build's
+    names, because the running language may be one whose names the frozen list lacks: the
+    list must hold at least 20000 names and four sentinels, English and Chinese, that every
+    correct list contains ("Large Leak", "RERA", "Flow Limit.", "气流限制."). */
+bool isUsable();
 
 } // namespace ShippedChannelNames
 

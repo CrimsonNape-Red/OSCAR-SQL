@@ -36,6 +36,11 @@ private slots:
     void testClassifyDropsDefaultsAndShippedNames();
     void testClassifyKeepsRenameAndColour();
     void testClassifyIgnoresSettingChannel();
+    void testClassifySkipsInvalidColour();
+    void testApplySetsOnlyOverridableFields();
+    void testDiffReportsWaveformThreshold();
+    void testDiffIgnoresPreferenceThresholds();
+    void testDiffReportsEnabledAndOverview();
     void cleanupTestCase();
 
 private:

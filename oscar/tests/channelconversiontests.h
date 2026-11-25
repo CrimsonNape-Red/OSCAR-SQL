@@ -34,6 +34,9 @@ private slots:
 
     // The list of shipped names (Task 4)
     void testShippedNamesLookup();
+    void testShippedNamesParserAcceptsCrLf();
+    void testShippedNamesParserUnescapes();
+    void testShippedNamesListIsUsable();
 
     // Conversion of channels_legacy rows and of channels.dat (Task 5)
     void testConvertsEveryProfile();
@@ -45,6 +48,8 @@ private slots:
     void testLoadImportsChannelsDatOnceAndMarks();
     void testFailedStoreLeavesProfileUnmarked();
     void testFailedConversionLeavesProfileUnmarked();
+    void testExistingOverrideWinsOverLegacyRow();
+    void testOneProfileFailingDoesNotStopOthers();
 
     void cleanupTestCase();
 

@@ -158,6 +158,30 @@ void ChannelConversionTests::testShippedNamesLookup()
     QVERIFY(!ShippedChannelNames::contains(QString()));
 }
 
+// A checkout with Windows line endings must not leave a CR on every name (review C1).
+void ChannelConversionTests::testShippedNamesParserAcceptsCrLf()
+{
+    const QSet<QString> names = ShippedChannelNames::parse(QByteArray("Alpha\r\nBeta\r\n"));
+    QCOMPARE(names, (QSet<QString>{ QStringLiteral("Alpha"), QStringLiteral("Beta") }));
+}
+
+// Escapes are reversed, empty lines and empty input give no names.
+void ChannelConversionTests::testShippedNamesParserUnescapes()
+{
+    // File bytes: A\nB, newline, C\\n, newline.
+    const QSet<QString> names = ShippedChannelNames::parse(QByteArray("A\\nB\nC\\\\n\n"));
+    QCOMPARE(names, (QSet<QString>{ QStringLiteral("A\nB"), QStringLiteral("C\\n") }));
+    QVERIFY(!names.contains(QString()));
+    QVERIFY(ShippedChannelNames::parse(QByteArray()).isEmpty());
+    QVERIFY(!ShippedChannelNames::parse(QByteArray("\n\r\n\nX\n")).contains(QString()));
+}
+
+// The bundled list passes the sanity check the conversion requires before using it.
+void ChannelConversionTests::testShippedNamesListIsUsable()
+{
+    QVERIFY(ShippedChannelNames::isUsable());
+}
+
 // ---------------------------------------------------------------------------
 // Conversion of channels_legacy rows and of channels.dat
 // ---------------------------------------------------------------------------
@@ -298,6 +322,50 @@ void ChannelConversionTests::testFailedConversionLeavesProfileUnmarked() {
     QVERIFY(!isMarked());
     QVERIFY(ChannelRepository().findOverrides(m_profileId).isEmpty());
     QCOMPARE(ChannelRepository().profilesWithLegacyRows(), QList<qint64>{ m_profileId });
+}
+
+// An override row the profile already has decides the channel; the legacy row for the
+// same channel is removed without touching it.
+void ChannelConversionTests::testExistingOverrideWinsOverLegacyRow() {
+    ChannelRepository repo;
+    schema::Channel &oa = schema::channel[CPAP_Obstructive];
+    ChannelOverrideRow mine; mine.channelId = oa.id(); mine.channelCode = oa.code(); mine.values.label = QString("Mine");
+    QVERIFY(repo.replaceOverrides(m_profileId, { mine }, { oa.id() }, { oa.code() }));
+    ChannelData legacy = legacyOf(oa); legacy.label = "Zz Legacy Zz";
+    QVERIFY(repo.insertLegacy(m_profileId, { legacy }));
+
+    QCOMPARE(ChannelStore::convertLegacyRows(kFake), 1);
+
+    const auto rows = repo.findOverrides(m_profileId);
+    QCOMPARE(rows.size(), 1);
+    QCOMPARE(rows[0].values.label.value(), QString("Mine"));
+    QVERIFY(repo.findLegacy(m_profileId).isEmpty());
+}
+
+// A profile whose conversion fails keeps its legacy rows and gets no overrides; the other
+// profile still converts. A temporary trigger blocks the override insert for one profile
+// only; it is dropped before any assertion.
+void ChannelConversionTests::testOneProfileFailingDoesNotStopOthers() {
+    ChannelRepository repo;
+    ChannelData renamed = legacyOf(schema::channel[CPAP_Obstructive]); renamed.label = "Zz Renamed Zz";
+    QVERIFY(repo.insertLegacy(m_profileId, { renamed }));
+    QVERIFY(repo.insertLegacy(m_otherProfileId, { renamed }));
+    exec(QString("CREATE TEMP TRIGGER test_block_one_profile BEFORE INSERT ON profile_channel_overrides"
+                 " WHEN NEW.profile_id = %1 BEGIN SELECT RAISE(ABORT, 'blocked by test'); END").arg(m_profileId));
+    QTest::ignoreMessage(QtWarningMsg, QRegularExpression("inserting the override for channel"));
+    QTest::ignoreMessage(QtCriticalMsg, QRegularExpression("convertLegacyRows: converting the stored channels"));
+    QSet<qint64> failed;
+    const int converted = ChannelStore::convertLegacyRows(kFake, &failed);
+    exec("DROP TRIGGER temp.test_block_one_profile");
+
+    QCOMPARE(converted, 1);
+    QCOMPARE(failed, QSet<qint64>{ m_profileId });
+    QCOMPARE(repo.findLegacy(m_profileId).size(), 1);
+    QVERIFY(repo.findOverrides(m_profileId).isEmpty());
+    QVERIFY(repo.findLegacy(m_otherProfileId).isEmpty());
+    const auto other = repo.findOverrides(m_otherProfileId);
+    QCOMPARE(other.size(), 1);
+    QCOMPARE(other[0].values.label.value(), QString("Zz Renamed Zz"));
 }
 
 void ChannelConversionTests::cleanupTestCase()

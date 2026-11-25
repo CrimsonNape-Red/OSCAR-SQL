@@ -17,6 +17,9 @@
 #include <QSet>
 #include <QSqlDatabase>
 #include <QSqlError>
+#include <QStringList>
+
+#include <optional>
 
 #include "SleepLib/common.h"
 #include "SleepLib/schema.h"
@@ -26,26 +29,54 @@
 
 namespace {
 
-/*! \brief The registry channel a channels_legacy row belongs to, or nullptr if none.
-    The stored id is tried first. When the id is unknown, or names a channel whose code is
-    not the stored code (the id has since been given to another channel), the stored code
-    decides; as the OSCAR 1.x channels.dat reader did, a known code wins over the id. */
-schema::Channel *findChannel(const ChannelData &row)
+//! \brief Counts of the name fields a conversion dropped, for the per-profile log line.
+struct DroppedNames {
+    int equalToDefault = 0;     //!< Stored name equal to today's default
+    int shipped = 0;            //!< Stored name that an older build shipped
+    QStringList shippedDetail;  //!< One "code field: text" entry per shipped name dropped
+};
+
+/*! \brief Records which name fields of \p row the classification dropped, and why.
+    Compares the classification without the shipped-names lookup (names that differ from
+    today's default) with \p kept, the real classification: a name absent from both equals
+    the default; a name present only in the first was dropped as shipped.
+    \param chan The channel the row was matched to.
+    \param row The channels_legacy row.
+    \param kept The overrides classifyLegacy() returned for the row with the real lookup.
+    \param dropped Receives the counts and the dropped texts. */
+void countDroppedNames(const schema::Channel &chan, const ChannelData &row,
+                       const ChannelOverrides::Values &kept, DroppedNames &dropped)
 {
-    schema::Channel *byId = &schema::channel[row.channelId];
-    if (!byId->isNull() && (row.channelCode.isEmpty() || byId->code() == row.channelCode)) {
-        return byId;
-    }
-    if (!row.channelCode.isEmpty()) {
-        schema::Channel *byCode = &schema::channel[row.channelCode];
-        if (!byCode->isNull()) {
-            return byCode;
+    using ChannelOverrides::Values;
+    const Values differing = ChannelOverrides::classifyLegacy(chan, row, ChannelOverrides::ShippedLookup());
+    struct NameField {
+        ChannelOverrides::Field field;
+        std::optional<QString> Values::*member;
+        const char *name;
+    };
+    static const NameField fields[] = {
+        { ChannelOverrides::Fullname, &Values::fullname, "fullname" },
+        { ChannelOverrides::Label, &Values::label, "label" },
+        { ChannelOverrides::Description, &Values::description, "description" },
+    };
+    for (const NameField &f : fields) {
+        if (!ChannelOverrides::overridable(chan.id(), chan.type(), f.field)) {
+            continue;
+        }
+        const std::optional<QString> &before = differing.*(f.member);
+        if (!before) {
+            ++dropped.equalToDefault;
+        } else if (!(kept.*(f.member))) {
+            ++dropped.shipped;
+            dropped.shippedDetail.append(QStringLiteral("%1 %2: \"%3\"")
+                                         .arg(chan.code(), QLatin1String(f.name), *before));
         }
     }
-    return byId->isNull() ? nullptr : byId;
 }
 
 /*! \brief Converts the channels_legacy rows of one profile, in one transaction.
+    \param profileId The profile to convert.
+    \param wasShipped The shipped-names lookup passed to ChannelOverrides::classifyLegacy().
     \return The number of legacy rows matched and removed, or -1 if nothing was written. */
 int convertProfile(qint64 profileId, const ChannelOverrides::ShippedLookup &wasShipped)
 {
@@ -67,9 +98,10 @@ int convertProfile(qint64 profileId, const ChannelOverrides::ShippedLookup &wasS
 
     QList<ChannelOverrideRow> added;
     QList<qint64> converted;
+    DroppedNames dropped;
     int unmatched = 0;
     for (const ChannelData &row : legacy) {
-        const schema::Channel *chan = findChannel(row);
+        const schema::Channel *chan = ChannelStore::findChannel(row.channelId, row.channelCode);
         if (chan == nullptr) {
             ++unmatched;    // kept for a later build that knows the channel
             continue;
@@ -82,6 +114,7 @@ int convertProfile(qint64 profileId, const ChannelOverrides::ShippedLookup &wasS
         out.channelId = chan->id();
         out.channelCode = chan->code();
         out.values = ChannelOverrides::classifyLegacy(*chan, row, wasShipped);
+        countDroppedNames(*chan, row, out.values, dropped);
         if (!out.values.isEmpty()) {
             added.append(out);
             coveredIds.insert(out.channelId);
@@ -106,15 +139,38 @@ int convertProfile(qint64 profileId, const ChannelOverrides::ShippedLookup &wasS
         return -1;
     }
 
-    qDebug() << "ChannelStore::convertLegacyRows: profile" << profileId << "-" << converted.size()
-             << "stored channels converted," << added.size() << "overrides added,"
-             << unmatched << "unknown channels kept";
+    // The legacy rows are gone now: this log is the only record of what was dropped. It
+    // holds channel text only, never the profile's or the user's name.
+    qInfo().nospace() << "ChannelStore::convertLegacyRows: profile " << profileId << ": "
+                      << converted.size() << " stored channels converted, " << added.size()
+                      << " overrides written, names dropped: " << dropped.equalToDefault
+                      << " equal to today's default, " << dropped.shipped << " shipped before; "
+                      << unmatched << " unknown channels kept";
+    for (const QString &detail : std::as_const(dropped.shippedDetail)) {
+        qDebug().noquote() << "ChannelStore::convertLegacyRows: profile" << profileId
+                           << "dropped shipped name" << detail;
+    }
     return converted.size();
 }
 
 } // namespace
 
 namespace ChannelStore {
+
+schema::Channel *findChannel(ChannelID channelId, const QString &channelCode)
+{
+    schema::Channel *byId = &schema::channel[channelId];
+    if (!byId->isNull() && (channelCode.isEmpty() || byId->code() == channelCode)) {
+        return byId;
+    }
+    if (!channelCode.isEmpty()) {
+        schema::Channel *byCode = &schema::channel[channelCode];
+        if (!byCode->isNull()) {
+            return byCode;
+        }
+    }
+    return byId->isNull() ? nullptr : byId;
+}
 
 bool syncDefaults()
 {
@@ -134,7 +190,7 @@ bool syncDefaults()
         ChannelDefaultRow row;
         row.channelId = chan->id();
         row.channelCode = chan->code();
-        row.type = chan->type();
+        row.type = d.type;  // the code's type, not a Flag Type changed in Preferences
         row.enabled = d.enabled;
         row.defaultColor = d.color;
         row.fullname = d.fullname;
@@ -166,10 +222,33 @@ int convertLegacyRows(const ChannelOverrides::ShippedLookup &wasShipped, QSet<qi
     // the code defaults; classifying needs it. Channels that have one are left alone.
     schema::snapshotDefaults();
 
-    int total = 0;
     const QList<qint64> profileIds = ChannelRepository().profilesWithLegacyRows();
+    if (profileIds.isEmpty()) {
+        return 0;
+    }
+
+    // No lookup given: use the bundled list, but only if it loaded completely. With a
+    // missing or broken list every old default would be kept as a "rename" and the evidence
+    // deleted, so nothing is converted and the rows wait for a later start.
+    ChannelOverrides::ShippedLookup lookup = wasShipped;
+    if (!lookup) {
+        if (!ShippedChannelNames::isUsable()) {
+            qCritical() << "ChannelStore::convertLegacyRows: the list of shipped channel names"
+                        << "could not be loaded; no stored channel rows were converted"
+                        << "(they are kept for a later start)";
+            if (failedProfiles != nullptr) {
+                for (qint64 profileId : profileIds) {
+                    failedProfiles->insert(profileId);
+                }
+            }
+            return 0;
+        }
+        lookup = &ShippedChannelNames::contains;
+    }
+
+    int total = 0;
     for (qint64 profileId : profileIds) {
-        const int n = convertProfile(profileId, wasShipped);
+        const int n = convertProfile(profileId, lookup);
         if (n > 0) {
             total += n;
         } else if (n < 0 && failedProfiles != nullptr) {

@@ -64,8 +64,9 @@ void apply(schema::Channel &chan, const Values &v);
 
 /*! \brief Classifies an old full-copy stored row as overrides.
     Uses chan.type(), never legacy.type. A name differing from the default is an override
-    only when \p wasShipped says it was not an old shipped name; other fields are overrides
-    when they differ from the default. */
+    only when \p wasShipped says it was not an old shipped name (an empty \p wasShipped
+    treats no name as shipped); other fields are overrides when they differ from the
+    default, except an invalid stored colour, which is never an override. */
 Values classifyLegacy(const schema::Channel &chan, const ChannelData &legacy,
                       const ShippedLookup &wasShipped);
 

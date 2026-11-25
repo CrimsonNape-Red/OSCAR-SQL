@@ -2067,6 +2067,34 @@ bool DatabaseSchema::migrateV19ToV20(QSqlDatabase& db)
 {
     qDebug() << "DatabaseSchema: Migrating v19 -> v20";
 
+    // Without legacy_alter_table, renaming channels would make SQLite rewrite every view
+    // and trigger that names it, including a user's own, to read channels_legacy (which is
+    // emptied by the conversion), and a broken unrelated view would make the rename fail.
+    // With it, such a view keeps reading "channels", which becomes the new view. The
+    // pragma is a connection setting, not part of the transaction, so the guard restores
+    // the previous value on every return, including after a rollback.
+    struct LegacyAlterTableGuard {
+        QSqlDatabase &db;
+        QVariant previous;
+        explicit LegacyAlterTableGuard(QSqlDatabase &database) : db(database)
+        {
+            QSqlQuery q(db);
+            if (q.exec("PRAGMA legacy_alter_table") && q.next()) {
+                previous = q.value(0);
+            }
+            QSqlQuery set(db);
+            if (!set.exec("PRAGMA legacy_alter_table=ON")) {
+                qWarning() << "DatabaseSchema: migrateV19ToV20: cannot set legacy_alter_table:"
+                           << set.lastError().text();
+            }
+        }
+        ~LegacyAlterTableGuard()
+        {
+            QSqlQuery q(db);
+            q.exec(QString("PRAGMA legacy_alter_table=%1").arg(previous.toInt() != 0 ? "ON" : "OFF"));
+        }
+    } legacyAlterTable(db);
+
     if (!db.transaction()) {
         qCritical() << "DatabaseSchema: migrateV19ToV20: failed to start transaction";
         return false;

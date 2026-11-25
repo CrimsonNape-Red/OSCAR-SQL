@@ -2649,8 +2649,9 @@ const quint16 chandata_version = 1;
  * Saves the profile's channel overrides: for every channel, the overridable fields that
  * differ from the code defaults (ChannelOverrides::diff). A channel with no differences
  * has no row, so an override set back to its default is removed. Rows of channels this
- * build does not know are kept. Also mirrors the code-defined option labels of LOOKUP
- * channels into channel_options, as before, for SQL scripts and backups.
+ * build does not know, or that have no defaults snapshot yet, are kept. Also mirrors the
+ * code-defined option labels of LOOKUP channels into channel_options, as before, for SQL
+ * scripts and backups.
  */
 void Profile::saveChannels()
 {
@@ -2666,6 +2667,15 @@ void Profile::saveChannels()
     QSet<ChannelID> knownIds;
     QSet<QString> knownCodes;
     for (schema::Channel *chan : std::as_const(schema::channel.channels)) {
+        if (!chan->m_options.isEmpty()) {
+            optionsRepo.saveBatch(chan->id(), chan->m_options);
+        }
+
+        // Without a defaults snapshot diff() cannot tell an override from a default and
+        // reports none; listing such a channel as known would delete its stored override.
+        if (!chan->hasDefaults()) {
+            continue;
+        }
         knownIds.insert(chan->id());
         knownCodes.insert(chan->code());
 
@@ -2675,10 +2685,6 @@ void Profile::saveChannels()
         row.values = ChannelOverrides::diff(*chan);
         if (!row.values.isEmpty()) {
             rows.append(row);
-        }
-
-        if (!chan->m_options.isEmpty()) {
-            optionsRepo.saveBatch(chan->id(), chan->m_options);
         }
     }
 
@@ -2760,7 +2766,9 @@ bool Profile::migrateChannelsToDatabase(const QString& channelsDatDir)
         return false;
     }
     QSet<qint64> failed;
-    ChannelStore::convertLegacyRows(&ShippedChannelNames::contains, &failed);
+    // The bundled names list; if it cannot be used, nothing is converted and this profile is
+    // reported as failed, so it stays unmarked.
+    ChannelStore::convertLegacyRows(ChannelOverrides::ShippedLookup(), &failed);
     if (failed.contains(profileId)) {
         qWarning() << "Profile: Converting the channels.dat rows failed; they are kept for the next start";
         return false;
@@ -2770,7 +2778,7 @@ bool Profile::migrateChannelsToDatabase(const QString& channelsDatDir)
 
 /*
  * Loads the profile's channel settings: every channel back to its code defaults, then
- * the profile's overrides on top, matched by channel id or, failing that, by code. An
+ * the profile's overrides on top, matched as ChannelStore::findChannel() does. An
  * override row for a channel this build does not know is skipped (and kept in the
  * database). Channels with no option labels in code take any stored in channel_options.
  * Finally the preference-driven thresholds are re-applied.
@@ -2802,13 +2810,12 @@ void Profile::loadChannels()
     if (profileId != 0) {
         const QList<ChannelOverrideRow> rows = ChannelRepository().findOverrides(profileId);
         for (const ChannelOverrideRow &row : rows) {
-            schema::Channel *chan = &schema::channel[row.channelId];
-            if (chan->isNull()) {
-                chan = &schema::channel[row.channelCode];
-                if (chan->isNull()) {
-                    qDebug() << "Profile: Skipping override for unknown channel" << row.channelCode;
-                    continue;
-                }
+            // The same matching as the conversion of old rows: by id, unless the stored code
+            // is known and the id's channel has a different code.
+            schema::Channel *chan = ChannelStore::findChannel(row.channelId, row.channelCode);
+            if (chan == nullptr) {
+                qDebug() << "Profile: Skipping override for unknown channel" << row.channelCode;
+                continue;
             }
             ChannelOverrides::apply(*chan, row.values);
         }

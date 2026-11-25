@@ -139,3 +139,65 @@ void ChannelOverridesTests::testClassifyIgnoresSettingChannel() {
     row.defaultColor = QColor("#123456");
     QVERIFY(classifyLegacy(c, row, [](const QString &) { return false; }).isEmpty());
 }
+// A NULL or unparsable stored colour (an invalid QColor) is not an override (review M4).
+void ChannelOverridesTests::testClassifySkipsInvalidColour() {
+    schema::Channel &c = schema::channel[CPAP_Obstructive];
+    QVERIFY(c.defaults().color.name() != QColor().name());   // the default is not #000000
+    ChannelData row = legacyOf(c);
+    row.defaultColor = QColor();
+    QVERIFY(classifyLegacy(c, row, [](const QString &) { return false; }).isEmpty());
+}
+// apply() sets the fields present and overridable for the channel, and nothing else.
+void ChannelOverridesTests::testApplySetsOnlyOverridableFields() {
+    schema::Channel &flag = schema::channel[CPAP_Obstructive];
+    const EventDataType flagUpper = flag.upperThreshold();
+    const QString flagName = flag.fullname();
+    Values v;
+    v.label = QString("Zz Label Zz");
+    v.upperThreshold = 42.0;
+    ChannelOverrides::apply(flag, v);
+    QCOMPARE(flag.label(), QString("Zz Label Zz"));
+    QCOMPARE(flag.upperThreshold(), flagUpper);       // no thresholds on a flag channel
+    QCOMPARE(flag.fullname(), flagName);              // absent fields are left alone
+
+    schema::Channel &setting = schema::channel[CPAP_PSMin];
+    const QString settingLabel = setting.label();
+    const QString settingColor = setting.defaultColor().name();
+    Values s;
+    s.label = QString("Zz Setting Zz");
+    s.color = QColor("#123456");
+    ChannelOverrides::apply(setting, s);
+    QCOMPARE(setting.label(), settingLabel);
+    QCOMPARE(setting.defaultColor().name(), settingColor);
+}
+// A changed threshold on a WAVEFORM channel is an override.
+void ChannelOverridesTests::testDiffReportsWaveformThreshold() {
+    schema::Channel &c = schema::channel[CPAP_FlowRate];
+    QCOMPARE(c.type(), schema::WAVEFORM);
+    c.setUpperThreshold(c.defaults().upperThreshold + 5);
+    const Values v = diff(c);
+    QVERIFY(v.upperThreshold.has_value());
+    QCOMPARE(*v.upperThreshold, double(c.defaults().upperThreshold + 5));
+}
+// Thresholds that preferences drive are never overrides.
+void ChannelOverridesTests::testDiffIgnoresPreferenceThresholds() {
+    schema::Channel &leak = schema::channel[CPAP_Leak];
+    QCOMPARE(leak.type(), schema::WAVEFORM);
+    leak.setUpperThreshold(leak.defaults().upperThreshold + 5);
+    QVERIFY(diff(leak).isEmpty());
+
+    schema::Channel &pulse = schema::channel[OXI_Pulse];
+    QCOMPARE(pulse.type(), schema::WAVEFORM);
+    pulse.setLowerThreshold(pulse.defaults().lowerThreshold + 5);
+    QVERIFY(diff(pulse).isEmpty());
+}
+// Enabled and ShowInOverview changes are overrides.
+void ChannelOverridesTests::testDiffReportsEnabledAndOverview() {
+    schema::Channel &c = schema::channel[CPAP_Obstructive];
+    c.setEnabled(!c.defaults().enabled);
+    c.setShowInOverview(!c.defaults().showInOverview);
+    const Values v = diff(c);
+    QCOMPARE(v.enabled.value(), !c.defaults().enabled);
+    QCOMPARE(v.showInOverview.value(), !c.defaults().showInOverview);
+    QVERIFY(!v.label && !v.fullname && !v.color);
+}
