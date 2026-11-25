@@ -81,7 +81,7 @@ enum ScopeType {
 class Channel;
 extern Channel EmptyChannel;
 
-/*! rief The user-overridable display values of a Channel as the code defines them.
+/*! \brief The user-overridable display values of a Channel as the code defines them.
     A snapshot of these is taken once initialisation (schema and loaders) has finished, so
     that per-profile overrides can later be compared with, and reset to, the code defaults. */
 struct ChannelDefaults {
@@ -191,17 +191,17 @@ class Channel
     inline bool enabled() const { return m_enabled; }
     void setEnabled(bool value) { m_enabled = value; }
 
-    //! rief True once snapshotDefaults() has recorded this channel's code defaults.
+    //! \brief True once snapshotDefaults() has recorded this channel's code defaults.
     bool hasDefaults() const { return m_hasDefaults; }
 
-    //! rief The recorded code defaults. Meaningful only when hasDefaults() is true.
+    //! \brief The recorded code defaults. Meaningful only when hasDefaults() is true.
     const ChannelDefaults &defaults() const { return m_defaults; }
 
-    //! rief Records the current values as the code defaults; does nothing if already recorded.
+    //! \brief Records the current values as the code defaults; does nothing if already recorded.
     //! Not done in the constructor because loaders adjust channels after construction.
     void snapshotDefaults();
 
-    //! rief Puts the recorded defaults back into the live values; does nothing if none recorded.
+    //! \brief Puts the recorded defaults back into the live values; does nothing if none recorded.
     void resetToDefaults();
 
     //! \brief Types of calculations that can be plotted on this channel and color to be used for plotting
@@ -294,10 +294,10 @@ extern ChannelList channel;
 void init();
 void done();
 
-//! rief Records the code defaults of every channel that has no snapshot yet.
+//! \brief Records the code defaults of every channel that has no snapshot yet.
 void snapshotDefaults();
 
-//! rief Restores every channel to its recorded code defaults.
+//! \brief Restores every channel to its recorded code defaults.
 void resetChannelsToDefaults();
 
 } // namespace schema
