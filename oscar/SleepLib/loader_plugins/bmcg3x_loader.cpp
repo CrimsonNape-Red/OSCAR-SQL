@@ -84,7 +84,9 @@ int BmcG3xLoader::Open(const QString& dirpath)
 
     // Warn if the firmware version has not been tested with this loader.
     // Tested user-facing versions: G3-2.11.x.x (SC.72), G3-2.12.x.x (SC.74/SC.75/SC.76),
-    // E5-1.02.x.x on the E5 B25A Plus and P5-1.02.x.x on the P5 B20A Plus.
+    // E5-1.02.x.x on the E5 B25A Plus, P5-1.02.x.x on the P5 B20A Plus and E6-1.00.x.x on
+    // the E6 B25A Plus (its IDX build string has the same form, "E6-1.00.02.03", so it
+    // needs no separate fallback test).
     // The version string comes from the .log file (e.g. "G3-2.11.02.33", "E5-1.02.05.02")
     // and matches what PAP-Link and the device display report.  If the .log was
     // unavailable, the fallback is the IDX internal build string, which has an "SC" field
@@ -96,6 +98,7 @@ int BmcG3xLoader::Open(const QString& dirpath)
                                    fwVersion.startsWith("G3-2.12.") ||
                                    fwVersion.startsWith("E5-1.02.") ||
                                    fwVersion.startsWith("P5-1.02.") ||
+                                   fwVersion.startsWith("E6-1.00.") ||
                                    fwVersion.contains("SC.72") ||        // IDX fallback
                                    fwVersion.contains("SC.74") ||        // IDX fallback
                                    fwVersion.contains("SC.75") ||        // IDX fallback
@@ -119,13 +122,17 @@ int BmcG3xLoader::Open(const QString& dirpath)
 
     // Warn if the model has not been tested with this loader.
     // Tested models (from IDX product name field 0x0100): "G3 A20", "G3 B20A",
-    // "E5 B25A Plus" (bilevel; AutoS settings verified against PAP-Link) and
-    // "P5 B20A Plus" (events, pressure and leak verified against the IDX nightly statistics).
+    // "E5 B25A Plus" (bilevel; AutoS settings verified against PAP-Link),
+    // "P5 B20A Plus" (events, pressure and leak verified against the IDX nightly statistics)
+    // and "E6 B25A Plus" (AutoS settings, events, pressure and leak verified against the IDX
+    // nightly statistics and against PAP-Link 4.04.01 reading the card as an E5 B25A Plus;
+    // its EVT span records 0x11-0x14 are not decoded).
     const QString model = machine_info.model;
     if (!model.isEmpty()) {
         const bool knownModel = model == QLatin1String("G3 A20") ||
                                 model == QLatin1String("G3 B20A") ||
                                 model == QLatin1String("E5 B25A Plus") ||
+                                model == QLatin1String("E6 B25A Plus") ||
                                 model == QLatin1String("P5 B20A Plus");
         if (!knownModel) {
             // Also record this in the debug log — see the firmware check above.
