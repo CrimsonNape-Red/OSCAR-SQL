@@ -1,6 +1,6 @@
 # Channel defaults and per-profile overrides (GitLab #418)
 
-Status: design, awaiting approval. No code written.
+Status: implemented on branch `channel-overrides` (2026-11-25); pending the developer's hands-on verification and merge.
 
 ## Why
 
