@@ -8,6 +8,7 @@
         <file>docs/tz.txt</file>
         <file>docs/schema.xml</file>
         <file>docs/channels.xml</file>
+        <file>docs/shipped_channel_names.txt</file>
         <file>fonts/FreeSans.ttf</file>
         <file>icons/sdcard.png</file>
         <file>icons/preferences.png</file>

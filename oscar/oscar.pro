@@ -489,6 +489,7 @@ SOURCES += \
     SleepLib/card_archive.cpp \
     SleepLib/channel_overrides.cpp \
     SleepLib/channel_store.cpp \
+    SleepLib/shipped_channel_names.cpp \
     SleepLib/thirdparty/miniz.c \
     SleepLib/xmlreplay.cpp \
     database/database_manager.cpp \
@@ -649,6 +650,7 @@ HEADERS  += \
     SleepLib/card_archive.h \
     SleepLib/channel_overrides.h \
     SleepLib/channel_store.h \
+    SleepLib/shipped_channel_names.h \
     SleepLib/loader_plugins/applehealthDataParsing.h \
     SleepLib/loader_plugins/applehealth_loader.h \
     SleepLib/loader_plugins/apexDataParsing.h \
@@ -832,6 +834,7 @@ OTHER_FILES += \
     docs/schema.xml \
     docs/graphs.xml \
     docs/channels.xml \
+    docs/shipped_channel_names.txt \
     docs/startup_tips.txt \
     docs/countries.txt \
     docs/system_reports.orf \
@@ -1017,6 +1020,7 @@ test {
         tests/machinepurgedatetests.cpp \
         tests/channeloverridestests.cpp \
         tests/channelstoragetests.cpp \
+        tests/channelconversiontests.cpp \
         tests/machinepropertiestests.cpp \
         tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp \
@@ -1075,6 +1079,7 @@ test {
         tests/machinepurgedatetests.h \
         tests/channeloverridestests.h \
         tests/channelstoragetests.h \
+        tests/channelconversiontests.h \
         tests/machinepropertiestests.h \
         tests/portablemodetests.h \
         tests/sessionsplittests.h \
