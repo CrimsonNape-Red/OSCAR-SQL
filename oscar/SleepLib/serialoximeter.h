@@ -46,6 +46,7 @@ public:
     SerialOximeter() : MachineLoader() {
         m_importing = m_streaming = false;
         m_productID = m_vendorID = 0;
+        m_altProductID = m_altVendorID = 0;
         have_perfindex = false;
     }
     virtual ~SerialOximeter() {}
@@ -84,6 +85,8 @@ public:
 
     // Serial Stuff
     virtual bool scanDevice(QString keyword="",quint16 vendor_id=0, quint16 product_id=0);
+    //! Looks for this loader's USB serial ID, then for its alternative one if it has one.
+    bool scanOwnDevice();
     virtual bool openDevice();
     virtual void closeDevice();
 
@@ -144,6 +147,9 @@ protected:
 
     quint16 m_productID;
     quint16 m_vendorID;
+    //! A second USB serial ID to look for when the first isn't plugged in (0: none).
+    quint16 m_altProductID;
+    quint16 m_altVendorID;
 
     bool m_streaming;
     bool m_importing;

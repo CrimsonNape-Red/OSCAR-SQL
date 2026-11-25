@@ -20,19 +20,20 @@
 
 namespace ViatomBle {
 
-// Bluetooth names from the ViHealth SDK (Bluetooth.BT_NAME_*). Devices usually add a
-// suffix, e.g. "O2Ring 2345", so names are matched by prefix. SleepO2, Checkme O2,
-// SnoreO2, KidsO2, BabyO2 and OxyLink use the classic protocol but the SDK gives no
-// name for them; those entries are the product names and still need confirming.
+// Bluetooth names from the ViHealth SDK (Bluetooth.getDeviceModel(), ViHealth 2.75.68,
+// checked again on 2026-11-25). Devices usually add a suffix, e.g. "O2Ring 2345", so
+// names are matched by prefix. Some names differ from the product's: the Checkme O2
+// advertises as "O2" (the Checkme O2 Max as "O2M") and the SnoreO2 as "O2BAND".
+// "R10" is a second name for the JFR1001.
 static const char *const CLASSIC_NAMES[] = {
-    "O2Ring", "O2RingF", "O2Ring-RE", "O2R WAVE", "WearO2", "SleepU", "SleepO2", "Checkme O2",
-    "SnoreO2", "KidsO2", "BabyO2", "BabyO2N", "OxyLink", "OxyRing", "OxyU", "OxyU SE",
+    "O2Ring", "O2RingF", "O2Ring-RE", "O2R WAVE", "WearO2", "SleepU", "SleepO2", "O2",
+    "O2BAND", "KidsO2", "KidsO2-WPS", "BabyO2", "BabyO2N", "OxyLink", "OxyRing", "OxyU", "OxyU SE",
     "Oxyfit", "Oxyfit-WPS", "O2M", "O2M-WPS", "O2S", "O2NCI", "CMRing", "BBSM S1", "AI-S100",
-    "Lepu PO6", "BM10", "JFR1001", "JFK1001", "OMP", "SHQFlex", "O2 Intg", "PO2",
+    "Lepu PO6", "BM10", "JFR1001", "R10", "JFK1001", "OMP", "SHQFlex", "O2 Intg", "PO2",
 };
 static const char *const O2RING_S_NAMES[] = {
     "O2Ring S", "O2Ring SC", "O2Ring SF", "O2Ring SP", "O2RMed S", "O2MP", "S8-AW",
-    "SHQO2Pro", "PO2B", "PO2B-PPG",
+    "SHQO2Pro", "PO2B", "PO2B-PPG", "Band-WU",
 };
 static const char *const O2RING_S_SERVICE = "e8fb0001-a14b-98f9-831b-4e2941d01248";
 
@@ -217,13 +218,22 @@ void Scanner::consider(const QBluetoothDeviceInfo &info)
         for (const QBluetoothUuid &uuid : info.serviceUuids()) {
             services << uuid.toString(QUuid::WithoutBraces);
         }
+        QStringList maker;   // company ID and the first bytes of its data, for oximeters only
+        if (family != DeviceFamily::NotViatom) {
+            const auto ids = info.manufacturerIds();
+            for (quint16 company : ids) {
+                maker << QStringLiteral("%1:%2").arg(company, 4, 16, QLatin1Char('0'))
+                                                .arg(QString::fromLatin1(info.manufacturerData(company).left(16).toHex()));
+            }
+        }
         qDebug().noquote() << "ViatomBle::Scanner: saw"
                            << (info.name().isEmpty() ? QStringLiteral("(no name)") : info.name())
                            << id << "rssi" << info.rssi() << "services [" << services.join(QLatin1Char(' ')) << "]"
                            << (family == DeviceFamily::O2RingS ? "-> O2Ring S family"
                                : family == DeviceFamily::Classic ? "-> classic Viatom"
                                : family == DeviceFamily::Emay ? "-> EMAY"
-                               : family == DeviceFamily::Unsupported ? "-> not supported yet" : "");
+                               : family == DeviceFamily::Unsupported ? "-> not supported yet" : "")
+                           << (maker.isEmpty() ? QString() : QStringLiteral("maker data [ %1 ]").arg(maker.join(QLatin1Char(' '))));
     }
 
     if (family != DeviceFamily::NotViatom) {

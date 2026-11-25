@@ -24,9 +24,24 @@ QList<SerialOximeter *> GetOxiLoaders()
 
     return oxiloaders;
 }
+bool SerialOximeter::scanOwnDevice()
+{
+    if (scanDevice("", m_vendorID, m_productID)) {
+        return true;
+    }
+    if (m_altVendorID && scanDevice("", m_altVendorID, m_altProductID)) {
+        qDebug() << "seroxi - using the alternative USB serial ID" << Qt::hex << m_altVendorID << m_altProductID;
+        return true;
+    }
+    return false;
+}
+
 bool SerialOximeter::scanDevice(QString keyword, quint16 vendor_id, quint16 product_id)
 {
-    static bool dumponce = true;
+    // The other ports are listed in the log once, and again whenever the list changes
+    // (e.g. a cable was plugged in after the first look).
+    static QStringList lastOthers;
+    QStringList others;
     QStringList ports;
 
     qDebug() << "seroxi - Scanning for USB Serial devices";
@@ -52,18 +67,26 @@ bool SerialOximeter::scanDevice(QString keyword, quint16 vendor_id, quint16 prod
 
             qDebug() << "seroxi - " << dbg.toLocal8Bit().data();
             break;
-        } else if (dumponce) {
+        } else {
             QString dbg=QString("Other Serial Port: Name: %1 Desc: %2 Manufacturer: %3 Location: %4").arg(name).arg(desc).arg(info->manufacturer()).arg(info->systemLocation());
 
             if (info->hasProductIdentifier()) //60000
-                dbg += QString(" PID: %1").arg(info->productIdentifier());
+                dbg += QString(" PID: %1 (0x%2)").arg(info->productIdentifier()).arg(info->productIdentifier(), 4, 16, QLatin1Char('0'));
             if (info->hasVendorIdentifier()) // 4292
-                dbg += QString(" VID: %1").arg(info->vendorIdentifier());
+                dbg += QString(" VID: %1 (0x%2)").arg(info->vendorIdentifier()).arg(info->vendorIdentifier(), 4, 16, QLatin1Char('0'));
 
+            others << dbg;
+        }
+    }
+    if (ports.isEmpty() && others != lastOthers) {
+        lastOthers = others;
+        if (others.isEmpty()) {
+            qDebug() << "seroxi - no serial ports at all";
+        }
+        for (const QString &dbg : others) {
             qDebug() << "seroxi - " << dbg.toLocal8Bit().data();
         }
     }
-    dumponce = false;
     if (ports.isEmpty()) {
         return false;
     }
@@ -86,12 +109,15 @@ void SerialOximeter::closeDevice()
 bool SerialOximeter::openDevice()
 {
     if (port.isEmpty()) {
-        if (!scanDevice("",m_vendorID, m_productID))
+        if (!scanOwnDevice())
             return false;
     }
     serial.setPortName(port);
-    if (!serial.open(QSerialPort::ReadWrite))
+    if (!serial.open(QSerialPort::ReadWrite)) {
+        qWarning().noquote() << "seroxi - could not open serial port" << port
+                             << "(in use by another program, or no permission?)";
         return false;
+    }
 
     // forward this stuff
 

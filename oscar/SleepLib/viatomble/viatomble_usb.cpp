@@ -49,6 +49,21 @@ namespace Usb {
 
 static const char *const tr_context = "ViatomBle::UsbLink";
 
+#if defined(Q_OS_LINUX) || defined(Q_OS_WIN)
+//! Contec's newer oximeters (hardware 2.0: CMS50E/F, Pulox PO-400, ...) have a USB HID cable,
+//! 28e9:028a, which OSCAR can't read yet. Said once in the log, so a report shows it was
+//! there. (Not looked for on macOS, where the search only asks for the cables OSCAR reads.)
+static void noteContecHidCable(const QString &where)
+{
+    static bool said = false;
+    if (!said) {
+        said = true;
+        qDebug().noquote() << "ViatomUsb: a Contec HID oximeter cable (28e9:028a) is plugged in at" << where
+                           << "- not supported yet";
+    }
+}
+#endif
+
 QList<QByteArray> toReports(const QByteArray &frame, int reportSize)
 {
     QList<QByteArray> reports;
@@ -172,6 +187,9 @@ QList<Port> findPorts()
         const QString id = QStringLiteral("HID_ID=0003:%1:%2")
                                .arg(CHECKME_VENDOR_ID, 8, 16, QLatin1Char('0'))
                                .arg(CHECKME_PRODUCT_ID, 8, 16, QLatin1Char('0')).toUpper();
+        if (text.contains(QStringLiteral("HID_ID=0003:000028E9:0000028A"))) {
+            noteContecHidCable(entry);
+        }
         if (!text.contains(id)) {
             continue;
         }
@@ -230,6 +248,9 @@ QList<Port> findPorts()
         const bool checkme = ok && attributes.VendorID == CHECKME_VENDOR_ID
                              && attributes.ProductID == CHECKME_PRODUCT_ID;
         CloseHandle(h);
+        if (ok && attributes.VendorID == 0x28e9 && attributes.ProductID == 0x028a) {
+            noteContecHidCable(path);
+        }
         if (wch || checkme) {
             Port port;
             port.cable = checkme ? Cable::Checkme : Cable::WchBridge;

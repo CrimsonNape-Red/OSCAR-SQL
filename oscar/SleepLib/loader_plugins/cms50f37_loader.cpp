@@ -58,6 +58,12 @@ CMS50F37Loader::CMS50F37Loader()
 
     m_vendorID = 0x10c4;
     m_productID = 0xea60;
+    // Contec's PC software (Smart Device Assistant 3.1) also installs a driver for an
+    // STM32 virtual COM port, for units without the CP210x cable. Which models use it,
+    // and whether they speak this protocol, is unconfirmed (2026-11-25): tried only when
+    // no CP210x is plugged in.
+    m_altVendorID = 0x0483;
+    m_altProductID = 0x5740;
 
     oxirec = nullptr;
 
@@ -78,7 +84,7 @@ CMS50F37Loader::~CMS50F37Loader()
 bool CMS50F37Loader::openDevice()
 {
     if (port.isEmpty()) {
-        bool b = scanDevice("",m_vendorID, m_productID);
+        bool b = scanOwnDevice();
         if (!b) {
             b = scanDevice("rfcomm", 0, 0); // Linux
         }
@@ -89,7 +95,8 @@ bool CMS50F37Loader::openDevice()
     }
     serial.setPortName(port);
     if (!serial.open(QSerialPort::ReadWrite)) {
-    	qDebug() << "cms50f37 - Failed to open oximeter";
+    	qWarning().noquote() << "cms50f37 - Failed to open oximeter on serial port" << port
+    	                     << "(in use by another program, or no permission?)";
         return false;
     }
 
@@ -374,7 +381,11 @@ void CMS50F37Loader::processBytes(QByteArray bytes)
 
     QString tmpstr;
 
-    int lengths[32] = { 0, 0, 9, 9, 9, 9, 4, 8, 8, 6, 4, 4, 2, 0, 3, 8, 3, 9, 8, 9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    // Package lengths by type. 0x01-0x12 and 0x15 are from Contec's "Communication protocol
+    // of pulse oximeter V7.0" (2010); 0x02, 0x03, 0x06, 0x13 and 0x14 are later additions
+    // seen on devices. 0x01 (real-time data), 0x0D (the device's disconnect notice) and
+    // 0x15 (storage data identifiers) aren't used here but have to be stepped over.
+    int lengths[32] = { 0, 9, 9, 9, 9, 9, 4, 8, 8, 6, 4, 4, 2, 3, 3, 8, 3, 9, 8, 9, 9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     buffer.append(bytes);
     int size = buffer.size();
@@ -410,6 +421,10 @@ void CMS50F37Loader::processBytes(QByteArray bytes)
                 // add a dummy to make up for it.
                 qDebug() << "cms50f37 - pB: lost sync, padding...";
                 oxirec->append(OxiRecord(0,0,0));
+            } else {
+                // An unknown package type: step over the byte. (Without this the loop
+                // never moved on, and OSCAR hung.)
+                idx++;
             }
             continue;
         }
@@ -496,6 +511,11 @@ void CMS50F37Loader::processBytes(QByteArray bytes)
 
             // Query Perfusion Index available (0 is yes, 1 is no)
         case 0x0e: // e,80,81
+            break;
+
+        case 0x01: // real-time data: not asked for, ignored
+        case 0x0d: // the device is disconnecting, with a reason code
+        case 0x15: // storage data identifiers (the reply to 0xB6, which isn't sent)
             break;
 
             // Get User Count

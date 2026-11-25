@@ -174,6 +174,14 @@ void Device::onConnectTimeout()
 
 void Device::onDiscoveryFinished()
 {
+    {
+        QStringList offered;
+        const auto uuids = m_controller->services();
+        for (const QBluetoothUuid &uuid : uuids) {
+            offered << uuid.toString(QUuid::WithoutBraces);
+        }
+        qDebug().noquote() << "ViatomBle::Device: services offered:" << offered.join(QLatin1Char(' '));
+    }
     QBluetoothUuid serviceUuid;
     for (const ServiceSpec &spec : m_candidates) {
         if (m_controller->services().contains(QBluetoothUuid(spec.service))) {
@@ -183,11 +191,6 @@ void Device::onDiscoveryFinished()
         }
     }
     if (serviceUuid.isNull()) {
-        QStringList offered;
-        for (const QBluetoothUuid &uuid : m_controller->services()) {
-            offered << uuid.toString();
-        }
-        qWarning() << "ViatomBle::Device: services offered:" << offered;
         fail(tr("This device does not offer the Viatom data service OSCAR expected. "
                 "It may be a model OSCAR cannot download from yet."));
         return;
@@ -228,6 +231,15 @@ void Device::onServiceStateChanged(QLowEnergyService::ServiceState state)
 {
     if (state != QLowEnergyService::RemoteServiceDiscovered) {
         return;
+    }
+    {
+        QStringList found;   // uuid:properties, e.g. for a model whose characteristics differ
+        const auto characteristics = m_service->characteristics();
+        for (const QLowEnergyCharacteristic &c : characteristics) {
+            found << QStringLiteral("%1:0x%2").arg(c.uuid().toString(QUuid::WithoutBraces))
+                                              .arg(int(c.properties()), 2, 16, QLatin1Char('0'));
+        }
+        qDebug().noquote() << "ViatomBle::Device: characteristics:" << found.join(QLatin1Char(' '));
     }
     m_writeChar = m_service->characteristic(QBluetoothUuid(m_spec.write));
     m_notifyChar = m_service->characteristic(QBluetoothUuid(m_spec.notify));

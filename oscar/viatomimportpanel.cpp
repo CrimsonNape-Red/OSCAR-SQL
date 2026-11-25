@@ -746,6 +746,9 @@ void ViatomImportPanel::onInfoReceived(const DeviceInfo &info)
     m_info = info;
     m_folder = folderFor(info);
     m_clockNote.clear();
+    qDebug().noquote() << "ViatomBleImport: device details: model" << info.model << "serial" << info.serialNumber
+                       << "firmware" << info.softwareVersion << "device time" << info.deviceTime
+                       << "-" << info.files.size() << "recording(s)";
 
     if (!m_setClock->isChecked()) {
         showFiles();
@@ -774,6 +777,7 @@ void ViatomImportPanel::onInfoReceived(const DeviceInfo &info)
 
 void ViatomImportPanel::onTimeSet(const QString &error)
 {
+    qDebug().noquote() << "ViatomBleImport: clock" << (error.isEmpty() ? QStringLiteral("set") : "not set: " + error);
     if (error.isEmpty()) {
         m_clockNote = (m_clockNote.isEmpty() ? QString() : m_clockNote + QLatin1Char(' '))
                     + tr("Its clock has been set to this computer's time.");
@@ -836,6 +840,7 @@ void ViatomImportPanel::onFailed(const QString &reason)
         m_searchAgainButton->setVisible(true);
         return;
     }
+    qDebug().noquote() << "ViatomBleImport: failed before the download:" << reason;
     closeConnection();
     showPage(DevicesPage);
     m_rescanButton->setEnabled(true);

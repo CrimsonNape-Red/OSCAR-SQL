@@ -1248,6 +1248,20 @@ void ViatomBleTests::testDeviceFamilyFromName()
     QCOMPARE(deviceFamilyFromName("O2Ring"), DeviceFamily::Classic);
     QCOMPARE(deviceFamilyFromName("SleepU 0123"), DeviceFamily::Classic);
     QCOMPARE(deviceFamilyFromName("PO2 77"), DeviceFamily::Classic);
+    // Names that differ from the product's: Checkme O2, SnoreO2, KidsO2-WPS, JFR1001.
+    QCOMPARE(deviceFamilyFromName("O2 1234"), DeviceFamily::Classic);
+    QCOMPARE(deviceFamilyFromName("O2"), DeviceFamily::Classic);
+    QCOMPARE(deviceFamilyFromName("O2M 2743"), DeviceFamily::Classic);
+    QCOMPARE(deviceFamilyFromName("O2 Intg 12"), DeviceFamily::Classic);
+    QCOMPARE(deviceFamilyFromName("O2BAND 0456"), DeviceFamily::Classic);
+    QCOMPARE(deviceFamilyFromName("KidsO2-WPS 0001"), DeviceFamily::Classic);
+    QCOMPARE(deviceFamilyFromName("R10 0099"), DeviceFamily::Classic);
+    QCOMPARE(deviceFamilyFromName("Band-WU 0007"), DeviceFamily::O2RingS);
+    // No longer names OSCAR guesses at, and near misses of the short ones.
+    QCOMPARE(deviceFamilyFromName("Checkme O2 1"), DeviceFamily::NotViatom);
+    QCOMPARE(deviceFamilyFromName("SnoreO2 1"), DeviceFamily::NotViatom);
+    QCOMPARE(deviceFamilyFromName("O2Homespot"), DeviceFamily::NotViatom);
+    QCOMPARE(deviceFamilyFromName("R100"), DeviceFamily::NotViatom);
     // O2Ring S family names start like classic ones
     QCOMPARE(deviceFamilyFromName("O2Ring S 2345"), DeviceFamily::O2RingS);
     QCOMPARE(deviceFamilyFromName("O2Ring SC 2345"), DeviceFamily::O2RingS);

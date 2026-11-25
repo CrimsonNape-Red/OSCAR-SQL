@@ -56,6 +56,9 @@ CMS50Loader::CMS50Loader()
 
     m_vendorID = 0x10c4;
     m_productID = 0xea60;
+    // See CMS50F37Loader: the STM32 virtual COM port Contec's PC software also supports.
+    m_altVendorID = 0x0483;
+    m_altProductID = 0x5740;
     cms50dplus = false;
 
     oxirec = nullptr;

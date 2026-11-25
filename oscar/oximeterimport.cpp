@@ -475,7 +475,7 @@ QWidget *OximeterImport::buildDevicePage()
     const QList<Card> cards = {
         { OXI_VIATOM, ":/icons/wellue.png", tr("O2Ring, O2Ring S, SleepU, Checkme O2, Wearable O2"),
           tr("USB cable · Bluetooth · Data files") },
-        { OXI_EMAY, ":/icons/emay.png", tr("EMO-80 (Bluetooth sleep oximeter)"),
+        { OXI_EMAY, ":/icons/emay.png", tr("EMO-80 only. SleepO2, EMO-90 and EMO-100 are not supported yet"),
           tr("Bluetooth") },
         { OXI_CMS50F37, ":/icons/cms50f.png", tr("CMS50F v3.7+, CMS50H, CMS50I, CMS50D+ v4.6, Pulox PO-400/500"),
           tr("Serial cable · Data files") },
@@ -739,7 +739,9 @@ void OximeterImport::refreshMethods()
         m_filesDetail->setText(tr("Recordings OSCAR downloaded earlier (.spo2), in your profile's Oximetry_Data folder."));
         m_deviceHelp->setText(tr("OSCAR can set the oximeter's clock when it connects, and never deletes "
                                  "recordings from it. EMAY support was written from EMAY's app and hasn't been "
-                                 "tried on a device yet: please report how it goes."));
+                                 "tried on a device yet: please report how it goes. Only the EMO-80 can be "
+                                 "downloaded from; EMAY's SleepO2, EMO-90 and EMO-100 use a different "
+                                 "Bluetooth protocol, which OSCAR doesn't have yet."));
         break;
     case OXI_CSV:
         m_filesDetail->setText(tr("A CSV file with the date and time, SpO2 and pulse on each row (format below)."));
@@ -752,7 +754,9 @@ void OximeterImport::refreshMethods()
         break;
     default:
         m_filesDetail->setText(tr("Files saved by SpO2Review or a similar program (.spo, .spor, .spo2)."));
-        m_deviceHelp->setText(tr("Contec CMS50D+ devices do not have an internal clock, and do not record a starting time. If you do not have a CPAP session to link a recording to, you will have to enter the start time manually after the import process is completed."));
+        m_deviceHelp->setText(tr("Contec CMS50D+ devices do not have an internal clock, and do not record a starting time. If you do not have a CPAP session to link a recording to, you will have to enter the start time manually after the import process is completed.")
+                              + QStringLiteral("<br><br>")
+                              + tr("OSCAR can't download yet from Contec's Bluetooth models, or from newer models whose USB cable isn't a serial cable. For those, save the recording with Contec's software and import the file."));
         break;
     }
 
@@ -878,6 +882,9 @@ void OximeterImport::reject()
 void OximeterImport::startImport()
 {
     const int type = oximeterType();
+    static const char *const methodNames[] = { "none", "USB cable", "Bluetooth", "data files", "serial cable" };
+    qDebug().noquote() << "oximod - starting import:" << deviceName(type) << "(type" << type << ") by"
+                       << methodNames[qBound(0, int(method()), 4)];
     if (method() == SerialMethod) {
         startSerialImport();
         return;
@@ -960,6 +967,7 @@ void OximeterImport::importOximeterFile()
         }
     }
     if (!oximodule) {
+        qWarning().noquote() << "oximod - no loader could read" << filename << "size" << QFileInfo(filename).size();
         QMessageBox::warning(this, STR_MessageBox_Warning, tr("No Oximetry module could parse the given file:")+QString("\n\n%1").arg(filename), QMessageBox::Ok);
         return;
     }
@@ -1356,6 +1364,7 @@ void OximeterImport::showSummary(const QString &text, const QString &heading)
 {
     m_summaryHeading->setText(heading.isEmpty() ? tr("Import finished") : heading);
     m_summaryText->setText(text);
+    qDebug().noquote() << "oximod - summary:" << m_summaryHeading->text() << "|" << text;
     showPage(m_summaryPage, FinishStep);
 }
 

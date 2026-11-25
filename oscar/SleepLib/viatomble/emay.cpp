@@ -230,12 +230,29 @@ EmayDownloader::EmayDownloader(Link *link, QObject *parent)
 
 EmayDownloader::~EmayDownloader() = default;
 
+//! The first bytes of data as hex, for the log.
+static QString hexPreview(const QByteArray &data, int limit = 64)
+{
+    QString text = QString::fromLatin1(data.left(limit).toHex(' '));
+    if (data.size() > limit) {
+        text += QStringLiteral(" ...");
+    }
+    return text;
+}
+
+void EmayDownloader::sendLastFrame()
+{
+    qDebug().noquote() << QStringLiteral("EmayDownloader tx (state %1, %2 bytes):").arg(int(m_state)).arg(m_lastFrame.size())
+                       << hexPreview(m_lastFrame);
+    m_link->send(m_lastFrame);
+}
+
 void EmayDownloader::send(State state, quint8 cmd, quint8 type, const QByteArray &payload)
 {
     m_state = state;
     m_expectCmd = cmd;
     m_lastFrame = buildFrame(cmd, type, payload);
-    m_link->send(m_lastFrame);
+    sendLastFrame();
     m_timer.start(m_replyTimeoutMs);
 }
 
@@ -249,7 +266,7 @@ void EmayDownloader::acknowledge(quint8 cmd)
             return;
         }
         m_lastFrame = buildFrame(cmd, TYPE_ACK, QByteArray(1, '\0'));
-        m_link->send(m_lastFrame);
+        sendLastFrame();
         m_timer.start(m_replyTimeoutMs);
     });
 }
@@ -290,6 +307,8 @@ void EmayDownloader::finishInfo()
 
 void EmayDownloader::onDataReceived(const QByteArray &chunk)
 {
+    qDebug().noquote() << QStringLiteral("EmayDownloader raw rx (state %1, %2 bytes):").arg(int(m_state)).arg(chunk.size())
+                       << hexPreview(chunk);
     for (const Frame &f : m_splitter.feed(chunk)) {
         handle(f);
     }
@@ -407,7 +426,7 @@ void EmayDownloader::onTimeout()
         } else if (m_state == WaitList) {
             requestList();   // start the list again
         } else {
-            m_link->send(m_lastFrame);
+            sendLastFrame();
             m_timer.start(m_replyTimeoutMs);
         }
         return;

@@ -132,6 +132,8 @@ class EmayDownloader : public DownloaderBase
     void onLinkLost(const QString &reason);
     void handle(const Emay::Frame &frame);
     void send(State state, quint8 cmd, quint8 type, const QByteArray &payload);
+    //! Sends m_lastFrame, and logs it.
+    void sendLastFrame();
     void acknowledge(quint8 cmd);
     void requestList();
     void requestPackage();
