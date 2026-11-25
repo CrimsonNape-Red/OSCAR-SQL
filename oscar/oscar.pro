@@ -1021,6 +1021,7 @@ test {
         tests/channeloverridestests.cpp \
         tests/channelstoragetests.cpp \
         tests/channelconversiontests.cpp \
+        tests/channelbackuptests.cpp \
         tests/machinepropertiestests.cpp \
         tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp \
@@ -1080,6 +1081,7 @@ test {
         tests/channeloverridestests.h \
         tests/channelstoragetests.h \
         tests/channelconversiontests.h \
+        tests/channelbackuptests.h \
         tests/machinepropertiestests.h \
         tests/portablemodetests.h \
         tests/sessionsplittests.h \

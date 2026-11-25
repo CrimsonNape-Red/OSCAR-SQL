@@ -896,6 +896,8 @@ QString ProfileRestore::parseAndRemapSql(const QString& sql)
  *  - Remaps FK columns (machine_id, session_id, session_channel_id,
  *    eventlist_id) using the incremental mapping tables.
  *  - Substitutes the resolved username when inserting the profiles row.
+ *  - Redirects channels.sql (backups of schema v12-v19) to the channels_legacy table,
+ *    because channels is a view since schema v20.
  *  - After inserting a "parent" table row, captures
  *    \c last_insert_rowid() and records the old→new ID mapping.
  *
@@ -904,7 +906,16 @@ QString ProfileRestore::parseAndRemapSql(const QString& sql)
  */
 bool ProfileRestore::executeSqlFile(const QString& sqlFile)
 {
-    const QString tableName = QFileInfo(sqlFile).baseName();
+    // The table is named by the file.  A backup from schema v12-v19 holds the per-profile
+    // channel copies in channels.sql, but channels is now a view; those rows go into
+    // channels_legacy (same columns), and Profiles::Scan() converts them into overrides
+    // after the restore.  From here on tableName is the redirected name, so the existence
+    // check, the column filter and the INSERT all agree.
+    QString tableName = QFileInfo(sqlFile).baseName();
+    const bool isOldChannelsFile = (tableName == QLatin1String("channels"));
+    if (isOldChannelsFile) {
+        tableName = QStringLiteral("channels_legacy");
+    }
 
     qDebug() << "ProfileRestore::executeSqlFile()";
 
@@ -1115,7 +1126,7 @@ bool ProfileRestore::executeSqlFile(const QString& sqlFile)
         const bool useIgnore = (tableName == QLatin1String("channel_options"));
         const QString sql = QString(useIgnore ? "INSERT OR IGNORE INTO %1 (%2) VALUES (%3)"
                                               : "INSERT INTO %1 (%2) VALUES (%3)")
-                                .arg(stmt.tableName,
+                                .arg(isOldChannelsFile ? tableName : stmt.tableName,
                                      newCols.join(QStringLiteral(", ")),
                                      placeholders.join(QStringLiteral(", ")));
 
@@ -1187,7 +1198,9 @@ bool ProfileRestore::restoreInTransaction()
         QStringLiteral("doctor_info"),
         QStringLiteral("profile_preferences"),
         QStringLiteral("graph_layouts"),
-        QStringLiteral("channels"),
+        QStringLiteral("channels"),                  // schema 12-19 backups only: goes to channels_legacy
+        QStringLiteral("profile_channel_overrides"),
+        QStringLiteral("channels_legacy"),
         QStringLiteral("channel_options"),
         QStringLiteral("machines"),
         QStringLiteral("device_time_corrections"),

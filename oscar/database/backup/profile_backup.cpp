@@ -617,7 +617,8 @@ bool ProfileBackup::validateProfile()
 /*!
  * \brief Export profile-level tables (always full, not date-filtered).
  *
- * Exports: profiles, user_info, doctor_info, profile_preferences, graph_layouts, channels.
+ * Exports: profiles, user_info, doctor_info, profile_preferences, graph_layouts,
+ * profile_channel_overrides, channels_legacy, channel_options.
  * When privacy mode is active, personal fields in user_info and doctor_info
  * are replaced with NULL via exportPrivacyTable().
  * All profile_id values are written as the @PROFILE_ID@ placeholder.
@@ -714,27 +715,41 @@ bool ProfileBackup::exportProfileMetadata(const QString& tempDir)
     }
     if (checkCancelled()) return false;
 
-    // channels
+    // profile_channel_overrides — what the user changed on channels (schema v20).  The
+    // global channel_defaults table is rebuilt from code at start-up and is not exported.
     {
         SqlExporter exp;
         exp.setColumnPlaceholders({{"profile_id", "@PROFILE_ID@"}});
-        if (!exp.exportTable("channels", pidWhere, dbDir + "/channels.sql")) {
-            m_errorMessage = QString("Failed to export channels: %1").arg(exp.errorMessage());
+        if (!exp.exportTable("profile_channel_overrides", pidWhere,
+                             dbDir + "/profile_channel_overrides.sql")) {
+            m_errorMessage = QString("Failed to export profile_channel_overrides: %1")
+                                 .arg(exp.errorMessage());
+            return false;
+        }
+    }
+    if (checkCancelled()) return false;
+
+    // channels_legacy — old per-profile channel rows not yet converted into overrides
+    // (normally empty; Profiles::Scan() converts them).  Restore converts them in turn.
+    {
+        SqlExporter exp;
+        exp.setColumnPlaceholders({{"profile_id", "@PROFILE_ID@"}});
+        if (!exp.exportTable("channels_legacy", pidWhere, dbDir + "/channels_legacy.sql")) {
+            m_errorMessage = QString("Failed to export channels_legacy: %1")
+                                 .arg(exp.errorMessage());
             return false;
         }
     }
     if (checkCancelled()) return false;
 
     // channel_options — lookup value mappings for LOOKUP-type channels (e.g. CPAP mode names).
-    // channel_options.channel_id stores the channel code (ChannelID), not the channels.id PK,
-    // so no placeholder remapping is needed.  The data is effectively global; during restore
-    // INSERT OR IGNORE is used so that rows already present from other profiles are skipped.
+    // channel_options.channel_id stores the channel code (ChannelID), not a per-profile row
+    // id, so no placeholder remapping is needed.  The data is global, so every row is
+    // exported (there is no per-profile channel list to select through any more); during
+    // restore INSERT OR IGNORE is used so that rows already present are skipped.
     {
-        const QString coWhere = QString(
-            "channel_id IN (SELECT channel_id FROM channels WHERE profile_id = %1)")
-                .arg(m_profileId);
         SqlExporter exp;
-        if (!exp.exportTable("channel_options", coWhere, dbDir + "/channel_options.sql")) {
+        if (!exp.exportTable("channel_options", QString(), dbDir + "/channel_options.sql")) {
             m_errorMessage = QString("Failed to export channel_options: %1").arg(exp.errorMessage());
             return false;
         }
