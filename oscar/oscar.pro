@@ -506,6 +506,7 @@ SOURCES += \
     database/session_slices_repository.cpp \
     database/session_summaries_repository.cpp \
     database/channel_repository.cpp \
+    SleepLib/channel_overrides.cpp \
     database/channel_options_repository.cpp \
     database/daily_summary_repository.cpp \
     database/event_list_repository.cpp \
@@ -764,6 +765,7 @@ HEADERS  += \
     database/session_slices_repository.h \
     database/session_summaries_repository.h \
     database/channel_repository.h \
+    SleepLib/channel_overrides.h \
     database/channel_options_repository.h \
     database/daily_summary_repository.h \
     database/event_list_repository.h \
@@ -1011,6 +1013,7 @@ test {
         tests/applehealthtests.cpp \
         tests/machinetests.cpp \
         tests/machinepurgedatetests.cpp \
+        tests/channeloverridestests.cpp \
         tests/machinepropertiestests.cpp \
         tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp \
@@ -1067,6 +1070,7 @@ test {
         tests/applehealthtests.h \
         tests/machinetests.h \
         tests/machinepurgedatetests.h \
+        tests/channeloverridestests.h \
         tests/machinepropertiestests.h \
         tests/portablemodetests.h \
         tests/sessionsplittests.h \
