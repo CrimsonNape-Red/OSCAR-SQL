@@ -31,6 +31,7 @@ private slots:
 
     void testOverridesSurviveBackupAndRestore();
     void testOldChannelsFileIsParkedAndConverted();
+    void testReplaceModeDropsOldOverrides();
 
     void cleanupTestCase();
 

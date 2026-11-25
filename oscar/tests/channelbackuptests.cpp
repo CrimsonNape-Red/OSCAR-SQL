@@ -126,14 +126,10 @@ void ChannelBackupTests::testOverridesSurviveBackupAndRestore() {
     schema::channel[CPAP_Obstructive].setLabel("Zz Backup Label Zz");
     p_profile->saveChannels();
 
-    ProfileBackup backup(m_profileId);
-    backup.setOutputPath(m_tempDir->path());
-    backup.setFilename("channelbackup");
-    QVERIFY2(backup.createBackup(), "createBackup failed");
-    const QString package = QDir(m_tempDir->path()).entryList({ "channelbackup*" }).value(0);
+    const QString package = makeBackup("channelbackup");
     QVERIFY(!package.isEmpty());
 
-    ProfileRestore restore(m_tempDir->filePath(package));
+    ProfileRestore restore(package);
     restore.setNewUsername("ChannelBackupRestored");
     QVERIFY(restore.validatePackage());
     QVERIFY(restore.checkCompatibility());
@@ -243,6 +239,47 @@ void ChannelBackupTests::testOldChannelsFileIsParkedAndConverted() {
     QCOMPARE(rows[0].channelId, ChannelID(CPAP_Obstructive));
     QCOMPARE(rows[0].values.label.value(), QString("Zz Old Backup Label Zz"));
     QVERIFY(ChannelRepository().findLegacy(restoredId).isEmpty());
+}
+
+// Restoring over the same profile in Replace mode leaves exactly the backup's overrides:
+// those made after the backup are gone with the replaced profile.
+void ChannelBackupTests::testReplaceModeDropsOldOverrides() {
+    schema::channel[CPAP_Obstructive].setLabel("Zz Replace X Zz");
+    p_profile->saveChannels();
+    const QString package = makeBackup("replacebackup");
+    QVERIFY(!package.isEmpty());
+
+    schema::resetChannelsToDefaults();
+    schema::channel[CPAP_Hypopnea].setLabel("Zz Replace Y Zz");
+    p_profile->saveChannels();
+    const auto before = ChannelRepository().findOverrides(m_profileId);
+    QCOMPARE(before.size(), 1);
+    QCOMPARE(before[0].channelId, ChannelID(CPAP_Hypopnea));
+
+    ProfileRestore restore(package);
+    restore.setConflictResolution(ConflictResolution::Replace);
+    QVERIFY2(restore.validatePackage(), qPrintable(restore.getErrorMessage()));
+    QVERIFY2(restore.checkCompatibility(), qPrintable(restore.getErrorMessage()));
+    QVERIFY(restore.checkConflicts() == ConflictStatus::UsernameExists);
+    QVERIFY2(restore.restoreProfile(), qPrintable(restore.getErrorMessage()));
+
+    // Replace deletes the profile row and inserts a new one, so the id changes; Scan()
+    // rebuilds the Profile objects. Later tests use the new ones.
+    Profiles::Scan();
+    p_profile = Profiles::Get(kProfileName);
+    QVERIFY(p_profile != nullptr);
+    m_profile = p_profile;
+    const qint64 oldId = m_profileId;
+    m_profileId = ProfileRepository().findByUsername(kProfileName).id;
+    QVERIFY(m_profileId > 0);
+
+    const auto rows = ChannelRepository().findOverrides(m_profileId);
+    QCOMPARE(rows.size(), 1);
+    QCOMPARE(rows[0].channelId, ChannelID(CPAP_Obstructive));
+    QCOMPARE(rows[0].values.label.value(), QString("Zz Replace X Zz"));
+    if (oldId != m_profileId) {
+        QVERIFY(ChannelRepository().findOverrides(oldId).isEmpty());
+    }
 }
 
 void ChannelBackupTests::cleanupTestCase()
