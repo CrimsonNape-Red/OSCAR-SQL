@@ -1608,12 +1608,16 @@ void PreferencesDialog::on_chanView_doubleClicked(const QModelIndex &index)
 
         a.setCurrentColor(QColor((QRgb)color));
 
+        // Resolve the source cell before the modal loop: the proxy can refilter while the
+        // colour dialog is open, leaving the proxy index stale. A persistent source index
+        // follows the row; the first change can also hide the row from the proxy (Show
+        // customized only), so both roles are set on the source item.
+        const QPersistentModelIndex source(chanFilterModel->mapToSource(index));
+
         if (a.exec() == QColorDialog::Accepted) {
             quint32 cv = a.currentColor().rgba();
 
-            // Set both roles on the source item: the first change can hide the row from
-            // the proxy (Show customized only), which would invalidate the proxy index.
-            QStandardItem *cell = chanModel->itemFromIndex(chanFilterModel->mapToSource(index));
+            QStandardItem *cell = source.isValid() ? chanModel->itemFromIndex(source) : nullptr;
             if (!cell) return;
             cell->setData(a.currentColor(), Qt::BackgroundRole);
             cell->setData(cv, Qt::UserRole);
@@ -1647,12 +1651,16 @@ void PreferencesDialog::on_waveView_doubleClicked(const QModelIndex &index)
 
         a.setCurrentColor(QColor((QRgb)color));
 
+        // Resolve the source cell before the modal loop: the proxy can refilter while the
+        // colour dialog is open, leaving the proxy index stale. A persistent source index
+        // follows the row; the first change can also hide the row from the proxy (Show
+        // customized only), so both roles are set on the source item.
+        const QPersistentModelIndex source(waveFilterModel->mapToSource(index));
+
         if (a.exec() == QColorDialog::Accepted) {
             quint32 cv = a.currentColor().rgba();
 
-            // Set both roles on the source item: the first change can hide the row from
-            // the proxy (Show customized only), which would invalidate the proxy index.
-            QStandardItem *cell = waveModel->itemFromIndex(waveFilterModel->mapToSource(index));
+            QStandardItem *cell = source.isValid() ? waveModel->itemFromIndex(source) : nullptr;
             if (!cell) return;
             cell->setData(a.currentColor(), Qt::BackgroundRole);
             cell->setData(cv, Qt::UserRole);
@@ -1794,7 +1802,9 @@ void PreferencesDialog::updateRowMarkers(const ChannelTab &tab, QStandardItem *n
         }
         QString tip = base.toString();
         if (overridden) {
-            const QString line = PreferencesDialog::tr("Default: %1").arg(defaultText);
+            // An empty default would leave "Default: " with nothing after it.
+            const QString shown = defaultText.isEmpty() ? PreferencesDialog::tr("(empty)") : defaultText;
+            const QString line = PreferencesDialog::tr("Default: %1").arg(shown);
             tip += Qt::mightBeRichText(tip) ? QStringLiteral("<br/>") + line.toHtmlEscaped()
                                             : QStringLiteral("\n") + line;
         }

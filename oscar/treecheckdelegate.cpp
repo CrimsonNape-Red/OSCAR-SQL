@@ -51,11 +51,14 @@ void TreeCheckDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
     const QWidget *widget = opt.widget;
     QStyle *style = widget ? widget->style() : QApplication::style();
     const bool hasText = !opt.text.isEmpty();
-    const bool hasIcon = hasText && (opt.features & QStyleOptionViewItem::HasDecoration);
+    const bool hasIcon = opt.features & QStyleOptionViewItem::HasDecoration;
+    // A cell with an icon but no text (a channel renamed to an empty string still shows
+    // its customized dot) is laid out like a cell with text: check box at the left.
+    const bool hasContent = hasText || hasIcon;
 
     // Let the style draw the cell background, selection and focus rect, but with no
-    // indicator and no text (and, beside text, no icon): those are drawn below so they
-    // can be laid out together.
+    // indicator, no text and no icon: those are drawn below so they can be laid out
+    // together.
     QStyleOptionViewItem panelOpt = opt;
     panelOpt.features &= ~(QStyleOptionViewItem::HasCheckIndicator | QStyleOptionViewItem::HasDisplay);
     panelOpt.text.clear();
@@ -65,15 +68,19 @@ void TreeCheckDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
     }
     style->drawControl(QStyle::CE_ItemViewItem, &panelOpt, painter, widget);
 
+    if (hasIcon) {
+        // The icon (Qt::DecorationRole) goes between the check box and the text.
+        QRect tr = textRect(opt.rect).adjusted(0, 0, -kPad, 0);
+        const QSize ds = opt.decorationSize;
+        const QRect iconRect(tr.left(), tr.top() + (tr.height() - ds.height()) / 2,
+                             ds.width(), ds.height());
+        opt.icon.paint(painter, iconRect);
+    }
+
     if (hasText) {
         QRect tr = textRect(opt.rect).adjusted(0, 0, -kPad, 0);
         if (hasIcon) {
-            // The icon (Qt::DecorationRole) goes between the check box and the text.
-            const QSize ds = opt.decorationSize;
-            const QRect iconRect(tr.left(), tr.top() + (tr.height() - ds.height()) / 2,
-                                 ds.width(), ds.height());
-            opt.icon.paint(painter, iconRect);
-            tr.setLeft(iconRect.right() + 1 + kPad);
+            tr.setLeft(tr.left() + opt.decorationSize.width() + kPad);
         }
         const QString text = opt.fontMetrics.elidedText(opt.text, opt.textElideMode, tr.width());
 
@@ -92,7 +99,7 @@ void TreeCheckDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
         painter->restore();
     }
 
-    drawOscarCheckBox(painter, checkRect(opt.rect, hasText),
+    drawOscarCheckBox(painter, checkRect(opt.rect, hasContent),
                       static_cast<Qt::CheckState>(state.toInt()) == Qt::Checked);
 }
 
@@ -135,9 +142,11 @@ bool TreeCheckDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
     case QEvent::MouseButtonRelease:
     case QEvent::MouseButtonDblClick: {
         auto *me = static_cast<QMouseEvent *>(event);
-        const bool hasText = !index.data(Qt::DisplayRole).toString().isEmpty();
+        // Same layout rule as paint(): text or an icon puts the box at the left.
+        const bool hasContent = !index.data(Qt::DisplayRole).toString().isEmpty()
+                                || index.data(Qt::DecorationRole).isValid();
         if (me->button() != Qt::LeftButton
-            || !checkRect(option.rect, hasText).contains(me->position().toPoint()))
+            || !checkRect(option.rect, hasContent).contains(me->position().toPoint()))
             return false;
         // Swallow press and double-click inside the box so they neither start an
         // edit nor toggle twice; the release does the toggle.

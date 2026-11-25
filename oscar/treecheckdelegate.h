@@ -44,7 +44,8 @@ protected:
                      const QStyleOptionViewItem &option, const QModelIndex &index) override;
 
 private:
-    //! Rectangle of the check box within \a cell; centred when \a hasText is false.
+    //! Rectangle of the check box within \a cell; centred when \a hasText is false (the
+    //! cell has neither text nor an icon), at the left otherwise.
     static QRect checkRect(const QRect &cell, bool hasText);
 
     //! Area left for text and editors to the right of the check box.
