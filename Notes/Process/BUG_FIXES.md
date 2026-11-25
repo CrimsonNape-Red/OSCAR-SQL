@@ -4,6 +4,24 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-24 - Overview Pressure details popup had a too-tall title bar
+
+**Files:** `oscar/overviewdetailspopup.cpp`
+
+**Symptom:** On the Overview page, the Details popup for the Pressure chart had a taller title bar
+than the popups of the other charts.
+
+**Root cause:** The popup sized itself with `adjustSize()`, which for a child widget takes
+`sizeHint()`. Word-wrapped labels give a size hint for a width of their own choosing, not the
+popup's fixed 300 px, so long wrapped text overstated the height. The Pressure chart's subtitle
+(the pressure settings) and notes are the longest, so only its popup got spare height, and the
+header widget (Preferred vertical policy) took a share of it.
+
+**Fix:** The popup's height is now `totalHeightForWidth(300)` of its layout, and the header has a
+Fixed vertical size policy so spare height can never go to it.
+
+---
+
 ## 2026-11-24 - Profiles screen showed the wrong device when two share a loader (GitLab #344)
 
 **Files:** `oscar/mainwindow.cpp`, `oscar/SleepLib/machine.cpp/.h`

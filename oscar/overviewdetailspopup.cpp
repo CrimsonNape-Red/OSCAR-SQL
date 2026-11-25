@@ -95,6 +95,7 @@ OverviewDetailsPopup::OverviewDetailsPopup(QWidget *parent, const QString &title
     m_header->setObjectName("popupHeader");
     m_header->setAttribute(Qt::WA_StyledBackground, true);
     m_header->setCursor(Qt::SizeAllCursor);
+    m_header->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);   // spare height must never go to the header
     auto *head = new QHBoxLayout(m_header);
     head->setContentsMargins(12, 3, 4, 3);
     m_title = new QLabel(title, m_header);
@@ -162,7 +163,10 @@ OverviewDetailsPopup::OverviewDetailsPopup(QWidget *parent, const QString &title
     setGraphicsEffect(shadow);
 
     applyStyle();
-    adjustSize();
+    // adjustSize() on a child widget takes sizeHint(), which sizes word-wrapped labels for a width of
+    // their own choosing rather than the popup's fixed width; with long wrapped text (the Pressure
+    // chart's settings subtitle) that over-estimated the height, and the spare height went to the header.
+    resize(kWidth, outer->hasHeightForWidth() ? outer->totalHeightForWidth(kWidth) : sizeHint().height());
 }
 
 void OverviewDetailsPopup::applyStyle()
