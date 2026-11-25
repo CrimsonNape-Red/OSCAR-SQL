@@ -12,10 +12,12 @@ Source strings (the English names):
   * every fullname, label and description in the channel_defaults table of an OSCAR database
     that was written by a run of OSCAR set to English (opened read-only; nothing else in the
     database is read), and
-  * every string that was once a tr("...") or QObject::tr("...") literal in
+  * every string that has ever been a tr("...") or QObject::tr("...") literal in
     oscar/SleepLib/schema.cpp, oscar/SleepLib/common.cpp or oscar/SleepLib/loader_plugins/*.cpp
     (or the same files at their earlier locations, SleepLib/... and sleepyhead/SleepLib/...)
-    in any commit and is no longer one at HEAD (old wordings that were later changed).
+    in any commit, including the literals present at HEAD. Strings still in the code are
+    kept because they may no longer be the same channel's name (for example "Large Leak"
+    is still a literal, but is no longer the full name of the large-leak channel).
 
 Output: those strings plus every <translation> that any Translations/*.ts file has ever
 paired with one of them as its <source>, over every commit that touched Translations/*.ts
@@ -52,8 +54,7 @@ TR_PATHSPECS = [
     "oscar/SleepLib/loader_plugins/*.cpp",
 ]
 # The same files at the locations they had earlier in the history (before the oscar/
-# layout, and before that as SleepyHead). Their tr() literals count as "once shipped" but
-# are never used for the "still a literal at HEAD" test, which uses TR_PATHSPECS only.
+# layout, and before that as SleepyHead). Their tr() literals count as "once shipped" too.
 OLD_TR_PATHSPECS = [
     "SleepLib/schema.cpp",
     "SleepLib/common.cpp",
@@ -125,8 +126,12 @@ def tr_literals(text):
     return found
 
 
-def retired_tr_strings(repo):
-    """Strings that were once tr() literals in the channel source files but are not at HEAD."""
+def source_tr_strings(repo):
+    """Every string that has ever been a tr() literal in the channel source files.
+
+    Covers the history at all locations of those files, and the files at HEAD (a literal
+    that no scanned diff shows as an added line is still read from HEAD).
+    """
     log("Scanning the history of the channel source files for tr() literals...")
     log_out = git(repo, "log", "-p", "-U0", "--no-renames", "--format=%x00%H", "--",
                   *(TR_PATHSPECS + OLD_TR_PATHSPECS)).decode("utf-8", errors="replace")
@@ -143,10 +148,10 @@ def retired_tr_strings(repo):
     names = git(repo, "ls-files", "--", *TR_PATHSPECS).decode("utf-8").split()
     for name in names:
         at_head |= tr_literals(git(repo, "show", "HEAD:" + name).decode("utf-8", errors="replace"))
-    retired = ever - at_head
-    log("  %d commits, %d tr() literals ever, %d at HEAD, %d retired" %
-        (commits, len(ever), len(at_head), len(retired)))
-    return retired, commits
+    ever |= at_head
+    log("  %d commits, %d tr() literals ever (%d of them at HEAD)" %
+        (commits, len(ever), len(at_head)))
+    return ever, commits
 
 
 def database_names(db_path):
@@ -320,8 +325,8 @@ def main():
 
     db_names = database_names(args.db)
     log("channel_defaults: %d distinct names" % len(db_names))
-    retired, tr_commits = retired_tr_strings(args.repo)
-    sources = db_names | retired
+    tr_strings, tr_commits = source_tr_strings(args.repo)
+    sources = db_names | tr_strings
     translations, head_sources, ts_commits, _ = collect_translations(args.repo, sources)
 
     found = len(db_names & head_sources)
@@ -336,8 +341,8 @@ def main():
         for line in lines:
             f.write(line + "\n")
     size = os.path.getsize(args.out)
-    print("Source strings: %d (%d from the database, %d retired tr() literals)" %
-          (len(sources), len(db_names), len(retired)))
+    print("Source strings: %d (%d from the database, %d distinct tr() literals, %d in both)" %
+          (len(sources), len(db_names), len(tr_strings), len(db_names & tr_strings)))
     print("Output lines:   %d" % len(lines))
     print("Output size:    %d bytes" % size)
     print("Commits scanned: %d touching Translations, %d touching channel source files" %

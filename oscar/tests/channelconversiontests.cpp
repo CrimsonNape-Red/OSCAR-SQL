@@ -150,6 +150,10 @@ void ChannelConversionTests::testShippedNamesLookup()
 {
     QVERIFY(ShippedChannelNames::contains(schema::channel[CPAP_Obstructive].defaults().fullname));
     QVERIFY(ShippedChannelNames::contains(kRetiredTranslation));
+    // Strings that are still tr() literals elsewhere in the code but were once these
+    // channels' full names (today "Large Leak (LL)" and "RERA (RE)").
+    QVERIFY(ShippedChannelNames::contains(QStringLiteral("Large Leak")));
+    QVERIFY(ShippedChannelNames::contains(QStringLiteral("RERA")));
     QVERIFY(!ShippedChannelNames::contains(QStringLiteral("zz not a channel name zz")));
     QVERIFY(!ShippedChannelNames::contains(QString()));
 }
