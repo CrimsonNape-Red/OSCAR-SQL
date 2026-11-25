@@ -2090,6 +2090,51 @@ Higher percentiles cope better with nights spent mostly desaturated, but on stea
                   </widget>
                  </item>
                  <item row="3" column="0" colspan="2">
+                  <widget class="QGroupBox" name="oxiApplyGroup">
+                   <property name="title">
+                    <string>Apply Changes To</string>
+                   </property>
+                   <property name="toolTip">
+                    <string>SpO2 drop and pulse change flags are calculated when data is imported and are saved with it. Choose whether changes to the settings above also recalculate the data you already have.</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_oxiApply">
+                    <item>
+                     <widget class="QRadioButton" name="oxiApplyNewOnly">
+                      <property name="text">
+                       <string>New data only</string>
+                      </property>
+                      <property name="toolTip">
+                       <string>Existing data keeps the flags it has. The new settings are used for data imported from now on.</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="oxiApplyRecalculate">
+                      <property name="text">
+                       <string>Existing data too (recalculate)</string>
+                      </property>
+                      <property name="toolTip">
+                       <string>Recalculates the SpO2 drop and pulse change flags of all your existing oximetry data with the new settings.</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="oxiApplyNote">
+                      <property name="text">
+                       <string>Note: depending on how much oximetry data you have, recalculating may take a while.</string>
+                      </property>
+                      <property name="wordWrap">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item row="4" column="0" colspan="2">
                   <spacer name="verticalSpacer_6">
                    <property name="orientation">
                     <enum>Qt::Vertical</enum>
@@ -2102,7 +2147,7 @@ Higher percentiles cope better with nights spent mostly desaturated, but on stea
                    </property>
                   </spacer>
                  </item>
-                 <item row="4" column="0">
+                 <item row="5" column="0">
                   <widget class="QPushButton" name="resetOxiMetryDefaults">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Minimum">

@@ -161,7 +161,10 @@ class MainWindow : public QMainWindow
     void sendStatsUrl(QString msg) { on_recordsBox_anchorClicked(QUrl(msg)); }
 
     //! \brief Sets up recalculation of all event summaries and flags
-    void reprocessEvents(bool restart = false);
+    //! \brief Recalculate stored data after a preference change
+    //! \param events    reindex every session (user flags, AHI graph, leaks, summaries)
+    //! \param oximetry  recalculate the SpO2 drop and pulse change flags with the current settings
+    void reprocessEvents(bool restart = false, bool events = true, bool oximetry = true);
     void recompressEvents();
 
 
@@ -584,6 +587,8 @@ private:
 //    gGraphView *SnapshotGraph;
     QString bookmarkFilter;
     bool m_restartRequired;
+    bool m_reprocessEvents = true;
+    bool m_reprocessOximetry = true;
     bool m_clinicalMode = false;
     bool m_geometryCorrected = false;
     bool m_batchMode = false;

@@ -3790,9 +3790,11 @@ void MainWindow::recompressEvents()
 {
     QTimer::singleShot(0, this, SLOT(doRecompressEvents()));
 }
-void MainWindow::reprocessEvents(bool restart)
+void MainWindow::reprocessEvents(bool restart, bool events, bool oximetry)
 {
     m_restartRequired = restart;
+    m_reprocessEvents = events;
+    m_reprocessOximetry = oximetry;
     QTimer::singleShot(0, this, SLOT(doReprocessEvents()));
 }
 
@@ -3879,7 +3881,9 @@ void MainWindow::doReprocessEvents()
     }
 
     int idx = 0;
-    for (Day * day : p_profile->daylist) {
+    // An oximetry-only change leaves everything but the oximetry flags as it is
+    const QList<Day *> reindexDays = m_reprocessEvents ? p_profile->daylist.values() : QList<Day *>();
+    for (Day * day : reindexDays) {
         for (Session * sess : day->sessions) {
             bool isopen = sess->eventsLoaded();
 
@@ -3918,13 +3922,18 @@ void MainWindow::doReprocessEvents()
     // Machines only ever add to their channel lists, so channels the reprocess removed
     // (user flags when Custom User Flagging is turned off) would still show as empty
     // rows in the Event Flags graph until a restart. Rebuild them from the sessions.
-    for (Machine * mach : p_profile->GetMachines(MT_CPAP)) {
-        mach->rebuildChannels();
+    if (m_reprocessEvents) {
+        for (Machine * mach : p_profile->GetMachines(MT_CPAP)) {
+            mach->rebuildChannels();
+        }
     }
 
     // Oximetry flags, so they pick up the current drop/change preferences. Done separately
-    // so a recording cut at the day split time is recalculated whole.
-    p_profile->recalculateOximetryEvents(&progress);
+    // so a recording cut at the day split time is recalculated whole. Skipped when the user
+    // chose to keep the flags of existing data (Preferences applies the change to new data only).
+    if (m_reprocessOximetry) {
+        p_profile->recalculateOximetryEvents(&progress);
+    }
     progress.close();
 
     welcome = createWelcomePage();

@@ -915,8 +915,13 @@ bool PreferencesDialog::Save()
             || ((new_base_method == SBM_Rolling) && (profile->oxi->spO2BaselineWindow() != new_base_window))
             || (new_base_static && (profile->oxi->spO2BaselinePercentile() != new_base_percentile))
             || ((new_base_method == SBM_Manual) && (profile->oxi->spO2ManualBaseline() != new_base_manual));
-    if (recalc_oximetry) {
-        recalc_events = true;
+    if (recalc_oximetry && !profile->hasOximetryData()) {
+        recalc_oximetry = false;        // nothing stored to recalculate
+    }
+    // The "Apply Changes To" choice on the Oximetry tab: recalculate what is already
+    // stored, or use the new settings only for data imported from now on.
+    if (recalc_oximetry && ui->oxiApplyNewOnly->isChecked()) {
+        recalc_oximetry = false;
     }
 
     if (recompress_events) {
@@ -930,9 +935,6 @@ bool PreferencesDialog::Save()
     }
     if (recalc_events) {
         int days = profile->countDays(MT_CPAP, profile->FirstDay(), profile->LastDay());
-        if (recalc_oximetry) {
-            days += profile->countDays(MT_OXIMETER, profile->FirstDay(), profile->LastDay());
-        }
         if (days > 0) {
             if (QMessageBox::question(this, tr("Data Reindex Required"),
                                       tr("A data reindexing procedure is required to apply these changes. This operation may take a couple of minutes to complete.\n\nAre you sure you want to make these changes?"),
@@ -1184,9 +1186,9 @@ bool PreferencesDialog::Save()
     } else
         if (recompress_events) {
             mainwin->recompressEvents();
-        } else if (recalc_events) {
+        } else if (recalc_events || recalc_oximetry) {
             // send a signal instead?
-            mainwin->reprocessEvents(needs_restart);
+            mainwin->reprocessEvents(needs_restart, recalc_events, recalc_oximetry);
         } else if (needs_reload) {
             QTimer::singleShot(0, mainwin, SLOT(reloadProfile()));
         } else if (needs_restart) {

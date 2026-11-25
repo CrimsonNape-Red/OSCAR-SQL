@@ -3415,6 +3415,20 @@ bool Profile::repairBmcSessionEnds(qint64 profileId, ProgressDialog *progress)
     return allSaved;
 }
 
+bool Profile::hasOximetryData() const
+{
+    for (Day *day : std::as_const(daylist)) {
+        if (!day) continue;
+        for (Session *sess : day->sessions) {
+            if (sess && (sess->m_availableChannels.contains(OXI_SPO2)
+                         || sess->m_availableChannels.contains(OXI_Pulse))) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool Profile::recalculateOximetryEvents(ProgressDialog *progress, MachineType mt)
 {
     // A session's summary lists its channels, so this needs no event data loaded.

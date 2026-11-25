@@ -125,6 +125,9 @@ class Profile : public Preferences
     //! \return false if the results couldn't be saved; nothing is changed then
     bool recalculateOximetryEvents(ProgressDialog *progress, MachineType mt = MT_UNKNOWN);
 
+    //! \brief Whether any session has SpO2 or pulse data that recalculateOximetryEvents() would process
+    bool hasOximetryData() const;
+
     //! \brief Barf because data format has changed. This does a purge of CPAP data for machine *m
     void DataFormatError(Machine *m);
 
