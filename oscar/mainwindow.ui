@@ -198,6 +198,16 @@
               </widget>
              </item>
              <item>
+              <widget class="QRadioButton" name="reportMode90Day">
+               <property name="toolTip">
+                <string>Show 30, 60 and 90 Day Report</string>
+               </property>
+               <property name="text">
+                <string>90 Days</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QRadioButton" name="reportModeRange">
                <property name="toolTip">
                 <string>Show Range Report</string>

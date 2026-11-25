@@ -477,6 +477,7 @@ const QString STR_US_SkipTimeAlignWelcome = "SkipTimeAlignWelcome";
 const int STAT_MODE_STANDARD = 0;
 const int STAT_MODE_MONTHLY = 1;
 const int STAT_MODE_RANGE = 2;
+const int STAT_MODE_90DAY = 3;
 
 //added by Sheila 1/5/2026
 const QString STR_OS_baseSpO2Option = "baseSpO2Option";

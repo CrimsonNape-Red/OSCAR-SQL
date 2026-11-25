@@ -411,6 +411,8 @@ class MainWindow : public QMainWindow
 
     void on_reportModeStandard_clicked();
 
+    void on_reportMode90Day_clicked();
+
     void init_reportModeUi();
     void reset_reportModeUi();
 

@@ -1518,6 +1518,9 @@ QString Statistics::GenerateCPAPUsage()
     } else if (p_profile->general->statReportMode() == STAT_MODE_STANDARD) {
         firstcpap = lastcpap.addYears(-1).addDays(1);
         adjustRange(firstcpap,lastcpap);
+    } else if (p_profile->general->statReportMode() == STAT_MODE_90DAY) {
+        firstcpap = lastcpap.addDays(-89);
+        adjustRange(firstcpap,lastcpap);
     } else if (p_profile->general->statReportMode() == STAT_MODE_RANGE) {
         firstcpap = p_profile->general->statReportRangeStart();
         lastcpap = p_profile->general->statReportRangeEnd();
@@ -1578,6 +1581,12 @@ QString Statistics::GenerateCPAPUsage()
                 for (; j < number_periods; ++j) {
                     periods.push_back(Period(last,last, ""));
                 }
+            } else if (p_profile->general->statReportMode() == STAT_MODE_90DAY) {
+                // Three cumulative columns, each ending on the report date.
+                bool finished = false;  // used to detect end of data - when less than 90 days of data.
+                periods.push_back(Period(first,last,finished, -29,false, tr("Last 30 Days")));
+                periods.push_back(Period(first,last,finished, -59,false, tr("Last 60 Days")));
+                periods.push_back(Period(first,last,finished, -89,false, tr("Last 90 Days")));
             } else {  // STAT_MODE_STANDARD or STAT_MODE_RANGE
                 // note add days or addmonths returns the start of the next day or the next month.
                 // must shorten one day for each. Month executed in Period method
@@ -1710,6 +1719,12 @@ QString Statistics::GenerateCPAPUsage()
             // both create header column and 13  data columns for a total of 100
             dataWidth = 6;
             headerWidth = 22;
+        }
+        else if (p_profile->general->statReportMode() == STAT_MODE_90DAY)
+        {
+            // header column and 3 data columns for a total of 100
+            dataWidth = 20;
+            headerWidth = 40;
         }
         QString bgColor = alternatingColor(alternatingColorCounter);
         line += QString("<tr class=datarow bgcolor='%3'><td width='%1%'>%2</td>").arg(headerWidth).arg(name).arg(bgColor);

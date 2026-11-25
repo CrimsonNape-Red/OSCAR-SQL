@@ -4904,6 +4904,16 @@ void MainWindow::reset_reportModeUi()
                 ui->statEndDate->setDate(p_profile->general->statReportDate());
             }
             break;
+        case STAT_MODE_90DAY:
+            ui->statStartDate->setVisible(false);
+            ui->statEndDate->setVisible(true);
+            ui->reportMode90Day->setChecked(true);
+
+            ui->statEnableEndDisplay->setVisible(true);
+            if (p_profile) {
+                ui->statEndDate->setDate(p_profile->general->statReportDate());
+            }
+            break;
         case STAT_MODE_RANGE:
             ui->reportModeRange->setChecked(true);
             ui->statStartDate->setVisible(true);
@@ -4938,6 +4948,14 @@ void MainWindow::on_reportModeStandard_clicked()
     }
 }
 
+void MainWindow::on_reportMode90Day_clicked()
+{
+    if (!p_profile) return;
+    if (p_profile->general->statReportMode() != STAT_MODE_90DAY) {
+        p_profile->general->setStatReportMode(STAT_MODE_90DAY);
+        GenerateStatistics();
+    }
+}
 
 void MainWindow::on_reportModeRange_clicked()
 {
