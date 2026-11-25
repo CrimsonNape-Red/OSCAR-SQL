@@ -1,4 +1,5 @@
  Kg
+ cm
  inch
  kg
 "
@@ -31,7 +32,9 @@
 %1 mm
 %1mm
 &Abbrechen
+&Abort
 &Abrechen
+&Accept
 &Afbryd
 &Afslut
 &Annuler
@@ -186,6 +189,9 @@
 0 cm H2O
 0 cmH2O
 0 cmWK
+0-1
+0=offen, 1=zu
+0=open, 1=dicht
 0cmH20
 0cmH2O
 1 = Sveglia 2 = REM 3 = Sonno leggero 4 = Sonno profondo
@@ -198,6 +204,7 @@
 1 cmH2O
 1 cmWK
 1 分あたりの最小呼吸数 (BPM) を下回ると、時間指定された呼吸が開始されます
+100% {0-1?}
 12 cmH2O 时的理论面罩漏气量
 12 cmH2O 時的理論面罩漏氣量
 12 cmH2O'da teorik maske kaçağı
@@ -350,6 +357,7 @@ A partially obstructed airway
 A percventiláció variációja
 A period during a session where the device could not detect flow.
 A period during a session where the machine could not detect flow.
+A period of periodic breathing
 A pulse of pressure 'pinged' to detect a closed airway.
 A pulzuserősség relatív értékelése a megfigyelési helyen
 A párásító használatával töltött idő aránya (az egész napra)
@@ -367,6 +375,7 @@ A taxa máxima de vazamento da máscara
 A type of respiratory event that won't respond to a pressure increase.
 A user definable event detected by OSCAR's flow waveform processor.
 A user definable event detected by OSCR's flow waveform processor.
+A user definable event detected by SleepyHead's flow waveform processor.
 A vibratory snore
 A vibratory snore as detcted by a System One device
 A vibratory snore as detcted by a System One machine
@@ -427,6 +436,7 @@ Aanloop incident
 Aanloop startdruk
 Aanloop vertraging
 Aanloopdruk
+Aanloopdruk.
 Aanlooptijd
 Aanlooptijd 
 Aantal Ontwakings
@@ -641,6 +651,7 @@ Allarme perdita
 Alleen naleving ;(
 Alleen overzichtgegevens :(
 Alleen overzichtsgegevens
+Allvarlighetsgrad (0-1)
 Almacenamiento automático
 Almacenamiento manual
 Aloitusaika str.edf:n mukaan
@@ -694,11 +705,13 @@ Amount of air displaced per minute
 Amount of time it takes to transition from EPAP to IPAP, the higher the number the slower the transition
 An abnormal period of Cheyne Stokes Respiration
 An abnormal period of Periodic Breathing
+An abnormal period of Periodic Breathing/Cheyne Stokes Respiration
 An abnormal period of either Periodic Breathing or Cheyne Stokes Respiration
 An apnea caused by airway obstruction
 An apnea reported by your CPAP device.
 An apnea reportred by your CPAP device.
 An apnea reportred by your CPAP machine.
+An apnea that could not fit into a category
 An apnea that couldn't be determined as Central or Obstructive.
 An apnea where the airway is open
 An apnoea caused by airway obstruction
@@ -711,6 +724,7 @@ An epoch with snoring.
 An optical Photo-plethysmogram showing heart rhythm
 An optical Photo-plethysomogram showing heart rhythm
 An restriction in breathing from normal, causing a flattening of the flow waveform.
+An restriction in breathing that causes an either an awakening or sleep disturbance.
 Analiza pliku identyfikacyjnego
 Andel av tiden som befuktaren användes (för hela dagen)
 Andetag BPM
@@ -728,6 +742,7 @@ Andningsfrekvens per minut
 Andningsfrekvens under vilken maskinen ger tidsstyrda andetag
 Andningshändelser
 Andningskretsen kopplades från
+Andningsrelaterat uppvaknande
 Andningsrelaterat uppvaknande: En begränsning av andningen som orsakar antingen ett uppvaknande eller en sömnstörning.
 Andningsrelaterat uppvaknande: En begränsning av andningen som\norsakar antingen ett uppvaknande eller en sömnstörning.
 Andningsstörningar
@@ -748,6 +763,7 @@ Ang uri ng backup breath rate na ginagamit: wala (naka-off), awtomatiko, o nakat
 Anggulo ng pagtayo sa degrees
 Angle supérieur droit en degré
 Angolo verticale in gradi
+Anlauf Dr.
 Anlaufdruck
 Anmerkungen
 Annuleren
@@ -855,6 +871,7 @@ Apne Hipopne Indeksi
 Apne Hipopne Indeksi (AHI)
 Apnea
 Apnea (A)
+Apnea Central
 Apnea Centrale
 Apnea Hipopea Index (AHI)
 Apnea Hypopnea Indeksi
@@ -863,6 +880,7 @@ Apnea Hypopnea Index (AHI)
 Apnea No Clasificada (UA)
 Apnea Non Classificata
 Apnea Obstructiva (OA)
+Apnea Obtructiva
 Apnea Ostruttiva
 Apnea centrale
 Apnea no clasificada
@@ -919,12 +937,14 @@ Apné (A)
 Apné-hypopné-indeks (AHI)
 Apnée
 Apnée (A)
+Apnée Obstructive
 Apnée avec passage de l'air ouvert
 Apnée causé par une obstruction du passage de l'air
 Apnée causée par une obstruction du passage de l'air
 Apnée causée par une obstruction du passage de l'air.
 Apnée ne pouvant être détérminée comme Centrale ou Obstructive.
 Apnée non classifiée
+Apnée non obstructive
 Apnée obstructive
 Apnée où le passage de l'air est ouvert
 Apnée où le passage de l'air est ouvert.
@@ -996,8 +1016,10 @@ Arată dacă jurnalul de terapie este salvat pe cardul SD
 Arată dacă meniul pentru pacient este disponibil
 Arată dacă setarea SoftPAP poate fi modificată
 Arată sau nu aparatul AHI prin afișajul propriu.
+Are you sure you want to do this?
 Armazenamento automático
 Armazenamento manual
+Arousal door ademprobleem (RERA)
 Arranque automático
 Arresto Intelligente
 Arresto intelligente
@@ -1043,6 +1065,8 @@ Asleep
 Asleep time
 Atem Ereignis
 Atem-Störungs-Verzeichnis
+Atemanstrengung auf Erregung
+Atemanstrengung bei Erregung
 Atemanstrengungs - Verwandte Erregung: Eine Einschränkung bei der Atmung, die entweder durch ein Erwachen oder eine Schlafstörung verursacht wird.
 Atemanstrengungsbedingte Erregung: Eine Atembehinderung, die entweder zu Aufwach- oder Schlafstörungen führt.
 Atemaussetzer obwohl Atemwege offen
@@ -1199,6 +1223,7 @@ Automatyczny start
 Automatyczny zapis
 Autostart
 Autostop
+Außergewöhnliche Schwere (0-1)
 Availability ng Reslex
 Avertisment
 Avertizare Scurgeri (FL)
@@ -1695,8 +1720,10 @@ Bouffée expiratoire
 Bouffées expiratoires
 Bovenste uitademdruk
 Boy
+Bpm
 Brain Wave
 BrainWave
+Brak danych
 Branch
 Branch:
 Branche :
@@ -1751,12 +1778,14 @@ CPAP Pro
 CPAP Seansı sadece özet verisi içeriyor
 CPAP Sessie bevat slegs opsommende data
 CPAP Session contains summary data only
+CPAP Session contains summary data onlyf
 CPAP Session indeholder kun oversigtsdata
 CPAP Sitzung enthält nur Übersichtsdaten
 CPAP cihazınız tarafından bildirilen bir apne.
 CPAP cihazınız tarafından bildirilmiş olan bir apne.
 CPAP ensiöletkun halkaisija
 CPAP mód
+CPAP period innehåller sammanfattningsdata enbart
 CPAP perioden innehåller enbart sammanfattningsdata
 CPAP relace obsahuje pouze souhrnná data
 CPAP режим
@@ -1772,6 +1801,7 @@ CPAP 장치에 의해 무호흡이 보고되었습니다.
 CPAP 장치에 의해 보고된 무호흡입니다.
 CPAP 장치에서 보고된 무호흡.
 CPAP(고정) 모드
+CPAP-Sitzung enthält nur zusammengefasste Daten
 CPAP-inställning
 CPAP-istunto sisältää vain yhteenvetotiedot
 CPAP-käyttöjakso sisältää vain yhteenvetotiedot
@@ -1785,6 +1815,7 @@ CPAP-session indeholder kun oversummeringsdata
 CPAP-tilstand
 CPAP-økt inneholder kun sammendragsdata
 CPAPモード
+CPAP会话信息仅含有概要数据
 CPAP模式
 CSR
 Ca va pas etre possible, c'est une soirée privée.
@@ -1958,6 +1989,7 @@ Ciśnienie wydechowe
 Ciśnienie zmierzone
 Clear Airway
 Clear Airway (CA)
+Clear Airway Apnea
 Climate Control
 Climate 制御
 ClimateLine Hőmérséklet szabályzás engedélyezése
@@ -1977,6 +2009,7 @@ ClimateLine 温度
 ClimateLine 온도 활성화
 ClimateLine-temperatur
 ClimateLine-temperatur aktivér
+Closing this dialog will leave this time unedited.
 Cod %1 PRS1 Necunoscut
 Code PRS1 %1 inconnu
 Coisa ultra secreta e interna que você não deveria ver ;)
@@ -2227,6 +2260,7 @@ Das Schlauchsystem wurde getrennt
 Datele din acest aparat nu pot fi importate in acest profil.
 Datová položka ResMed: Událost spouštěcího cyklu
 Dauer der automatischen Prüfung
+De CPAP sessie bevat alleen overzichtsgegevens
 De Reslex-instelling kan worden beperkt tot alleen het klinikmenu of beschikbaar worden gemaakt voor de gebruiker om te wijzigen
 De SensAwake functie verlaagt de druk als een arousal wordt gedetecteerd.
 De geïmporteerde gegevens zijn mogelijk niet helemaal nauwkeurig, dus de ontwikkelaars willen graag een .zip-kopie van de SD-kaart van deze machine en bijpassende Encore .pdf-rapporten om te controleren of OSCAR de gegevens correct verwerkt.
@@ -2300,6 +2334,7 @@ Den typ av andningsfrekvens som är inställd: Ingen (Av), Automatisk eller Fast
 Den type backup-åndedrætsfrekvens, der bruges: ingen (fra), automatisk eller fast
 Deneme sürecinde cihazın Auto-CPAP modunda kalacağı ve sonrasında CPAP moduna döneceği gün sayısı
 Denna maskin är otestad
+Denna maskins inspelning kan inte importeras i denna profil.\nInspelningen överlappar existerande innehåll.
 Deník
 Deník terapie
 Depanare channel #1
@@ -2310,6 +2345,8 @@ Depurando el canal #1
 Depurando el canal #2
 Der Höchstsatz der Maskenlecks
 Der Leckagealarm des Geräts war aktiv
+Der Schlafmütze Flusswellenformprozessor hat ein definierbares Ereignis erkannt.
+Der SleepyHead Flusswellenformprozessor hat ein definierbares Ereignis erkannt.
 Derece cinsinden dikine açı
 Derece cinsinden uyku pozisyonu
 Derin Uyku
@@ -2361,6 +2398,7 @@ Device automatically switches off
 Deweloperzy potrzebują kopię (.zip) karty SD z tego aparatu i odpowiadającym jej raportów pdf z programów Encore lub Care Orchestrator aby móc obsługiwać go w programie OSCAR.\n
 Deweloperzy potrzebują kopię .zip karty SD tego urządzenia i odpowiedniego raportu w .pdf z Encore aby móc obsługiwać to urządzenie w programie OSCAR.
 Deze apparaatgegevens kunnen niet in dit profiel worden geimporteerd.
+Deze apparaatgegevens kunnen niet in dit profiel worden geimporteerd.\nDe gegevens overlappen reeds bestaande gegevens.
 Deze sessie bevat uitsluitend overzichtgegevens
 Dezvoltatorii au nevoie de o copie .zip a cardului SD al acestui aparat și a rapoartelor Encore .pdf corespunzătoare pentru a se asigura că funcționează cu OSCAR.
 Dezvoltatorii au nevoie de o copie .zip a cardului SD al acestui aparat și de rapoartele Encore sau Care Orchestrator .pdf corespunzătoare pentru a face ca acesta să funcționeze cu OSCAR.
@@ -2434,6 +2472,8 @@ Diepe Slaap Indicator
 Diepe slaap
 Diepe slaap, stabiele ademhaling
 Dieser Geräte-Datensatz kann in diesem Profil nicht importiert werden.
+Dieser Gerätedatensatz kann nicht in diesem Profil importiert werden.\nDie Tagessätze überschneiden sich mit bereits vorhandenen Inhalte.
+Dieser Gerätedatensatz kann nicht in diesem Profil importiert werden.\nDie Tagessätze überschneiden sich mit bereits vorhandenen Inhalten.
 Diminuição súbita da fuga
 Din Philips Respironics %1 (%2) genererade data som OSCAR aldrig har sett förut.
 Din Philips Respironics CPAP-maskin (Model %1) är tyvärr inte en data kapabel modell.
@@ -2534,6 +2574,7 @@ Doel Alveolaire Ventilatie (iVAPS)
 Doel Va
 Doelfrequentie
 Doelminuutventilatie
+Doelminuutventilatie?
 Doelminuutvolume
 Doeltijd
 Doeltijd van de PSR1 bevochtiger
@@ -2545,11 +2586,15 @@ Dolní hranice výdechového tlaku
 Donanım yazılımı sürümü
 Door apparaat getriggerde ademhaling
 Door de gebruiker instelbaar incident dat door OSCAR wordt herkend.
+Door de gebruiker instelbaar incident dat door SleepyHead wordt herkend.
+Door de gebruiker instelbare gebeurtenis die door SleepyHead wordt herkend.
 Dormido
 Dostupnost Reslex
 Dostęp Pt
 Dostęp pacjenta
 Dostępność Reslex
+Dr. Max
+Dr. Min
 Dragning
 Dream Station
 DreamStation
@@ -2736,6 +2781,8 @@ Dépression d&apos;expiration ResMed
 Dépression d'expiration ResMed
 Dépression d'expiration Resvent
 Désole, OSCAR ne peut suivre que les heures d'utilisation et quelques informations de bases pour cet appareil.
+Désole, SleepyHead ne peut suivre que les heures d'utilisation et quelques informations de bases pour cet appareil.
+Désolé mais SleepyHead peut seulement suivre la durée d'utilisation de cette machine.
 Désolé mais votre respirateur PPC Philips Respironics (%1) n'est pas encore supporté.
 Désolé votre appareil Philips Respironics (Model %1) n'est pas pris en charge pour le moment.
 Désolé votre appareil Philips Respironics (Model %1) n'est pas prise en charge pour le moment.
@@ -2870,6 +2917,7 @@ EPR
 EPR Düzeyi
 EPR Ebene
 EPR Level
+EPR Mode
 EPR Nivå
 EPR Vlak
 EPR niveau
@@ -2911,6 +2959,7 @@ Een ademhalingsgebeurtenis die niet door drukverhoging ophoudt.
 Een apneu die door het apparaat is geregistreerd.
 Een apneu die niet als centraal of obstructief kon worden geclassificeerd.
 Een apneu die niet kon worden ingeddeld als obstructief of centraal, doordat er teveel lekkage optrad kan er geen goede meting worden gedaan.
+Een apneu die niet traceerbaar was
 Een apneu waarbij de luchtweg is afgesloten
 Een apneu waarbij de luchtweg niet is afgesloten
 Een epoch met ernstige obstructie.
@@ -2926,12 +2975,16 @@ Een optisch foto-plethysomogram die het hartritme laat zien
 Een optische foto-plethysomogram die het hartritme laat zien
 Een optische plethysomogram die het hartritme laat zien
 Een periode tijdens een sessie waarbij het apparaat geen flow kon detecteren.
+Een periode van cyclische ademhaling
 Een plotselinge verandering in hartritme (instelbaar)
 Een plotselinge verandering in polsslag (instelbaar)
 Een plotselinge verlaging in zuurstofsaturatie (instelbaar)
 Een relatieve benadering van de sterkte van de hartslag op de gemeten plek
 Een relatieve benadering van de sterkte van de polsslag op de gemeten plek
 Een snurk
+Een stroombeperking die (gedeeltelijk) ontwaken (arousal) veroorzaakt.
+Een tijdsduur van periodiek ademhalen / Cheyne Stokes ademhaling
+Een tijdsduur van periodiek ademhalen / Cheyne Stokes ademhaling.
 Effort Respiratoire Eveillant: Une gène respiratoire qui cause un réveil ou un trouble du sommeil.
 Effort respiratoire éveillant: une gêne respiratoire qui cause un réveil ou un trouble du sommeil.
 Egy ResMed adatelem: Trigger ciklus esemény
@@ -2941,8 +2994,11 @@ Egy időzített légvétel belégzési ideje
 Egy nyomáslökés, amelyet a zárt légút észlelésére „pingel" a rendszer.
 Egyenletes légzés
 Egyenletes légzés (SB)
+Ei Apnoe ohne Kategorie
+Ei tietoja
 Ei-vastaava tapahtuma (NR)
 Ein Abschnitt während einer Sitzung, in der das Gerät keinen Fluss erkennen konnte.
+Ein Apnoe ohne Kategorie
 Ein Atemereignis, das nicht auf Druckanstieg reagiert.
 Ein Druckimpuls um geschlossene Atemwege zu detektieren.
 Ein Druckimpuls um geschlossene Atemwege zu erkennen.
@@ -2965,6 +3021,7 @@ Eine Apnoe, der nicht als Central oder atmungsbedingt ermittelt werden konnte, w
 Eine Apnoe, die nicht als zentral oder obstruktiv bestimmt werden konnte.
 Eine Apnoe, die von Ihrem CPAP-Gerät gemeldet wird.
 Eine Art von Atem Ereignis, welches auf keinen Druckanstieg reagiert.
+Eine Einschränkung bei der Atmung, die entweder ein Erwachen oder eine Schlafstörung verursacht.
 Eine Einschränkung bei der normalen Atmung, was zu einer Abflachung der Strömungswellenform führt.
 Eine Einschränkung der Atmung aus dem Normalzustand, die zu einer Verflachung der Strömungswellenform führt.
 Eine Epoche mit Flusslimitierung.
@@ -3051,6 +3108,7 @@ En ResMed-datakälla som visar andningshändelser
 En ResMed-datapost: Trigger Cycle Event
 En Son Güncelleme
 En användardefinierad händelse som upptäcks av OSCAR's luftflödes processor.
+En användardefinierad händelse som upptäcks av SleepyHead:s flödes-vågform processor.
 En apne rapporterad av din CPAP maskin.
 En apnea som inte kunde kännas igen som Central eller Obstruktiv.
 En apné rapporterad av din CPAP-enhet.
@@ -3062,6 +3120,7 @@ En apnø, der ikke kunne klassificeres som central eller obstruktiv.
 En apnø, hvor luftvejen er åben
 En apnø, hvor luftvejen er åbenApnø forårsaget af blokering af luftvejene
 En begrensning i pusting fra det normale, som forårsaker en utflating av strømningskurven.
+En begränsning att andas som orsakar en antingen ett uppvaknande eller sömnstörningar.
 En begränsning i andningen från normalt, vilket orsakar en utplaning av flödes vågformen.
 En begränsning i andningen mot det normala, orsakar en plattare form på andningskurvan.
 En begränsning i andningen mot det normala\nOrsakar en plattare form på andningskurvan.
@@ -3094,7 +3153,9 @@ En händelse som inte reagerats på (NR)
 En kısa inspirasyon süresi
 En onormal period av Cheyne-Stokes andning
 En onormal period av periodisk andning
+En onormal period av periodisk andning/Cheyne-Stokes andning
 En optisk foto-plethysomogram visande hjärtrytmen
+En period av periodisk andning
 En period under en session då maskinen inte kunde detektera flöde.
 En periode under en session, hvor enheden ikke kunne registrere flow.
 En periode under en økt der enheten ikke kunne registrere luftstrøm.
@@ -3286,15 +3347,22 @@ Epookki, jossa virtauksen rajoite
 Epäsäännöllisyys mitatussa datassa, joka ei edusta hengitystapahtumaa (esim. nieleminen, yskiminen tai puhuminen)
 Equipamento para automaticamente por respiração
 Er scheint mit anderen Rechnern so ähnlich zu sein, dass er funktionieren könnte, aber die Entwickler hätten gerne eine .zip-Kopie der SD-Karte dieses Rechners, um sicherzustellen, dass er mit OSCAR funktioniert.
+Ereignisse
+Ereignisse/Std.
+Ereignisse/Stunde
+Ereignisse/h
 Erittäin salaista sisäistä tietoa, jota et saa nähdä ;)
 Erittäin salaista sisäistä tietoa, jota sinun ei oleteta näkevän ;)
 Erkannte Masken Lecks einschließlich der natürlichen Masken Leckagen
 Erkannte Masken Lecks einschließlich der natürlichen Maskenlecks
 Erken döngü geçişli dönem (2 dk)
+Ernst (0 - 1)
 Ernst van de maskerlekkage
 Erwachen
 Es scheint ähnlich genug zu anderen Maschinen zu sein, dass es funktionieren könnte, aber die Entwickler möchten eine.zip-Kopie der SD-Karte dieser Maschine und passende Encore.pdf-Berichte, um sicherzustellen, dass es mit OSCAR funktioniert.
 Es tut mir leid zu berichten, dass OSCAR nur Betriebsstunden und grundlegende Einstellungen für dieses System verfolgen kann.
+Es tut mir leid zu berichten, dass SleepyHead nur Stunden verfolgen kann und ganz einfache Einstellungen für dieses System.
+Es tut mir leid, aber SleepyHead kann für dieses Gerät nur Stunden verfolgen.
 Es tut uns leid, Ihre Philips Respironics CPAP-Gerät (Modell %1) wird noch nicht unterstützt.
 Esenciales
 Esentiale
@@ -3330,6 +3398,7 @@ Estatura del Paciente (iVAPS)
 Estatura iVAPS
 Este posibil ca datele importate să nu fie în întregime exacte, astfel încât dezvoltatorii ar dori o copie .zip a cardului SD al acestei mașini împreună cu rapoartele Encore .pdf corespunzătoare pentru a vă asigura că OSCAR tratează corect datele.
 Este registro de máquina no puede ser importado a este perfi.
+Este registro de máquina no puede ser importado a este perfiĺ.\nLos datos se traslapan con contenido previo.
 Este sau nu activat EZ-Start
 Esteaste prosentteina
 Estetaso
@@ -3357,6 +3426,7 @@ Etat de l'Humidificateur activé
 Etat de la Resistance Sys1
 Ett andningsuppehåll där luftvägarna är blockerade
 Ett andningsuppehåll där luftvägarna är öppna
+Ett andningsuppehåll som inte kan placeras i någon kategori
 Ett optiskt foto-plethysmogram visande hjärtrytmen
 Ett optiskt foto-plethysomogram visande hjärtrytmen
 Ett vibrerande snarkljud som detekteras av en System One-enhet
@@ -3396,6 +3466,7 @@ Evènement respiratoire
 Evènement utilisateur #1
 Evènement utilisateur #2
 Evènement utilisateur #3
+Excitación relacionada a esfuerzo respiratorio
 Excitare legată de efortul respirator: O restricție a respirației care provoacă fie trezire, fie tulburări de somn.
 Excitação Esforço Respiratório (EER)
 Excitação Relacionada ao Esforço Respiratório: Uma restrição na respiração que causa despertar ou distúrbios do sono.
@@ -3826,8 +3897,10 @@ Gebruikt therapieprogramma
 Gecontroleerde beademingsmodus
 Gecontroleerde inademing
 Gedetecteerde maskerlekkage inclusief de bedoelde lek
+Geen Data
 Geen ademhaling gedetecteerd (BND)
 Geen ademhaling gedetecteerd (BND) tijdfractie
+Geen gegevens
 Geforceerde ademhaling
 Gefühl
 Gehirn Wellen
@@ -3883,6 +3956,7 @@ Gli sviluppatori hanno bisogno di una copia .zip della scheda SD di questa macch
 Gli sviluppatori hanno bisogno di una copia .zip della scheda SD di questa macchina e dei corrispondenti report Encore .pdf per farlo funzionare con OSCAR.
 Golfvorm van de Luchtstroomsterkte
 Golfvorm van de luchtstroomsterkte
+Grad
 Gradiënt
 Graf der viser løbende AHI for den seneste time
 Graf der viser løbende RDI for den seneste time
@@ -3945,6 +4019,7 @@ Graphique montrant l'IAH pour les heures précédantes
 Graphische Anzeige Schnarchvolumen
 Graphische Darstellung der Schwere der Flussbegrenzung
 Graphische Darstellung des Schweregrades der Flusslimitierungen
+Graphs Switched Off!
 Grapo na nagpapakita ng kalubhaan ng mga limitasyon sa daloy
 Grapo na nagpapakita ng lakas ng hilik
 Grapo na nagpapakita ng tumatakbong AHI sa nakalipas na isang oras
@@ -4061,6 +4136,7 @@ Hava yolu tıkanması sebebiyle oluşan bir apne
 Hava yolu tıkanıklığından kaynaklanan bir hipopne
 Hava yolunun açık olduğu bir apne
 Havaitut maskivuodot sisältäen luonnolliset maskivuodot
+Headed Tubing
 Heart Rate Variability (SDNN)
 Heart rate in beats per minute
 Heart rate variability measured by Apple Watch
@@ -4125,6 +4201,8 @@ Het lekalarm van het apparaat was actief
 Het soort back-up-ademfrequentie dat wordt gebruikt: geen (uit), automatisch of vast
 Het soort gecontroleerde ademfrequentie die wordt gebruikt: geen (uit), automatisch of vast
 Het spijt me dat OSCAR van dit apparaat alleen gebruiksuren en erg simpele instellingen kan verwerken.
+Het spijt me dat SleepyHead van dit apparaat alleen gebruiksuren en erg simpele instellingen kan verwerken.
+Het spijt me dat SleepyHead voor dit apparaat alleen de gebruiksuren kan bijhouden.
 Het water in de bevochtiger raakte op tijdens de therapie
 Heure cible
 Heure cible pour l'humificateur PRS1
@@ -4342,6 +4420,7 @@ Hypopnées (H)
 Hypopnø (H)
 Hypopnø med høj lækage
 Hypopnø registreret under meget høj lækage. Tælles ikke med i AHI.
+Hz
 Háttérfrekvencia
 Håndleddstemperatur
 Håndleddstemperatur målt av Apple Watch, lagret i Celsius
@@ -4384,6 +4463,8 @@ I 靈敏度
 I 감도
 I'm sorry to report that OSCAR can only track hours of use and very basic settings for this machine.
 I'm sorry to report that OSCR can only track hours of use and very basic settings for this machine.
+I'm sorry to report that SleepyHead can only track hours of use and very basic settings for this machine.
+I'm sorry to report that SleepyHead can only track hours of use for this machine.
 I-enable ang Ramp
 I-enable ang Ramp Down
 I/E Değeri
@@ -4458,9 +4539,13 @@ IPAP Stelling
 IPAP Ställ in
 IPAP Trend
 IPAP asetus
+IPAP bas
 IPAP establecida
+IPAP haut
+IPAP hoog
 IPAP indstilling
 IPAP instelling
+IPAP laag
 IPAP max
 IPAP maxi
 IPAP min
@@ -4482,6 +4567,8 @@ IPAP-Einstellung
 IPAP-Set
 IPAP-indstilling
 IPAP:n asetus
+IPAPHi
+IPAPLo
 IPAPMáx
 IPAPMín
 IPAPセット
@@ -4497,6 +4584,8 @@ Időzített inspiráció
 Időzített légzés
 Időzített lélegzetvétel
 If it is, the developers will need a copy of this file so that future versions of OSCAR will be able to read it.
+If you remembered to start your oximeter at exactly the same time as your CPAP session, you can sync to the first CPAP session of the day last recorded.
+If you started both devices at exactly the same time, or don't know if the clock is set correctly on either devices, choose CPAP.
 Ifall System One motståndsinställningar är tillgängliga för dig.
 Ihr Philips Respironics %1 (%2) generierte Daten, die OSCAR noch nie zuvor gesehen hat.
 Ihr Philips Respironics CPAP-Gerät (%1) wird leider noch nicht unterstützt.
@@ -4515,6 +4604,7 @@ Il tempo è iniziato secondo str.edf
 Il tipo di frequenza respiratoria di backup in uso: nessuno (spento), automatico o fisso
 Il tuo Philips Respironics %1 (%2) ha generato dati che OSCAR non ha mai visto prima.
 Ilmamäärä minuutissa
+Ilmamäärä minuutissa?
 Ilmankostuttimen taso
 Ilmaputken tyyppi
 Ilmastoint
@@ -4688,6 +4778,7 @@ Indítás
 Info tuşu basılı tutularak SD karta hangi bilgilerin kaydedildiğini gösterir
 Info 키를 길게 누르면 SD 카드에 저장되는 정보를 표시합니다
 Infoキーを長押ししたときにSDカードへ保存される情報を示します
+Ingen data
 Ingestelde EPAP
 Ingestelde IPAP
 Ingestelde Ti/T
@@ -4922,6 +5013,7 @@ Irtikytkeytyminen
 Is de bevochtiger aan de PRS1 aangesloten?
 Is de bevochtiger.aangesloten?
 Is die PRS1 bevogtiger gekoppel?
+Is u seker dat u hierdie wil doen?
 Isang ResMed data item: Trigger Cycle Event
 Isang abnormal na panahon ng Cheyne Stokes Respiration
 Isang abnormal na panahon ng Periodic Breathing
@@ -4963,6 +5055,8 @@ IЧувств
 JP
 Ja
 Jag är ledsen att rapportera att OSCAR endast kan spåra timmar av användning och endast grundläggande inställningar för den här maskinen.
+Jag är ledsen att rapportera att SleepyHead endast kan spåra timmar av användning och endast grundläggande inställningar för den här maskinen.
+Jag är ledsen att rapportera att Sleepyhead bara kan visa timmars användning för denna maskin.
 Jak jste se cítili ráno
 Jak se cítíte (1 = hrozně, 10 = neporazitelně)
 Jak się czujesz (0-gówniano; 10-zajefajnie)
@@ -4978,6 +5072,13 @@ Jammer, u Philips Respironics CPAP masjien (%1) word nog nie ondersteun nie.
 Jammer, u Philips Respironics CPAP masjien (Model %1) word nog nie ondersteun nie.
 Jatkuva edellisen tunnin RDI:n kaavio
 Je připojen zvlhčovač PRS1?
+JediMark behöver en .zip kopia av denna maskins SD-kort och matchande Encore .pdf rapport för att få det att fungera med SleepyHead.
+JediMark braucht eine ZIP-Kopie dieser Geräte SD-Karte und passender Encore PDF-Berichte, um es mit SleepyHead konform zu machen.
+JediMark needs a .zip copy of this machines' SD card and matching Encore .pdf reports to make it work with SleepyHead.
+JediMark precisa de uma cópia .zip do cartão SD e relatórios .pdf Encore correspondentes para fazê-la funcionar com o OSCAR.
+JediMark precisa de uma cópia .zip do cartão SD e relatórios .pdf Encore correspondentes para fazê-la funcionar com o SleepyHead.
+JediMark wil graag een .zip bestand van de SD-kaart en bijbehorende Encore .pdf rapporten om het te kunnen analyseren voor gebruik in SleepyHead.
+JediMark（作者）需要呼吸机SD卡的.zip来重新编程来使其可以用SleepyHead读取.
 Jegyzetek
 Jevn pust
 Jevn pust (JP)
@@ -5044,6 +5145,7 @@ Kehittelijät tarvitsevat .zip kopion tämän laitteen SD-koritsta ja vastaavat 
 Kehittäjät tarvitsevat .zip-kopion koneen SD-kortin sisällöstä ja vastaavista Encore .pdf-raporteista, jotta he saisivat ne toimimaan OSCARin kanssa.
 Kehittäjät tarvitsevat .zip-kopion koneen SD-kortin sisällöstä ja vastaavista Encore .pdf-raporteista, jotta he saisivat ne toimimaan Oscarin kanssa.
 Kein Ereignis registriert
+Keine Daten
 Keine-Antwort-Ereignis (NR)
 Kertahengitystilavuus
 Kezdeti EPAP
@@ -5076,6 +5178,7 @@ Kirjanmerkki loppu
 Kirjanmerkkihuomautus
 Klar luftvei (CA)
 Klar luftvej (CA)
+Klarer Atemwegsverschluss
 Kleinster Theraphiedruck
 Klima Kontrolü
 Klimaatbeheer
@@ -5184,6 +5287,8 @@ Käyttäjälippu #1
 Käyttäjälippu #2
 Käyttäjälippu #3
 Käyttäjällä pääsy
+Käyttäjän määrittelemä tapahtuma Oscarin aaltomuodon prosessorin havaitsema.
+Käyttäjän määrittelemä tapahtuma SleepyHeadin aaltomuodon prosessorin havaitsema.
 Käyttäjän näkymä
 Käyttäjätapahtuma #1 (UF1)
 Käyttäjätapahtuma #2 (UF2)
@@ -5202,10 +5307,13 @@ Kısmi olarak tıkanmış bir hava yolu
 L'acqua dell'umidificatore si è esaurita durante la terapia
 L'alarme de fuite de l'appareil était active
 L'allarme perdita del dispositivo era attivo
+L'auteur (JediMark) a besoin d'un copie compressé (ZIP) de la carte SD de cet appareil et du rapport en PDF du logiciel Encore pour adapter SlepyHead a cet appareil.
 L'auto si avvia respirando
 L'eau de l'humidificateur s'est épuisée pendant le traitement
+L'import des cette machine ne peut se faire dans ce profile.\nLes jours enregistré ecraseraient ceux existants.
 L'impostazione Reslex può essere limitata al solo menu del medico o resa disponibile per la modifica da parte dell'utente
 L/dk
+L/m
 L/min
 LA
 LF
@@ -5266,8 +5374,11 @@ Laitteen vuotohälytys oli aktiivinen
 Laittteelle ei löydy tukea
 Lamendo, seu aparelho CPAP Philips Respironics (Modelo %1) ainda não é suportado.
 Lamendo, sua máquina CPAP Philips Respironics (Modelo %1) ainda não é suportada.
+Lamentamos informarle que SleepyHead sólo puede dar seguimiento a las horas de uso de esta máquina.
 Lamento informar que OSCAR sólo puede rastrear horas de uso y ajustes muy básicos para esta máquina.
 Lamento relatar que OSCAR só pode registrar horas de uso e configurações básicas nesse aparelho.
+Lamento relatar que o OSCAR pode apenas manter registros de horas de uso e configurações muito básicas para essa máquina.
+Lamento relatar que o SleepyHead pode apenas manter registros de horas de uso e configurações muito básicas para essa máquina.
 Langste inademing die het apparaat toestaat
 Langste inaseming wat die toestel toelaat
 Large Leak (LL)
@@ -5392,6 +5503,7 @@ Limitação de Fluxo
 Limitação de Fluxo (LF)
 Limite de Fluxo.
 Limite di flusso.
+Lipsa Date
 Liter
 Liter/minut
 Liters
@@ -5987,6 +6099,7 @@ Mga Tala sa Bookmark
 Mga Tala sa Journal
 Mga hakbang na binilang ng oximeter habang nagre-record
 Mga hininga bawat minuto na sinusukat ng Apple Watch
+Mga pangyayari
 Mi dispiace segnalare che OSCAR può monitorare solo le ore di utilizzo e le impostazioni di base per questa macchina.
 Mica Ventilatie Tinta
 Mieliala aamulla
@@ -6003,6 +6116,7 @@ Min trykk
 Min. EEPAP
 Min. EPAP
 Min. IPAP
+Min. druk
 Min. ondersteuningsdruk
 Min. paine
 Min. tryck
@@ -6080,6 +6194,7 @@ Minut ventilation
 Minut ventilation.
 Minute Vent.
 Minute Ventilation
+Minuten
 Minuten Vent.
 Minutenvolumen
 Minutová vent.
@@ -6288,6 +6403,7 @@ Määrittelemätön apnea, johtuen liiallisesta vuodosta.
 Mål Alveolær Ventilation (iVAPS)
 Mål Frekvens
 Mål Minut Ventilation
+Mål Minut Ventilation?
 Mål Respirationsfrekvens
 Mål Va
 Mål alveolær ventilasjon (iVAPS)
@@ -6295,6 +6411,7 @@ Mål for minutventilation
 Mål for tid
 Mål for ventilation.
 Mål minutventilation
+Mål minutventilation?
 Mål respirasjonsfrekvens
 Mål-Va
 Målalveolär ventilation (iVAPS)
@@ -6434,9 +6551,11 @@ Nemlendirici seviyesi
 Nemlendiricinin Durumu
 Nemlendiricinin kullanıldığı sürenin yüzdesi (tüm gün için)
 Nemlendiriciyi toplam kullanım süreniz (içe aktarma sırasında)
+Nenhum Dado
 Nepravidelnost v naměřených datech, která nepředstavuje dechovou příhodu (např. polykání, kašel nebo mluvení)
 Nereagující událost (NR)
 Neregularitate în datele măsurate, care nu reprezintă un eveniment respirator (ex. înghițit, tușit sau vorbit)
+Nessun dato
 Nicht gut
 Nicht klassifizierte Apnoe (UA)
 Nie mogę zanalizować Channels.xml, ta wersja jest poważnie uszkodzona, nic tylko spadać!!!
@@ -6459,6 +6578,7 @@ Nieznany PRS1
 Nieznany kod PRS1 %1
 Nieznany model
 Nieznany zakres PRS1 0x0E
+Nincs adat
 Niska zmienność wentylacji minutowej
 Niskie ciśnienie wdechowe
 Niskie ciśnienie wydechowe
@@ -6555,6 +6675,7 @@ Nivå på trycklindring vid utandning
 Nižší expirační tlak
 Nižší inspirační tlak
 Nml. Hdf Süresi
+No Data
 No se puede leer Channels.xml, esta compilación está gravemente dañada ¡no queda mas que abortar!
 Noen få pust starter enheten automatisk
 Nogle vejrtrækninger starter automatisk enheden
@@ -6798,12 +6919,14 @@ Obstructieniveau
 Obstructieniveau als percentage
 Obstructieve Apneu (OA)
 Obstructieve apneu (OA)
+Obstructieve apneu (XXXXX)
 Obstructieve hypopneu (OH)
 Obstruction Level
 Obstruction level
 Obstruction level in percentage
 Obstructiva
 Obstructive
+Obstructive Apnea
 Obstructive Apnea (OA)
 Obstructive Hypopnea (OH)
 Obstrukció szintje
@@ -6835,7 +6958,9 @@ Obstruktiv-stopp i halsen
 Obstruktive Apnoe
 Obstruktive Apnoe (OA)
 Obstruktive Hypopnoe (OH)
+Obstruktive Schlafapnoe
 Obstruktiver Apnoe
+Obstruktiver Schlafapnoe
 Obstruktív
 Obstruktív Apnoé (OA)
 Obstruktív hypopnoe (OH)
@@ -6893,7 +7018,9 @@ Ograniczenie przepływu (FL)
 Ograniczenie przepływu.
 Ohivuoto (LF)
 Ohjelma
+Ohjelman kehittäjät tarvitsee .zip-tiedoston SD-kortin sisällöstä ja vastaavat Encore .pdf raportit pystyäkseen lisäämään tukea laitteelle.
 Ohjelman kehittäjät tarvitsevat .zip-tiedoston SD-kortin sisällöstä ja vastaavat Encore .pdf raportit pystyäkseen sen toimivan Oscarin kanssa.
+Ohjelman kehittäjät tarvitsevat .zip-tiedoston SD-kortin sisällöstä ja vastaavat Encore .pdf raportit saadakseen ne toimimaan Oscarin kanssa.
 Okos indítás
 Okruh pacienta
 Oksimetre cihazları menüsünden 'yükle' seçeneğini seçtiğinize emin olun.
@@ -6913,6 +7040,7 @@ Okänd modell
 Okänt PRS1 spann 0x0E
 Olay algılamayı durduran sinyal bozulması, ör. pozisyon değişikliği, öksürme, konuşma, yutkunma vb.
 Olennaiset
+Oletko varma että haluat jatkaa?
 Olyan hypopnea, amelynél a légzési erőfeszítés csökken, nem pedig elzáródik
 Olyan időszak a munkamenet során, amikor a készülék nem tudott áramlást érzékelni.
 Olyan légzési esemény típusa, amely nem reagál a nyomásnövelésre.
@@ -6995,6 +7123,7 @@ Oop Lugweg (CA)
 Opad. wydech.
 Opadanie wydechowe
 Open luchtweg (Centrale Apneu) (CA)
+Open luchtweg apneu (CA)
 Open luchtweg of Centrale Apneu (CA)
 Open luchtweg of Centrale apneu (CA)
 Opiekunowie programu potrzebują kopii .zip karty SD tego aparatu oraz odpowiednich raportów Encore w formacie .pdf aby pomóc w obsłudze tego aparatu przez OSCAR.
@@ -7062,6 +7191,7 @@ Oryentasyon
 Os dados importados podem não estar inteiramente corretos, assim os desenvolvedores gostariam de uma cópia .zip do cartão SD do seu aparelho, bem como um relatório Encore .pdf para ter certeza que o OSCAR está manipulando os dados corretamente.
 Os desenvolvedores necessitam uma copia zip do cartão SD deste equipamento e um relatório pdf tipo Encore ou Care Oschestrator correspondente para faze-lo funcionar com o OSCAR.
 Os desenvolvedores precisam de uma cópia zip do cartão SD desse aparelho e relatórios pdf Encore correspondentes para fazê-lo funcionar no OSCAR.
+Oscar
 Oscar havaitsi käyttäjän määriteltävissä olevan tapahtuman virtauksen aaltomuodon prosessoinnissa.
 Osittain tukkeutunut ilmavirta
 Ospecifierat andningsuppehåll
@@ -7070,6 +7200,7 @@ Ostatnio uaktualnione
 Ostruttiva
 Ostrzeżenie
 Osztályozatlan apnoe (UA)
+Otherwise you can adjust the time yourself.
 Oto-Dnm Sür.
 Otomatik Açılma
 Otomatik EPAP
@@ -7089,6 +7220,9 @@ Outomatiese instelling van die rugsteun-asemhalingsfrekwensie
 Outomatiese start
 Ovatko aikalukkoasetukset muutettavissa.
 Ovatko joustavat asetukset saatavilla.
+Oximeter import completed
+Oximeter import completed successfully, but your device did not record a starting time.
+Oximeter starting time
 Oxygen score calculated by the oximeter (0-10)
 Oxygen score na kinalkula ng oximeter (0-10)
 Oxymètre
@@ -7096,6 +7230,8 @@ P Inicial
 P Iniziale
 P Manual
 P Manuale
+P Máx
+P Mín
 P Trat
 P Tratamiento
 P Trattamento
@@ -7109,6 +7245,7 @@ P manuale
 P manuel
 P ng Paggamot
 P tratament
+P. Rampa
 PAEP
 PAEP Máx
 PAEP Mín
@@ -7139,6 +7276,7 @@ PAP-laitteen moodi
 PAP-modus
 PAP-moodi
 PAP-tilstand
+PAP_Mode
 PAP主管内径
 PAP自動關閉
 PB
@@ -7383,6 +7521,8 @@ Parsing-Identifikationsdatei
 Partida suave tempo máx.
 Pas
 Pas comptés par l'oxymètre pendant l'enregistrement
+Pas de données
+Pas de donée
 Pas de respiration
 Pas. utl. pust
 Pasienthøyde (iVAPS)
@@ -7777,6 +7917,8 @@ Počáteční EPAP rampy
 Počáteční EPAP rampy (iVAPS)
 Počáteční tlak
 Počáteční tlak náběhu
+Pr. Max
+Pr. Min
 Pres Gram
 Pres Inic
 Pres Man
@@ -8062,6 +8204,7 @@ Procento času, kdy byl použit zvlhčovač (za celý den)
 Procentul din timp în care a fost folosit umidificatorul (pentru întreaga zi)
 Procentuální saturace krve kyslíkem
 Procesez fisierul de identificare
+Processing STR.edf File(s)...
 Program
 Program de terapie
 Program de terapie folosit
@@ -8241,6 +8384,7 @@ Quedas 3%
 Quedas 4%
 Quedas de SpO2 de 3%
 Quedas de SpO2 de 4%
+Queing Import Jobs...
 RA
 RAtion I:E
 RC
@@ -8294,6 +8438,7 @@ Ramp Down inschakelen
 Ramp Enable
 Ramp Event
 Ramp Händelser
+Ramp Pr.
 Ramp Pressure
 Ramp Start EPAP
 Ramp Start EPAP (iVAPS)
@@ -8335,6 +8480,7 @@ Rampa Süresi
 Rampa Süresi 
 Rampa Tipi
 Rampayı Etkinleştir
+Rampdr.
 Rampdruk
 Rampe
 Rampe Aktivering
@@ -8510,6 +8656,7 @@ RemStar Plus Voldoening Alleenlik
 RemStar Plus doar Complianta
 RemStar Plus hoitohyvyys ainoastaan
 RemStar Plus met alleen naleving
+RemStar Plus with C-Flex+
 RemStar Plus само спазване на терапията
 RemStar Pro C-Flex+
 RemStar Pro avec A-Flex
@@ -8532,6 +8679,7 @@ ResMed Ausatmungsdruckentlastung
 ResMed CPAP cihazınız (Model %1) henüz test edilmemiştir.
 ResMed CPAP 시스템(%1 모델)이 아직 테스트되지 않았습니다.
 ResMed Exhale Pressure Relief
+ResMed Exhale Pressure Relief Mode.
 ResMed Exhale 압력 완화
 ResMed Mask Setting
 ResMed Maske Ayarı
@@ -8744,6 +8892,7 @@ Respiratorisk hændelse
 Respiratoriskt störningsindex
 Respiratory Disturbance Index
 Respiratory Disturbance Index (RDI)
+Respiratory Effort Related Arousal
 Respiratory Effort Related Arousal (RERA) : gêne respiratoire qui cause un réveil ou un trouble du sommeil.
 Respiratory Effort Related Arousal (RERA): затруднение дыхания, вызывающее пробуждение или нарушение сна.
 Respiratory Effort Related Arousal: 'n Beperking in asemhaling wat of veroorsaak dat die pasiënt wakker word of wat slaapversteuring tot gevolg het.
@@ -8757,6 +8906,7 @@ Respiratory Effort Related Arousal: затруднение дыхания, вы�
 Respiratory Event
 Respiratory Rate
 Respiratory Rate (Watch)
+Respiratory effort-related arousal
 Respirazione Non Rilevata
 Respirazione Periodica
 Respirazione Variabile
@@ -9043,6 +9193,7 @@ Scapari importante
 Schalten Sie das Gerät automatisch durch Atmen ein
 Schimbare Puls
 Schlaf
+Schlafmütze
 Schlafposition in Grad
 Schlafqualitätsmessung
 Schlafstadium
@@ -9125,8 +9276,10 @@ Se o dispositivo permite verificar a Máscara.
 Se os gatilhos respiratórios são definidos manual ou automaticamente
 Seans esnasında cihazın akımı tesbit edemediği bir dönem.
 Seans esnasında cihazın akımı tespit edemediği bir dönem.
+Searching for EDF Files...
 Segnale di Perdita
 Segnalibro Fine
+Sekunden
 Selon disponibilité des réglages de résistance System One.
 Selon que l'appareil affiche ou pas l'IAH sur l'affichage LCD.
 Selon que l'appareil permet la vérification du masque.
@@ -9209,10 +9362,12 @@ Sentrale Hipopnee (CH)
 Sesiunea CPAP contine doar date sumare
 Sesje CPAP zawierające tylko dane sumaryczne
 Session PPC avec résumé seulement
+Sessions Switched Off!
 Sessão CPAP contém apenas dados resumidos
 Sestupná rampa
 Set EPAP
 Set IPAP
+Set Manually
 Set Pressure
 Set Respiratory Rate (T mode)
 Set di pressione
@@ -9241,6 +9396,7 @@ Seu aparelho CPAP Philips Respironics (Modelo %1) ainda não foi testada ainda.
 Seu aparelho CPAP Philips Respironics (Modelo %1) ainda não foi testado ainda.
 Seu aparelho CPAP Philips Respironics (Modelo %1) infelizmente não é um modelo com capacidade de dados.
 Seu equipamento CPAP ResMed (Modelo %1) ainda não foi testado.
+Severety (0-1)
 Sfarsit
 Sfiato minuti.
 Sforait
@@ -9294,9 +9450,11 @@ Signalverfälschung, die die Ereigniserkennung unterbricht, z. B. durch Lagewech
 Siklus
 Simt trezire (SA)
 Simula ng Bookmark
+Sin datos
 Sinalização do usuário #1 (SU1)
 Sinalização do usuário #2 (SU2)
 Sinalização do usuário #3 (SU3)
+Sind Sie sicher, dass Sie dies tun wollen?
 Sinneswahrnehmungslevel
 Sinun Philips Respironics %1 (%2) loi tietoja, joita Oscar ei ole tavannut koskaan aiemmin.
 Sinun Philips Respironics CPAP laite (Malli %1) ei ole vielä testattu.
@@ -9325,6 +9483,7 @@ Skóre O2
 Slaap
 Slaap Stadium
 Slaap posisie in grade
+SlaapKop
 Slaapfase
 Slaaphouding in graden
 Slaaptijd
@@ -9333,6 +9492,7 @@ Slaaptyd
 Slang Diam.
 Slang Diameter
 Slang type
+Slang vid huvudet
 SlangType
 Slangdiameter
 Slangdiameter.
@@ -9361,6 +9521,8 @@ Slangtype vergrendeling
 Slangverwarming
 Sleep Stage
 Sleep position in degrees
+SleepyHead
+SleepyHead could not parse the model number, this machine can not be imported..
 Slegs Opsomming :(
 Slegs Voldoening :(
 Slegs vir interne gebruik
@@ -9981,6 +10143,7 @@ Talaarawan
 Tam akış
 Target Alveolar Ventilation (iVAPS)
 Target Minute Ventilation
+Target Minute Ventilation?
 Target Patient Rate (iVAPS)
 Target RR
 Target Rate
@@ -10338,7 +10501,9 @@ Therapy Pressure
 Therapy program
 Therapy program in use
 This Machine Record cannot be imported in this profile.
+This Machine Record cannot be imported in this profile.\nThe Day records overlap with already existing content.
 This file does not appear to be a Viatom data file.
+Threshold
 Ti
 Ti Maks
 Ti Max
@@ -10836,6 +11001,7 @@ Tube Temp.
 Tube Temperature
 Tube chauffé
 Tube chauffé connecté
+Tube en tete
 Tube type
 TubeType
 Tubing Type Lock
@@ -11009,6 +11175,8 @@ Ultimo Aggiornamento
 Ultimo aggiornamento
 Um Evento Não Respondendo
 Um evento definível do utilizador detetado pelo processador de forma de onda de fluxo do OSCAR.
+Um evento definível pelo utilizador detectado pelo processador de forma de onda do OSCAR.
+Um evento definível pelo utilizador detectado pelo processador de forma de onda do SleepyHead.
 Um evento definível por usuário detectado pelo processador de forma de onda de fluxo do OSCAR.
 Um evento definível por utilizador detectado pelo processador de forma de onda de fluxo do OSCAR
 Um grande vazamento de máscara afetando o desempenho da máquina.
@@ -11078,6 +11246,7 @@ Umido. Livello
 Umido. Modalità
 Umido. Stato
 Un Pulso de Presión 'lanzado' para detectar una vía aérea cerrada.
+Un apnée ne rentrant dans aucune catégorie
 Un baisse soudaine (definissable par l'utilisateur) d'oxygénation du sang
 Un calo improvviso (definibile dall'utente) nella saturazione di ossigeno nel sangue
 Un calo improvviso (definibile dall'utente) nella saturazione di ossigeno nel sangue (desaturazioni per ora)
@@ -11090,6 +11259,7 @@ Un elemento de datos ResMed: Evento de Ciclo de Disparo
 Un eveniment definibil de catre utilizator detectat de procesorul de flux al programului OSCAR.
 Un evento definibile dall'utente rilevato dal processore di forme d'onda di flusso di OSCAR.
 Un evento definible por el usuario detectado por el procesador de forma de onda de flujo de OSCAR.
+Un evento definible por el usuario detectado por el procesador de formas de onda de SleepyHead.
 Un foto-pletismograma óptico mostrando el ritmo cardiaco
 Un foto-pletisomogramma ottico che mostra il ritmo cardiaco
 Un improvviso (definibile dall'utente) cambiamento nella frequenza cardiaca
@@ -11097,6 +11267,7 @@ Un improvviso (definibile dall'utente) cambiamento nella frequenza cardiaca (eve
 Un impulso di pressione "pingato" per rilevare una via aerea chiusa.
 Un periodo anormale di Cheyne Stokes Respiration
 Un periodo anormale di respirazione periodica
+Un periodo de respiración periódca
 Un periodo durante una sesión en el que el dispositivo no pudo detectar flujo.
 Un periodo durante una sessione in cui la macchina non è stata in grado di rilevare il flusso.
 Un período anormal de Respiración Periódica
@@ -11108,6 +11279,7 @@ Un período durante una sesión en el que el dispositivo no pudo detectar flujo.
 Un período durante una sesión en el que la máquina no puede detectar el flujo.
 Un puls de presiune fortat pentru a detecta cai aeriene blocate.
 Un pulso de presión 'lanzado' para detectar una vía aérea cerrada.
+Un période de respiration périodique
 Un repentino (definible por el usuario) cambio en el ritmo cardiaco
 Un ronflement vibratoire
 Un ronflement vibratoire comme détecté par une machine SystemOne
@@ -11125,6 +11297,7 @@ Un tip de eveniment respirator care nu raspunde la un puls de presiune suplimnet
 Un tipo de evento respiratorio que no responde a los incrementos de presión.
 Un tipo di evento respiratorio che non risponderà a un aumento della pressione.
 Un élément de données ResMed: événement de cycle de déclenchement
+Un évènement défiissable par l'utilisateur détécté par le moteur d'analyse de flux de SleepyHead.
 Un évènement ne répondant pas
 Un évènement resporatoire ne répondant pas a l'augmentation de la pression.
 Un'apnea causata da ostruzione delle vie aeree
@@ -11143,6 +11316,7 @@ Una apnea mientras la vía aérea se encuentra abierta
 Una apnea notificada por su dispositivo CPAP.
 Una apnea provocada por obstrucción de la vía aérea
 Una apnea que no pudo determinarse como Central u Obstructiva.
+Una apnea que no se pudo categorizar
 Una apnea que no se pudo determinar como Central u Obstructiva.
 Una apnea reportada por su dispositivo CPAP.
 Una evaluación relativa de la fuerza del pulso en el lugar de monitorización
@@ -11164,6 +11338,7 @@ Una repentina (definible por el usuario) caída en la saturación de oxígeno en
 Una restricción en la respiración a comparación con lo normal, que causa un achatamiento en la forma de onda de flujo.
 Una restricción en la respiración desde lo normal, causando un aplanamiento de la forma de onda del flujo.
 Una restricción en la respiración normal, que causa un aplanamiento de la forma de onda de flujo.
+Una restricción en la respiración que causa o bien un despertar o una perturbación del dormir.
 Una restricción en la respiración respecto a lo normal, causando un aplanamiento de la forma de onda de flujo.
 Una restricción en la respiración respecto a lo normal, que causa un aplanamiento de la forma de onda de flujo.
 Una valutazione relativa della forza del polso nel sito di monitoraggio
@@ -11245,6 +11420,7 @@ Uri ng Ramp
 Uri ng kurba ng ramp na gagamitin.
 Uri ng tubo
 Urządzenie nie testowane
+Use CPAP
 User Flag #1
 User Flag #1 (UF1)
 User Flag #2
@@ -11364,8 +11540,10 @@ Vain yhteenveto :(
 Vakentid
 Vakio backup hengityksen BPM
 Valeur I/E
+Valitettavasti Oscar pystyy näyttämään vain käyttötunnit ja perusasetukset tälle laitteelle.
 Valitettavasti Oscar voi tutkia ja raportoida vain käyttötunteja ja tämän laitteen perustietoja.
 Valitettavasti Philips Respironics CPAP (malli %1) ei ole tuettu vielä.
+Valitettavasti SleepyHead pystyy näyttämään vain käyttötunnit ja perusasetukset tälle laitteelle.
 Valoare I/E
 Valor I/E
 Vannet i fukteren tok slutt under behandlingen
@@ -11485,6 +11663,7 @@ Ventilasyon modu
 Ventilatie Mica
 Ventilatie pe minut
 Ventilation Cible par Minute
+Ventilation Cible par Minute?
 Ventilation alvéoalire cible (iVAPS)
 Ventilation alvéolaire par minute
 Ventilation cible par minute
@@ -11523,6 +11702,7 @@ Verhouding tussen Inasem en Uitasem tyd
 Verhouding tussen inadem- en uitademtijd
 Verhältnis Ein-/Ausatemzeit
 Verhältnis zwischen den expiratorischen Zeiten
+Veri Yok
 Veri Özelliğine Sahip Olmayan Cihaz
 Verrou Flex
 Verrou Resit. Sys1
@@ -11737,6 +11917,7 @@ Waargenome maskerlek, insluitend natuurlike Maskerlekkasies
 Waarschuwing
 Waarskuwing
 Waga
+Walang Data
 Walang laman ang humidifier
 Warning
 Warnung
@@ -11744,6 +11925,7 @@ Wartość procentowa saturacji krwi tlenem
 Weergawe
 Weerst. vergrendeld
 Weerstand vergrendeling
+Weet je het zeker?
 Weight
 Weinmann pressure relief setting.
 Wektijd
@@ -11768,6 +11950,7 @@ Whether or not machine shows AHI via LCD panel.
 Whether or not machine shows AHI via built-in display.
 Whether the breath triggers are set manually or automatically
 Whether tubing type settings are available to you.
+Which devices starting time do you wish to use for this oximetry session?
 Widok pacjenta
 Wie fühlen Sie sich (0 = nicht gut, 10 = hervorragend)
 Wie fühlten Sie sich am Morgen
@@ -11845,10 +12028,12 @@ Yer İşareti Bitişi
 Yer İşareti Notları
 Yksittäisen hengityksen ilmamäärä
 You are about to import a large number of sessions and may run out of memory.
+You will have to adjust the starting time of this oximetery session manually.
 Your Philips Respironics %1 (%2) generated data that OSCAR has never seen before.
 Your Philips Respironics CPAP machine (Model %1) has not been tested yet.
 Your Philips Respironics CPAP machine (Model %1) is unfortunately not a data capable model.
 Your ResMed CPAP machine (Model %1) has not been tested yet.
+Your oximeter does not record a starting time, and no CPAP session is available to match it to
 Yugto ng Pagtulog
 Yugto ng Tulog
 Yumuşak başlangıç
@@ -11885,6 +12070,7 @@ Yüzeyel Uykuda geçen Zaman
 Yüzeyel Uykudaki Zaman
 ZEO ZQ
 ZEO ZQ(수면 총점)
+ZEO Zq
 ZEO 睡商
 ZEO 睡商(ZQ)
 ZEO 睡眠质量指标
@@ -11943,6 +12129,7 @@ Zeitaufwand für den Übergang von EPAP zu IPAP, je höher die Zahl, desto langs
 Zeitgesteuerte Insp.
 Zeitgesteuerter Atem
 Zeitliche Inspiration
+Zeitraum der wiederkehrenden Atmung
 Zeitschloss für den Aufstieg
 Zeitüberschreitung Atem
 Zentrale Hypopnoe (ZH)
@@ -11968,6 +12155,7 @@ Ziel-Va
 Zielalveolarventilation (iVAPS)
 Zielfrequenz
 Zielminutenvolumen
+Zielminutenvolumen?
 Zielzeit
 Zit/lig stand in graden
 Zjazd rampy
@@ -12020,6 +12208,7 @@ avvertimento
 avvio automatico
 avvio graduale pressione minima
 avvio graduale tempo max
+begivenheder
 beheizte Schläuche
 beheizter Schlauch angeschlossen
 beheiztes Rohrniveau
@@ -12027,10 +12216,12 @@ bezdech
 bezdech (a)
 bezdech który nie może być określony jako obturacyjny lub centralny, z uwagi na zbyt duży wyciek przeszkadzający w procesie klasyfikacji.
 ciclo
+cm
 configuration EPAP
 cycles spont.%
 cyclus
 define si la máquina muestra el IAH desde el panel LCD.
+degrees
 desconocido
 diamètre du circuit patient
 diario giornaliero
@@ -12048,12 +12239,41 @@ eVB
 emO
 en apné som inte kunde bestämmas som Central eller Obstruktiv, på grund av överdrivet läckage som stör klassificeringsprocessen.
 en apné som inte kunde bestämmas som Central- eller Obstruktiv, på grund av överdrivet läckage som stör klassificeringsprocessen.
+ereignisse
 esO
+esemény/óra
+események
+evenimente
+evenimente/h
+evenimente/oră
+eventi
+eventi/h
+eventi/ora
+eventos
+eventos/h
+eventos/hora
+events
+events/hour
+events/hr
 flusso espiratorio
 flusso totale
+gebeurtenisse
+gebeurtenisse/uur
+gebeurtenissen per uur
+geleitete Schläuche
+graden
 h. cible Humidificateur
+hendelser
+hendelser/t
+hendelser/time
 hengitysyritykseen liittyvä havahtuminen (SA)
 hypopnées
+hz
+händelser
+händelser/h
+händelser/timme
+hændelser/t
+hændelser/time
 iBR
 iPR
 iPR Level
@@ -12104,6 +12324,9 @@ iVAPS-pituus
 iVAPS-tavoite Va
 in
 inch
+incidenten
+incidenten/u
+incidenten/uur
 ipopnea
 kaltevuus
 kg
@@ -12111,14 +12334,22 @@ l/min
 l/minut
 liter
 litres
+max. Druck
 media Perdite
 mesure de qualité d'endormissement ZOE
+min. Druck
+minuten
+minutes
 necunoscut
 nieznany
 obiettivo Vent.
+olay/sa
+olay/saat
+olaylar
 onbekend
 onde celebrali
 onde cerebrali
+pangyayari/oras
 perdita della maschera è al di sopra di una soglia critica
 periodische Atmung
 periodischer Atmung
@@ -12153,7 +12384,11 @@ rampe
 risvegli
 rmv Fluttuazione
 running
+seconden
+seconds
 sentirsi al mattino
+slagen per minuut
+sleepyHead
 softSTART 壓力
 softSTART 時間
 softSTART 最大壓力
@@ -12166,6 +12401,9 @@ str.edf 記録開始時間
 str.edf'ye göre başlangıç zamanı
 str.edf에 따라 시간이 시작되었습니다
 sveglio
+tapahtumaa/h
+tapahtumaa/tunti
+tapahtumat
 tempo (2 min) con grave ostruzione
 tempo (2 min) con lieve ostruzione
 tempo (2 min) con russamento
@@ -12175,10 +12413,14 @@ tempo sveglio
 tipo di tubo
 trigger
 tuntematon
+události
+událostí/h
+událostí/hodinu
 ulga wydechowa
 uma apnéia que não poderia ser determinada como Central ou Obstrutiva, devido ao vazamento excessivo interferindo no processo de classificação.
 un roflement vibratoire
 unbekannt
+une restriction dans la respiration qui cause un réveil ou un micro-réveil.
 unknown
 v%1
 vREM basınç azaltma ayarı.
@@ -12226,6 +12468,8 @@ x2
 x3
 x4
 x5
+zdarzenia
+zdarzeń/godz.
 ¿Está el humidificador PRS1 conectado?
 Ángulo vertical en grados
 Áramlás limit.
@@ -12243,6 +12487,7 @@ x5
 Älykäs käynnistys
 Älykäs pysäytys
 Älykäs varahengitystaajuus
+Är du säker på att du vill göra detta?
 Åndedræt BPM
 Åndedrætsfrekvens
 Åndedrætskredsløbet blev frakoblet
@@ -12383,6 +12628,9 @@ x5
 Üzgünüz, Philips Respironics CPAP cihazınız (%1) henüz desteklenmiyor.
 Üzgünüz, Philips Respironics CPAP cihazınız (Model %1) henüz desteklenmiyor.
 évènement définissable par l'utilisateur détécté par le moteur d'analyse de flux d'OSCAR.
+évènements
+évènements/h
+évènements/heure
 Čas < 90%
 Čas bdění
 Čas do usnutí
@@ -12428,6 +12676,7 @@ x5
 Špičkový průtok
 Špičkový průtok během 2minutového intervalu
 Źródło danych ResMed pokazujące zdarzenia oddechowe
+Žádná data
 Άδειος υγραντήρας
 Άνοδος εισπν.
 Άνοδος εισπνοής
@@ -12788,6 +13037,7 @@ x5
 Περιοδική αναπνοή
 Περιορισμός Ροής (FL)
 Περιορισμός ροής
+Περιστατικα
 Πλήθος
 Πλήρης ροή
 Πλεισματολογία
@@ -12952,7 +13202,9 @@ x5
 Χρόνος στην ανοιχτή νύχτα
 Χρόνος ύπνου
 Χρόνος ύπνου σύμφωνα με το οξύμετρο
+Χωρίς δεδομένα
 Ωρα για ύπνο
+συμβάντα/ώρα
 ІМТ
 Імпульс тиску
 Імпульс тиску, поданий для виявлення закритих дихальних шляхів.
@@ -12965,6 +13217,7 @@ x5
 Інтелектуальна резервна частота
 АБ фильтр
 АБ-фильтр
+Абнормален период на Периодично дишане/Чейн-Стоксово дишане
 Абнормален период на Чейн-Стоксово дишане
 Абнормален период на периодично вдишване
 Авто EPAP
@@ -13419,6 +13672,7 @@ x5
 ЗУ
 За съжаление вашият апарат Philips Respironics CPAP (Модел %1) не се поддържа все още.
 За съжаление вашият апарат Philips Respironics CPAP (Модел %1) няма възможност за събиране на данни.
+За съжаление трябва да ви съобщя че специално за вашият апарат SleepyHead може само да следи броя на часовете, в които е използван и някои прости настройки.
 Загальна швидкість витоку
 Загальний час використання
 Загальний час використання вами зволожувача (на момент імпорту)
@@ -13656,6 +13910,7 @@ x5
 Минутная вентиляция
 Мозкові хвилі
 Мозъчна вълна
+Моля изпратете на JediMark .zip архив със съдържанието на SD картата с памет за този апарат както и съответни Encore .pdf репорти за да може този софтуер да поддържа и вашия модел в следващите си версии.
 Моля уверете се че сте избрали 'upload' от менюто на оксиметъра.
 Мін. тиск
 Мінімальна кількість вдихів за хвилину (BPM), нижче якої ініціюється часовий вдих
@@ -13756,6 +14011,7 @@ x5
 Некласифицирана апнея
 Некласифіковане апное (UA)
 Неклассифицированное апноэ (UA)
+Немає даних
 Неотговарящо събитие (NR)
 Непознат PRS1 код %1
 Непознат модел
@@ -13765,6 +14021,7 @@ x5
 Нерегулярность в измеренных данных, не представляющая собой дыхательное событие (например, глотание, кашель или разговор)
 Нерегулярність у виміряних даних, що не є дихальною подією (наприклад, ковтання, кашель або мовлення)
 Нередовност в измерените данни, която не представлява дихателно събитие (напр. преглъщане, кашляне или говорене)
+Нет данных
 Нет дыхания (BND)
 Ниво на Comfort Control Plus
 Ниво на SensAwake
@@ -13792,6 +14049,7 @@ x5
 Нотатки щоденника
 Няколко вдишвания автоматично включват апарата
 Няколко вдишвания автоматично стартират устройството
+Няма данни
 ОГ
 ОХ
 Об'єм повітря за один вдих
@@ -13964,6 +14222,7 @@ x5
 Потребителски маркер #1
 Потребителски маркер #2
 Потребителски маркер #3
+Потребителски указано събитие засечено от SleepyHead.
 Потребителски флаг #1 (UF1)
 Потребителски флаг #2 (UF2)
 Потребителски флаг #3 (UF3)
@@ -14152,6 +14411,7 @@ x5
 Сигнал утечки
 Сигнал утечки аппарата был активен
 Сигнализация маски
+Сигурни ли сте, че желаете да направите това?
 Скорост на нарастване на налягането в началото на вдишването
 Скорост на повишаване на налягането
 Скорост на спадане на налягането в началото на издишването
@@ -14423,6 +14683,7 @@ x5
 Целева алвеолна вентилация (iVAPS)
 Целева белодр. вмест.
 Целева белодробна вместимост
+Целева белодробна вместимост?
 Целева дихателна честота
 Целева честота
 Целевая Va
@@ -14553,6 +14814,14 @@ x5
 л/мин
 литра
 непознат
+подій/год
+події
+событий/ч
+событий/час
+события
+събития
+събития/ч
+събития/час
 אוורור דקתי
 אוורור דקתי יעד
 אוורור לדקה
@@ -14568,12 +14837,15 @@ x5
 אי-סדירות בנתונים המדודים, שאינה מייצגת אירוע נשימה (למשל בליעה, שיעול או דיבור)
 איך אתה מרגיש (1 = נורא, 10 = בלתי ניתן לעצירה)
 איך הרגשת בבוקר
+אין נתונים
 אירוע Intellipap שבו אתה נושף דרך הפה.
 אירוע הניתן להגדרה על ידי המשתמש, המזוהה על ידי מעבד צורת גל הזרימה של OSCAR.
 אירוע ללא מענה (NR)
 אירוע נחירות.
 אירוע נשימתי
 אירוע עלייה הדרגתית
+אירועים
+אירועים/שעה
 אנא ודא שאתה בוחר 'העלאה' מתפריט מכשירי ה-oximeter.
 אפוך (2 דקות) עם הגבלת זרימה
 אפוך (2 דקות) עם חסימה קלה
@@ -14770,6 +15042,7 @@ x5
 כמות האוויר המועברת בדקה
 כמות האוויר המועברת בכל נשימה
 כמות הזמן הנדרשת למעבר מ-EPAP ל-IPAP, ככל שהמספר גבוה יותר כך המעבר איטי יותר
+ל\\ד
 לא מאושר: ייתכן שמדובר בנשימה משתנה, שהן תקופות של סטייה גבוהה מגמת זרימת ההשראה הגבוהה ביותר
 לחות
 לחץ
@@ -14906,6 +15179,7 @@ x5
 נשימות שהופעלו על ידי המטופל
 נשימת Cheyne Stokes (CSR)
 נתיב אוויר חופשי
+ס"מ
 סה"כ דליפות
 סוג
 סוג עקומת הרמפה לשימוש.
@@ -15032,6 +15306,8 @@ x5
 آلة لم تختبر
 أثار المريض أنفاسه
 أثر زائف
+أحداث
+أحداث/ساعة
 أدنى زمن للشهيق
 أشياء داخلية سرية للغاية لا يفترض أن تراها ؛)
 أطول شهيق يسمح به الجهاز
@@ -15431,6 +15707,7 @@ x5
 لا
 لا يمكن استيراد سجل الجهاز في ملف التعريف هذا.
 لا يمكن تحليل Channels.xml ، هذه البنية تم قطعها على نحو خطير ، لا خيار سوى الإجهاض !!
+لايوجد بيانات
 لتر / دقيقة
 للاستخدام الداخلي فقط
 لم يتم اختبار جهاز Philips Respironics CPAP (الطراز %1) حتى الآن.
@@ -15992,7 +16269,10 @@ x5
 เส้นผ่านศูนย์กลางท่อ
 เส้นผ่านศูนย์กลางวงจรผู้ป่วย
 เส้นผ่าศูนย์กลางสาย
+เหตุการณ์
 เหตุการณ์ Intellipap ที่คุณหายใจออกทางปาก
+เหตุการณ์/ชม.
+เหตุการณ์/ชั่วโมง
 เหตุการณ์กรน
 เหตุการณ์การหายใจ
 เหตุการณ์ที่ผู้ใช้กำหนดได้ ตรวจพบโดยตัวประมวลผลคลื่นการไหลของ OSCAR
@@ -16038,6 +16318,7 @@ x5
 โหมดอุปกรณ์ PAP
 ไดอารี่
 ไม่พบการหายใจ
+ไม่มีข้อมูล
 ไม่ได้รับการยืนยัน: อาจเป็นการหายใจแบบแปรผัน ซึ่งเป็นช่วงที่มีการเบี่ยงเบนสูงจากแนวโน้มการไหลของอากาศขณะหายใจเข้าสูงสุด
 “
 いびき
@@ -16050,6 +16331,8 @@ x5
 このデバイスの総使用時間（インポート時）
 この呼吸数を下回ると機器が強制換気を行う呼吸数
 アーティファクト
+イベント
+イベント/時
 イベント検出を停止させる信号の乱れ（例：体位変換、咳、会話、嚥下など）。
 インテリジェントバックアップレート
 エアチューブの種類
@@ -16094,6 +16377,7 @@ x5
 デバイスが内蔵画面にAHIを表示するかどうか。
 デバイスのパフォーマンスに影響を与える大きなマスクの漏れ。
 デバイスは自動で電源が切れます
+データなし
 トリガー
 ノート
 ノートをブックマークする
@@ -16184,6 +16468,7 @@ x5
 不允许查看内部绝密文件
 不支持的机型
 不規則な呼吸 (Variable Breathing)
+不适用于任何分类的呼吸暂停
 中枢性
 中枢性または閉塞性と判断できない無呼吸。
 中枢性低呼吸 (CH)
@@ -16194,6 +16479,9 @@ x5
 中樞性呼吸不足（CH）
 临界漏气
 主の CPAP のホースの直径
+事件
+事件/小时
+事件/小時
 仅供内部使用
 仅含有概要数据
 仅含有概要資料
@@ -16269,6 +16557,7 @@ x5
 分時換気量の変動が少ない
 分鐘通氣率
 分鐘通氣率.
+分钟
 分钟通气率
 分钟通气率.
 分钟通气量
@@ -16351,11 +16640,13 @@ x5
 压力脉冲
 压力设定
 压力设置
+厘米
 反應
 变异呼吸
 口からのリークが止まったときのように、リークが急に減少しました
 口から息を吐くIntellipapイベント。
 只限內部使用
+可被用用户在SleepyHead波形处理器侦测到的事件.
 各セッション後にSDカードへ自動保存される情報を示します
 同行显示过去一个小时的AHI
 同行顯示最近一個小時的AHI
@@ -16432,6 +16723,7 @@ x5
 周期
 周期性呼吸
 周期性呼吸 (PB)
+周期性呼吸期间
 周期性呼吸的不正常时期
 周期性呼吸的不正常時期
 周期性呼吸的异常时段
@@ -16460,6 +16752,7 @@ x5
 呼吸努力指数与觉醒有关。呼吸限制会导致觉醒或者睡眠障碍.
 呼吸努力指数与觉醒有关：呼吸限制会导致觉醒或者睡眠障碍.
 呼吸努力指數與觉醒有关：呼吸限制會導致觉醒或者睡眠障碍.
+呼吸努力相关微觉醒
 呼吸努力相关觉醒 (RE)
 呼吸努力相关觉醒：呼吸受限导致觉醒或睡眠障碍。
 呼吸努力相關覺醒
@@ -16679,6 +16972,7 @@ x5
 开始
 开始斜坡升压
 开放气道
+开放气道呼吸暂停
 开放氣道
 強制換気の吸気時間
 後備呼吸模式
@@ -16747,6 +17041,7 @@ x5
 您的飞利浦伟康呼吸机 (型号 %1) 不适用.
 感受
 感度
+所存数据与此配置文件不符\n数据已被现有内容覆盖.
 手动压力
 手动存储
 手動 P
@@ -16791,6 +17086,7 @@ x5
 数次呼吸后自动启动设备
 斜坡下降
 斜坡下降启用
+斜坡升压.
 斜坡升压启动
 斜坡升压啟動
 斜坡升压时间
@@ -16810,6 +17106,7 @@ x5
 方向
 於同一行顯示最近一個小時的 AHI
 无响应事件 (NR)
+无数据
 无法判断为中枢性或阻塞性的呼吸暂停。
 无法在此配置文件中导入此设备的记录。
 无法解析 Channels.xml,已损坏,退出!
@@ -16983,6 +17280,7 @@ x5
 正壓通氣模式
 正常的呼吸限制,导致波形呈扁平状.
 此呼吸暂停事件无法归类到中枢性或者阻塞性类别，因为大量的漏气干扰。
+此类呼吸限制导致既不是觉醒也不是睡眠障碍的状态.
 步数
 步數
 歩数
@@ -17166,6 +17464,7 @@ x5
 無呼吸低呼吸指数(AHI)
 無效(ART)
 無法在此個人檔案中匯入此设备的记录。
+無資料
 爬升时间
 爬升时间 
 瑞思迈呼气压力释放
@@ -17202,6 +17501,7 @@ x5
 病患資訊選單
 監視サイトでの脈拍強度の相対的な評価
 目标分钟通气率
+目标分钟通气率?
 目标分钟通气量
 目标呼吸频率
 目标时间
@@ -17254,6 +17554,8 @@ x5
 短时间的呼吸
 短時間的呼吸
 短時間的呼吸(TB)
+确定?
+秒
 移動
 移動感應器
 程序
@@ -17411,6 +17713,7 @@ x5
 觉醒侦测功能会在侦测到醒来时降低呼吸机的压力.
 觉醒偵測功能會在偵測到醒来時降低PAP的壓力.
 觉醒次数
+角度
 解析识别文件
 觸發
 計測された吸気
@@ -17508,6 +17811,7 @@ x5
 重度阻塞时段
 重度阻塞时段（2分钟）
 重度阻塞時段
+重點事件
 鎖定面罩阻力
 閉塞ではなく呼吸努力の低下による低呼吸
 閉塞レベル
@@ -17527,6 +17831,7 @@ x5
 阻塞性低通气（OH）
 阻塞性呼吸不足（OH）
 阻塞性呼吸中止(OA)
+阻塞性呼吸暂停
 阻塞性呼吸暂停 (OA)
 阻塞性氣道窒息
 阻塞程度
@@ -17545,6 +17850,8 @@ x5
 震動式打鼾(鼻鼾)(VS2) 
 靈敏度
 非常に高い漏れの間に検出された低呼吸。AHI には含まれません。
+非常抱歉的统治您SleepyHead只能跟踪读取这款机器仅有的几个小时的数据.
+非常抱歉的通知您SleepyHead只能读取这台机器的使用小时数以及其他非常基本的设置信息.
 面具使用时间
 面具使用時間
 面罩
@@ -17690,6 +17997,7 @@ x5
 대상 환기구.
 더 높은 최종 호기압
 더 높은 흡기 압력
+데이터 없음
 들숨 걸린 시간
 들숨. 시간
 디버깅 채널 #1
@@ -17868,7 +18176,9 @@ x5
 이 장치로 받은 총 치료 시간(가져오기 시점)
 이 장치의 총 사용 시간(가져오기 시점)
 이 호흡수 아래로 내려가면 장치가 시간 조절 호흡을 제공하는 호흡수
+이벤트
 이벤트 감지를 중단시키는 신호 왜곡(예: 자세 변경, 기침, 말하기, 삼키기 등).
+이벤트/시간
 인공물
 일반 22mm
 일지

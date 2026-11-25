@@ -14,6 +14,7 @@ Source strings (the English names):
     database is read), and
   * every string that was once a tr("...") or QObject::tr("...") literal in
     oscar/SleepLib/schema.cpp, oscar/SleepLib/common.cpp or oscar/SleepLib/loader_plugins/*.cpp
+    (or the same files at their earlier locations, SleepLib/... and sleepyhead/SleepLib/...)
     in any commit and is no longer one at HEAD (old wordings that were later changed).
 
 Output: those strings plus every <translation> that any Translations/*.ts file has ever
@@ -49,6 +50,19 @@ TR_PATHSPECS = [
     "oscar/SleepLib/schema.cpp",
     "oscar/SleepLib/common.cpp",
     "oscar/SleepLib/loader_plugins/*.cpp",
+]
+# The same files at the locations they had earlier in the history (before the oscar/
+# layout, and before that as SleepyHead). Their tr() literals count as "once shipped" but
+# are never used for the "still a literal at HEAD" test, which uses TR_PATHSPECS only.
+OLD_TR_PATHSPECS = [
+    "SleepLib/schema.cpp",
+    "SleepLib/common.cpp",
+    "SleepLib/machine_common.cpp",
+    "SleepLib/loader_plugins/*.cpp",
+    "sleepyhead/SleepLib/schema.cpp",
+    "sleepyhead/SleepLib/common.cpp",
+    "sleepyhead/SleepLib/machine_common.cpp",
+    "sleepyhead/SleepLib/loader_plugins/*.cpp",
 ]
 TS_PATH = re.compile(r"^Translations/[^/]+\.ts$")
 GUARD_FRACTION = 0.80
@@ -115,7 +129,7 @@ def retired_tr_strings(repo):
     """Strings that were once tr() literals in the channel source files but are not at HEAD."""
     log("Scanning the history of the channel source files for tr() literals...")
     log_out = git(repo, "log", "-p", "-U0", "--no-renames", "--format=%x00%H", "--",
-                  *TR_PATHSPECS).decode("utf-8", errors="replace")
+                  *(TR_PATHSPECS + OLD_TR_PATHSPECS)).decode("utf-8", errors="replace")
     commits = 0
     ever = set()
     for chunk in log_out.split("\x00"):
@@ -160,7 +174,7 @@ def ts_blobs(repo):
     HEAD. Identical file contents are read once.
     """
     log("Listing Translations/*.ts versions in the history...")
-    out = git(repo, "log", "-m", "--raw", "--no-abbrev", "--no-renames", "--format=%x00%H",
+    out = git(repo, "-c", "core.quotepath=false", "log", "-m", "--raw", "--no-abbrev", "--no-renames", "--format=%x00%H",
               "--", "Translations").decode("utf-8", errors="replace")
     blobs = {}
     seen = set()
@@ -179,7 +193,7 @@ def ts_blobs(repo):
             blobs.setdefault(blob, set()).add(path)
     commits = len(seen)
     head_blobs = {}
-    for line in git(repo, "ls-tree", "-r", "--full-tree", "HEAD", "--", "Translations").decode("utf-8").splitlines():
+    for line in git(repo, "-c", "core.quotepath=false", "ls-tree", "-r", "--full-tree", "HEAD", "--", "Translations").decode("utf-8").splitlines():
         meta, _, path = line.partition("\t")
         if TS_PATH.match(path):
             blob = meta.split()[2]
