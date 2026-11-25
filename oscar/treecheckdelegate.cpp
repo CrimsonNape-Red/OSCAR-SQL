@@ -51,16 +51,30 @@ void TreeCheckDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
     const QWidget *widget = opt.widget;
     QStyle *style = widget ? widget->style() : QApplication::style();
     const bool hasText = !opt.text.isEmpty();
+    const bool hasIcon = hasText && (opt.features & QStyleOptionViewItem::HasDecoration);
 
     // Let the style draw the cell background, selection and focus rect, but with no
-    // indicator and no text: those are drawn below so they can be laid out together.
+    // indicator and no text (and, beside text, no icon): those are drawn below so they
+    // can be laid out together.
     QStyleOptionViewItem panelOpt = opt;
     panelOpt.features &= ~(QStyleOptionViewItem::HasCheckIndicator | QStyleOptionViewItem::HasDisplay);
     panelOpt.text.clear();
+    if (hasIcon) {
+        panelOpt.features &= ~QStyleOptionViewItem::HasDecoration;
+        panelOpt.icon = QIcon();
+    }
     style->drawControl(QStyle::CE_ItemViewItem, &panelOpt, painter, widget);
 
     if (hasText) {
-        const QRect tr = textRect(opt.rect).adjusted(0, 0, -kPad, 0);
+        QRect tr = textRect(opt.rect).adjusted(0, 0, -kPad, 0);
+        if (hasIcon) {
+            // The icon (Qt::DecorationRole) goes between the check box and the text.
+            const QSize ds = opt.decorationSize;
+            const QRect iconRect(tr.left(), tr.top() + (tr.height() - ds.height()) / 2,
+                                 ds.width(), ds.height());
+            opt.icon.paint(painter, iconRect);
+            tr.setLeft(iconRect.right() + 1 + kPad);
+        }
         const QString text = opt.fontMetrics.elidedText(opt.text, opt.textElideMode, tr.width());
 
         // Same colour-group choice the styles make for item text.

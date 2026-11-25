@@ -2180,6 +2180,13 @@ p, li { white-space: pre-wrap; }
                 <item>
                  <widget class="QLineEdit" name="channelSearch"/>
                 </item>
+                <item>
+                 <widget class="QCheckBox" name="chanCustomizedOnly">
+                  <property name="text">
+                   <string>Show customized only</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </item>
               <item>
@@ -2194,6 +2201,19 @@ p, li { white-space: pre-wrap; }
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_20">
+                <item>
+                 <widget class="QPushButton" name="resetOneChannel">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>Reset Channel</string>
+                  </property>
+                 </widget>
+                </item>
                 <item>
                  <widget class="QPushButton" name="resetChannelDefaults">
                   <property name="sizePolicy">
@@ -2259,6 +2279,13 @@ p, li { white-space: pre-wrap; }
                 <item>
                  <widget class="QLineEdit" name="waveSearch"/>
                 </item>
+                <item>
+                 <widget class="QCheckBox" name="waveCustomizedOnly">
+                  <property name="text">
+                   <string>Show customized only</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </item>
               <item>
@@ -2273,6 +2300,19 @@ p, li { white-space: pre-wrap; }
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_22">
+                <item>
+                 <widget class="QPushButton" name="resetOneWaveform">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>Reset Channel</string>
+                  </property>
+                 </widget>
+                </item>
                 <item>
                  <widget class="QPushButton" name="resetWaveformChannels">
                   <property name="sizePolicy">
