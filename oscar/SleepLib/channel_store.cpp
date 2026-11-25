@@ -155,7 +155,7 @@ bool syncDefaults()
     return true;
 }
 
-int convertLegacyRows(const ChannelOverrides::ShippedLookup &wasShipped)
+int convertLegacyRows(const ChannelOverrides::ShippedLookup &wasShipped, QSet<qint64> *failedProfiles)
 {
     if (!DatabaseManager::instance().isOpen()) {
         qWarning() << "ChannelStore::convertLegacyRows: database is not open";
@@ -172,6 +172,8 @@ int convertLegacyRows(const ChannelOverrides::ShippedLookup &wasShipped)
         const int n = convertProfile(profileId, wasShipped);
         if (n > 0) {
             total += n;
+        } else if (n < 0 && failedProfiles != nullptr) {
+            failedProfiles->insert(profileId);
         }
     }
     return total;

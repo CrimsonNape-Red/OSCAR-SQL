@@ -278,7 +278,8 @@ class Profile : public Preferences
     /*! \brief Imports an OSCAR 1.x channels.dat as overrides through the legacy-row
         conversion (ChannelStore::convertLegacyRows()); changes no channel.
         \param channelsDatDir Folder holding channels.dat; empty for this profile's data folder.
-        \return false if there is no readable file or it could not be stored. */
+        \return false if there is no readable file, or its rows could not be stored or
+                converted for this profile. */
     bool migrateChannelsToDatabase(const QString& channelsDatDir = QString());
 
 

@@ -42,6 +42,9 @@ private slots:
     void testScanConverts();
     void testChannelsDatGoesThroughClassifier();
     void testStaleChannelsDatIsNotReimported();
+    void testLoadImportsChannelsDatOnceAndMarks();
+    void testFailedStoreLeavesProfileUnmarked();
+    void testFailedConversionLeavesProfileUnmarked();
 
     void cleanupTestCase();
 
@@ -50,6 +53,8 @@ private:
     ChannelData legacyOf(schema::Channel &chan);
     //! \brief Runs \p sql on the test database and fails the test if it does not succeed.
     void exec(const QString &sql);
+    //! \brief Whether the open test profile holds ChannelsDatImported = true in memory.
+    bool isMarked();
 
     QCoreApplication *m_app = nullptr;
     QTemporaryDir *m_tempDir = nullptr;

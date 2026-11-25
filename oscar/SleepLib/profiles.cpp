@@ -2735,8 +2735,9 @@ void Profile::saveChannelsToDat()
  * channels_legacy for this profile and ChannelStore::convertLegacyRows() turns them into
  * overrides (which also marks the profile ChannelsDatImported). No schema::Channel is
  * changed, so neither the open profile nor any other profile picks up these values.
- * Returns false when there is no readable file, the profile has no database row, or the
- * rows cannot be stored.
+ * Returns false when there is no readable file, the profile has no database row, the
+ * rows cannot be stored, or this profile's conversion failed (its rows then stay in
+ * channels_legacy and are converted at a later start).
  */
 bool Profile::migrateChannelsToDatabase(const QString& channelsDatDir)
 {
@@ -2758,7 +2759,12 @@ bool Profile::migrateChannelsToDatabase(const QString& channelsDatDir)
         qWarning() << "Profile: Failed to store the channels.dat rows for conversion";
         return false;
     }
-    ChannelStore::convertLegacyRows();
+    QSet<qint64> failed;
+    ChannelStore::convertLegacyRows(&ShippedChannelNames::contains, &failed);
+    if (failed.contains(profileId)) {
+        qWarning() << "Profile: Converting the channels.dat rows failed; they are kept for the next start";
+        return false;
+    }
     return true;
 }
 
@@ -2779,10 +2785,16 @@ void Profile::loadChannels()
     const qint64 profileId = profileRepo.findByUsername(user->userName()).id;
 
     // Not marked while the profile has no database row, so the import is not lost then.
+    // Marked when there is nothing to import or the import succeeded; when storing or
+    // converting the rows fails the mark stays off, so the next open tries again.
     if (profileId != 0
         && (!contains(STR_PREF_ChannelsDatImported) || !(*this)[STR_PREF_ChannelsDatImported].toBool())) {
-        migrateChannelsToDatabase();
-        Set(STR_PREF_ChannelsDatImported, true);
+        const bool nothingToImport = readChannelsDat(Get("{DataFolder}")).isEmpty();
+        if (nothingToImport || migrateChannelsToDatabase()) {
+            Set(STR_PREF_ChannelsDatImported, true);
+        } else {
+            qWarning() << "Profile: channels.dat import failed; it will be retried when the profile is next opened";
+        }
     }
 
     schema::resetChannelsToDefaults();

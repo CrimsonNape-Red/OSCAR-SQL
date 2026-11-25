@@ -14,6 +14,8 @@
 #ifndef CHANNEL_STORE_H
 #define CHANNEL_STORE_H
 
+#include <QSet>
+
 #include "SleepLib/channel_overrides.h"
 #include "SleepLib/shipped_channel_names.h"
 
@@ -39,9 +41,12 @@ bool syncDefaults();
     and the others still convert. No schema::Channel value is changed (the defaults snapshot
     is taken first for channels that have none, see schema::snapshotDefaults()).
     \param wasShipped Says whether a name is one OSCAR once shipped (a default, not a rename).
+    \param failedProfiles If given, receives the ids of the profiles whose conversion failed
+           and was rolled back (their rows are still in channels_legacy).
     \return The number of legacy rows that matched a channel and were removed, whether or not
             they produced an override. */
-int convertLegacyRows(const ChannelOverrides::ShippedLookup &wasShipped = &ShippedChannelNames::contains);
+int convertLegacyRows(const ChannelOverrides::ShippedLookup &wasShipped = &ShippedChannelNames::contains,
+                      QSet<qint64> *failedProfiles = nullptr);
 
 } // namespace ChannelStore
 

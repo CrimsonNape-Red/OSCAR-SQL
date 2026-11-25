@@ -12,6 +12,7 @@
 #include "channelconversiontests.h"
 
 #include <QFile>
+#include <QRegularExpression>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QTemporaryDir>
@@ -100,6 +101,7 @@ void ChannelConversionTests::init()
         exec(QString("DELETE FROM profile_preferences WHERE profile_id = %1 AND key = '%2'")
                  .arg(id).arg(STR_PREF_ChannelsDatImported));
     }
+    p_profile->Erase(STR_PREF_ChannelsDatImported);
     const QString dat = p_profile->Get("{DataFolder}/") + QStringLiteral("channels.dat");
     if (QFile::exists(dat)) {
         QVERIFY(QFile::remove(dat));
@@ -130,6 +132,12 @@ void ChannelConversionTests::exec(const QString &sql)
 {
     QSqlQuery query(m_db);
     QVERIFY2(query.exec(sql), qPrintable(sql + ": " + query.lastError().text()));
+}
+
+bool ChannelConversionTests::isMarked()
+{
+    return p_profile->contains(STR_PREF_ChannelsDatImported)
+        && (*p_profile)[STR_PREF_ChannelsDatImported].toBool();
 }
 
 // ---------------------------------------------------------------------------
@@ -236,6 +244,56 @@ void ChannelConversionTests::testStaleChannelsDatIsNotReimported() {         // 
     p_profile = Profiles::Get(kProfileName);
     p_profile->loadChannels();
     QCOMPARE(schema::channel[CPAP_Obstructive].label(), schema::channel[CPAP_Obstructive].defaults().label);
+}
+
+// An unmarked profile imports the channels.dat in its own folder when its channels are
+// loaded, and is marked afterwards.
+void ChannelConversionTests::testLoadImportsChannelsDatOnceAndMarks() {
+    schema::channel[CPAP_Obstructive].setLabel("Zz Lazy Zz");
+    p_profile->saveChannelsToDat();
+    schema::resetChannelsToDefaults();
+    QVERIFY(!isMarked());
+    p_profile->loadChannels();
+    QCOMPARE(schema::channel[CPAP_Obstructive].label(), QString("Zz Lazy Zz"));
+    QVERIFY(isMarked());
+}
+
+// When the channels.dat rows cannot be stored, the profile stays unmarked so the import is
+// tried again at the next open. A temporary trigger makes the insert fail on this
+// connection only; it is dropped before any assertion.
+void ChannelConversionTests::testFailedStoreLeavesProfileUnmarked() {
+    schema::channel[CPAP_Obstructive].setLabel("Zz Fail Store Zz");
+    p_profile->saveChannelsToDat();
+    schema::resetChannelsToDefaults();
+    exec("CREATE TEMP TRIGGER test_block_legacy BEFORE INSERT ON channels_legacy"
+         " BEGIN SELECT RAISE(ABORT, 'blocked by test'); END");
+    QTest::ignoreMessage(QtWarningMsg, QRegularExpression("insertLegacy failed for channel"));
+    QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Failed to store the channels.dat rows"));
+    QTest::ignoreMessage(QtWarningMsg, QRegularExpression("channels.dat import failed"));
+    p_profile->loadChannels();
+    exec("DROP TRIGGER temp.test_block_legacy");
+    QVERIFY(!isMarked());
+    QCOMPARE(schema::channel[CPAP_Obstructive].label(), schema::channel[CPAP_Obstructive].defaults().label);
+    QVERIFY(ChannelRepository().findLegacy(m_profileId).isEmpty());
+}
+
+// When the stored rows cannot be converted, the profile stays unmarked and the rows stay in
+// channels_legacy for the next start. A temporary trigger blocks the override insert.
+void ChannelConversionTests::testFailedConversionLeavesProfileUnmarked() {
+    schema::channel[CPAP_Obstructive].setLabel("Zz Fail Convert Zz");
+    p_profile->saveChannelsToDat();
+    schema::resetChannelsToDefaults();
+    exec("CREATE TEMP TRIGGER test_block_overrides BEFORE INSERT ON profile_channel_overrides"
+         " BEGIN SELECT RAISE(ABORT, 'blocked by test'); END");
+    QTest::ignoreMessage(QtWarningMsg, QRegularExpression("inserting the override for channel"));
+    QTest::ignoreMessage(QtCriticalMsg, QRegularExpression("convertLegacyRows: converting the stored channels"));
+    QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Converting the channels.dat rows failed"));
+    QTest::ignoreMessage(QtWarningMsg, QRegularExpression("channels.dat import failed"));
+    p_profile->loadChannels();
+    exec("DROP TRIGGER temp.test_block_overrides");
+    QVERIFY(!isMarked());
+    QVERIFY(ChannelRepository().findOverrides(m_profileId).isEmpty());
+    QCOMPARE(ChannelRepository().profilesWithLegacyRows(), QList<qint64>{ m_profileId });
 }
 
 void ChannelConversionTests::cleanupTestCase()
