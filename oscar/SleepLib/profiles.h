@@ -263,17 +263,16 @@ class Profile : public Preferences
     Machine * lookupMachine(QString serial, QString loadername);
     Machine * CreateMachine(MachineInfo info, MachineID id = 0);
 
+    //! \brief Resets every channel to its code defaults, then applies this profile's overrides.
     void loadChannels();
+    //! \brief Stores this profile's channel overrides (the fields that differ from the defaults).
     void saveChannels();
     void resetOxiChannelPref();
-    
-    // Database integration for channels
-    bool loadChannelsFromDatabase();
-    bool saveChannelsToDatabase();
+
     void saveChannelsToDat();    // Original file-based implementation
     void loadChannelsFromDat(const QString& channelsDatDir = QString());  // Original file-based implementation
-    bool migrateChannelsToDatabase(const QString& channelsDatDir = QString());  // One-time migration from channels.dat to database
-    bool initializeChannelsFromSchema();  // Initialize channels from schema::channel registry
+    //! \brief Imports an OSCAR 1.x channels.dat as overrides; false if there is no file.
+    bool migrateChannelsToDatabase(const QString& channelsDatDir = QString());
 
 
     bool is_first_day;

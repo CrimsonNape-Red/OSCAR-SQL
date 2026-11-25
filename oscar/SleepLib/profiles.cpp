@@ -49,6 +49,8 @@
 #include "calcs.h"
 #include "../database/channel_repository.h"
 #include "../database/channel_options_repository.h"
+#include "channel_overrides.h"
+#include "channel_store.h"
 #include "../database/daily_summary_repository.h"
 #include "../database/device_time_correction_repository.h"
 #include "../database/respiratory_events_repository.h"
@@ -1695,6 +1697,11 @@ void Scan()
     QString path = p_pref->Get("{home}/Profiles");
     profiles.clear();
 
+    // Keep channel_defaults equal to this build's code defaults before any profile is used.
+    if (DatabaseManager::instance().isOpen()) {
+        ChannelStore::syncDefaults();
+    }
+
     // Try database first
     ProfileRepository profileRepo;
     QList<ProfileData> dbProfiles = profileRepo.findAll();
@@ -2634,17 +2641,48 @@ bool Profile::hasChannel(ChannelID code)
 
 const quint16 chandata_version = 1;
 
-// New wrapper method - saves to database only
+/*
+ * Saves the profile's channel overrides: for every channel, the overridable fields that
+ * differ from the code defaults (ChannelOverrides::diff). A channel with no differences
+ * has no row, so an override set back to its default is removed. Rows of channels this
+ * build does not know are kept. Also mirrors the code-defined option labels of LOOKUP
+ * channels into channel_options, as before, for SQL scripts and backups.
+ */
 void Profile::saveChannels()
 {
-    // Save to database only - channels.dat file no longer created
-    if (saveChannelsToDatabase()) {
-        qDebug() << "Profile: Channels saved to database";
-    } else {
-        qWarning() << "Profile: Failed to save channels to database";
+    ProfileRepository profileRepo;
+    const qint64 profileId = profileRepo.findByUsername(user->userName()).id;
+    if (profileId == 0) {
+        qWarning() << "Profile: Cannot save channels, profile not in database";
+        return;
     }
-    
-    // saveChannelsToDat();  // Disabled - channels.dat not needed (data in database)
+
+    ChannelOptionsRepository optionsRepo;
+    QList<ChannelOverrideRow> rows;
+    QSet<ChannelID> knownIds;
+    QSet<QString> knownCodes;
+    for (schema::Channel *chan : std::as_const(schema::channel.channels)) {
+        knownIds.insert(chan->id());
+        knownCodes.insert(chan->code());
+
+        ChannelOverrideRow row;
+        row.channelId = chan->id();
+        row.channelCode = chan->code();
+        row.values = ChannelOverrides::diff(*chan);
+        if (!row.values.isEmpty()) {
+            rows.append(row);
+        }
+
+        if (!chan->m_options.isEmpty()) {
+            optionsRepo.saveBatch(chan->id(), chan->m_options);
+        }
+    }
+
+    if (ChannelRepository().replaceOverrides(profileId, rows, knownIds, knownCodes)) {
+        qDebug() << "Profile: Saved" << rows.size() << "channel overrides to database";
+    } else {
+        qWarning() << "Profile: Failed to save channel overrides to database";
+    }
 }
 
 // Original file-based implementation
@@ -2687,128 +2725,11 @@ void Profile::saveChannelsToDat()
 
 }
 
-// New database implementation
-bool Profile::saveChannelsToDatabase()
-{
-    ProfileRepository profileRepo;
-    ProfileData profileData = profileRepo.findByUsername(user->userName());
-
-    if (profileData.id == 0) {
-        qWarning() << "Profile: Cannot save channels, profile not in database";
-        return false;
-    }
-
-    // Record the language the channel names are in, so loadChannelsFromDatabase()
-    // can detect a language change on the next run and fall back to schema defaults.
-    (*p_profile)[STR_PREF_Language] = currentLanguage();
-    
-    ChannelRepository channelRepo;
-    ChannelOptionsRepository optionsRepo;
-    
-    QList<ChannelData> channels;
-    
-    // Convert schema::channel to ChannelData
-    for (auto it = schema::channel.channels.begin();
-         it != schema::channel.channels.end(); ++it) {
-        schema::Channel* chan = it.value();
-
-        ChannelData data;
-        data.profileId = profileData.id;
-        data.channelId = chan->id();
-        data.channelCode = chan->code();
-        data.type = chan->type();  // Store channel type from schema
-        data.enabled = chan->enabled();
-        data.defaultColor = chan->defaultColor();
-        data.fullname = chan->fullname();
-        data.label = chan->label();
-        data.description = chan->description();
-        data.lowerThreshold = chan->lowerThreshold();
-        data.lowerThresholdColor = chan->lowerThresholdColor();
-        data.upperThreshold = chan->upperThreshold();
-        data.upperThresholdColor = chan->upperThresholdColor();
-        data.showInOverview = chan->showInOverview();
-
-        channels.append(data);
-        
-        // Save channel options if present
-        if (!chan->m_options.isEmpty()) {
-            optionsRepo.saveBatch(chan->id(), chan->m_options);
-        }
-    }
-    
-    return channelRepo.saveBatch(profileData.id, channels);
-}
-
-// New database implementation
-bool Profile::loadChannelsFromDatabase()
-{
-    ProfileRepository profileRepo;
-    ProfileData profileData = profileRepo.findByUsername(user->userName());
-    
-    if (profileData.id == 0) {
-        return false;
-    }
-    
-    ChannelRepository channelRepo;
-    ChannelOptionsRepository optionsRepo;
-    
-    QList<ChannelData> channels = channelRepo.findByProfile(profileData.id);
-    
-    if (channels.isEmpty()) {
-        return false;  // No channels in database yet
-    }
-    
-    qDebug() << "Profile: Loading" << channels.size() << "channels from database";
-    
-    // Detect language changes
-    bool changing_language = false;
-    QSettings settings;
-    QString language = Get(STR_PREF_Language);
-    if (settings.value(LangSetting, "").toString() != language) {
-        qDebug() << "Language change detected, using default channel names";
-        changing_language = true;
-    }
-
-    // Apply channel data from database
-    for (const ChannelData& data : channels) {
-        schema::Channel* chan = &schema::channel[data.channelId];
-        
-        if (chan->isNull()) {
-            // Try lookup by name
-            chan = &schema::channel[data.channelCode];
-            if (chan->isNull()) {
-                qDebug() << "Unknown channel:" << data.channelCode;
-                continue;
-            }
-        }
-        
-        chan->setEnabled(data.enabled);
-        chan->setDefaultColor(data.defaultColor);
-        
-        if (!changing_language) {
-            chan->setFullname(data.fullname);
-            chan->setLabel(data.label);
-            chan->setDescription(data.description);
-        }
-        
-        chan->setLowerThreshold(data.lowerThreshold);
-        chan->setLowerThresholdColor(data.lowerThresholdColor);
-        chan->setUpperThreshold(data.upperThreshold);
-        chan->setUpperThresholdColor(data.upperThresholdColor);
-        chan->setShowInOverview(data.showInOverview);
-        
-        // Option labels (e.g. mode names) are defined by the loaders and only
-        // mirrored here, so the code's labels win: a renamed or retranslated
-        // label would otherwise never replace the copy saved by an older build.
-        if (chan->m_options.isEmpty() && optionsRepo.hasOptions(data.channelId)) {
-            chan->m_options = optionsRepo.getOptionsHash(data.channelId);
-        }
-    }
-    
-    return true;
-}
-
-// One-time migration from channels.dat to database
+/*
+ * Imports an OSCAR 1.x channels.dat (from channelsDatDir, or the profile's data folder):
+ * its values are applied to the channel registry and then saved as overrides.
+ * Returns false when there is no file or the profile has no database row.
+ */
 bool Profile::migrateChannelsToDatabase(const QString& channelsDatDir)
 {
     ProfileRepository profileRepo;
@@ -2817,15 +2738,6 @@ bool Profile::migrateChannelsToDatabase(const QString& channelsDatDir)
     if (profileData.id == 0) {
         qDebug() << "Profile: Cannot migrate channels, profile not in database yet";
         return false;
-    }
-
-    // Check if channels table already has data for this profile
-    ChannelRepository channelRepo;
-    QList<ChannelData> existing = channelRepo.findByProfile(profileData.id);
-
-    if (!existing.isEmpty()) {
-        qDebug() << "Profile: Channels already migrated to database (" << existing.size() << "channels found), skipping migration";
-        return false;  // Already migrated
     }
 
     // Check if channels.dat file exists
@@ -2839,105 +2751,47 @@ bool Profile::migrateChannelsToDatabase(const QString& channelsDatDir)
 
     qDebug() << "Profile: Migrating channels from channels.dat to database...";
 
-    // Load from file
+    // The 1.x import at startup runs before Profiles::Scan() takes the defaults snapshot.
+    // Take it now, before channels.dat changes the registry, or the imported values would
+    // become the "defaults" and nothing would be saved as an override.
+    schema::snapshotDefaults();
+
     loadChannelsFromDat(channelsDatDir);
-    
-    // Save to database
-    if (saveChannelsToDatabase()) {
-        qDebug() << "Profile: Successfully migrated channels to database";
-        return true;
-    } else {
-        qWarning() << "Profile: Failed to migrate channels to database";
-        return false;
-    }
+    saveChannels();
+    return true;
 }
 
-// New wrapper - tries database first, falls back to file, handles migration
+/*
+ * Loads the profile's channel settings: every channel back to its code defaults, then
+ * the profile's overrides on top, matched by channel id or, failing that, by code. An
+ * override row for a channel this build does not know is skipped (and kept in the
+ * database). Finally the preference-driven thresholds are re-applied.
+ */
 void Profile::loadChannels()
 {
-    // Try database first
-    if (loadChannelsFromDatabase()) {
-        qDebug() << "Profile: Channels loaded from database";
-        resetOxiChannelPref();
-        return;
-    }
-    
-    // Database doesn't have data - try one-time migration from file
-    qDebug() << "Profile: No channels in database, attempting migration from channels.dat";
-    if (migrateChannelsToDatabase()) {
-        qDebug() << "Profile: Migration complete, channels now in database";
-        resetOxiChannelPref();
-        return;
-    }
-    
-    // No file to migrate - initialize from schema::channel registry
-    qDebug() << "Profile: No channels.dat file, initializing channels from schema registry";
-    if (initializeChannelsFromSchema()) {
-        qDebug() << "Profile: Channels initialized from schema registry";
-        resetOxiChannelPref();
-        return;
-    }
-    
-    // Last resort - fall back to loading from file if it exists
-    qDebug() << "Profile: Loading channels from channels.dat (no migration)";
-    loadChannelsFromDat();
-    resetOxiChannelPref();
-}
+    schema::resetChannelsToDefaults();
 
-// Initialize channels table from schema::channel registry
-bool Profile::initializeChannelsFromSchema()
-{
     ProfileRepository profileRepo;
-    ProfileData profileData = profileRepo.findByUsername(user->userName());
-    
-    if (profileData.id == 0) {
-        qDebug() << "Profile: Cannot initialize channels, profile not in database yet";
-        return false;
-    }
-    
-    ChannelRepository channelRepo;
-    QList<ChannelData> channels;
-    
-    qDebug() << "Profile: Initializing" << schema::channel.channels.size() << "channels from schema registry";
-    
-    // Convert all schema::channel entries to ChannelData
-    for (auto it = schema::channel.channels.begin(); 
-         it != schema::channel.channels.end(); ++it) {
-        schema::Channel* chan = it.value();
-        
-        ChannelData data;
-        data.profileId = profileData.id;
-        data.channelId = chan->id();
-        data.channelCode = chan->code();
-        data.type = chan->type();
-        data.enabled = chan->enabled();
-        data.defaultColor = chan->defaultColor();
-        data.fullname = chan->fullname();
-        data.label = chan->label();
-        data.description = chan->description();
-        data.lowerThreshold = chan->lowerThreshold();
-        data.lowerThresholdColor = chan->lowerThresholdColor();
-        data.upperThreshold = chan->upperThreshold();
-        data.upperThresholdColor = chan->upperThresholdColor();
-        data.showInOverview = chan->showInOverview();
-        
-        channels.append(data);
-        
-        // Save channel options if present
-        if (!chan->m_options.isEmpty()) {
-            ChannelOptionsRepository optionsRepo;
-            optionsRepo.saveBatch(chan->id(), chan->m_options);
+    const qint64 profileId = profileRepo.findByUsername(user->userName()).id;
+    if (profileId != 0) {
+        const QList<ChannelOverrideRow> rows = ChannelRepository().findOverrides(profileId);
+        for (const ChannelOverrideRow &row : rows) {
+            schema::Channel *chan = &schema::channel[row.channelId];
+            if (chan->isNull()) {
+                chan = &schema::channel[row.channelCode];
+                if (chan->isNull()) {
+                    qDebug() << "Profile: Skipping override for unknown channel" << row.channelCode;
+                    continue;
+                }
+            }
+            ChannelOverrides::apply(*chan, row.values);
         }
-    }
-    
-    // Batch save all channels
-    if (channelRepo.saveBatch(profileData.id, channels)) {
-        qDebug() << "Profile: Successfully initialized" << channels.size() << "channels in database";
-        return true;
+        qDebug() << "Profile: Applied" << rows.size() << "channel overrides";
     } else {
-        qWarning() << "Profile: Failed to initialize channels in database";
-        return false;
+        qWarning() << "Profile: Cannot load channel overrides, profile not in database";
     }
+
+    resetOxiChannelPref();
 }
 
 // Original file-based implementation

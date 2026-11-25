@@ -487,6 +487,8 @@ SOURCES += \
     SleepLib/session.cpp \
     SleepLib/session_split.cpp \
     SleepLib/card_archive.cpp \
+    SleepLib/channel_overrides.cpp \
+    SleepLib/channel_store.cpp \
     SleepLib/thirdparty/miniz.c \
     SleepLib/xmlreplay.cpp \
     database/database_manager.cpp \
@@ -506,7 +508,6 @@ SOURCES += \
     database/session_slices_repository.cpp \
     database/session_summaries_repository.cpp \
     database/channel_repository.cpp \
-    SleepLib/channel_overrides.cpp \
     database/channel_options_repository.cpp \
     database/daily_summary_repository.cpp \
     database/event_list_repository.cpp \
@@ -646,6 +647,8 @@ HEADERS  += \
     SleepLib/session.h \
     SleepLib/session_split.h \
     SleepLib/card_archive.h \
+    SleepLib/channel_overrides.h \
+    SleepLib/channel_store.h \
     SleepLib/loader_plugins/applehealthDataParsing.h \
     SleepLib/loader_plugins/applehealth_loader.h \
     SleepLib/loader_plugins/apexDataParsing.h \
@@ -765,7 +768,6 @@ HEADERS  += \
     database/session_slices_repository.h \
     database/session_summaries_repository.h \
     database/channel_repository.h \
-    SleepLib/channel_overrides.h \
     database/channel_options_repository.h \
     database/daily_summary_repository.h \
     database/event_list_repository.h \
@@ -1014,6 +1016,7 @@ test {
         tests/machinetests.cpp \
         tests/machinepurgedatetests.cpp \
         tests/channeloverridestests.cpp \
+        tests/channelstoragetests.cpp \
         tests/machinepropertiestests.cpp \
         tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp \
@@ -1071,6 +1074,7 @@ test {
         tests/machinetests.h \
         tests/machinepurgedatetests.h \
         tests/channeloverridestests.h \
+        tests/channelstoragetests.h \
         tests/machinepropertiestests.h \
         tests/portablemodetests.h \
         tests/sessionsplittests.h \

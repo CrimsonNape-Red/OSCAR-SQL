@@ -306,16 +306,11 @@ bool ProfileImporter::importProfile(const QString& sourcePath,
         return false;
     }
 
-    // Initialize channels for this profile immediately after import.
+    // Import channel customizations for this profile immediately after import.
     // Read channels.dat directly from the source profile so user customizations
     // (colors, labels, thresholds, enabled state) are preserved without copying the file.
-    // Falls back to schema defaults when the source has no channels.dat.
-    if (!profile->migrateChannelsToDatabase(sourcePath)) {
-        if (!profile->initializeChannelsFromSchema()) {
-            qWarning() << "ProfileImporter: Failed to initialize channels for" << newProfileName
-                       << "- they will be initialized when the profile is first opened";
-        }
-    }
+    // A source with no channels.dat has no customizations, and so needs no rows.
+    profile->migrateChannelsToDatabase(sourcePath);
 
     reportProgress(100, 100, tr("Import complete!"));
 
