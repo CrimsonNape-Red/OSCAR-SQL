@@ -266,6 +266,9 @@ const QString STR_MACH_ZEO = "Zeo";
 const QString STR_MACH_Prisma = "Prisma";
 
 const QString STR_PREF_Language = "Language";
+//! Per-profile flag: true once the profile's channel settings came from the database or a
+//! channels.dat import, so a channels.dat left in its folder is never imported again.
+const QString STR_PREF_ChannelsDatImported = "ChannelsDatImported";
 
 const QString STR_AppName = "OSCAR";
 const QString STR_DeveloperName = "OSCAR_Team";

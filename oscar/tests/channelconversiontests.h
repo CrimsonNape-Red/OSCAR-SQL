@@ -16,6 +16,8 @@
 
 #include <QSqlDatabase>
 
+#include "database/channel_repository.h"
+
 class Profile;
 class QCoreApplication;
 class QTemporaryDir;
@@ -33,14 +35,28 @@ private slots:
     // The list of shipped names (Task 4)
     void testShippedNamesLookup();
 
+    // Conversion of channels_legacy rows and of channels.dat (Task 5)
+    void testConvertsEveryProfile();
+    void testMatchesByCodeAndKeepsUnknownRows();
+    void testSecondRunChangesNothing();
+    void testScanConverts();
+    void testChannelsDatGoesThroughClassifier();
+    void testStaleChannelsDatIsNotReimported();
+
     void cleanupTestCase();
 
 private:
+    //! \brief A channels_legacy row holding \p chan's code defaults, as an older build stored it.
+    ChannelData legacyOf(schema::Channel &chan);
+    //! \brief Runs \p sql on the test database and fails the test if it does not succeed.
+    void exec(const QString &sql);
+
     QCoreApplication *m_app = nullptr;
     QTemporaryDir *m_tempDir = nullptr;
     QString m_previousAppData;
     Profile *m_profile = nullptr;      //!< The test profile
     qint64 m_profileId = 0;            //!< Its database id
+    qint64 m_otherProfileId = 0;       //!< A second profile that the tests never open
     QSqlDatabase m_db;                 //!< The application's connection, set in initTestCase()
 };
 

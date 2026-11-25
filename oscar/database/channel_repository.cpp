@@ -255,6 +255,21 @@ bool ChannelRepository::replaceOverrides(qint64 profileId, const QList<ChannelOv
         }
     }
 
+    if (!insertOverrideRows(profileId, rows)) {
+        db.rollback();
+        return false;
+    }
+
+    if (!db.commit()) {
+        qWarning() << "ChannelRepository::replaceOverrides failed to commit transaction:" << db.lastError().text();
+        db.rollback();
+        return false;
+    }
+    return true;
+}
+
+bool ChannelRepository::insertOverrideRows(qint64 profileId, const QList<ChannelOverrideRow> &rows)
+{
     QSqlQuery insert(db);
     insert.prepare("INSERT INTO profile_channel_overrides (profile_id, channel_id, channel_code,"
                    " enabled, default_color, fullname, label, description, lower_threshold,"
@@ -276,20 +291,19 @@ bool ChannelRepository::replaceOverrides(qint64 profileId, const QList<ChannelOv
         insert.addBindValue(optionalDouble(v.upperThreshold));
         insert.addBindValue(optionalBool(v.showInOverview));
         if (!insert.exec()) {
-            qWarning() << "ChannelRepository::replaceOverrides failed for channel" << row.channelId
-                       << ":" << insert.lastError().text();
-            DatabaseManager::instance().checkQueryError("ChannelRepository::replaceOverrides (insert)", insert);
-            db.rollback();
+            qWarning() << "ChannelRepository: inserting the override for channel" << row.channelId
+                       << "failed:" << insert.lastError().text();
+            DatabaseManager::instance().checkQueryError("ChannelRepository::insertOverrideRows", insert);
             return false;
         }
     }
-
-    if (!db.commit()) {
-        qWarning() << "ChannelRepository::replaceOverrides failed to commit transaction:" << db.lastError().text();
-        db.rollback();
-        return false;
-    }
     return true;
+}
+
+bool ChannelRepository::writeConversion(qint64 profileId, const QList<ChannelOverrideRow> &added,
+                                        const QList<qint64> &convertedIds)
+{
+    return insertOverrideRows(profileId, added) && deleteLegacyRows(convertedIds);
 }
 
 QList<qint64> ChannelRepository::profilesWithLegacyRows()
@@ -378,22 +392,30 @@ bool ChannelRepository::deleteLegacy(const QList<qint64> &rowIds)
         return false;
     }
 
-    QSqlQuery query(db);
-    query.prepare("DELETE FROM channels_legacy WHERE id = ?");
-    for (qint64 id : rowIds) {
-        query.addBindValue(id);
-        if (!query.exec()) {
-            qWarning() << "ChannelRepository::deleteLegacy failed:" << query.lastError().text();
-            DatabaseManager::instance().checkQueryError("ChannelRepository::deleteLegacy", query);
-            db.rollback();
-            return false;
-        }
+    if (!deleteLegacyRows(rowIds)) {
+        db.rollback();
+        return false;
     }
 
     if (!db.commit()) {
         qWarning() << "ChannelRepository::deleteLegacy failed to commit transaction:" << db.lastError().text();
         db.rollback();
         return false;
+    }
+    return true;
+}
+
+bool ChannelRepository::deleteLegacyRows(const QList<qint64> &rowIds)
+{
+    QSqlQuery query(db);
+    query.prepare("DELETE FROM channels_legacy WHERE id = ?");
+    for (qint64 id : rowIds) {
+        query.addBindValue(id);
+        if (!query.exec()) {
+            qWarning() << "ChannelRepository::deleteLegacyRows failed:" << query.lastError().text();
+            DatabaseManager::instance().checkQueryError("ChannelRepository::deleteLegacyRows", query);
+            return false;
+        }
     }
     return true;
 }

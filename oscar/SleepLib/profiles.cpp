@@ -1697,9 +1697,13 @@ void Scan()
     QString path = p_pref->Get("{home}/Profiles");
     profiles.clear();
 
-    // Keep channel_defaults equal to this build's code defaults before any profile is used.
+    // Keep channel_defaults equal to this build's code defaults before any profile is used,
+    // then turn any pre-v20 stored channel copies (from an upgrade, a restore or a 1.x
+    // import) into overrides, for every profile. This runs before the Profile objects are
+    // made below, so each reads the ChannelsDatImported mark the conversion may have set.
     if (DatabaseManager::instance().isOpen()) {
         ChannelStore::syncDefaults();
+        ChannelStore::convertLegacyRows();
     }
 
     // Try database first
@@ -2726,38 +2730,35 @@ void Profile::saveChannelsToDat()
 }
 
 /*
- * Imports an OSCAR 1.x channels.dat (from channelsDatDir, or the profile's data folder):
- * its values are applied to the channel registry and then saved as overrides.
- * Returns false when there is no file or the profile has no database row.
+ * Imports an OSCAR 1.x channels.dat (from channelsDatDir, or the profile's data folder)
+ * through the same path as the pre-v20 database copies: its rows are stored in
+ * channels_legacy for this profile and ChannelStore::convertLegacyRows() turns them into
+ * overrides (which also marks the profile ChannelsDatImported). No schema::Channel is
+ * changed, so neither the open profile nor any other profile picks up these values.
+ * Returns false when there is no readable file, the profile has no database row, or the
+ * rows cannot be stored.
  */
 bool Profile::migrateChannelsToDatabase(const QString& channelsDatDir)
 {
-    ProfileRepository profileRepo;
-    ProfileData profileData = profileRepo.findByUsername(user->userName());
-
-    if (profileData.id == 0) {
-        qDebug() << "Profile: Cannot migrate channels, profile not in database yet";
+    const QString dir = channelsDatDir.isEmpty() ? Get("{DataFolder}") : channelsDatDir;
+    const QList<ChannelData> rows = readChannelsDat(dir);
+    if (rows.isEmpty()) {
+        qDebug() << "Profile: No channels.dat to import in" << dir;
         return false;
     }
 
-    // Check if channels.dat file exists
-    QString dir = channelsDatDir.isEmpty() ? Get("{DataFolder}/") : (channelsDatDir + "/");
-    QString filename = dir + "channels.dat";
-    QFile f(filename);
-    if (!f.exists()) {
-        qDebug() << "Profile: No channels.dat file to migrate";
+    const qint64 profileId = ProfileRepository().findByUsername(user->userName()).id;
+    if (profileId == 0) {
+        qDebug() << "Profile: Cannot import channels.dat, profile not in database yet";
         return false;
     }
 
-    qDebug() << "Profile: Migrating channels from channels.dat to database...";
-
-    // The 1.x import at startup runs before Profiles::Scan() takes the defaults snapshot.
-    // Take it now, before channels.dat changes the registry, or the imported values would
-    // become the "defaults" and nothing would be saved as an override.
-    schema::snapshotDefaults();
-
-    loadChannelsFromDat(channelsDatDir);
-    saveChannels();
+    qDebug() << "Profile: Importing" << rows.size() << "channels from channels.dat";
+    if (!ChannelRepository().insertLegacy(profileId, rows)) {
+        qWarning() << "Profile: Failed to store the channels.dat rows for conversion";
+        return false;
+    }
+    ChannelStore::convertLegacyRows();
     return true;
 }
 
@@ -2767,13 +2768,25 @@ bool Profile::migrateChannelsToDatabase(const QString& channelsDatDir)
  * override row for a channel this build does not know is skipped (and kept in the
  * database). Channels with no option labels in code take any stored in channel_options.
  * Finally the preference-driven thresholds are re-applied.
+ *
+ * A profile not yet marked ChannelsDatImported first imports a channels.dat from its own
+ * data folder, once: the mark is set whether or not a file was found. A profile whose
+ * database copies were converted is already marked, so a stale file there is ignored.
  */
 void Profile::loadChannels()
 {
-    schema::resetChannelsToDefaults();
-
     ProfileRepository profileRepo;
     const qint64 profileId = profileRepo.findByUsername(user->userName()).id;
+
+    // Not marked while the profile has no database row, so the import is not lost then.
+    if (profileId != 0
+        && (!contains(STR_PREF_ChannelsDatImported) || !(*this)[STR_PREF_ChannelsDatImported].toBool())) {
+        migrateChannelsToDatabase();
+        Set(STR_PREF_ChannelsDatImported, true);
+    }
+
+    schema::resetChannelsToDefaults();
+
     if (profileId != 0) {
         const QList<ChannelOverrideRow> rows = ChannelRepository().findOverrides(profileId);
         for (const ChannelOverrideRow &row : rows) {
@@ -2807,18 +2820,19 @@ void Profile::loadChannels()
     resetOxiChannelPref();
 }
 
-// Original file-based implementation
-void Profile::loadChannelsFromDat(const QString& channelsDatDir)
+/*
+ * Reads an OSCAR 1.x channels.dat from dir into channels_legacy-shaped rows: channelId is
+ * the stored id and channelCode the stored name. Parsing only; no channel is changed. A
+ * missing, unreadable or foreign file gives no rows; a truncated file gives the rows read
+ * before the damage.
+ */
+QList<ChannelData> Profile::readChannelsDat(const QString &dir)
 {
-    bool changing_language = false;
-
-    QString dir = channelsDatDir.isEmpty() ? Get("{DataFolder}/") : (channelsDatDir + "/");
-    QString filename = dir + "channels.dat";
-    QFile f(filename);
+    QList<ChannelData> rows;
+    QFile f(QDir(dir).filePath(QStringLiteral("channels.dat")));
     if (!f.open(QFile::ReadOnly)) {
-        return;
+        return rows;
     }
-    qDebug() << "Loading channel.dat States";
 
     QDataStream in(&f);
     in.setVersion(QDataStream::Qt_4_6);
@@ -2826,86 +2840,59 @@ void Profile::loadChannelsFromDat(const QString& channelsDatDir)
 
     quint32 mag;
     in >> mag;
-
-    if (magic != mag)  {
-        qDebug() << "LoadChannels: Faulty data";
-        return;
+    if (magic != mag) {
+        qDebug() << "Profile: channels.dat in" << dir << "is not a channels file";
+        return rows;
     }
     quint16 version;
     in >> version;
-
-    QSettings settings;
-    QString language = Get(STR_PREF_Language);
-    if (settings.value(LangSetting, "").toString() != language) {
-        qDebug() << "Language change detected, resetting default channel names";
-        changing_language = true;
-    }
-
     quint16 size;
     in >> size;
 
-    QString name;
-    ChannelID code;
-    bool enabled;
-    QColor color;
-    EventDataType lowerThreshold;
-    QColor lowerThresholdColor;
-    EventDataType upperThreshold;
-    QColor upperThresholdColor;
+    for (int i = 0; i < size; i++) {
+        ChannelID id;
+        QString name;
+        bool enabled;
+        QColor color;
+        EventDataType lowerThreshold;
+        QColor lowerThresholdColor;
+        EventDataType upperThreshold;
+        QColor upperThresholdColor;
+        QString fullname;
+        QString label;
+        QString description;
+        bool showOverview = false;
 
-    QString fullname;
-    QString label;
-    QString description;
-    bool showOverview = false;
-
-    for (int i=0; i < size; i++) {
-        in >> code;
-        schema::Channel * chan = &schema::channel[code];
-        in >> name;
-        if (chan->code() != name) {
-            qDebug() << "Looking up channel" << name << "by name, as it's ChannedID must have changed";
-            chan = &schema::channel[name];
-        }
-        in >> enabled;
-        in >> color;
-        in >> fullname;
-        in >> label;
-        in >> description;
-        in >> lowerThreshold;
-        in >> lowerThresholdColor;
-        in >> upperThreshold;
-        in >> upperThresholdColor;
+        in >> id >> name >> enabled >> color >> fullname >> label >> description
+           >> lowerThreshold >> lowerThresholdColor >> upperThreshold >> upperThresholdColor;
         if (version >= 1) {
             in >> showOverview;
         }
-
-        if (chan->isNull()) {
-            qDebug() << "loadChannels has no idea about channel" << name;
-            if (in.atEnd()) break;
-            continue;
-        }
-        chan->setEnabled(enabled);
-        chan->setDefaultColor(color);
-
-        // Don't import channel descriptions if event renaming is turned off. (helps pick up new translations)
-        if (changing_language) {
-            // Nothing
-        } else {
-            chan->setFullname(fullname);
-            chan->setLabel(label);
-            chan->setDescription(description);
+        if (in.status() != QDataStream::Ok) {
+            qWarning() << "Profile: channels.dat in" << dir << "is truncated after" << rows.size() << "channels";
+            break;
         }
 
-        chan->setLowerThreshold(lowerThreshold);
-        chan->setLowerThresholdColor(lowerThresholdColor);
-        chan->setUpperThreshold(upperThreshold);
-        chan->setUpperThresholdColor(upperThresholdColor);
+        ChannelData row;
+        row.channelId = id;
+        row.channelCode = name;
+        row.enabled = enabled;
+        row.defaultColor = color;
+        row.fullname = fullname;
+        row.label = label;
+        row.description = description;
+        row.lowerThreshold = lowerThreshold;
+        row.lowerThresholdColor = lowerThresholdColor;
+        row.upperThreshold = upperThreshold;
+        row.upperThresholdColor = upperThresholdColor;
+        row.showInOverview = showOverview;
+        rows.append(row);
 
-        chan->setShowInOverview(showOverview);
-        if (in.atEnd()) break;
+        if (in.atEnd()) {
+            break;
+        }
     }
-    f.close();
-    resetOxiChannelPref();
+    return rows;
 }
 
 void Profile::resetOxiChannelPref() {

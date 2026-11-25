@@ -21,6 +21,7 @@
 #include "common.h"
 
 class Machine;
+struct ChannelData;
 
 enum Gender { GenderNotSpecified, Male, Female };
 enum MaskType { Mask_Unknown, Mask_NasalPillows, Mask_Hybrid, Mask_StandardNasal, Mask_FullFace };
@@ -270,8 +271,14 @@ class Profile : public Preferences
     void resetOxiChannelPref();
 
     void saveChannelsToDat();    // Original file-based implementation
-    void loadChannelsFromDat(const QString& channelsDatDir = QString());  // Original file-based implementation
-    //! \brief Imports an OSCAR 1.x channels.dat as overrides; false if there is no file.
+    /*! \brief Parses the OSCAR 1.x channels.dat in \p dir into channels_legacy rows
+        (channelId = the stored id, channelCode = the stored name). Changes no channel.
+        \return The rows; empty if there is no readable channels.dat. */
+    static QList<ChannelData> readChannelsDat(const QString &dir);
+    /*! \brief Imports an OSCAR 1.x channels.dat as overrides through the legacy-row
+        conversion (ChannelStore::convertLegacyRows()); changes no channel.
+        \param channelsDatDir Folder holding channels.dat; empty for this profile's data folder.
+        \return false if there is no readable file or it could not be stored. */
     bool migrateChannelsToDatabase(const QString& channelsDatDir = QString());
 
 

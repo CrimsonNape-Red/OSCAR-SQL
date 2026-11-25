@@ -11,9 +11,13 @@
 
 #include "channelconversiontests.h"
 
+#include <QFile>
+#include <QSqlError>
+#include <QSqlQuery>
 #include <QTemporaryDir>
 
 #include "SleepLib/appsettings.h"
+#include "SleepLib/channel_store.h"
 #include "SleepLib/common.h"
 #include "SleepLib/preferences.h"
 #include "SleepLib/profiles.h"
@@ -25,6 +29,10 @@
 namespace {
 
 const QString kProfileName = QStringLiteral("ChannelConversionUnitTest");
+const QString kOtherProfileName = QStringLiteral("ChannelConversionUnitTestB");
+
+//! Stands in for the list of shipped names: exactly "Old Shipped" counts as shipped.
+const ChannelOverrides::ShippedLookup kFake = [](const QString &s) { return s == QStringLiteral("Old Shipped"); };
 
 //! A Simplified Chinese translation of "Flow Limit." that OSCAR shipped before it was
 //! corrected (GitLab #417); the current translation is different.
@@ -70,12 +78,58 @@ void ChannelConversionTests::initTestCase()
 
     m_profileId = ProfileRepository().findByUsername(kProfileName).id;
     QVERIFY(m_profileId > 0);
+
+    // A second profile that exists in the database (with its folder, so Profiles::Scan()
+    // accepts it) but is never opened by any test.
+    QVERIFY(QDir().mkpath(m_tempDir->path() + QStringLiteral("/Profiles/") + kOtherProfileName));
+    ProfileData other;
+    other.username = kOtherProfileName;
+    other.dataFolder = QStringLiteral("%PROFDIR%/") + kOtherProfileName;
+    m_otherProfileId = ProfileRepository().create(other);
+    QVERIFY(m_otherProfileId > 0);
 }
 
 void ChannelConversionTests::init()
 {
-    // Every test starts from the code defaults.
+    // Every test starts from the code defaults, with no stored overrides or old rows for the
+    // test profiles, no "channels.dat imported" mark and no channels.dat in the data folder.
     schema::resetChannelsToDefaults();
+    for (qint64 id : { m_profileId, m_otherProfileId }) {
+        exec(QString("DELETE FROM profile_channel_overrides WHERE profile_id = %1").arg(id));
+        exec(QString("DELETE FROM channels_legacy WHERE profile_id = %1").arg(id));
+        exec(QString("DELETE FROM profile_preferences WHERE profile_id = %1 AND key = '%2'")
+                 .arg(id).arg(STR_PREF_ChannelsDatImported));
+    }
+    const QString dat = p_profile->Get("{DataFolder}/") + QStringLiteral("channels.dat");
+    if (QFile::exists(dat)) {
+        QVERIFY(QFile::remove(dat));
+    }
+}
+
+ChannelData ChannelConversionTests::legacyOf(schema::Channel &chan)
+{
+    const schema::ChannelDefaults &d = chan.defaults();
+    ChannelData row;
+    row.channelId = chan.id();
+    row.channelCode = chan.code();
+    row.type = chan.type();
+    row.enabled = d.enabled;
+    row.defaultColor = d.color;
+    row.fullname = d.fullname;
+    row.label = d.label;
+    row.description = d.description;
+    row.lowerThreshold = d.lowerThreshold;
+    row.lowerThresholdColor = d.lowerThresholdColor;
+    row.upperThreshold = d.upperThreshold;
+    row.upperThresholdColor = d.upperThresholdColor;
+    row.showInOverview = d.showInOverview;
+    return row;
+}
+
+void ChannelConversionTests::exec(const QString &sql)
+{
+    QSqlQuery query(m_db);
+    QVERIFY2(query.exec(sql), qPrintable(sql + ": " + query.lastError().text()));
 }
 
 // ---------------------------------------------------------------------------
@@ -90,6 +144,98 @@ void ChannelConversionTests::testShippedNamesLookup()
     QVERIFY(ShippedChannelNames::contains(kRetiredTranslation));
     QVERIFY(!ShippedChannelNames::contains(QStringLiteral("zz not a channel name zz")));
     QVERIFY(!ShippedChannelNames::contains(QString()));
+}
+
+// ---------------------------------------------------------------------------
+// Conversion of channels_legacy rows and of channels.dat
+// ---------------------------------------------------------------------------
+
+// Every profile with old rows is converted, opened or not; only real changes on
+// overridable fields become overrides, and every matched row is removed.
+void ChannelConversionTests::testConvertsEveryProfile() {
+    ChannelRepository repo;
+    schema::Channel &oa = schema::channel[CPAP_Obstructive];
+    schema::Channel &ps = schema::channel[CPAP_PSMin];
+    ChannelData same = legacyOf(schema::channel[CPAP_Hypopnea]);
+    ChannelData renamed = legacyOf(oa);  renamed.label = "MyOA"; renamed.defaultColor = QColor("#123456");
+    ChannelData setting = legacyOf(ps);  setting.fullname = "Never Shipped"; setting.defaultColor = QColor("#123456");
+    ChannelData stale = legacyOf(oa);    stale.fullname = "Old Shipped";
+    QVERIFY(repo.insertLegacy(m_profileId, { same, renamed, setting }));
+    QVERIFY(repo.insertLegacy(m_otherProfileId, { stale }));          // this profile is never opened
+
+    QCOMPARE(ChannelStore::convertLegacyRows(kFake), 4);
+
+    const auto a = repo.findOverrides(m_profileId);
+    QCOMPARE(a.size(), 1);
+    QCOMPARE(a[0].channelId, ChannelID(CPAP_Obstructive));
+    QCOMPARE(a[0].values.label.value(), QString("MyOA"));
+    QCOMPARE(a[0].values.color.value().name(), QString("#123456"));
+    QVERIFY(!a[0].values.fullname.has_value());
+    QVERIFY(repo.findOverrides(m_otherProfileId).isEmpty());
+    QVERIFY(repo.profilesWithLegacyRows().isEmpty());
+}
+
+// A row whose channel id changed is matched by its code; a row for a channel unknown by id
+// and by code stays in channels_legacy for a later run.
+void ChannelConversionTests::testMatchesByCodeAndKeepsUnknownRows() {        // Review Focus 4
+    ChannelRepository repo;
+    schema::Channel &oa = schema::channel[CPAP_Obstructive];
+    ChannelData moved = legacyOf(oa); moved.channelId = 61001; moved.label = "MyOA";   // id changed, code still matches
+    ChannelData unknown; unknown.channelId = 61002; unknown.channelCode = "NotInThisBuild"; unknown.label = "Keep";
+    QVERIFY(repo.insertLegacy(m_profileId, { moved, unknown }));
+    QCOMPARE(ChannelStore::convertLegacyRows(kFake), 1);
+    QCOMPARE(repo.findOverrides(m_profileId)[0].channelId, ChannelID(CPAP_Obstructive));
+    const auto left = repo.findLegacy(m_profileId);
+    QCOMPARE(left.size(), 1);
+    QCOMPARE(left[0].channelCode, QString("NotInThisBuild"));
+}
+
+// Converted rows are gone, so a second run finds nothing to do.
+void ChannelConversionTests::testSecondRunChangesNothing() {                 // Review Focus 5
+    ChannelRepository repo;
+    ChannelData renamed = legacyOf(schema::channel[CPAP_Obstructive]); renamed.label = "MyOA";
+    QVERIFY(repo.insertLegacy(m_profileId, { renamed }));
+    QCOMPARE(ChannelStore::convertLegacyRows(kFake), 1);
+    QCOMPARE(ChannelStore::convertLegacyRows(kFake), 0);
+    QCOMPARE(repo.findOverrides(m_profileId).size(), 1);
+}
+
+// Profiles::Scan() runs the conversion (with the real list of shipped names).
+void ChannelConversionTests::testScanConverts() {
+    ChannelRepository repo;
+    ChannelData renamed = legacyOf(schema::channel[CPAP_Obstructive]); renamed.label = "Zz Never Shipped Zz";
+    QVERIFY(repo.insertLegacy(m_profileId, { renamed }));
+    Profiles::Scan();
+    p_profile = Profiles::Get(kProfileName);
+    QVERIFY(repo.profilesWithLegacyRows().isEmpty());
+    QCOMPARE(repo.findOverrides(m_profileId)[0].values.label.value(), QString("Zz Never Shipped Zz"));
+}
+
+// An OSCAR 1.x channels.dat goes through the same classification: only the real change is
+// stored, not a full copy of every channel.
+void ChannelConversionTests::testChannelsDatGoesThroughClassifier() {
+    schema::Channel &oa = schema::channel[CPAP_Obstructive];
+    oa.setLabel("Zz Dat Label Zz");
+    p_profile->saveChannelsToDat();               // the old writer, still compiled
+    schema::resetChannelsToDefaults();
+    QVERIFY(p_profile->migrateChannelsToDatabase(p_profile->Get("{DataFolder}")));
+    const auto rows = ChannelRepository().findOverrides(m_profileId);
+    QCOMPARE(rows.size(), 1);                     // every other channel was at its default
+    QCOMPARE(rows[0].values.label.value(), QString("Zz Dat Label Zz"));
+}
+
+// A profile whose old rows were converted never imports a channels.dat left in its folder.
+void ChannelConversionTests::testStaleChannelsDatIsNotReimported() {         // Review Focus 3
+    schema::channel[CPAP_Obstructive].setLabel("Zz Stale Zz");
+    p_profile->saveChannelsToDat();               // a file left behind by an older build
+    schema::resetChannelsToDefaults();
+    ChannelRepository repo;
+    QVERIFY(repo.insertLegacy(m_profileId, { legacyOf(schema::channel[CPAP_Hypopnea]) }));
+    ChannelStore::convertLegacyRows(kFake);       // marks the profile as imported
+    Profiles::Scan();
+    p_profile = Profiles::Get(kProfileName);
+    p_profile->loadChannels();
+    QCOMPARE(schema::channel[CPAP_Obstructive].label(), schema::channel[CPAP_Obstructive].defaults().label);
 }
 
 void ChannelConversionTests::cleanupTestCase()

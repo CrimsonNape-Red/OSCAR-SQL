@@ -113,6 +113,16 @@ public:
     //! \brief Deletes the channels_legacy rows whose primary keys are \p rowIds.
     bool deleteLegacy(const QList<qint64> &rowIds);
 
+    /**
+     * @brief Writes the result of converting one profile's channels_legacy rows.
+     * Inserts \p added as override rows (rows with no values are skipped) and deletes the
+     * channels_legacy rows whose primary keys are \p convertedIds. Opens no transaction of
+     * its own: the caller wraps it, together with any other write of the same conversion,
+     * in one transaction on this repository's connection.
+     */
+    bool writeConversion(qint64 profileId, const QList<ChannelOverrideRow> &added,
+                         const QList<qint64> &convertedIds);
+
     //! \brief A colour as #RRGGBB, or an empty string for an invalid colour.
     static QString colorToString(const QColor &color);
     //! \brief The colour named by \p colorStr, or an invalid colour for an empty string.
@@ -125,6 +135,11 @@ private:
     ChannelData mapLegacy(const QSqlQuery &query);
     //! \brief Maps the current row of a profile_channel_overrides query.
     ChannelOverrideRow mapOverride(const QSqlQuery &query);
+
+    //! \brief Inserts the non-empty rows of \p rows for \p profileId; no transaction of its own.
+    bool insertOverrideRows(qint64 profileId, const QList<ChannelOverrideRow> &rows);
+    //! \brief Deletes channels_legacy rows by primary key; no transaction of its own.
+    bool deleteLegacyRows(const QList<qint64> &rowIds);
 };
 
 #endif // CHANNEL_REPOSITORY_H
