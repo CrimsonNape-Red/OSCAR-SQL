@@ -1219,6 +1219,9 @@ bool PreferencesDialog::Save()
 
     saveChanInfo();
     saveWaveInfo();
+    // Write the channel edits now, not only when the profile closes, so a backup or an
+    // external script sees them and they survive an abnormal exit (#431).
+    profile->saveChannels();
 
     p_pref->Save();
     profile->Save();

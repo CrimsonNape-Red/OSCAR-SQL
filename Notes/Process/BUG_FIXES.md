@@ -4,6 +4,27 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-25 - Channel edits in Preferences were written only when the profile closed (GitLab #431)
+
+**Files:** `oscar/preferencesdialog.cpp`
+
+**Symptom:** A channel name, label, colour, threshold or tick changed in Preferences > Events or
+Waveforms took effect on screen at once, but a backup made afterwards and the `channels` view read by
+external scripts still held the old values until the profile was closed or OSCAR exited.
+
+**Root cause:** `PreferencesDialog::Save()` applied the edits to the channels in memory only.
+`Profile::saveChannels()` was called from `MainWindow::CloseProfile()` and when another profile is
+created, nowhere else.
+
+**Fix:** `PreferencesDialog::Save()` calls `Profile::saveChannels()` after applying the edits.
+
+**Non-obvious:**
+- The two "Reset Defaults" buttons still act on the channels in memory at once and are still written
+  only when Preferences is accepted or the profile closes; Cancel after a confirmed reset does not
+  undo it. Unchanged by this fix.
+
+---
+
 ## 2026-11-25 - Existing profiles kept old channel names, colours and thresholds (GitLab #418)
 
 **Files:** `oscar/database/database_schema.cpp/.h`, `oscar/database/channel_repository.cpp/.h`,
