@@ -72,7 +72,7 @@ QWidget *cardRow(QWidget *left, QWidget *right)
 
 QString num(double v, int decimals = 1)
 {
-    // Without the "-0.0" a value just below zero would round to
+    // Shows 0 instead of "-0.0" for a value that rounds to zero from below
     return QLocale().toString(qAbs(v) < 0.5 * std::pow(10.0, -decimals) ? 0.0 : v, 'f', decimals);
 }
 
@@ -90,6 +90,18 @@ QString nights(int n)
 QString date(const QDate &d)
 {
     return QLocale().toString(d, MedDateFormat);
+}
+
+//! \brief Whether Statistics treats \a a and \a b as one device when it splits the periods
+bool sameDevice(Machine *a, Machine *b)
+{
+    if (!a || !b) return a == b;
+    return AppSetting->combineSimilarMachines() ? a->brand() == b->brand() : a == b;
+}
+
+QString deviceName(Machine *m)
+{
+    return m ? (m->brand() + " " + m->model()).trimmed() : QString();
 }
 
 //! \brief One settings period, with the nights that count towards its AHI.
@@ -195,6 +207,12 @@ QWidget *settingsCard(const QList<Period> &periods, const QString &ahiText)
         Role fg = Role::Ink3, bg = Role::Surface2;
         if (!before) {
             text = InsightsPage::tr("First period: nothing to compare with.");
+        } else if (!sameDevice(before->rx.machine, p.rx.machine)) {
+            // Devices score events differently, so their AHIs aren't compared
+            tag = InsightsPage::tr("Device changed");
+            fg = Role::AccentInk; bg = Role::AccentSoft;
+            text = InsightsPage::tr("New device: %1. Not compared with the previous device, which "
+                                    "may score events differently.").arg(deviceName(p.rx.machine));
         } else {
             const Insights::RxComparison cmp = Insights::compareRxPeriods(before->nights, p.nights);
             const QString from = num(before->ahi, 2), to = num(p.ahi, 2);
@@ -220,8 +238,14 @@ QWidget *settingsCard(const QList<Period> &periods, const QString &ahiText)
             case Insights::ChangeLabel::Within:
                 tag = InsightsPage::tr("No real change");
                 fg = Role::Neutral; bg = Role::NeutralSoft;
-                text = InsightsPage::tr("%1 %2 then %3: within normal night-to-night variation.")
-                       .arg(ahiText, from, to);
+                if (cmp.ciLow > 0 || cmp.ciHigh < 0) {
+                    // Real, but smaller than the minimum change worth reporting
+                    text = InsightsPage::tr("%1 %2 then %3: a change of less than %4 events/h.")
+                           .arg(ahiText, from, to, num(Insights::kMinAhiChange));
+                } else {
+                    text = InsightsPage::tr("%1 %2 then %3: within normal night-to-night variation.")
+                           .arg(ahiText, from, to);
+                }
                 break;
             }
             if (cmp.valid) {
@@ -357,8 +381,12 @@ QWidget *usageCard(const QList<Day *> &days)
     const Insights::UsagePattern usage = Insights::usagePattern(days);
     // A US rule, so only for profiles set to the United States
     const bool us = p_profile->user->country() == QLocale::territoryToString(QLocale::UnitedStates);
-    const Insights::MedicareCheck med = us ? Insights::medicareFirst90Days(p_profile->daylist)
-                                           : Insights::MedicareCheck();
+    Insights::MedicareCheck med = us ? Insights::medicareFirst90Days(p_profile->daylist)
+                                     : Insights::MedicareCheck();
+    // Only useful early on: hidden from a year after the first night
+    if (med.valid && med.firstNight.addYears(1) < QDate::currentDate()) {
+        med = Insights::MedicareCheck();
+    }
     if (!usage.valid && !med.valid) return nullptr;
 
     QVBoxLayout *col;
@@ -409,8 +437,8 @@ QWidget *usageCard(const QList<Day *> &days)
         m->addWidget(body(text, c, Role::Ink2), 1);
         col->addLayout(m);
         col->addWidget(makeLabel(InsightsPage::tr("%1 or more hours on at least %2 nights in some %3 nights in a "
-                                                  "row, starting within %4 days of the first night OSCAR "
-                                                  "holds (%5).").arg(4).arg(21).arg(30).arg(90)
+                                                  "row, within the first %4 days from the first night "
+                                                  "OSCAR holds (%5).").arg(4).arg(21).arg(30).arg(90)
                                  .arg(date(med.firstNight)), Theme::font(0.95), Role::Ink3, c, true));
     }
     col->addStretch(1);
@@ -447,10 +475,15 @@ void InsightsPage::showEvent(QShowEvent *event)
 QString InsightsPage::dataKey() const
 {
     if (!p_profile) return "none";
-    double hours = 0;
-    for (Day *day : std::as_const(p_profile->daylist)) hours += day->hours(MT_CPAP);
-    return QString("%1|%2|%3|%4|%5|%6|%7|%8|%9")
+    // Hours and scored events catch imports, purges, disabled sessions and re-flagged events
+    double hours = 0, events = 0;
+    for (Day *day : std::as_const(p_profile->daylist)) {
+        hours += day->hours(MT_CPAP);
+        events += day->count(AllAhiChannels) + day->count(CPAP_RERA);
+    }
+    return QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11")
            .arg(quintptr(p_profile)).arg(p_profile->daylist.size()).arg(hours, 0, 'f', 4)
+           .arg(events, 0, 'f', 2).arg(p_profile->cpap->leakRedline())
            .arg(p_profile->general->calculateRDI()).arg(p_profile->cpap->complianceHours())
            .arg(p_profile->user->country()).arg(QLocale().name())
            .arg(AppSetting->combineSimilarMachines())   // how Statistics groups the periods

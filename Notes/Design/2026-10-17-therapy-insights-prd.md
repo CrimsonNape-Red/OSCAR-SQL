@@ -61,7 +61,7 @@ PRD uses data OSCAR already imports. **No new loaders and no schema migration.**
    carefully; translators and reviewers will copy them.
 2. **Gate on the data, not the brand.** A metric appears only when the day has the channels
    it needs. Follow the evidence-based approach of `Machine::reportsHypopneaMechanism()` (see
-   `Notes/specs/2026-09-14-oh-ch-capability-gating-design.md`). Never hard-code a list of
+   `Notes/Design/2026-09-14-oh-ch-capability-gating-design.md`). Never hard-code a list of
    loaders.
 3. **Show the method.** Every new number needs a tooltip or help text that names its
    definition and window, e.g. "ODI 3%: drops of ≥3% from a 120 s rolling baseline, lasting
@@ -106,7 +106,7 @@ PRD uses data OSCAR already imports. **No new loaders and no schema migration.**
 
 - Every user-visible string goes through `tr()`. `Translations/*.ts` are left for the
   maintainers' batch `lupdate` run.
-- `oscar/docs/release_notes.html` is left to the maintainers; each merge request carries a
+- `Htmldocs/release_notes.html` is left to the maintainers; each merge request carries a
   short user-facing summary they can paste in.
 - Thresholds are named constants in `insights.h`, each with a comment saying it could become a
   preference. No preference UI is added.
@@ -150,7 +150,7 @@ oscar/oscar.pro                  EDIT add the new files
   tested with both end-stamped and instantaneous events.
 - **Oximeter–CPAP clock alignment.** F4 and F5 need both on one timeline. OSCAR has
   device-time correction (`devicetimecorrectiondialog.*`, `driftanalysisdialog.*`,
-  `Notes/Developer Notes/Clock Drift Plan.md`). Use the corrected times OSCAR already applies.
+  `Notes/Design/Clock Drift Plan.md`). Use the corrected times OSCAR already applies.
   Hide cross-device metrics when the day has no oximeter session overlapping a CPAP session by
   ≥ 1 h.
 - **Performance:** Statistics covers ranges of up to years. Anything that walks waveforms
@@ -206,8 +206,13 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
   - The 95 % interval of the difference comes from a **bootstrap over nights**: 1,000
     resamples with a fixed seed, so output is deterministic. A bootstrap handles nights being
     noisier than a plain Poisson count (overdispersion).
-  - Label: "within night-to-night variation" when the interval contains 0. Otherwise
-    "lower", "higher" or "no comparison".
+  - Label: "lower" or "higher" only when the interval excludes 0 **and** the change is at
+    least `Insights::kMinAhiChange` (1 event/h; added after review on !85, since long periods
+    make the interval narrow enough to flag a tiny difference). Otherwise "within" (the page
+    says "a change of less than 1 events/h" when the interval excludes 0), or "no
+    comparison".
+  - A period that starts on a different device is not compared: the page marks "Device
+    changed", since devices score events differently.
   - No comparison when either period has fewer days than the minimum-days pref in §6.
 - **Gate:** CPAP days with event data.
 - **Surface:** Insights page, "Settings changes": one row per "Changes to Device Settings"
@@ -265,7 +270,7 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
   - (c) Median sessions per night.
 - **Gate:** CPAP. (a) appears only when first use falls inside the profile's data.
 - **Surface:** Insights page, "Usage pattern". (a) only for profiles whose country is the
-  United States.
+  United States, and only until a year after the first night (agreed after review on !85).
 - **Accept:** `f4_medicare_just_met` (21 good nights, one exactly 4.0 h) and
   `f4_medicare_just_missed` (20).
 - **Test:** `testMedicareWindowMet`, `testMedicareWindowNotMet`.
@@ -294,8 +299,7 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
   - Burden, ΔHR and desat-confirmed index need SpO2 (+ pulse for ΔHR) overlapping CPAP for
     ≥ 1 h.
   - Never mix data from two oximeters on one night.
-- **Surface:** Statistics "Oximeter Statistics": new rows after the existing `SPO2Drop` rows.
-  Daily: oximetry section, via `getInsightsInfo`.
+- **Surface:** a section on the Insights page (see "Where the results show" in §5).
 - **Accept:** the seven `f5_*` scenarios.
 - **Test:** one test per definition, plus a gap/invalid-sample test.
 
@@ -324,7 +328,7 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
   thirds of the night), across all nights in the range. Each bucket shows its count of
   contributing nights.
 - **Gate:** CPAP.
-- **Surface:** Statistics: a 1-row-per-bucket table. A graph comes later (§9).
+- **Surface:** a 1-row-per-bucket table on the Insights page. A graph comes later (§9).
 
 ### Phase 3 — patterns across time (MR 3)
 
@@ -373,8 +377,10 @@ data.
 - **New file `oscar/tests/insightstests.{h,cpp}`**, registered with `DECLARE_TEST` (see
   `machinetests.h`). Build `Session`/`EventList` objects in code. Don't depend on
   `testdata/`, which isn't in the repo.
-- **The scenarios already exist** (built 2026-10-17): 33 JSON files in
-  `oscar/tests/insights_scenarios/`, generated by `Tools/insights_testdata/make_scenarios.py`.
+- **The scenarios already exist** (built 2026-10-17): `Tools/insights_testdata/make_scenarios.py`
+  has a function per feature and writes `oscar/tests/insights_scenarios/`. Only the
+  implemented features' files are committed (Phase 1 and the cross-feature `general_*`: 17
+  files); each later feature adds its function's output to `main()` in its own MR.
   `Tools/insights_testdata/README.md` documents the format and the decisions the scenarios
   encode. Each expected value was checked by an independent 1 Hz sampling script.
   `insightstests.cpp` needs one small loader that turns a scenario file into
@@ -459,8 +465,8 @@ of the 7 pre-existing failures.
 
 ## 10. Open questions for the maintainers (raise in MR 1's description)
 
-1. Should insights live in a new "Therapy Insights" section on Statistics, or be folded into
-   the existing sections?
+1. ~~Should insights live in a new "Therapy Insights" section on Statistics?~~ Settled on !53
+   (2026-11-24): on their own Insights page, opened from the Welcome page.
 2. Is the Medicare criterion (F4-lite a) acceptable in an international app, if it is labelled
    as US-specific?
 3. Would they prefer insight thresholds become preferences now, rather than in a follow-up?

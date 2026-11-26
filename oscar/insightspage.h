@@ -27,7 +27,8 @@ class InsightsPage : public QScrollArea
 public:
     explicit InsightsPage(QWidget *parent = nullptr);
 
-    //! \brief Rebuilds the page the next time it is shown, e.g. after a colour scheme change
+    //! \brief Rebuilds the page now if it is on screen, otherwise the next time it is shown,
+    //! e.g. after a colour scheme change
     void invalidate();
     //! \brief Recalculates now if the page is on screen and its data changed, e.g. after an import
     void refreshIfShown();

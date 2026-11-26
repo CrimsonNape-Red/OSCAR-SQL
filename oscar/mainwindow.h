@@ -155,6 +155,7 @@ class MainWindow : public QMainWindow
     void JumpDaily();
     void JumpOverview();
     void JumpStatistics();
+    //! \brief Shows the Insights tab; does nothing while it is disabled (no profile or no devices)
     void JumpInsights();
     void JumpImport();
     void JumpOxiWizard();
@@ -369,6 +370,7 @@ class MainWindow : public QMainWindow
     void on_actionView_Overview_triggered();
     //! \brief View > View Statistics (F4): brings the Statistics page to the front
     void on_actionView_Statistics_triggered();
+    //! \brief View > View Insights (no shortcut): brings the Insights page to the front
     void on_actionView_Insights_triggered();
 
 
