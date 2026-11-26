@@ -1,0 +1,102 @@
+{
+ "format_version": 1,
+ "id": "general_two_cpap_devices",
+ "feature": "all",
+ "description": "Home device 6 h with 6 events, travel device 1 h with 4 events, same night.",
+ "devices": [
+  {
+   "id": "cpap1",
+   "type": "CPAP",
+   "loader": "ResMed",
+   "event_time": "end"
+  },
+  {
+   "id": "cpap2",
+   "type": "CPAP",
+   "loader": "PRS1",
+   "event_time": "start"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 6,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     },
+     "events": {
+      "Obstructive": [
+       [
+        600,
+        15
+       ],
+       [
+        3600,
+        15
+       ],
+       [
+        6600,
+        15
+       ],
+       [
+        9600,
+        15
+       ],
+       [
+        12600,
+        15
+       ],
+       [
+        15600,
+        15
+       ]
+      ]
+     }
+    },
+    {
+     "device": "cpap2",
+     "start": "2021-01-05T05:15:00",
+     "hours": 1,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     },
+     "events": {
+      "Obstructive": [
+       [
+        60,
+        15
+       ],
+       [
+        660,
+        15
+       ],
+       [
+        1260,
+        15
+       ],
+       [
+        1860,
+        15
+       ]
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "ahi": 1.4286,
+  "hours": 7.0
+ },
+ "tolerance": {
+  "ahi": 0.001
+ }
+}

@@ -1,0 +1,1371 @@
+{
+ "format_version": 1,
+ "id": "f4_medicare_just_met",
+ "feature": "F4-lite",
+ "description": "90 nights of 3.5 h except 21 consecutive nights of >= 4 h (the first exactly 4.0 h).",
+ "devices": [
+  {
+   "id": "cpap1",
+   "type": "CPAP",
+   "loader": "ResMed",
+   "event_time": "end"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-05",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-05T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-06",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-06T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-07",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-07T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-08",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-08T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-09",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-09T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-10",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-10T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-11",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-11T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-12",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-12T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-13",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-13T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-14",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-14T23:00:00",
+     "hours": 4.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-15",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-15T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-16",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-16T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-17",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-17T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-18",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-18T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-19",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-19T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-20",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-20T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-21",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-21T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-22",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-22T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-23",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-23T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-24",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-24T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-25",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-25T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-26",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-26T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-27",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-27T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-28",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-28T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-29",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-29T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-30",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-30T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-01-31",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-31T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-01",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-01T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-02",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-02T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-03",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-03T23:00:00",
+     "hours": 6.0,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-04T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-05",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-05T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-06",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-06T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-07",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-07T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-08",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-08T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-09",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-09T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-10",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-10T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-11",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-11T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-12",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-12T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-13",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-13T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-14",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-14T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-15",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-15T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-16",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-16T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-17",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-17T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-18",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-18T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-19",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-19T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-20",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-20T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-21",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-21T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-22",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-22T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-23",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-23T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-24",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-24T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-25",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-25T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-26",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-26T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-27",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-27T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-02-28",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-02-28T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-01",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-01T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-02",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-02T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-03",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-03T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-04T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-05",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-05T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-06",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-06T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-07",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-07T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-08",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-08T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-09",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-09T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-10",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-10T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-11",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-11T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-12",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-12T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-13",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-13T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-14",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-14T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-15",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-15T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-16",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-16T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-17",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-17T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-18",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-18T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-19",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-19T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-20",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-20T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-21",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-21T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-22",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-22T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-23",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-23T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-24",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-24T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-25",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-25T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-26",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-26T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-27",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-27T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-28",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-28T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-29",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-29T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-30",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-30T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-03-31",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-03-31T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-04-01",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-04-01T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-04-02",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-04-02T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  },
+  {
+   "date": "2021-04-03",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-04-03T23:00:00",
+     "hours": 3.5,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "medicare_met": true,
+  "best_window_nights_ge_4h": 21,
+  "best_window_first_night": "2021-01-05"
+ }
+}

@@ -1,0 +1,145 @@
+{
+ "format_version": 1,
+ "id": "f2_events_at_pressure_start_stamped",
+ "feature": "F2",
+ "description": "Same events, device stores them at their start. Onsets are given in the file; the builder converts them to the device's convention. Bins are 1 cmH2O.",
+ "devices": [
+  {
+   "id": "cpap2",
+   "type": "CPAP",
+   "loader": "PRS1",
+   "event_time": "start"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap2",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     },
+     "channels": {
+      "Pressure": {
+       "rate_s": 2,
+       "segments": [
+        [
+         [
+          0,
+          8
+         ],
+         [
+          7200,
+          8
+         ],
+         [
+          7200,
+          10
+         ],
+         [
+          14400,
+          10
+         ],
+         [
+          14400,
+          12
+         ],
+         [
+          28800,
+          12
+         ]
+        ]
+       ]
+      }
+     },
+     "events": {
+      "Obstructive": [
+       [
+        1800,
+        20
+       ],
+       [
+        3600,
+        20
+       ],
+       [
+        7185,
+        20
+       ],
+       [
+        7190,
+        20
+       ],
+       [
+        9000,
+        15
+       ],
+       [
+        12000,
+        15
+       ]
+      ],
+      "Hypopnea": [
+       [
+        15000,
+        20
+       ],
+       [
+        16500,
+        20
+       ],
+       [
+        18000,
+        20
+       ],
+       [
+        19500,
+        20
+       ],
+       [
+        21000,
+        20
+       ],
+       [
+        22500,
+        20
+       ],
+       [
+        24000,
+        20
+       ],
+       [
+        25500,
+        20
+       ]
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "events_at_pressure_by_onset": {
+   "8": {
+    "events": 4,
+    "hours": 2.0,
+    "per_hour": 2.0
+   },
+   "10": {
+    "events": 2,
+    "hours": 2.0,
+    "per_hour": 1.0
+   },
+   "12": {
+    "events": 8,
+    "hours": 4.0,
+    "per_hour": 2.0
+   }
+  }
+ }
+}

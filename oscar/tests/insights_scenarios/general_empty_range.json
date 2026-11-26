@@ -1,0 +1,18 @@
+{
+ "format_version": 1,
+ "id": "general_empty_range",
+ "feature": "all",
+ "description": "No nights at all: every insight is invalid, nothing crashes.",
+ "devices": [
+  {
+   "id": "cpap1",
+   "type": "CPAP",
+   "loader": "ResMed",
+   "event_time": "end"
+  }
+ ],
+ "nights": [],
+ "expected": {
+  "all_valid": false
+ }
+}

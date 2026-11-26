@@ -1,0 +1,93 @@
+{
+ "format_version": 1,
+ "id": "f7_too_little_rem",
+ "feature": "F7",
+ "description": "Only 10 min of REM: split is hidden.",
+ "devices": [
+  {
+   "id": "cpap1",
+   "type": "CPAP",
+   "loader": "ResMed",
+   "event_time": "end"
+  },
+  {
+   "id": "stage1",
+   "type": "SLEEPSTAGE",
+   "loader": "Dreem"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     },
+     "events": {
+      "Obstructive": [
+       [
+        15000,
+        20
+       ]
+      ]
+     }
+    },
+    {
+     "device": "stage1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "channels": {
+      "SleepStage": {
+       "rate_s": 30,
+       "segments": [
+        [
+         [
+          0,
+          -1
+         ],
+         [
+          1800,
+          -1
+         ],
+         [
+          1800,
+          -3
+         ],
+         [
+          14400,
+          -3
+         ],
+         [
+          14400,
+          -2
+         ],
+         [
+          15000,
+          -2
+         ],
+         [
+          15000,
+          -4
+         ],
+         [
+          28800,
+          -4
+         ]
+        ]
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "rem_nrem_valid": false
+ }
+}

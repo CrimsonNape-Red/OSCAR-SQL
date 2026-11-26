@@ -60,11 +60,16 @@ Makefile*
 __pycache__/
 *.pyc
 
+#Unit-test sample data (real CPAP cards and profiles) is distributed separately, never committed
+/testdata/
+
 #Doxygen output does not go in repository
 doxydoc
 
 #SourceTrail files
 *.json
+#...but the synthetic Therapy Insights scenarios are test fixtures
+!oscar/tests/insights_scenarios/*.json
 # Added by code-review-graph
 .code-review-graph/
 

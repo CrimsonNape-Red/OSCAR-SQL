@@ -423,6 +423,7 @@ SOURCES += \
     Graphs/MinutesAtPressure.cpp \
     SleepLib/appsettings.cpp \
     SleepLib/calcs.cpp \
+    SleepLib/insights.cpp \
     SleepLib/common.cpp \
     SleepLib/day.cpp \
     SleepLib/deviceconnection.cpp \
@@ -634,6 +635,7 @@ HEADERS  += \
     Graphs/gYAxis.h \
     Graphs/layer.h \
     SleepLib/calcs.h \
+    SleepLib/insights.h \
     SleepLib/common.h \
     SleepLib/day.h \
     SleepLib/event.h \
@@ -1017,6 +1019,7 @@ test {
         tests/zeotests.cpp \
         tests/applehealthtests.cpp \
         tests/machinetests.cpp \
+        tests/insightstests.cpp \
         tests/machinepurgedatetests.cpp \
         tests/channeloverridestests.cpp \
         tests/channelstoragetests.cpp \
@@ -1078,6 +1081,7 @@ test {
         tests/zeotests.h \
         tests/applehealthtests.h \
         tests/machinetests.h \
+        tests/insightstests.h \
         tests/machinepurgedatetests.h \
         tests/channeloverridestests.h \
         tests/channelstoragetests.h \

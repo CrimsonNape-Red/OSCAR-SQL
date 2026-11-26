@@ -1,0 +1,62 @@
+{
+ "format_version": 1,
+ "id": "f2_pinned_at_max_half_night",
+ "feature": "F2",
+ "description": "APAP 6-14: 10 cmH2O for 4 h, then pinned at 14.",
+ "devices": [
+  {
+   "id": "cpap1",
+   "type": "CPAP",
+   "loader": "ResMed",
+   "event_time": "end"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     },
+     "channels": {
+      "Pressure": {
+       "rate_s": 2,
+       "segments": [
+        [
+         [
+          0,
+          10
+         ],
+         [
+          14400,
+          10
+         ],
+         [
+          14400,
+          14
+         ],
+         [
+          28800,
+          14
+         ]
+        ]
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "time_at_max_pct": 50.0
+ },
+ "tolerance": {
+  "time_at_max_pct": 0.5
+ }
+}

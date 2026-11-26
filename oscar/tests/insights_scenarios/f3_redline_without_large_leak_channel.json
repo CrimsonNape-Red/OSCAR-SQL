@@ -1,0 +1,77 @@
+{
+ "format_version": 1,
+ "id": "f3_redline_without_large_leak_channel",
+ "feature": "F3",
+ "description": "Device with no LargeLeak channel: leak above the 24 L/min redline for 30 min of 6 h.",
+ "devices": [
+  {
+   "id": "cpap2",
+   "type": "CPAP",
+   "loader": "PRS1",
+   "event_time": "start"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap2",
+     "start": "2021-01-04T23:00:00",
+     "hours": 6,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     },
+     "channels": {
+      "Leak": {
+       "rate_s": 2,
+       "segments": [
+        [
+         [
+          0,
+          10
+         ],
+         [
+          10800,
+          10
+         ],
+         [
+          10800,
+          30
+         ],
+         [
+          12600,
+          30
+         ],
+         [
+          12600,
+          10
+         ],
+         [
+          21600,
+          10
+         ]
+        ]
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "large_leak_pct": 8.333,
+  "large_leak_source": "redline",
+  "flags": [
+   "large_leak"
+  ]
+ },
+ "profile": {
+  "leak_redline": 24
+ },
+ "tolerance": {
+  "large_leak_pct": 0.05
+ }
+}

@@ -1,0 +1,51 @@
+{
+ "format_version": 1,
+ "id": "f2_fixed_cpap_hidden",
+ "feature": "F2",
+ "description": "Fixed CPAP: time at max is meaningless and hidden.",
+ "devices": [
+  {
+   "id": "cpap1",
+   "type": "CPAP",
+   "loader": "ResMed",
+   "event_time": "end"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 7,
+     "settings": {
+      "PAPMode": "CPAP",
+      "Pressure": 10
+     },
+     "channels": {
+      "Pressure": {
+       "rate_s": 2,
+       "segments": [
+        [
+         [
+          0,
+          10
+         ],
+         [
+          25200,
+          10
+         ]
+        ]
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "time_at_max_valid": false,
+  "events_at_pressure_valid": false
+ }
+}

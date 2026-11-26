@@ -1,0 +1,81 @@
+{
+ "format_version": 1,
+ "id": "f6_too_little_supine",
+ "feature": "F6",
+ "description": "Only 20 min supine: split is hidden.",
+ "devices": [
+  {
+   "id": "cpap1",
+   "type": "CPAP",
+   "loader": "ResMed",
+   "event_time": "end"
+  },
+  {
+   "id": "pos1",
+   "type": "POSITION",
+   "loader": "Somnopose"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     },
+     "events": {
+      "Obstructive": [
+       [
+        600,
+        20
+       ]
+      ]
+     }
+    },
+    {
+     "device": "pos1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "channels": {
+      "Orientation": {
+       "rate_s": 5,
+       "segments": [
+        [
+         [
+          0,
+          0
+         ],
+         [
+          1200,
+          0
+         ],
+         [
+          1200,
+          90
+         ],
+         [
+          28800,
+          90
+         ]
+        ]
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "positional_valid": false
+ },
+ "orientation_convention": {
+  "supine_deg": 0,
+  "half_width_deg": 45
+ }
+}

@@ -1,0 +1,70 @@
+{
+ "format_version": 1,
+ "id": "f10_high_flow_limitation",
+ "feature": "F10",
+ "description": "FLG 0.5 for 2 h of 8 h, 0 otherwise.",
+ "devices": [
+  {
+   "id": "cpap1",
+   "type": "CPAP",
+   "loader": "ResMed",
+   "event_time": "end"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     },
+     "channels": {
+      "FLG": {
+       "rate_s": 2,
+       "segments": [
+        [
+         [
+          0,
+          0
+         ],
+         [
+          14400,
+          0
+         ],
+         [
+          14400,
+          0.5
+         ],
+         [
+          21600,
+          0.5
+         ],
+         [
+          21600,
+          0
+         ],
+         [
+          28800,
+          0
+         ]
+        ]
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "fl_time_pct": 25.0
+ },
+ "tolerance": {
+  "fl_time_pct": 0.1
+ }
+}

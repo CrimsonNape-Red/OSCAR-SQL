@@ -1,0 +1,132 @@
+{
+ "format_version": 1,
+ "id": "f5_desat_confirmed_hypopneas",
+ "feature": "F5",
+ "description": "Four hypopneas: #1 followed 5 s later by a 5 % dip, #2 by a 3.5 % dip, #3 by none, #4 by a 5 % dip that starts 45 s after it ends (outside the 30 s window).",
+ "devices": [
+  {
+   "id": "cpap1",
+   "type": "CPAP",
+   "loader": "ResMed",
+   "event_time": "end"
+  },
+  {
+   "id": "oxi1",
+   "type": "OXIMETER",
+   "loader": "Viatom"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     },
+     "events": {
+      "Hypopnea": [
+       [
+        1800,
+        20
+       ],
+       [
+        5400,
+        20
+       ],
+       [
+        9000,
+        20
+       ],
+       [
+        12600,
+        20
+       ]
+      ]
+     }
+    },
+    {
+     "device": "oxi1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "channels": {
+      "SPO2": {
+       "rate_s": 1,
+       "segments": [
+        [
+         [
+          0,
+          96
+         ],
+         [
+          1825,
+          96
+         ],
+         [
+          1835,
+          91
+         ],
+         [
+          1850,
+          91
+         ],
+         [
+          1860,
+          96
+         ],
+         [
+          5425,
+          96
+         ],
+         [
+          5435,
+          92.5
+         ],
+         [
+          5450,
+          92.5
+         ],
+         [
+          5460,
+          96
+         ],
+         [
+          12665,
+          96
+         ],
+         [
+          12675,
+          91
+         ],
+         [
+          12690,
+          91
+         ],
+         [
+          12700,
+          96
+         ],
+         [
+          28800,
+          96
+         ]
+        ]
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "desat_confirmed_hypopneas_3pct": 2,
+  "desat_confirmed_hypopneas_4pct": 1,
+  "index_3pct": 0.25,
+  "index_4pct": 0.125
+ }
+}

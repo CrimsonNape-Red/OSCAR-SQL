@@ -1,0 +1,115 @@
+{
+ "format_version": 1,
+ "id": "f2_auto_bilevel_resmed",
+ "feature": "F2",
+ "description": "ResMed auto-bilevel: the loader stores IPAP as Pressure (Press.2s), so time at max compares Pressure with IPAPHi.",
+ "devices": [
+  {
+   "id": "cpap1",
+   "type": "CPAP",
+   "loader": "ResMed",
+   "event_time": "end"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "settings": {
+      "PAPMode": "BiLevelAuto",
+      "EPAPLo": 6,
+      "IPAPHi": 16,
+      "PS": 4
+     },
+     "channels": {
+      "EPAP": {
+       "rate_s": 2,
+       "segments": [
+        [
+         [
+          0,
+          9
+         ],
+         [
+          21600,
+          9
+         ],
+         [
+          21600,
+          12
+         ],
+         [
+          28800,
+          12
+         ]
+        ]
+       ]
+      },
+      "Pressure": {
+       "rate_s": 2,
+       "segments": [
+        [
+         [
+          0,
+          13
+         ],
+         [
+          21600,
+          13
+         ],
+         [
+          21600,
+          16
+         ],
+         [
+          28800,
+          16
+         ]
+        ]
+       ]
+      }
+     },
+     "events": {
+      "Obstructive": [
+       [
+        3600,
+        20
+       ],
+       [
+        7200,
+        20
+       ],
+       [
+        25000,
+        20
+       ]
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "time_at_max_pct": 25.0,
+  "events_at_pressure_by_onset": {
+   "9": {
+    "events": 2,
+    "hours": 6.0,
+    "per_hour": 0.3333
+   },
+   "12": {
+    "events": 1,
+    "hours": 2.0,
+    "per_hour": 0.5
+   }
+  }
+ },
+ "tolerance": {
+  "time_at_max_pct": 0.5,
+  "per_hour": 0.001
+ }
+}

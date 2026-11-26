@@ -1,0 +1,120 @@
+{
+ "format_version": 1,
+ "id": "f3_disabled_session_excluded",
+ "feature": "F3",
+ "description": "6 h enabled session with 6 events, plus a disabled 1 h session with 10.",
+ "devices": [
+  {
+   "id": "cpap1",
+   "type": "CPAP",
+   "loader": "ResMed",
+   "event_time": "end"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 6,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     },
+     "events": {
+      "Obstructive": [
+       [
+        600,
+        15
+       ],
+       [
+        3600,
+        15
+       ],
+       [
+        6600,
+        15
+       ],
+       [
+        9600,
+        15
+       ],
+       [
+        12600,
+        15
+       ],
+       [
+        15600,
+        15
+       ]
+      ]
+     }
+    },
+    {
+     "device": "cpap1",
+     "start": "2021-01-05T05:30:00",
+     "hours": 1,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     },
+     "events": {
+      "Obstructive": [
+       [
+        60,
+        15
+       ],
+       [
+        360,
+        15
+       ],
+       [
+        660,
+        15
+       ],
+       [
+        960,
+        15
+       ],
+       [
+        1260,
+        15
+       ],
+       [
+        1560,
+        15
+       ],
+       [
+        1860,
+        15
+       ],
+       [
+        2160,
+        15
+       ],
+       [
+        2460,
+        15
+       ],
+       [
+        2760,
+        15
+       ]
+      ]
+     },
+     "enabled": false
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "ahi": 1.0,
+  "hours": 6.0,
+  "sessions": 1,
+  "flags": []
+ }
+}

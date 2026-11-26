@@ -1,0 +1,34 @@
+{
+ "format_version": 1,
+ "id": "f10_no_flg_channel",
+ "feature": "F10",
+ "description": "Device without the FLG channel.",
+ "devices": [
+  {
+   "id": "cpap2",
+   "type": "CPAP",
+   "loader": "PRS1",
+   "event_time": "start"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap2",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "fl_valid": false
+ }
+}

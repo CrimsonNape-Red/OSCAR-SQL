@@ -1,0 +1,172 @@
+{
+ "format_version": 1,
+ "id": "f7_rem_vs_nrem",
+ "feature": "F7",
+ "description": "1.5 h REM with 9 events, 6 h NREM with 3, 30 min awake (excluded).",
+ "devices": [
+  {
+   "id": "cpap1",
+   "type": "CPAP",
+   "loader": "ResMed",
+   "event_time": "end"
+  },
+  {
+   "id": "stage1",
+   "type": "SLEEPSTAGE",
+   "loader": "Dreem"
+  }
+ ],
+ "nights": [
+  {
+   "date": "2021-01-04",
+   "sessions": [
+    {
+     "device": "cpap1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "settings": {
+      "PAPMode": "APAP",
+      "PressureMin": 6,
+      "PressureMax": 14
+     },
+     "events": {
+      "Obstructive": [
+       [
+        7500,
+        20
+       ],
+       [
+        8000,
+        20
+       ],
+       [
+        8500,
+        20
+       ],
+       [
+        14700,
+        20
+       ],
+       [
+        15200,
+        20
+       ],
+       [
+        15700,
+        20
+       ],
+       [
+        21900,
+        20
+       ],
+       [
+        22400,
+        20
+       ],
+       [
+        22900,
+        20
+       ],
+       [
+        3000,
+        20
+       ],
+       [
+        10000,
+        20
+       ],
+       [
+        17000,
+        20
+       ]
+      ]
+     }
+    },
+    {
+     "device": "stage1",
+     "start": "2021-01-04T23:00:00",
+     "hours": 8,
+     "channels": {
+      "SleepStage": {
+       "rate_s": 30,
+       "segments": [
+        [
+         [
+          0,
+          -1
+         ],
+         [
+          1800,
+          -1
+         ],
+         [
+          1800,
+          -3
+         ],
+         [
+          7200,
+          -3
+         ],
+         [
+          7200,
+          -2
+         ],
+         [
+          9000,
+          -2
+         ],
+         [
+          9000,
+          -4
+         ],
+         [
+          14400,
+          -4
+         ],
+         [
+          14400,
+          -2
+         ],
+         [
+          16200,
+          -2
+         ],
+         [
+          16200,
+          -3
+         ],
+         [
+          21600,
+          -3
+         ],
+         [
+          21600,
+          -2
+         ],
+         [
+          23400,
+          -2
+         ],
+         [
+          23400,
+          -3
+         ],
+         [
+          28800,
+          -3
+         ]
+        ]
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "expected": {
+  "ahi_rem": 6.0,
+  "ahi_nrem": 0.5,
+  "rem_nrem_ratio": 12.0,
+  "rem_hours": 1.5
+ }
+}
