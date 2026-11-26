@@ -490,6 +490,7 @@ of the 7 pre-existing failures.
    device has reported it, otherwise time above the redline, and doesn't check the
    `large_leak_source` value in `f3_redline_without_large_leak_channel`. Is that acceptable?
 8. A `Day` holds one device per type, so a second CPAP or oximeter on the same night is
-   dropped (§3). Should insights combine devices of one type (`general_two_cpap_devices`
-   expects AHI over both CPAPs; `f5_two_oximeters_one_night` picks the longer overlap), or
-   follow OSCAR and use one?
+   dropped (§3). Phase 1 follows OSCAR and uses the device it keeps
+   (`general_two_cpap_devices`, changed on !85 to match what OSCAR does). Should a later
+   phase combine devices of one type (`f5_two_oximeters_one_night` picks the longer
+   overlap), or keep following OSCAR?
