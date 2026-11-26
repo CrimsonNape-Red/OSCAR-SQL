@@ -266,14 +266,25 @@ bool EDFInfo::Parse() {
 }
 
 bool EDFInfo::ParseSignalData() {
-    // Now check the file isn't truncated before allocating space for the values
-    long allocsize = 0;
+    // Now check the file isn't truncated before allocating space for the values.
+    // The sizes are worked out in qint64: long is 32 bits on Windows, where a damaged header's
+    // record or sample count used to overflow this check, pass it, and then crash in new[] or
+    // write past the end of a short array. Both header fields are at most 8 ASCII digits, so
+    // the qint64 products cannot overflow. A negative sample count is never valid.
+    qint64 allocsize = 0;
     for (auto & sig : edfsignals) {
+        if (sig.sampleCnt < 0) {
+            qWarning() << "EDFInfo::Parse(): " << filename << " has a negative sample count for" << sig.label;
+            fileData.clear();
+            return false;
+        }
         if (edfHdr.num_data_records > 0) {
-            allocsize += sig.sampleCnt * edfHdr.num_data_records * 2;
+            allocsize += qint64(sig.sampleCnt) * qint64(edfHdr.num_data_records) * 2;
         }
     }
-    if (allocsize > (datasize - pos)) {
+    // After this check every array below holds no more samples than the file has bytes, so
+    // sample counts and indexes fit in a 32-bit long as well.
+    if (allocsize > qint64(datasize - pos)) {
         // Space required more than the remainder left to read,
         // so abort and let the user clean up the corrupted file themselves
         qWarning() << "EDFInfo::Parse(): " << filename << " is too short!";

@@ -140,6 +140,11 @@ void EventList::AddWaveform(qint64 start, qint16 *data, int recs, qint64 duratio
         return;
     }
 
+    // No samples: memcpy() below must not be handed a null pointer, even for 0 bytes.
+    if ((recs <= 0) || !data) {
+        return;
+    }
+
     qint64 last = start + duration;
 
     if (!m_first) {

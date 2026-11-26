@@ -57,6 +57,7 @@ ViatomLoader::Open(const QStringList & paths)
     int imported = 0;
     int found = 0;
     s_unexpectedMessages.clear();
+    m_failedFiles.clear();
 
     int size = paths.size();
     for (int i=0; i < size; i++) {
@@ -68,8 +69,13 @@ ViatomLoader::Open(const QStringList & paths)
         if (ok > 0) {
             imported++;
         } else if (ok < 0) {
-            // Stop on error...
-            break;
+            // Carry on with the other files: stopping here used to lose every later
+            // night after one damaged file. The caller reports the failures.
+            qWarning().noquote() << "ViatomLoader: could not import" << paths[i] << "- continuing with the remaining files";
+            m_failedFiles << paths[i];
+            emit setProgressValue(i+1);
+            QCoreApplication::processEvents();
+            continue;
         }
         found++;
         emit setProgressValue(i+1);

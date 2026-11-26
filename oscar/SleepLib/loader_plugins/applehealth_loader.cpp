@@ -84,6 +84,13 @@ int AppleHealthLoader::Open(const QStringList &paths)
 
 int AppleHealthLoader::OpenFile(const QString & filename)
 {
+    // Every Apple Health export holds export_cda.xml next to export.xml. It is a clinical
+    // (HL7 CDA) document, not the export OSCAR reads, so importing the export folder must
+    // not count it as a failed file.
+    if (QFileInfo(filename).fileName().compare(QStringLiteral("export_cda.xml"), Qt::CaseInsensitive) == 0) {
+        qDebug() << "AppleHealthLoader::OpenFile: skipping" << filename << "(a clinical document, not an export)";
+        return 0;
+    }
     if (!m_accumulatingImportSummary) {
         m_lastImportSummary = AppleHealthImportSummary();
         m_chosenSleepSources.clear();

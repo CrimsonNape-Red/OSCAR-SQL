@@ -201,7 +201,7 @@ class MainWindow : public QMainWindow
     //! \param files List of file paths to import.
     //! \param silent If true, suppresses progress dialogs, notifications, and interactive modals.
     //! \return true if all files were imported successfully, false if any file failed or was aborted.
-    bool importNonCPAPFiles(MachineLoader &loader, const QStringList &files, bool silent = false, bool requireComplete = false);
+    bool importNonCPAPFiles(MachineLoader &loader, const QStringList &files, bool silent = false);
 
     /*! \brief Run the imports another OSCAR process asked for ("OSCAR --import" started while
         this instance has the data folder open, see importhandover.h).

@@ -3004,7 +3004,9 @@ void Profile::calculateDailySummaries()
                 qDebug() << "Profile::calculateDailySummaries() - SUCCESS for day" << day->date();
 #endif
             } else {
-                qWarning() << "Profile::calculateDailySummaries() - Failed to store summary for day" << day->date();
+                // calculateAndStoreFromDay() also returns false when it skips a day with no
+                // session hours on purpose; it logs its own warning when storing really fails.
+                qDebug() << "Profile::calculateDailySummaries() - No summary stored for day" << day->date();
             }
         }
     }

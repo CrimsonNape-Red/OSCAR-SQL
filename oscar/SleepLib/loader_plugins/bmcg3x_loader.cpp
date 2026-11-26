@@ -10,6 +10,9 @@
 #include "SleepLib/loader_plugins/bmcDataParsing.h"
 #include "SleepLib/loader_plugins/bmcG3xDataParsing.h"
 #include "SleepLib/loader_plugins/bmcg3x_loader.h"
+#include "mainwindow.h"
+
+extern MainWindow *mainwin;
 
 BmcG3xLoader::BmcG3xLoader()
     : BmcLoader()
@@ -112,11 +115,14 @@ int BmcG3xLoader::Open(const QString& dirpath)
                        << "- model" << machine_info.model
                        << "serial" << machine_info.serial
                        << "- import will continue";
-            QMessageBox::information(QApplication::activeWindow(),
-                QObject::tr("BMC G3X — Untested Firmware"),
-                QObject::tr("Your BMC G3X device is running firmware \"%1\", which has not been tested with this version of OSCAR.").arg(fwVersion) + "\n\n" +
-                QObject::tr("It may be similar enough to known firmware versions that import works correctly, but the OSCAR developers would like a .zip copy of this device's SD card to verify support. Import will continue."),
-                QMessageBox::Ok);
+            // No one can answer a message box in batch mode: the import would wait for ever.
+            if (!(mainwin && mainwin->isBatchMode())) {
+                QMessageBox::information(QApplication::activeWindow(),
+                    QObject::tr("BMC G3X — Untested Firmware"),
+                    QObject::tr("Your BMC G3X device is running firmware \"%1\", which has not been tested with this version of OSCAR.").arg(fwVersion) + "\n\n" +
+                    QObject::tr("It may be similar enough to known firmware versions that import works correctly, but the OSCAR developers would like a .zip copy of this device's SD card to verify support. Import will continue."),
+                    QMessageBox::Ok);
+            }
         }
     }
 
@@ -140,11 +146,14 @@ int BmcG3xLoader::Open(const QString& dirpath)
                        << "- firmware" << fwVersion
                        << "serial" << machine_info.serial
                        << "- import will continue";
-            QMessageBox::information(QApplication::activeWindow(),
-                QObject::tr("BMC G3X — Untested Model"),
-                QObject::tr("Your BMC G3X device model \"%1\" has not been tested with this version of OSCAR.").arg(model) + "\n\n" +
-                QObject::tr("It may be similar enough to known models that import works correctly, but the OSCAR developers would like a .zip copy of this device's SD card to verify support. Import will continue."),
-                QMessageBox::Ok);
+            // No one can answer a message box in batch mode: the import would wait for ever.
+            if (!(mainwin && mainwin->isBatchMode())) {
+                QMessageBox::information(QApplication::activeWindow(),
+                    QObject::tr("BMC G3X — Untested Model"),
+                    QObject::tr("Your BMC G3X device model \"%1\" has not been tested with this version of OSCAR.").arg(model) + "\n\n" +
+                    QObject::tr("It may be similar enough to known models that import works correctly, but the OSCAR developers would like a .zip copy of this device's SD card to verify support. Import will continue."),
+                    QMessageBox::Ok);
+            }
         }
     }
 

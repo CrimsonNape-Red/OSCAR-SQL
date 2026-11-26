@@ -80,6 +80,26 @@ void BmcLoaderTask::run()
     {
         BmcDateSession bmcDateSession = bmc->ReadDateSession(this->bmcLink->UsrSession.StartTimestamp.date());
 
+        // The index lists this night, so it should hold at least one session with data. If
+        // none could be read (most often a damaged or missing data file), say so: such
+        // nights used to drop out of the import without a word.
+        {
+            bool anyUsable = false;
+            for (const BmcSession* bmcSession : std::as_const(bmcDateSession.Sessions)) {
+                if (bmcSession && !(bmcSession->Waveforms.isEmpty() &&
+                                    bmcSession->RespiratoryEvents.isEmpty() &&
+                                    bmcSession->PressureSnapshots.isEmpty())) {
+                    anyUsable = true;
+                    break;
+                }
+            }
+            if (!anyUsable) {
+                qWarning().noquote() << "BmcLoader: the night of"
+                                     << this->bmcLink->UsrSession.StartTimestamp.date().toString(Qt::ISODate)
+                                     << "is listed in the index but none of its data could be read; not imported";
+            }
+        }
+
         const auto computeSessionId = [this](BmcSession* bmcSession, int index) -> SessionID {
             const qint64 sessionStartSecs = bmcSession->StartTimestamp.toSecsSinceEpoch();
             if (sessionStartSecs > 0 &&
@@ -1217,8 +1237,10 @@ int BmcLoader::importFromFolder(const QString & dirpath, Machine * mach, const Q
 
     BmcImportSource source = BmcOpenImportSource(dirpath, sourceIsBackup, factory);
     if (source.parsers.empty()) {
+        // An error, not "nothing new": a missing or unreadable index used to return 0, so the
+        // GUI said "Already up to date" and a batch import reported success with no data.
         qWarning() << "BmcLoader: no readable BMC data in" << dirpath;
-        return 0;
+        return -1;
     }
     if (source.isArchive) {
         qDebug() << "BmcLoader: importing from a night archive with" << source.parsers.size() << "index set(s)";

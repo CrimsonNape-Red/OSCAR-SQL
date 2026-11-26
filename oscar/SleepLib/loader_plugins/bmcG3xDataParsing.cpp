@@ -2200,10 +2200,14 @@ void BmcG3xData::ParseIdxRecords(const QByteArray& idxBytes)
 
             if (!startTs.isValid()) {
                 ++idxBadTs;
-#ifdef BMCDEBUG
-                qDebug() << "BmcG3xData IDX: skipping" << QDate(year, month, day).toString(Qt::ISODate)
-                         << "invalid waveform timestamp at waveStart" << Qt::hex << dayEntry.WaveStartOffset;
-#endif // BMCDEBUG
+                // Logged in every build, not only BMCDEBUG: the whole night is left out, and
+                // a damaged or missing waveform file (.000, .001, ...) is the usual cause.
+                // The night's events may still be on the card; importing them alone is not
+                // attempted here.
+                qWarning().noquote() << "BmcG3xData IDX: the night of" << QDate(year, month, day).toString(Qt::ISODate)
+                                     << "is not imported: its waveform data has no valid timestamp"
+                                     << "(damaged or missing waveform file?) at offset"
+                                     << QString::number(dayEntry.WaveStartOffset, 16);
                 continue;
             }
             if (!endTs.isValid() || endTs < startTs || !IsInG3xDayWindow(endTs, dayEntry.Date)) {

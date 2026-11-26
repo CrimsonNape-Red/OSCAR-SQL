@@ -77,17 +77,35 @@ ChannelID PrismaLoader::CPAPModeChannel() { return Prisma_Mode; }
 //********************************************************************************************
 
 bool WMEDFInfo::ParseSignalData() {
-    int bytes = 0;
+    // Sizes in qint64: long is 32 bits on Windows, and a damaged header must not overflow them.
+    qint64 bytes = 0;
     for (auto & sig : edfsignals) {
+        if (sig.sampleCnt < 0) {
+            qWarning() << "WMEDFInfo::ParseSignalData():" << filename << "has a negative sample count for" << sig.label;
+            return false;
+        }
         if (sig.reserved == "#1") {
-            bytes += 1 * sig.sampleCnt;
+            bytes += 1 * qint64(sig.sampleCnt);
         }
         else if (sig.reserved == "#2") {
-            bytes += 2 * sig.sampleCnt;
+            bytes += 2 * qint64(sig.sampleCnt);
+        }
+    }
+    // A record with no 8- or 16-bit samples would divide by zero below.
+    if (bytes <= 0) {
+        qWarning() << "WMEDFInfo::ParseSignalData():" << filename << "has no 8- or 16-bit signals";
+        return false;
+    }
+    // Signals with neither marker are allocated too but never read; a damaged sample count
+    // on one of them must not ask for more memory than the file could fill.
+    for (auto & sig : edfsignals) {
+        if ((sig.reserved != "#1") && (sig.reserved != "#2") && (sig.sampleCnt > bytes)) {
+            qWarning() << "WMEDFInfo::ParseSignalData():" << filename << "has an impossible sample count for" << sig.label;
+            return false;
         }
     }
     // allocate the arrays for the signal values
-    edfHdr.num_data_records = (fileData.size() - edfHdr.num_header_bytes) / bytes;
+    edfHdr.num_data_records = long((fileData.size() - edfHdr.num_header_bytes) / bytes);
 
     for (auto & sig : edfsignals) {
         long samples = sig.sampleCnt * edfHdr.num_data_records;

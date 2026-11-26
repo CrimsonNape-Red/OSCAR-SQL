@@ -65,8 +65,13 @@ class MachineLoader: public QObject
     //! \brief Override this to scan path and detect new device data
     virtual int Open(const QString & path) = 0;
 
-    //! \brief Load all of the given files and update dialog with progress (for non-CPAP devices)
+    //! \brief Load all of the given files and update dialog with progress (for non-CPAP devices).
+    //! A file that fails to open is recorded in failedFiles() and the rest are still loaded.
+    //! \return the number of files that opened
     virtual int Open(const QStringList & paths);
+
+    //! \brief The files the last Open(const QStringList &) could not open, in the order tried
+    const QStringList & failedFiles() const { return m_failedFiles; }
 
     //! \brief Load a specific (non-CPAP) file
     virtual int OpenFile(const QString & path) { Q_UNUSED(path); return 0; }
@@ -139,6 +144,8 @@ protected:
     int m_totalMLtasks;
 
     bool m_abort;
+
+    QStringList m_failedFiles;
 
     DeviceStatus m_status;
     MachineType m_type;

@@ -2426,7 +2426,7 @@ void MainWindow::runOximetryWizard(bool viatom)
         // data files go through the usual import, with its own messages.
         oxiimp.setViatomFileImporter([this](const QString &path) {
             ViatomLoader viatom;
-            return importNonCPAPFiles(viatom, QStringList(path), true, false);
+            return importNonCPAPFiles(viatom, QStringList(path), true);
         });
         oxiimp.setViatomFilesImporter([this]() {
             ViatomLoader viatom;
@@ -4350,12 +4350,12 @@ bool MainWindow::importNonCPAP(MachineLoader &loader, const QString &folderPrefK
     if (w.exec() == QFileDialog::Accepted) {
         saveProfilePath(folderPrefKey, w.directory().absolutePath());
         QStringList files = w.selectedFiles();
-        return importNonCPAPFiles(loader, files, false, false);
+        return importNonCPAPFiles(loader, files, false);
     }
     return false;
 }
 
-bool MainWindow::importNonCPAPFiles(MachineLoader &loader, const QStringList &files, bool silent, bool requireComplete)
+bool MainWindow::importNonCPAPFiles(MachineLoader &loader, const QStringList &files, bool silent)
 {
     ImportRunning importRunning(m_importsRunning);
     if (p_profile == nullptr) {
@@ -4465,6 +4465,14 @@ bool MainWindow::importNonCPAPFiles(MachineLoader &loader, const QStringList &fi
     }
 
     const bool aborted = loader.isAborted();
+    // The loader carries on past a file it cannot open, so name the ones that failed rather
+    // than assuming the import stopped at file number res.
+    const QStringList failedFiles = loader.failedFiles();
+    QStringList failedNames;
+    for (const QString &f : failedFiles) {
+        failedNames << QFileInfo(f).fileName();
+    }
+    const QString firstProblem = failedFiles.isEmpty() ? files.value(0) : failedFiles.first();
     if (!silent) {
         if (aborted) {
             if (res > 0) {
@@ -4474,13 +4482,13 @@ bool MainWindow::importNonCPAPFiles(MachineLoader &loader, const QStringList &fi
         } else if (res < 0) {
             // Negative res means a bad file format or a missing file.
             QString msg = QString(tr("There was a problem parsing %1 \nData File: %2")
-                .arg(name, QFileInfo(files[0]).fileName()));
+                .arg(name, QFileInfo(firstProblem).fileName()));
             Notify(msg,"",20*1000 /* convert sec to ms */);
         } else if (res == 0) {
-            Notify(tr("There was a problem opening %1 Data File: %2").arg(name, files[0]));
+            Notify(tr("There was a problem opening %1 Data File: %2").arg(name, firstProblem));
         } else if (res < size){
             Notify(tr("%1 Data Import of %2 file(s) complete").arg(name).arg(res) + "\n\n" +
-                   tr("There was a problem opening %1 Data File: %2").arg(name, files[res]),
+                   tr("There was a problem opening %1 Data File: %2").arg(name, failedNames.join(", ")),
                    tr("%1 Import Partial Success").arg(name));
         } else {
             Notify(tr("%1 Data Import complete").arg(name));
@@ -4489,10 +4497,10 @@ bool MainWindow::importNonCPAPFiles(MachineLoader &loader, const QStringList &fi
         if (aborted) {
             qWarning().noquote() << QString("%1 import aborted: %2 file(s) processed").arg(name).arg(res);
         } else if (res < 0 || res == 0) {
-            qWarning().noquote() << QString("Failed to import %1 data from: %2").arg(name, files[0]);
+            qWarning().noquote() << QString("Failed to import %1 data from: %2").arg(name, firstProblem);
         } else if (res < size) {
             qWarning().noquote() << QString("%1 import partial: %2 of %3 files imported. Failed on: %4")
-                .arg(name).arg(res).arg(size).arg(files[res]);
+                .arg(name).arg(res).arg(size).arg(failedFiles.join(", "));
         } else {
             qInfo().noquote() << QString("%1 import of %2 file(s) complete").arg(name).arg(res);
         }
@@ -4514,10 +4522,9 @@ bool MainWindow::importNonCPAPFiles(MachineLoader &loader, const QStringList &fi
         GenerateStatistics();
         daily->LoadDate(daily->getDate());
     }
-    if (requireComplete) {
-        return (!aborted && res == size);
-    }
-    // Partial or aborted imports that kept at least one file still count as success.
+    // Partial or aborted imports that kept at least one file still count as success; the
+    // files that failed are logged above. (Batch imports used to demand every file, so one
+    // damaged night failed a whole folder even though the rest had been imported.)
     return !failed && (!aborted || res > 0);
 }
 
@@ -4655,7 +4662,7 @@ bool MainWindow::importFromPath(const QString &loaderName, const QString &path, 
         }
     }
 
-    return importNonCPAPFiles(*loader, files, silent, true);
+    return importNonCPAPFiles(*loader, files, silent);
 }
 
 namespace {

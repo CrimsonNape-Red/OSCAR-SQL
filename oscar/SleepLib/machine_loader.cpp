@@ -416,9 +416,13 @@ bool compressFile(QString infile, QString outfile)
 
 int MachineLoader::Open(const QStringList & paths)
 {
-    int i = 0;
+    // One bad file used to end the loop, so every file after it went unimported (a damaged
+    // night in a folder of oximetry files lost all the later nights). Carry on instead, and
+    // keep a list of the failures for the caller to report.
+    m_failedFiles.clear();
+    int opened = 0;
     int size = paths.size();
-    for (i=0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         if (isAborted()) {
             break;
         }
@@ -426,15 +430,20 @@ int MachineLoader::Open(const QStringList & paths)
 
         int res = OpenFile(filename);
         if (res < 0) {
-            break;
+            qWarning().noquote() << "MachineLoader::Open: could not import" << filename << "- continuing with the remaining files";
+            m_failedFiles << filename;
+            emit setProgressValue(i+1);
+            QCoreApplication::processEvents();
+            continue;
         }
         // A file that imported nothing before the abort (e.g. a dismissed
         // chooser) doesn't count as opened.
         if (res == 0 && isAborted()) {
             break;
         }
+        opened++;
         emit setProgressValue(i+1);
         QCoreApplication::processEvents();
     }
-    return i;
+    return opened;
 }

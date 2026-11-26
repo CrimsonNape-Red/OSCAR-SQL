@@ -323,8 +323,10 @@ protected:
 
     QString m_label;
     MachineType m_machtype;
-    bool m_empty;
-    bool m_emptyPrev;
+    // Initialised here because isEmpty() is called before the first SetDay() (Overview's
+    // ReloadGraphs()); the values are the ones SetDay() starts from.
+    bool m_empty = false;
+    bool m_emptyPrev = true;
     int hl_day;
     int tz_offset;
     float tz_hours;

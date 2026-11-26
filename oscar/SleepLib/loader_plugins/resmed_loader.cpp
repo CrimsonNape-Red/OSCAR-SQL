@@ -2453,6 +2453,34 @@ EDFType lookupEDFType(const QString & filename)
 ///////////////////////////////////////////////////////////////////////////////
 // Looks inside an EDF or EDF.gz and grabs the start and duration
 ///////////////////////////////////////////////////////////////////////////////
+/*! \brief The most data records an EDF file of \a dataSize bytes can hold, given its header
+    \a hdr (the fixed 256 bytes followed by the per-signal headers). Returns -1 when that
+    cannot be worked out (incomplete header or unknown size), so the caller keeps the
+    header's own count. */
+static qint64 edfMaxRecords(const QByteArray & hdr, qint64 dataSize)
+{
+    if (dataSize < 0)
+        return -1;
+    bool ok;
+    const int ns = hdr.mid(0xfc, 4).trimmed().toInt(&ok);
+    if (!ok || (ns < 1) || (ns > 256) || (hdr.size() < EDFHeaderSize + qint64(ns) * 256))
+        return -1;
+    // The samples-per-record fields follow label, transducer, dimension, physical and
+    // digital min/max and prefiltering: 16+80+8+8+8+8+8+80 = 216 bytes per signal.
+    const qint64 sprOffset = EDFHeaderSize + qint64(ns) * 216;
+    qint64 recordBytes = 0;
+    for (int i = 0; i < ns; ++i) {
+        const qint64 spr = hdr.mid(sprOffset + qint64(i) * 8, 8).trimmed().toLongLong(&ok);
+        if (!ok || (spr < 0))
+            return 0;               // unreadable sample count: the records are unusable
+        recordBytes += spr * 2;
+    }
+    if (recordBytes <= 0)
+        return -1;
+    const qint64 dataBytes = dataSize - (EDFHeaderSize + qint64(ns) * 256);
+    return (dataBytes > 0) ? (dataBytes / recordBytes) : 0;
+}
+
 EDFduration getEDFDuration(const QString & filename)
 {
 
@@ -2471,54 +2499,63 @@ EDFduration getEDFDuration(const QString & filename)
     double rec_duration;
     QDateTime startDate;
 
-//  We will just look at the header part of the edf file here
+    // We will just look at the header part of the edf file here: the fixed 256 bytes, then
+    // the per-signal headers, so the record count can be checked against the file's size.
+    static constexpr int HDR_END = 0xec + 16;   // end of num_records + rec_duration
+    QByteArray hdr;
+    qint64 dataSize = -1;                       // uncompressed file size, -1 if not known
     if (!filename.endsWith(".gz", Qt::CaseInsensitive)) {
         QFile file(filename);
         if (!file.open(QFile::ReadOnly))
             return EDFduration(0, 0, filename);
-
-        if (!file.seek(0xa8)) {
-            file.close();
-            return EDFduration(0, 0, filename);
-        }
-
-        QByteArray bytes = file.read(16).trimmed();
-//      We'll fix the xx85 problem below
-//      getStartDT ought to be named getStartNoDST ... TODO someday
-        startDate = EDFInfo::getStartDT(QString::fromLatin1(bytes,16));
-
-        if (!file.seek(0xec)) {
-            file.close();
-            return EDFduration(0, 0, filename);
-        }
-
-        bytes = file.read(8).trimmed();
-        num_records = bytes.toInt(&ok1);
-        bytes = file.read(8).trimmed();
-        rec_duration = bytes.toDouble(&ok2);
-
+        hdr = file.read(EDFHeaderSize);
+        const int ns = hdr.mid(0xfc, 4).trimmed().toInt();
+        if ((ns > 0) && (ns <= 256))
+            hdr += file.read(qint64(ns) * 256);
+        dataSize = file.size();
         file.close();
     } else {
         // Read through QFile rather than gzopen() so non-ASCII paths work (GitLab #350).
-        // The fixed header compresses well, so the first few KB decompress to
-        // well past the fields we need; fall back to the whole file otherwise.
-        static constexpr int HDR_END = 0xec + 16;   // end of num_records + rec_duration
+        // The header compresses well, so the first few KB usually decompress to all of it;
+        // fall back to the whole file otherwise.
         QFile file(filename);
         if (!file.open(QFile::ReadOnly))
             return EDFduration(0, 0, filename);
 
-        QByteArray hdr = gUncompress(file.read(4096));
-        if (hdr.size() < HDR_END) {
+        hdr = gUncompress(file.read(4096));
+        const int ns = hdr.mid(0xfc, 4).trimmed().toInt();
+        const qint64 fullHeader = EDFHeaderSize + qint64(qBound(0, ns, 256)) * 256;
+        if (hdr.size() < qMax<qint64>(HDR_END, fullHeader)) {
             file.seek(0);
             hdr = gUncompress(file.readAll());
+            dataSize = hdr.size();
+        } else if (file.size() >= 18) {
+            // The gzip trailer's last 4 bytes hold the uncompressed size (mod 2^32).
+            file.seek(file.size() - 4);
+            const QByteArray isize = file.read(4);
+            if (isize.size() == 4)
+                dataSize = quint32(quint8(isize[0])) | (quint32(quint8(isize[1])) << 8)
+                         | (quint32(quint8(isize[2])) << 16) | (quint32(quint8(isize[3])) << 24);
         }
         file.close();
-        if (hdr.size() < HDR_END)
-            return EDFduration(0, 0, filename);
+    }
+    if (hdr.size() < HDR_END)
+        return EDFduration(0, 0, filename);
 
-        startDate = EDFInfo::getStartDT(QString::fromLatin1(hdr.constData() + 0xa8, 16).trimmed());
-        num_records = hdr.mid(0xec, 8).trimmed().toInt(&ok1);
-        rec_duration = hdr.mid(0xf4, 8).trimmed().toDouble(&ok2);
+//  We'll fix the xx85 problem below
+//  getStartDT ought to be named getStartNoDST ... TODO someday
+    startDate = EDFInfo::getStartDT(QString::fromLatin1(hdr.constData() + 0xa8, 16).trimmed());
+    num_records = hdr.mid(0xec, 8).trimmed().toInt(&ok1);
+    rec_duration = hdr.mid(0xf4, 8).trimmed().toDouble(&ok2);
+
+    // A damaged header can claim far more records than the file holds; one SA2 file claiming
+    // 99999999 one-second records looked about three years long and swallowed every later
+    // session of the night. Never let the claimed count exceed what the file can contain.
+    const qint64 maxRecords = edfMaxRecords(hdr, dataSize);
+    if (ok1 && (maxRecords >= 0) && (num_records > maxRecords)) {
+        qWarning() << "ResMed: EDF header of" << filename << "claims" << num_records
+                   << "records but the file holds at most" << maxRecords;
+        num_records = int(maxRecords);
     }
 
     // Derive the filename-based start time up front so we can use it as a
@@ -2941,9 +2978,13 @@ void ResDayTask::run()
 #endif
 
     QMap<quint32, QString> EVElist, CSLlist;
-    for (auto f_itr=resday->files.begin(), fend=resday->files.end(); f_itr!=fend; ++f_itr) {
-        const QString & filename = f_itr.key();
-        const QString & fullpath = f_itr.value();
+    // Walk the files in name order (date and time first). resday->files is a QHash, whose
+    // order Qt changes in every process; each file joins the first group it overlaps, so in
+    // hash order the same card could be grouped into different sessions on each import.
+    QStringList fileNames = resday->files.keys();
+    std::sort(fileNames.begin(), fileNames.end());
+    for (const QString & filename : std::as_const(fileNames)) {
+        const QString & fullpath = resday->files[filename];
         EDFType type = lookupEDFType(filename);
 
         QString datestr = filename.section("_", 0, 1);
@@ -3535,7 +3576,9 @@ bool ResmedLoader::LoadBRP(Session *sess, const QString & path)
 
     for (auto & es : edf.edfsignals) {
         long recs = es.sampleCnt * edf.GetNumDataRecords();
-        if (recs < 0)
+        // No samples (a header record count of 0, or one that isn't a number): nothing to
+        // add, no data array, and the sample rate below would divide by zero.
+        if (recs <= 0)
             continue;
         ChannelID code;
 

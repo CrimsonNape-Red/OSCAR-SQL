@@ -1260,10 +1260,6 @@ int main(int argc, char *argv[]) {
         settings.setValue(GFXOpenGLUnusableSetting, true);
         settings.remove(GFXSoftwareFallbackSetting);
         settings.sync();
-        QMessageBox::warning(nullptr, STR_MessageBox_Warning,
-                             QObject::tr("Your graphics hardware does not support the version of OpenGL that OSCAR needs.") + "\n\n" +
-                             QObject::tr("OSCAR will restart using a slower but more compatible method of drawing."),
-                             QMessageBox::Ok);
         // Carry the original command line over so --datadir and --profile survive the
         // restart, but drop --OpenGL: it would put the engine back and restart us again.
         QStringList restartArgs;
@@ -1272,6 +1268,26 @@ int main(int argc, char *argv[]) {
             if ((args[i] != "-p") && (args[i].compare("--OpenGL", Qt::CaseInsensitive) != 0))
                 restartArgs << args[i];
         }
+        if (batchMode) {
+            // No one can answer a message box in batch mode (it would wait for ever), and a
+            // detached restart would hand the caller exit code 0 before anything had been
+            // imported. Run the restarted OSCAR as a child instead, wait for it, and pass on
+            // its exit code, so a script sees the real result of the import.
+            qWarning() << "Batch mode: running the requested imports again with the software graphics engine";
+            QProcess child;
+            child.setProcessChannelMode(QProcess::ForwardedChannels);
+            child.start(QApplication::applicationFilePath(), restartArgs);
+            if (!child.waitForStarted(-1)) {
+                qCritical() << "Batch mode: OSCAR was unable to restart itself:" << child.errorString();
+                return 1;
+            }
+            child.waitForFinished(-1);
+            return (child.exitStatus() == QProcess::NormalExit) ? child.exitCode() : 1;
+        }
+        QMessageBox::warning(nullptr, STR_MessageBox_Warning,
+                             QObject::tr("Your graphics hardware does not support the version of OpenGL that OSCAR needs.") + "\n\n" +
+                             QObject::tr("OSCAR will restart using a slower but more compatible method of drawing."),
+                             QMessageBox::Ok);
         if (!QProcess::startDetached(QApplication::applicationFilePath(), restartArgs)) {
             QMessageBox::warning(nullptr, STR_MessageBox_Warning,
                                  QObject::tr("OSCAR was unable to restart itself. Please start OSCAR again."),
