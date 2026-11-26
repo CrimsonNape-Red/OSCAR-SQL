@@ -354,6 +354,32 @@ void checkF3(const Scenario &sc)
 }
 
 //! \brief F4-lite: adherence patterns.
+//! \brief Cases every feature must handle: no nights, and two CPAP devices in one night.
+void checkAll(const Scenario &sc)
+{
+    const QJsonObject exp = sc.json["expected"].toObject();
+    const QList<Day *> days = sc.days.values();
+    if (exp.contains("all_valid")) {
+        QVERIFY(!exp["all_valid"].toBool());
+        QVERIFY(!Insights::timeAtMaxPressure(days).valid);
+        QVERIFY(!Insights::eventsAtPressure(days).valid);
+        QVERIFY(!Insights::medicareFirst90Days(sc.days).valid);
+        QVERIFY(!Insights::usagePattern(days).valid);
+        QVERIFY(!Insights::compareRxPeriods({}, {}).valid);
+        return;
+    }
+    // A Day holds one device per type: OSCAR keeps the first device and refuses the other's.
+    QCOMPARE(sc.rejected.size(), exp["rejected_sessions"].toInt());
+    QCOMPARE(days.size(), 1);
+    Day *day = days.first();
+    const double tol = sc.json["tolerance"].toObject()["ahi"].toDouble(0.001);
+    QVERIFY2(qAbs(day->hours(MT_CPAP) - exp["hours"].toDouble()) < 0.001,
+             qPrintable(QString::number(day->hours(MT_CPAP))));
+    QVERIFY2(qAbs(day->count(AllAhiChannels) / day->hours(MT_CPAP) - exp["ahi"].toDouble()) < tol,
+             qPrintable(QString::number(day->count(AllAhiChannels) / day->hours(MT_CPAP))));
+    QCOMPARE(Insights::usagePattern(days).medianSessions, 1.0);
+}
+
 void checkF4(const Scenario &sc)
 {
     const QJsonObject exp = sc.json["expected"].toObject();
@@ -457,7 +483,7 @@ void InsightsTests::cleanupTestCase()
     m_app = nullptr;
 }
 
-// Pins the loader's conventions on known points of three scenario files.
+// Pins the loader's conventions on known points of the scenario files.
 void InsightsTests::testScenarioLoader()
 {
     for (const QString &name : {QStringLiteral("f2_events_at_pressure_end_stamped"),
@@ -475,21 +501,6 @@ void InsightsTests::testScenarioLoader()
         QCOMPARE(ev->time(0), start + (name.endsWith("end_stamped") ? 1820000 : 1800000));
         QCOMPARE(ev->data(0), EventDataType(name.endsWith("end_stamped") ? 20 : 0));
     }
-
-    // SpO2 in two segments (0-2 h, 3-8 h); a 5 % dip at 1200 s; 0 % from 14400 s to 15000 s.
-    Scenario sc;
-    loadScenario(sc, QFINDTESTDATA("insights_scenarios/f5_gaps_and_invalid_samples.json"));
-    if (QTest::currentTestFailed()) { return; }
-    Session *sess = sc.days.first()->sessions.first();
-    const QVector<EventList *> &spo2 = sess->eventlist[OXI_SPO2];
-    QCOMPARE(spo2.size(), 2);
-    QCOMPARE(spo2[0]->count(), quint32(7200));
-    QCOMPARE(spo2[1]->count(), quint32(18000));
-    QCOMPARE(spo2[1]->first(), sess->realFirst() + 10800000);
-    QCOMPARE(spo2[0]->raw(1205), qint16(9350));     // halfway down the 10 s fall
-    QCOMPARE(spo2[0]->raw(1215), qint16(9100));     // bottom of the dip
-    QCOMPARE(spo2[1]->raw(3599), qint16(9600));     // 14399 s: still 96
-    QCOMPARE(spo2[1]->raw(3600), qint16(0));        // 14400 s: the step down wins
 
     // A disabled session still loads; only its enabled flag differs.
     Scenario dis;
@@ -524,6 +535,7 @@ void InsightsTests::testScenario()
     if (feature == "F2") { return checkF2(sc); }
     if (feature == "F3") { return checkF3(sc); }
     if (feature == "F4-lite") { return checkF4(sc); }
+    if (feature == "all") { return checkAll(sc); }
     QSKIP(qPrintable(feature + " is not implemented yet"));
 }
 

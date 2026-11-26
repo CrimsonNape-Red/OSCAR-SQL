@@ -127,6 +127,9 @@ def bootstrap_diff(a, b, kinds, seed=1, reps=1000):
     return diffs[int(0.025 * reps)], diffs[int(0.975 * reps) - 1]
 
 
+MIN_AHI_CHANGE = 1.0
+
+
 def robust_series(label, mean_a, mean_b, kinds, n_a=30, n_b=30, hours=7):
     """Find the first seed whose bootstrap result sits well inside the wanted label."""
     for seed in range(1, 200):
@@ -137,11 +140,16 @@ def robust_series(label, mean_a, mean_b, kinds, n_a=30, n_b=30, hours=7):
         ea, ha = pooled(a, kinds)
         eb, hb = pooled(b, kinds)
         point, margin = eb / hb - ea / ha, 0.25 * (hi - lo)
+        # MIN_AHI_CHANGE mirrors Insights::kMinAhiChange: Lower/Higher also need a change
+        # of at least that much. "small" is an interval clear of 0 with a change well under it.
         ok = {"within": lo + margin < 0 < hi - margin and abs(point) < margin,
-              "lower": hi < -margin, "higher": lo > margin}[label]
+              "small": (lo > margin or hi < -margin) and abs(point) < 0.8 * MIN_AHI_CHANGE,
+              "lower": hi < -margin and point <= -1.2 * MIN_AHI_CHANGE,
+              "higher": lo > margin and point >= 1.2 * MIN_AHI_CHANGE}[label]
         if ok:
             return a, b, {"ahi_before": round(ea / ha, 4), "ahi_after": round(eb / hb, 4),
-                          "label": label, "oracle_ci95_of_difference": [round(lo, 3),
+                          "label": "within" if label == "small" else label,
+                          "oracle_ci95_of_difference": [round(lo, 3),
                                                                         round(hi, 3)]}
     raise RuntimeError(f"no robust seed for {label}")
 
@@ -159,6 +167,10 @@ def f1():
                             "PressureMin change. Bootstrap seeds differ between Python and C++, "
                             "so only the label and pooled AHIs must match; the oracle interval "
                             "is a guide.", [RESMED], a + b, exp))
+    a, b, exp = robust_series("small", 2.0, 2.6, ["Obstructive", "Hypopnea"], n_a=60, n_b=60)
+    out.append(scenario("f1_small_but_real", "F1", "60 + 60 nights, AHI ~2.0 then ~2.6: the "
+                        "interval excludes 0, but the change is below the minimum AHI change, "
+                        "so the label is within.", [RESMED], a + b, exp))
     rng = random.Random(7)
     a = series(rng, 0, 30, 7, 3, ["Obstructive"], APAP)
     b = series(rng, 30, 3, 7, 3, ["Obstructive"], {**APAP, "PressureMin": 8})
@@ -212,6 +224,15 @@ def f2():
                                                "per_hour": 0.3333},
                                          "12": {"events": 1, "hours": 2.0, "per_hour": 0.5}}},
         tolerance={"time_at_max_pct": 0.5, "per_hour": 0.001}))
+    # ResMed's loader stores a bilevel's IPAP as Pressure ("Press.2s") and has no IPAP channel
+    out.append(scenario(
+        "f2_auto_bilevel_resmed", "F2", "ResMed auto-bilevel: the loader stores IPAP as "
+        "Pressure (Press.2s), so time at max compares Pressure with IPAPHi.",
+        [RESMED], [night(0, session(RESMED, night_start(0), 8, bilevel,
+                                    {"EPAP": steps(2, (21600, 9), (7200, 12)),
+                                     "Pressure": steps(2, (21600, 13), (7200, 16))},
+                                    {"Obstructive": [[3600, 20], [7200, 20], [25000, 20]]}))],
+        out[-1]["expected"], tolerance=out[-1]["tolerance"]))
     return out
 
 
@@ -488,7 +509,9 @@ def general():
         scenario("general_empty_range", "all", "No nights at all: every insight is invalid, "
                  "nothing crashes.", [RESMED], [], {"all_valid": False}),
         scenario("general_two_cpap_devices", "all",
-                 "Home device 6 h with 6 events, travel device 1 h with 4 events, same night.",
+                 "Home device 6 h with 6 events, travel device 1 h with 4 events, same night. "
+                 "A Day holds one device per type, so OSCAR keeps the first device's sessions "
+                 "and refuses the other's; the insights use what OSCAR keeps.",
                  [RESMED, PRS1],
                  [night(0, session(RESMED, night_start(0), 6, APAP,
                                    events={"Obstructive": [[i * 3000 + 600, 15]
@@ -496,7 +519,7 @@ def general():
                         session(PRS1, night_start(0) + timedelta(hours=6.25), 1, APAP,
                                 events={"Obstructive": [[i * 600 + 60, 15]
                                                         for i in range(4)]}))],
-                 {"ahi": 1.4286, "hours": 7.0}, tolerance={"ahi": 0.001}),
+                 {"ahi": 1.0, "hours": 6.0, "rejected_sessions": 1}, tolerance={"ahi": 0.001}),
     ]
 
 
@@ -506,8 +529,9 @@ def main():
     ap.add_argument("--out", default="oscar/tests/insights_scenarios")
     out = Path(ap.parse_args().out)
     out.mkdir(parents=True, exist_ok=True)
-    scenarios = f1() + f2() + f3() + f4() + f5() + f6() + f7() + f8() + f9() + f10() + f11() \
-        + general()
+    # Only the features that are implemented. Each later phase adds its own (f5 to f11 below
+    # are ready) in the merge request that implements it.
+    scenarios = f1() + f2() + f3() + f4() + general()
     for old in out.glob("*.json"):
         old.unlink()
     for s in scenarios:

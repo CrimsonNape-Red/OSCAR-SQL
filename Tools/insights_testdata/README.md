@@ -64,6 +64,8 @@ python3 -I Tools/insights_testdata/make_scenarios.py   # rewrites oscar/tests/in
 
 The output is deterministic: random series use fixed seeds, and a second run is
 byte-identical. Commit the regenerated JSON together with any change to the script.
+`main()` writes only the implemented features (F1 to F4-lite and `general_*`). The functions
+for F5 to F11 are ready; each is added to `main()` in the merge request that implements it.
 
 ### Format (`format_version` 1)
 
@@ -118,6 +120,8 @@ Channel codes match `schema.cpp`. `SleepStage` values are `SleepStageValue` nega
 | `f5_two_oximeters_one_night` | Use only the oximeter with the longest CPAP overlap. |
 | `f6_*` | Somnopose's degree convention is unconfirmed: its app lets users adjust the angles, and the loader stores raw degrees. The scenarios declare 0° = supine, ±45°. Check against a real Somnopose export. |
 | `f1_*` | Python and C++ bootstraps use different random generators, so only `label` and the pooled AHIs must match. Seeds are chosen so the label is well clear of the boundary. |
+| `general_two_cpap_devices` | A Day holds one device per type, so OSCAR keeps the first device's sessions and refuses the other's; the insights use what OSCAR keeps. |
+| `f1_small_but_real` | The interval excludes 0, but a change below `Insights::kMinAhiChange` (1 event/h) is labelled within. |
 | `f4_medicare_*` | Windows are 30 consecutive nights, starting within the first 61 nights. `best_window_first_night` is the earliest window with the best count. |
 
 A case from the PRD that has **no** scenario: "data starts after the first 90 days of use".

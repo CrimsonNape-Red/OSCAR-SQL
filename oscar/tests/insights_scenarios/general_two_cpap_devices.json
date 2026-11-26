@@ -2,7 +2,7 @@
  "format_version": 1,
  "id": "general_two_cpap_devices",
  "feature": "all",
- "description": "Home device 6 h with 6 events, travel device 1 h with 4 events, same night.",
+ "description": "Home device 6 h with 6 events, travel device 1 h with 4 events, same night. A Day holds one device per type, so OSCAR keeps the first device's sessions and refuses the other's; the insights use what OSCAR keeps.",
  "devices": [
   {
    "id": "cpap1",
@@ -93,8 +93,9 @@
   }
  ],
  "expected": {
-  "ahi": 1.4286,
-  "hours": 7.0
+  "ahi": 1.0,
+  "hours": 6.0,
+  "rejected_sessions": 1
  },
  "tolerance": {
   "ahi": 0.001

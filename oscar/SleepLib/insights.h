@@ -44,12 +44,18 @@ struct RxComparison {
 // (statistics.cpp has only the commented-out rxthresh = 5). Could become one.
 const int kRxMinNights = 5;
 
+// Smallest change in AHI (events/h) labelled Lower or Higher. With long periods the interval
+// is narrow enough to call a tiny difference real; this keeps such rows "Within". A fixed
+// value for now; could become a preference.
+const double kMinAhiChange = 1.0;
+
 //! \brief Compares the pooled AHI of \a after with \a before.
 //!
 //! The interval comes from 1,000 bootstrap resamples of nights with a fixed \a seed, so
 //! output is deterministic and nights noisier than a Poisson count are handled. The label
-//! is Within when the interval contains 0. No comparison when either period has fewer
-//! than \a minNights nights.
+//! is Lower or Higher only when the interval excludes 0 and the change is at least
+//! kMinAhiChange; otherwise Within. No comparison when either period has fewer than
+//! \a minNights nights.
 RxComparison compareRxPeriods(const QVector<NightCount> &before,
                               const QVector<NightCount> &after,
                               int minNights = kRxMinNights, quint32 seed = 1);

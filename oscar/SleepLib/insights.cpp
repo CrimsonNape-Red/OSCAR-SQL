@@ -286,9 +286,10 @@ RxComparison compareRxPeriods(const QVector<NightCount> &before,
     r.ciHigh = diffs[reps * 975 / 1000 - 1];
 
     r.valid = true;
-    r.label = r.ciHigh < 0 ? ChangeLabel::Lower
-            : r.ciLow > 0  ? ChangeLabel::Higher
-                           : ChangeLabel::Within;
+    const double change = r.ahiAfter - r.ahiBefore;
+    r.label = (r.ciHigh < 0 && change <= -kMinAhiChange) ? ChangeLabel::Lower
+            : (r.ciLow > 0 && change >= kMinAhiChange)   ? ChangeLabel::Higher
+                                                         : ChangeLabel::Within;
     return r;
 }
 
