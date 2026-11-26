@@ -9573,3 +9573,46 @@ historical; `leak_unintentional_avg` is left NULL.
   (58 suites, 619 passed, 8 skipped), and a read-only dry run of the refill on a database
   of 14,753 sessions (12,205 rows gain leak values; 1.5 s). Not checked: the repair in a
   running OSCAR on existing data, a device that reports total leak, and summary-only days.
+
+---
+
+## 2026-11-26 - Calculated respiratory rate, tidal volume and minute ventilation: implausible peaks (MR !87)
+
+**Files:** `oscar/SleepLib/calcs.cpp` (`FlowParser::calc()`)
+
+**Symptom:** On a device whose respiratory rate, tidal volume and minute ventilation OSCAR
+calculates from the flow waveform, nights showed a maximum respiratory rate of exactly
+50/min, a tidal volume near 3.9 l and a minute ventilation above 40 l/min. Found on a
+Weinmann device with 5 Hz flow.
+
+**Root cause:** Two separate faults.
+1. Respiratory rate: at the start of each flow block there is less than a minute of breaths,
+   and the count is scaled up to a minute. A single short first breath (1.2 s, the shortest
+   accepted at 5 Hz; 1.04 s at 25 Hz) became 50/min (58/min at 25 Hz).
+2. Tidal volume: when the flow stays above the zero line for a long time, e.g. while the
+   baseline catches up with a sudden change of leak, the breath detector sees one "breath"
+   with a 15-28 s inspiration and sums the flow over the whole period.
+
+**Fix:** No respiratory rate is written until half a minute of breaths is available in the
+flow block. A breath with an inspiration longer than 10 s gets no tidal volume and no minute
+ventilation; minute ventilation is also skipped while there is no rate.
+
+**Non-obvious:**
+- The code is shared: it changes every loader that leaves these channels to OSCAR, not only
+  Weinmann. Loaders that never supply them are Weinmann, prisma, F&P Icon, F&P SleepStyle,
+  SEFAM and vTitan vREM; ResMed, PRS1, BMC, DV6, Resvent, Yuwell and prisma VENT are affected
+  only where the device does not supply the channel.
+- The values are calculated at import and no loader version was changed, so nights imported
+  earlier keep their old values until they are imported again.
+- Breaths tile a flow block from its first sample (`calcPeaks()`), so the half-minute test
+  only trims the start of each block; it cannot leave a gap mid-night.
+- The respiratory rate and tidal volume lists are pre-sized to the breath count, and their
+  count can now be smaller than that. Save, load and the statistics go by `count()`; the
+  stored blob carries trailing zeros.
+- Inspiratory time is still written for the long "breath", so its maximum stays implausible.
+- A flow block with at least 4 breaths that ends in under 30 s leaves empty respiratory rate
+  and minute ventilation lists. They are not stored.
+- Checked: the contributor's import of 27 nights from one 5 Hz device (maximum rate 50.0 to
+  27.2 /min, tidal volume 3896 to 2095 ml, minute ventilation 41.4 to 31.8 l/min, medians
+  unchanged), and a code review. Not checked: a 25 Hz device. No unit test covers
+  `FlowParser::calc()`.
