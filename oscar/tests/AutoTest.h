@@ -48,14 +48,30 @@ namespace AutoTest
      * DECLARE_TEST objects. Never QSKIP in initTestCase(): QtTest keeps the skip state, and
      * every class that runs after it in this process silently runs nothing (#356). Skip in
      * init() or in each test function instead.
+     *
+     * Two optional environment variables change a run; with neither set, every class runs
+     * with the command line as given:
+     *  - OSCAR_TEST_SUITES=A,B runs only the classes with those names.
+     *  - OSCAR_TEST_LOGDIR=<dir> writes each class's results to <dir>/<Class>.txt. Without
+     *    it, QtTest's -o option keeps only the last class, because each class overwrites
+     *    the file. The directory must exist, and other command-line options are ignored.
      */
     inline int run(int argc, char *argv[])
     {
         int ret = 0;
 
+        const QStringList only = qEnvironmentVariable("OSCAR_TEST_SUITES").split(',', Qt::SkipEmptyParts);
+        const QString logDir = qEnvironmentVariable("OSCAR_TEST_LOGDIR");
         foreach (QObject* test, testList())
         {
-            ret += QTest::qExec(test, argc, argv);
+            if (!only.isEmpty() && !only.contains(test->objectName())) continue;
+            if (logDir.isEmpty()) {
+                ret += QTest::qExec(test, argc, argv);
+            } else {
+                QStringList args;
+                args << QString::fromLocal8Bit(argv[0]) << "-o" << (logDir + "/" + test->objectName() + ".txt,txt");
+                ret += QTest::qExec(test, args);
+            }
         }
 
         return ret;

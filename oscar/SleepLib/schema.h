@@ -81,6 +81,21 @@ enum ScopeType {
 class Channel;
 extern Channel EmptyChannel;
 
+/*! \brief The user-overridable display values of a Channel as the code defines them.
+    A snapshot of these is taken once initialisation (schema and loaders) has finished, so
+    that per-profile overrides can later be compared with, and reset to, the code defaults. */
+struct ChannelDefaults {
+    bool enabled = true;
+    QColor color;
+    QString fullname, label, description;
+    EventDataType lowerThreshold = 0, upperThreshold = 0;
+    QColor lowerThresholdColor, upperThresholdColor;
+    bool showInOverview = false;
+    //! The channel type the code defines. Recorded for channel_defaults only: it is not
+    //! overridable and Channel::resetToDefaults() does not restore it.
+    ChanType type = DATA;
+};
+
 /*! \class Channel
     \brief Contains information about a SleepLib data Channel (aka signals)
     */
@@ -107,20 +122,20 @@ class Channel
     inline MachineType machtype() const { return m_machtype; }
 
     //! \brief Unique string identifier for this channel.  Must not be translated.  Later used as a unique key to identify graph derived from this channel.
-    const QString &code() { return m_code; }
+    const QString &code() const { return m_code; }
 
     //! \brief Full name of channel.  Translatable.  Used generally for channel names such as rows on Statistics page.
-    const QString &fullname() { return m_fullname; }
+    const QString &fullname() const { return m_fullname; }
 
     //! \brief Short description of what this channel does.  Translatable.  Used in tooltips for graphs to explain what the graph shows.
-    const QString &description() { return m_description; }
+    const QString &description() const { return m_description; }
 
     //! \brief Short-form label to indicate this channel on screen.  Translatable.  Used for vertical labels in graphs.
     //! Can be changed in Preferences dialog.
-    const QString &label() { return m_label; }
+    const QString &label() const { return m_label; }
 
     //! \brief Units, such as cmH2O, events per hour, etc.  See STR_UNIT_* for possible values.
-    const QString &units() { return m_unit; }
+    const QString &units() const { return m_unit; }
 
     //! \brief Seems to be some kind of sort order for event flags.  Not sure this is used.
     inline short order() const { return m_order; }
@@ -128,7 +143,7 @@ class Channel
     //! \brief Whether or not chart of this channel is to be shown on Overview page
     //! Initial settings of this flag for individual channels set in schema.cpp.
     //! May be changed by user in Preferences Dialog.
-    bool showInOverview() { return m_showInOverview; }
+    bool showInOverview() const { return m_showInOverview; }
 
     //! \brief Upper threshold for channel, apparently used in Statistics.cpp for calculation purposes.  Not sure if it is used elsewhere.
     inline EventDataType upperThreshold() const { return m_upperThreshold; }
@@ -179,6 +194,19 @@ class Channel
     inline bool enabled() const { return m_enabled; }
     void setEnabled(bool value) { m_enabled = value; }
 
+    //! \brief True once snapshotDefaults() has recorded this channel's code defaults.
+    bool hasDefaults() const { return m_hasDefaults; }
+
+    //! \brief The recorded code defaults. Meaningful only when hasDefaults() is true.
+    const ChannelDefaults &defaults() const { return m_defaults; }
+
+    //! \brief Records the current values as the code defaults; does nothing if already recorded.
+    //! Not done in the constructor because loaders adjust channels after construction.
+    void snapshotDefaults();
+
+    //! \brief Puts the recorded defaults back into the live values; does nothing if none recorded.
+    void resetToDefaults();
+
     //! \brief Types of calculations that can be plotted on this channel and color to be used for plotting
     QHash<ChannelCalcType, ChannelCalc> calc;
 
@@ -217,6 +245,9 @@ class Channel
     short m_order;
 
     bool m_showInOverview;
+
+    ChannelDefaults m_defaults;
+    bool m_hasDefaults = false;
 };
 
 /*! \class ChannelList
@@ -265,6 +296,12 @@ extern ChannelList channel;
 
 void init();
 void done();
+
+//! \brief Records the code defaults of every channel that has no snapshot yet.
+void snapshotDefaults();
+
+//! \brief Restores every channel to its recorded code defaults.
+void resetChannelsToDefaults();
 
 } // namespace schema
 

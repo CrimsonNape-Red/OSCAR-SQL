@@ -19,6 +19,11 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QCalendarWidget>
+#include <QMenu>
+#include <QPainter>
+#include <QScopedValueRollback>
+#include <QTextDocument>
+#include <QTimer>
 //#include <QMenuBar>
 #include <QDebug>
 
@@ -47,6 +52,41 @@ typedef QMessageBox::StandardButton StandardButton;
 typedef QMessageBox::StandardButtons StandardButtons;
 
 QHash<schema::ChanType, QString> channeltype;
+
+namespace {
+//! Role holding a cell's own tooltip, so the "Default:" line can be added and removed again.
+constexpr int kBaseToolTipRole = Qt::UserRole + 2;
+
+/*! \brief A small filled dot in the widget's text colour, marking a customized channel row.
+    Drawn in code with the palette so it reads in light and dark mode. */
+QIcon makeCustomizedDot(const QWidget *widget)
+{
+    const int side = 16;      // the item views' default decoration size
+    const qreal diameter = 7;
+    const qreal dpr = widget->devicePixelRatioF();
+    QPixmap pm(QSize(side, side) * dpr);
+    pm.setDevicePixelRatio(dpr);
+    pm.fill(Qt::transparent);
+    QPainter p(&pm);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(Qt::NoPen);
+    p.setBrush(widget->palette().color(QPalette::Text));
+    p.drawEllipse(QRectF((side - diameter) / 2, (side - diameter) / 2, diameter, diameter));
+    p.end();
+    return QIcon(pm);
+}
+
+//! Threshold text as the Waveforms tab shows it.
+QString thresholdText(double value)
+{
+    return QString::number(value, 'f', 1);
+}
+
+// Column layouts of the two channel tabs (see InitChanInfo() and InitWaveInfo()).
+constexpr int kEventsColor = 1, kEventsOverview = 2, kEventsLabel = 4, kEventsDetails = 5;
+constexpr int kWavesColor = 1, kWavesOverview = 2, kWavesLower = 3, kWavesUpper = 4,
+              kWavesLabel = 5, kWavesDetails = 6;
+} // namespace
 
 QString PreferencesDialog::clinicalHelp() {
     QStringList str; str
@@ -393,12 +433,18 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
             shortformat.replace("yy","yyyy");
         }*/
 
+    m_customizedDot = makeCustomizedDot(ui->chanView);
+
     chanFilterModel = new MySortFilterProxyModel(this);
     chanModel = new QStandardItemModel(this);
     chanFilterModel->setSourceModel(chanModel);
     chanFilterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     chanFilterModel->setFilterKeyColumn(0);
     ui->chanView->setModel(chanFilterModel);
+
+    m_eventsTab = { chanModel, chanFilterModel, ui->chanView, ui->resetOneChannel,
+                    { kEventsColor, kEventsOverview, kEventsLabel, kEventsDetails, -1, -1 } };
+    setupChannelTab(m_eventsTab);
 
     InitChanInfo();
 
@@ -408,6 +454,11 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     waveFilterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     waveFilterModel->setFilterKeyColumn(0);
     ui->waveView->setModel(waveFilterModel);
+
+    m_wavesTab = { waveModel, waveFilterModel, ui->waveView, ui->resetOneWaveform,
+                   { kWavesColor, kWavesOverview, kWavesLabel, kWavesDetails, kWavesLower, kWavesUpper } };
+    setupChannelTab(m_wavesTab);
+
     InitWaveInfo();
 
     ui->waveView->setSortingEnabled(true);
@@ -664,6 +715,8 @@ void PreferencesDialog::InitChanInfo()
         }
     }
 
+    updateAllMarkers(m_eventsTab);
+
     ui->chanView->expandAll();
     ui->chanView->setSortingEnabled(true);
 }
@@ -793,6 +846,8 @@ void PreferencesDialog::InitWaveInfo()
             waveModel->removeRow(i.value()->row());
         }
     }
+
+    updateAllMarkers(m_wavesTab);
 
     ui->waveView->expandAll();
     ui->waveView->setSortingEnabled(true);
@@ -1166,6 +1221,9 @@ bool PreferencesDialog::Save()
 
     saveChanInfo();
     saveWaveInfo();
+    // Write the channel edits now, not only when the profile closes, so a backup or an
+    // external script sees them and they survive an abnormal exit (#431).
+    profile->saveChannels();
 
     p_pref->Save();
     profile->Save();
@@ -1309,10 +1367,49 @@ bool MySortFilterProxyModel::filterAcceptsRow(int source_row,
     if (source_parent == qobject_cast<QStandardItemModel *>
             (sourceModel())->invisibleRootItem()->index()) {
         // always accept children of rootitem, since we want to filter their children
-        return true;
+        if (!m_customizedOnly) {
+            return true;
+        }
+        // ...except when showing customized rows only: then a group header stays only
+        // while at least one of its channel rows is shown.
+        const QModelIndex header = sourceModel()->index(source_row, 0, source_parent);
+        const int children = sourceModel()->rowCount(header);
+        for (int r = 0; r < children; ++r) {
+            if (filterAcceptsRow(r, header)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    return QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent);
+    if (!QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent)) {
+        return false;
+    }
+    if (m_customizedOnly) {
+        const QModelIndex name = sourceModel()->index(source_row, 0, source_parent);
+        return name.data(CustomizedRole).toBool();
+    }
+    return true;
+}
+
+void MySortFilterProxyModel::setCustomizedOnly(bool on)
+{
+    m_customizedOnly = on;
+    invalidateFilter();
+}
+
+void MySortFilterProxyModel::scheduleRefilter()
+{
+    if (!m_customizedOnly || m_refilterPending) {
+        return;
+    }
+    m_refilterPending = true;
+    QTimer::singleShot(0, this, [this]() {
+        m_refilterPending = false;
+        if (m_customizedOnly) {
+            invalidateFilter();
+        }
+    });
 }
 
 // Might still be useful..
@@ -1516,11 +1613,19 @@ void PreferencesDialog::on_chanView_doubleClicked(const QModelIndex &index)
 
         a.setCurrentColor(QColor((QRgb)color));
 
+        // Resolve the source cell before the modal loop: the proxy can refilter while the
+        // colour dialog is open, leaving the proxy index stale. A persistent source index
+        // follows the row; the first change can also hide the row from the proxy (Show
+        // customized only), so both roles are set on the source item.
+        const QPersistentModelIndex source(chanFilterModel->mapToSource(index));
+
         if (a.exec() == QColorDialog::Accepted) {
             quint32 cv = a.currentColor().rgba();
 
-            chanFilterModel->setData(index, cv, Qt::UserRole);
-            chanFilterModel->setData(index, a.currentColor(), Qt::BackgroundRole);
+            QStandardItem *cell = source.isValid() ? chanModel->itemFromIndex(source) : nullptr;
+            if (!cell) return;
+            cell->setData(a.currentColor(), Qt::BackgroundRole);
+            cell->setData(cv, Qt::UserRole);
 
         }
 
@@ -1551,15 +1656,322 @@ void PreferencesDialog::on_waveView_doubleClicked(const QModelIndex &index)
 
         a.setCurrentColor(QColor((QRgb)color));
 
+        // Resolve the source cell before the modal loop: the proxy can refilter while the
+        // colour dialog is open, leaving the proxy index stale. A persistent source index
+        // follows the row; the first change can also hide the row from the proxy (Show
+        // customized only), so both roles are set on the source item.
+        const QPersistentModelIndex source(waveFilterModel->mapToSource(index));
+
         if (a.exec() == QColorDialog::Accepted) {
             quint32 cv = a.currentColor().rgba();
 
-            waveFilterModel->setData(index, cv, Qt::UserRole);
-            waveFilterModel->setData(index, a.currentColor(), Qt::BackgroundRole);
+            QStandardItem *cell = source.isValid() ? waveModel->itemFromIndex(source) : nullptr;
+            if (!cell) return;
+            cell->setData(a.currentColor(), Qt::BackgroundRole);
+            cell->setData(cv, Qt::UserRole);
 
         }
 
     }
+}
+
+// ---------------------------------------------------------------------------------------
+// Customized channels on the Events and Waveforms tabs: marker, Reset Channel and filter.
+// A row is "customized" when ChannelOverrides::diffFrom() finds a field of its current
+// cells that differs from the channel's code defaults, i.e. what OK would store as an
+// override. Everything here works on the dialog's model only; OK saves it, Cancel drops it.
+// ---------------------------------------------------------------------------------------
+
+namespace {
+//! The channel a tree row describes, or nullptr when it is unknown or has no recorded defaults.
+schema::Channel *rowChannel(QStandardItem *nameItem)
+{
+    bool ok = false;
+    const ChannelID id = nameItem->data(Qt::UserRole).toUInt(&ok);
+    if (!ok) {
+        return nullptr;
+    }
+    schema::Channel &chan = schema::channel[id];
+    if (chan.isNull() || !chan.hasDefaults()) {
+        return nullptr;
+    }
+    return &chan;
+}
+} // namespace
+
+void PreferencesDialog::setupChannelTab(ChannelTab &tab)
+{
+    ChannelTab *t = &tab;   // a member of this dialog, so it outlives the connections
+    connect(tab.model, &QStandardItemModel::itemChanged, this,
+            [this, t](QStandardItem *item) { channelItemChanged(*t, item); });
+    connect(tab.view->selectionModel(), &QItemSelectionModel::currentChanged, this,
+            [this, t]() { updateResetButton(*t); });
+
+    tab.view->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(tab.view, &QWidget::customContextMenuRequested, this,
+            [this, t](const QPoint &pos) { showChannelMenu(*t, pos); });
+
+    // A group header that the filter hides and shows again comes back collapsed.
+    QTreeView *view = tab.view;
+    MySortFilterProxyModel *proxy = tab.proxy;
+    connect(proxy, &QAbstractItemModel::rowsInserted, view,
+            [view, proxy](const QModelIndex &parent, int first, int last) {
+        if (parent.isValid()) {
+            return;
+        }
+        for (int r = first; r <= last; ++r) {
+            view->expand(proxy->index(r, 0));
+        }
+    });
+}
+
+QStandardItem *PreferencesDialog::channelRowAt(const ChannelTab &tab, const QModelIndex &proxyIndex) const
+{
+    if (!proxyIndex.isValid()) {
+        return nullptr;
+    }
+    const QModelIndex source = tab.proxy->mapToSource(proxyIndex);
+    if (!source.isValid() || !source.parent().isValid()) {
+        return nullptr;   // a group header row
+    }
+    return tab.model->itemFromIndex(source.siblingAtColumn(0));
+}
+
+QStandardItem *PreferencesDialog::rowCell(QStandardItem *nameItem, int col)
+{
+    if (col < 0 || !nameItem || !nameItem->parent()) {
+        return nullptr;
+    }
+    return nameItem->parent()->child(nameItem->row(), col);
+}
+
+ChannelOverrides::Values PreferencesDialog::rowValues(const ChannelTab &tab, QStandardItem *nameItem) const
+{
+    // Read the cells exactly as saveChanInfo() / saveWaveInfo() do.
+    const ChannelColumns &c = tab.cols;
+    ChannelOverrides::Values v;
+    v.enabled = nameItem->checkState() == Qt::Checked;
+    v.fullname = nameItem->text();
+    if (QStandardItem *cell = rowCell(nameItem, c.color)) {
+        v.color = QColor(QRgb(cell->data(Qt::UserRole).toUInt()));
+    }
+    if (QStandardItem *cell = rowCell(nameItem, c.overview)) {
+        v.showInOverview = cell->checkState() == Qt::Checked;
+    }
+    if (QStandardItem *cell = rowCell(nameItem, c.label)) {
+        v.label = cell->text();
+    }
+    if (QStandardItem *cell = rowCell(nameItem, c.details)) {
+        v.description = cell->text();
+    }
+    if (QStandardItem *cell = rowCell(nameItem, c.lower)) {
+        v.lowerThreshold = cell->text().toDouble();
+    }
+    if (QStandardItem *cell = rowCell(nameItem, c.upper)) {
+        v.upperThreshold = cell->text().toDouble();
+    }
+    return v;
+}
+
+ChannelOverrides::Values PreferencesDialog::rowOverrides(const ChannelTab &tab, QStandardItem *nameItem) const
+{
+    const schema::Channel *chan = rowChannel(nameItem);
+    if (!chan) {
+        return ChannelOverrides::Values();
+    }
+    return ChannelOverrides::diffFrom(chan->id(), chan->type(), chan->defaults(),
+                                      rowValues(tab, nameItem));
+}
+
+void PreferencesDialog::updateRowMarkers(const ChannelTab &tab, QStandardItem *nameItem)
+{
+    if (!nameItem || !nameItem->parent()) {
+        return;
+    }
+    const schema::Channel *chan = rowChannel(nameItem);
+    const schema::ChannelDefaults defaults = chan ? chan->defaults() : schema::ChannelDefaults();
+    const ChannelOverrides::Values ov = rowOverrides(tab, nameItem);
+    const bool customized = !ov.isEmpty();
+    const ChannelColumns &c = tab.cols;
+
+    // Bold and a "Default:" tooltip line on an overridden text cell; plain and the cell's
+    // own tooltip otherwise. The cell's text is never touched: it is what OK saves.
+    auto mark = [](QStandardItem *cell, bool overridden, const QString &defaultText) {
+        if (!cell) {
+            return;
+        }
+        QVariant base = cell->data(kBaseToolTipRole);
+        if (!base.isValid()) {
+            base = cell->toolTip();
+            cell->setData(base, kBaseToolTipRole);
+        }
+        QString tip = base.toString();
+        if (overridden) {
+            // An empty default would leave "Default: " with nothing after it.
+            const QString shown = defaultText.isEmpty() ? PreferencesDialog::tr("(empty)") : defaultText;
+            const QString line = PreferencesDialog::tr("Default: %1").arg(shown);
+            tip += Qt::mightBeRichText(tip) ? QStringLiteral("<br/>") + line.toHtmlEscaped()
+                                            : QStringLiteral("\n") + line;
+        }
+        cell->setToolTip(tip);
+        if (overridden) {
+            QFont bold;   // only the weight is set, so the view's own font supplies the rest
+            bold.setBold(true);
+            cell->setFont(bold);
+        } else if (cell->data(Qt::FontRole).isValid()) {
+            cell->setData(QVariant(), Qt::FontRole);
+        }
+    };
+
+    {
+        // Each change below emits itemChanged again; channelItemChanged() ignores it.
+        const QScopedValueRollback<bool> guard(m_updatingMarkers, true);
+        if (customized) {
+            nameItem->setData(m_customizedDot, Qt::DecorationRole);
+        } else if (nameItem->data(Qt::DecorationRole).isValid()) {
+            nameItem->setData(QVariant(), Qt::DecorationRole);
+        }
+        nameItem->setData(customized, MySortFilterProxyModel::CustomizedRole);
+
+        mark(nameItem, ov.fullname.has_value(), defaults.fullname);
+        mark(rowCell(nameItem, c.label), ov.label.has_value(), defaults.label);
+        mark(rowCell(nameItem, c.details), ov.description.has_value(), defaults.description);
+        mark(rowCell(nameItem, c.lower), ov.lowerThreshold.has_value(),
+             thresholdText(defaults.lowerThreshold));
+        mark(rowCell(nameItem, c.upper), ov.upperThreshold.has_value(),
+             thresholdText(defaults.upperThreshold));
+    }
+
+    // The proxy re-filters this row itself; group headers need a full pass.
+    tab.proxy->scheduleRefilter();
+    updateResetButton(tab);
+}
+
+void PreferencesDialog::updateAllMarkers(const ChannelTab &tab)
+{
+    for (int i = 0; i < tab.model->rowCount(); ++i) {
+        QStandardItem *header = tab.model->item(i, 0);
+        if (!header) {
+            continue;
+        }
+        for (int j = 0; j < header->rowCount(); ++j) {
+            updateRowMarkers(tab, header->child(j, 0));
+        }
+    }
+    tab.proxy->scheduleRefilter();
+    updateResetButton(tab);
+}
+
+void PreferencesDialog::resetRow(const ChannelTab &tab, QStandardItem *nameItem)
+{
+    if (!nameItem || !nameItem->parent()) {
+        return;
+    }
+    const schema::Channel *chan = rowChannel(nameItem);
+    if (!chan) {
+        return;
+    }
+    const schema::ChannelDefaults &d = chan->defaults();
+    const ChannelID id = chan->id();
+    const schema::ChanType type = chan->type();
+    auto may = [id, type](ChannelOverrides::Field field) {
+        return ChannelOverrides::overridable(id, type, field);
+    };
+    const ChannelColumns &c = tab.cols;
+
+    {
+        // Markers are recomputed once below, not after every cell.
+        const QScopedValueRollback<bool> guard(m_updatingMarkers, true);
+        if (may(ChannelOverrides::Enabled)) {
+            nameItem->setCheckState(d.enabled ? Qt::Checked : Qt::Unchecked);
+        }
+        if (may(ChannelOverrides::Fullname)) {
+            nameItem->setText(d.fullname);
+        }
+        QStandardItem *cell = rowCell(nameItem, c.color);
+        if (cell && may(ChannelOverrides::Color)) {
+            cell->setBackground(QBrush(d.color));
+            cell->setData(d.color.rgba(), Qt::UserRole);
+        }
+        cell = rowCell(nameItem, c.overview);
+        if (cell && may(ChannelOverrides::ShowInOverview)) {
+            cell->setCheckState(d.showInOverview ? Qt::Checked : Qt::Unchecked);
+        }
+        cell = rowCell(nameItem, c.label);
+        if (cell && may(ChannelOverrides::Label)) {
+            cell->setText(d.label);
+        }
+        cell = rowCell(nameItem, c.details);
+        if (cell && may(ChannelOverrides::Description)) {
+            cell->setText(d.description);
+        }
+        // Thresholds that a preference drives (leak, oximetry) are left alone.
+        cell = rowCell(nameItem, c.lower);
+        if (cell && may(ChannelOverrides::LowerThreshold)) {
+            cell->setText(thresholdText(d.lowerThreshold));
+        }
+        cell = rowCell(nameItem, c.upper);
+        if (cell && may(ChannelOverrides::UpperThreshold)) {
+            cell->setText(thresholdText(d.upperThreshold));
+        }
+    }
+    updateRowMarkers(tab, nameItem);
+}
+
+void PreferencesDialog::updateResetButton(const ChannelTab &tab)
+{
+    QStandardItem *nameItem = channelRowAt(tab, tab.view->currentIndex());
+    tab.resetButton->setEnabled(nameItem
+                                && nameItem->data(MySortFilterProxyModel::CustomizedRole).toBool());
+}
+
+void PreferencesDialog::channelItemChanged(const ChannelTab &tab, QStandardItem *item)
+{
+    if (m_updatingMarkers || !item || !item->parent()) {
+        return;   // our own marker edits, or a group header row
+    }
+    updateRowMarkers(tab, item->parent()->child(item->row(), 0));
+}
+
+void PreferencesDialog::showChannelMenu(const ChannelTab &tab, const QPoint &pos)
+{
+    const QModelIndex index = tab.view->indexAt(pos);
+    QStandardItem *nameItem = channelRowAt(tab, index);
+    if (!nameItem) {
+        return;
+    }
+    // Make the row the menu acts on the current one, so it is highlighted.
+    tab.view->setCurrentIndex(index.siblingAtColumn(0));
+
+    const QPersistentModelIndex row(nameItem->index());
+    QMenu menu(this);
+    QAction *reset = menu.addAction(tr("Reset Channel"));
+    reset->setEnabled(nameItem->data(MySortFilterProxyModel::CustomizedRole).toBool());
+    if (menu.exec(tab.view->viewport()->mapToGlobal(pos)) == reset && row.isValid()) {
+        resetRow(tab, tab.model->itemFromIndex(row));
+    }
+}
+
+void PreferencesDialog::on_resetOneChannel_clicked()
+{
+    resetRow(m_eventsTab, channelRowAt(m_eventsTab, ui->chanView->currentIndex()));
+}
+
+void PreferencesDialog::on_resetOneWaveform_clicked()
+{
+    resetRow(m_wavesTab, channelRowAt(m_wavesTab, ui->waveView->currentIndex()));
+}
+
+void PreferencesDialog::on_chanCustomizedOnly_toggled(bool checked)
+{
+    chanFilterModel->setCustomizedOnly(checked);
+    updateResetButton(m_eventsTab);
+}
+
+void PreferencesDialog::on_waveCustomizedOnly_toggled(bool checked)
+{
+    waveFilterModel->setCustomizedOnly(checked);
+    updateResetButton(m_wavesTab);
 }
 
 void PreferencesDialog::on_maskLeaks4Slider_valueChanged(int value)

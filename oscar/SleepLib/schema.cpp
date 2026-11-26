@@ -507,6 +507,57 @@ void resetChannels()
         loader->initChannels();
     }
     setOrders();
+    snapshotDefaults();
+}
+
+void snapshotDefaults()
+{
+    for (Channel *c : schema::channel.channels) {
+        c->snapshotDefaults();
+    }
+}
+
+void resetChannelsToDefaults()
+{
+    for (Channel *c : schema::channel.channels) {
+        c->resetToDefaults();
+    }
+}
+
+void Channel::snapshotDefaults()
+{
+    if (m_hasDefaults) {
+        return;
+    }
+    m_defaults.enabled = m_enabled;
+    m_defaults.color = m_defaultcolor;
+    m_defaults.fullname = m_fullname;
+    m_defaults.label = m_label;
+    m_defaults.description = m_description;
+    m_defaults.lowerThreshold = m_lowerThreshold;
+    m_defaults.upperThreshold = m_upperThreshold;
+    m_defaults.lowerThresholdColor = m_lowerThresholdColor;
+    m_defaults.upperThresholdColor = m_upperThresholdColor;
+    m_defaults.showInOverview = m_showInOverview;
+    m_defaults.type = m_type;
+    m_hasDefaults = true;
+}
+
+void Channel::resetToDefaults()
+{
+    if (!m_hasDefaults) {
+        return;
+    }
+    m_enabled = m_defaults.enabled;
+    m_defaultcolor = m_defaults.color;
+    m_fullname = m_defaults.fullname;
+    m_label = m_defaults.label;
+    m_description = m_defaults.description;
+    m_lowerThreshold = m_defaults.lowerThreshold;
+    m_upperThreshold = m_defaults.upperThreshold;
+    m_lowerThresholdColor = m_defaults.lowerThresholdColor;
+    m_upperThresholdColor = m_defaults.upperThresholdColor;
+    m_showInOverview = m_defaults.showInOverview;
 }
 
 Channel::Channel(ChannelID id, ChanType type, MachineType machtype, ScopeType scope, QString code, QString fullname,

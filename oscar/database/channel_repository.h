@@ -1,5 +1,9 @@
 /* Channel Repository Header
  *
+ * Database access for channel display settings (schema v20): the global
+ * channel_defaults table, the sparse per-profile profile_channel_overrides table, and
+ * channels_legacy, which holds pre-v20 per-profile full copies until they are converted.
+ *
  * Copyright (c) 2025-2026 The OSCAR Team
  *
  * This file is subject to the terms and conditions of the GNU General Public
@@ -13,15 +17,15 @@
 #include <QColor>
 #include <QString>
 #include <QList>
+#include <QSet>
 #include "SleepLib/machine_common.h"
+#include "SleepLib/channel_overrides.h"
 
-// Forward declaration
-namespace schema {
-    class Channel;
-}
+class QSqlQuery;
 
 /**
- * @brief Data structure for channel preferences (per profile)
+ * @brief A row of channels_legacy: one profile's full stored copy of one channel, as
+ * written by OSCAR before schema v20.
  */
 struct ChannelData {
     qint64 id = 0;
@@ -30,56 +34,115 @@ struct ChannelData {
     QString channelCode;
     int type = 0;  // Channel type from schema (FLAG, WAVEFORM, DATA, etc.)
     bool enabled = true;
-    
+
     // Display properties
     QColor defaultColor;
     QString fullname;
     QString label;
     QString description;
-    
+
     // Threshold settings
     double lowerThreshold = 0.0;
     QColor lowerThresholdColor;
     double upperThreshold = 0.0;
     QColor upperThresholdColor;
-    
+
     // UI preferences
     bool showInOverview = false;
 };
 
 /**
- * @brief Repository for managing channel preferences in database
- * 
- * Handles per-profile channel customizations (colors, names, thresholds, etc.)
+ * @brief A row of channel_defaults: one channel's code defaults in the current language.
+ */
+struct ChannelDefaultRow {
+    ChannelID channelId = 0; QString channelCode; int type = 0;
+    bool enabled = true; QColor defaultColor; QString fullname, label, description;
+    double lowerThreshold = 0; QColor lowerThresholdColor;
+    double upperThreshold = 0; QColor upperThresholdColor; bool showInOverview = false;
+};
+
+/**
+ * @brief A row of profile_channel_overrides: the fields one profile changed on one
+ * channel. An absent value means "use the default" and is stored as NULL.
+ */
+struct ChannelOverrideRow { ChannelID channelId = 0; QString channelCode; ChannelOverrides::Values values; };
+
+/**
+ * @brief Repository for the channel tables of schema v20.
+ *
+ * OSCAR never writes the channels view; it writes channel_defaults (from code) and
+ * profile_channel_overrides (from the user's changes), and reads channels_legacy only
+ * to convert it.
  */
 class ChannelRepository
 {
 public:
+    //! \brief Uses the application's database connection.
     ChannelRepository();
-    explicit ChannelRepository(const QSqlDatabase& database);
-    
-    // CRUD operations
-    qint64 create(const ChannelData& data);
-    bool update(const ChannelData& data);
-    bool remove(qint64 id);
-    
-    // Queries
-    ChannelData findById(qint64 id);
-    QList<ChannelData> findByProfile(qint64 profileId);
-    ChannelData findByProfileAndChannelId(qint64 profileId, ChannelID channelId);
-    
-    // Batch operations
-    bool saveBatch(qint64 profileId, const QList<ChannelData>& channels);
-    bool deleteByProfile(qint64 profileId);
-    
-    // Color conversion helpers
-    static QString colorToString(const QColor& color);
-    static QColor stringToColor(const QString& colorStr);
-    
+    //! \brief Uses \p database, e.g. a private connection.
+    explicit ChannelRepository(const QSqlDatabase &database);
+
+    /**
+     * @brief Makes channel_defaults equal to \p rows in one transaction.
+     * Inserts new channels, rewrites rows whose stored values differ, leaves identical
+     * rows untouched, and deletes channels not in \p rows.
+     */
+    bool syncDefaults(const QList<ChannelDefaultRow> &rows);
+
+    //! \brief All override rows of profile \p profileId, ordered by channel id.
+    QList<ChannelOverrideRow> findOverrides(qint64 profileId);
+
+    /**
+     * @brief Replaces a profile's overrides for the channels the running build knows.
+     * In one transaction, deletes the profile's rows whose channel_id is in \p knownIds or
+     * whose channel_code is in \p knownCodes, then inserts every row of \p rows whose values
+     * are not empty. Rows for channels unknown to this build are left alone.
+     */
+    bool replaceOverrides(qint64 profileId, const QList<ChannelOverrideRow> &rows,
+                          const QSet<ChannelID> &knownIds, const QSet<QString> &knownCodes);
+
+    //! \brief Ids of the profiles that have rows in channels_legacy, ascending.
+    QList<qint64> profilesWithLegacyRows();
+
+    //! \brief The channels_legacy rows of profile \p profileId, ordered by channel id.
+    QList<ChannelData> findLegacy(qint64 profileId);
+
+    /**
+     * @brief Inserts \p rows into channels_legacy for profile \p profileId, in one transaction.
+     * A row the profile already has for the same channel id is replaced.
+     */
+    bool insertLegacy(qint64 profileId, const QList<ChannelData> &rows);
+
+    //! \brief Deletes the channels_legacy rows whose primary keys are \p rowIds.
+    bool deleteLegacy(const QList<qint64> &rowIds);
+
+    /**
+     * @brief Writes the result of converting one profile's channels_legacy rows.
+     * Inserts \p added as override rows (rows with no values are skipped) and deletes the
+     * channels_legacy rows whose primary keys are \p convertedIds. Opens no transaction of
+     * its own: the caller wraps it, together with any other write of the same conversion,
+     * in one transaction on this repository's connection.
+     */
+    bool writeConversion(qint64 profileId, const QList<ChannelOverrideRow> &added,
+                         const QList<qint64> &convertedIds);
+
+    //! \brief A colour as #RRGGBB, or an empty string for an invalid colour.
+    static QString colorToString(const QColor &color);
+    //! \brief The colour named by \p colorStr, or an invalid colour for an empty string.
+    static QColor stringToColor(const QString &colorStr);
+
 private:
     QSqlDatabase db;
-    
-    ChannelData mapResultToData(const QSqlQuery& query);
+
+    //! \brief Maps the current row of a channels_legacy query.
+    ChannelData mapLegacy(const QSqlQuery &query);
+    //! \brief Maps the current row of a profile_channel_overrides query.
+    ChannelOverrideRow mapOverride(const QSqlQuery &query);
+
+    //! \brief Inserts the non-empty rows of \p rows for \p profileId; no transaction of its own.
+    bool insertOverrideRows(qint64 profileId, const QList<ChannelOverrideRow> &rows);
+    //! \brief Deletes channels_legacy rows by primary key; no transaction of its own.
+    bool deleteLegacyRows(const QList<qint64> &rowIds);
 };
 
 #endif // CHANNEL_REPOSITORY_H

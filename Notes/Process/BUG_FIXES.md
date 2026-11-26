@@ -4,6 +4,72 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-25 - Channel edits in Preferences were written only when the profile closed (GitLab #431)
+
+**Files:** `oscar/preferencesdialog.cpp`
+
+**Symptom:** A channel name, label, colour, threshold or tick changed in Preferences > Events or
+Waveforms took effect on screen at once, but a backup made afterwards and the `channels` view read by
+external scripts still held the old values until the profile was closed or OSCAR exited.
+
+**Root cause:** `PreferencesDialog::Save()` applied the edits to the channels in memory only.
+`Profile::saveChannels()` was called from `MainWindow::CloseProfile()` and when another profile is
+created, nowhere else.
+
+**Fix:** `PreferencesDialog::Save()` calls `Profile::saveChannels()` after applying the edits.
+
+**Non-obvious:**
+- The two "Reset Defaults" buttons still act on the channels in memory at once and are still written
+  only when Preferences is accepted or the profile closes; Cancel after a confirmed reset does not
+  undo it. Unchanged by this fix.
+
+---
+
+## 2026-11-25 - Existing profiles kept old channel names, colours and thresholds (GitLab #418)
+
+**Files:** `oscar/database/database_schema.cpp/.h`, `oscar/database/channel_repository.cpp/.h`,
+`oscar/SleepLib/channel_store.cpp/.h`, `oscar/SleepLib/channel_overrides.cpp/.h`,
+`oscar/SleepLib/shipped_channel_names.cpp/.h`, `oscar/docs/shipped_channel_names.txt`,
+`oscar/SleepLib/profiles.cpp`, `oscar/SleepLib/schema.cpp`, `oscar/database/backup/profile_backup.cpp`,
+`oscar/database/backup/profile_restore.cpp`, `oscar/profileimporter.cpp`, `oscar/preferencesdialog.cpp/.ui`,
+`Tools/gen_shipped_channel_names.py`
+
+**Symptom:** After a translation or a correction of a channel name in the source, existing profiles
+went on showing the old name (and, in another language, the old translation). Old default colours and
+thresholds stayed too, while a new profile got the corrected values.
+
+**Root cause:** Every profile stored a full copy of every channel's names, colours and thresholds
+(about 307 rows per profile) with no record of which values the user had changed. On load the stored
+copy replaced the program's values, so a default corrected in code never reached a profile that
+already had its copy.
+
+**Fix:** Schema v20 stores the defaults once and only what a profile changed. `channel_defaults` is
+rewritten from code at every start; `profile_channel_overrides` holds a row per customized channel;
+`channels` is now a view over the two (same columns as before, plus `is_customized`), so SQL that
+reads it keeps working. The v19 `channels` rows are parked in `channels_legacy` by the migration and
+converted at startup for every profile: a value equal to today's default is dropped, a name OSCAR has
+shipped before in any language (`shipped_channel_names.txt`) is dropped, and anything else is kept as
+an override. Backup writes the overrides; backups from schema 12 to 19 still restore, through the same
+conversion. Preferences marks customized channels and can reset a single channel.
+
+**Non-obvious:**
+- Not changed: the Device Settings Changes cache (#258); the single colour per channel (threshold
+  colours are still not editable); a channel-type change in Preferences > Events is still saved but
+  never loaded back.
+- Four thresholds are driven by profile preferences and are never overrides (`CPAP_Leak` upper,
+  `OXI_Pulse` lower and upper, `OXI_SPO2` lower). The `channels` view shows the code default for
+  them; the real value is in `profile_preferences`.
+- A default colour or threshold that changed in code between the saving build and v20 cannot be told
+  from a user's choice and is kept as an override. Preferences can reset it.
+- Schema reference updated in `Notes/Database/DATABASE_SCHEMA_REFERENCE.md`; the ER diagram still
+  shows the old `channels` table and needs regenerating.
+- Found in the final review: with Git's `core.autocrlf=true` a checkout can give the names list CRLF line
+  ends; the loader kept the CR on every name, and the conversion would have kept every old default as
+  a rename. The loader now drops a trailing CR, `.gitattributes` pins the file to `eol=lf`, and the
+  conversion refuses to run (rows stay parked) unless the list passes a size-and-sentinel check.
+
+---
+
 ## 2026-11-24 - Overview Pressure details popup had a too-tall title bar
 
 **Files:** `oscar/overviewdetailspopup.cpp`

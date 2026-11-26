@@ -101,9 +101,25 @@ bool DatabaseSchema::createSchema(QSqlDatabase& db)
         return false;
     }
 
-    // Channel tables (schema version 5)
-    if (!createChannelsTable(db)) {
-        qCritical() << "DatabaseSchema: Failed to create channels table";
+    // Channel tables (schema version 20). A fresh database also gets channels_legacy, the
+    // target for the channels rows of a backup made before v20.
+    if (!createChannelDefaultsTable(db)) {
+        qCritical() << "DatabaseSchema: Failed to create channel_defaults table";
+        return false;
+    }
+
+    if (!createProfileChannelOverridesTable(db)) {
+        qCritical() << "DatabaseSchema: Failed to create profile_channel_overrides table";
+        return false;
+    }
+
+    if (!createChannelsLegacyTable(db)) {
+        qCritical() << "DatabaseSchema: Failed to create channels_legacy table";
+        return false;
+    }
+
+    if (!createChannelsView(db)) {
+        qCritical() << "DatabaseSchema: Failed to create channels view";
         return false;
     }
 
@@ -237,6 +253,7 @@ bool DatabaseSchema::upgradeSchema(QSqlDatabase& db, int fromVersion,
         { 16, &migrateV16ToV17 },
         { 17, &migrateV17ToV18 },
         { 18, &migrateV18ToV19 },
+        { 19, &migrateV19ToV20 },
     };
     const int stepsAvailable = int(sizeof(steps) / sizeof(steps[0]));
 
@@ -452,11 +469,9 @@ bool DatabaseSchema::createIndexes(QSqlDatabase& db)
     indexes << "CREATE INDEX IF NOT EXISTS idx_session_slices_session ON session_slices(session_id)";
     indexes << "CREATE INDEX IF NOT EXISTS idx_session_slices_time ON session_slices(start_time, end_time)";
 
-    // Channels indexes (schema version 5)
-    indexes << "CREATE INDEX IF NOT EXISTS idx_channels_profile ON channels(profile_id)";
-    indexes << "CREATE INDEX IF NOT EXISTS idx_channels_code ON channels(channel_code)";
-    indexes << "CREATE INDEX IF NOT EXISTS idx_channels_lookup ON channels(profile_id, channel_id)";
-    
+    // Channels indexes (schema version 20: channels is a view; the old table is channels_legacy)
+    indexes << "CREATE INDEX IF NOT EXISTS idx_channels_legacy_profile ON channels_legacy(profile_id)";
+
     indexes << "CREATE INDEX IF NOT EXISTS idx_channel_options_channel ON channel_options(channel_id)";
     indexes << "CREATE INDEX IF NOT EXISTS idx_channel_options_lookup ON channel_options(channel_id, option_key)";
 
@@ -981,22 +996,82 @@ bool DatabaseSchema::createSessionSlicesTable(QSqlDatabase& db)
 }
 
 /*
- * Create the channels table
- *
- * Parameters:
- *   db - Database connection to use
- *
- * Returns: true if successful, false otherwise
- *
- * The channels table stores per-profile channel customizations
- * (enabled state, colors, labels, thresholds, etc.)
+ * Run one CREATE statement for the channel tables, logging a failure under \p what.
  */
-bool DatabaseSchema::createChannelsTable(QSqlDatabase& db)
+static bool execChannelDdl(QSqlDatabase& db, const QString& sql, const char* what)
 {
     QSqlQuery query(db);
-    
-    QString sql = 
-        "CREATE TABLE IF NOT EXISTS channels ("
+    if (!query.exec(sql)) {
+        qCritical() << "DatabaseSchema: Failed to create" << what << ":"
+                    << query.lastError().text();
+        DatabaseManager::instance().checkQueryError(QString("DatabaseSchema: create %1").arg(what), query);
+        return false;
+    }
+    qDebug() << "DatabaseSchema:" << what << "created";
+    return true;
+}
+
+/*
+ * Create the channel_defaults table (schema version 20)
+ *
+ * One row per channel of the running build: the channel's code defaults in the current
+ * OSCAR language. Not per profile. ChannelStore::syncDefaults() rewrites it at every
+ * start, so it always matches the code; it is never a user's data.
+ */
+bool DatabaseSchema::createChannelDefaultsTable(QSqlDatabase& db)
+{
+    return execChannelDdl(db,
+        "CREATE TABLE IF NOT EXISTS channel_defaults ("
+        "    channel_id INTEGER PRIMARY KEY,"
+        "    channel_code TEXT NOT NULL,"
+        "    type INTEGER,"
+        "    enabled INTEGER NOT NULL DEFAULT 1,"
+        "    default_color TEXT,"
+        "    fullname TEXT, label TEXT, description TEXT,"
+        "    lower_threshold REAL, lower_threshold_color TEXT,"
+        "    upper_threshold REAL, upper_threshold_color TEXT,"
+        "    show_in_overview INTEGER DEFAULT 0,"
+        "    updated_at TEXT DEFAULT CURRENT_TIMESTAMP)",
+        "channel_defaults table");
+}
+
+/*
+ * Create the profile_channel_overrides table (schema version 20)
+ *
+ * Sparse: a row exists only for a channel on which the profile changed at least one
+ * field, and a NULL column means "use the default". channel_code lets a row be matched
+ * by code when its channel_id is unknown to the running build. The threshold colours
+ * have no column because nothing in the UI can change them.
+ */
+bool DatabaseSchema::createProfileChannelOverridesTable(QSqlDatabase& db)
+{
+    return execChannelDdl(db,
+        "CREATE TABLE IF NOT EXISTS profile_channel_overrides ("
+        "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "    profile_id INTEGER NOT NULL,"
+        "    channel_id INTEGER NOT NULL,"
+        "    channel_code TEXT NOT NULL,"
+        "    enabled INTEGER, default_color TEXT,"
+        "    fullname TEXT, label TEXT, description TEXT,"
+        "    lower_threshold REAL, upper_threshold REAL,"
+        "    show_in_overview INTEGER,"
+        "    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,"
+        "    FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,"
+        "    UNIQUE(profile_id, channel_id))",
+        "profile_channel_overrides table");
+}
+
+/*
+ * Create the channels_legacy table (schema version 20)
+ *
+ * Exactly the columns of the v5-v19 per-profile channels table, which stored a full copy
+ * of every channel for every profile. It holds those old rows (from the v19 -> v20
+ * migration, or from restoring a pre-v20 backup) until they are converted into overrides.
+ */
+bool DatabaseSchema::createChannelsLegacyTable(QSqlDatabase& db)
+{
+    return execChannelDdl(db,
+        "CREATE TABLE IF NOT EXISTS channels_legacy ("
         "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
         "    profile_id INTEGER NOT NULL,"
         "    channel_id INTEGER NOT NULL,"
@@ -1016,17 +1091,39 @@ bool DatabaseSchema::createChannelsTable(QSqlDatabase& db)
         "    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,"
         "    FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,"
         "    UNIQUE(profile_id, channel_id)"
-        ")";
+        ")",
+        "channels_legacy table");
+}
 
-    if (!query.exec(sql)) {
-        qCritical() << "DatabaseSchema: Failed to create channels table:"
-                    << query.lastError().text();
-        DatabaseManager::instance().checkQueryError("DatabaseSchema::createChannelsTable", query);
-        return false;
-    }
-
-    qDebug() << "DatabaseSchema: channels table created";
-    return true;
+/*
+ * Create the channels view (schema version 20)
+ *
+ * Every profile crossed with every channel default, with the profile's non-NULL override
+ * fields taking precedence, under the column names of the pre-v20 channels table, so SQL
+ * scripts that read channels keep working. is_customized is 1 where the profile has an
+ * override row for the channel. OSCAR never writes through this view.
+ */
+bool DatabaseSchema::createChannelsView(QSqlDatabase& db)
+{
+    return execChannelDdl(db,
+        "CREATE VIEW IF NOT EXISTS channels AS "
+        "SELECT p.id AS profile_id, d.channel_id, d.channel_code, d.type,"
+        "       COALESCE(o.enabled, d.enabled) AS enabled,"
+        "       COALESCE(o.default_color, d.default_color) AS default_color,"
+        "       COALESCE(o.fullname, d.fullname) AS fullname,"
+        "       COALESCE(o.label, d.label) AS label,"
+        "       COALESCE(o.description, d.description) AS description,"
+        "       COALESCE(o.lower_threshold, d.lower_threshold) AS lower_threshold,"
+        "       d.lower_threshold_color,"
+        "       COALESCE(o.upper_threshold, d.upper_threshold) AS upper_threshold,"
+        "       d.upper_threshold_color,"
+        "       COALESCE(o.show_in_overview, d.show_in_overview) AS show_in_overview,"
+        "       (o.id IS NOT NULL) AS is_customized "
+        "FROM profiles p "
+        "CROSS JOIN channel_defaults d "
+        "LEFT JOIN profile_channel_overrides o"
+        "       ON o.profile_id = p.id AND o.channel_id = d.channel_id",
+        "channels view");
 }
 
 /*
@@ -1952,5 +2049,93 @@ bool DatabaseSchema::migrateV18ToV19(QSqlDatabase& db)
     }
 
     qDebug() << "DatabaseSchema: Migration v18->v19 complete";
+    return true;
+}
+
+/*
+ * Migrate database from schema version 19 to 20 (GitLab #418)
+ *
+ * The per-profile channels table, which held a full copy of every channel for every
+ * profile, is renamed channels_legacy and its rows are kept as they are; no values are
+ * interpreted here, because the channel registry and translations do not exist yet.
+ * They are converted into overrides later, once the registry is built. The new
+ * channel_defaults and profile_channel_overrides tables are created, and channels becomes
+ * a view over them. Every CREATE uses IF NOT EXISTS, so a database that already has some
+ * of these objects is accepted.
+ */
+bool DatabaseSchema::migrateV19ToV20(QSqlDatabase& db)
+{
+    qDebug() << "DatabaseSchema: Migrating v19 -> v20";
+
+    // Without legacy_alter_table, renaming channels would make SQLite rewrite every view
+    // and trigger that names it, including a user's own, to read channels_legacy (which is
+    // emptied by the conversion), and a broken unrelated view would make the rename fail.
+    // With it, such a view keeps reading "channels", which becomes the new view. The
+    // pragma is a connection setting, not part of the transaction, so the guard restores
+    // the previous value on every return, including after a rollback.
+    struct LegacyAlterTableGuard {
+        QSqlDatabase &db;
+        QVariant previous;
+        explicit LegacyAlterTableGuard(QSqlDatabase &database) : db(database)
+        {
+            QSqlQuery q(db);
+            if (q.exec("PRAGMA legacy_alter_table") && q.next()) {
+                previous = q.value(0);
+            }
+            QSqlQuery set(db);
+            if (!set.exec("PRAGMA legacy_alter_table=ON")) {
+                qWarning() << "DatabaseSchema: migrateV19ToV20: cannot set legacy_alter_table:"
+                           << set.lastError().text();
+            }
+        }
+        ~LegacyAlterTableGuard()
+        {
+            QSqlQuery q(db);
+            q.exec(QString("PRAGMA legacy_alter_table=%1").arg(previous.toInt() != 0 ? "ON" : "OFF"));
+        }
+    } legacyAlterTable(db);
+
+    if (!db.transaction()) {
+        qCritical() << "DatabaseSchema: migrateV19ToV20: failed to start transaction";
+        return false;
+    }
+
+    const QStringList sql = {
+        "DROP INDEX IF EXISTS idx_channels_profile",
+        "DROP INDEX IF EXISTS idx_channels_code",
+        "DROP INDEX IF EXISTS idx_channels_lookup",
+        "ALTER TABLE channels RENAME TO channels_legacy",
+        "CREATE INDEX IF NOT EXISTS idx_channels_legacy_profile ON channels_legacy(profile_id)",
+    };
+    QSqlQuery q(db);
+    for (const QString & statement : sql) {
+        if (!q.exec(statement)) {
+            qCritical() << "DatabaseSchema: migrateV19ToV20:" << statement
+                        << "failed:" << q.lastError().text();
+            DatabaseManager::instance().checkQueryError("DatabaseSchema::migrateV19ToV20", q);
+            db.rollback();
+            return false;
+        }
+    }
+
+    if (!createChannelDefaultsTable(db) || !createProfileChannelOverridesTable(db)
+            || !createChannelsView(db)) {
+        qCritical() << "DatabaseSchema: migrateV19ToV20: creating the v20 channel tables failed";
+        db.rollback();
+        return false;
+    }
+
+    if (!setSchemaVersion(db, 20)) {
+        qCritical() << "DatabaseSchema: migrateV19ToV20: setSchemaVersion failed";
+        db.rollback();
+        return false;
+    }
+    if (!db.commit()) {
+        qCritical() << "DatabaseSchema: migrateV19ToV20: commit failed";
+        db.rollback();
+        return false;
+    }
+
+    qDebug() << "DatabaseSchema: Migration v19->v20 complete";
     return true;
 }

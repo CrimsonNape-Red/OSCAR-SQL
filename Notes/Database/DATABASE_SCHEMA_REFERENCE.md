@@ -1,13 +1,13 @@
 # OSCAR Database Schema Reference
-**Version:** Schema Version 18
-**Last Updated:** 2026 Q3
+**Version:** Schema Version 20
+**Last Updated:** 2026 Q4
 **Database Type:** SQLite
 
 ---
 
 ## Overview
 
-The OSCAR database uses SQLite to store user profiles, machine configurations, session data, and preferences. This document provides a complete reference for all tables, fields, and relationships in schema version 18.
+The OSCAR database uses SQLite to store user profiles, machine configurations, session data, and preferences. This document provides a complete reference for all tables, fields, and relationships in schema version 20.
 
 **Key Design Principles:**
 - **Profile-centric**: All data organized around user profiles
@@ -17,6 +17,7 @@ The OSCAR database uses SQLite to store user profiles, machine configurations, s
 - **Profile ID denormalization**: session_settings, session_channels, session_summaries, event_lists, and respiratory_events carry profile_id for query performance 🔧 NEW IN v12
 - **Report tree**: Hierarchical report tree with system and user nodes, loaded from .orf file 🌲 NEW IN v13
 - **Flexible preferences**: Key-value storage for settings
+- **Channel defaults plus overrides**: channel names, colours and thresholds are stored once as code defaults (`channel_defaults`); a profile stores only what the user changed (`profile_channel_overrides`); `channels` is a view over the two 🔧 NEW IN v20
 - **Cascade deletes**: Removing a profile removes all associated data
 - **Database-only mode**: Waveform and event data stored in database BLOBs (replaces .001 files) ⚡ NEW IN v8
 - **Migration policy**: Schema version mismatch requires migration after v13.
@@ -46,6 +47,7 @@ The OSCAR database uses SQLite to store user profiles, machine configurations, s
 | 17 | 2026 Q3 | 🕐 **NEW FEATURE**: Added `device_time_corrections` table for per-device per-night time corrections (timezone, travel, dst, reset, offset, drift). |
 | 18 | 2026 Q3 | 📊 **NEW FEATURE**: Central / Obstructive hypopnea split. Added `obstructive_hypopnea_count`, `central_hypopnea_count`, `all_apnea_count` (INTEGER) and `oahi`, `cahi` (REAL) to both `session_summaries` and `daily_summaries`. `all_apnea_count` closes a pre-existing gap — `CPAP_AllApnea` contributes to AHI but was never stored, so SQL sums could not reproduce the app's AHI for devices reporting an undifferentiated apnea. Purely additive; pre-v18 rows read 0 in all five columns and are **not** backfilled. |
 | 19 | 2026 Q3 | 🔧 **SEMANTICS**: Summary metrics that do not apply are now `NULL`, not `0`, in `session_summaries` and `daily_summaries`: event counts for channels the device has never reported, `oahi`/`cahi` unless the device splits hypopneas by mechanism, `rdi` unless it reports RERA, and pressure/leak/oximetry statistics a row has no data for. No column changes. The #285 index recompute moved here from v18. Zero-count OH/CH `session_channels` rows of devices that never scored either are removed. `daily_summaries` rows of profiles whose CPAP devices disagree on some channel are regenerated on next open. A v18 backup restored into v19 keeps its `0`s. |
+| 20 | 2026 Q4 | 🔧 **CHANNEL STORAGE (GitLab #418)**: The per-profile `channels` table, which held a full copy of every channel's names, colours and thresholds for every profile, is replaced. New tables `channel_defaults` (one row per channel of the running build, rewritten from code at every start) and `profile_channel_overrides` (only the fields a profile changed). `channels` is now a VIEW over them, with the old column names plus `is_customized`, so SQL that reads `channels` keeps working. The old table is renamed `channels_legacy` and its rows are converted into overrides at startup (transitional, see below). Indexes `idx_channels_profile`, `idx_channels_code` and `idx_channels_lookup` are dropped; `idx_channels_legacy_profile` is added. Backups from schema 12 to 19 still restore. |
 
 ---
 
@@ -343,11 +345,74 @@ CREATE TABLE session_slices (
 
 **Status:** 0=mask off, 1=mask on
 
-### 13. channels
-Per-profile channel customizations.
+### 13. channels (view), channel_defaults, profile_channel_overrides, channels_legacy 🔧 **CHANGED IN v20**
+Until v19 `channels` was a table holding a full per-profile copy of every channel (about 300 rows per profile). From v20 the channel data is held in three tables and `channels` is a read-only view over two of them. OSCAR never writes through the view.
+
+**channel_defaults** - global, not per profile. One row per channel of the running build, in the current OSCAR language. Rewritten from code at every start, so it always matches the program; it is never user data and is not backed up.
 
 ```sql
-CREATE TABLE channels (
+CREATE TABLE channel_defaults (
+    channel_id INTEGER PRIMARY KEY,
+    channel_code TEXT NOT NULL,
+    type INTEGER,
+    enabled INTEGER NOT NULL DEFAULT 1,
+    default_color TEXT,
+    fullname TEXT, label TEXT, description TEXT,
+    lower_threshold REAL, lower_threshold_color TEXT,
+    upper_threshold REAL, upper_threshold_color TEXT,
+    show_in_overview INTEGER DEFAULT 0,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+)
+```
+
+**profile_channel_overrides** - sparse, per profile. A row exists only for a channel on which the profile changed at least one field; a NULL column means "use the default". `channel_code` lets a row be matched by code when its `channel_id` is unknown to the running build. There are no threshold colour columns because nothing in the UI can change them.
+
+```sql
+CREATE TABLE profile_channel_overrides (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    profile_id INTEGER NOT NULL,
+    channel_id INTEGER NOT NULL,
+    channel_code TEXT NOT NULL,
+    enabled INTEGER, default_color TEXT,
+    fullname TEXT, label TEXT, description TEXT,
+    lower_threshold REAL, upper_threshold REAL,
+    show_in_overview INTEGER,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
+    UNIQUE(profile_id, channel_id)
+)
+```
+
+**channels** - a VIEW: every profile crossed with every channel default, the profile's non-NULL override fields taking precedence. It keeps the column names of the pre-v20 table and adds `is_customized`.
+
+```sql
+CREATE VIEW channels AS
+SELECT p.id AS profile_id, d.channel_id, d.channel_code, d.type,
+       COALESCE(o.enabled, d.enabled) AS enabled,
+       COALESCE(o.default_color, d.default_color) AS default_color,
+       COALESCE(o.fullname, d.fullname) AS fullname,
+       COALESCE(o.label, d.label) AS label,
+       COALESCE(o.description, d.description) AS description,
+       COALESCE(o.lower_threshold, d.lower_threshold) AS lower_threshold,
+       d.lower_threshold_color,
+       COALESCE(o.upper_threshold, d.upper_threshold) AS upper_threshold,
+       d.upper_threshold_color,
+       COALESCE(o.show_in_overview, d.show_in_overview) AS show_in_overview,
+       (o.id IS NOT NULL) AS is_customized
+FROM profiles p
+CROSS JOIN channel_defaults d
+LEFT JOIN profile_channel_overrides o
+       ON o.profile_id = p.id AND o.channel_id = d.channel_id
+```
+
+**Preference-driven thresholds.** Four thresholds are driven by profile preferences and are never stored as overrides: `CPAP_Leak` upper, `OXI_Pulse` lower and upper, and `OXI_SPO2` lower. For these the view shows the code default; the real value is in `profile_preferences`.
+
+**Empty until the first start of a v20 build.** `channel_defaults` is filled by OSCAR at startup, from the running build's code, not by the v19 to v20 migration. Between that migration and the first completed start of a v20 build the view therefore returns no rows. A profile whose rows are still in `channels_legacy` (not yet converted) shows the code defaults in the view until it is converted.
+
+**channels_legacy** - transitional. Exactly the columns of the v5-v19 `channels` table. It holds the old per-profile rows (from the v19 to v20 migration, or from restoring a backup made before v20) until OSCAR converts them into overrides. The conversion runs at startup, when profiles are scanned: a stored value equal to today's default is dropped, a name OSCAR has shipped before is dropped, and anything else (a real rename, a changed colour, threshold or flag) becomes an override. Converted rows are deleted; rows for channels the running build does not know stay. If the bundled list of shipped names cannot be loaded, nothing is converted and every row stays for a later start. Until its rows are converted, a profile shows the code defaults in the `channels` view. The table is normally empty after the first start of v20. It exists only to carry old data through that conversion, so do not build anything on it.
+
+```sql
+CREATE TABLE channels_legacy (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     profile_id INTEGER NOT NULL,
     channel_id INTEGER NOT NULL,
@@ -843,27 +908,72 @@ Re-import is required to repair pre-fix rows; the discontinuity is accepted.
 | end_time | INTEGER | | NO | Slice end (Unix timestamp) |
 | status | INTEGER | | NO | 0=mask off, 1=mask on |
 
-### channels
+### channels (view, v20)
+
+Read-only view; before v20 a per-profile table. `is_customized` is new. A channel the profile has not changed shows the code default.
+
+| Field | Type | Null | Description |
+|-------|------|------|-------------|
+| profile_id | INTEGER | NO | → profiles(id) (one row per profile per channel) |
+| channel_id | INTEGER | NO | OSCAR channel ID constant |
+| channel_code | TEXT | NO | Code (e.g., "CPAP_Pressure") |
+| type | INTEGER | YES | Channel type (NEW IN v12) |
+| enabled | INTEGER | NO | Enabled flag (0/1) |
+| default_color | TEXT | YES | Color (#RRGGBB) |
+| fullname | TEXT | YES | Full name |
+| label | TEXT | YES | Short label |
+| description | TEXT | YES | Description |
+| lower_threshold | REAL | YES | Lower threshold value (code default for `OXI_Pulse` and `OXI_SPO2`; real value in `profile_preferences`) |
+| lower_threshold_color | TEXT | YES | Lower threshold color (always the default) |
+| upper_threshold | REAL | YES | Upper threshold value (code default for `CPAP_Leak` and `OXI_Pulse`; real value in `profile_preferences`) |
+| upper_threshold_color | TEXT | YES | Upper threshold color (always the default) |
+| show_in_overview | INTEGER | YES | Show in overview (0/1) |
+| is_customized | INTEGER | NO | 1 if the profile has an override row for this channel, else 0 (NEW IN v20) |
+
+The `id`, `created_at` and `updated_at` columns of the old table are not in the view.
+
+### channel_defaults (NEW IN v20)
 
 | Field | Type | Key | Null | Description |
 |-------|------|-----|------|-------------|
-| id | INTEGER | PK | NO | Auto-increment ID |
-| profile_id | INTEGER | FK | NO | → profiles(id) |
-| channel_id | INTEGER | | NO | OSCAR channel ID constant |
+| channel_id | INTEGER | PK | NO | OSCAR channel ID constant |
 | channel_code | TEXT | | NO | Code (e.g., "CPAP_Pressure") |
-| type | INTEGER | | YES | Channel type (NEW IN v12) |
+| type | INTEGER | | YES | Channel type |
 | enabled | INTEGER | | NO | Enabled flag (0/1) |
 | default_color | TEXT | | YES | Color (#RRGGBB) |
-| fullname | TEXT | | YES | Full name |
+| fullname | TEXT | | YES | Full name, in the current OSCAR language |
 | label | TEXT | | YES | Short label |
 | description | TEXT | | YES | Description |
 | lower_threshold | REAL | | YES | Lower threshold value |
 | lower_threshold_color | TEXT | | YES | Lower threshold color |
 | upper_threshold | REAL | | YES | Upper threshold value |
 | upper_threshold_color | TEXT | | YES | Upper threshold color |
-| show_in_overview | INTEGER | | NO | Show in overview (0/1) |
-| created_at | TEXT | | NO | Creation timestamp |
-| updated_at | TEXT | | NO | Update timestamp |
+| show_in_overview | INTEGER | | YES | Show in overview (0/1) |
+| updated_at | TEXT | | YES | Time of the last rewrite at startup |
+
+### profile_channel_overrides (NEW IN v20)
+
+NULL in a value column means "use the default from `channel_defaults`".
+
+| Field | Type | Key | Null | Description |
+|-------|------|-----|------|-------------|
+| id | INTEGER | PK | NO | Auto-increment ID |
+| profile_id | INTEGER | FK | NO | → profiles(id) ON DELETE CASCADE |
+| channel_id | INTEGER | | NO | OSCAR channel ID constant; with `profile_id` UNIQUE |
+| channel_code | TEXT | | NO | Code, so a row can be matched by code if the ID is unknown to the build |
+| enabled | INTEGER | | YES | Enabled flag override (0/1) |
+| default_color | TEXT | | YES | Color override (#RRGGBB) |
+| fullname | TEXT | | YES | Full name override (a user rename) |
+| label | TEXT | | YES | Short label override |
+| description | TEXT | | YES | Description override |
+| lower_threshold | REAL | | YES | Lower threshold override (waveform channels only) |
+| upper_threshold | REAL | | YES | Upper threshold override (waveform channels only) |
+| show_in_overview | INTEGER | | YES | Show in overview override (0/1) |
+| updated_at | TEXT | | YES | Update timestamp |
+
+### channels_legacy (NEW IN v20, transitional)
+
+Same columns, types and constraints as the pre-v20 `channels` table (listed in section 13). Holds unconverted old rows only; normally empty. Not for new queries.
 
 ### channel_options
 
@@ -1040,10 +1150,9 @@ idx_session_slices_time ON session_slices(start_time, end_time)
 ```
 
 ### Channel Indexes
+The v5-v19 indexes `idx_channels_profile`, `idx_channels_code` and `idx_channels_lookup` were dropped in v20: `channels` is now a view and cannot be indexed. `profile_channel_overrides` and `channel_defaults` rely on their UNIQUE / PRIMARY KEY indexes.
 ```sql
-idx_channels_profile ON channels(profile_id)
-idx_channels_code ON channels(channel_code)
-idx_channels_lookup ON channels(profile_id, channel_id)
+idx_channels_legacy_profile ON channels_legacy(profile_id)
 idx_channel_options_channel ON channel_options(channel_id)
 idx_channel_options_lookup ON channel_options(channel_id, option_key)
 ```
@@ -1097,7 +1206,8 @@ profiles (1) ──┬─< machines (N)
                ├─< user_info (1)
                ├─< doctor_info (1)
                ├─< profile_preferences (N)
-               ├─< channels (N)
+               ├─< profile_channel_overrides (N)   [v20]
+               ├─< channels_legacy (N)             [v20, transitional]
                ├─< daily_summaries (N)
                ├─< session_settings (N)    [denormalized profile_id, v12]
                ├─< session_channels (N)    [denormalized profile_id, v12]
@@ -1121,6 +1231,8 @@ session_channels (1) ─< session_channel_values (N)
 report_tree (1) ─< report_tree (N)   [self-referencing parent_id, v13]
 
 channel_options (N) - standalone (references channel_id constant)
+channel_defaults (N) - global (not profile-specific, rewritten at every start) 🔧 NEW IN v20
+channels - VIEW over profiles x channel_defaults, with profile_channel_overrides applied (v20)
 report_tree (N) - global (not profile-specific) 🌲 NEW IN v13
 ```
 
@@ -1132,7 +1244,8 @@ report_tree (N) - global (not profile-specific) 🌲 NEW IN v13
 | user_info | profile_id | profiles | id | CASCADE |
 | doctor_info | profile_id | profiles | id | CASCADE |
 | profile_preferences | profile_id | profiles | id | CASCADE |
-| channels | profile_id | profiles | id | CASCADE |
+| profile_channel_overrides | profile_id | profiles | id | CASCADE |
+| channels_legacy | profile_id | profiles | id | CASCADE |
 | daily_summaries | profile_id | profiles | id | CASCADE |
 | sessions | machine_id | machines | id | CASCADE |
 | session_settings | session_id | sessions | id | CASCADE |
@@ -1151,7 +1264,7 @@ report_tree (N) - global (not profile-specific) 🌲 NEW IN v13
 | report_tree | parent_id | report_tree | id | CASCADE |
 
 **Cascade Delete Behavior:**
-- Deleting **profile** removes: machines, user_info, doctor_info, preferences, channels, daily_summaries, session_settings, session_channels, session_summaries, event_lists, respiratory_events (all denormalized profile_id FKs)
+- Deleting **profile** removes: machines, user_info, doctor_info, preferences, channel overrides (and any `channels_legacy` rows), daily_summaries, session_settings, session_channels, session_summaries, event_lists, respiratory_events (all denormalized profile_id FKs)
 - Deleting **machine** removes: sessions (and their data). `daily_summaries` rows survive, since v16 they no longer reference a machine.
 - Deleting **session** removes: settings, channels, events, summaries, slices, event_lists (which cascades to event_data)
 - Deleting **event_list** removes: event_data (waveform/event binary data)
@@ -1393,6 +1506,6 @@ is defensive only.
 
 ---
 
-**Document Version:** 8.1
-**Schema Version:** 16
+**Document Version:** 8.2
+**Schema Version:** 20
 **Generated:** 2026 Q2

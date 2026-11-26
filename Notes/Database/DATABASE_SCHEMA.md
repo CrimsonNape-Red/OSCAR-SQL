@@ -347,6 +347,12 @@ CREATE TABLE session_slices (
 ### 14. channels
 Per-profile channel customizations.
 
+**Note (2026-11-25, schema v20):** this section describes v19 and earlier. From v20 `channels` is a
+read-only view, and its indexes `idx_channels_profile`, `idx_channels_code` and
+`idx_channels_lookup` are gone. The channel data is in three tables: `channel_defaults` (global code
+defaults), `profile_channel_overrides` (only what a profile changed) and `channels_legacy` (the old
+rows, until converted at startup). See `DATABASE_SCHEMA_REFERENCE.md`, section 13.
+
 ```sql
 CREATE TABLE channels (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

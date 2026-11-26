@@ -4,3 +4,6 @@
 # macOS build scripts without a .sh extension, run directly by oscar.pro
 Building/MacOS/create_dmg text eol=lf
 Building/MacOS/finalize_plist text eol=lf
+
+# Read by OSCAR line by line to match channel names; must not gain a CR per line
+oscar/docs/shipped_channel_names.txt text eol=lf

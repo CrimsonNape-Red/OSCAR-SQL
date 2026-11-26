@@ -21,6 +21,7 @@
 #include "common.h"
 
 class Machine;
+struct ChannelData;
 
 enum Gender { GenderNotSpecified, Male, Female };
 enum MaskType { Mask_Unknown, Mask_NasalPillows, Mask_Hybrid, Mask_StandardNasal, Mask_FullFace };
@@ -266,17 +267,23 @@ class Profile : public Preferences
     Machine * lookupMachine(QString serial, QString loadername);
     Machine * CreateMachine(MachineInfo info, MachineID id = 0);
 
+    //! \brief Resets every channel to its code defaults, then applies this profile's overrides.
     void loadChannels();
+    //! \brief Stores this profile's channel overrides (the fields that differ from the defaults).
     void saveChannels();
     void resetOxiChannelPref();
-    
-    // Database integration for channels
-    bool loadChannelsFromDatabase();
-    bool saveChannelsToDatabase();
+
     void saveChannelsToDat();    // Original file-based implementation
-    void loadChannelsFromDat(const QString& channelsDatDir = QString());  // Original file-based implementation
-    bool migrateChannelsToDatabase(const QString& channelsDatDir = QString());  // One-time migration from channels.dat to database
-    bool initializeChannelsFromSchema();  // Initialize channels from schema::channel registry
+    /*! \brief Parses the OSCAR 1.x channels.dat in \p dir into channels_legacy rows
+        (channelId = the stored id, channelCode = the stored name). Changes no channel.
+        \return The rows; empty if there is no readable channels.dat. */
+    static QList<ChannelData> readChannelsDat(const QString &dir);
+    /*! \brief Imports an OSCAR 1.x channels.dat as overrides through the legacy-row
+        conversion (ChannelStore::convertLegacyRows()); changes no channel.
+        \param channelsDatDir Folder holding channels.dat; empty for this profile's data folder.
+        \return false if there is no readable file, or its rows could not be stored or
+                converted for this profile. */
+    bool migrateChannelsToDatabase(const QString& channelsDatDir = QString());
 
 
     bool is_first_day;

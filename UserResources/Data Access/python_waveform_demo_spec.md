@@ -157,6 +157,11 @@ the short form (`"FlowRate"`, `"Pressure"`) — `common_gui.h` defines these
 as `STR_GRAPH_FlowRate = "FlowRate"`, `STR_GRAPH_Pressure = "Pressure"`.
 Use the short form when querying.
 
+Note: from schema v20 `channels` is a view over OSCAR's code defaults and the
+changes the user made to each channel, not a stored table. Existing queries keep
+working unchanged; the extra column `is_customized` is 1 when the user changed
+that channel in the profile.
+
 ### Step 6 — For each session × channel, load the EventList metadata
 
 ```sql

@@ -22,8 +22,9 @@
  * background, selection, text and focus rect are still drawn by the style. Items
  * without Qt::CheckStateRole data fall through to QStyledItemDelegate unchanged.
  *
- * Layout: when the item has text, the box sits at the left with the text after it;
- * when the text is empty (e.g. the Overview column) the box is centred in the cell. */
+ * Layout: when the item has text, the box sits at the left with the text after it, and
+ * an icon (Qt::DecorationRole), if any, between the two; when the text is empty (e.g. the
+ * Overview column) the box is centred in the cell. */
 class TreeCheckDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
@@ -43,7 +44,8 @@ protected:
                      const QStyleOptionViewItem &option, const QModelIndex &index) override;
 
 private:
-    //! Rectangle of the check box within \a cell; centred when \a hasText is false.
+    //! Rectangle of the check box within \a cell; centred when \a hasText is false (the
+    //! cell has neither text nor an icon), at the left otherwise.
     static QRect checkRect(const QRect &cell, bool hasText);
 
     //! Area left for text and editors to the right of the check box.

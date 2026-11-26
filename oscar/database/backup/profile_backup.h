@@ -128,7 +128,7 @@ public:
      * daily_summaries table is filtered by its \c date column.
      *
      * Profile-level tables (profiles, user_info, doctor_info,
-     * profile_preferences, channels, machines) are always exported in full
+     * profile_preferences, channel overrides, machines) are always exported in full
      * regardless of the date range.
      *
      * Pass two invalid (default-constructed) QDate objects, or call
@@ -298,7 +298,8 @@ private:
     /*!
      * \brief Export profile-level tables (always full, not date-filtered).
      *
-     * Exports: profiles, user_info, doctor_info, profile_preferences, channels.
+     * Exports: profiles, user_info, doctor_info, profile_preferences, graph_layouts,
+     * profile_channel_overrides, channels_legacy, channel_options.
      * When m_privacyMode is true, personal fields in user_info and doctor_info
      * are replaced with empty strings / NULL before export.
      *

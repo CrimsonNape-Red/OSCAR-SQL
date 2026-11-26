@@ -40,6 +40,15 @@ public:
      * Increment this when schema changes. Used to determine if
      * database upgrades are needed.
      *
+     * Version 20: Channel defaults stored once, per-profile overrides (GitLab #418)
+     * - New channel_defaults table: one row per channel holding the code defaults,
+     *   rewritten from the running build at every start (ChannelStore::syncDefaults()).
+     * - New profile_channel_overrides table: only the fields a user changed, NULL = default.
+     * - The old per-profile channels table is renamed channels_legacy; its rows are kept
+     *   until they are converted into overrides.
+     * - channels is now a VIEW over profiles x channel_defaults with the overrides applied,
+     *   under the old column names, so existing SQL scripts keep working.
+     *
      * Version 19: NULL for summary metrics that do not apply (GitLab #261)
      * - No column changes. session_summaries and daily_summaries now store NULL, not 0,
      *   for counts of channels the device has never reported, for oahi/cahi unless the
@@ -98,7 +107,7 @@ public:
      * - Added type field to channels
      * - Removed events_file and summary_file from sessions (no longer needed)
      */
-    static const int CURRENT_SCHEMA_VERSION = 19;
+    static const int CURRENT_SCHEMA_VERSION = 20;
 
     /*!
      * \brief Oldest schema version that can be restored into the current database.
@@ -177,6 +186,10 @@ public:
     static bool checkAndUpdateReportVersion(QSqlDatabase& db);
 
 private:
+#ifdef UNITTEST_MODE
+    friend class ChannelStorageTests;
+#endif
+
     // Schema creation methods
     static bool createSchemaVersionTable(QSqlDatabase& db);
     static bool createProfilesTable(QSqlDatabase& db);
@@ -194,9 +207,17 @@ private:
     static bool createSessionSummariesTable(QSqlDatabase& db);
     static bool createSessionSlicesTable(QSqlDatabase& db);
 
-    // Channel tables (schema version 5)
-    static bool createChannelsTable(QSqlDatabase& db);
+    // Channel tables (schema version 5; reorganised in version 20)
     static bool createChannelOptionsTable(QSqlDatabase& db);
+
+    //! \brief Global table of every channel's code defaults (schema version 20).
+    static bool createChannelDefaultsTable(QSqlDatabase& db);
+    //! \brief Sparse per-profile table of user-changed channel fields (schema version 20).
+    static bool createProfileChannelOverridesTable(QSqlDatabase& db);
+    //! \brief The pre-v20 per-profile full-copy channels table, under its new name.
+    static bool createChannelsLegacyTable(QSqlDatabase& db);
+    //! \brief The channels view: defaults with each profile's overrides applied.
+    static bool createChannelsView(QSqlDatabase& db);
 
     // Daily summaries table (schema version 6)
     static bool createDailySummariesTable(QSqlDatabase& db);
@@ -234,6 +255,10 @@ private:
 
     // Migration from v18 to v19
     static bool migrateV18ToV19(QSqlDatabase& db);
+
+    //! \brief Migration from v19 to v20: parks the channels table as channels_legacy and
+    //! creates channel_defaults, profile_channel_overrides and the channels view.
+    static bool migrateV19ToV20(QSqlDatabase& db);
 
     static bool createIndexes(QSqlDatabase& db);
     static bool setSchemaVersion(QSqlDatabase& db, int version);
