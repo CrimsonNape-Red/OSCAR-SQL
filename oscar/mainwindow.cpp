@@ -3784,6 +3784,11 @@ void MainWindow::on_actionView_Statistics_triggered()
     ui->tabWidget->setCurrentWidget(ui->statisticsTab);
 }
 
+void MainWindow::on_actionView_Insights_triggered()
+{
+    JumpInsights();     // does nothing while its tab is disabled, as for Statistics
+}
+
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
     Q_UNUSED(index);

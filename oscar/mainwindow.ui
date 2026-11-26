@@ -528,6 +528,7 @@
     <addaction name="actionView_Daily"/>
     <addaction name="actionView_Overview"/>
     <addaction name="actionView_Statistics"/>
+    <addaction name="actionView_Insights"/>
     <addaction name="separator"/>
     <addaction name="action_Fullscreen"/>
     <addaction name="action_Screenshot"/>
@@ -860,6 +861,14 @@
    </property>
    <property name="shortcut">
     <string notr="true">F4</string>
+   </property>
+  </action>
+  <action name="actionView_Insights">
+   <property name="text">
+    <string>View Insights</string>
+   </property>
+   <property name="toolTip">
+    <string>Show Insights view</string>
    </property>
   </action>
   <action name="actionImport_ZEO_Data">

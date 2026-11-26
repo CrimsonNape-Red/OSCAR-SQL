@@ -369,6 +369,7 @@ class MainWindow : public QMainWindow
     void on_actionView_Overview_triggered();
     //! \brief View > View Statistics (F4): brings the Statistics page to the front
     void on_actionView_Statistics_triggered();
+    void on_actionView_Insights_triggered();
 
 
 
