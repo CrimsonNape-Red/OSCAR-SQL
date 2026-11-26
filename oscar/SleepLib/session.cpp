@@ -3296,10 +3296,14 @@ bool Session::StoreSummaryToDatabase()
         // The percentile needs the events; without them it is unknown, not 0.
         if (s_events_loaded) sessionSummaryData.pressure95th = percentile(CPAP_Pressure, 0.95);
     }
-    if (m_wavg.contains(CPAP_LeakTotal)) {
-        sessionSummaryData.leakTotalAvg = m_wavg[CPAP_LeakTotal];
-        if (m_max.contains(CPAP_LeakTotal)) sessionSummaryData.leakTotalMax = m_max[CPAP_LeakTotal];
-        if (s_events_loaded) sessionSummaryData.leakTotal95th = percentile(CPAP_LeakTotal, 0.95);
+    // Despite the column names, the leak statistics are the unintentional leak (CPAP_Leak),
+    // the channel every leak figure in the UI uses and the one daily_summaries stores. Most
+    // devices report no total leak at all, and one that reports only the total gets CPAP_Leak
+    // from calcLeaks() unless the user has turned that off (GitLab #212).
+    if (m_wavg.contains(CPAP_Leak)) {
+        sessionSummaryData.leakTotalAvg = m_wavg[CPAP_Leak];
+        if (m_max.contains(CPAP_Leak)) sessionSummaryData.leakTotalMax = m_max[CPAP_Leak];
+        if (s_events_loaded) sessionSummaryData.leakTotal95th = percentile(CPAP_Leak, 0.95);
     }
     if (m_wavg.contains(OXI_SPO2)) {
         sessionSummaryData.spo2Avg = m_wavg[OXI_SPO2];

@@ -51,9 +51,11 @@ struct SessionSummaryData
     std::optional<double> pressureMax;
     std::optional<double> pressure95th;          // NULL also when events were not loaded
 
-    // Leak statistics. NULL when the session has no leak data.
+    // Leak statistics. Despite the names (leak_total_* columns) these are the
+    // unintentional leak, CPAP_Leak, as in daily_summaries (GitLab #212). NULL when the
+    // session has no CPAP_Leak data, reported or derived.
     std::optional<double> leakTotalAvg;
-    std::optional<double> leakTotal95th;
+    std::optional<double> leakTotal95th;         // NULL also when events were not loaded
     std::optional<double> leakTotalMax;
 
     // Oximetry. NULL when the session has no oximetry data.
@@ -140,6 +142,24 @@ public:
      * \return true if every statement succeeded.
      */
     static bool rebuildFromChannels(QSqlDatabase& db, qint64 machineId);
+
+    /*!
+     * \brief Rewrite the leak columns of a profile's rows from session_channels.
+     *
+     * Rows stored before GitLab #212 took leak_total_avg / _95th / _max from CPAP_LeakTotal,
+     * which left them NULL on every device that reports unintentional leak only. This sets
+     * them from the session's CPAP_Leak row, as Session::StoreSummaryToDatabase() now
+     * writes them: wavg, max, and p95 where the session has a value histogram for the
+     * channel (without one the percentile was never computed and stays NULL). A session
+     * with no CPAP_Leak row gets NULL in all three.
+     *
+     * Used once per profile by Profile::repairSummaryStatistics().
+     *
+     * \param db        Connection to use; the caller owns the transaction.
+     * \param profileId profiles.id whose rows to rewrite.
+     * \return true if the statement succeeded.
+     */
+    static bool refillLeakFromChannels(QSqlDatabase& db, qint64 profileId);
     
     /*!
      * \brief Create or update session summary

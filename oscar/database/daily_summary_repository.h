@@ -51,13 +51,15 @@ struct DailySummaryData {
     std::optional<double> pressureAvg;
     std::optional<double> pressureMin;
     std::optional<double> pressureMax;
-    std::optional<double> pressure95th;
+    std::optional<double> pressure95th;          // always the 95th, whatever the user's preferred percentile
 
-    // Leak statistics. NULL when the day has no leak data.
+    // Leak statistics. Despite the names (leak_total_* columns) these are the
+    // unintentional leak, CPAP_Leak, as in session_summaries (GitLab #212). NULL when the
+    // day has no CPAP_Leak data, reported or derived.
     std::optional<double> leakTotalAvg;
-    std::optional<double> leakTotal95th;
+    std::optional<double> leakTotal95th;         // always the 95th
     std::optional<double> leakTotalMax;
-    std::optional<double> leakUnintentionalAvg;
+    std::optional<double> leakUnintentionalAvg;  // unused, always NULL: leakTotalAvg is the unintentional leak
 
     // Oximetry. NULL when the day has no oximetry data.
     std::optional<double> spo2Avg;

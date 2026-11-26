@@ -55,6 +55,7 @@
 #include "../database/device_time_correction_repository.h"
 #include "../database/respiratory_events_repository.h"
 #include "../database/session_repository.h"
+#include "../database/session_summaries_repository.h"
 #include "loader_plugins/bmc_loader.h"
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -999,6 +1000,16 @@ void Profile::UnloadMachineData()
 
     removeLock();
 }
+//! \brief Whether a day produces a daily_summaries row. Mirrors calculateDailySummaries():
+//!        only CPAP, oximetry, sleep-stage and position days do.
+static bool isSummaryEligible(Day *day)
+{
+    return day && (day->hasEnabledSessions(MT_CPAP) ||
+                   day->hasEnabledSessions(MT_OXIMETER) ||
+                   day->hasEnabledSessions(MT_SLEEPSTAGE) ||
+                   day->hasEnabledSessions(MT_POSITION));
+}
+
 void Profile::LoadMachineData(ProgressDialog *progress)
 {
     addLock();
@@ -1111,20 +1122,14 @@ void Profile::LoadMachineData(ProgressDialog *progress)
             // scan of daylist; the heavier database read and per-day recalculation run
             // only when a gap is actually detected.
             //
-            // "Summary-eligible" mirrors calculateDailySummaries(): only CPAP, oximetry,
-            // sleep-stage and position days ever produce a row. Days with only enabled
-            // Journal (or other non-eligible) sessions are ignored so they cannot make
-            // the count perpetually mismatch and re-trigger this scan on every load.
-            auto isEligible = [](Day *day) -> bool {
-                return day && (day->hasEnabledSessions(MT_CPAP) ||
-                               day->hasEnabledSessions(MT_OXIMETER) ||
-                               day->hasEnabledSessions(MT_SLEEPSTAGE) ||
-                               day->hasEnabledSessions(MT_POSITION));
-            };
-
+            // "Summary-eligible" (isSummaryEligible()) mirrors calculateDailySummaries():
+            // only CPAP, oximetry, sleep-stage and position days ever produce a row. Days
+            // with only enabled Journal (or other non-eligible) sessions are ignored so
+            // they cannot make the count perpetually mismatch and re-trigger this scan on
+            // every load.
             int expected = 0;
             for (auto it = daylist.begin(), end = daylist.end(); it != end; ++it) {
-                if (isEligible(it.value())) expected++;
+                if (isSummaryEligible(it.value())) expected++;
             }
 
             if (expected > existingCount) {
@@ -1139,7 +1144,7 @@ void Profile::LoadMachineData(ProgressDialog *progress)
                 int filled = 0;
                 for (auto it = daylist.begin(), end = daylist.end(); it != end; ++it) {
                     Day *day = it.value();
-                    if (!isEligible(day)) continue;
+                    if (!isSummaryEligible(day)) continue;
                     if (haveSummary.contains(it.key().toString(Qt::ISODate))) continue;
                     if (summaryRepo.calculateAndStoreFromDay(day, profileData.id)) filled++;
                 }
@@ -1160,6 +1165,14 @@ void Profile::LoadMachineData(ProgressDialog *progress)
         if (!(*this)[STR_PREF_BmcSessionEndsRepaired].toBool()
                 && repairBmcSessionEnds(profileData.id, progress)) {
             Set(STR_PREF_BmcSessionEndsRepaired, true);
+        }
+
+        // One-time rewrite of the summary tables' leak and percentile columns, which the
+        // two tables used to fill differently (#212); retried only if it failed. It follows
+        // the BMC repair, which re-saves sessions and so rewrites their summary rows.
+        if (!(*this)[STR_PREF_SummaryStatisticsRepaired].toBool()
+                && repairSummaryStatistics(profileData.id, progress)) {
+            Set(STR_PREF_SummaryStatisticsRepaired, true);
         }
 
         // One-time switch to the rolling SpO2 baseline. A profile with a fixed baseline set keeps
@@ -3101,6 +3114,68 @@ bool Profile::repairRespiratoryEvents(qint64 profileId, ProgressDialog *progress
     qDebug() << "Profile::repairRespiratoryEvents() - rebuilt" << repaired << "sessions,"
              << failed << "failed," << notLoaded << "not loaded";
     return failed == 0 && notLoaded == 0;
+}
+
+/**
+ * @brief Rewrite summary-table columns stored before the two tables were made consistent (#212).
+ *
+ * session_summaries took its leak columns from CPAP_LeakTotal and a 95th percentile, while
+ * daily_summaries took them from CPAP_Leak and a 90th percentile, and averaged a flag
+ * channel into leak_unintentional_avg. Both now store the unintentional leak and the 95th
+ * percentile, and leak_unintentional_avg is unused. Existing rows are brought into line:
+ *  - session_summaries: the leak columns are refilled in SQL from session_channels
+ *    (SessionSummariesRepository::refillLeakFromChannels()); no events are loaded.
+ *  - daily_summaries: every day's row is recalculated from the loaded summaries.
+ *
+ * LoadMachineData() runs it until it succeeds once, then records
+ * STR_PREF_SummaryStatisticsRepaired in the profile preferences. Restoring a backup made
+ * before the fix also restores its preferences without that flag, so the restored rows are
+ * repaired on the next load.
+ *
+ * @param profileId Database ID of the profile
+ * @param progress  Load progress dialog (may be null)
+ * @return true once the rewrite is committed; false to retry on the next load. A day that
+ *         yields no row (no session hours) is not a failure.
+ */
+bool Profile::repairSummaryStatistics(qint64 profileId, ProgressDialog *progress)
+{
+    DatabaseManager &dbm = DatabaseManager::instance();
+    QSqlDatabase db = dbm.database();
+
+    // One transaction for both tables: far faster than committing per day, and a failure
+    // leaves the rows as they were for the retry.
+    const bool ownTransaction = !dbm.inTransaction() && dbm.transaction();
+
+    if (!SessionSummariesRepository::refillLeakFromChannels(db, profileId)) {
+        if (ownTransaction) dbm.rollback();
+        qWarning() << "Profile::repairSummaryStatistics() - session_summaries refill failed; will retry on next load";
+        return false;
+    }
+
+    if (progress) {
+        progress->setMessage(QObject::tr("Calculating Daily Summaries"));
+        progress->setProgressMax(daylist.size());
+        progress->setProgressValue(0);
+    }
+
+    DailySummaryRepository summaryRepo;
+    int rewritten = 0, done = 0;
+    for (auto it = daylist.begin(), end = daylist.end(); it != end; ++it) {
+        Day *day = it.value();
+        if (isSummaryEligible(day) && summaryRepo.calculateAndStoreFromDay(day, profileId)) rewritten++;
+        if (progress && (++done % 50 == 0)) {
+            progress->setProgressValue(done);
+            QApplication::processEvents();
+        }
+    }
+
+    if (ownTransaction && !dbm.commit()) {
+        qWarning() << "Profile::repairSummaryStatistics() - commit failed; will retry on next load";
+        return false;
+    }
+
+    qDebug() << "Profile::repairSummaryStatistics() - rewrote" << rewritten << "daily summaries";
+    return true;
 }
 
 /**

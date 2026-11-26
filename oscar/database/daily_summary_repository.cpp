@@ -20,6 +20,9 @@
 #include <QCryptographicHash>
 
 namespace {
+//! \brief Percentile level of the *_95th columns, as a fraction.
+constexpr EventDataType kSummaryPercentile = 0.95F;
+
 //! \brief Bind an optional metric: SQL NULL when it is absent, the value otherwise.
 template <class T>
 QVariant bindOptional(const std::optional<T> & v)
@@ -345,23 +348,23 @@ DailySummaryData DailySummaryRepository::calculateFromDay(Day* day)
     // is why SQL sums over these columns used to disagree with the stored ahi.
     storeCount(data.allApneaCount,            CPAP_AllApnea);
 
-    // Continuous statistics: present only when the day has the channel.
+    // Continuous statistics: present only when the day has the channel. The percentile is
+    // a fixed 95th, the level session_summaries stores, not the user's preferred one: a
+    // stored value must not go stale when the preference changes (GitLab #212).
     if (day->channelHasData(CPAP_Pressure)) {
         data.pressureAvg  = day->wavg(CPAP_Pressure);
         data.pressureMin  = day->Min(CPAP_Pressure);
         data.pressureMax  = day->Max(CPAP_Pressure);
-        data.pressure95th = day->p90(CPAP_Pressure);
+        data.pressure95th = day->percentile(CPAP_Pressure, kSummaryPercentile);
     }
 
-    // Leak statistics
+    // Leak statistics. Despite the column names these are the unintentional leak
+    // (CPAP_Leak), as in session_summaries. leakUnintentionalAvg is left NULL: it would
+    // only repeat leakTotalAvg, and used to hold the average of a flag channel.
     if (day->channelHasData(CPAP_Leak)) {
         data.leakTotalAvg  = day->wavg(CPAP_Leak);
-        data.leakTotal95th = day->p90(CPAP_Leak);
+        data.leakTotal95th = day->percentile(CPAP_Leak, kSummaryPercentile);
         data.leakTotalMax  = day->Max(CPAP_Leak);
-    }
-
-    if (day->channelHasData(CPAP_LeakFlag)) {
-        data.leakUnintentionalAvg = day->wavg(CPAP_LeakFlag);
     }
 
     // Oximetry statistics

@@ -887,9 +887,9 @@ Re-import is required to repair pre-fix rows; the discontinuity is accepted.
 | pressure_min | REAL | | YES | Min pressure |
 | pressure_max | REAL | | YES | Max pressure |
 | pressure_95th | REAL | | YES | 95th percentile pressure |
-| leak_total_avg | REAL | | YES | Average leak (L/min) |
-| leak_total_95th | REAL | | YES | 95th percentile leak |
-| leak_total_max | REAL | | YES | Max leak |
+| leak_total_avg | REAL | | YES | Average unintentional leak (L/min); see the #212 note under session_summaries |
+| leak_total_95th | REAL | | YES | 95th percentile unintentional leak |
+| leak_total_max | REAL | | YES | Max unintentional leak |
 | spo2_avg | REAL | | YES | Average SpO₂ (%) |
 | spo2_min | REAL | | YES | Min SpO₂ |
 | pulse_avg | REAL | | YES | Average pulse (BPM) |
@@ -897,6 +897,14 @@ Re-import is required to repair pre-fix rows; the discontinuity is accepted.
 | mask_on_hours | REAL | | NO | Mask-on hours |
 | created_at | TEXT | | NO | Creation timestamp |
 | updated_at | TEXT | | NO | Update timestamp |
+
+**Leak and percentile columns (#212).** In both `session_summaries` and `daily_summaries` the
+`leak_total_*` columns hold the *unintentional* leak (channel `Leak`, 0x1108), whether the device
+reports it or OSCAR derives it from total leak; they are NULL when a session has neither. The names
+are historical and will be corrected at the next schema change. Total leak, where a device reports
+it, is in `session_channels` (channel `LeakTotal`, 0x1117). `pressure_95th` and `leak_total_95th`
+are always the 95th percentile, whatever percentile is chosen in Preferences; `session_channels`
+has `median`, `p90` and `p95` for every channel. `daily_summaries.leak_unintentional_avg` is unused.
 
 **Note:** The old `central_count` column is retained in the database for backward compatibility but new code uses `unclassified_count`.
 
@@ -1016,11 +1024,11 @@ Same columns, types and constraints as the pre-v20 `channels` table (listed in s
 | pressure_avg | REAL | | YES | Average pressure (cmH₂O) |
 | pressure_min | REAL | | YES | Min pressure |
 | pressure_max | REAL | | YES | Max pressure |
-| pressure_95th | REAL | | YES | 90th percentile pressure |
-| leak_total_avg | REAL | | YES | Average leak (L/min) |
-| leak_total_95th | REAL | | YES | 90th percentile leak |
-| leak_total_max | REAL | | YES | Max leak |
-| leak_unintentional_avg | REAL | | YES | Average unintentional leak |
+| pressure_95th | REAL | | YES | 95th percentile pressure |
+| leak_total_avg | REAL | | YES | Average unintentional leak (L/min); see the #212 note under session_summaries |
+| leak_total_95th | REAL | | YES | 95th percentile unintentional leak |
+| leak_total_max | REAL | | YES | Max unintentional leak |
+| leak_unintentional_avg | REAL | | YES | Unused, always NULL (leak_total_avg is the unintentional leak) |
 | spo2_avg | REAL | | YES | Average SpO₂ (%) |
 | spo2_min | REAL | | YES | Min SpO₂ |
 | pulse_avg | REAL | | YES | Average pulse (BPM) |

@@ -1572,19 +1572,19 @@ CREATE UNIQUE INDEX idx_graph_layouts_current
 | REAL
 |
 | YES
-| Average leak (L/min)
+| Average unintentional leak (L/min); see the #212 note under session_summaries
 |-
 | leak_total_95th
 | REAL
 |
 | YES
-| 95th percentile leak
+| 95th percentile unintentional leak
 |-
 | leak_total_max
 | REAL
 |
 | YES
-| Max leak
+| Max unintentional leak
 |-
 | spo2_avg
 | REAL
@@ -1628,6 +1628,8 @@ CREATE UNIQUE INDEX idx_graph_layouts_current
 | NO
 | Update timestamp
 |}
+
+'''Leak and percentile columns (#212).''' In both <code>session_summaries</code> and <code>daily_summaries</code> the <code>leak_total_*</code> columns hold the ''unintentional'' leak (channel <code>Leak</code>, 0x1108), whether the device reports it or OSCAR derives it from total leak; they are NULL when a session has neither. The names are historical and will be corrected at the next schema change. Total leak, where a device reports it, is in <code>session_channels</code> (channel <code>LeakTotal</code>, 0x1117). <code>pressure_95th</code> and <code>leak_total_95th</code> are always the 95th percentile, whatever percentile is chosen in Preferences; <code>session_channels</code> has <code>median</code>, <code>p90</code> and <code>p95</code> for every channel. <code>daily_summaries.leak_unintentional_avg</code> is unused.
 
 '''Note:''' The old <code>central_count</code> column is retained in the database for backward compatibility but new code uses <code>unclassified_count</code>.
 
@@ -1976,31 +1978,31 @@ CREATE UNIQUE INDEX idx_graph_layouts_current
 | REAL
 |
 | YES
-| 90th percentile pressure
+| 95th percentile pressure
 |-
 | leak_total_avg
 | REAL
 |
 | YES
-| Average leak (L/min)
+| Average unintentional leak (L/min); see the #212 note under session_summaries
 |-
 | leak_total_95th
 | REAL
 |
 | YES
-| 90th percentile leak
+| 95th percentile unintentional leak
 |-
 | leak_total_max
 | REAL
 |
 | YES
-| Max leak
+| Max unintentional leak
 |-
 | leak_unintentional_avg
 | REAL
 |
 | YES
-| Average unintentional leak
+| Unused, always NULL (leak_total_avg is the unintentional leak)
 |-
 | spo2_avg
 | REAL

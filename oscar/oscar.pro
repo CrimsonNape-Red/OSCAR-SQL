@@ -1035,6 +1035,7 @@ test {
         tests/prismaventtests.cpp \
         tests/prismalinetests.cpp \
         tests/respiratoryeventstests.cpp \
+        tests/summarystatisticstests.cpp \
         tests/bmcsessionendstests.cpp \
         tests/bmcusrsessionstests.cpp \
         tests/bmcpressurewavetests.cpp \
@@ -1097,6 +1098,7 @@ test {
         tests/prismaventtests.h \
         tests/prismalinetests.h \
         tests/respiratoryeventstests.h \
+        tests/summarystatisticstests.h \
         tests/bmcsessionendstests.h \
         tests/bmcusrsessionstests.h \
         tests/bmcpressurewavetests.h \

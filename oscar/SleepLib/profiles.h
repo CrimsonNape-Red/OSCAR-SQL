@@ -119,6 +119,11 @@ class Profile : public Preferences
     //! \return true once the repair is committed; false to retry on the next load
     bool repairBmcSessionEnds(qint64 profileId, ProgressDialog *progress);
 
+    //! \brief Rewrite the leak and percentile columns of session_summaries and daily_summaries
+    //!        stored before the two tables were made consistent (#212)
+    //! \return true once the repair is committed; false to retry on the next load
+    bool repairSummaryStatistics(qint64 profileId, ProgressDialog *progress);
+
     //! \brief Recalculate the SpO2 drop and pulse change flags of every session with oximetry,
     //!        using the current oximetry settings. A recording cut at the day split time is
     //!        recalculated whole. Sessions whose events can't be loaded are left as they are.
@@ -448,6 +453,7 @@ const QString STR_IS_SplitNonCPAPSessions = "SplitNonCPAPSessions";
 // One-time data repairs (set once the repair has completed for the profile)
 const QString STR_PREF_RespiratoryEventsRepaired = "RespiratoryEventsRepaired";  ///< #335
 const QString STR_PREF_BmcSessionEndsRepaired = "BmcSessionEndsRepaired";  ///< #342
+const QString STR_PREF_SummaryStatisticsRepaired = "SummaryStatisticsRepaired";  ///< #212
 const QString STR_PREF_SpO2BaselineMigrated = "SpO2BaselineMigrated";  ///< switched to the rolling baseline
 /// Serial numbers, comma separated, of ResMed devices whose oximetry was imported with missing
 /// readings filled in and still needs rebuilding; absent until the profile has been checked

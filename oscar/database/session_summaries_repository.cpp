@@ -379,11 +379,12 @@ bool SessionSummariesRepository::rebuildFromChannels(QSqlDatabase& db, qint64 ma
            .arg(scopedSessions);
 
     // Continuous statistics: NULL when the session has no row for the source channel
-    // (Pressure 0x110C, LeakTotal 0x1117, OXI_SPO2 0x1801, OXI_Pulse 0x1800).
+    // (Pressure 0x110C, Leak 0x1108, OXI_SPO2 0x1801, OXI_Pulse 0x1800). The leak_total_*
+    // columns hold the unintentional leak, CPAP_Leak (GitLab #212).
     struct StatCols { const char * assignments; int channel; };
     static const StatCols statCols[] = {
         { "pressure_avg = NULL, pressure_min = NULL, pressure_max = NULL, pressure_95th = NULL", 4364 },
-        { "leak_total_avg = NULL, leak_total_95th = NULL, leak_total_max = NULL",                4375 },
+        { "leak_total_avg = NULL, leak_total_95th = NULL, leak_total_max = NULL",                4360 },
         { "spo2_avg = NULL, spo2_min = NULL",                                                    6145 },
         { "pulse_avg = NULL",                                                                    6144 },
     };
@@ -411,6 +412,34 @@ bool SessionSummariesRepository::rebuildFromChannels(QSqlDatabase& db, qint64 ma
             DatabaseManager::instance().checkQueryError("SessionSummariesRepository::rebuildFromChannels", q);
             return false;
         }
+    }
+    return true;
+}
+
+bool SessionSummariesRepository::refillLeakFromChannels(QSqlDatabase& db, qint64 profileId)
+{
+    // CPAP_Leak is channel 0x1108 (4360). A scalar subquery with no matching row yields
+    // NULL, which is the wanted result for a session without the channel. p95 is stored
+    // as 0 when it could not be computed, and 0 is also a genuine leak percentile, so it
+    // is only taken where the channel has a value histogram to compute it from.
+    const QString leakRow =
+        "(SELECT %1 FROM session_channels sc"
+        " WHERE sc.session_id = session_summaries.session_id AND sc.channel_id = 4360%2)";
+    const QString hasHistogram =
+        " AND EXISTS (SELECT 1 FROM session_channel_values v WHERE v.session_channel_id = sc.id)";
+
+    QSqlQuery q(db);
+    q.prepare(QString("UPDATE session_summaries SET"
+                      " leak_total_avg = %1, leak_total_max = %2, leak_total_95th = %3"
+                      " WHERE profile_id = ?")
+              .arg(leakRow.arg("sc.wavg", QString()))
+              .arg(leakRow.arg("sc.max", QString()))
+              .arg(leakRow.arg("sc.p95", hasHistogram)));
+    q.addBindValue(profileId);
+    if (!q.exec()) {
+        qCritical() << "SessionSummariesRepository::refillLeakFromChannels failed:" << q.lastError().text();
+        DatabaseManager::instance().checkQueryError("SessionSummariesRepository::refillLeakFromChannels", q);
+        return false;
     }
     return true;
 }

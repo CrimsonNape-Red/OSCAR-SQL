@@ -9519,3 +9519,55 @@ check and comes before `initializeLogger()`, so a batch run waited on it for eve
   engine changed); 30 launches 200 ms apart and 45 launches 100 ms apart gave no hang
   (before: 4 of 30); an interactive launch with the sentinel set still switches to Software
   and waits on its message box. Not checked: a real import, and the stress test itself.
+
+## 2026-11-25 - Summary tables: day and session rows used different leak channels and percentiles (GitLab #212)
+
+**Files:** `oscar/SleepLib/session.cpp`, `oscar/database/daily_summary_repository.cpp`,
+`oscar/database/session_summaries_repository.cpp`, `oscar/SleepLib/profiles.cpp`,
+`oscar/docs/system_reports.orf`, `oscar/tests/summarystatisticstests.cpp`
+
+**Symptom:** The CSV reports disagreed with each other. The by-Day report's percentile
+columns were the 90th percentile and the by-Session report's the 95th, and the by-Session
+leak columns were empty for most devices.
+
+**Root cause:** The two writers were added two days apart and each hardcoded its own
+choice; nothing in OSCAR reads these columns back, so only the reports showed it.
+
+- `daily_summaries`: `pressure_95th` / `leak_total_95th` from `Day::p90()`, leak from
+  `CPAP_Leak`, and `leak_unintentional_avg` from the average of `CPAP_LeakFlag`, a flag
+  channel one loader writes.
+- `session_summaries`: a 95th percentile, leak from `CPAP_LeakTotal`. Devices that report
+  unintentional leak only (ResMed, BMC and others) have no such channel, so the three leak
+  columns were NULL on all of their sessions.
+
+**Fix:** Both tables store the unintentional leak (`CPAP_Leak`) and a fixed 95th
+percentile. No schema change: the `leak_total_*` column names stay and are documented as
+historical; `leak_unintentional_avg` is left NULL.
+
+- `Session::StoreSummaryToDatabase()` reads `CPAP_Leak`.
+- `DailySummaryRepository::calculateFromDay()` uses `Day::percentile(code, 0.95)`.
+- `SessionSummariesRepository::rebuildFromChannels()` now clears the leak columns by the
+  presence of the Leak row (4360), not the LeakTotal row (4375).
+- Existing rows: `Profile::repairSummaryStatistics()` runs once per profile at load, gated
+  by `STR_PREF_SummaryStatisticsRepaired`. It refills the session leak columns in SQL from
+  `session_channels` (`refillLeakFromChannels()`) and recalculates every daily row, in one
+  transaction.
+- Reports: by-Day headers are `Pressure_95th` / `Leak_95th` again and `Leak_Unint_Avg` is
+  gone. System reports are reloaded only when the OSCAR version changes.
+
+**Non-obvious:**
+- The percentile is fixed at 95, not the user's preferred percentile: a stored value would
+  go stale whenever the preference changed. `session_channels` has `median`, `p90` and
+  `p95` for every channel.
+- `session_channels.p95` is 0 both for "never computed" and for a genuine 0 L/min, which is
+  common on leak. The refill takes it only where the channel has a value histogram
+  (`session_channel_values`), and leaves the column NULL otherwise.
+- A device that reports total leak only gets `CPAP_Leak` from `calcLeaks()`. With
+  "calculate unintentional leaks" turned off it has none, and the leak columns are NULL.
+- The weekly and monthly reports average the nightly 95th percentiles. That is not the
+  95th percentile of the period; it is unchanged.
+- `Day::p90()` has no live caller left (`gStatsLine` is never instantiated).
+- Checked: `SummaryStatisticsTests` (9 tests, each seen failing first), full unit suite
+  (58 suites, 619 passed, 8 skipped), and a read-only dry run of the refill on a database
+  of 14,753 sessions (12,205 rows gain leak values; 1.5 s). Not checked: the repair in a
+  running OSCAR on existing data, a device that reports total leak, and summary-only days.
