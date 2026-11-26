@@ -40,7 +40,9 @@ The size of a block is the difference to the next offset (the last one runs to t
 ### Week data versus day data
 
 * **Week data** (up to 60 usage days) is low resolution: 1 sample/min for pressure and leak, 2 s resolution for events. It always exists.
-* **Day data** (detailed) only covers about 35-36 hours, it exists only if the device stores detailed data (storage settings, see section 8).
+* **Day data** (detailed) only covers about 33-34 hours (4 to 6 records; a short session is a record of its own), it exists only if
+  the device stores detailed data (storage settings, see section 8). When a new night does not fit, the device drops the oldest
+  record whole (section 2).
   It holds flow, pressure, status bits, relative minute volume and events with full resolution.
 * A night that exists as day data replaces the low resolution session created from week data (`new_sessions` / `delete new_sessions.take(ts)`).
 * A night already stored from week data only (for example from a newer card, when cards are imported in reverse order) is replaced
@@ -81,7 +83,19 @@ begins and ends at 12 noon, data from midnight to noon belong to the previous ca
 Session duration = `min(pressure length / 2, flow length / 5)` seconds; the last second is cut.
 If the deleted AMV count (+0x8C) is not 0, the remaining data starts `ceil(count / 5)` seconds later. Only the session start
 moves; the session ID stays the time of the record, so the night still matches its week session (`SessionExists()`,
-`new_sessions`). **Not verified**: the count was 0 on all test cards.
+`new_sessions`). **Not verified**: the counts are never non-zero on the test cards, and when they can be is not known.
+
+What the test cards show instead (32 cards: one from 2020, and 31 cards written every day from 27.10. to 26.11.2026):
+
+* All deleted counts (+0x80 ... +0x93) are 0. The device drops the oldest records whole rather than overwriting the
+  beginning of one.
+* From one daily card to the next (30 changes) the device only dropped records from the start and added new ones at the
+  end; the records it kept were unchanged. The oldest record of each card is byte-identical (flow, status, pressure, AMV,
+  events) to the same record on the previous card.
+* A record is dropped whole even when part of it would fit. The fullest card held 34.3 hours of flow, yet after dropping,
+  16 of the 30 cards held more than 1 hour less, up to 3.4 hours less. The limit lies between 34.3 and 39.4 hours of flow.
+* The day data blocks are not a fixed ring buffer: their size follows the data they hold (the flow block in steps of
+  3072 bytes), so the size of `WM_DATA.TDF` varies from card to card.
 
 ---
 
@@ -317,7 +331,8 @@ The timer must run for more than 20 s, otherwise only overview/compliance data i
 Always switch the device off with the on/off key before pulling the plug, otherwise the therapy data are not stored completely
 (operating manual, "Save energy").
 
-Import soon afterwards: detailed data lasts only about 35 hours, week data about 60 usage days.
+Import soon afterwards: the card holds only about 33-34 hours of detailed data (with nights of 8 hours or more only 4 nights),
+week data about 60 usage days. To keep every night in full detail, import at least every 3 days.
 Cards can be imported in any order: a night that is known only from week data is upgraded when a card with its detailed data is imported.
 
 OSCAR keeps a copy of each card it imports (section 6a), so Rebuild CPAP Data restores the nights imported since. Nights imported

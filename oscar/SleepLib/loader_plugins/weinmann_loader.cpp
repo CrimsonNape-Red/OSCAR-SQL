@@ -1354,7 +1354,8 @@ int WeinmannLoader::OpenCard(const QString &path)
         // When the device overwrites the beginning of the oldest record, it counts the deleted samples, and the
         // remaining data starts ceil(deleted AMV count / 5) s later. Only the data is shifted: the session keeps
         // the time of the record as its ID, so it still matches the week session of that night.
-        // Not verified: the count was 0 on all test cards.
+        // Not verified: on all test cards the counts were 0 and the device dropped the oldest record whole
+        // (WEINMANN_LOADER.md, section 2).
         const quint32 deletedAmv = p[0x8c] | p[0x8d] << 8 | p[0x8e] << 16 | p[0x8f] << 24;
         const int startShift = qCeil(deletedAmv / 5.0);
 
