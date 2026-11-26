@@ -156,6 +156,23 @@ QDataStream & operator<<(QDataStream & out, const RXItem & rx)
 void Statistics::loadRXChanges()
 {
     QString path = p_profile->Get("{" + STR_GEN_DataFolder + "}/RXChanges.cache" );
+
+    // The cache holds mode, relief and pressure as translated text, so one written in
+    // another language is deleted here and rebuilt by updateRXChanges() (GitLab #258).
+    // A profile with no language recorded yet has its cache deleted once: that cache may
+    // have been written before the language was recorded.
+    const QString language = AppSetting->language();
+    if ((*p_profile)[STR_PREF_RxCacheLanguage].toString() != language) {
+        if (QFile::exists(path) && !QFile::remove(path)) {
+            // Not loaded and not recorded, so the next call tries again.
+            qWarning() << "Could not delete" << path << "after a language change";
+            return;
+        }
+        qDebug() << "Deleted" << path << "- written in another language than" << language;
+        p_profile->Set(STR_PREF_RxCacheLanguage, language);
+        return;
+    }
+
     QFile file(path);
     if (!file.open(QFile::ReadOnly)) {
         qDebug() << "Could not open" << path << "for reading, error code" << file.error() << file.errorString();

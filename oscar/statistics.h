@@ -214,6 +214,8 @@ class Statistics : public QObject
     void adjustRange(QDate& start , QDate& last);
 
   protected:
+    /*! \brief Reads RXChanges.cache into rxitems. The cache holds translated text, so one
+        written in a language other than the running one is deleted instead of read */
     void loadRXChanges();
     void saveRXChanges();
     void updateRXChanges();

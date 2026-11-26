@@ -269,6 +269,9 @@ const QString STR_PREF_Language = "Language";
 //! Per-profile flag: true once the profile's channel settings came from the database or a
 //! channels.dat import, so a channels.dat left in its folder is never imported again.
 const QString STR_PREF_ChannelsDatImported = "ChannelsDatImported";
+//! Per-profile: the language RXChanges.cache was written in. The cache holds translated
+//! text, so Statistics::loadRXChanges() deletes it when this is not the running language.
+const QString STR_PREF_RxCacheLanguage = "RxCacheLanguage";
 
 const QString STR_AppName = "OSCAR";
 const QString STR_DeveloperName = "OSCAR_Team";

@@ -9381,3 +9381,33 @@ trailing space, apart from the standard one. Translators were offered program id
   code and no longer in the catalogue.
 - Checked: compiles; the generated `ui_*.h` files set the three style sheets without
   `translate()`. Not checked in a running OSCAR.
+
+---
+
+## 2026-11-25 - Statistics: Device Settings Changes table stayed in the old language (GitLab #258)
+
+**Files:** `oscar/statistics.cpp`, `oscar/statistics.h`, `oscar/SleepLib/common.h`
+
+**Symptom:** After a language change, the Device Settings Changes table on the Statistics
+page kept showing mode names, pressure relief and pressures in the previous language.
+
+**Root cause:** `RXChanges.cache` stores those three columns as text that is already
+translated (`RXItem::mode`, `relief`, `pressure`), and `Statistics::loadRXChanges()` read it
+back whatever language it was written in. The cache was deleted when a device or a day was
+purged and when "combine similar devices" changed, never on a language change.
+
+**Fix:** Each profile records the language its cache was written in (profile preference
+`RxCacheLanguage`). `loadRXChanges()` compares it with the running language; when they
+differ it deletes the cache, records the new language and loads nothing, so
+`updateRXChanges()` rebuilds the table from the days.
+
+**Non-obvious:**
+- The check is made when the cache is read, not in the language dialog: the language is
+  chosen before any profile is open and is an application setting, while the cache is per
+  profile. A profile that was not open at the time is put right when it is next opened.
+- A profile with no recorded language has its cache deleted once, on the first Statistics
+  refresh after this change. That also clears caches that were already in the wrong
+  language.
+- The cache still holds translated text; storing the values and formatting them when the
+  table is drawn (the other direction in the issue) was not done.
+- Checked: compiles. Not checked in a running OSCAR.
