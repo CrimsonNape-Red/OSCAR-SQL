@@ -384,6 +384,14 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->createSDBackups->setChecked(bcd);
     ui->compressSDBackups->setEnabled(bcd);
     ui->compressSDBackups->setChecked(profile->session->compressBackupData());
+    // only the Weinmann loader prunes its card backups so far
+    bool haveWeinmann = false;
+    for (Machine *m : profile->GetMachines(MT_CPAP)) {
+        haveWeinmann = haveWeinmann || (m->loaderName() == STR_MACH_Weinmann);
+    }
+    ui->pruneCardBackups->setVisible(haveWeinmann);
+    ui->pruneCardBackups->setEnabled(bcd);
+    ui->pruneCardBackups->setChecked(profile->session->pruneCardBackups());
     ui->compressSessionData->setChecked(profile->session->compressSessionData());
     ui->ignoreOlderSessionsCheck->setChecked(profile->session->ignoreOlderSessions());
     ui->ignoreOlderSessionsDate->setDate(profile->session->ignoreOlderSessionsDate().date());
@@ -1137,6 +1145,7 @@ bool PreferencesDialog::Save()
     profile->general->setCalculateRDI((ui->eventIndexCombo->currentIndex() == 1));
     profile->session->setBackupCardData(ui->createSDBackups->isChecked());
     profile->session->setCompressBackupData(ui->compressSDBackups->isChecked());
+    profile->session->setPruneCardBackups(ui->pruneCardBackups->isChecked());
     profile->session->setCompressSessionData(ui->compressSessionData->isChecked());
 
     profile->session->setCombineCloseSessions(ui->combineSlider->value());
@@ -1462,6 +1471,7 @@ void PreferencesDialog::on_createSDBackups_toggled(bool checked)
     if (!checked) { ui->compressSDBackups->setChecked(false); }
 
     ui->compressSDBackups->setEnabled(checked);
+    ui->pruneCardBackups->setEnabled(checked);
 }
 
 void PreferencesDialog::on_okButton_clicked()

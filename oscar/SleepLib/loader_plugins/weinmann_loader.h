@@ -78,7 +78,7 @@ const QString weinmann_class_name = STR_MACH_Weinmann;
 /*! \class WeinmannLoader
     \brief Loader for the data of Weinmann SOMNObalance / SOMNObalance e devices
 
-    Reads WM_DATA.TDF (and WM_PARA.TPG) from the SD card.
+    Reads WM_DATA.TDF (and WM_PARA.TPG) from the SD card, and keeps a copy of each card in the backup folder of the device.
     */
 class WeinmannLoader : public CPAPLoader
 {
@@ -86,14 +86,18 @@ class WeinmannLoader : public CPAPLoader
     WeinmannLoader();
     virtual ~WeinmannLoader();
 
-    //! \brief Detect if the given path contains a valid Folder structure
+    //! \brief Detect if the given path holds a card (WM_DATA.TDF), or copies of cards in its immediate subfolders
     virtual bool Detect(const QString &path);
 
     //! \brief Look up the device model and serial number
     virtual MachineInfo PeekInfo(const QString &path);
 
-    //! \brief Scans path for Weinmann data signature, and Loads any new data
+    //! \brief Loads any new data of the card in path, or of every card in its immediate subfolders
+    //! (the backup folder of the device, or cards the user saved), oldest card first
     virtual int Open(const QString &path);
+
+    //! \brief Says which nights a rebuild from the backups of the device cannot restore in full
+    virtual QString rebuildLossWarning(Machine *mach) override;
 
     //! \brief Returns SleepLib database version of this Weinmann loader
     virtual int Version() { return weinmann_data_version; }
@@ -136,6 +140,19 @@ class WeinmannLoader : public CPAPLoader
 
     //! \brief updates the progress bar and keeps the user interface responsive
     void reportProgress(int value);
+
+    //! \brief imports the card in path
+    int OpenCard(const QString &path);
+
+    //! \brief copies the card in path into the backup folder of the device, so Rebuild CPAP Data can import it again.
+    //! Returns the folder of the copy, or an empty string if no copy was made.
+    QString BackupCard(const QString &path, Machine *mach);
+
+    //! \brief removes the backups whose nights the other backups hold as well
+    void PruneBackups(Machine *mach);
+
+    //! \brief progress of the cards imported before the current one (Open() of a folder of cards)
+    int m_progressOffset = 0;
 };
 
 

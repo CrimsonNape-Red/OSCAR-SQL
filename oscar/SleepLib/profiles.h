@@ -442,6 +442,7 @@ const QString STR_IS_CombineCloseSessions = "CombineCloserSessions";
 const QString STR_IS_IgnoreShorterSessions = "IgnoreShorterSessions";
 const QString STR_IS_BackupCardData = "BackupCardData";
 const QString STR_IS_CompressBackupData = "CompressBackupData";
+const QString STR_IS_PruneCardBackups = "PruneCardBackups";
 const QString STR_IS_CompressSessionData = "CompressSessionData";
 const QString STR_IS_IgnoreOlderSessions = "IgnoreOlderSessions";
 const QString STR_IS_IgnoreOlderSessionsDate = "IgnoreOlderSessionsDate";
@@ -910,6 +911,7 @@ class SessionSettings : public PrefSettings
         m_ignoreShortSessions = initPref(STR_IS_IgnoreShorterSessions, 5.0).toDouble();
         m_backupCardData = initPref(STR_IS_BackupCardData, true).toBool();
         m_compressBackupData = initPref(STR_IS_CompressBackupData, false).toBool();
+        m_pruneCardBackups = initPref(STR_IS_PruneCardBackups, true).toBool();
         m_compressSessionData = initPref(STR_IS_CompressSessionData, false).toBool();
         m_ignoreOlderSessions = initPref(STR_IS_IgnoreOlderSessions, false).toBool();
         m_ignoreOlderSessionsDate=initPref(STR_IS_IgnoreOlderSessionsDate, QDateTime(QDate::currentDate().addYears(-1), daySplitTime()) ).toDateTime();
@@ -926,6 +928,8 @@ class SessionSettings : public PrefSettings
     inline bool compressSessionData() const { return m_compressSessionData; }
     inline bool compressBackupData() const { return m_compressBackupData; }
     inline bool backupCardData() const { return m_backupCardData; }
+    //! \brief True if card backups that the other backups make redundant are removed (only the Weinmann loader so far).
+    inline bool pruneCardBackups() const { return m_pruneCardBackups; }
     inline bool ignoreOlderSessions() const { return m_ignoreOlderSessions; }
     inline QDateTime ignoreOlderSessionsDate() const { return m_ignoreOlderSessionsDate; }
     inline bool lockSummarySessions() const { return m_lockSummarySessions; }
@@ -941,6 +945,7 @@ class SessionSettings : public PrefSettings
     void setIgnoreShortSessions(double val) { setPref(STR_IS_IgnoreShorterSessions, m_ignoreShortSessions=val); }
     void setBackupCardData(bool b) { setPref(STR_IS_BackupCardData, m_backupCardData=b); }
     void setCompressBackupData(bool b) { setPref(STR_IS_CompressBackupData, m_compressBackupData=b); }
+    void setPruneCardBackups(bool b) { setPref(STR_IS_PruneCardBackups, m_pruneCardBackups=b); }
     void setCompressSessionData(bool b) { setPref(STR_IS_CompressSessionData, m_compressSessionData=b); }
     void setIgnoreOlderSessions(bool b) { setPref(STR_IS_IgnoreOlderSessions, m_ignoreOlderSessions=b); }
     void setIgnoreOlderSessionsDate(QDate date) { setPref(STR_IS_IgnoreOlderSessionsDate, m_ignoreOlderSessionsDate=QDateTime(date, daySplitTime())); }
@@ -957,6 +962,7 @@ class SessionSettings : public PrefSettings
         m_ignoreShortSessions = getPref(STR_IS_IgnoreShorterSessions).toDouble();
         m_backupCardData = getPref(STR_IS_BackupCardData).toBool();
         m_compressBackupData = getPref(STR_IS_CompressBackupData).toBool();
+        m_pruneCardBackups = getPref(STR_IS_PruneCardBackups).toBool();
         m_compressSessionData = getPref(STR_IS_CompressSessionData).toBool();
         m_ignoreOlderSessions = getPref(STR_IS_IgnoreOlderSessions).toBool();
         m_ignoreOlderSessionsDate = getPref(STR_IS_IgnoreOlderSessionsDate).toDateTime();
@@ -969,7 +975,7 @@ class SessionSettings : public PrefSettings
     QTime m_daySplitTime;
     QDateTime m_ignoreOlderSessionsDate;
     bool m_preloadSummaries, m_backupCardData, m_compressBackupData, m_compressSessionData, m_ignoreOlderSessions, m_lockSummarySessions;
-    bool m_warnOnUntestedMachine, m_warnOnUnexpectedData, m_splitNonCPAPSessions;
+    bool m_warnOnUntestedMachine, m_warnOnUnexpectedData, m_splitNonCPAPSessions, m_pruneCardBackups;
     double m_combineCloseSessions, m_ignoreShortSessions;
 };
 

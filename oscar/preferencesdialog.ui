@@ -480,7 +480,7 @@
                  <property name="verticalSpacing">
                   <number>4</number>
                  </property>
-                 <item row="5" column="0">
+                 <item row="6" column="0">
                   <widget class="QLabel" name="label_41">
                    <property name="font">
                     <font>
@@ -496,6 +496,19 @@
                   </widget>
                  </item>
                  <item row="3" column="0">
+                  <widget class="QCheckBox" name="pruneCardBackups">
+                   <property name="toolTip">
+                    <string>OSCAR keeps a copy of each Weinmann card it imports, about 1.6 MB a day.
+A copy is removed when the other copies hold all of its nights,
+so Rebuild CPAP Data still restores the same nights.
+Turn this off to keep every card.</string>
+                   </property>
+                   <property name="text">
+                    <string>Remove Weinmann card backups that other backups make redundant</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
                   <widget class="QCheckBox" name="compressSDBackups">
                    <property name="toolTip">
                     <string>Compress ResMed (EDF) backups to save disk space.
@@ -525,7 +538,7 @@ To use it with ResScan will require the .gz files to be uncompressed first..</st
                    </property>
                   </widget>
                  </item>
-                 <item row="4" column="0">
+                 <item row="5" column="0">
                   <widget class="QCheckBox" name="compressSessionData">
                    <property name="toolTip">
                     <string>This makes OSCAR's data take around half as much space.
@@ -553,7 +566,7 @@ OSCAR can keep a copy of this data if you ever need to reinstall.
                    </property>
                   </widget>
                  </item>
-                 <item row="6" column="0">
+                 <item row="7" column="0">
                   <layout class="QHBoxLayout" name="horizontalLayout_18">
                    <property name="leftMargin">
                     <number>0</number>

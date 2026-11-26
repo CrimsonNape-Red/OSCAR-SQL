@@ -9,7 +9,8 @@ WEINMANNsupport (the manufacturer's Windows software) using real cards.
 
 ## 1. Card layout
 
-The loader needs one file, `WM_DATA.TDF`, in the root of the SD card (`Detect()` only checks that it exists).
+The loader needs one file, `WM_DATA.TDF`, in the root of the SD card (`Detect()` checks that it exists). It also accepts a folder
+whose immediate subfolders each hold a card: the backup folder of the device, or cards the user saved (section 6a).
 The settings file `WM_PARA.TPG` has the same XML settings block as `WM_DATA.TDF` at `DeviceConfigOffset`.
 
 `WM_DATA.TDF` = **XML index** (`<desc>...</desc>`, ISO-8859-1, one `<par name=".." val=".."/>` per line) followed directly by **binary blocks**.
@@ -233,10 +234,57 @@ All records of the real test cards pass these checks.
 
 ---
 
+## 6a. Card backups and rebuild
+
+The card only holds the last 60 days (detailed data: about 5 nights), so `BackupCard()` copies each imported card into the
+backup folder of the device, `Backup/<yyyyMMdd_HHmmss>/`, named after the time the device wrote the card (`DEVDA00`/`DEVTM00`,
+else the file time). Only the files of the device (`WM_*`: `WM_DATA.TDF`, `WM_PARA.TPG`, `WM_DIARY.CSV`) are copied,
+`WM_DATA.TDF` last and under a temporary name, so a folder that holds it is complete.
+
+* No copy is made when backups are switched off in the preferences (`backupCardData()`), when the card is imported from inside
+  the backup folder (rebuild), or when the folder of that time already holds an identical `WM_DATA.TDF` (the same card imported
+  again). A different card with the same time gets `_2`, `_3`, ...
+* The copy is made before the import: a card with nothing new for the database can still hold nights a rebuild needs.
+* `Open()` of a folder without `WM_DATA.TDF` imports each immediate subfolder that holds one, oldest card first (by the time the
+  card was written). Rebuild CPAP Data and an upgrade of `weinmann_data_version` open the backup folder this way; users can import
+  a folder of saved cards in one go. `Detect()` and `PeekInfo()` (newest card) accept such a folder too.
+* Pruning (`PruneBackups()`, after each import that made a copy, unless switched off in the preferences: "Remove Weinmann card
+  backups that other backups make redundant", `PruneCardBackups`, on by default, shown only in profiles with a Weinmann device):
+  a backup is removed when each of its nights is also in another
+  kept backup, at least as complete and with the same settings. Week days are compared by the start of their first session
+  (number of sessions, total length), detailed nights by the start of the day record (first and last second of the data, so a
+  night whose beginning the device overwrote never replaces the complete one), settings by the whole settings block except
+  `DEVDA00`, `DEVTM00`, `USETM00` and `CRC__00`, which change with every card. Records that `Open()` skips as damaged do not
+  count, a backup that cannot be read is never removed and covers nothing, and only folders named by `BackupCard()` are removed.
+  Backups are checked oldest first, each against all others still kept, so the nights a rebuild restores stay the same.
+* Before Rebuild CPAP Data purges the device, `rebuildLossWarning()` lists the nights the backups cannot restore: sessions in
+  the database that no backup holds (imported before card backups existed, or while they were switched off), and detailed
+  sessions that a backup holds only as week data. Matched by session id, which is the start time of the day record or of the
+  week session, as `Open()` creates them. When the sessions are not loaded yet (upgrade of the data version) it says from which
+  night on the backup holds data.
+* Size: a card is about 1.6 MB. With an import every morning about every fourth card stays (a card holds the detailed data of
+  about 4 nights), about 150 MB a year instead of 600 MB.
+* After a rebuild from pruned backups a night can come from a later card than at its first import. Data and settings are the
+  same; only the counters of the device stored with each session (`WM_UsedTime`, `WM_TherapyTime`, `WM_HumidifierTime`: totals
+  at the time the card was written) can be higher.
+* Tested with 8 real cards (24.10. to 22.11.2026): imported one by one, as one folder, and rebuilt from the backup, the databases
+  had the same sessions, settings, channels and event lists. Synthetic cards (the same nights written twice, matching settings,
+  a truncated first night) were pruned as expected, and a rebuild from the pruned backup differed only in those counters.
+  A profile imported mostly without backups got a warning of 27 missing and 19 reduced nights; a rebuild lost and reduced
+  exactly those nights.
+* Tested with 31 daily cards (27.10. to 26.11.2026), imported one by one: 10 backups stayed (17 MB instead of 52 MB), about
+  every fourth card, and the card of 28.10. because the soft start setting changed after it. Importing the folder of all 31
+  cards at once kept the same 10 backups and gave the same database. A rebuild from the 10 backups gave the same sessions,
+  data, events and settings; only those counters differed, on 23 sessions.
+
+---
+
 ## 7. Known gaps / ideas
 
-* The patch touches `daily.cpp` (the graph for `WM_rRMV`); everything else is in the loader.
-* Cancel discards the whole import (nothing is saved, no stored session is replaced), so the import can simply be repeated.
+* Outside the loader files: `daily.cpp` (the graph for `WM_rRMV`) and the preference for pruning the card backups
+  (`profiles.h`, `preferencesdialog.cpp`/`.ui`, `database/preferences_repository.cpp`).
+* Cancel discards the import of the current card (nothing of it is saved, no stored session is replaced), so the import can simply
+  be repeated. In a folder of cards (section 6a) the cards before it stay imported.
 * `weinmann_data_version` stays at 3 (see the header of this note). Users with data imported by the old loader can delete the old device (serial `141819`) by hand.
 * Mask open events (96/97) are not imported (no OSCAR channel).
 * Codes 0x0B / 0x0C as RERA are taken from Weinmann's table, not verified with real data.
@@ -272,6 +320,11 @@ Always switch the device off with the on/off key before pulling the plug, otherw
 Import soon afterwards: detailed data lasts only about 35 hours, week data about 60 usage days.
 Cards can be imported in any order: a night that is known only from week data is upgraded when a card with its detailed data is imported.
 
+OSCAR keeps a copy of each card it imports (section 6a), so Rebuild CPAP Data restores the nights imported since. Nights imported
+before card backups existed are not in the backup, and Rebuild CPAP Data lists them before it deletes anything. Import saved
+copies of older cards once to add them (each card in its own folder; selecting the folder that holds these folders imports all
+of them).
+
 ---
 
 ## 9. Testing
@@ -280,3 +333,5 @@ Cards can be imported in any order: a night that is known only from week data is
 * Check the raw event codes of a new card for unknown codes.
 * Syntax check without a full build: `g++ -std=c++17 -fPIC -fsyntax-only -Wall -Wextra` with the Qt6 include paths.
 * After changing data that was imported before, increment `weinmann_data_version`.
+* Backups: import cards one by one, as one folder, and the backup folder into a new profile (`--import Weinmann <folder>`), then
+  compare the databases (sessions, settings, channels, event lists).

@@ -459,7 +459,7 @@ bool PreferencesRepository::saveSessionSettings(qint64 profileId, SessionSetting
         "IgnoreShorterSessions", "BackupCardData", "CompressBackupData",
         "CompressSessionData", "IgnoreOlderSessions", "IgnoreOlderSessionsDate",
         "LockSummarySessions", "WarnOnUntestedMachine", "WarnOnUnexpectedData",
-        "SplitNonCPAPSessions"
+        "SplitNonCPAPSessions", "PruneCardBackups"
     };
     
     for (const QString& key : sessionKeys) {

@@ -9,14 +9,22 @@
  * for more details. */
 
 #include <QCoreApplication>
+#include <QDateTime>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomNode>
+#include <QLocale>
+#include <QRegularExpression>
+#include <QSet>
 #include <QtMath>
+#include <algorithm>
+#include <functional>
 #include <cmath>
 
+#include "SleepLib/day.h"
 #include "SleepLib/session.h"
 #include "weinmann_loader.h"
 
@@ -139,7 +147,7 @@ static QByteArray wmReadXmlBlock(QFile &f)
 
 void WeinmannLoader::reportProgress(int value)
 {
-    emit setProgressValue(value);
+    emit setProgressValue(m_progressOffset + value);
     QCoreApplication::processEvents();
 }
 
@@ -163,6 +171,21 @@ ChannelID WeinmannLoader::PresReliefMode() { return WM_SoftPAPLock; }
 ChannelID WeinmannLoader::PresReliefLevel() { return WM_SoftPAPLevel; }
 
 
+// The immediate subfolders of path that hold a card (WM_DATA.TDF): the backup folder of a device (see
+// BackupCard()) or a folder of cards the user saved.
+static QStringList wmCardFolders(const QString &path)
+{
+    QStringList folders;
+    const QDir dir(path);
+    for (const QString &sub : dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+        const QString folder = dir.absoluteFilePath(sub);
+        if (QFileInfo(folder + "/WM_DATA.TDF").isFile()) {
+            folders.append(folder);
+        }
+    }
+    return folders;
+}
+
 bool WeinmannLoader::Detect(const QString &givenpath)
 {
     QDir dir(givenpath);
@@ -171,12 +194,13 @@ bool WeinmannLoader::Detect(const QString &givenpath)
         return false;
     }
 
-    // Check for the settings file inside the .. folder
-    if (!dir.exists("WM_DATA.TDF")) {
-        return false;
+    // the card itself
+    if (dir.exists("WM_DATA.TDF")) {
+        return true;
     }
 
-    return true;
+    // or one card per subfolder: Rebuild CPAP Data opens the backup folder of the device
+    return !wmCardFolders(givenpath).isEmpty();
 }
 
 
@@ -224,7 +248,7 @@ static bool wmIndexValid(const QHash<QString, int> &index, qint64 fileSize)
     return (dayCount >= 0) && (hasDayData ? (dayCount * 0xd6 <= index["TID_Flow_Offset"] - index["DayComplianceOffset"]) : (dayCount == 0));
 }
 
-int WeinmannLoader::ParseIndex(QFile &wmdata)
+static int wmParseIndex(QFile &wmdata, QHash<QString, int> &index)
 {
     index.clear();
 
@@ -249,9 +273,14 @@ int WeinmannLoader::ParseIndex(QFile &wmdata)
     return index.size();
 }
 
-int WeinmannLoader::ParseSettings(QFile &wmdata)
+int WeinmannLoader::ParseIndex(QFile &wmdata)
 {
-    msettings.clear();
+    return wmParseIndex(wmdata, index);
+}
+
+static int wmParseSettings(QFile &wmdata, QHash<QString, QString> &settings)
+{
+    settings.clear();
 
     QDomDocument settings_xml("weinmann");
     if (!settings_xml.setContent(wmReadXmlBlock(wmdata))) {
@@ -263,11 +292,16 @@ int WeinmannLoader::ParseSettings(QFile &wmdata)
     while (!n.isNull()) {
         QDomElement e = n.toElement();
         if (!e.isNull()) {
-            msettings[e.attribute("name")] = e.attribute("val");
+            settings[e.attribute("name")] = e.attribute("val");
         }
         n = n.nextSibling();
     }
-    return msettings.size();
+    return settings.size();
+}
+
+int WeinmannLoader::ParseSettings(QFile &wmdata)
+{
+    return wmParseSettings(wmdata, msettings);
 }
 
 
@@ -280,11 +314,227 @@ const QString AMVOffset = "TID_AMV_Offset";
 const QString EventsOffset = "TID_Events_Offset";
 
 
+//////////////////////////////////////////////////////////////////////
+// Card backups, see BackupCard() and PruneBackups()
+//////////////////////////////////////////////////////////////////////
+
+// Reads the index and the settings block of an open WM_DATA.TDF.
+static bool wmReadHeader(QFile &wmdata, QHash<QString, int> &index, QHash<QString, QString> &settings)
+{
+    return (wmParseIndex(wmdata, index) > 0) && wmIndexValid(index, wmdata.size()) && wmdata.seek(index["DeviceConfigOffset"]) &&
+           (wmParseSettings(wmdata, settings) > 0);
+}
+
+// The time the device wrote the card (DEVDA00/DEVTM00 of the settings block), else the time of the file.
+static QDateTime wmCardWritten(const QHash<QString, QString> &settings, const QString &file)
+{
+    const QDate date = QDate::fromString(settings.value("DEVDA00"), "dd.MM.yyyy");
+    const QTime time = QTime::fromString(settings.value("DEVTM00"), "HH:mm:ss");
+    if (date.isValid() && time.isValid()) {
+        return QDateTime(date, time);
+    }
+    return QFileInfo(file).lastModified();
+}
+
+// The card folders, oldest card first.
+static QStringList wmOldestFirst(const QStringList &folders)
+{
+    QList<QPair<QDateTime, QString>> cards;
+    for (const QString &folder : folders) {
+        QFile wmdata(folder + "/WM_DATA.TDF");
+        QHash<QString, int> index;
+        QHash<QString, QString> settings;
+        if (wmdata.open(QFile::ReadOnly)) {
+            wmReadHeader(wmdata, index, settings);
+        }
+        cards.append(qMakePair(wmCardWritten(settings, wmdata.fileName()), folder));
+    }
+    std::sort(cards.begin(), cards.end());
+
+    QStringList sorted;
+    for (const auto &card : cards) {
+        sorted.append(card.second);
+    }
+    return sorted;
+}
+
+// True if path is root or inside it.
+static bool wmIsInside(const QString &path, const QString &root)
+{
+    const QString p = QFileInfo(path).canonicalFilePath();
+    const QString r = QFileInfo(root).canonicalFilePath();
+    if (p.isEmpty() || r.isEmpty()) {
+        return false;
+    }
+#ifdef Q_OS_WIN
+    const Qt::CaseSensitivity cs = Qt::CaseInsensitive;
+#else
+    const Qt::CaseSensitivity cs = Qt::CaseSensitive;
+#endif
+    return (p.compare(r, cs) == 0) || p.startsWith(r + "/", cs);
+}
+
+static bool wmSameContent(const QString &a, const QString &b)
+{
+    QFile fa(a), fb(b);
+    if (!fa.open(QFile::ReadOnly) || !fb.open(QFile::ReadOnly) || (fa.size() != fb.size())) {
+        return false;
+    }
+    return fa.readAll() == fb.readAll();
+}
+
+// The name BackupCard() gives a copy: the time the card was written, yyyyMMdd_HHmmss, with _2, _3 ... for
+// different cards of the same time. PruneBackups() only removes folders with such a name.
+static bool wmIsBackupName(const QString &name)
+{
+    static const QRegularExpression re("^\\d{8}_\\d{6}(_\\d+)?$");
+    return re.match(name).hasMatch();
+}
+
+static quint32 wmLe32(const unsigned char *p)
+{
+    return p[0] | p[1] << 8 | p[2] << 16 | quint32(p[3]) << 24;
+}
+
+// What a card can restore: the days of its week data and its detailed nights, keyed and checked as Open() reads
+// them, and the settings that PopulateSettings() gives their sessions.
+struct WmCardNights {
+    QString settings;                               // the settings block without the values that change with every card
+    QHash<qint64, QPair<int, qint64>> week;         // start of the first session of a day -> (sessions, total length in s)
+    QSet<qint64> weekSessions;                      // the sessions Open() creates from the week data (session id = start)
+    QHash<qint64, QPair<qint64, qint64>> detailed;  // start of a day record (session id) -> (first, last second of its data)
+};
+
+static bool wmReadCardNights(const QString &folder, WmCardNights &nights)
+{
+    QFile wmdata(folder + "/WM_DATA.TDF");
+    QHash<QString, int> index;
+    QHash<QString, QString> settings;
+    if (!wmdata.open(QFile::ReadOnly) || !wmReadHeader(wmdata, index, settings)) {
+        return false;
+    }
+    const qint64 fileSize = wmdata.size();
+
+    // the time of writing, the operating hours and the checksum change with every card
+    QStringList keys = settings.keys();
+    keys.sort();
+    for (const QString &key : keys) {
+        if ((key != "DEVDA00") && (key != "DEVTM00") && (key != "USETM00") && (key != "CRC__00")) {
+            nights.settings += key + "=" + settings.value(key) + "\n";
+        }
+    }
+
+    // week data: a record per day, its sessions in the I/O records
+    const int weekCount = index["WeekComplianceCount"];
+    const int compStart = index[CompOffset];
+    const int ioStart = index["WCD_IO_Offset"];
+    const qint64 ioSize = ((compStart == 0) || (index[DayComplianceCount] == 0)) ? (fileSize - ioStart) : (compStart - ioStart);
+    const quint64 pinSize = index["WCD_Pex_Offset"] - index["WCD_Pin_Offset"];
+    const quint64 pexSize = index["WCD_Snore_Offset"] - index["WCD_Pex_Offset"];
+    const quint64 lfSize = index["WCD_Events_Offset"] - index["WCD_Lf_Offset"];
+    const quint64 evtSize = index["WCD_IO_Offset"] - index["WCD_Events_Offset"];
+
+    wmdata.seek(index["WeekComplianceOffset"]);
+    const QByteArray week = wmdata.read(qint64(weekCount) * 0x84);
+    wmdata.seek(ioStart);
+    const QByteArray io = wmdata.read(ioSize);
+
+    quint64 pinOffset = 0, pexOffset = 0, lfOffset = 0, evtOffset = 0;
+    for (int c = 0; (c + 1) * 0x84 <= week.size(); c++) {
+        const unsigned char *p = (const unsigned char *)week.constData() + c * 0x84;
+        const int sessions = p[68];
+        const quint32 pinLength = p[102] | p[103] << 8;
+        const quint32 pexLength = p[104] | p[105] << 8;
+        const quint32 lfLength = p[108] | p[109] << 8;
+        const quint32 evtLength = p[110] | p[111] << 8;
+        // as Open(): the rest of the week data is ignored after a damaged record
+        if ((sessions > 30) || (pinOffset + pinLength > pinSize) || (pexOffset + pexLength > pexSize) || (lfOffset + lfLength > lfSize) ||
+            (evtOffset + evtLength * 6 > evtSize) || (quint64(c + 1) * 0xb4 > quint64(io.size()))) {
+            break;
+        }
+        QDate date(QString::asprintf("%02i%02i", p[0], p[1]).toInt(), p[2], p[3]);
+        bool dcdone = false;
+        if (p[5] < 12) {
+            date = date.addDays(1);
+            dcdone = true;
+        }
+        const qint64 ts = QDateTime(date, QTime(p[5], p[6], p[7])).toSecsSinceEpoch();
+
+        // the sessions as Open() creates them
+        const unsigned char *s = (const unsigned char *)io.constData() + c * 0xb4;
+        int created = 0;
+        quint32 steps = 0;
+        qint64 length = 0;
+        for (int i = 0; i < sessions; i++, s += 6) {
+            const quint32 dur = 2 * (s[4] | s[5] << 8);
+            if (!dcdone && (s[1] < 12)) {
+                date = date.addDays(1);
+                dcdone = true;
+            }
+            if (steps + dur / 60 > qMin(qMin(pinLength, pexLength), lfLength)) {
+                break;
+            }
+            nights.weekSessions.insert(QDateTime(date, QTime(s[1], s[2], s[3])).toSecsSinceEpoch());
+            steps += dur / 60;
+            length += dur;
+            created++;
+        }
+        if (created > 0) {
+            nights.week[ts] = qMakePair(created, length);
+        }
+        pinOffset += pinLength;
+        pexOffset += pexLength;
+        lfOffset += lfLength;
+        evtOffset += evtLength * 6;
+    }
+
+    // day data (detailed)
+    const int dayCount = index[DayComplianceCount];
+    if (dayCount > 0) {
+        const quint64 flowSize = index[StatusOffset] - index[FlowOffset];
+        const quint64 stSize = index[PresOffset] - index[StatusOffset];
+        const quint64 prSize = index[AMVOffset] - index[PresOffset];
+        const quint64 amvSize = index[EventsOffset] - index[AMVOffset];
+        const quint64 evSize = fileSize - index[EventsOffset];
+
+        wmdata.seek(compStart);
+        const QByteArray comp = wmdata.read(qint64(dayCount) * 0xd6);
+        for (int c = 0; (c + 1) * 0xd6 <= comp.size(); c++) {
+            const unsigned char *p = (const unsigned char *)comp.constData() + c * 0xd6;
+            const QDateTime date(QDate(QString::asprintf("%02i%02i", p[0], p[1]).toInt(), p[2], p[3]), QTime(p[5], p[6], p[7]));
+            const quint32 fs = wmLe32(p + 8), fl = wmLe32(p + 0x44);
+            const quint32 ss = wmLe32(p + 12), sl = wmLe32(p + 0x48);
+            const quint32 ps = wmLe32(p + 16), pl = wmLe32(p + 0x4c);
+            const quint32 as = wmLe32(p + 20), al = wmLe32(p + 0x50);
+            const quint32 es = wmLe32(p + 24), er = wmLe32(p + 0x54);
+            // as Open(): a damaged record is skipped
+            if (!date.isValid() || (quint64(fs) + fl > flowSize) || (quint64(ss) + sl > stSize) || (quint64(ps) + pl > prSize) ||
+                (quint64(as) + al > amvSize) || (quint64(es) + quint64(er) * 6 > evSize) || (qMin(pl / 2, fl / 5) < 2)) {
+                continue;
+            }
+            const qint64 ts = date.toSecsSinceEpoch();
+            const qint64 first = ts + qCeil(wmLe32(p + 0x8c) / 5.0);
+            nights.detailed[ts] = qMakePair(first, first + qint64(qMin(pl / 2, fl / 5)) - 1);
+        }
+    }
+    return true;
+}
+
+
 MachineInfo WeinmannLoader::PeekInfo(const QString &path)
 {
     //peek into WM_PARA.TPG
     QString tpath = path;
     tpath.replace("\\", "/");
+
+    if (!QFileInfo::exists(tpath + "/WM_PARA.TPG") && !QFileInfo::exists(tpath + "/WM_DATA.TDF")) {
+        // a folder of cards (see Open()): the newest card describes the device
+        const QStringList cards = wmOldestFirst(wmCardFolders(tpath));
+        if (cards.isEmpty()) {
+            return MachineInfo();
+        }
+        tpath = cards.last();
+    }
 
     QFile wmdata(tpath + "/WM_PARA.TPG");
     if (!wmdata.open(QFile::ReadOnly)) {
@@ -674,13 +924,43 @@ int WeinmannLoader::Open(const QString &dirpath)
     QString path(dirpath);
     path = path.replace("\\", "/");
 
+    m_progressOffset = 0;
+    if (QFileInfo::exists(path + "/WM_DATA.TDF")) {
+        emit setProgressMax(100);
+        return OpenCard(path);
+    }
 
+    // One card per subfolder: the backup folder of the device (Rebuild CPAP Data) or cards the user saved.
+    // Oldest card first, as if each had been imported when it was written.
+    const QStringList cards = wmOldestFirst(wmCardFolders(path));
+    if (cards.isEmpty()) {
+        return -1;
+    }
+    emit setProgressMax(100 * cards.size());
+
+    int imported = 0;
+    bool opened = false;
+    for (int i = 0; (i < cards.size()) && !isAborted(); i++) {
+        m_progressOffset = 100 * i;
+        const int count = OpenCard(cards.at(i));
+        if (count < 0) {
+            qWarning() << "WMLoader: could not import the card in" << cards.at(i);
+            continue;
+        }
+        opened = true;
+        imported += count;
+    }
+    m_progressOffset = 0;
+    return opened ? imported : -1;
+}
+
+int WeinmannLoader::OpenCard(const QString &path)
+{
     QFile wmdata(path + "/WM_DATA.TDF");
     if (!wmdata.open(QFile::ReadOnly)) {
         return -1;
     }
 
-    emit setProgressMax(100);
     reportProgress(0);
 
     if (ParseIndex(wmdata) <= 0)
@@ -709,6 +989,9 @@ int WeinmannLoader::Open(const QString &dirpath)
     if (!mach) {
         return -1;
     }
+
+    // Before the import: a card that holds nothing new for the database can still be needed by a rebuild.
+    const QString backup = BackupCard(path, mach);
 
     qint64 ignoreolder = p_profile->session->ignoreOlderSessionsDate().toSecsSinceEpoch();
     bool ignoreold = p_profile->session->ignoreOlderSessions();
@@ -1425,11 +1708,214 @@ int WeinmannLoader::Open(const QString &dirpath)
     const int imported = new_sessions.size();
     finishAddingSessions();
     mach->Save();
+    if (!backup.isEmpty() && p_profile->session->pruneCardBackups()) {
+        PruneBackups(mach);
+    }
     reportProgress(100);
 
     compinfo.clear();
 
     return imported;
+}
+
+// The card only holds the last 60 days (detailed data: about 5 nights), so a copy of each card is kept in
+// Backup/<time the card was written>/ of the device. Rebuild CPAP Data (and an upgrade of weinmann_data_version)
+// imports these copies again, see Open(). Only the files of the device (WM_*) are copied.
+QString WeinmannLoader::BackupCard(const QString &path, Machine *mach)
+{
+    const QString backupRoot = mach->getBackupPath();
+    if (!p_profile->session->backupCardData() || wmIsInside(path, backupRoot)) {
+        return QString(); // switched off in the preferences, or a rebuild, which imports the backup itself
+    }
+
+    const QString source = path + "/WM_DATA.TDF";
+    QDateTime written = wmCardWritten(msettings, source);
+    if (!written.isValid()) {
+        written = QDateTime::currentDateTime();
+    }
+    const QString base = written.toString("yyyyMMdd_HHmmss");
+
+    QDir root(backupRoot);
+    QString name = base;
+    for (int n = 2; root.exists(name); n++) {
+        if (wmSameContent(source, root.filePath(name + "/WM_DATA.TDF"))) {
+            return QString(); // this card is backed up already
+        }
+        name = base + "_" + QString::number(n);
+    }
+    if (!root.mkpath(name)) {
+        qWarning() << "WMLoader: could not create the backup folder" << root.filePath(name);
+        return QString();
+    }
+    const QDir target(root.filePath(name));
+
+    emit updateMessage(QObject::tr("Backing Up Files..."));
+    QCoreApplication::processEvents();
+
+    QStringList files;
+    for (const QString &file : QDir(path).entryList(QDir::Files)) {
+        if (file.startsWith("WM_", Qt::CaseInsensitive) && (file.compare("WM_DATA.TDF", Qt::CaseInsensitive) != 0)) {
+            files.append(file);
+        }
+    }
+    for (const QString &file : files) {
+        if (!QFile::copy(QDir(path).filePath(file), target.filePath(file))) {
+            qWarning() << "WMLoader: could not back up" << file;
+        }
+    }
+    // WM_DATA.TDF last and under a temporary name: a folder that holds WM_DATA.TDF is complete
+    const QString part = target.filePath("WM_DATA.TDF.part");
+    QFile::remove(part);
+    const bool copied = QFile::copy(source, part) && QFile::rename(part, target.filePath("WM_DATA.TDF"));
+
+    emit updateMessage(QObject::tr("Importing Sessions..."));
+    QCoreApplication::processEvents();
+
+    if (!copied) {
+        qWarning() << "WMLoader: could not back up the card to" << target.absolutePath();
+        QDir(target).removeRecursively();
+        return QString();
+    }
+    qDebug() << "WMLoader: backed up the card to" << target.absolutePath();
+    return target.absolutePath();
+}
+
+// Keeps the backups small (preference pruneCardBackups(), on by default): a copy for every import would be about
+// 1.6 MB a day. A backup is removed when each of its nights (week data and detailed data) is also in another backup
+// that is kept, at least as complete and with the same settings, so a rebuild still restores the same nights.
+// Oldest backup first, each against all others still kept. With an import every morning about every fourth card
+// stays (a card holds the detailed data of about 4 nights).
+void WeinmannLoader::PruneBackups(Machine *mach)
+{
+    const QStringList folders = wmOldestFirst(wmCardFolders(mach->getBackupPath()));
+    QList<WmCardNights> cards;
+    QList<bool> kept; // a card that cannot be read is never removed, and holds nothing for the others
+    for (const QString &folder : folders) {
+        WmCardNights nights;
+        kept.append(wmReadCardNights(folder, nights));
+        cards.append(nights);
+    }
+
+    for (int i = 0; i < cards.size(); i++) {
+        if (!kept.at(i) || !wmIsBackupName(QDir(folders.at(i)).dirName())) {
+            continue;
+        }
+        const WmCardNights &card = cards.at(i);
+        auto heldByOthers = [&](const std::function<bool(const WmCardNights &)> &holds) {
+            for (int j = 0; j < cards.size(); j++) {
+                if ((j != i) && kept.at(j) && (cards.at(j).settings == card.settings) && holds(cards.at(j))) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        bool redundant = true;
+        for (auto it = card.week.cbegin(); redundant && (it != card.week.cend()); ++it) {
+            redundant = heldByOthers([&](const WmCardNights &other) {
+                const auto w = other.week.constFind(it.key());
+                return (w != other.week.cend()) && (w->first >= it->first) && (w->second >= it->second);
+            });
+        }
+        for (auto it = card.detailed.cbegin(); redundant && (it != card.detailed.cend()); ++it) {
+            redundant = heldByOthers([&](const WmCardNights &other) {
+                const auto d = other.detailed.constFind(it.key());
+                return (d != other.detailed.cend()) && (d->first <= it->first) && (d->second >= it->second);
+            });
+        }
+        if (!redundant) {
+            continue;
+        }
+        kept[i] = false;
+        if (QDir(folders.at(i)).removeRecursively()) {
+            qDebug() << "WMLoader: removed the backup" << folders.at(i) << "- the other backups hold its nights";
+        } else {
+            qWarning() << "WMLoader: could not remove the backup" << folders.at(i);
+        }
+    }
+}
+
+// Rebuild CPAP Data purges the device and imports its backups (see BackupCard()). Shown before the purge: the nights
+// the backups cannot restore, or only from the week data (nights imported before card backups existed, or while they
+// were switched off).
+QString WeinmannLoader::rebuildLossWarning(Machine *mach)
+{
+    if (mach == nullptr) {
+        return QString();
+    }
+    QSet<qint64> week, detailed;
+    bool usable = false;
+    for (const QString &folder : wmCardFolders(mach->getBackupPath())) {
+        WmCardNights nights;
+        if (wmReadCardNights(folder, nights)) {
+            usable = true;
+            week.unite(nights.weekSessions);
+            for (auto it = nights.detailed.cbegin(); it != nights.detailed.cend(); ++it) {
+                detailed.insert(it.key());
+            }
+        }
+    }
+    if (!usable) {
+        return QString(); // the rebuild prompts already say that there is nothing to rebuild from
+    }
+
+    if (mach->day.isEmpty()) {
+        // The sessions are not loaded (the upgrade of the data version asks before loading them): say what the backup holds.
+        qint64 first = 0;
+        for (const QSet<qint64> *ids : {&week, &detailed}) {
+            for (qint64 id : *ids) {
+                first = (first == 0) ? id : qMin(first, id);
+            }
+        }
+        if (first == 0) {
+            return QString();
+        }
+        return QObject::tr("OSCAR's backup of this device holds the nights from %1 on. Older nights cannot be restored from it.")
+            .arg(QLocale().toString(mach->pickDate(first * 1000), QLocale::ShortFormat));
+    }
+
+    QList<QDate> missing, reduced;
+    for (auto it = mach->day.cbegin(); it != mach->day.cend(); ++it) {
+        bool lost = false, coarse = false;
+        for (Session *sess : it.value()->sessions) {
+            if (sess->machine() != mach) {
+                continue;
+            }
+            const qint64 id = sess->session();
+            if (detailed.contains(id)) {
+                continue;
+            }
+            if (!week.contains(id)) {
+                lost = true;
+            } else if (sess->m_cnt.contains(CPAP_FlowRate)) {
+                coarse = true; // detailed now, the backup only has its week data
+            }
+        }
+        if (lost) {
+            missing.append(it.key());
+        } else if (coarse) {
+            reduced.append(it.key());
+        }
+    }
+    if (missing.isEmpty() && reduced.isEmpty()) {
+        return QString();
+    }
+
+    auto days = [](const QList<QDate> &list) {
+        const QString first = QLocale().toString(list.first(), QLocale::ShortFormat);
+        return (list.size() == 1) ? first : first + " " + QChar(0x2013) + " " + QLocale().toString(list.last(), QLocale::ShortFormat);
+    };
+    QStringList text;
+    if (!missing.isEmpty()) {
+        text.append(QObject::tr("%n night(s) are not in OSCAR's backup of this device (%1) and will be missing after rebuilding.", "",
+                                int(missing.size())).arg(days(missing)));
+    }
+    if (!reduced.isEmpty()) {
+        text.append(QObject::tr("%n night(s) with detailed data are only in the summary data of the backup (%1). After rebuilding they "
+                                "will have no flow waveform, and pressure, leak and events only at low resolution.", "",
+                                int(reduced.size())).arg(days(reduced)));
+    }
+    text.append(QObject::tr("Before rebuilding, import saved copies of the cards that hold these nights, so they are added to the backup."));
+    return text.join(" ");
 }
 
 void WeinmannLoader::initChannels()
