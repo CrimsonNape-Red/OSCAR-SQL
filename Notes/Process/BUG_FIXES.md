@@ -9410,4 +9410,4 @@ differ it deletes the cache, records the new language and loads nothing, so
   language.
 - The cache still holds translated text; storing the values and formatting them when the
   table is drawn (the other direction in the issue) was not done.
-- Checked: compiles. Not checked in a running OSCAR.
+- Checked: compiles; the developer tested a language change in a running OSCAR.
