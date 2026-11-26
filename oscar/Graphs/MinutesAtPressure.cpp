@@ -89,6 +89,7 @@ some messages from Apnea Board.
 #include <QApplication>
 #include <QThreadPool>
 #include <QMutexLocker>
+#include <QTimer>
 
 #include "MinutesAtPressure.h"
 #include "Graphs/gGraph.h"
@@ -314,9 +315,7 @@ RecalcMAP::~RecalcMAP()
 {
 }
 void RecalcMAP::quit() {
-    map->mutex.lock();
     m_quit = true;
-    map->mutex.unlock();
 }
 
 // find  pressure given the time of the event.
@@ -542,29 +541,22 @@ void RecalcMAP::updateTimes(PressureInfo & info) {
     }
 }
 
-void RecalcMAP:: setSelectionRange(gGraph* graph) {
-    graph->graphView()->GetXBounds(minTime, maxTime);
-    // changes suggested by grnbrg
-    // Convert display-space bounds back to raw device time by subtracting the CPAP correction
-    if (map->m_day) {
-        for (const auto& sess : map->m_day->sessions) {
-            if (sess->type() == MT_CPAP) {
-                qint64 correction = sess->correctionMs();
-                minTime -= correction;
-                maxTime -= correction;
-                break;
-            }
-        }
-    }
-}
-
 void RecalcMAP::run()
 {
-    QMutexLocker locker(&map->mutex);
-    map->m_recalculating = true;
-    Day * day = map->m_day;
-    if (!day) return;
+    if (calculate() && m_view) {
+        // We are in another thread, so the view's timedRedraw() can't be called from here.
+        // A zero-length single shot is posted to the view's thread instead; it ends in
+        // MinutesAtPressure::paint() being called.
+        QTimer::singleShot(0, m_view, SLOT(refreshTimeout()));
+    }
+    // Last use of the layer: once this returns the layer is free to be destroyed.
+    map->recalcEnded(this);
+}
 
+bool RecalcMAP::calculate()
+{
+    Day * day = m_day;
+    if (!day || m_quit) return false;
 
 
     // Get the channels for specified Channel types
@@ -630,20 +622,20 @@ void RecalcMAP::run()
     if (minP>maxP) minP=maxP;
     IPAP.setMachineTimes(minP,maxP);
 
-    if (m_quit) {
-        m_done = true;
-        return;
-    }
+    if (m_quit) return false;
 
     IPAP.finishCalcs();
     EPAP.finishCalcs();
 
-    map->timelock.lock();
+    // The check is made with the lock held so that totals always arrive in the order the
+    // calculations were started: a job that is replaced after passing this check finishes
+    // handing over before its successor can, and one replaced before it hands over nothing.
+    QMutexLocker locker(&map->timelock);
+    if (m_quit) return false;
     map->epap = EPAP;
     map->ipap = IPAP;
-    map->timelock.unlock();
-    map->recalcFinished();
-    m_done = true;
+    map->initialized = true;
+    return true;
 }
 
 
@@ -656,7 +648,7 @@ MinutesAtPressure::MinutesAtPressure() :Layer(NoChannel)
 }
 MinutesAtPressure::~MinutesAtPressure()
 {
-    while (recalculating()) {};
+    cancelRecalc(true);
 }
 
 void MinutesAtPressure::SetDay(Day *day)
@@ -666,10 +658,13 @@ void MinutesAtPressure::SetDay(Day *day)
     IF (day) DEBUGCI O(day->date());
     #endif
 
+    // Callers clear the day before its sessions are freed, so nothing may still be reading
+    // the old one when this returns.
+    cancelRecalc(true);
+
     Layer::SetDay(day);
 
     m_empty = false;
-    m_recalculating = false;
     m_lastminx = 0;
     m_lastmaxx = 0;
     m_empty = !m_day || !(m_day->channelExists(CPAP_Pressure) || m_day->channelExists(CPAP_EPAP) || m_day->channelExists(CPAP_PressureSet) || m_day->channelExists(CPAP_EPAPSet));
@@ -701,6 +696,13 @@ void MinutesAtPressure::paint(QPainter &painter, gGraph &graph, const QRegion &r
         // it's a pretty useless graph to popout, probably should just block it's popout instead.
         recalculate(&graph);
     }
+
+    // Recalculating in the background...  So we just draw an old copy until then the new data is ready
+    // (it will refresh itself when complete)
+    // The only time we can't draw when at the end of the recalc when the map variables are being updated
+    // So use a mutex to lock
+    QMutexLocker TimeLock(&timelock);
+
     if (!initialized) return;
 
     // conditional display of TimeAtPressure Plots  based on Plots displayed by the Pressure Graph.
@@ -734,22 +736,9 @@ void MinutesAtPressure::paint(QPainter &painter, gGraph &graph, const QRegion &r
     m_lastminx = m_minx;
     m_lastmaxx = m_maxx;
 
-    if (graph.printing()) {
-        // Could just lock the mutex QMutex instead
-        mutex.lock();
-        // do nothing between, it should hang until complete.
-        mutex.unlock();
-        //while (recalculating()) { QThread::yieldCurrentThread(); } // yield or whatever
-    }
+    // When printing, recalculate() has already put the totals for this range in place.
 
     if (!painter.isActive()) return;
-
-
-    // Recalculating in the background...  So we just draw an old copy until then the new data is ready
-    // (it will refresh itself when complete)
-    // The only time we can't draw when at the end of the recalc when the map variables are being updated
-    // So use a mutex to lock
-    QMutexLocker TimeLock(&timelock);
 
     ////////////////////////////////////////////////////////////////////
     // calculate  pressure Ranges
@@ -850,41 +839,85 @@ void MinutesAtPressure::paint(QPainter &painter, gGraph &graph, const QRegion &r
     }
 }
 
+void MinutesAtPressure::selectionRange(gGraph * graph, qint64 & minTime, qint64 & maxTime)
+{
+    graph->graphView()->GetXBounds(minTime, maxTime);
+    // changes suggested by grnbrg
+    // Convert display-space bounds back to raw device time by subtracting the CPAP correction
+    if (m_day) {
+        for (const auto& sess : m_day->sessions) {
+            if (sess->type() == MT_CPAP) {
+                qint64 correction = sess->correctionMs();
+                minTime -= correction;
+                maxTime -= correction;
+                break;
+            }
+        }
+    }
+}
+
 void MinutesAtPressure::recalculate(gGraph * graph)
 {
-    while (recalculating())
-        m_remap->quit();
-
-    m_remap = new RecalcMAP(this);
-    m_remap->setAutoDelete(true);
-
-    m_remap->setSelectionRange(graph);
-    m_graph=graph;
-
-    QThreadPool * tp = QThreadPool::globalInstance();
+    qint64 minTime, maxTime;
+    selectionRange(graph, minTime, maxTime);
 
     if (graph->printing()) {
-        m_remap->run();
+        startRecalc(minTime, maxTime, nullptr, true);
     } else {
-        while(!tp->tryStart(m_remap));
+        startRecalc(minTime, maxTime, graph->graphView(), false);
 
         m_lastmaxx = m_maxx;
         m_lastminx = m_minx;
-
     }
-
 }
 
-void MinutesAtPressure::recalcFinished()
+void MinutesAtPressure::startRecalc(qint64 minTime, qint64 maxTime, gGraphView * view, bool synchronous)
 {
-    if (m_graph && !m_graph->printing()) {
-        // Can't call this using standard timedRedraw function, we are in another thread, so have to use a throwaway timer
-        QTimer::singleShot(0, m_graph->graphView(), SLOT(refreshTimeout()));
-        // this causes MinutesAtPressure:: paint to be called.
+    // A calculation for an earlier range is out of date. It is not waited for: it stops at
+    // its next check, and discards its totals if it gets as far as handing them over.
+    cancelRecalc(false);
+
+    if (synchronous) {
+        RecalcMAP job(this, m_day, minTime, maxTime, nullptr);
+        job.calculate();
+        return;
     }
-    m_remap = nullptr;
-    m_recalculating = false;
-    initialized=true;
+
+    RecalcMAP * job = new RecalcMAP(this, m_day, minTime, maxTime, view);
+    job->setAutoDelete(true);
+    {
+        QMutexLocker locker(&m_jobLock);
+        m_remap = job;
+        ++m_jobsRunning;
+    }
+    // Queued if every pool thread is busy; the job counts as running from here on.
+    QThreadPool::globalInstance()->start(job);
+}
+
+void MinutesAtPressure::cancelRecalc(bool wait)
+{
+    QMutexLocker locker(&m_jobLock);
+    if (m_remap) {
+        m_remap->quit();
+        m_remap = nullptr;      // earlier jobs were told to quit when they were replaced
+    }
+    while (wait && m_jobsRunning > 0) {
+        m_jobsDone.wait(&m_jobLock);
+    }
+}
+
+void MinutesAtPressure::recalcEnded(RecalcMAP * job)
+{
+    QMutexLocker locker(&m_jobLock);
+    if (m_remap == job) m_remap = nullptr;
+    --m_jobsRunning;
+    m_jobsDone.wakeAll();
+}
+
+bool MinutesAtPressure::recalculating()
+{
+    QMutexLocker locker(&m_jobLock);
+    return m_jobsRunning > 0;
 }
 
 

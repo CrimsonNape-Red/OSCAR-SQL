@@ -10,12 +10,18 @@
 #ifndef MINUTESATPRESSURE_H
 #define MINUTESATPRESSURE_H
 
+#include <atomic>
+
+#include <QMutex>
 #include <QPen>
+#include <QRunnable>
+#include <QWaitCondition>
 #include "Graphs/layer.h"
 #include "SleepLib/appsettings.h"
 #include "SleepLib/day.h"
 #include "SleepLib/schema.h"
 
+class gGraphView;
 class MinutesAtPressure;
 struct PressureInfo
 {
@@ -62,23 +68,53 @@ private:
 };
 
 
+/*! \class RecalcMAP
+    \brief One calculation of the Time at Pressure totals for a day and a time range.
+
+    Normally runs on a thread pool thread; for a printed report it runs on the calling thread.
+    The totals are built in the job's own PressureInfo objects and handed to the layer in one
+    step at the end, so a job that is replaced by a newer one can simply be told to quit():
+    it stops at its next check and hands over nothing.
+
+    A background job belongs to the thread pool, which deletes it when run() returns. The
+    layer may use its pointer only under MinutesAtPressure::m_jobLock, see there.
+  */
 class RecalcMAP:public QRunnable
 {
     friend class MinutesAtPressure;
 public:
-    explicit RecalcMAP(MinutesAtPressure * map) :map(map), m_quit(false), m_done(false) {}
+    /*! \brief Describe a calculation. Call on the GUI thread.
+        \param map      layer that receives the totals
+        \param day      day to total; must stay valid until the job has ended
+        \param minTime  start of the time range, device time in ms
+        \param maxTime  end of the time range, device time in ms
+        \param view     graph view to redraw when new totals are ready, or nullptr for none
+      */
+    RecalcMAP(MinutesAtPressure * map, Day * day, qint64 minTime, qint64 maxTime, gGraphView * view)
+        : map(map), m_quit(false), m_day(day), m_view(view), minTime(minTime), maxTime(maxTime) {}
     virtual ~RecalcMAP();
+
+    //! \brief Thread pool entry point: calculate, ask for a redraw, then tell the layer this job has ended.
     virtual void run();
+
+    //! \brief Ask the calculation to stop. Returns at once; safe to call from any thread.
     void quit();
 
 
 protected:
     MinutesAtPressure * map;
-    volatile bool m_quit;
-    volatile bool m_done;
+    //! Set by quit(), on the GUI thread, and read by the calculation on its own thread.
+    std::atomic<bool> m_quit;
 
 private:
-    void setSelectionRange(gGraph* graph);
+    /*! \brief Total the day and hand the result to the layer.
+        \return true if the layer now holds this job's totals, false if the job was told to
+                quit or there was no day
+      */
+    bool calculate();
+
+    Day * m_day;            //!< Day being totalled
+    gGraphView * m_view;    //!< View to redraw afterwards, may be nullptr
     qint64 minTime, maxTime;
     ChannelID chanId;       // required for debug.
 
@@ -97,13 +133,27 @@ private:
 class MinutesAtPressure:public Layer
 {
     friend class RecalcMAP;
+#ifdef UNITTEST_MODE
+    friend class MinutesAtPressureTests;
+#endif
 public:
     MinutesAtPressure();
+    //! \brief Stops any background calculation and waits for it to end.
     virtual ~MinutesAtPressure();
 
+    /*! \brief Start totalling the time range the graph's view is showing.
+
+        For a printed report the totals are ready when this returns. Otherwise the work is
+        done in the background and the view is redrawn when it finishes; a calculation that
+        is still under way for an earlier range is abandoned.
+      */
     virtual void recalculate(gGraph * graph);
 
+    //! \brief Change the day. No background calculation is reading the old day once this returns.
     virtual void SetDay(Day *d);
+
+    //! \brief True while a background calculation is queued or running.
+    bool recalculating();
 
     virtual bool isEmpty();
     virtual int minimumHeight();
@@ -115,7 +165,6 @@ public:
     bool mousePressEvent(QMouseEvent *event, gGraph *graph);
     bool mouseReleaseEvent(QMouseEvent *event, gGraph *graph);
 
-    virtual void recalcFinished();
     virtual Layer * Clone() {
         MinutesAtPressure * map = new MinutesAtPressure();
         Layer::CloneInto(map);
@@ -127,8 +176,8 @@ public:
 protected:
 
     int numCloned =0;
+    //! \brief Copy this layer's state. The copy starts with no calculation of its own.
     void CloneInto(MinutesAtPressure * layer) {
-        mutex.lock();
         timelock.lock();
         layer->m_empty = m_empty;
         layer->m_minimum_height = m_minimum_height;
@@ -141,14 +190,40 @@ protected:
 
         timelock.unlock();
         layer->m_enabled = m_enabled;
-        mutex.unlock();
     }
     bool isCLoned() {return numCloned!=0;};
-    RecalcMAP * m_remap;
-    bool initialized=false;
-    bool m_empty;
-    QMutex mutex;
+
+    /*! \brief Abandon any calculation under way and start one for the layer's day.
+        \param minTime      start of the time range, device time in ms
+        \param maxTime      end of the time range, device time in ms
+        \param view         graph view to redraw when the totals are ready, or nullptr
+        \param synchronous  calculate on the calling thread; the totals are in place on return
+      */
+    void startRecalc(qint64 minTime, qint64 maxTime, gGraphView * view, bool synchronous);
+
+    /*! \brief Tell every background calculation to stop.
+        \param wait  also block until they have all ended. They stop at the next sample they
+                     look at, so the wait is short.
+      */
+    void cancelRecalc(bool wait);
+
+    //! \brief Called by a background job, on its own thread, as the last thing it does.
+    void recalcEnded(RecalcMAP * job);
+
+    //! \brief Time range the graph's view is showing, converted to device time.
+    void selectionRange(gGraph * graph, qint64 & minTime, qint64 & maxTime);
+
+    /*! Guards m_remap and m_jobsRunning. A job cannot end without taking this lock in
+        recalcEnded(), so while it is held a non-null m_remap points to a live job. */
+    QMutex m_jobLock;
+    QWaitCondition m_jobsDone;      //!< Woken each time a background job ends
+    RecalcMAP * m_remap;            //!< Newest background job; nullptr once it has ended or been told to quit
+    int m_jobsRunning = 0;          //!< Background jobs started and not yet ended
+
+    //! Guards ipap, epap and initialized, which a background job writes when it finishes.
     QMutex timelock;
+    bool initialized=false;         //!< True once a calculation has delivered totals
+    bool m_empty;
     int m_minimum_height;
     //QAtomicInteger<int> m_recalcCount;
 
@@ -157,7 +232,6 @@ private:
     PressureInfo epap, ipap;
     void setEnabled(gGraph &graph);
     QHash<ChannelID, bool > m_enabled;
-    gGraph * m_graph;
     qint64 m_lastminx;
     qint64 m_lastmaxx;
     QPoint last_mouse=QPoint(0,0);

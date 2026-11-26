@@ -9411,3 +9411,69 @@ differ it deletes the cache, records the new language and loads nothing, so
 - The cache still holds translated text; storing the values and formatting them when the
   table is drawn (the other direction in the issue) was not done.
 - Checked: compiles; the developer tested a language change in a running OSCAR.
+
+---
+
+## 2026-11-25 - Time at Pressure: background recalculation used `volatile` flags and spin loops (GitLab #276)
+
+**Files:** `oscar/Graphs/MinutesAtPressure.cpp/.h`, `oscar/Graphs/layer.cpp/.h`,
+`oscar/tests/minutesatpressuretests.cpp/.h`, `oscar/oscar.pro`
+
+**Symptom:** None reported. These were the last three `volatile` fields left from #276
+(`RecalcMAP::m_quit`, `RecalcMAP::m_done`, `Layer::m_recalculating`), kept back because
+replacing the keyword alone would have hidden the faults below.
+
+**Root cause:** The Time at Pressure graph totals its data on a thread pool thread, and the
+GUI thread and that thread shared state with no working synchronization:
+
+- `recalculate()` spun on `while (recalculating()) m_remap->quit();` while the worker set
+  `m_remap` to null and only then cleared the flag, so the loop could call through a null
+  pointer. `m_recalculating` was set by the worker when it started, not when the job was
+  queued, so a second request in that gap started a second job and the first job's end
+  nulled the pointer to the second.
+- `quit()` took the mutex that `run()` held from start to finish, so it could set the flag
+  only after the calculation was over. Nothing was ever abandoned early; the GUI thread
+  waited for every out-of-date calculation.
+- `run()` returned without clearing `m_recalculating` when there was no day. The thread pool
+  then deleted the job, and the next `recalculate()` spun for ever on a freed pointer.
+- `SetDay()` cleared the flag by hand while a job could still be reading the old day, and
+  `Daily::releaseDayData()` relies on `setDay(nullptr)` to stop the layers reading a day
+  whose sessions are about to be freed.
+- `Layer::CloneInto()` copied `m_recalculating`, so a pop-out made during a calculation
+  believed it had a job of its own, with a null `m_remap`.
+- `paint()` read `initialized`, `ipap.code`, `epap.code` and the plot buckets before taking
+  `timelock`, while the worker replaced `ipap` and `epap` under it.
+- `m_done` was written and never read. A job run directly for a printed report was never
+  deleted. `while (!tp->tryStart(...))` spun when no pool thread was free.
+
+**Fix:** Each job is self-contained: it is given the day, the time range and the view to
+redraw when it is created on the GUI thread, totals into its own `PressureInfo`, and hands
+the result over in one step under `timelock`.
+
+- `m_quit` is `std::atomic<bool>`, set without a lock, so a replaced job stops at the next
+  sample it looks at. It is checked once more under `timelock` before the hand-over, which
+  makes results arrive in the order the calculations were started.
+- `m_done` is removed. `Layer::m_recalculating` is removed; the layer counts its jobs
+  (`m_jobsRunning`) under `m_jobLock`, and a `QWaitCondition` is signalled as each one ends.
+  `recalculating()` now belongs to `MinutesAtPressure`; nothing else used it.
+- `recalculate()` no longer waits for the old job: it tells it to quit and queues the new one
+  with `QThreadPool::start()`. Only `SetDay()` and the destructor wait, on the condition.
+- `paint()` takes `timelock` before its first read of the totals. The lock/unlock of the old
+  mutex for printing is gone, because a printed report is calculated on the calling thread.
+
+**Non-obvious:**
+- `m_remap` may be used only under `m_jobLock`. A job's last act is `recalcEnded()`, which
+  takes that lock, so a non-null `m_remap` seen under it is a live job even though the pool
+  deletes jobs itself.
+- A replaced job can still be running for a moment beside its successor. That is safe
+  because jobs only read the day and write nothing shared until the hand-over.
+- The job still reads the `Day`, its sessions and the device's channel list on the worker
+  thread. That is safe only while the GUI thread leaves them alone, which is what the wait in
+  `SetDay()` is for; it is not a general lock on the day's data.
+- The redraw request stays a `QTimer::singleShot(0, view, ...)` from the worker. With a
+  receiver and a zero interval Qt posts it to the receiver's thread.
+- The commented-out `volatile int savelistCnt` in `SleepLib/machine.h` is the only place the
+  keyword is left outside `thirdparty`.
+- Checked: compiles (MSVC, Qt 6.12); `MinutesAtPressureTests` passes, repeated 25 times, and
+  fails every time when `quit()` is made to do nothing; all unit-test suites pass. Not
+  checked in a running OSCAR: the graph on screen, a pop-out and a printed report.

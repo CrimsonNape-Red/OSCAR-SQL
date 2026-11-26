@@ -54,7 +54,6 @@ void Layer::CloneInto(Layer * layer)
     layer->m_position = m_position;
     layer->m_rect = m_rect;
     layer->m_mouseover = m_mouseover;
-    layer->m_recalculating = m_recalculating;
     layer->m_layertype = m_layertype;
 }
 

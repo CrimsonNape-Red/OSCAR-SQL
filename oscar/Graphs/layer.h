@@ -51,7 +51,6 @@ class Layer
           m_X(0), m_Y(0),
           m_order(0),
           m_position(LayerCenter),
-          m_recalculating(false),
           m_layertype(LT_Other)
     { }
 
@@ -131,8 +130,6 @@ class Layer
     //! \brief Return this layers Moveability status (not really used yet)
     inline bool movable() const { return m_movable; }
 
-    inline bool recalculating() const { return m_recalculating; }
-
     virtual void dataChanged() {}
 
     /*! \brief Override this for the drawing code, using GLBuffer components for drawing
@@ -185,7 +182,6 @@ class Layer
     LayerPosition m_position;
     QRect m_rect;
     bool m_mouseover;
-    volatile bool m_recalculating;
     LayerType m_layertype;
     int  m_minimumHeight=0;
 public:
