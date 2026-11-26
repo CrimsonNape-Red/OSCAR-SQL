@@ -91,8 +91,8 @@ struct ChannelDefaults {
     EventDataType lowerThreshold = 0, upperThreshold = 0;
     QColor lowerThresholdColor, upperThresholdColor;
     bool showInOverview = false;
-    //! The channel type the code defines. Recorded for channel_defaults only: it is not
-    //! overridable and Channel::resetToDefaults() does not restore it.
+    //! The channel type the code defines. A profile may override it on event channels only,
+    //! as the Flag Type of Preferences (see ChannelOverrides::Type).
     ChanType type = DATA;
 };
 

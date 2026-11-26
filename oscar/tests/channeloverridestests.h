@@ -41,6 +41,10 @@ private slots:
     void testDiffReportsWaveformThreshold();
     void testDiffIgnoresPreferenceThresholds();
     void testDiffReportsEnabledAndOverview();
+    void testFlagTypeOverridableOnFlagKindsOnly();
+    void testDiffReportsFlagTypeAndResetRestoresIt();
+    void testApplyAcceptsOnlyFlagKinds();
+    void testClassifyNeverTakesStoredType();
     void cleanupTestCase();
 
 private:

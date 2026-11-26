@@ -1040,8 +1040,9 @@ bool DatabaseSchema::createChannelDefaultsTable(QSqlDatabase& db)
  *
  * Sparse: a row exists only for a channel on which the profile changed at least one
  * field, and a NULL column means "use the default". channel_code lets a row be matched
- * by code when its channel_id is unknown to the running build. The threshold colours
- * have no column because nothing in the UI can change them.
+ * by code when its channel_id is unknown to the running build. type is the Flag Type of
+ * an event channel (a schema::ChanType value: FLAG, MINOR_FLAG or SPAN). The threshold
+ * colours have no column because nothing in the UI can change them.
  */
 bool DatabaseSchema::createProfileChannelOverridesTable(QSqlDatabase& db)
 {
@@ -1051,6 +1052,7 @@ bool DatabaseSchema::createProfileChannelOverridesTable(QSqlDatabase& db)
         "    profile_id INTEGER NOT NULL,"
         "    channel_id INTEGER NOT NULL,"
         "    channel_code TEXT NOT NULL,"
+        "    type INTEGER,"
         "    enabled INTEGER, default_color TEXT,"
         "    fullname TEXT, label TEXT, description TEXT,"
         "    lower_threshold REAL, upper_threshold REAL,"
@@ -1107,7 +1109,8 @@ bool DatabaseSchema::createChannelsView(QSqlDatabase& db)
 {
     return execChannelDdl(db,
         "CREATE VIEW IF NOT EXISTS channels AS "
-        "SELECT p.id AS profile_id, d.channel_id, d.channel_code, d.type,"
+        "SELECT p.id AS profile_id, d.channel_id, d.channel_code,"
+        "       COALESCE(o.type, d.type) AS type,"
         "       COALESCE(o.enabled, d.enabled) AS enabled,"
         "       COALESCE(o.default_color, d.default_color) AS default_color,"
         "       COALESCE(o.fullname, d.fullname) AS fullname,"

@@ -37,6 +37,12 @@ QVariant optionalBool(const std::optional<bool> &v)
     return v ? QVariant(*v ? 1 : 0) : QVariant();
 }
 
+//! \brief Value to bind for an optional Flag Type: NULL when absent, else the ChanType value.
+QVariant optionalType(const std::optional<schema::ChanType> &v)
+{
+    return v ? QVariant(static_cast<int>(*v)) : QVariant();
+}
+
 //! \brief Value to bind for an optional threshold: NULL when absent.
 QVariant optionalDouble(const std::optional<double> &v)
 {
@@ -203,7 +209,7 @@ QList<ChannelOverrideRow> ChannelRepository::findOverrides(qint64 profileId)
     QList<ChannelOverrideRow> rows;
     QSqlQuery query(db);
     query.prepare("SELECT channel_id, channel_code, enabled, default_color, fullname, label,"
-                  " description, lower_threshold, upper_threshold, show_in_overview"
+                  " description, lower_threshold, upper_threshold, show_in_overview, type"
                   " FROM profile_channel_overrides WHERE profile_id = ? ORDER BY channel_id");
     query.addBindValue(profileId);
     if (!query.exec()) {
@@ -273,7 +279,8 @@ bool ChannelRepository::insertOverrideRows(qint64 profileId, const QList<Channel
     QSqlQuery insert(db);
     insert.prepare("INSERT INTO profile_channel_overrides (profile_id, channel_id, channel_code,"
                    " enabled, default_color, fullname, label, description, lower_threshold,"
-                   " upper_threshold, show_in_overview) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                   " upper_threshold, show_in_overview, type)"
+                   " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     for (const ChannelOverrideRow &row : rows) {
         if (row.values.isEmpty()) {
             continue;
@@ -290,6 +297,7 @@ bool ChannelRepository::insertOverrideRows(qint64 profileId, const QList<Channel
         insert.addBindValue(optionalDouble(v.lowerThreshold));
         insert.addBindValue(optionalDouble(v.upperThreshold));
         insert.addBindValue(optionalBool(v.showInOverview));
+        insert.addBindValue(optionalType(v.type));
         if (!insert.exec()) {
             qWarning() << "ChannelRepository: inserting the override for channel" << row.channelId
                        << "failed:" << insert.lastError().text();
@@ -492,5 +500,11 @@ ChannelOverrideRow ChannelRepository::mapOverride(const QSqlQuery &query)
     if (!query.value(7).isNull()) v.lowerThreshold = query.value(7).toDouble();
     if (!query.value(8).isNull()) v.upperThreshold = query.value(8).toDouble();
     if (!query.value(9).isNull()) v.showInOverview = query.value(9).toBool();
+    // Only a flag kind is a Flag Type; any other stored number (a damaged or hand-edited
+    // row) is dropped here, before it is turned into a ChanType.
+    const int type = query.value(10).toInt();
+    if (type == schema::FLAG || type == schema::MINOR_FLAG || type == schema::SPAN) {
+        v.type = static_cast<schema::ChanType>(type);
+    }
     return row;
 }

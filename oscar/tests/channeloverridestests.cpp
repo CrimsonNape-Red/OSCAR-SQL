@@ -19,7 +19,7 @@
 using namespace ChannelOverrides;
 
 static const QList<Field> kAll = { Enabled, Color, Fullname, Label, Description,
-                                   LowerThreshold, UpperThreshold, ShowInOverview };
+                                   LowerThreshold, UpperThreshold, ShowInOverview, Type };
 
 void ChannelOverridesTests::initTestCase()
 {
@@ -200,4 +200,53 @@ void ChannelOverridesTests::testDiffReportsEnabledAndOverview() {
     QCOMPARE(v.enabled.value(), !c.defaults().enabled);
     QCOMPARE(v.showInOverview.value(), !c.defaults().showInOverview);
     QVERIFY(!v.label && !v.fullname && !v.color);
+}
+// The Flag Type can be overridden on the three flag kinds and on nothing else (#430).
+void ChannelOverridesTests::testFlagTypeOverridableOnFlagKindsOnly() {
+    for (schema::ChanType t : { schema::FLAG, schema::MINOR_FLAG, schema::SPAN })
+        QVERIFY(overridable(CPAP_Obstructive, t, Type));
+    for (schema::ChanType t : { schema::UNKNOWN, schema::WAVEFORM, schema::DATA, schema::SETTING })
+        QVERIFY(!overridable(CPAP_Obstructive, t, Type));
+}
+// A changed Flag Type is an override, and resetToDefaults() puts the code's type back.
+void ChannelOverridesTests::testDiffReportsFlagTypeAndResetRestoresIt() {
+    schema::Channel &c = schema::channel[CPAP_Obstructive];
+    QCOMPARE(c.type(), schema::FLAG);
+    c.setType(schema::SPAN);
+    const Values v = diff(c);
+    QCOMPARE(v.type.value(), schema::SPAN);
+    QVERIFY(!v.label && !v.fullname && !v.color && !v.enabled && !v.showInOverview);
+    c.resetToDefaults();
+    QCOMPARE(c.type(), schema::FLAG);
+    QVERIFY(diff(c).isEmpty());
+}
+// apply() takes a flag kind for a flag channel and ignores any other stored type.
+void ChannelOverridesTests::testApplyAcceptsOnlyFlagKinds() {
+    schema::Channel &flag = schema::channel[CPAP_Obstructive];
+    Values v;
+    v.type = schema::WAVEFORM;
+    ChannelOverrides::apply(flag, v);
+    QCOMPARE(flag.type(), schema::FLAG);
+    v.type = schema::UNKNOWN;
+    ChannelOverrides::apply(flag, v);
+    QCOMPARE(flag.type(), schema::FLAG);
+    v.type = static_cast<schema::ChanType>(12345);
+    ChannelOverrides::apply(flag, v);
+    QCOMPARE(flag.type(), schema::FLAG);
+    v.type = schema::MINOR_FLAG;
+    ChannelOverrides::apply(flag, v);
+    QCOMPARE(flag.type(), schema::MINOR_FLAG);
+
+    schema::Channel &wave = schema::channel[CPAP_FlowRate];
+    Values w;
+    w.type = schema::FLAG;
+    ChannelOverrides::apply(wave, w);
+    QCOMPARE(wave.type(), schema::WAVEFORM);
+}
+// The type an older build stored was never read back, so it is never an override.
+void ChannelOverridesTests::testClassifyNeverTakesStoredType() {
+    schema::Channel &c = schema::channel[CPAP_Obstructive];
+    ChannelData row = legacyOf(c);
+    row.type = schema::SPAN;
+    QVERIFY(classifyLegacy(c, row, [](const QString &) { return false; }).isEmpty());
 }

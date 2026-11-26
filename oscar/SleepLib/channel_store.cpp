@@ -60,7 +60,7 @@ void countDroppedNames(const schema::Channel &chan, const ChannelData &row,
         { ChannelOverrides::Description, &Values::description, "description" },
     };
     for (const NameField &f : fields) {
-        if (!ChannelOverrides::overridable(chan.id(), chan.type(), f.field)) {
+        if (!ChannelOverrides::overridable(chan.id(), ChannelOverrides::codeType(chan), f.field)) {
             continue;
         }
         const std::optional<QString> &before = differing.*(f.member);
@@ -190,7 +190,7 @@ bool syncDefaults()
         ChannelDefaultRow row;
         row.channelId = chan->id();
         row.channelCode = chan->code();
-        row.type = d.type;  // the code's type, not a Flag Type changed in Preferences
+        row.type = d.type;  // the code's type; a profile's Flag Type is an override
         row.enabled = d.enabled;
         row.defaultColor = d.color;
         row.fullname = d.fullname;

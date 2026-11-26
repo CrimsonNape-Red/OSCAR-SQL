@@ -29,13 +29,26 @@ bool sameThreshold(double a, double b) { return std::fabs(a - b) < kThresholdEps
 bool Values::isEmpty() const
 {
     return !enabled && !color && !fullname && !label && !description
-        && !lowerThreshold && !upperThreshold && !showInOverview;
+        && !lowerThreshold && !upperThreshold && !showInOverview && !type;
+}
+
+bool isFlagKind(schema::ChanType type)
+{
+    return type == schema::FLAG || type == schema::MINOR_FLAG || type == schema::SPAN;
+}
+
+schema::ChanType codeType(const schema::Channel &chan)
+{
+    return chan.hasDefaults() ? chan.defaults().type : chan.type();
 }
 
 bool overridable(ChannelID id, schema::ChanType type, Field field)
 {
     if (type == schema::DATA || type == schema::SETTING) {
         return false;
+    }
+    if (field == Type) {
+        return isFlagKind(type);
     }
     if (field == LowerThreshold || field == UpperThreshold) {
         if (type != schema::WAVEFORM) {
@@ -85,6 +98,10 @@ Values diffFrom(ChannelID id, schema::ChanType type,
             && *current.showInOverview != defaults.showInOverview) {
         out.showInOverview = current.showInOverview;
     }
+    if (current.type && overridable(id, type, Type) && isFlagKind(*current.type)
+            && *current.type != defaults.type) {
+        out.type = current.type;
+    }
     return out;
 }
 
@@ -102,13 +119,14 @@ Values diff(const schema::Channel &chan)
     cur.lowerThreshold = static_cast<double>(chan.lowerThreshold());
     cur.upperThreshold = static_cast<double>(chan.upperThreshold());
     cur.showInOverview = chan.showInOverview();
-    return diffFrom(chan.id(), chan.type(), chan.defaults(), cur);
+    cur.type = chan.type();
+    return diffFrom(chan.id(), codeType(chan), chan.defaults(), cur);
 }
 
 void apply(schema::Channel &chan, const Values &v)
 {
     const ChannelID id = chan.id();
-    const schema::ChanType type = chan.type();
+    const schema::ChanType type = codeType(chan);
     if (v.enabled && overridable(id, type, Enabled)) chan.setEnabled(*v.enabled);
     if (v.color && overridable(id, type, Color)) chan.setDefaultColor(*v.color);
     if (v.fullname && overridable(id, type, Fullname)) chan.setFullname(*v.fullname);
@@ -122,6 +140,10 @@ void apply(schema::Channel &chan, const Values &v)
     }
     if (v.showInOverview && overridable(id, type, ShowInOverview)) {
         chan.setShowInOverview(*v.showInOverview);
+    }
+    // A stored value that is not a flag kind (a damaged or hand-edited row) is ignored.
+    if (v.type && overridable(id, type, Type) && isFlagKind(*v.type)) {
+        chan.setType(*v.type);
     }
 }
 
@@ -144,8 +166,9 @@ Values classifyLegacy(const schema::Channel &chan, const ChannelData &legacy,
     stored.lowerThreshold = legacy.lowerThreshold;
     stored.upperThreshold = legacy.upperThreshold;
     stored.showInOverview = legacy.showInOverview;
+    // stored.type stays unset: legacy.type was written but never read back (see the header).
 
-    Values out = diffFrom(chan.id(), chan.type(), chan.defaults(), stored);
+    Values out = diffFrom(chan.id(), codeType(chan), chan.defaults(), stored);
 
     // A name that OSCAR itself once shipped is not a user edit.
     auto dropShipped = [&](std::optional<QString> &name) {

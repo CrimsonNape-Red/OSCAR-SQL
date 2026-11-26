@@ -27,9 +27,9 @@ of truth for defaults, and a store that holds only what the user chose.
 - Colours per theme. One colour per channel stays; dark mode keeps converting it at draw
   time (`GraphTheme::ink()` / `fill()`, `oscar/Graphs/graphtheme.cpp`).
 - The Device Settings Changes cache (#258). Separate store, separate fix.
-- Making a channel type change in Preferences › Events persist. Today it is saved and never
-  loaded back (read from code, not tested). To be filed as its own issue; this design keeps
-  the current behaviour.
+- ~~Making a channel type change in Preferences › Events persist.~~ Left out of the first
+  version of this design and filed as #430; added to v20 afterwards, before v20 reached
+  anyone. See "Flag Type (#430)" below.
 - Editing option labels (mode names). They stay code-defined (#257, #333).
 
 ## Anti-goals
@@ -118,6 +118,24 @@ channel. This rule applies to saving and to the conversion of old rows.
   for these four values the `channels` view shows the code default, where scripts today see
   the preference value; the real value is in `profile_preferences`. *(My call.)*
 
+### Flag Type (#430)
+
+The Flag Type column of Preferences › Events (Flag, Minor Flag, Span) is one more override:
+a nullable `type` column in `profile_channel_overrides`, and `COALESCE(o.type, d.type)` in
+the view.
+
+- Only a channel the code defines as FLAG, MINOR_FLAG or SPAN can have it, and only another
+  of those three is accepted; any other stored number is ignored on load. "Always Minor"
+  (UNKNOWN) channels are not editable in the dialog and never get one.
+- Which fields a channel may override is decided by the type the code defines, not by the
+  Flag Type the profile chose.
+- Loading a profile puts every channel back to the code's type before applying overrides,
+  so a Flag Type no longer carries over to the next profile opened in the same run.
+- The `type` of an old row is **not** converted. No version ever read it back (1.x did not
+  store it at all), so a stored type was never in effect and may predate a change in code.
+- A database upgraded to v20 by a build from before this addition lacks the column; there
+  is no repair step for it, because no such build was distributed.
+
 ### Migration v19 → v20 (SQL step)
 
 Rename the `channels` table to `channels_legacy`, create the two new tables and the view,
@@ -139,7 +157,7 @@ Converted rows are deleted, so their presence is the one-time gate. For each sto
 | A name that OSCAR has shipped before (see next section) | Not an override; the user gets the current name |
 | Any other name | Kept as an override: a real rename |
 | Colour, threshold, enabled or overview flag that differs | Kept as an override |
-| `type` | Ignored (see non-goals) |
+| `type` | Ignored: never an override (see "Flag Type (#430)") |
 | Row whose channel is unknown by id and by code | Left in `channels_legacy` and tried again at later starts. Today such a row is skipped at load but kept in the table, so this preserves it |
 
 No dialog (developer's decision). The same conversion is used for:

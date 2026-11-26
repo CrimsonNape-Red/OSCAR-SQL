@@ -558,6 +558,7 @@ void Channel::resetToDefaults()
     m_lowerThresholdColor = m_defaults.lowerThresholdColor;
     m_upperThresholdColor = m_defaults.upperThresholdColor;
     m_showInOverview = m_defaults.showInOverview;
+    m_type = m_defaults.type;
 }
 
 Channel::Channel(ChannelID id, ChanType type, MachineType machtype, ScopeType scope, QString code, QString fullname,

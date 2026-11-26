@@ -365,7 +365,7 @@ CREATE TABLE channel_defaults (
 )
 ```
 
-**profile_channel_overrides** - sparse, per profile. A row exists only for a channel on which the profile changed at least one field; a NULL column means "use the default". `channel_code` lets a row be matched by code when its `channel_id` is unknown to the running build. There are no threshold colour columns because nothing in the UI can change them.
+**profile_channel_overrides** - sparse, per profile. A row exists only for a channel on which the profile changed at least one field; a NULL column means "use the default". `channel_code` lets a row be matched by code when its `channel_id` is unknown to the running build. `type` is the Flag Type chosen in Preferences > Events for an event channel (4 = Flag, 8 = Minor Flag, 16 = Span). There are no threshold colour columns because nothing in the UI can change them.
 
 ```sql
 CREATE TABLE profile_channel_overrides (
@@ -373,6 +373,7 @@ CREATE TABLE profile_channel_overrides (
     profile_id INTEGER NOT NULL,
     channel_id INTEGER NOT NULL,
     channel_code TEXT NOT NULL,
+    type INTEGER,
     enabled INTEGER, default_color TEXT,
     fullname TEXT, label TEXT, description TEXT,
     lower_threshold REAL, upper_threshold REAL,
@@ -387,7 +388,8 @@ CREATE TABLE profile_channel_overrides (
 
 ```sql
 CREATE VIEW channels AS
-SELECT p.id AS profile_id, d.channel_id, d.channel_code, d.type,
+SELECT p.id AS profile_id, d.channel_id, d.channel_code,
+       COALESCE(o.type, d.type) AS type,
        COALESCE(o.enabled, d.enabled) AS enabled,
        COALESCE(o.default_color, d.default_color) AS default_color,
        COALESCE(o.fullname, d.fullname) AS fullname,
@@ -961,6 +963,7 @@ NULL in a value column means "use the default from `channel_defaults`".
 | profile_id | INTEGER | FK | NO | → profiles(id) ON DELETE CASCADE |
 | channel_id | INTEGER | | NO | OSCAR channel ID constant; with `profile_id` UNIQUE |
 | channel_code | TEXT | | NO | Code, so a row can be matched by code if the ID is unknown to the build |
+| type | INTEGER | | YES | Flag Type override (event channels only: 4 = Flag, 8 = Minor Flag, 16 = Span) |
 | enabled | INTEGER | | YES | Enabled flag override (0/1) |
 | default_color | TEXT | | YES | Color override (#RRGGBB) |
 | fullname | TEXT | | YES | Full name override (a user rename) |

@@ -83,9 +83,22 @@ QString thresholdText(double value)
 }
 
 // Column layouts of the two channel tabs (see InitChanInfo() and InitWaveInfo()).
-constexpr int kEventsColor = 1, kEventsOverview = 2, kEventsLabel = 4, kEventsDetails = 5;
+constexpr int kEventsColor = 1, kEventsOverview = 2, kEventsFlagType = 3, kEventsLabel = 4,
+              kEventsDetails = 5;
 constexpr int kWavesColor = 1, kWavesOverview = 2, kWavesLower = 3, kWavesUpper = 4,
               kWavesLabel = 5, kWavesDetails = 6;
+
+/*! \brief The channel type a Flag Type cell shows: the reverse of the channeltype names.
+    Text that matches none of them reads as a minor flag. */
+schema::ChanType flagTypeFromText(const QString &text)
+{
+    for (auto it = channeltype.constBegin(); it != channeltype.constEnd(); ++it) {
+        if (it.value() == text) {
+            return it.key();
+        }
+    }
+    return schema::MINOR_FLAG;
+}
 } // namespace
 
 QString PreferencesDialog::clinicalHelp() {
@@ -443,7 +456,8 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->chanView->setModel(chanFilterModel);
 
     m_eventsTab = { chanModel, chanFilterModel, ui->chanView, ui->resetOneChannel,
-                    { kEventsColor, kEventsOverview, kEventsLabel, kEventsDetails, -1, -1 } };
+                    { kEventsColor, kEventsOverview, kEventsLabel, kEventsDetails, -1, -1,
+                      kEventsFlagType } };
     setupChannelTab(m_eventsTab);
 
     InitChanInfo();
@@ -456,7 +470,8 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->waveView->setModel(waveFilterModel);
 
     m_wavesTab = { waveModel, waveFilterModel, ui->waveView, ui->resetOneWaveform,
-                   { kWavesColor, kWavesOverview, kWavesLabel, kWavesDetails, kWavesLower, kWavesUpper } };
+                   { kWavesColor, kWavesOverview, kWavesLabel, kWavesDetails, kWavesLower, kWavesUpper,
+                     -1 } };
     setupChannelTab(m_wavesTab);
 
     InitWaveInfo();
@@ -1286,15 +1301,7 @@ void PreferencesDialog::saveChanInfo()
             chan.setFullname(item->text());
             chan.setDefaultColor(QColor(topitem->child(j,1)->data(Qt::UserRole).toUInt()));
             chan.setShowInOverview(topitem->child(j,2)->checkState() == Qt::Checked);
-            QString ts = topitem->child(j,3)->text();
-            schema::ChanType type = schema::MINOR_FLAG;
-            for (QHash<schema::ChanType, QString>::iterator it = channeltype.begin(); it!= channeltype.end(); ++it) {
-                if (it.value() == ts) {
-                    type = it.key();
-                    break;
-                }
-            }
-            chan.setType(type);
+            chan.setType(flagTypeFromText(topitem->child(j, kEventsFlagType)->text()));
             chan.setLabel(topitem->child(j,4)->text());
             chan.setDescription(topitem->child(j,5)->text());
         }
@@ -1770,6 +1777,9 @@ ChannelOverrides::Values PreferencesDialog::rowValues(const ChannelTab &tab, QSt
     if (QStandardItem *cell = rowCell(nameItem, c.upper)) {
         v.upperThreshold = cell->text().toDouble();
     }
+    if (QStandardItem *cell = rowCell(nameItem, c.flagType)) {
+        v.type = flagTypeFromText(cell->text());
+    }
     return v;
 }
 
@@ -1779,7 +1789,7 @@ ChannelOverrides::Values PreferencesDialog::rowOverrides(const ChannelTab &tab, 
     if (!chan) {
         return ChannelOverrides::Values();
     }
-    return ChannelOverrides::diffFrom(chan->id(), chan->type(), chan->defaults(),
+    return ChannelOverrides::diffFrom(chan->id(), ChannelOverrides::codeType(*chan), chan->defaults(),
                                       rowValues(tab, nameItem));
 }
 
@@ -1840,6 +1850,7 @@ void PreferencesDialog::updateRowMarkers(const ChannelTab &tab, QStandardItem *n
              thresholdText(defaults.lowerThreshold));
         mark(rowCell(nameItem, c.upper), ov.upperThreshold.has_value(),
              thresholdText(defaults.upperThreshold));
+        mark(rowCell(nameItem, c.flagType), ov.type.has_value(), channeltype.value(defaults.type));
     }
 
     // The proxy re-filters this row itself; group headers need a full pass.
@@ -1873,7 +1884,7 @@ void PreferencesDialog::resetRow(const ChannelTab &tab, QStandardItem *nameItem)
     }
     const schema::ChannelDefaults &d = chan->defaults();
     const ChannelID id = chan->id();
-    const schema::ChanType type = chan->type();
+    const schema::ChanType type = ChannelOverrides::codeType(*chan);
     auto may = [id, type](ChannelOverrides::Field field) {
         return ChannelOverrides::overridable(id, type, field);
     };
@@ -1913,6 +1924,10 @@ void PreferencesDialog::resetRow(const ChannelTab &tab, QStandardItem *nameItem)
         cell = rowCell(nameItem, c.upper);
         if (cell && may(ChannelOverrides::UpperThreshold)) {
             cell->setText(thresholdText(d.upperThreshold));
+        }
+        cell = rowCell(nameItem, c.flagType);
+        if (cell && may(ChannelOverrides::Type)) {
+            cell->setText(channeltype.value(d.type));
         }
     }
     updateRowMarkers(tab, nameItem);

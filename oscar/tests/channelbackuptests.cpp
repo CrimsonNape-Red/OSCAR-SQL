@@ -124,6 +124,7 @@ QString ChannelBackupTests::makeBackup(const QString &name)
 // override of the restored profile; nothing else is copied.
 void ChannelBackupTests::testOverridesSurviveBackupAndRestore() {
     schema::channel[CPAP_Obstructive].setLabel("Zz Backup Label Zz");
+    schema::channel[CPAP_Obstructive].setType(schema::SPAN);
     p_profile->saveChannels();
 
     const QString package = makeBackup("channelbackup");
@@ -143,6 +144,7 @@ void ChannelBackupTests::testOverridesSurviveBackupAndRestore() {
     QCOMPARE(rows.size(), 1);
     QCOMPARE(rows[0].channelId, ChannelID(CPAP_Obstructive));
     QCOMPARE(rows[0].values.label.value(), QString("Zz Backup Label Zz"));
+    QCOMPARE(rows[0].values.type.value(), schema::SPAN);
 }
 
 // A backup of schema v12-v19 holds channels.sql. Restore parks its rows in channels_legacy

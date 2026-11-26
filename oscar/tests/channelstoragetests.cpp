@@ -180,13 +180,17 @@ void ChannelStorageTests::testViewPrefersOverride()
 {
     ChannelRepository repo;
     ChannelDefaultRow d; d.channelId = 60001; d.channelCode = "TestChan"; d.fullname = "Def Name"; d.label = "Def";
+    d.type = schema::FLAG;
     QVERIFY(repo.syncDefaults({ d }));
     const QString where = QString(" FROM channels WHERE profile_id=%1 AND channel_id=60001").arg(m_profileId);
     QCOMPARE(scalar("SELECT label" + where).toString(), QString("Def"));
     QCOMPARE(scalar("SELECT is_customized" + where).toInt(), 0);
+    QCOMPARE(scalar("SELECT type" + where).toInt(), int(schema::FLAG));
     ChannelOverrideRow o; o.channelId = 60001; o.channelCode = "TestChan"; o.values.label = QString("Mine");
+    o.values.type = schema::SPAN;
     QVERIFY(repo.replaceOverrides(m_profileId, { o }, { 60001 }, { "TestChan" }));
     QCOMPARE(scalar("SELECT label" + where).toString(), QString("Mine"));
+    QCOMPARE(scalar("SELECT type" + where).toInt(), int(schema::SPAN));
     QCOMPARE(scalar("SELECT fullname" + where).toString(), QString("Def Name"));
     QCOMPARE(scalar("SELECT is_customized" + where).toInt(), 1);
 }
@@ -197,6 +201,7 @@ void ChannelStorageTests::testOverridesRoundTrip()
     ChannelRepository repo;
     ChannelOverrideRow a; a.channelId = 60001; a.channelCode = "TestChan";
     a.values.label = QString(""); a.values.color = QColor("#123456"); a.values.enabled = false;
+    a.values.type = schema::MINOR_FLAG;
     ChannelOverrideRow empty; empty.channelId = 60002; empty.channelCode = "Other";
     QVERIFY(repo.replaceOverrides(m_profileId, { a, empty }, { 60001, 60002 }, { "TestChan", "Other" }));
     const auto rows = repo.findOverrides(m_profileId);
@@ -204,6 +209,7 @@ void ChannelStorageTests::testOverridesRoundTrip()
     QCOMPARE(rows[0].values.label.value(), QString(""));       // empty string, not NULL
     QCOMPARE(rows[0].values.color.value().name(), QString("#123456"));
     QCOMPARE(rows[0].values.enabled.value(), false);
+    QCOMPARE(rows[0].values.type.value(), schema::MINOR_FLAG);
     QVERIFY(!rows[0].values.fullname.has_value());
 }
 
@@ -314,6 +320,35 @@ void ChannelStorageTests::testPreferenceThresholdAndSettingNotStored()
     schema::channel[CPAP_PSMin].setLabel("Mine");
     p_profile->saveChannels();
     QCOMPARE(overrideCount(), 0);
+}
+
+// A Flag Type changed in Preferences is stored as an override and comes back (#430).
+void ChannelStorageTests::testFlagTypeSurvivesReload()
+{
+    schema::Channel &c = schema::channel[CPAP_Obstructive];
+    QCOMPARE(c.defaults().type, schema::FLAG);
+    c.setType(schema::SPAN);
+    p_profile->saveChannels();
+    QCOMPARE(overrideCount(), 1);
+    schema::resetChannelsToDefaults();
+    QCOMPARE(c.type(), schema::FLAG);
+    p_profile->loadChannels();
+    QCOMPARE(c.type(), schema::SPAN);
+
+    // Set back to the code's type, the override goes away.
+    c.setType(schema::FLAG);
+    p_profile->saveChannels();
+    QCOMPARE(overrideCount(), 0);
+}
+
+// A Flag Type left in the registry by another profile is put back to the code's type
+// when a profile without that override is loaded (#430).
+void ChannelStorageTests::testFlagTypeGoesBackWithoutOverride()
+{
+    schema::Channel &c = schema::channel[CPAP_Obstructive];
+    c.setType(schema::MINOR_FLAG);
+    p_profile->loadChannels();
+    QCOMPARE(c.type(), schema::FLAG);
 }
 
 // Loading a second profile does not carry over the first profile's overrides.

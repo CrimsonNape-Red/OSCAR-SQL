@@ -49,6 +49,8 @@ private slots:
     void testEmptyLabelSurvivesReload();
     void testOverrideDroppedWhenBackToDefault();
     void testPreferenceThresholdAndSettingNotStored();
+    void testFlagTypeSurvivesReload();
+    void testFlagTypeGoesBackWithoutOverride();
     void testSecondProfileDoesNotInheritOverrides();
     void testLoadMatchesOverrideByCode();
     void testSaveRewritesMovedOverrideUnderRegistryId();

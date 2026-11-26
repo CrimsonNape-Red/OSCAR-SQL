@@ -150,6 +150,7 @@ private:
         int details;
         int lower;
         int upper;
+        int flagType;   //!< Flag Type (Flag, Minor Flag, Span); Events tab only
     };
 
     //! \brief One channel tab (Events or Waveforms): what the shared row helpers work on.

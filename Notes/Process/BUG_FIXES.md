@@ -4,6 +4,37 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-25 - A Flag Type change in Preferences > Events was lost at restart (GitLab #430)
+
+**Files:** `oscar/SleepLib/channel_overrides.cpp/.h`, `oscar/SleepLib/schema.cpp/.h`,
+`oscar/SleepLib/channel_store.cpp`, `oscar/database/channel_repository.cpp`,
+`oscar/database/database_schema.cpp`, `oscar/preferencesdialog.cpp/.h`
+
+**Symptom:** Changing an event's Flag Type (Flag, Minor Flag, Span) worked until OSCAR was closed,
+then was gone. Until then it also stayed in effect for any other profile opened in the same run.
+
+**Root cause:** The type was applied to the channel in memory only. Up to schema v19 it was written
+to `channels.type` but never read back; OSCAR 1.x did not store it at all. Nothing reset it when a
+profile was loaded.
+
+**Fix:** The Flag Type is one more per-profile override: a `type` column in
+`profile_channel_overrides` (added to schema v20 itself, which had not been distributed), read
+through `COALESCE` in the `channels` view. `Channel::resetToDefaults()` now restores the code's type,
+so loading a profile starts from it. Preferences marks a changed Flag Type as customized and Reset
+Channel puts it back.
+
+**Non-obvious:**
+- Only FLAG, MINOR_FLAG and SPAN channels can have the override, and only to another of the three;
+  any other stored number is ignored.
+- The `type` stored by older builds is not converted: it was never in effect.
+- Which fields a channel may override now goes by the code's type (`ChannelOverrides::codeType()`),
+  not the live type.
+- A database already upgraded to v20 by a build from before this change has no `type` column and
+  fails to load or save overrides. Only development databases are affected; add the column and
+  recreate the view by hand, or go back to the pre-upgrade copy.
+
+---
+
 ## 2026-11-25 - Channel edits in Preferences were written only when the profile closed (GitLab #431)
 
 **Files:** `oscar/preferencesdialog.cpp`
@@ -54,8 +85,8 @@ conversion. Preferences marks customized channels and can reset a single channel
 
 **Non-obvious:**
 - Not changed: the Device Settings Changes cache (#258); the single colour per channel (threshold
-  colours are still not editable); a channel-type change in Preferences > Events is still saved but
-  never loaded back.
+  colours are still not editable). A Flag Type change in Preferences > Events was left out here
+  and added to v20 afterwards (#430, above).
 - Four thresholds are driven by profile preferences and are never overrides (`CPAP_Leak` upper,
   `OXI_Pulse` lower and upper, `OXI_SPO2` lower). The `channels` view shows the code default for
   them; the real value is in `profile_preferences`.
