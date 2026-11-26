@@ -409,7 +409,8 @@ void MainWindow::SetupGUI(bool batchMode)
         // On macOS the colour scheme is applied again first, now that the window is on screen,
         // and before a profile's pages are built (GitLab #397)
         QTimer::singleShot(50, this, [this] {
-            ColorScheme::reapplyAfterShow(this, [this] { Startup(); });
+            ColorScheme::reapplyAfterShow();
+            Startup();
         });
     }
 

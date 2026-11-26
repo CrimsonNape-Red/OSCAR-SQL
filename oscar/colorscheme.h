@@ -12,10 +12,6 @@
 #ifndef COLORSCHEME_H
 #define COLORSCHEME_H
 
-#include <functional>
-
-class QObject;
-
 /*! \namespace ColorScheme
     \brief Applies the user's light/dark choice (AppSetting->colorScheme()) to the application
 
@@ -47,26 +43,18 @@ void apply();
  */
 bool nativeDialogsMatch();
 
-/*! \brief Applies the choice again once the main window is on screen, then calls \a done
+/*! \brief Applies the choice again; call once the main window is on screen
  *
  *  For macOS (GitLab #397). When OSCAR's choice differs from macOS's own scheme, the scheme
  *  apply() sets at startup, before any window is shown, reaches Qt's palette but not the parts
  *  the macOS style draws with native controls (tab bars, frames): those are drawn in macOS's
  *  scheme. A change made while the window is on screen reaches both. So this goes back to
- *  macOS's scheme and, a moment later, to the chosen one, as the user would with the moon/sun
- *  button.
+ *  macOS's scheme and straight on to the chosen one, as the user would with the moon/sun
+ *  button. Both steps happen before anything is drawn.
  *
- *  Elsewhere, and when the choice doesn't differ from macOS's scheme, \a done is called at
- *  once and nothing else happens.
- *
- *  While this is being tested on Macs, the environment variable OSCAR_SCHEME_REAPPLY picks the
- *  method: "pause" (the default, described above), "sync" (the same two steps with no pause
- *  between them), "same" (only the chosen scheme, applied once more) or "off".
- *
- *  \param context  Object the delayed step belongs to; \a done is not called if it is destroyed first
- *  \param done     Called when the scheme has settled
+ *  Does nothing elsewhere, or when the choice doesn't differ from macOS's scheme.
  */
-void reapplyAfterShow(QObject *context, const std::function<void()> &done);
+void reapplyAfterShow();
 
 } // namespace ColorScheme
 

@@ -8864,19 +8864,21 @@ for OSCAR. The scheme `main()` applies before any window is shown reaches Qt's p
 drawn parts. A change made while the window is on screen reaches both. Why is not established; that is
 between Qt and macOS.
 
-**Change (not yet tested on a Mac):** On macOS, when the choice differs from macOS's scheme,
-`reapplyAfterShow()` goes back to macOS's scheme once the main window is on screen and 100 ms later applies
-the choice again, as the reporter's own workaround did. `Startup()` runs after that, so no profile pages are
-built in between.
+**Fix:** On macOS, when the choice differs from macOS's scheme, `reapplyAfterShow()` goes back to macOS's
+scheme once the main window is on screen and straight on to the choice again, as the reporter's own
+workaround did. `Startup()` runs after that, so no profile pages are built in between.
 
 **Non-obvious:**
 - Ruled out: an old Qt. Qt's macOS style wraps every draw call in the application's appearance
   (`QMacApperanceStyle`, `qtbase/src/gui/platform/macos/qmacstyle_p.h`, in 6.10.2 and 6.12.0), which looked
   like the fix for this; the problem is unchanged with Qt 6.12.1.
-- The 100 ms pause shows the window in macOS's scheme for a moment at startup. Whether it is needed is not
-  known, so the environment variable `OSCAR_SCHEME_REAPPLY` picks the method for testing: `pause` (default),
-  `sync` (the two steps with no pause), `same` (the choice applied once more, nothing else) or `off`. It is
-  to be removed once one method is settled on.
+- A first version (f74e13ba) let the environment variable `OSCAR_SCHEME_REAPPLY` pick the method, so one
+  Mac build could try them all. Tested on a Mac in dark mode with OSCAR set to light (Qt 6.12): the two
+  steps with a 100 ms pause between them: right. The two steps with no pause: right. The choice simply
+  applied a second time: wrong. Nothing: wrong. So it takes a change of scheme, and no pause; the variable
+  and the pause are gone.
+- Not tested on a Mac: the code as it is now (the same steps as the no-pause method, with the variable
+  removed), and the other direction (macOS light, OSCAR dark).
 - Compiled on Windows only; the macOS block was syntax-checked with MSVC with its guard forced on.
 
 ## 2026-11-17 - BMC G3/G3X: snore events not imported (GitLab #398)
