@@ -218,12 +218,16 @@ QWidget *WelcomePage::buildTiles()
         QTimer::singleShot(0, mainwin, [] { mainwin->JumpStatistics(); });
     });
 
-    m_insightsTile = new ActionTile(LineIcon::Insights, tr("Insights"), tr("Patterns and highlights"), box);
-    connect(m_insightsTile, &QAbstractButton::clicked, this, [] {
-        QTimer::singleShot(0, mainwin, [] { mainwin->JumpInsights(); });
-    });
+    m_tiles = { import, oxi, m_dailyTile, m_overviewTile, m_statisticsTile };
 
-    m_tiles = { import, oxi, m_dailyTile, m_overviewTile, m_statisticsTile, m_insightsTile };
+    // No tile while Insights is turned off in Preferences; MainWindow rebuilds the page on a change
+    if (AppSetting->showInsights()) {
+        m_insightsTile = new ActionTile(LineIcon::Insights, tr("Insights"), tr("Patterns and highlights"), box);
+        connect(m_insightsTile, &QAbstractButton::clicked, this, [] {
+            QTimer::singleShot(0, mainwin, [] { mainwin->JumpInsights(); });
+        });
+        m_tiles.append(m_insightsTile);
+    }
     return box;
 }
 
@@ -504,7 +508,7 @@ void WelcomePage::refreshPage()
     m_dailyTile->setEnabled(!noMachines);
     m_overviewTile->setEnabled(!noMachines);
     m_statisticsTile->setEnabled(!noMachines);
-    m_insightsTile->setEnabled(!noMachines);
+    if (m_insightsTile) m_insightsTile->setEnabled(!noMachines);
     if (mainwin) mainwin->EnableTabs(!noMachines);
 
     // Rebuild the data-dependent sections
@@ -571,7 +575,8 @@ void WelcomePage::relayout(bool force)
 {
     const int width = m_scroll->viewport()->width() - 2 * Theme::PagePadding;
 
-    int tiles = columnsFor(width, { { 1050, 6 }, { 640, 3 } }, 2);
+    // One row when wide: six tiles, or five without Insights
+    int tiles = columnsFor(width, { { 1050, int(m_tiles.size()) }, { 640, 3 } }, 2);
     if (force || tiles != m_tileColumns) {
         m_tileColumns = tiles;
         placeInGrid(m_tileGrid, m_tiles, tiles);

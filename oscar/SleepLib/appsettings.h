@@ -67,6 +67,7 @@ const QString STR_AS_GraphTooltips = "GraphTooltips";
 const QString STR_AS_UseFusionTheme = "UseFusionTheme";
 const QString STR_AS_UseNewWelcome = "UseNewWelcome";
 const QString STR_AS_WelcomeCardColour = "WelcomeCardColour";
+const QString STR_AS_ShowInsights = "ShowInsights";
 const QString STR_AS_ColorScheme = "ColorScheme";
 const QString STR_AS_UseSystemTooltipColors = "UseSystemTooltipColors";
 const QString STR_AS_LineThickness = "LineThickness";
@@ -199,6 +200,9 @@ public:
   WelcomeCardColour welcomeCardColour() const {
       return WelcomeCardColour(getPref(STR_AS_WelcomeCardColour).toInt());
   }
+  //! \brief Whether the Insights page can be reached: its tab, Welcome tile and View menu entry.
+  //!        The page calculates nothing until it is shown, so hiding these turns Insights off.
+  bool showInsights() const { return getPref(STR_AS_ShowInsights).toBool(); }
   //! \brief Whether the application is light, dark, or follows the operating system
   ColorSchemeChoice colorScheme() const {
       return ColorSchemeChoice(getPref(STR_AS_ColorScheme).toInt());
@@ -293,6 +297,8 @@ public:
   void setUseNewPages(bool b) { setPref(STR_AS_UseNewWelcome, b); }
   //! \brief Sets how the redesigned Welcome page colours its metric cards
   void setWelcomeCardColour(WelcomeCardColour c) { setPref(STR_AS_WelcomeCardColour, int(c)); }
+  //! \brief Sets whether the Insights page can be reached (tab, Welcome tile, View menu entry)
+  void setShowInsights(bool b) { setPref(STR_AS_ShowInsights, b); }
   //! \brief Sets whether the application is light, dark, or follows the operating system
   void setColorScheme(ColorSchemeChoice c) { setPref(STR_AS_ColorScheme, int(c)); }
   //! \brief Sets whether tooltips use the system's colors. ToolTipColors::apply() puts it into effect.

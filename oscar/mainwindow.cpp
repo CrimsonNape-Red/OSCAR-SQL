@@ -352,11 +352,11 @@ void MainWindow::SetupGUI(bool batchMode)
     const int statisticsIndex = ui->tabWidget->indexOf(ui->statisticsTab);
     ui->tabWidget->setTabEnabled(statisticsIndex, false);
     ui->tabWidget->setTabVisible(statisticsIndex, false);
-    // Insights follows Statistics: one page for every profile, shown once one is open
+    // Insights follows Statistics: one page for every profile, shown once one is open.
+    // The tab is always created, so tab numbers don't depend on the Show Insights preference.
     insights = new InsightsPage(ui->tabWidget);
     ui->tabWidget->insertTab(statisticsIndex + 1, insights, tr("Insights"));
-    ui->tabWidget->setTabEnabled(statisticsIndex + 1, false);
-    ui->tabWidget->setTabVisible(statisticsIndex + 1, false);
+    updateInsightsAccess();
     setupColorSchemeButton();
 
     applySidebarTheme();
@@ -573,7 +573,24 @@ void MainWindow::EnableTabs(bool b)
     ui->tabWidget->setTabEnabled(2, b);
     ui->tabWidget->setTabEnabled(3, b);
     ui->tabWidget->setTabEnabled(4, b);
-    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(insights), b);
+    updateInsightsAccess();
+}
+
+void MainWindow::updateInsightsAccess()
+{
+    const bool show = AppSetting->showInsights();
+    ui->actionView_Insights->setVisible(show);
+
+    const int index = ui->tabWidget->indexOf(insights);
+    if (index < 0) return;
+    // Hidden from under the user (Preferences opened from the Insights page): go to Welcome
+    if (!show && welcome && ui->tabWidget->currentWidget() == insights) {
+        ui->tabWidget->setCurrentWidget(welcome);
+    }
+    // A hidden tab is also disabled, which is what JumpInsights() checks
+    const int statisticsIndex = ui->tabWidget->indexOf(ui->statisticsTab);
+    ui->tabWidget->setTabEnabled(index, show && ui->tabWidget->isTabEnabled(statisticsIndex));
+    ui->tabWidget->setTabVisible(index, show && ui->tabWidget->isTabVisible(statisticsIndex));
 }
 
 void MainWindow::Notify(QString s, QString title, int ms)
@@ -924,9 +941,7 @@ bool MainWindow::OpenProfile(QString profileName)
     ui->tabWidget->setTabEnabled(3, !noMachines);       // overview, STR_TR_Overview);
     ui->tabWidget->setTabEnabled(4, !noMachines);       // statistics, STR_TR_Statistics);
     ui->tabWidget->setTabVisible(4, true);              // hidden while no profile is open
-    const int insightsIndex = ui->tabWidget->indexOf(insights);
-    ui->tabWidget->setTabEnabled(insightsIndex, !noMachines);
-    ui->tabWidget->setTabVisible(insightsIndex, true);
+    updateInsightsAccess();
 
     progress->close();
     delete progress;
@@ -1001,9 +1016,7 @@ void MainWindow::resetNoProfileUi()
     const int statisticsIndex = ui->tabWidget->indexOf(ui->statisticsTab);
     ui->tabWidget->setTabEnabled(statisticsIndex, false);
     ui->tabWidget->setTabVisible(statisticsIndex, false);
-    const int insightsIndex = ui->tabWidget->indexOf(insights);
-    ui->tabWidget->setTabEnabled(insightsIndex, false);
-    ui->tabWidget->setTabVisible(insightsIndex, false);
+    updateInsightsAccess();
     if (insights) insights->invalidate();   // drop the closed profile's content
 
     if (profileSelector) profileSelector->updateProfileHighlight(QString());
@@ -2308,6 +2321,7 @@ void MainWindow::on_action_Preferences_triggered()
 
     const bool oldNewPages = AppSetting->useNewPages();
     const WelcomeCardColour oldCardColour = AppSetting->welcomeCardColour();
+    const bool oldShowInsights = AppSetting->showInsights();
 
     if (pd.exec() == PreferencesDialog::Accepted) {
         // Apply any updates from preference changes (notably fonts)
@@ -2315,8 +2329,14 @@ void MainWindow::on_action_Preferences_triggered()
         setApplicationFont();
 
         const bool pagesChanged = (oldNewPages != AppSetting->useNewPages());
-        if (welcome && (pagesChanged || oldCardColour != AppSetting->welcomeCardColour())) {
+        const bool insightsChanged = (oldShowInsights != AppSetting->showInsights());
+        // The Welcome page's tiles include Insights only while it is shown
+        if (welcome && (pagesChanged || insightsChanged
+                        || oldCardColour != AppSetting->welcomeCardColour())) {
             rebuildWelcomePage();
+        }
+        if (insightsChanged) {
+            updateInsightsAccess();
         }
         if (pagesChanged) {
             rebuildDailyPage();

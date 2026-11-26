@@ -365,6 +365,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->notifyMessageBoxCheckbox->setChecked(AppSetting->notifyMessagBoxOption());
     ui->dontAskWhenSavingScreenshotsCheckbox->setChecked(AppSetting->dontAskWhenSavingScreenshots());
     ui->showDatabaseMenuCheckbox->setChecked(AppSetting->showDatabaseMenu());
+    ui->showInsights->setChecked(AppSetting->showInsights());
     ui->cacheSessionData->setChecked(AppSetting->cacheSessions());
     ui->preloadSummaries->setChecked(profile->session->preloadSummaries());
     ui->animationsAndTransitionsCheckbox->setChecked(AppSetting->animations());
@@ -1122,6 +1123,8 @@ bool PreferencesDialog::Save()
     AppSetting->setNotifyMessagBoxOption(ui->notifyMessageBoxCheckbox->isChecked());
     AppSetting->setDontAskWhenSavingScreenshots(ui->dontAskWhenSavingScreenshotsCheckbox->isChecked());
     AppSetting->setShowDatabaseMenu(ui->showDatabaseMenuCheckbox->isChecked());
+    // MainWindow shows or hides the Insights tab, tile and menu entry when this changes.
+    AppSetting->setShowInsights(ui->showInsights->isChecked());
 
     AppSetting->setCacheSessions(ui->cacheSessionData->isChecked());
     profile->session->setPreloadSummaries(ui->preloadSummaries->isChecked());

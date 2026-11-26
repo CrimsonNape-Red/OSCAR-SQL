@@ -566,6 +566,14 @@ private:
     //! \brief Replaces the Welcome tab's page after the Preferences choice changes
     void rebuildWelcomePage();
 
+    /*! \brief Shows or hides the Insights tab and View menu entry
+     *
+     *  Follows AppWideSetting::showInsights(). While Insights is shown, its tab is visible and
+     *  enabled exactly when the Statistics tab is: hidden until a profile is open, disabled
+     *  while the profile has no devices. Call after changing the Statistics tab's state.
+     */
+    void updateInsightsAccess();
+
     /*! \brief Replaces the Daily and Overview tabs with new ones, after the Classic/Modern
      *         setting changes
      *

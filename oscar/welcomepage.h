@@ -81,7 +81,7 @@ private:
     UiKit::ActionTile *m_dailyTile;
     UiKit::ActionTile *m_overviewTile;
     UiKit::ActionTile *m_statisticsTile;
-    UiKit::ActionTile *m_insightsTile;
+    UiKit::ActionTile *m_insightsTile = nullptr;    //!< Null while Insights is turned off
 
     QGridLayout *m_cardGrid = nullptr;
     QVector<QWidget *> m_cards;
