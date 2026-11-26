@@ -2088,7 +2088,8 @@ QString Daily::getPieChart (float values, Day * day) {
 
         int w=155;
         int h=155;
-        QPixmap pixmap=eventBreakdownPie()->renderPixmap(w,h,false);
+        // On a clear background: the panel's colour is not the graphs' background colour
+        QPixmap pixmap=eventBreakdownPie()->renderPixmap(w,h,false,true);
         if (!pixmap.isNull()) {
             QByteArray byteArray;
             QBuffer buffer(&byteArray); // use buffer to store pixmap into byteArray
@@ -2116,7 +2117,14 @@ QString Daily::getPieChart (float values, Day * day) {
         // over every session, so a device that scores events on other days qualifies, while a
         // device that never reports them (a brick) still shows nothing.
         if (reportsBreakdownChannels(day)) {
-            html += "<tr><td align=center><img src=\"qrc:/docs/0.0.gif\"></td></tr>\n";
+            // The image file is black on white; it is shown as the text alone in the panel's
+            // text colour, so it suits a dark panel too.
+            const QImage zero = DailyDetails::zeroEventsImage(QApplication::palette().color(QPalette::Text));
+            QByteArray byteArray;
+            QBuffer buffer(&byteArray);
+            buffer.open(QIODevice::WriteOnly);
+            zero.save(&buffer, "PNG");
+            html += "<tr><td align=center><img src=\"data:image/png;base64," + byteArray.toBase64() + "\"></td></tr>\n";
         }
     }
     html+="</table>\n";
@@ -2170,7 +2178,7 @@ DailyDetails::Page Daily::detailsPage(Day *day, QDate date, bool brick, bool oth
     if (page.showPie && page.kind == DailyDetails::DayKind::Cpap) {
         if (DailyDetails::pieTotal(page.events) > 0) {
             eventBreakdownPie()->setShowTitle(false);
-            page.pie = eventBreakdownPie()->renderPixmap(155, 155, false);
+            page.pie = eventBreakdownPie()->renderPixmap(155, 155, false, true);    // clear background: the card's shows
         } else {
             page.pieZero = reportsBreakdownChannels(day);
         }

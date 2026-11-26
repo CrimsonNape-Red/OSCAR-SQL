@@ -92,3 +92,24 @@ void DailyDetailsTests::testCaptureCardsOpen()
     QCOMPARE(DailyDetails::captureCardsOpen(pie), all);         // the pie stays open
     QCOMPARE(DailyDetails::captureCardsOpen(all & ~pie), all & ~pie);
 }
+
+void DailyDetailsTests::testZeroEventsImage()
+{
+    // The "0.0!" image is the text alone in the colour asked for, on nothing: it has to suit
+    // the dark panels as well as the white ones (GitLab #434)
+    const QColor ink(0xe6, 0xe6, 0xe6);
+    const QImage image = DailyDetails::zeroEventsImage(ink);
+    QVERIFY(!image.isNull());
+    QVERIFY(image.hasAlphaChannel());
+    QVERIFY(image.pixelColor(0, 0).alpha() < 8);        // no background
+    int solid = 0;
+    for (int y = 0; y < image.height(); ++y) {
+        for (int x = 0; x < image.width(); ++x) {
+            const QColor pixel = image.pixelColor(x, y);
+            if (pixel.alpha() < 255) continue;
+            ++solid;
+            QCOMPARE(pixel.rgb(), ink.rgb());
+        }
+    }
+    QVERIFY(solid > 1000);                              // the text is there
+}

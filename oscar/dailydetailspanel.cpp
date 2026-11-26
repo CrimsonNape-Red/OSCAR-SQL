@@ -424,8 +424,11 @@ QWidget *DailyDetailsPanel::eventBreakdownCard(const Page &page)
     column->setContentsMargins(0, 0, 0, 4);
     auto *image = new QLabel(content);
     image->setAlignment(Qt::AlignCenter);
-    // The pie, or the "0.0" image when the device scores these events but recorded none
-    image->setPixmap(page.pie.isNull() ? QPixmap(":/docs/0.0.gif") : page.pie);
+    // The pie, or the "0.0" image when the device scores these events but recorded none. Both
+    // have a clear background, so the card's colour shows behind them in light and dark mode.
+    image->setPixmap(page.pie.isNull()
+                         ? QPixmap::fromImage(zeroEventsImage(Theme::color(Theme::Role::Ink)))
+                         : page.pie);
     column->addWidget(image);
     return collapsible(DC_EventBreakdown, classic(QT_TRANSLATE_NOOP("Daily", "Event Breakdown")), content);
 }

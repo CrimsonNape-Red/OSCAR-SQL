@@ -9616,3 +9616,38 @@ ventilation; minute ventilation is also skipped while there is no rate.
   27.2 /min, tidal volume 3896 to 2095 ml, minute ventilation 41.4 to 31.8 l/min, medians
   unchanged), and a code review. Not checked: a 25 Hz device. No unit test covers
   `FlowParser::calc()`.
+
+## 2026-11-26 - Dark mode: Event Breakdown pie in a darker box, "0.0!" in a white box (GitLab #434)
+
+**Files:** `oscar/Graphs/gGraph.cpp`, `oscar/Graphs/gGraph.h` (`gGraph::renderPixmap()`),
+`oscar/dailydetails.cpp`, `oscar/dailydetails.h` (`DailyDetails::zeroEventsImage()`),
+`oscar/daily.cpp` (`Daily::getPieChart()`, `Daily::detailsPage()`),
+`oscar/dailydetailspanel.cpp` (`eventBreakdownCard()`), `oscar/tests/dailydetailstests.cpp`
+
+**Symptom:** In dark mode, Classic and Modern, the Event Breakdown pie on the Daily page's
+Details tab sat in a square that was darker than the panel around it. On a night without
+events the "0.0!" was black text in a white square.
+
+**Root cause:** Two separate faults.
+1. The pie is a picture of a graph, and `renderPixmap()` filled it with the graphs' dark
+   background (`GraphTheme::background()`, #252525). The Details panel and the Modern cards
+   take the palette's Base colour, which is a different dark shade.
+2. The "0.0!" is an image file (`docs/0.0.gif`), black text on opaque white, shown as it is.
+
+**Fix:** `renderPixmap()` has a `transparent` argument that leaves the background clear; the
+two Daily callers use it, so the panel's own colour shows around the pie. The "0.0!" is made
+at run time from the image file: the text alone, in the panel's text colour, on a clear
+background (`DailyDetails::zeroEventsImage()`).
+
+**Non-obvious:**
+- The printed report's pie (`reports.cpp`) calls `renderPixmap()` with `printing` and keeps
+  its white background.
+- `0.0.gif` is an animated image of 7 frames in different colours. Neither the Classic HTML
+  panel nor a `QLabel` pixmap ever played it; only the first frame (black on white) is used.
+- The Classic panel now embeds the "0.0!" in its HTML as a PNG, as it does the pie, instead
+  of naming the resource file.
+- Both pictures are made when the day is loaded. A switch between light and dark reloads the
+  day (`MainWindow::applyPageThemes()`), so they follow it.
+- Checked with screenshots of a test instance on Windows 11: dark mode in Classic and
+  Modern, and light mode in Classic, each on a night with events and a night without. Not
+  checked: light mode in Modern, the printed report, Linux and macOS.

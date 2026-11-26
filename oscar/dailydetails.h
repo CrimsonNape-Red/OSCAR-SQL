@@ -17,6 +17,7 @@
 #include <QColor>
 #include <QDate>
 #include <QDateTime>
+#include <QImage>
 #include <QPixmap>
 #include <QPair>
 #include <QString>
@@ -210,6 +211,13 @@ Settings settings(Day *day);
 QVector<SessionGroup> sessions(Day *day);
 //! \brief The total of the rates the event breakdown pie shows (above 0 means there is a pie)
 double pieTotal(const QVector<EventRow> &events);
+
+/*! \brief The "0.0!" image shown in place of the event breakdown pie on a night without events
+
+    The text alone, in \a ink, on a transparent background, so it suits whatever panel it is put
+    on in light and dark mode. Made from the first frame of :/docs/0.0.gif, which is black text
+    on white. Null when that image can't be read. */
+QImage zeroEventsImage(const QColor &ink);
 
 } // namespace DailyDetails
 

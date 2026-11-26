@@ -707,6 +707,22 @@ double pieTotal(const QVector<EventRow> &events)
     return total;
 }
 
+QImage zeroEventsImage(const QColor &ink)
+{
+    // The source is black text on white: how dark a pixel is becomes how solid the ink is
+    const QImage source = QImage(":/docs/0.0.gif").convertToFormat(QImage::Format_Grayscale8);
+    if (source.isNull()) return QImage();
+    QImage image(source.size(), QImage::Format_ARGB32);
+    for (int y = 0; y < source.height(); ++y) {
+        const uchar *in = source.constScanLine(y);
+        QRgb *out = reinterpret_cast<QRgb *>(image.scanLine(y));
+        for (int x = 0; x < source.width(); ++x) {
+            out[x] = qRgba(ink.red(), ink.green(), ink.blue(), 255 - in[x]);
+        }
+    }
+    return image;
+}
+
 DayKind classify(bool hasCpap, double cpapHours, int sessionCount, bool brick, bool hasOximeterOrPosition)
 {
     if (!hasCpap) {

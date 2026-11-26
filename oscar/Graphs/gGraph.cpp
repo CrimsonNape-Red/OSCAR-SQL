@@ -615,7 +615,7 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
 
 }
 
-QPixmap gGraph::renderPixmap(int w, int h, bool printing)
+QPixmap gGraph::renderPixmap(int w, int h, bool printing, bool transparent)
 {
 
     QFont *_defaultfont = defaultfont;
@@ -646,13 +646,15 @@ QPixmap gGraph::renderPixmap(int w, int h, bool printing)
     bigfont = &fc;
 
     QPixmap pm(w,h);
-
+    // A clear background takes the colour of whatever the image is shown on. The graphs' own
+    // background colour is not the colour of the panels around them in dark mode.
+    if (transparent) pm.fill(Qt::transparent);
 
     bool pixcaching = AppSetting->usePixmapCaching();
     graphView()->setUsePixmapCache(false);
     AppSetting->setUsePixmapCaching(false);
     QPainter painter(&pm);
-    painter.fillRect(0,0,w,h,QBrush(GraphTheme::background()));
+    if (!transparent) painter.fillRect(0,0,w,h,QBrush(GraphTheme::background()));
     QRegion region(0,0,w,h);
     paint(painter, region);
     DrawTextQue(painter);

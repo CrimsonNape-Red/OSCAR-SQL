@@ -23,5 +23,6 @@ private slots:
     void testCardBitsDefault();
     void testCardBitsRoundTrip();
     void testCaptureCardsOpen();
+    void testZeroEventsImage();
 };
 DECLARE_TEST(DailyDetailsTests)

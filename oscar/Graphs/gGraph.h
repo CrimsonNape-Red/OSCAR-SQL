@@ -85,16 +85,19 @@ class gGraph : public QObject
     //! \brief Starts the singleshot Timer running, for ms milliseconds
     void Trigger(int ms);
 
-    /*! \fn QPixmap renderPixmap(int width, int height, float fontscale=1.0);
+    /*! \fn QPixmap renderPixmap(int width, int height, bool printing = false, bool transparent = false);
         \brief Returns a QPixmap containing a snapshot of the graph rendered at size widthxheight
         \param int width    Width of graph 'screenshot'
         \param int height   Height of graph 'screenshot'
-        \param float fontscale Scaling value to adjust DPI (when used for HighRes printing)
+        \param bool printing Render for a printed page: light colours and print-sized fonts
+        \param bool transparent Leave the background clear instead of filling it with the graphs'
+               background colour, for an image shown on a panel of another colour (the event
+               breakdown pie in the Daily page's Details tab)
 
         Note if width or height is more than the OpenGL system allows, it could result in a crash
         Keeping them under 2048 is a reasonably safe value.
         */
-    QPixmap renderPixmap(int width, int height, bool printing = false);
+    QPixmap renderPixmap(int width, int height, bool printing = false, bool transparent = false);
 
     //! \brief Set Graph visibility status
     void setVisible(bool b) { m_visible = b; }
