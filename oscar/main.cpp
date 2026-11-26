@@ -853,13 +853,47 @@ static bool handOverImportsOrWaitForLock(QLockFile &lockFile, const QString &pro
     version probe, and one from SetupGUI() onwards. MainWindow::Startup() disarms the
     second explicitly as soon as the window has been drawn, so a crash later in the
     session is not blamed on graphics.
+
+    A guard made with \a active false does nothing at all. Batch runs use that: the
+    sentinel is one setting shared by every OSCAR process of this user, so a batch run
+    that armed it would be taken for a crashed one by any OSCAR starting meanwhile, and
+    one that disarmed it would hide a real crash of the window (GitLab #432).
     */
 class GraphicsCrashSentinelGuard
 {
   public:
-    GraphicsCrashSentinelGuard() { armGraphicsCrashSentinel(); }
-    ~GraphicsCrashSentinelGuard() { disarmGraphicsCrashSentinel(); }
+    explicit GraphicsCrashSentinelGuard(bool active = true) : m_active(active)
+    {
+        if (m_active)
+            armGraphicsCrashSentinel();
+    }
+    ~GraphicsCrashSentinelGuard()
+    {
+        if (m_active)
+            disarmGraphicsCrashSentinel();
+    }
+
+  private:
+    bool m_active;  //!< false = leave the sentinel alone
 };
+
+/*! \brief True if the command line asks for a batch run: no window, exit when done.
+
+    For the decisions that have to be made before QApplication exists, so it reads argv
+    itself. It must agree with the option loop in main(), including which options take
+    values: "--profile -b" names a profile, it does not ask for a batch run. */
+static bool batchModeRequested(int argc, char *argv[])
+{
+    for (int i = 1; i < argc; ++i) {
+        const QByteArray arg(argv[i]);
+        if (arg == "--batch" || arg == "-b" || arg == "--import-and-exit" || arg == "--import") {
+            return true;
+        } else if (arg == "--profile" || arg == "--datadir") {
+            ++i;    // skip the value
+        }
+    }
+    return false;
+}
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -920,8 +954,16 @@ int main(int argc, char *argv[]) {
 #ifdef Q_OS_WIN
     // A sentinel left over from the previous run means OSCAR died while it was setting
     // up or drawing its window, which on Windows is nearly always the graphics engine.
+    //
+    // A batch run takes no part in this. The sentinel is shared by every OSCAR process of
+    // this user, so finding it set may only mean that another OSCAR is starting right now;
+    // a batch run that believed it would change the user's graphics engine and then wait
+    // forever on the message box below, which nobody is there to close, before a single
+    // line is logged (GitLab #432). It leaves a set sentinel for the next interactive
+    // launch to deal with.
+    const bool batchRequested = batchModeRequested(argc, argv);
     bool oscarCrashed = false;
-    if (settings.value(GFXCrashSentinelSetting).toBool()) {
+    if (!batchRequested && settings.value(GFXCrashSentinelSetting).toBool()) {
         oscarCrashed = true;
     }
     if (oscarCrashed) {
@@ -1182,8 +1224,9 @@ int main(int argc, char *argv[]) {
         // the flag and reverts to the software engine; without this the crash simply repeats
         // on every launch, leaving the user no way in (GitLab #277). The dialogs and database
         // work in between are left out, so a crash or End Task there is not blamed on the
-        // graphics driver (GitLab #362).
-        GraphicsCrashSentinelGuard graphicsProbeSentinel;
+        // graphics driver (GitLab #362). A batch run does not arm it: see the note where
+        // the sentinel is read.
+        GraphicsCrashSentinelGuard graphicsProbeSentinel(!batchMode);
 #endif
 
 // Moved buildInfo calls to after translation is available as makeBuildInfo includes tr() calls

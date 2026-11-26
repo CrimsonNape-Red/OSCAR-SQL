@@ -9477,3 +9477,45 @@ the result over in one step under `timelock`.
 - Checked: compiles (MSVC, Qt 6.12); `MinutesAtPressureTests` passes, repeated 25 times, and
   fails every time when `quit()` is made to do nothing; all unit-test suites pass. Not
   checked in a running OSCAR: the graph on screen, a pop-out and a printed report.
+
+---
+
+## 2026-11-25 - Windows: a batch import hung at startup with no output when another OSCAR was starting (GitLab #432)
+
+**Files:** `oscar/main.cpp`
+
+**Symptom:** With several batch imports running at once on Windows, now and then one sat
+until it was killed without writing a line, not even "Started logging thread". Run again by
+itself, the same import worked. Afterwards OSCAR was on the Software graphics engine.
+
+**Root cause:** The graphics crash sentinel (`OpenGLCompatibilityCheck`) is one setting
+shared by every OSCAR process of the user. Every launch, batch included, armed it around
+the OpenGL version probe. A process that started inside that window read it as "the last
+run crashed while drawing", set the engine to Software, and showed the "OSCAR crashed due
+to an incompatibility with your graphics hardware" message box. The box had no batch-mode
+check and comes before `initializeLogger()`, so a batch run waited on it for ever, silently.
+
+**Fix:** A batch run takes no part in the sentinel.
+
+- `batchModeRequested()` reads argv, because the sentinel is examined before `QApplication`
+  exists and so before the option loop. A batch run skips the check, so it neither changes
+  the engine nor shows the box.
+- `GraphicsCrashSentinelGuard` takes an `active` flag; the guard around the probe is
+  inactive in a batch run, so it neither arms nor disarms.
+
+**Non-obvious:**
+- A batch run leaves a set sentinel alone instead of clearing it. It may be a real crash
+  of the window, and the next interactive launch has to find it to switch engines.
+- A batch import killed during the probe used to leave the sentinel set, so the next launch
+  hung the same way with nothing running beside it. That is gone too.
+- `batchModeRequested()` must agree with the option loop in `main()`, including which
+  options take a value (`--profile -b` names a profile).
+- Not changed: two interactive launches at the same moment can still collide. The second
+  shows the message box and moves to the Software engine. The check near "Insufficient
+  OpenGL support" also shows a message box without asking whether this is a batch run.
+- Checked (MSVC, Qt 6.12, batch runs against a data folder that does not exist): with the
+  sentinel set by hand, `--batch`, `-b`, `--import-and-exit` and `--import` all exit with
+  full output and leave the engine and the sentinel as they were (before: hang, no output,
+  engine changed); 30 launches 200 ms apart and 45 launches 100 ms apart gave no hang
+  (before: 4 of 30); an interactive launch with the sentinel set still switches to Software
+  and waits on its message box. Not checked: a real import, and the stress test itself.
