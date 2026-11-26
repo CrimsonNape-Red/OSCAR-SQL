@@ -120,12 +120,20 @@ PRD uses data OSCAR already imports. **No new loaders and no schema migration.**
 ```
 oscar/SleepLib/insights.h/.cpp   NEW  pure calculations, no Qt widgets, no p_profile writes
 oscar/tests/insightstests.h/.cpp NEW  QTest, synthetic Sessions/EventLists, no testdata/ needed
-oscar/statistics.cpp/.h          EDIT new GenerateInsights(): "Therapy Insights" tables after
-                                      "Changes to Device Settings"
-oscar/daily.cpp/.h               EDIT new getInsightsInfo(Day*) and getAhiReliability(Day*),
-                                      one call each in Daily::Load
-oscar/oscar.pro                  EDIT add the four new files
+oscar/insightspage.h/.cpp        NEW  the Insights tab (2.2 UI kit), opened from the Welcome
+                                      page's Insights tile
+oscar/statistics.h               EDIT settingsPeriods(): the "Changes to Device Settings" periods
+oscar/mainwindow.cpp/.h          EDIT the tab, JumpInsights()
+oscar/welcomepage.cpp/.h         EDIT the Insights tile opens the tab
+oscar/oscar.pro                  EDIT add the new files
 ```
+
+- **Where the results show (2026-11-24, agreed on !53):** Phase 1 shows on its own Insights
+  page, not in Statistics or Daily. Statistics is regenerated whenever Daily opens a day, and
+  events by pressure loads every session's events in its range, so it must never run from
+  there. The page calculates only when it is shown, and again only after the data changes.
+  Settings changes cover the whole history; pressure, data quality and usage cover the last
+  90 days to the last CPAP night.
 
 - `insights.h` exposes free functions in `namespace Insights` (this matches the free functions
   in `calcs.h`; there is one implementation, so no class hierarchy). Each function returns a
@@ -202,11 +210,8 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
     "lower", "higher" or "no comparison".
   - No comparison when either period has fewer days than the minimum-days pref in §6.
 - **Gate:** CPAP days with event data.
-- **Surface:**
-  - New column or row in the "Changes to Device Settings" section, if that can be done
-    without editing `GenerateRXChanges()`.
-  - Otherwise a new "Therapy Insights" subsection on Statistics, listing each change with
-    "AHI a → b (95 % CI of difference x to y): <label>".
+- **Surface:** Insights page, "Settings changes": one row per "Changes to Device Settings"
+  period, newest first, with the changed setting marked, a verdict and the interval.
 - **Accept:** synthetic data with identical distributions → label is "within variation".
   Halving the rate across 30 + 30 nights → "lower". A period of 3 nights → no comparison.
 - **Test:** `InsightsTests::testRxComparisonNoise`, `testRxComparisonRealDrop`,
@@ -225,8 +230,8 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
   - Pressure channel: `Day::getPressureChannelID()` (EPAP for bilevel).
 - **Gate:** APAP or auto-bilevel modes only (`getCPAPMode()`). Hide in fixed CPAP mode,
   where (a) is meaningless.
-- **Surface:** Statistics "Therapy Insights": "% time at max pressure" per period, and the
-  top-3 bins for events at pressure. Daily: one line, "At max pressure X % of the night".
+- **Surface:** Insights page, "Pressure": % time at max pressure and the top-3 bins for
+  events at pressure, over the page's 90 days.
 - **Accept:** a synthetic session with pressure pinned at max for half the night → 50 % ± 1.
   Fixed CPAP mode → row hidden. Event-offset handling is verified against a ResMed-style
   end-timestamped event.
@@ -245,9 +250,8 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
 
   Keep the thresholds as named constants that could become preferences.
 - **Gate:** each flag only where its channel exists.
-- **Surface:** Daily: an "AHI reliability" line under the AHI banner listing the active flags,
-  added via `getInsightsInfo`, not inside `getAHI`. Statistics: "Nights with data-quality
-  flags: n (x %)".
+- **Surface:** Insights page, "Nights to read with care": nights with each flag over the
+  page's 90 days.
 - **Accept:** each flag fires on its synthetic case and stays silent on a clean night.
 - **Test:** `testQualityFlags*`.
 
@@ -260,7 +264,8 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
   - (b) Median mask-off clock time and its spread.
   - (c) Median sessions per night.
 - **Gate:** CPAP. (a) appears only when first use falls inside the profile's data.
-- **Surface:** Statistics, under "CPAP Usage" via the new subsection.
+- **Surface:** Insights page, "Usage pattern". (a) only for profiles whose country is the
+  United States.
 - **Accept:** `f4_medicare_just_met` (21 good nights, one exactly 4.0 h) and
   `f4_medicare_just_missed` (20).
 - **Test:** `testMedicareWindowMet`, `testMedicareWindowNotMet`.

@@ -155,6 +155,7 @@ class MainWindow : public QMainWindow
     void JumpDaily();
     void JumpOverview();
     void JumpStatistics();
+    void JumpInsights();
     void JumpImport();
     void JumpOxiWizard();
 
@@ -576,6 +577,7 @@ private:
     Overview *overview;
     ProfileSelector *profileSelector;
     WelcomePageBase * welcome;
+    class InsightsPage *insights = nullptr;
 #ifndef helpless
     Help * help;
 #endif

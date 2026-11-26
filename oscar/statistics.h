@@ -213,6 +213,9 @@ class Statistics : public QObject
 
     void adjustRange(QDate& start , QDate& last);
 
+    //! \brief The settings periods of the Changes to Device Settings table, keyed by start date
+    QMap<QDate, RXItem> settingsPeriods() { updateRXChanges(); return rxitems; }
+
   protected:
     /*! \brief Reads RXChanges.cache into rxitems. The cache holds translated text, so one
         written in a language other than the running one is deleted instead of read */

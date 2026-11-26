@@ -363,6 +363,7 @@ SOURCES += \
     version.cpp \
     welcome.cpp \
     welcomepage.cpp \
+    insightspage.cpp \
     uikit/theme.cpp \
     uikit/comparison.cpp \
     uikit/formatting.cpp \
@@ -731,6 +732,7 @@ HEADERS  += \
     aboutdialog.h \
     welcome.h \
     welcomepage.h \
+    insightspage.h \
     welcomepagebase.h \
     uikit/theme.h \
     uikit/comparison.h \

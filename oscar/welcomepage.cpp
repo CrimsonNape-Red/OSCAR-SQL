@@ -218,11 +218,12 @@ QWidget *WelcomePage::buildTiles()
         QTimer::singleShot(0, mainwin, [] { mainwin->JumpStatistics(); });
     });
 
-    auto *insights = new ActionTile(LineIcon::Insights, tr("Insights"), tr("Patterns and highlights"), box);
-    insights->setTag(tr("Coming later"));
-    insights->setEnabled(false);
+    m_insightsTile = new ActionTile(LineIcon::Insights, tr("Insights"), tr("Patterns and highlights"), box);
+    connect(m_insightsTile, &QAbstractButton::clicked, this, [] {
+        QTimer::singleShot(0, mainwin, [] { mainwin->JumpInsights(); });
+    });
 
-    m_tiles = { import, oxi, m_dailyTile, m_overviewTile, m_statisticsTile, insights };
+    m_tiles = { import, oxi, m_dailyTile, m_overviewTile, m_statisticsTile, m_insightsTile };
     return box;
 }
 
@@ -503,6 +504,7 @@ void WelcomePage::refreshPage()
     m_dailyTile->setEnabled(!noMachines);
     m_overviewTile->setEnabled(!noMachines);
     m_statisticsTile->setEnabled(!noMachines);
+    m_insightsTile->setEnabled(!noMachines);
     if (mainwin) mainwin->EnableTabs(!noMachines);
 
     // Rebuild the data-dependent sections

@@ -91,6 +91,7 @@
 
 #include "mainwindow.h"
 #include "welcomepage.h"
+#include "insightspage.h"
 #include "statisticsstyle.h"
 #include "sidebarstyle.h"
 #include "importhandover.h"
@@ -351,6 +352,11 @@ void MainWindow::SetupGUI(bool batchMode)
     const int statisticsIndex = ui->tabWidget->indexOf(ui->statisticsTab);
     ui->tabWidget->setTabEnabled(statisticsIndex, false);
     ui->tabWidget->setTabVisible(statisticsIndex, false);
+    // Insights follows Statistics: one page for every profile, shown once one is open
+    insights = new InsightsPage(ui->tabWidget);
+    ui->tabWidget->insertTab(statisticsIndex + 1, insights, tr("Insights"));
+    ui->tabWidget->setTabEnabled(statisticsIndex + 1, false);
+    ui->tabWidget->setTabVisible(statisticsIndex + 1, false);
     setupColorSchemeButton();
 
     applySidebarTheme();
@@ -566,6 +572,7 @@ void MainWindow::EnableTabs(bool b)
     ui->tabWidget->setTabEnabled(2, b);
     ui->tabWidget->setTabEnabled(3, b);
     ui->tabWidget->setTabEnabled(4, b);
+    ui->tabWidget->setTabEnabled(ui->tabWidget->indexOf(insights), b);
 }
 
 void MainWindow::Notify(QString s, QString title, int ms)
@@ -916,6 +923,9 @@ bool MainWindow::OpenProfile(QString profileName)
     ui->tabWidget->setTabEnabled(3, !noMachines);       // overview, STR_TR_Overview);
     ui->tabWidget->setTabEnabled(4, !noMachines);       // statistics, STR_TR_Statistics);
     ui->tabWidget->setTabVisible(4, true);              // hidden while no profile is open
+    const int insightsIndex = ui->tabWidget->indexOf(insights);
+    ui->tabWidget->setTabEnabled(insightsIndex, !noMachines);
+    ui->tabWidget->setTabVisible(insightsIndex, true);
 
     progress->close();
     delete progress;
@@ -990,6 +1000,10 @@ void MainWindow::resetNoProfileUi()
     const int statisticsIndex = ui->tabWidget->indexOf(ui->statisticsTab);
     ui->tabWidget->setTabEnabled(statisticsIndex, false);
     ui->tabWidget->setTabVisible(statisticsIndex, false);
+    const int insightsIndex = ui->tabWidget->indexOf(insights);
+    ui->tabWidget->setTabEnabled(insightsIndex, false);
+    ui->tabWidget->setTabVisible(insightsIndex, false);
+    if (insights) insights->invalidate();   // drop the closed profile's content
 
     if (profileSelector) profileSelector->updateProfileHighlight(QString());
 }
@@ -1974,6 +1988,7 @@ void MainWindow::applyPageThemes()
     if (dynamic_cast<WelcomePage *>(welcome)) {
         rebuildWelcomePage();
     }
+    if (insights) insights->invalidate();
     if (daily) {
         daily->applyTheme();    // calendar and date button
         // Daily's left panel is HTML with the text colour written in when the day is loaded
@@ -4846,6 +4861,11 @@ void MainWindow::JumpOverview()
 void MainWindow::JumpStatistics()
 {
     ui->tabWidget->setCurrentWidget(ui->statisticsTab);
+}
+void MainWindow::JumpInsights()
+{
+    if (!ui->tabWidget->isTabEnabled(ui->tabWidget->indexOf(insights))) return;
+    ui->tabWidget->setCurrentWidget(insights);
 }
 void MainWindow::JumpImport()
 {
