@@ -4850,6 +4850,8 @@ void MainWindow::GenerateStatistics()
 
     setStatsHTML(htmlStats);
     setRecBoxHTML(htmlRecords);
+    // After an import, purge or preference change. Cheap unless Insights is on screen.
+    if (insights) insights->refreshIfShown();
 
 }
 

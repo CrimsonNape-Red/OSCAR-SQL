@@ -390,24 +390,27 @@ QWidget *usageCard(const QList<Day *> &days)
         if (med.met) {
             tag = InsightsPage::tr("Met");
             fg = Role::Good; bg = Role::GoodSoft;
-            text = InsightsPage::tr("%1 of 30 nights with 4 h or more, from %2")
-                   .arg(med.bestNights).arg(date(med.bestFirstNight));
+            text = InsightsPage::tr("%1 of %2 nights with %3 h or more, from %4")
+                   .arg(med.bestNights).arg(30).arg(4).arg(date(med.bestFirstNight));
         } else if (med.complete) {
             tag = InsightsPage::tr("Not met");
             fg = Role::Bad; bg = Role::BadSoft;
-            text = InsightsPage::tr("At most %1 of 30 nights with 4 h or more").arg(med.bestNights);
+            text = InsightsPage::tr("At most %1 of %2 nights with %3 h or more")
+                   .arg(med.bestNights).arg(30).arg(4);
         } else {
             tag = InsightsPage::tr("Not met yet");
             fg = Role::Warn; bg = Role::WarnSoft;
-            text = InsightsPage::tr("%1 of 30 nights with 4 h or more so far").arg(med.bestNights);
+            text = InsightsPage::tr("%1 of %2 nights with %3 h or more so far")
+                   .arg(med.bestNights).arg(30).arg(4);
         }
         auto *m = new QHBoxLayout();
         m->setSpacing(8);
         m->addWidget(makeChip(tag, fg, bg, c), 0, Qt::AlignTop);
         m->addWidget(body(text, c, Role::Ink2), 1);
         col->addLayout(m);
-        col->addWidget(makeLabel(InsightsPage::tr("4 or more hours on 21 of 30 nights in a row, within "
-                                                  "90 days of the first night OSCAR holds (%1).")
+        col->addWidget(makeLabel(InsightsPage::tr("%1 or more hours on at least %2 nights in some %3 nights in a "
+                                                  "row, starting within %4 days of the first night OSCAR "
+                                                  "holds (%5).").arg(4).arg(21).arg(30).arg(90)
                                  .arg(date(med.firstNight)), Theme::font(0.95), Role::Ink3, c, true));
     }
     col->addStretch(1);
@@ -430,6 +433,11 @@ void InsightsPage::invalidate()
     if (isVisible()) rebuild();
 }
 
+void InsightsPage::refreshIfShown()
+{
+    if (isVisible() && m_builtFor != dataKey()) rebuild();
+}
+
 void InsightsPage::showEvent(QShowEvent *event)
 {
     QScrollArea::showEvent(event);
@@ -441,10 +449,12 @@ QString InsightsPage::dataKey() const
     if (!p_profile) return "none";
     double hours = 0;
     for (Day *day : std::as_const(p_profile->daylist)) hours += day->hours(MT_CPAP);
-    return QString("%1|%2|%3|%4|%5|%6|%7")
+    return QString("%1|%2|%3|%4|%5|%6|%7|%8|%9")
            .arg(quintptr(p_profile)).arg(p_profile->daylist.size()).arg(hours, 0, 'f', 4)
            .arg(p_profile->general->calculateRDI()).arg(p_profile->cpap->complianceHours())
-           .arg(p_profile->user->country()).arg(QLocale().name());
+           .arg(p_profile->user->country()).arg(QLocale().name())
+           .arg(AppSetting->combineSimilarMachines())   // how Statistics groups the periods
+           .arg(p_profile->session->daySplitTime().toString());
 }
 
 void InsightsPage::rebuild()

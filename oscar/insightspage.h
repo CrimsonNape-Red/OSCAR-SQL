@@ -29,6 +29,8 @@ public:
 
     //! \brief Rebuilds the page the next time it is shown, e.g. after a colour scheme change
     void invalidate();
+    //! \brief Recalculates now if the page is on screen and its data changed, e.g. after an import
+    void refreshIfShown();
 
 protected:
     void showEvent(QShowEvent *event) override;
