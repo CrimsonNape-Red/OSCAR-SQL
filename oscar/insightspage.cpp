@@ -236,13 +236,14 @@ QWidget *settingsCard(const QList<Period> &periods, const QString &ahiText)
                        .arg(ahiText, from, to);
                 break;
             case Insights::ChangeLabel::Within:
-                tag = InsightsPage::tr("No real change");
                 fg = Role::Neutral; bg = Role::NeutralSoft;
                 if (cmp.ciLow > 0 || cmp.ciHigh < 0) {
                     // Real, but smaller than the minimum change worth reporting
+                    tag = InsightsPage::tr("Small change");
                     text = InsightsPage::tr("%1 %2 then %3: a change of less than %4 events/h.")
                            .arg(ahiText, from, to, num(Insights::kMinAhiChange));
                 } else {
+                    tag = InsightsPage::tr("No real change");
                     text = InsightsPage::tr("%1 %2 then %3: within normal night-to-night variation.")
                            .arg(ahiText, from, to);
                 }

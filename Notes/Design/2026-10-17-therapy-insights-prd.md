@@ -209,8 +209,8 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
   - Label: "lower" or "higher" only when the interval excludes 0 **and** the change is at
     least `Insights::kMinAhiChange` (1 event/h; added after review on !85, since long periods
     make the interval narrow enough to flag a tiny difference). Otherwise "within" (the page
-    says "a change of less than 1 events/h" when the interval excludes 0), or "no
-    comparison".
+    tags it "Small change", "a change of less than 1 events/h", when the interval
+    excludes 0), or "no comparison".
   - A period that starts on a different device is not compared: the page marks "Device
     changed", since devices score events differently.
   - No comparison when either period has fewer days than the minimum-days pref in §6.

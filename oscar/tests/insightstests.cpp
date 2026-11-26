@@ -353,7 +353,6 @@ void checkF3(const Scenario &sc)
     if (exp.contains("ahi")) { checkValue(sc, "ahi", day->calcAHI()); }
 }
 
-//! \brief F4-lite: adherence patterns.
 //! \brief Cases every feature must handle: no nights, and two CPAP devices in one night.
 void checkAll(const Scenario &sc)
 {
@@ -380,6 +379,7 @@ void checkAll(const Scenario &sc)
     QCOMPARE(Insights::usagePattern(days).medianSessions, 1.0);
 }
 
+//! \brief F4-lite: adherence patterns.
 void checkF4(const Scenario &sc)
 {
     const QJsonObject exp = sc.json["expected"].toObject();
