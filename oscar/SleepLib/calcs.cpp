@@ -554,10 +554,16 @@ void FlowParser::calc(bool calcResp, bool calcTv, bool calcTi, bool calcTe, bool
             lastte = te;
         }
 
+        // An inspiration longer than 10 s is not a breath. It appears when the flow stays above the zero line for a
+        // long time, e.g. while the baseline catches up with a sudden change of leak, and summing the flow over the
+        // whole period would give a tidal volume of several litres. Such breaths get no tidal volume and no minute
+        // ventilation.
+        const bool implausibleBreath = (mt - st) > 10000.0;
+
         /////////////////////////////////////////////////////////////////////
         // Calculate TidalVolume
         /////////////////////////////////////////////////////////////////////
-        if (calcTv) {
+        if (calcTv && !implausibleBreath) {
             val1 = 0, val2 = 0;
 
             // Scan the upper breath
@@ -648,29 +654,36 @@ void FlowParser::calc(bool calcResp, bool calcTv, bool calcTi, bool calcTe, bool
                 rr += b;
             }
 
-            if (len2 < minute) {
-                rr *= minute / len2;
+            // At the start of a flow block there is less than a minute of breaths, and the count is scaled up to a
+            // minute. With too little of it a single short breath becomes an impossible rate (one breath of 1.2 s,
+            // the shortest accepted at 5 Hz, gives 50/min), so wait until half a minute of breaths is available.
+            if (len2 < minute / 2) {
+                rr = -1;
+            } else {
+                if (len2 < minute) {
+                    rr *= minute / len2;
+                }
+
+                // Calculate min & max
+                if (rr < minrr) {
+                    minrr = rr;
+                }
+
+                if (rr > maxrr) {
+                    maxrr = rr;
+                }
+
+                // Add manually.. (much quicker)
+                *rr_tptr++ = timeval;
+
+                // Use the same gains as ResMed..
+
+                *rr_dptr++ = rr * 5.0;
+                rr_count++;
             }
-
-            // Calculate min & max
-            if (rr < minrr) {
-                minrr = rr;
-            }
-
-            if (rr > maxrr) {
-                maxrr = rr;
-            }
-
-            // Add manually.. (much quicker)
-            *rr_tptr++ = timeval;
-
-            // Use the same gains as ResMed..
-
-            *rr_dptr++ = rr * 5.0;
-            rr_count++;
         }
 
-        if (calcMv && calcResp && calcTv) {
+        if (calcMv && calcResp && calcTv && rr >= 0 && !implausibleBreath) {
             // Minute Ventilation is tidal volume times respiratory rate
             mv = (tv / 1000.0) * rr;
 
