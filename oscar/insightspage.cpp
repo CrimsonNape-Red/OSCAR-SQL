@@ -157,6 +157,15 @@ QWidget *header(const QDate &first, const QDate &last)
     return w;
 }
 
+//! \brief Warning card, shown under the header, that marks the page as experimental
+QWidget *experimentalNotice()
+{
+    return new Callout(Callout::Kind::Warning, InsightsPage::tr("EXPERIMENTAL FEATURE"),
+                       InsightsPage::tr("Insights is new and still being tested. What it shows and how "
+                                        "it is worked out may change in later versions. Check anything "
+                                        "that matters against Daily and Statistics."));
+}
+
 QWidget *settingsCard(const QList<Period> &periods, const QString &ahiText)
 {
     QVBoxLayout *col;
@@ -509,6 +518,7 @@ void InsightsPage::rebuild()
     const QDate last = p_profile ? p_profile->LastDay(MT_CPAP) : QDate();
     if (!last.isValid()) {
         column->addWidget(header(QDate(), QDate()));
+        column->addWidget(experimentalNotice());
         column->addWidget(new Callout(Callout::Kind::Info, QString(),
                                       tr("Insights needs CPAP data. Import a night to see it here.")));
     } else {
@@ -521,6 +531,7 @@ void InsightsPage::rebuild()
         }
 
         column->addWidget(header(first, last));
+        column->addWidget(experimentalNotice());
         column->addWidget(new Callout(Callout::Kind::Info, QString(),
             tr("Insights describes what happened. It doesn't tell you what to change: talk to your "
                "clinician before changing settings.")));
