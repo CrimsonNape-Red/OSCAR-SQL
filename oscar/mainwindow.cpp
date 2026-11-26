@@ -400,7 +400,11 @@ void MainWindow::SetupGUI(bool batchMode)
     ui->mainsplitter->setStretchFactor(1,0);
 
     if (!m_batchMode) {
-        QTimer::singleShot(50, this, SLOT(Startup()));
+        // On macOS the colour scheme is applied again first, now that the window is on screen,
+        // and before a profile's pages are built (GitLab #397)
+        QTimer::singleShot(50, this, [this] {
+            ColorScheme::reapplyAfterShow(this, [this] { Startup(); });
+        });
     }
 
     ui->action_Frequently_Asked_Questions->setVisible(false);

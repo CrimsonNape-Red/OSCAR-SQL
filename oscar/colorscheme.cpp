@@ -15,6 +15,7 @@
 #include <QStyle>
 #include <QStyleFactory>
 #include <QStyleHints>
+#include <QTimer>
 
 #include "SleepLib/appsettings.h"
 #include "uikit/theme.h"
@@ -181,6 +182,37 @@ bool nativeDialogsMatch()
 #else
     return true;
 #endif
+}
+
+void reapplyAfterShow(QObject *context, const std::function<void()> &done)
+{
+#if defined(Q_OS_MACOS) && QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    // The method can be picked from outside while this is tested on Macs (see the header)
+    const QString mode = qEnvironmentVariable("OSCAR_SCHEME_REAPPLY", QStringLiteral("pause")).toLower();
+    if (s_differsFromSystem && mode != QLatin1String("off")) {
+        // Long enough for macOS to draw the window once in its own scheme
+        constexpr int kPauseMs = 100;
+        QStyleHints *hints = QGuiApplication::styleHints();
+        qDebug() << "Colour scheme: applying again after show, method" << mode
+                 << "in effect" << int(hints->colorScheme());
+        if (mode == QLatin1String("same")) {
+            apply();
+        } else if (mode == QLatin1String("sync")) {
+            hints->setColorScheme(Qt::ColorScheme::Unknown);    // macOS's own scheme
+            apply();
+        } else {
+            hints->setColorScheme(Qt::ColorScheme::Unknown);    // macOS's own scheme
+            QTimer::singleShot(kPauseMs, context, [done] {
+                apply();
+                done();
+            });
+            return;
+        }
+    }
+#else
+    Q_UNUSED(context);
+#endif
+    done();
 }
 
 } // namespace ColorScheme
