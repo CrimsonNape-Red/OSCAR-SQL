@@ -290,6 +290,184 @@ void ResmedTests::testEveEventPastSessionEnd()
 
 
 // ====================================================================================================
+// GitLab #425: a session recorded while the SD card was out of the device has a mask-on/off
+// pair in STR.edf but no DATALOG files. It was dropped whenever the same day had other
+// sessions with files, so the day's usage was under-reported.
+
+void ResmedTests::testMaskPairsWithoutData()
+{
+    const qint64 h = 3600000;
+    const qint64 t0 = 1000000000000LL;
+    using Spans = QList<QPair<qint64, qint64>>;
+    using Indices = QList<int>;
+
+    // Three sessions, the card was out for the middle one.
+    QCOMPARE(ResmedLoader::maskPairsWithoutData(
+                 Spans{ { t0, t0 + 3*h }, { t0 + 4*h, t0 + 5*h }, { t0 + 6*h, t0 + 8*h } },
+                 Spans{ { t0, t0 + 3*h }, { t0 + 6*h, t0 + 8*h } }), Indices{ 1 });
+
+    // Every pair has files: nothing to add.
+    QCOMPARE(ResmedLoader::maskPairsWithoutData(
+                 Spans{ { t0, t0 + 3*h }, { t0 + 4*h, t0 + 5*h } },
+                 Spans{ { t0, t0 + 3*h }, { t0 + 4*h, t0 + 5*h } }), Indices());
+
+    // The previous session's files run 20 s into the pair (STR times are whole minutes):
+    // the pair is still a session of its own.
+    QCOMPARE(ResmedLoader::maskPairsWithoutData(
+                 Spans{ { t0, t0 + 3*h }, { t0 + 3*h, t0 + 4*h } },
+                 Spans{ { t0, t0 + 3*h + 20000 } }), Indices{ 1 });
+
+    // A session stored from another SD card covers the pair: importing it as a summary
+    // would duplicate that session.
+    QCOMPARE(ResmedLoader::maskPairsWithoutData(
+                 Spans{ { t0, t0 + 3*h }, { t0 + 4*h, t0 + 5*h } },
+                 Spans{ { t0 + 30000, t0 + 3*h - 15000 }, { t0 + 4*h, t0 + 5*h } }), Indices());
+
+    // Files that matched no pair but hold the pair's session (they made a group of their own).
+    QCOMPARE(ResmedLoader::maskPairsWithoutData(
+                 Spans{ { t0, t0 + 3*h } },
+                 Spans{ { t0 + 10*60000, t0 + 3*h + 10*60000 } }), Indices());
+
+    // Pairs with a missing time, or that don't end after they start, are never sessions.
+    QCOMPARE(ResmedLoader::maskPairsWithoutData(
+                 Spans{ { t0, 0 }, { 0, t0 + h }, { t0 + 2*h, t0 + 2*h }, { t0 + 4*h, t0 + 3*h } },
+                 Spans()), Indices());
+
+    // Nothing covered: every valid pair is returned.
+    QCOMPARE(ResmedLoader::maskPairsWithoutData(
+                 Spans{ { t0, t0 + h }, { t0 + 2*h, t0 + 3*h } }, Spans()), (Indices{ 0, 1 }));
+}
+
+/*! \brief Write a minimal ResMed-style waveform EDF: one "Crc16" signal, one sample per record
+ *
+ * Enough for the loader to take the recording's start and length from it. Holds no therapy
+ * signal, so the session it produces has times but no waveforms.
+ */
+static QByteArray makeWaveEdf(const QString & startDateTime, int records, int secondsPerRecord)
+{
+    auto field = [](const QString & s, int width) { return s.leftJustified(width, ' ', true).toLatin1(); };
+    QByteArray edf;
+    edf += field("0", 8);
+    edf += field("X X X X", 80);
+    edf += field("Startdate 31-OCT-2026 X X X", 80);
+    edf += field(startDateTime, 16);          // dd.MM.yyHH.mm.ss
+    edf += field("512", 8);
+    edf += field("", 44);
+    edf += field(QString::number(records), 8);
+    edf += field(QString::number(secondsPerRecord), 8);
+    edf += field("1", 4);                     // one signal
+    edf += field("Crc16", 16);
+    edf += field("", 80);
+    edf += field("", 8);
+    edf += field("-32768", 8);
+    edf += field("32767", 8);
+    edf += field("-32768", 8);
+    edf += field("32767", 8);
+    edf += field("", 80);
+    edf += field("1", 8);                     // one sample per record
+    edf += field("", 32);
+    edf += QByteArray(records * 2, '\0');
+    return edf;
+}
+
+static QList<Session *> s_savedSessions;
+
+static void collectSession(ResmedLoader* /*loader*/, Session* session)
+{
+    s_savedSessions.append(session);
+}
+
+//! Deletes the sessions collected by collectSession() when a test ends, pass or fail.
+struct SavedSessionsCleanup {
+    ~SavedSessionsCleanup() { qDeleteAll(s_savedSessions); s_savedSessions.clear(); }
+};
+
+//! Mask-on time (s since epoch) of the first (0) or second (1) session of the card-out day.
+static quint32 cardOutMaskOn(int index)
+{
+    const quint32 first = QDateTime(QDate(2026, 10, 31), QTime(23, 27, 0), EDFInfo::localNoDST)
+                              .toSecsSinceEpoch();
+    return first + index * 3 * 3600;
+}
+
+/*! \brief Run a ResMed day with two STR mask-on/off pairs, of which only the first has a file
+ *
+ * First pair: 23:27 for two hours, with a waveform file starting at 23:27:42. Second pair:
+ * 02:27 for 23 minutes, no file (the SD card was out). The sessions the loader saves are
+ * left in s_savedSessions.
+ * \param mach             device the sessions belong to; must outlive them
+ * \param storedSessionsMs sessions already stored for the day, passed on to the task
+ */
+static void runCardOutDay(Machine & mach, const QList<QPair<qint64, qint64>> & storedSessionsMs)
+{
+    if (!schema::channel.names.contains("RMS9_Mode")) {
+        s_loader->initChannels();
+    }
+    s_savedSessions.clear();
+
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    const QString name = "20261031_232742_BRP.edf";
+    const QString path = tmp.path() + "/" + name;
+    QFile f(path);
+    QVERIFY(f.open(QFile::WriteOnly));
+    f.write(makeWaveEdf("31.10.2623.27.42", 100, 60));     // 100 minutes
+    f.close();
+
+    ResMedDay resday(QDate(2026, 10, 31));
+    resday.str.date = resday.date;
+    resday.str.maskon = { cardOutMaskOn(0), cardOutMaskOn(1) };
+    resday.str.maskoff = { cardOutMaskOn(0) + 2 * 3600, cardOutMaskOn(1) + 23 * 60 };
+    resday.str.maskevents = 4;
+    resday.str.oai = 2.0;                   // the day's obstructive apnea index
+    resday.files[name] = path;
+
+    ResDayTask task(s_loader, &mach, &resday, collectSession);
+    task.storedSessionsMs = storedSessionsMs;
+    task.run();
+}
+
+void ResmedTests::testCardOutSessionImportedAsSummary()
+{
+    SavedSessionsCleanup cleanup;
+    CPAP mach(p_profile, 425);
+    runCardOutDay(mach, {});
+    if (QTest::currentTestFailed()) return;
+
+    // The session with the file, then the card-out session as a summary-only session.
+    QCOMPARE(s_savedSessions.size(), 2);
+    Session *detail = s_savedSessions[0];
+    QCOMPARE(detail->session(), SessionID(cardOutMaskOn(0)));
+    QVERIFY(!detail->summaryOnly());
+
+    Session *summary = s_savedSessions[1];
+    QCOMPARE(summary->session(), SessionID(cardOutMaskOn(1)));
+    QVERIFY(summary->summaryOnly());
+    QCOMPARE(summary->first(), qint64(cardOutMaskOn(1)) * 1000);
+    QCOMPARE(summary->last(), qint64(cardOutMaskOn(1) + 23 * 60) * 1000);
+    // Events are estimated from the day's index, as on a day with no files at all.
+    QVERIFY(qAbs(summary->count(CPAP_Obstructive) - 2.0 * 23.0 / 60.0) < 0.001);
+}
+
+// Card swap (#376): the session of the second pair is already stored, imported from another
+// card. It must not be imported again as a summary-only session with the same session id.
+void ResmedTests::testCardOutSessionNotDuplicated()
+{
+    SavedSessionsCleanup cleanup;
+    CPAP mach(p_profile, 425);
+    // Stored from its waveform files: starts a little after mask-on, ends a little before mask-off.
+    const qint64 storedFirst = qint64(cardOutMaskOn(1)) * 1000 + 20000;
+    const qint64 storedLast = qint64(cardOutMaskOn(1) + 23 * 60) * 1000 - 5000;
+    runCardOutDay(mach, { { storedFirst, storedLast } });
+    if (QTest::currentTestFailed()) return;
+
+    QCOMPARE(s_savedSessions.size(), 1);
+    QCOMPARE(s_savedSessions[0]->session(), SessionID(cardOutMaskOn(0)));
+    QVERIFY(!s_savedSessions[0]->summaryOnly());
+}
+
+
+// ====================================================================================================
 
 QString resmedOutputPath(const QString & inpath, int session, const QString & suffix)
 {

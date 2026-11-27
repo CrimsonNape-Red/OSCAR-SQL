@@ -51,7 +51,20 @@ public:
 
     bool reimporting;
 
+    //! \brief (first, last) in ms of this device's sessions already stored for the day and kept
+    //! through this import. A mask-on/off pair they cover is not imported again as a
+    //! summary-only session (#425). Set before the task is queued.
+    QList<QPair<qint64, qint64>> storedSessionsMs;
+
 protected:
+    //! \brief Build a summary-only session from one STR.edf mask-on/off pair and save it.
+    //!
+    //! The session gets the pair's times, the day's settings and the day's summary figures;
+    //! event counts are the day's indices times the session's hours.
+    //! \param maskon  mask-on time, s since epoch; also the session id
+    //! \param maskoff mask-off time, s since epoch
+    void saveSummaryOnlySession(quint32 maskon, quint32 maskoff);
+
     ResmedLoader * loader;
     Machine * mach;
     ResMedDay * resday;
@@ -128,6 +141,20 @@ class ResmedLoader : public CPAPLoader
     //! \return Indices into \a existingMs of the sessions to replace, in ascending order
     static QList<int> sessionsOverlappedByFiles(const QList<QPair<qint64, qint64>> & existingMs,
                                                 const QList<QPair<qint64, qint64>> & filesMs);
+
+    //! \brief Which of a day's STR.edf mask-on/off pairs have no data and so become summary-only sessions (#425).
+    //!
+    //! A pair with no DATALOG files is a session recorded while the SD card was out of the
+    //! device: only STR.edf knows about it. A pair is taken to have data when its midpoint
+    //! lies inside a covered span. The midpoint is used because STR times are whole minutes,
+    //! so a neighbouring session's files can run a few seconds into the pair.
+    //! \param pairsMs   (mask-on, mask-off) in ms of the day's STR pairs
+    //! \param coveredMs (start, end) in ms of the day's groups of waveform files and of the
+    //!                  sessions already stored for the day
+    //! \return Indices into \a pairsMs of the pairs to import as summary-only sessions, in
+    //!         ascending order. Pairs without both times, or not ending after they start, are left out.
+    static QList<int> maskPairsWithoutData(const QList<QPair<qint64, qint64>> & pairsMs,
+                                           const QList<QPair<qint64, qint64>> & coveredMs);
 
     //! \brief Parse the EVE Event annotation data, and save to Session * sess
     //! This contains all Hypopnea, Obstructive Apnea, Central and Apnea codes

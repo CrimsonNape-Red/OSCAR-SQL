@@ -1063,7 +1063,8 @@ test {
         tests/bmcnightreplacementtests.cpp \
         tests/bmcg3xleaktests.cpp \
         tests/minutesatpressuretests.cpp \
-        tests/flowparsertests.cpp
+        tests/flowparsertests.cpp \
+        tests/daytests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -1128,7 +1129,8 @@ test {
         tests/bmcnightreplacementtests.h \
         tests/bmcg3xleaktests.h \
         tests/minutesatpressuretests.h \
-        tests/flowparsertests.h
+        tests/flowparsertests.h \
+        tests/daytests.h
 }
 
 macx {

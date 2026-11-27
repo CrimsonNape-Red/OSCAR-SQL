@@ -183,8 +183,8 @@ void SefamTests::testArchiveOnlyNeedsCardRange()
     QVERIFY(findArchiveOnlySessions(archive, QDateTime(), QSet<qint64>()).isEmpty());
 }
 
-// The session is an ordinary one, not summary-only: a summary-only session would make
-// Day::summaryOnly() downgrade any detailed session sharing its day.
+// The session is an ordinary one, not summary-only: it has the same event records as a
+// recorded session.
 void SefamTests::testArchiveSessionContents()
 {
     const QDateTime start(QDate(2026, 11, 6), QTime(1, 18, 32));

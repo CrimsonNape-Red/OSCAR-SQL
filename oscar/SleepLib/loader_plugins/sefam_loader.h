@@ -105,10 +105,11 @@ class SefamLoader : public CPAPLoader
 
         Gives the session its times, settings, events and one-minute pressure and
         total leak traces. There is no flow, because only a session directory holds
-        it. The session is deliberately not marked summary-only: Day::summaryOnly() is
-        true if any one session on a day is, which would downgrade a recorded session
-        sharing the day, and this session's events are the same archive records a
-        recorded S.Box session gets its events from. */
+        it. The session is deliberately not marked summary-only: this session's events
+        are the same archive records a recorded S.Box session gets its events from.
+        (When this was written Day::summaryOnly() was also true if any one session on a
+        day was, which would have downgraded a recorded session sharing the day; since
+        GitLab #425 it is true only when no session of the device has detail.) */
     static void populateArchiveSession(Session *session,
                                        const SefamParsing::SessionSummary &summary);
 

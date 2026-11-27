@@ -23,6 +23,9 @@ private slots:
     void testEveGraceEnd();
     void testEveEventPastSessionEnd();
     void testSessionsOverlappedByFiles();
+    void testMaskPairsWithoutData();
+    void testCardOutSessionImportedAsSummary();
+    void testCardOutSessionNotDuplicated();
     void cleanupTestCase();
 };
 

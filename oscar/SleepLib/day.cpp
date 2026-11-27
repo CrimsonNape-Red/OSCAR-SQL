@@ -11,6 +11,7 @@
 #include <test_macros.h>
 
 #include <QMultiMap>
+#include <QSet>
 
 #include <algorithm>
 #include <cmath>
@@ -1152,17 +1153,24 @@ bool Day::noSettings(Machine * mach)
 
 bool Day::summaryOnly(Machine * mach)
 {
+    // A day is summary-only for a kind of device (CPAP, oximeter...) when that device has
+    // sessions on the day and none of them has detail. One summary-only session beside
+    // sessions with detail (e.g. a ResMed session recorded with the SD card out, #425) does
+    // not downgrade the night, and neither does another kind of device's recording.
+    QSet<MachineType> summaryTypes;
+    QSet<MachineType> detailTypes;
     for (auto & sess : sessions) {
-        if ((mach == nullptr) && sess->summaryOnly()) {
-            // If this day generally has just summary data.
-            return true;
-        } else if ((mach == sess->machine())  && sess->summaryOnly()) {
-            // Focus only on device match
-            qDebug() << "Day::summaryOnly() reports summary only day for machine" << mach->brand() << mach->model();
-            return true;
+        if ((mach != nullptr) && (sess->machine() != mach)) {
+            continue;   // Focus only on device match
+        }
+        if (sess->summaryOnly()) {
+            summaryTypes.insert(sess->type());
+        } else {
+            detailTypes.insert(sess->type());
         }
     }
-    return false;
+    summaryTypes.subtract(detailTypes);
+    return !summaryTypes.isEmpty();
 }
 
 bool Day::settingExists(ChannelID id)

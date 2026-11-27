@@ -1022,6 +1022,9 @@ void ResmedLoader::checkSummaryDay( ResMedDay & resday, QDate date, Machine * ma
 {
     Day * day = p_profile->FindDay(date, MT_CPAP);
     bool reimporting = false;
+    // This device's sessions that stay stored for the day; the import task must not create
+    // summary-only sessions for the mask-on/off pairs they cover (#425).
+    QList<QPair<qint64, qint64>> keptMs;
 #ifdef STR_DEBUG
     qDebug() << "Starting checkSummary for" << date.toString();
 #endif
@@ -1051,6 +1054,7 @@ void ResmedLoader::checkSummaryDay( ResMedDay & resday, QDate date, Machine * ma
             for (auto & sess : day->sessions) {
                 if (sess->machine() != mach)
                     continue;
+                keptMs.append({ sess->first(), sess->last() });
 #ifdef STR_DEBUG
                 qDebug() << "Adding STR.edf information to session" << sess->session();
 #endif
@@ -1086,10 +1090,42 @@ void ResmedLoader::checkSummaryDay( ResMedDay & resday, QDate date, Machine * ma
             // mid-night re-imports where the STR hasn't recorded the second session yet.
             int expectedSessions = qMax(numPairs, (int)edfTimestamps.size());
             QList<Session *> sessions = day->getSessions(MT_CPAP, true);
+            // Waveform file spans, read only when needed: each one opens a file.
+            auto waveformFileSpans = [&resday]() {
+                QList<QPair<qint64, qint64>> spans;
+                for (auto it = resday.files.begin(); it != resday.files.end(); ++it) {
+                    EDFType type = lookupEDFType(it.key());
+                    if (type == EDF_EVE || type == EDF_CSL)
+                        continue;
+                    EDFduration dur = getEDFDuration(it.value());
+                    if (dur.start != dur.end)
+                        spans.append({ qint64(dur.start) * 1000L, qint64(dur.end) * 1000L });
+                }
+                return spans;
+            };
+            QList<QPair<qint64, qint64>> filesMs;
+            bool haveFilesMs = false;
+            // A stored summary-only session beside sessions with detail was recorded with the
+            // SD card out, or imported from a card that lacked its files (#425). When its
+            // files turn up, e.g. on another card, the day is re-imported to replace it.
+            bool summaryNowHasFiles = false;
+            if (sessions.length() >= expectedSessions && sessions[0]->machine() == mach
+                    && resday.files.size() > 0) {
+                QList<QPair<qint64, qint64>> summaryMs;
+                for (const auto & sess : sessions)
+                    if (sess->summaryOnly())
+                        summaryMs.append({ sess->first(), sess->last() });
+                if (!summaryMs.isEmpty()) {
+                    filesMs = waveformFileSpans();
+                    haveFilesMs = true;
+                    summaryNowHasFiles = maskPairsWithoutData(summaryMs, filesMs).size() < summaryMs.size();
+                }
+            }
             // If we have at least as many sessions as expected (from STR or EDF file
             // count, whichever is higher), or if the sessions are for a different device,
             // leave well enough alone and don't re-import the day.
-            if (sessions.length() >= expectedSessions || sessions[0]->machine() != mach) {
+            if (!summaryNowHasFiles
+                    && (sessions.length() >= expectedSessions || sessions[0]->machine() != mach)) {
 #ifdef STR_DEBUG
                 qDebug() << "No new sessions -- skipping.  Sessions now in day:";
                 qDebug() << " i  sessionID    s_first                   from  -  to";
@@ -1102,7 +1138,10 @@ void ResmedLoader::checkSummaryDay( ResMedDay & resday, QDate date, Machine * ma
 #endif
                 return;
             }
-            qDebug() << "Expected session count" << expectedSessions << "is greater than the existing MT_CPAP session count" << sessions.length();
+            if (summaryNowHasFiles)
+                qDebug() << "Files found for a summary-only session stored on" << date.toString();
+            else
+                qDebug() << "Expected session count" << expectedSessions << "is greater than the existing MT_CPAP session count" << sessions.length();
 
             // Replace only the stored sessions that the new files overlap; keep the rest.
             // A session's files are never split between two cards, so a stored session the
@@ -1111,16 +1150,12 @@ void ResmedLoader::checkSummaryDay( ResMedDay & resday, QDate date, Machine * ma
             QList<QPair<qint64, qint64>> existingMs;
             for (const auto & sess : sessions)
                 existingMs.append({ sess->first(), sess->last() });
-            QList<QPair<qint64, qint64>> filesMs;
-            for (auto it = resday.files.begin(); it != resday.files.end(); ++it) {
-                EDFType type = lookupEDFType(it.key());
-                if (type == EDF_EVE || type == EDF_CSL)
-                    continue;
-                EDFduration dur = getEDFDuration(it.value());
-                if (dur.start != dur.end)
-                    filesMs.append({ qint64(dur.start) * 1000L, qint64(dur.end) * 1000L });
-            }
+            if (!haveFilesMs)
+                filesMs = waveformFileSpans();
             const QList<int> replaced = sessionsOverlappedByFiles(existingMs, filesMs);
+            for (int i = 0; i < existingMs.size(); ++i)
+                if (!replaced.contains(i))
+                    keptMs.append(existingMs[i]);
             qDebug().noquote() << "Re-importing" << date.toString() << "- replacing" << replaced.size()
                                << "of" << sessions.length() << "stored sessions";
             // Destroy() deletes the session's database rows as well; Day::removeSession()
@@ -1134,6 +1169,7 @@ void ResmedLoader::checkSummaryDay( ResMedDay & resday, QDate date, Machine * ma
 
     ResDayTask * rdt = new ResDayTask(this, mach, &resday, saveCallback);
     rdt->reimporting = reimporting;
+    rdt->storedSessionsMs = keptMs;
 #ifdef STR_DEBUG
     qDebug() << "in checkSummary, Queue task for" << resday.date.toString();
 #endif
@@ -2888,6 +2924,23 @@ struct OverlappingEDF {
 };
 
 
+void ResDayTask::saveSummaryOnlySession(quint32 maskon, quint32 maskoff)
+{
+    STRRecord & R = resday->str;
+    Session * sess = new Session(mach, maskon);
+    sess->set_first(quint64(maskon) * 1000L);
+    sess->set_last(quint64(maskoff) * 1000L);
+    StoreSettings(sess, R);         // Process the STR.edf settings
+    // StoreSummaryStatistics must be called AFTER set_first/set_last
+    // because it uses sess->hours() to calculate event counts
+    StoreSummaryStatistics(sess, R);  // We want the summary information too
+
+    sess->setSummaryOnly(true);
+    sess->SetChanged(true);
+
+    save(loader, sess);                     // This is aliased to SaveSession - unless testing
+}
+
 void ResDayTask::run()
 {
 #ifdef SESSION_DEBUG
@@ -2900,7 +2953,6 @@ void ResDayTask::run()
             return;
         }
         // Summary only day, create sessions for each mask-on/off pair and tag them summary only
-        STRRecord & R = resday->str;
 #ifdef SESSION_DEBUG
         qDebug() << "Creating summary-only sessions for" << resday->date;
 #endif
@@ -2918,21 +2970,7 @@ void ResDayTask::run()
             }
 **/
             if (((maskon>0) && (maskoff>0)) && (maskon != maskoff)) {   //ignore very short sessions
-                Session * sess = new Session(mach, maskon);
-                sess->set_first(quint64(maskon) * 1000L);
-                sess->set_last(quint64(maskoff) * 1000L);
-                StoreSettings(sess, R);         // Process the STR.edf settings
-                // StoreSummaryStatistics must be called AFTER set_first/set_last
-                // because it uses sess->hours() to calculate event counts
-                StoreSummaryStatistics(sess, R);  // We want the summary information too
-
-                sess->setSummaryOnly(true);
-                sess->SetChanged(true);
-
-//                loader->sessionMutex.lock();          // This chunk moved into SaveSession below
-////              delete sess;
-
-                save(loader, sess);                     // This is aliased to SaveSession - unless testing
+                saveSummaryOnlySession(maskon, maskoff);
             }
         }
         return;
@@ -3241,6 +3279,31 @@ void ResDayTask::run()
 //      delete sess;
     }   // end for-loop walking the overlaps (file groups per session
 
+    // A mask-on/off pair that got no files is a session recorded while the SD card was out
+    // of the device: STR.edf is all there is of it. Import it as a summary-only session, as
+    // on a day with no files at all, so that the day's usage is complete (#425). Pairs
+    // covered by a group of files, or by a session already stored for the day (imported
+    // from another card), have their data and are left alone.
+    if (resday->str.date.isValid()) {
+        QList<QPair<qint64, qint64>> pairsMs;
+        for (int i = 0; i < maskOnSize; ++i) {
+            pairsMs.append({ qint64(resday->str.maskon[i]) * 1000L, qint64(resday->str.maskoff[i]) * 1000L });
+        }
+        QList<QPair<qint64, qint64>> coveredMs = storedSessionsMs;
+        for (const auto & ovr : overlaps) {
+            if (ovr.filemap.size() > 0) {
+                coveredMs.append({ qint64(ovr.start) * 1000L, qint64(ovr.end) * 1000L });
+            }
+        }
+        const QList<int> cardOutPairs = ResmedLoader::maskPairsWithoutData(pairsMs, coveredMs);
+        for (int i : cardOutPairs) {
+#ifdef SESSION_DEBUG
+            qDebug() << "Creating summary-only session for mask-on/off pair" << i << "of" << resday->date;
+#endif
+            saveSummaryOnlySession(resday->str.maskon[i], resday->str.maskoff[i]);
+        }
+    }
+
     // Diagnostic: compare day-level PLD-derived p95 against STR Leak95 when they differ >5%.
 }
 
@@ -3436,6 +3499,31 @@ QList<int> ResmedLoader::sessionsOverlappedByFiles(const QList<QPair<qint64, qin
         }
     }
     return overlapped;
+}
+
+QList<int> ResmedLoader::maskPairsWithoutData(const QList<QPair<qint64, qint64>> & pairsMs,
+                                              const QList<QPair<qint64, qint64>> & coveredMs)
+{
+    QList<int> withoutData;
+    for (int i = 0; i < pairsMs.size(); ++i) {
+        const qint64 on = pairsMs[i].first;
+        const qint64 off = pairsMs[i].second;
+        if ((on <= 0) || (off <= on)) {
+            continue;       // not a complete mask-on/off pair
+        }
+        const qint64 mid = on + (off - on) / 2;
+        bool covered = false;
+        for (const auto & span : coveredMs) {
+            if ((span.first <= mid) && (mid < span.second)) {
+                covered = true;
+                break;
+            }
+        }
+        if (!covered) {
+            withoutData.append(i);
+        }
+    }
+    return withoutData;
 }
 
 bool ResmedLoader::LoadEVE(Session *sess, const QString & path, qint64 graceEndMs)

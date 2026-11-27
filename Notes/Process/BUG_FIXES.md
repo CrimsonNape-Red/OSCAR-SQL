@@ -9830,3 +9830,57 @@ tidal volume lists are resized to the values written.
   nightly maximum Ti goes from 10.4 to 6.1 s (largest 31.4 to 8.6 s), the maximum Te stays at 10.1 s
   (largest 15.9 s), and respiratory rate, tidal volume and minute ventilation are the same in every
   session. Not checked: real data from a 25 Hz device, Windows, macOS.
+
+---
+
+## 2026-11-27 - ResMed: a session recorded with the SD card out was dropped (GitLab #425)
+
+**Files:** `oscar/SleepLib/loader_plugins/resmed_loader.cpp/.h` (`ResDayTask::run()`,
+`ResDayTask::saveSummaryOnlySession()` new, `ResmedLoader::maskPairsWithoutData()` new,
+`ResmedLoader::checkSummaryDay()`), `oscar/SleepLib/day.cpp/.h` (`Day::summaryOnly()`),
+`oscar/tests/resmedtests.cpp/.h`, `oscar/tests/daytests.cpp/.h` (new), `oscar/oscar.pro`
+
+**Symptom:** A night with several sessions, one of them recorded while the SD card was out of the
+device, showed only the sessions that had DATALOG files. The card-out session's usage was missing.
+Reproduced with a three-session night whose middle session's files were removed: 6.77 hours and two
+sessions, where the untouched card gives 7.15 hours and three.
+
+**Root cause:** `ResDayTask::run()` built sessions only from groups of files. A mask-on/off pair in
+STR.edf that got no files was skipped (`if (ovr.filemap.size() == 0) continue;`). Summary-only
+sessions were created from STR.edf only when the day had no files at all.
+
+**Fix:**
+1. After the sessions with files, each STR pair that has no data is imported as a summary-only
+   session, built the same way as on a day with no files (settings from STR, event counts = the
+   day's index x the session's hours).
+2. `maskPairsWithoutData()` decides which pairs those are: a pair has data when its midpoint lies
+   inside a group of files or inside a session already stored for the day.
+3. `Day::summaryOnly()` is now true only when a kind of device has sessions on the day and none has
+   detail. Before, one summary-only session made the whole day summary-only.
+4. `checkSummaryDay()` passes the sessions it keeps to the task, and re-imports a day when the
+   files of a stored summary-only session turn up.
+
+**Non-obvious:**
+- Without 3, fix 1 would have made things worse: the night would be drawn grey in the Overview
+  usage chart, lose its median and upper pressure in the pressure chart, be left out of range
+  percentiles (`Profile::calcPercentile()`), and be purged and re-imported at every import
+  (`checkSummaryDay()`'s first branch).
+- 3 is shared code. Philips nights that mix sessions with and without detail
+  (`prs1_loader.cpp` marks sessions one by one) are no longer treated as summary-only days either.
+  `Insights::qualityFlags()` has its own any-session test and is unchanged.
+- The stored-session test in 2 is for swapped SD cards (#376): the second card's STR.edf lists the
+  first card's session, whose files are not on it. Without the test that session would be imported
+  again as a summary-only session with the same session id, over the stored one.
+- The midpoint is used, not any overlap, because STR times are whole minutes: a neighbouring
+  session's files can run a few seconds into the pair.
+- The event counts of the card-out session are an estimate (the day's index applied to its hours),
+  as they are for every summary-only session.
+- No loader version change. Only new imports change; a night already imported without its card-out
+  session gets it after a purge and re-import, or a rebuild.
+- Checked: new unit tests fail before the change and pass after (the card-swap test was shown
+  to fail with the stored-session check taken out); all 62 suites pass (663 passed, 9 skipped) on Windows, MSVC,
+  Qt 6.12. Batch imports of one series 11 card: untouched card, identical sessions before and after
+  the change; middle session's files removed, three sessions with the middle one summary-only, and
+  7.15 hours for the night; the same card imported again, no new sessions; night split over two
+  cards, imported in either order, three detailed sessions and no duplicate. Not checked: how the
+  night looks in Daily and Overview, S9 and series 10 cards, a real card-out night, Linux, macOS.

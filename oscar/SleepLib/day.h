@@ -190,7 +190,12 @@ class Day
     //! \brief Return the end session record as a QVector<Session*>::iterator
     QList<Session *>::iterator end() { return sessions.end(); }
 
-    //! \brief Check if day contains SummaryOnly records
+    //! \brief Check if the day has summary data only
+    //!
+    //! True when a kind of device (CPAP, oximeter...) has sessions on the day and every one
+    //! of them is summary-only. A summary-only session beside sessions with detail leaves the
+    //! day a detailed one; ask Session::summaryOnly() about individual sessions.
+    //! \param mach Consider only this device's sessions; nullptr considers every device
     bool summaryOnly(Machine * mach = nullptr);
 
     //! \brief Check if day has missing Summary/Settings records
