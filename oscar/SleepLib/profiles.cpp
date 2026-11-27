@@ -2236,7 +2236,9 @@ EventDataType Profile::calcWavg(ChannelID code, MachineType mt, QDate start, QDa
 
         if (day) {
             if (!day->summaryOnly() || day->hasData(code, ST_WAVG)) {
-                tmph = day->hours();
+                // Weight by the hours of the device type asked for. day->hours() also
+                // counts other devices used that night (an oximeter beside the CPAP).
+                tmph = (mt == MT_UNKNOWN) ? day->hours() : day->hours(mt);
                 tmp = day->wavg(code);
                 val += tmp * tmph;
                 hours += tmph;

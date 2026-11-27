@@ -83,12 +83,12 @@ QString resizeHTMLPixmap(QPixmap &pixmap, int width, int height) {
     return QString("<img src='data:image/png;base64,"+byteArray.toBase64()+"' ALT='logo'>");
 }
 
+// Decimal hours as hh:mm, rounded to the nearest minute. Truncating showed 7.99 hours
+// (07:59.4) as 07:59 and 6.865 hours (06:51.9) as 06:51.
 QString formatTime(float time)
 {
-    int hours = time;
-    int seconds = time * 3600.0;
-    int minutes = (seconds / 60) % 60;
-    return QString::asprintf("%02i:%02i", hours, minutes); //,seconds);
+    const int totalMinutes = qRound(double(time) * 60.0);
+    return QString::asprintf("%02i:%02i", totalMinutes / 60, totalMinutes % 60);
 }
 
 
@@ -239,7 +239,9 @@ QDate firstGoodDay() {
     QDate first1  = p_profile->FirstGoodDay(MT_OXIMETER);
     if (!first2.isValid()) return first1;
     if (!first1.isValid()) return first2;
-    return qMax(first2,first1);
+    // The earlier of the two: this is where the Date Range report starts by default, and
+    // the later one left out the CPAP nights recorded before the first oximetry night.
+    return qMin(first2,first1);
 }
 
 QDate lastGoodDay() {
@@ -677,7 +679,7 @@ void Statistics::updateRXChanges()
                 rx.s_sum[code] = day->sum(code);
             }
 
-            rx.hours = day->hours();
+            rx.hours = day->hours(MT_CPAP);   // CPAP hours only, as in the other branches
 
             // Store settings, etc..
             rx.relief = relief;
@@ -2260,7 +2262,9 @@ QString StatisticsRow::oximetryValue(const QList<Day *> & days, QDate start, QDa
         if (!day->channelHasRecordedData(code)) {
             continue;
         }
-        const EventDataType dayHours = day->hours();
+        // Weighted by the hours of the device that recorded the oximetry, not by the
+        // hours of every device that was used that night.
+        const EventDataType dayHours = day->oximetryHours();
         weighted += day->wavg(code) * dayHours;
         weight += dayHours;
         const EventDataType dayMin = day->Min(code);
@@ -2412,10 +2416,19 @@ QString StatisticsRow::value(QDate start, QDate end)
                 fmt += "%";
                 val = 100.0 / p_profile->calcHours(type, start, end) * p_profile->calcSum(code, type, start, end) / 3600.0;
                 break;
-            case SC_ABOVE:
+            case SC_ABOVE: {
                 fmt += "%";
-                val = 100.0 / p_profile->calcHours(type, start, end) * (p_profile->calcAboveThreshold(code, schema::channel[code].upperThreshold(), type, start, end) / 60.0);
+                // The leak redline preference, not the Leak channel's upper threshold: the
+                // Daily page sets that threshold only while the redline is shown, and leaves
+                // it 0 otherwise, which made every reading count as above it.
+                const EventDataType threshold = (code == CPAP_Leak) ? p_profile->cpap->leakRedline()
+                                                                    : schema::channel[code].upperThreshold();
+                if (threshold <= 0) {
+                    return "-";
+                }
+                val = 100.0 / p_profile->calcHours(type, start, end) * (p_profile->calcAboveThreshold(code, threshold, type, start, end) / 60.0);
                 break;
+            }
             case SC_BELOW:
                 fmt += "%";
                 val = 100.0 / p_profile->calcHours(type, start, end) * (p_profile->calcBelowThreshold(code, schema::channel[code].lowerThreshold(), type, start, end) / 60.0);

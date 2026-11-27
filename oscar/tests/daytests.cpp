@@ -254,8 +254,9 @@ void DayTests::testOximetryStatisticsUseOximetryNights()
     // SpO2 was recorded on one of the two nights only.
     QCOMPARE(value("SPO2", SC_WAVG), QString("96.00"));
     QCOMPARE(value("SPO2", SC_MIN), QString("90.00"));
-    // Pulse: 60 over a 2 hour night and 70 over a 1 hour night.
-    QCOMPARE(value("Pulse", SC_WAVG), QString("63.33"));
+    // Pulse: 60 over 1 hour of oximetry and 70 over 1 hour. 3 March also had an hour of
+    // CPAP, which is no part of the pulse average's weight.
+    QCOMPARE(value("Pulse", SC_WAVG), QString("65.00"));
     QCOMPARE(value("Pulse", SC_MIN), QString("50.00"));
     QCOMPARE(value("Pulse", SC_MAX), QString("90.00"));
     // Indices are per hour of oximetry: 6 pulse changes, and 72 seconds of drops, in 2 hours.
@@ -274,6 +275,57 @@ void DayTests::testOximetryStatisticsUseOximetryNights()
     // The days hold sessions of the devices above: remove them before the devices go.
     qDeleteAll(profile.daylist);
     profile.daylist.clear();
+}
+
+// A day's weight in a period average is the hours of the device type asked for. A night
+// with 1 hour of CPAP and 3 hours of oximeter weighs 1 hour in a CPAP average, not 4.
+void DayTests::testWavgWeightsByDeviceHours()
+{
+    if (CPAP_Pressure == 0) { schema::init(); }
+    ScopedProfile scoped;
+    Profile & profile = scoped.profile();
+    CPAP cpap(&profile, 1);
+    Oximeter oximeter(&profile, 2);
+    cpap.setType(MT_CPAP);
+    oximeter.setType(MT_OXIMETER);
+    const QDate first(2026, 3, 1);
+
+    // 1 March: an hour of CPAP at 10, and three hours of oximeter.
+    Day *both = new Day();
+    both->setDate(first);
+    recordChannel(addPlainSession(*both, cpap, 1000000), CPAP_Pressure, 10, 10, 10);
+    Session *oxi = new Session(&oximeter, 1010000);
+    oxi->really_set_first(qint64(1010000) * 1000);
+    oxi->really_set_last(qint64(1010000) * 1000 + 3 * 3600000);
+    both->addSession(oxi);
+    profile.daylist.insert(both->date(), both);
+
+    // 2 March: an hour of CPAP at 20.
+    Day *cpapOnly = new Day();
+    cpapOnly->setDate(first.addDays(1));
+    recordChannel(addPlainSession(*cpapOnly, cpap, 1100000), CPAP_Pressure, 20, 20, 20);
+    profile.daylist.insert(cpapOnly->date(), cpapOnly);
+
+    QCOMPARE(both->hours(), EventDataType(4));
+    QCOMPARE(both->hours(MT_CPAP), EventDataType(1));
+    // Two hours of CPAP, one at 10 and one at 20. Weighting 1 March by all 4 hours gave 12.
+    QCOMPARE(profile.calcWavg(CPAP_Pressure, MT_CPAP, first, first.addDays(1)), EventDataType(15));
+
+    qDeleteAll(profile.daylist);
+    profile.daylist.clear();
+}
+
+QString formatTime(float time);     // statistics.cpp
+
+// Statistics hours are rounded to the nearest minute, not truncated.
+void DayTests::testStatisticsHoursRoundToMinute()
+{
+    QCOMPARE(formatTime(6.865f), QString("06:52"));    // 6 h 51.9 min
+    QCOMPARE(formatTime(7.0261f), QString("07:02"));   // 7 h 1.57 min
+    QCOMPARE(formatTime(7.66f), QString("07:40"));     // 7 h 39.6 min
+    QCOMPARE(formatTime(7.995f), QString("08:00"));    // 7 h 59.7 min carries into the hour
+    QCOMPARE(formatTime(0.0f), QString("00:00"));
+    QCOMPARE(formatTime(10.5f), QString("10:30"));
 }
 
 // Every session of the night has summary data only: the day is a summary-only day.

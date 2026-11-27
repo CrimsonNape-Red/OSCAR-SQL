@@ -71,7 +71,13 @@
       <li>[fix] ResMed loader ignored a session recorded with the SD card out when the same night had other sessions with detailed data</li>
       <li>[fix] Statistics page no longer shows pressure and leak rows that have no data in the period shown</li>
       <li>[fix] Statistics page Oximeter section counted CPAP days as oximetry days and showed zeros when the period had no oximetry</li>
-      <li>[fix] Importing an OSCAR 1.x profile could store sessions from an oximeter or other device without a serial number under the wrong device; re-import the profile to correct it</li>    </ul>
+      <li>[fix] Importing an OSCAR 1.x profile could store sessions from an oximeter or other device without a serial number under the wrong device; re-import the profile to correct it</li>
+      <li>[fix] Statistics page Date Range report now starts at the first CPAP night by default, not at the first oximetry night</li>
+      <li>[fix] Statistics page averages on nights with both CPAP and oximetry are weighted by the hours of the device reported on</li>
+      <li>[fix] Statistics page hours per night are rounded to the nearest minute instead of cut off</li>
+      <li>[fix] Statistics page time above the leak redline no longer reads near 100% when the redline is not shown on the Daily page</li>
+      <li>[fix] Changes to Device Settings no longer counts oximetry hours on the first night of a settings period</li>
+    </ul>
   <p>
 
   <b>Changes and fixes in OSCAR v2.1.1</b>

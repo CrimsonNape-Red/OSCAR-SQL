@@ -22,6 +22,8 @@ private slots:
     void testRecordedDataIgnoresDisabledSessions();
     void testOximetryFromAnyDevice();
     void testOximetryStatisticsUseOximetryNights();
+    void testWavgWeightsByDeviceHours();
+    void testStatisticsHoursRoundToMinute();
     void testAllSummarySessions();
     void testMixedDayIsNotSummaryOnly();
     void testOximeterDoesNotCountAsDetail();

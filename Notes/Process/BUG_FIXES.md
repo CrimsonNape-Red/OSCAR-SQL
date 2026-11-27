@@ -10029,3 +10029,60 @@ serial number out of the serial tests.
   `ProfileImporter::importProfile()`: with the old rules the oximeter got 0 sessions and the
   position sensor 3; with the fix 2 and 1, and no "Machine ID does not match" lines.
   Not checked: an import through the GUI, a full-size profile, Linux, macOS.
+
+---
+
+## 2026-11-27 - Statistics: five calculation faults found in a review against real data
+
+**Files:** `oscar/statistics.cpp` (`firstGoodDay()`, `formatTime()`,
+`Statistics::updateRXChanges()`, `StatisticsRow::oximetryValue()`, `StatisticsRow::value()`),
+`oscar/SleepLib/profiles.cpp` (`Profile::calcWavg()`), `oscar/tests/daytests.cpp/.h`
+
+**Symptom:** A review of the Statistics page against a profile with an AirCurve 10 and a Viatom
+oximeter (every row recalculated from oscar.db and compared) found:
+1. Date Range mode: the default "Everything" column started 5/23/20, the first oximetry night,
+   instead of 2/17/20, the first CPAP night (1947 days and AHI 0.63 instead of 2043 and 0.68).
+   The same range clamped a device's First Use in Device Information.
+2. Averages on nights with both CPAP and oximetry were off: Avg Pulse 30 days 50.10 (49.77),
+   last year 55.88 (56.02); Avg SpO2 6 months 96.48 (96.41); Avg Pressure 30 days 11.42 (11.41).
+3. Average and Median Hours per Night could show a minute low (07:01 for 7 h 1.6 min).
+4. Changes to Device Settings: the first night of a settings period counted oximetry hours.
+5. "% of time above Leak Rate threshold" used a threshold that is 0 unless the Daily page has
+   set it, which it does only while "Show leak redline" is on.
+
+**Root cause:**
+1. `firstGoodDay()` returned the later of the first CPAP and first oximetry day (`qMax`).
+2. `Profile::calcWavg()` weighted each day by `day->hours()`, which covers every device used
+   that night, and `StatisticsRow::oximetryValue()` (#439) copied that weighting.
+3. `formatTime()` truncated to the minute.
+4. The branch of `updateRXChanges()` that creates a new record used `day->hours()`; the others
+   use `day->hours(MT_CPAP)`.
+5. `SC_ABOVE` read `schema::channel[code].upperThreshold()`, which `Daily` sets to the leak
+   redline or to 0.
+
+**Fix:**
+1. `qMin`.
+2. `calcWavg()` weights by `day->hours(mt)` (`day->hours()` for `MT_UNKNOWN`);
+   `oximetryValue()` weights by `day->oximetryHours()`, as its indices already did.
+3. Round to the nearest minute.
+4. `day->hours(MT_CPAP)`.
+5. For Leak, use `p_profile->cpap->leakRedline()`; a threshold of 0 or less shows "-".
+
+**Non-obvious:**
+- `calcWavg()` is also used by the Welcome page leak averages and the Overview range figures,
+  which get the same correction.
+- #438 (days without the channel still add their hours, minimum 0.00 in mixed periods) is in the
+  same function and is not touched here.
+- `testOximetryStatisticsUseOximetryNights` expected 63.33 for a pulse average, the value the
+  old weighting gives for a night of 1 h CPAP plus 1 h oximeter. Pulse was recorded for 1 h each
+  night, so it is now 65.00.
+- Finding 4 did not affect the reviewed profile: none of its settings periods starts on a night
+  with oximetry.
+- Checked: two new unit tests (weighting by device hours, rounding) and the corrected
+  expectation above; all 63 suites pass (681 passed, 7 skipped) on Linux, GCC, Qt 6.4.2. The
+  Statistics page of the reviewed profile was written out in all four report modes and every
+  row compared with figures recalculated from its oscar.db: all match, including Date Range
+  "Everything" from 2/17/20 (2043 days, AHI 0.68). Time above the leak redline is unchanged
+  for that profile, whose redline is shown. Not checked: finding 4 on real data (no settings
+  period there starts on an oximetry night), "Show leak redline" off, the printed report,
+  Windows, macOS.
