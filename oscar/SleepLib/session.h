@@ -355,6 +355,15 @@ class Session
 
     EventDataType count(ChannelID id);
 
+    /*! \brief Event count of a summary-only session from its index and hours
+        \details index x hours, which is fractional by design for an index the device
+        reports per hour (ResMed STR: 0.1/h over 2.8 h is 0.28 events). A result within
+        0.01 of a whole number is that number, so a count stored as count / hours by a
+        loader (ICON) comes back exact rather than as 2.9999999.
+        \param cph   events per hour
+        \param hours hours of the session */
+    static EventDataType restoredEventCount(double cph, double hours);
+
     //! \brief Returns the Count of all events of type id between time range
     EventDataType rangeCount(ChannelID id, qint64 first, qint64 last);
 

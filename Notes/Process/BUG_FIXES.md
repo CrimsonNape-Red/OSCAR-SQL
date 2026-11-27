@@ -10086,3 +10086,57 @@ oximeter (every row recalculated from oscar.db and compared) found:
   for that profile, whose redline is shown. Not checked: finding 4 on real data (no settings
   period there starts on an oximetry night), "Show leak redline" off, the printed report,
   Windows, macOS.
+
+---
+
+## 2026-11-27 - session_channels.count stored summary-only event counts as whole numbers
+
+**Files:** `oscar/database/session_channels_repository.cpp/.h` (`SessionChannelData::count`,
+`SessionChannelsRepository::restoreSummaryOnlyCounts()` new), `oscar/SleepLib/session.cpp/.h`
+(`Session::StoreToDatabase()`, `Session::LoadFromDatabase()`, `Session::restoredEventCount()`
+new), `oscar/SleepLib/profiles.cpp/.h` (`Profile::repairSessionChannelCounts()` new,
+`STR_PREF_SessionChannelCountsRepaired`), `oscar/SleepLib/day.cpp` (comment),
+`oscar/tests/summarystatisticstests.cpp/.h`
+
+**Symptom:** For summary-only sessions (ResMed nights with STR.edf only), SQL over
+`session_channels.count` undercounted events: in the reviewed profile, 291 rows of 288 summary-only
+sessions summed to 61 events where the indices give 143. A night of five sessions at 0.1-0.2/h,
+4 events by the device's daily index, summed to 0. The same nights also had other counts after a
+restart (112 events, rounded per session) than when they were imported (143).
+
+**Root cause:** A summary-only session's count is estimated as index x hours (0.1/h over 2.8 h is
+0.28 events). `SessionChannelData::count` was an `int`, so the value was truncated, and since #287
+rounded, per session, on store; `LoadFromDatabase()` then restored it as `qRound(cph x hours)`.
+Rounding each session to a whole event loses every session under half an event.
+
+**Fix:**
+1. `SessionChannelData::count` is a `double`; the store writes `m_cnt` as it is and the load
+   reads it back with `toDouble()`. The column keeps its INTEGER declaration: SQLite stores a
+   value that is not a whole number as REAL in it, so no schema change is needed and older
+   builds still open the database.
+2. `LoadFromDatabase()` restores a summary-only count as cph x hours unrounded, through
+   `Session::restoredEventCount()`, which snaps a result within 0.01 of a whole number to it (a
+   loader that stores count / hours as the index, such as ICON, gets its whole count back).
+3. One-time repair on profile load (`Profile::repairSessionChannelCounts()`, flag
+   `SessionChannelCountsRepaired`): rewrites `session_channels.count` of summary-only sessions
+   from cph x `session_summaries.hours_used` in SQL, then recalculates the daily_summaries rows
+   of the days that have a summary-only session.
+
+**Non-obvious:**
+- The count columns of session_summaries and daily_summaries are left as #287 made them: whole
+  numbers, rounded. They are per-session and per-day totals of a kind that reads as a number of
+  events; the fractional value is kept in session_channels.
+- Sessions with detail data are untouched: their counts are whole numbers already, and the
+  repair only takes summary-only sessions with an index.
+- Effect on the reviewed profile's Statistics page: 31 more events over about 15,000 hours
+  moved the Date Range "Everything" AHI from 0.68 to 0.69, and February 2026's OA index in the
+  Monthly report from 0.24 to 0.25. Daily AHI of summary-only nights moves to what the device's
+  indices give, e.g. 2021-10-20 from 0.46 (per-session rounding) to 0.40.
+- Checked: three new unit tests (restoredEventCount, store and reload of a 0.28 count, repair of a
+  count stored as 0); all 63 suites pass (684 passed, 7 skipped) on Linux, GCC, Qt 6.4.2.
+  A copy of the reviewed profile opened with the fix: the repair rewrote 291 session_channels
+  rows and 79 daily summaries and set its flag; the summary-only AHI events in session_channels
+  went from 61 to 142.97; sessions with detail data were unchanged (same total, no fractional
+  counts); the Standard and 90 Days reports were identical to before, the others changed as
+  above. Not checked: ICON or PRS1 summary-only data, a backup restored from before the fix,
+  Windows, macOS.

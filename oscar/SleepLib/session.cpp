@@ -1940,6 +1940,13 @@ EventDataType Session::rangeMax(ChannelID id, qint64 first, qint64 last)
     return max;
 }
 
+EventDataType Session::restoredEventCount(double cph, double hours)
+{
+    const double estimate = cph * hours;
+    const double whole = std::round(estimate);
+    return EventDataType((std::fabs(estimate - whole) < 0.01) ? whole : estimate);
+}
+
 EventDataType Session::count(ChannelID id)
 {
     // Counts can be fractional (ResMed summary-only sessions store STR index * hours),
@@ -2833,10 +2840,11 @@ bool Session::StoreToDatabase()
             SessionChannelData channel;
             channel.channelId = id;
             // Counts are EventDataType and can be fractional (ResMed summary-only
-            // sessions store STR index * hours). Round to the nearest event, as
-            // LoadFromDatabase() does when it rebuilds them from cph, rather than
-            // letting the int conversion truncate.
-            channel.count = qRound(m_cnt.value(id, 0));
+            // sessions store STR index * hours, e.g. 0.28). Store them as they are:
+            // rounding each session to a whole event made 0.28 a 0, so SQL sums over
+            // session_channels.count lost events, and a reload gave the night other
+            // counts than it had when imported.
+            channel.count = m_cnt.value(id, 0);
             channel.sum = m_sum.value(id, 0);
             channel.avg = m_avg.value(id, 0);
             channel.wavg = m_wavg.value(id, 0);
@@ -3104,7 +3112,8 @@ bool Session::LoadFromDatabase()
         ChannelID id = channel.channelId;
         m_availableChannels.push_back(id);
         m_cnt[id] = channel.count;
-        if (channel.count != static_cast<int>(channel.count)) {   // channel.count is ok!
+        // Fractional counts are expected from summary-only sessions (index x hours) only.
+        if (!s_summaryOnly && (channel.count != static_cast<int>(channel.count))) {
             qDebug() << "Session::LoadFromDatabase() channel" << id << "channel.count" << qSetRealNumberPrecision(9) <<channel.count;
         }
         m_sum[id] = channel.sum;
@@ -3187,12 +3196,14 @@ bool Session::LoadFromDatabase()
 
         // Restore event counts from summary data.
         // Prefer cph * hours over the stored count: cph is preserved as REAL, while
-        // the count was truncated to INTEGER in session_channels.
+        // session_channels rows written before counts were stored fractional hold the
+        // count rounded or truncated, and session_summaries holds it rounded. The
+        // estimate is not rounded: an index of 0.1/h over 2.8 h is 0.28 events, not 0.
         auto restoreCount = [&](ChannelID id, int storedCount) {
             if (storedCount <= 0 && !(sessionHours > 0 && m_cph.contains(id))) { return; }
 
             if (m_cph.contains(id) && sessionHours > 0) {
-                m_cnt[id] = qRound(static_cast<double>(m_cph[id] * sessionHours));
+                m_cnt[id] = restoredEventCount(m_cph[id], sessionHours);
             } else if (storedCount > 0) {
                 m_cnt[id] = qRound(static_cast<double>(storedCount));
             }

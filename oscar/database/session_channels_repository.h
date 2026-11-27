@@ -15,6 +15,7 @@
 #include <QString>
 #include <QList>
 #include <QDateTime>
+#include <QSqlDatabase>
 
 /*!
  * \struct SessionChannelData
@@ -28,7 +29,9 @@ struct SessionChannelData
     int channelId = 0;                  // Channel ID (e.g., CPAP_Pressure)
     
     // Summary statistics
-    int count = 0;                      // Number of samples
+    // Number of samples or events. Fractional for summary-only sessions, whose counts
+    // are estimated as index x hours (e.g. ResMed STR); see Session::restoredEventCount().
+    double count = 0.0;
     double sum = 0.0;                   // Sum of all values
     double avg = 0.0;                   // Average
     double wavg = 0.0;                  // Weighted average
@@ -139,6 +142,25 @@ public:
      * \return Number of channels
      */
     int countBySession(qint64 sessionId);
+
+    /*!
+     * \brief Rewrite the event counts of summary-only sessions from their index and hours
+     *
+     * Until the count column was given fractional values, a summary-only session's count
+     * (index x hours, e.g. 0.28 from 0.1/h over 2.8 h) was stored rounded or truncated to a
+     * whole number, so SQL sums over the column lost events. This sets count = cph x
+     * session_summaries.hours_used for every channel of a summary-only session that has an
+     * index, snapping to the whole number when within 0.01 of one, as
+     * Session::restoredEventCount() does on load.
+     *
+     * Used once per profile by Profile::repairSessionChannelCounts().
+     *
+     * \param db          Connection to use; the caller owns the transaction.
+     * \param profileId   profiles.id whose rows to rewrite.
+     * \param rowsUpdated if not null, receives the number of rows rewritten.
+     * \return true if the statement succeeded.
+     */
+    static bool restoreSummaryOnlyCounts(QSqlDatabase& db, qint64 profileId, int *rowsUpdated = nullptr);
 };
 
 #endif // SESSION_CHANNELS_REPOSITORY_H

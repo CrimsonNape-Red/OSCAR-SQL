@@ -125,6 +125,34 @@ Session *SummaryStatisticsTests::addSession(qint64 startMs, bool withLeak)
     return sess;
 }
 
+Session *SummaryStatisticsTests::addSummaryOnlySession(qint64 startMs)
+{
+    // As the ResMed loader builds a night it has only STR.edf for: an index per hour, and
+    // a count of index x hours, which is fractional (0.1/h over 2.8 h is 0.28 events).
+    const double hours = 2.8;
+    Session *sess = new Session(m_machine, static_cast<SessionID>(startMs / 1000L));
+    sess->really_set_first(startMs);
+    sess->really_set_last(startMs + qint64(hours * 3600000.0));
+    sess->setSummaryOnly(true);
+    sess->setCph(CPAP_Obstructive, 0.1f);
+    sess->setCount(CPAP_Obstructive, 0.1f * hours);
+    sess->SetChanged(true);
+    if (!m_machine->AddSession(sess) || !m_machine->SaveSession(sess) || sess->sessionRowId() <= 0) {
+        return nullptr;
+    }
+    return sess;
+}
+
+QVariant SummaryStatisticsTests::channelCount(const Session *sess, ChannelID id) const
+{
+    QSqlQuery query(DatabaseManager::instance().database());
+    query.prepare(QStringLiteral("SELECT count FROM session_channels WHERE session_id = ? AND channel_id = ?"));
+    query.addBindValue(sess->sessionRowId());
+    query.addBindValue(static_cast<int>(id));
+    if (!query.exec() || !query.next()) return QVariant(QStringLiteral("no row"));
+    return query.value(0);
+}
+
 QVariant SummaryStatisticsTests::sessionColumn(const Session *sess, const QString &column) const
 {
     QSqlQuery query(DatabaseManager::instance().database());
@@ -263,6 +291,53 @@ void SummaryStatisticsTests::testProfileRepairRewritesBothTables()
     QCOMPARE(dailyColumn(m_day, "leak_total_95th").toDouble(), double(m_day->percentile(CPAP_Leak, 0.95f)));
     QVERIFY(dailyColumn(m_day, "leak_unintentional_avg").isNull());
     QCOMPARE(sessionColumn(m_session, "leak_total_max").toDouble(), kLeakMax);
+}
+
+// index x hours comes back as it is, unless it is within 0.01 of a whole number: a loader
+// that stores count / hours as the index (ICON) gets its whole count back.
+void SummaryStatisticsTests::testRestoredEventCount()
+{
+    QVERIFY(qAbs(Session::restoredEventCount(0.1, 2.8) - 0.28f) < 1e-6f);
+    QCOMPARE(Session::restoredEventCount(3.0f / 2.7f, 2.7), EventDataType(3));
+    QCOMPARE(Session::restoredEventCount(0.0, 8.0), EventDataType(0));
+    QVERIFY(qAbs(Session::restoredEventCount(0.46, 8.65) - 3.979f) < 1e-3f);
+}
+
+// A summary-only session's fractional count is stored as it is in session_channels, and a
+// reload gives back the count it had when imported, not 0.
+void SummaryStatisticsTests::testSummaryOnlyCountKeepsFraction()
+{
+    m_summaryOnly = addSummaryOnlySession(QDateTime(QDate(2026, 10, 5), QTime(23, 0)).toMSecsSinceEpoch());
+    QVERIFY(m_summaryOnly != nullptr);
+
+    const QVariant stored = channelCount(m_summaryOnly, CPAP_Obstructive);
+    QVERIFY2(qAbs(stored.toDouble() - 0.28) < 1e-6, qPrintable(stored.toString()));
+
+    QVERIFY(m_summaryOnly->LoadFromDatabase());
+    QVERIFY(qAbs(m_summaryOnly->count(CPAP_Obstructive) - 0.28f) < 1e-6f);
+}
+
+// Rows written before counts were stored fractional hold a whole number; the one-time
+// repair rewrites them from the index and the session's hours.
+void SummaryStatisticsTests::testRepairRewritesWholeNumberCounts()
+{
+    QVERIFY(m_summaryOnly != nullptr);
+    const qint64 profileId = m_machine->getProfileId();
+
+    QSqlQuery query(DatabaseManager::instance().database());
+    query.prepare(QStringLiteral("UPDATE session_channels SET count = 0 WHERE session_id = ? AND channel_id = ?"));
+    query.addBindValue(m_summaryOnly->sessionRowId());
+    query.addBindValue(static_cast<int>(CPAP_Obstructive));
+    QVERIFY(query.exec());
+    QCOMPARE(query.numRowsAffected(), 1);
+    // A session with detail data keeps its counts: its pressure samples are not an estimate.
+    const QVariant pressureBefore = channelCount(m_session, CPAP_Pressure);
+
+    QVERIFY(p_profile->repairSessionChannelCounts(profileId, nullptr));
+
+    const QVariant repaired = channelCount(m_summaryOnly, CPAP_Obstructive);
+    QVERIFY2(qAbs(repaired.toDouble() - 0.28) < 1e-6, qPrintable(repaired.toString()));
+    QCOMPARE(channelCount(m_session, CPAP_Pressure), pressureBefore);
 }
 
 void SummaryStatisticsTests::testRefillLeavesUncomputedPercentileEmpty()

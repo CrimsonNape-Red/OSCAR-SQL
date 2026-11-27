@@ -157,7 +157,7 @@ QList<SessionChannelData> SessionChannelsRepository::findBySession(qint64 sessio
         data.sessionId = query.value(1).toLongLong();
         data.profileId = query.value(2).toLongLong();  // FIX: Added missing profile_id read
         data.channelId = query.value(3).toInt();
-        data.count = query.value(4).toInt();
+        data.count = query.value(4).toDouble();
         data.sum = query.value(5).toDouble();
         data.avg = query.value(6).toDouble();
         data.wavg = query.value(7).toDouble();
@@ -210,7 +210,7 @@ SessionChannelData SessionChannelsRepository::findByChannel(qint64 sessionId, in
         data.sessionId = query.value(1).toLongLong();
         data.profileId = query.value(2).toLongLong();  // FIX: Added missing profile_id read
         data.channelId = query.value(3).toInt();
-        data.count = query.value(4).toInt();
+        data.count = query.value(4).toDouble();
         data.sum = query.value(5).toDouble();
         data.avg = query.value(6).toDouble();
         data.wavg = query.value(7).toDouble();
@@ -432,4 +432,29 @@ int SessionChannelsRepository::countBySession(qint64 sessionId)
     }
 
     return 0;
+}
+
+bool SessionChannelsRepository::restoreSummaryOnlyCounts(QSqlDatabase& db, qint64 profileId, int *rowsUpdated)
+{
+    // A scalar subquery for the session's hours; the WHERE clause only takes sessions that
+    // have a summary row with hours, so it is never NULL here.
+    const QString estimate =
+        "(session_channels.cph * (SELECT ss.hours_used FROM session_summaries ss"
+        " WHERE ss.session_id = session_channels.session_id))";
+
+    QSqlQuery q(db);
+    q.prepare(QString("UPDATE session_channels SET count ="
+                      " CASE WHEN abs(%1 - round(%1)) < 0.01 THEN round(%1) ELSE %1 END"
+                      " WHERE profile_id = ? AND cph > 0 AND session_id IN"
+                      " (SELECT s.id FROM sessions s JOIN session_summaries ss ON ss.session_id = s.id"
+                      "  WHERE s.summary_only = 1 AND ss.hours_used > 0)")
+              .arg(estimate));
+    q.addBindValue(profileId);
+    if (!q.exec()) {
+        qCritical() << "SessionChannelsRepository::restoreSummaryOnlyCounts failed:" << q.lastError().text();
+        DatabaseManager::instance().checkQueryError("SessionChannelsRepository::restoreSummaryOnlyCounts", q);
+        return false;
+    }
+    if (rowsUpdated) *rowsUpdated = q.numRowsAffected();
+    return true;
 }

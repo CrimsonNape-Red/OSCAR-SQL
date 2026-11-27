@@ -56,6 +56,7 @@
 #include "../database/respiratory_events_repository.h"
 #include "../database/session_repository.h"
 #include "../database/session_summaries_repository.h"
+#include "../database/session_channels_repository.h"
 #include "loader_plugins/bmc_loader.h"
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -1183,6 +1184,14 @@ void Profile::LoadMachineData(ProgressDialog *progress)
         if (!(*this)[STR_PREF_SummaryStatisticsRepaired].toBool()
                 && repairSummaryStatistics(profileData.id, progress)) {
             Set(STR_PREF_SummaryStatisticsRepaired, true);
+        }
+
+        // One-time rewrite of summary-only sessions' event counts in session_channels, which
+        // were stored as whole numbers (0.28 events as 0); retried only if it failed. It
+        // follows the #212 repair, which also rewrites daily summaries.
+        if (!(*this)[STR_PREF_SessionChannelCountsRepaired].toBool()
+                && repairSessionChannelCounts(profileData.id, progress)) {
+            Set(STR_PREF_SessionChannelCountsRepaired, true);
         }
 
         // One-time switch to the rolling SpO2 baseline. A profile with a fixed baseline set keeps
@@ -3280,6 +3289,66 @@ bool Profile::repairSummaryStatistics(qint64 profileId, ProgressDialog *progress
     }
 
     qDebug() << "Profile::repairSummaryStatistics() - rewrote" << rewritten << "daily summaries";
+    return true;
+}
+
+/**
+ * @brief Rewrite the event counts of summary-only sessions stored as whole numbers.
+ *
+ * A summary-only session's event counts are estimated as index x hours (ResMed STR), which
+ * is fractional: 0.1/h over 2.8 h is 0.28 events. session_channels.count used to be written
+ * rounded (and before that truncated) to a whole number, so SQL sums over the column lost
+ * events, e.g. a night of five sessions at 0.1-0.2/h summed to 0 instead of 4. The rows are
+ * rewritten from cph x hours (SessionChannelsRepository::restoreSummaryOnlyCounts()).
+ *
+ * The loaded sessions already hold the fractional counts (LoadFromDatabase() restores them
+ * from cph), so the days with a summary-only session have their daily_summaries row
+ * recalculated from them; those rows were calculated from the rounded counts.
+ *
+ * LoadMachineData() runs it until it succeeds once, then records
+ * STR_PREF_SessionChannelCountsRepaired in the profile preferences.
+ *
+ * @param profileId Database ID of the profile
+ * @param progress  Load progress dialog (may be null)
+ * @return true once the rewrite is committed; false to retry on the next load
+ */
+bool Profile::repairSessionChannelCounts(qint64 profileId, ProgressDialog *progress)
+{
+    DatabaseManager &dbm = DatabaseManager::instance();
+    QSqlDatabase db = dbm.database();
+
+    const bool ownTransaction = !dbm.inTransaction() && dbm.transaction();
+
+    int rows = 0;
+    if (!SessionChannelsRepository::restoreSummaryOnlyCounts(db, profileId, &rows)) {
+        if (ownTransaction) dbm.rollback();
+        qWarning() << "Profile::repairSessionChannelCounts() - session_channels rewrite failed; will retry on next load";
+        return false;
+    }
+
+    if (progress) {
+        progress->setMessage(QObject::tr("Calculating Daily Summaries"));
+    }
+
+    DailySummaryRepository summaryRepo;
+    int rewritten = 0;
+    for (auto it = daylist.begin(), end = daylist.end(); it != end; ++it) {
+        Day *day = it.value();
+        if (!isSummaryEligible(day)) continue;
+        bool hasSummaryOnly = false;
+        for (Session *sess : day->sessions) {
+            if (sess && sess->enabled() && sess->summaryOnly()) { hasSummaryOnly = true; break; }
+        }
+        if (hasSummaryOnly && summaryRepo.calculateAndStoreFromDay(day, profileId)) rewritten++;
+    }
+
+    if (ownTransaction && !dbm.commit()) {
+        qWarning() << "Profile::repairSessionChannelCounts() - commit failed; will retry on next load";
+        return false;
+    }
+
+    qDebug() << "Profile::repairSessionChannelCounts() - rewrote" << rows << "session_channels rows and"
+             << rewritten << "daily summaries";
     return true;
 }
 

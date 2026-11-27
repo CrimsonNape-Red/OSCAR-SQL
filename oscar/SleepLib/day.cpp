@@ -1126,7 +1126,8 @@ EventDataType Day::count(ChannelID code)
             const EventDataType cnt = sess->count(code);
             total += cnt;
             // Summary-only sessions carry estimated counts (index x hours, e.g. ResMed STR),
-            // which are fractional by design and are rounded where they are stored. A
+            // which are fractional by design; session_channels keeps them fractional, while the
+            // count columns of session_summaries and daily_summaries hold them rounded. A
             // fractional count from a session with detail data is unexpected (GitLab #236).
             if (!sess->summaryOnly() && cnt != static_cast<int>(cnt)) {
                 qWarning() << "Day::count for code" << code << "session" << sess->session()

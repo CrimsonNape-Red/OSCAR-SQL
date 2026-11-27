@@ -17,6 +17,8 @@
 
 #include <QVariant>
 
+#include "SleepLib/machine_common.h"
+
 class Day;
 class Machine;
 class Session;
@@ -37,6 +39,9 @@ private slots:
     void testRefillRestoresSessionLeak();
     void testRefillClearsLeakWithoutChannel();
     void testProfileRepairRewritesBothTables();
+    void testRestoredEventCount();
+    void testSummaryOnlyCountKeepsFraction();
+    void testRepairRewritesWholeNumberCounts();
     void testRefillLeavesUncomputedPercentileEmpty();
     void cleanupTestCase();
 
@@ -49,6 +54,10 @@ private:
     bool setSessionLeak(const Session *sess, double avg, double p95, double max) const;
     //! \brief Build, summarise and save a one-hour session starting at \a startMs
     Session *addSession(qint64 startMs, bool withLeak);
+    //! \brief Save a 2.8-hour summary-only session with an obstructive index of 0.1/h
+    Session *addSummaryOnlySession(qint64 startMs);
+    //! \brief session_channels.count of one channel of a session
+    QVariant channelCount(const Session *sess, ChannelID id) const;
 
     QCoreApplication *m_app = nullptr;
     QTemporaryDir *m_tempDir = nullptr;
@@ -57,6 +66,7 @@ private:
     Session *m_session = nullptr;       ///< pressure, unintentional leak and total leak
     Session *m_noLeakSession = nullptr; ///< pressure only, on another night
     Day *m_day = nullptr;               ///< the day holding m_session alone
+    Session *m_summaryOnly = nullptr;   ///< summary-only, 0.28 obstructive events
 };
 
 DECLARE_TEST(SummaryStatisticsTests)
