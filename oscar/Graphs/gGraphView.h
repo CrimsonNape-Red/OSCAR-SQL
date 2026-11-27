@@ -48,11 +48,21 @@
 #include <SleepLib/day.h>
 
 
+/*! \class MinMaxWidget
+    \brief The Y-axis scaling controls shown in a graph's menu.
+
+    Classic menu: a scaling mode list (Auto-Fit, Defaults, Override) with the Override Min and
+    Max, which are enabled once Override is picked.
+
+    Card look menu (overrideOnly): Min, Max and reset alone, under "Override scale...". Auto,
+    Default and Dynamic are items of the menu itself there, so there is no mode list: using
+    Min, Max or reset switches the graph to Override (see selectOverride()).
+ */
 class MinMaxWidget:public QWidget
 {
      Q_OBJECT
 public:
-    explicit MinMaxWidget(gGraph * graph, QWidget *parent);
+    explicit MinMaxWidget(gGraph * graph, QWidget *parent, bool overrideOnly = false);
      ~MinMaxWidget() {}
 
     void createLayout();
@@ -74,7 +84,19 @@ public slots:
     void onMaxChanged(double d);
     void onComboChanged(int idx);
     void onResetClicked();
+signals:
+    //! \brief Card look: the graph has just been switched to Override from this widget
+    void overrideSelected();
 protected:
+    //! \brief Card look: a mouse press in Min or Max selects Override with the values shown
+    bool eventFilter(QObject * watched, QEvent * event) override;
+    //! \brief Card look: makes the Min and Max shown the graph's Override range and switches
+    //! the graph to Override (which also switches Dynamic off)
+    void selectOverride();
+    //! \brief Sets the spin boxes' step to suit the range min..max
+    void setStepFor(double min, double max);
+
+    bool m_overrideOnly = false;    //!< Card look: no scaling mode list
     gGraph * graph;
     QComboBox *combobox;
 //    QCheckBox *checkbox;
@@ -845,6 +867,9 @@ public:
     void arrangeCardMenu();
     //! \brief A section heading for the card menu: a small bold label that cannot be chosen
     QAction * menuHeading(const QString &text);
+    //! \brief Ticks the one Y-axis item that describes what graph g's axis is doing: Dynamic
+    //! while it is in effect, otherwise the scaling mode (Auto, Default or Override)
+    void updateScaleTicks(gGraph *g);
     bool m_cardMenuBuilt = false;
     QAction * m_headDisplay = nullptr;
     QAction * m_headYAxis = nullptr;

@@ -162,6 +162,10 @@ class gGraph : public QObject
     //         Applies the Graph Preference min/max settings.
     void roundY(EventDataType &miny, EventDataType &maxy);
 
+    //! \brief The range Auto-Fit scaling gives this graph: its data's min and max, rounded
+    //! outward. Unlike roundY() it does not depend on the graph's scaling mode or Dynamic.
+    void autoFitRange(EventDataType &miny, EventDataType &maxy);
+
 //    //! \brief Process all Layers GLBuffer (Vertex) objects, drawing the actual OpenGL stuff.
 
     //! \brief Returns the Graph's (vertical) title

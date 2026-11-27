@@ -744,6 +744,9 @@ void gGraphView::arrangeCardMenu()
         }
     });
     limits_menu->setTitle(tr("Override scale..."));
+    // Ticked while the graph is on Override (see updateScaleTicks()). A click on an item that
+    // opens a sub-menu does not toggle it.
+    limits_menu->menuAction()->setCheckable(true);
     context_menu->addMenu(limits_menu);
 
     context_menu->addAction(m_headOverlays = menuHeading(tr("Overlays")));
@@ -751,6 +754,19 @@ void gGraphView::arrangeCardMenu()
     context_menu->addMenu(cpap_menu);
     context_menu->addMenu(oximeter_menu);
     context_menu->addMenu(lines_menu);
+}
+
+void gGraphView::updateScaleTicks(gGraph *g)
+{
+    if (!g || !m_autoScale) return;
+    // Dynamic is a switch on top of the scaling mode, not a mode itself. While it is in
+    // effect only Dynamic is ticked, so the menu shows what the axis is doing; the mode's
+    // tick returns when Dynamic is switched off. Picking a mode also switches Dynamic off.
+    const bool dynamic = g->dynamicScalingOn && g->isDynamicScalingEnabled();
+    m_autoScale->setChecked(!dynamic && g->zoomY() == ZS_AUTO_FIT);
+    m_defaultScale->setChecked(!dynamic && g->zoomY() == ZS_DEFAULT);
+    m_dynamicScale->setChecked(dynamic);
+    limits_menu->menuAction()->setChecked(!dynamic && g->zoomY() == ZS_OVERRIDE);
 }
 
 void gGraphView::showGraphMenu(gGraph *g, const QPoint &globalPos)
@@ -782,10 +798,8 @@ void gGraphView::showGraphMenu(gGraph *g, const QPoint &globalPos)
         m_headYAxis->setVisible(scalable);
         m_autoScale->setVisible(scalable);
         m_defaultScale->setVisible(scalable);
-        m_autoScale->setChecked(g->zoomY() == ZS_AUTO_FIT);
-        m_defaultScale->setChecked(g->zoomY() == ZS_DEFAULT);
         m_dynamicScale->setVisible(scalable && g->isDynamicScalingEnabled());
-        m_dynamicScale->setChecked(g->dynamicScalingOn);
+        updateScaleTicks(g);
 
         m_headOverlays->setVisible(plots_menu->menuAction()->isVisible() || cpap_menu->menuAction()->isVisible()
                                    || oximeter_menu->menuAction()->isVisible() || lines_menu->menuAction()->isVisible());
@@ -2295,25 +2309,80 @@ protected:
 };
 
 
-MinMaxWidget::MinMaxWidget(gGraph * graph, QWidget *parent)
-:QWidget(parent), graph(graph)
+MinMaxWidget::MinMaxWidget(gGraph * graph, QWidget *parent, bool overrideOnly)
+:QWidget(parent), m_overrideOnly(overrideOnly), graph(graph)
 {
     step = 1;
     createLayout();
 }
 
+void MinMaxWidget::selectOverride()
+{
+    graph->rec_miny = minbox->value();
+    graph->rec_maxy = maxbox->value();
+    if (graph->zoomY() != ZS_OVERRIDE || graph->dynamicScalingOn) {
+        graph->setZoomY(ZS_OVERRIDE);
+        emit overrideSelected();
+    }
+    graph->timedRedraw(0);
+}
+
+bool MinMaxWidget::eventFilter(QObject * watched, QEvent * event)
+{
+    // A click in Min or Max is enough to choose Override: the values shown are then in use,
+    // changed or not (a range set earlier, or the Auto-Fit range offered for a first use)
+    if (m_overrideOnly && event->type() == QEvent::MouseButtonPress) {
+        selectOverride();
+    }
+    return QWidget::eventFilter(watched, event);
+}
+
+void MinMaxWidget::setStepFor(double min, double max)
+{
+    const double r = max - min;
+    if (r > 400) {
+        step = 50;
+    } else if (r > 100) {
+        step = 10;
+    } else if (r > 50) {
+        step = 5;
+    } else {
+        step = 1;
+    }
+    minbox->setSingleStep(step);
+    maxbox->setSingleStep(step);
+}
+
 void MinMaxWidget::onMinChanged(double d)
 {
+    if (m_overrideOnly) {
+        selectOverride();
+        return;
+    }
     graph->rec_miny = d;
     graph->timedRedraw(0);
 }
 void MinMaxWidget::onMaxChanged(double d)
 {
+    if (m_overrideOnly) {
+        selectOverride();
+        return;
+    }
     graph->rec_maxy = d;
     graph->timedRedraw(0);
 }
 void MinMaxWidget::onResetClicked()
 {
+    if (m_overrideOnly) {
+        EventDataType miny, maxy;
+        graph->autoFitRange(miny, maxy);
+        setStepFor(miny, maxy);
+        setMin(miny);
+        setMax(maxy);
+        selectOverride();
+        return;
+    }
+
     ZoomyScaling tmp = graph->zoomY();
     graph->setZoomY(ZS_AUTO_FIT);
     EventDataType miny = graph->MinY(),
@@ -2374,9 +2443,12 @@ void MinMaxWidget::createLayout()
 
     int idx = graph->zoomY();
     combobox->setCurrentIndex(idx);
+    // Card look: no mode list, and Min and Max are always ready for use
+    const bool editable = m_overrideOnly || idx == ZS_OVERRIDE;
+    if (m_overrideOnly) combobox->hide();
 
-    minbox->setEnabled(idx == 2);
-    maxbox->setEnabled(idx == 2);
+    minbox->setEnabled(editable);
+    maxbox->setEnabled(editable);
 
     minbox->setAlignment(Qt::AlignRight);
     maxbox->setAlignment(Qt::AlignRight);
@@ -2385,52 +2457,63 @@ void MinMaxWidget::createLayout()
     maxbox->setMinimum(-9999.0);
     minbox->setMaximum(9999.99);
     maxbox->setMaximum(9999.99);
-    setMin(graph->rec_miny);
-    setMax(graph->rec_maxy);
-
-    float r = graph->rec_maxy - graph->rec_miny;
-    if (r > 400) {
-        step = 50;
-    } else if (r > 100) {
-        step = 10;
-    } else if (r > 50) {
-        step = 5;
-    } else {
-        step = 1;
+    double shownMin = graph->rec_miny;
+    double shownMax = graph->rec_maxy;
+    if (m_overrideOnly && qAbs(shownMax - shownMin) < 0.0001) {
+        // No Override range has been set for this graph: offer the Auto-Fit range to start
+        // from. It is only shown here; selectOverride() makes it the graph's range.
+        EventDataType miny, maxy;
+        graph->autoFitRange(miny, maxy);
+        shownMin = miny;
+        shownMax = maxy;
     }
-
-    minbox->setSingleStep(step);
-    maxbox->setSingleStep(step);
+    setMin(shownMin);
+    setMax(shownMax);
+    setStepFor(shownMin, shownMax);
 
     connect(minbox, SIGNAL(valueChanged(double)), this, SLOT(onMinChanged(double)));
     connect(maxbox, SIGNAL(valueChanged(double)), this, SLOT(onMaxChanged(double)));
 
-    QLabel * label = new QLabel(tr("Scaling Mode"));
+    if (m_overrideOnly) {
+        // A press on the text of a spin box goes to its line edit, one on its arrows to the box
+        for (QDoubleSpinBox * box : {minbox, maxbox}) {
+            box->installEventFilter(this);
+            if (QLineEdit * edit = box->findChild<QLineEdit *>()) edit->installEventFilter(this);
+        }
+    }
+
+    QLabel * label = new QLabel(tr("Scaling Mode"), this);
     QFont font = label->font();
     font.setBold(true);
     label->setFont(font);
     label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(label,0,0);
-    layout->addWidget(combobox,1,0);
+    // The mode list takes the first column in the Classic menu only
+    const int col = m_overrideOnly ? 0 : 1;
+    if (m_overrideOnly) {
+        label->hide();
+    } else {
+        layout->addWidget(label,0,0);
+        layout->addWidget(combobox,1,0);
+    }
 
     label = new QLabel(STR_TR_Min);
     label->setFont(font);
     label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(label,0,1);
-    layout->addWidget(minbox,1,1);
+    layout->addWidget(label,0,col);
+    layout->addWidget(minbox,1,col);
 
     label = new QLabel(STR_TR_Max);
     label->setFont(font);
     label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(label,0,2);
-    layout->addWidget(maxbox,1,2);
+    layout->addWidget(label,0,col+1);
+    layout->addWidget(maxbox,1,col+1);
 
     reset = new QToolButton(this);
     reset->setIcon(QIcon(":/icons/refresh.png"));
     reset->setToolTip(tr("This button resets the Min and Max to match the Auto-Fit"));
-    reset->setEnabled(idx == 2);
+    reset->setEnabled(editable);
 
-    layout->addWidget(reset,1,3);
+    layout->addWidget(reset,1,col+2);
     connect(reset, SIGNAL(clicked()), this, SLOT(onResetClicked()));
     this->setLayout(layout);
 }
@@ -2468,7 +2551,11 @@ void gGraphView::populateMenu(gGraph * graph)
     #endif
     {
         QWidgetAction * widget = new QWidgetAction(this);
-        MinMaxWidget * minmax = new MinMaxWidget(graph, this);
+        // Card look: Min, Max and reset only; using them selects Override (see MinMaxWidget)
+        MinMaxWidget * minmax = new MinMaxWidget(graph, this, cardLook());
+        if (cardLook()) {
+            connect(minmax, &MinMaxWidget::overrideSelected, this, [this] { updateScaleTicks(m_menuGraph); });
+        }
 
         widget->setDefaultWidget(minmax);
 

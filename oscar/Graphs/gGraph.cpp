@@ -767,6 +767,12 @@ void gGraph::roundY(EventDataType &miny, EventDataType &maxy)
         maxy = physMaxY();
         if (maxy > miny) return; // Not Autoscaling
     }
+    autoFitRange(miny, maxy);
+}
+
+// The Auto-Fit range: the data's range, rounded outward
+void gGraph::autoFitRange(EventDataType &miny, EventDataType &maxy)
+{
     miny = MinY();
     maxy = MaxY();
     int m, t;

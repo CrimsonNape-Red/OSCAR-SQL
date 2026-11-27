@@ -9749,9 +9749,42 @@ named layouts use the same code and carry the flag too.
   flag is kept, so Dynamic returns when the preference is turned on again.
 - A graph whose visible data is all zero or negative never updates the Dynamic range
   (`actual_max_y > 0` in `gLineChart::paint()`). Not changed.
+- Follow-up, same day: the Modern graph menu ticked both the scaling mode ("Default scale")
+  and "Dynamic scale", which read as two modes at once. While Dynamic is in effect only
+  Dynamic is ticked now; the mode's tick returns when Dynamic is switched off
+  (`gGraphView.cpp`, where the menu is filled).
 - Checked on Windows 11 with a test instance: a layout with Dynamic on for Flow Rate and
   Pressure came up with both graphs on their Dynamic range (screenshot and log), one repeat
   paint and no more; the flag was still in the layout after exit; with the preference off
   both graphs used their scaling mode and the flag was kept; a version 5 layout loaded with
   its scaling modes unchanged. Not checked: switching Dynamic on by hand and restarting, a
   day change, a saved named layout, a clone open at exit, Linux and macOS.
+
+## 2026-11-27 - Modern graph menu: "Override scale..." asked for Override a second time
+
+**Files:** `oscar/Graphs/gGraphView.cpp`, `oscar/Graphs/gGraphView.h` (`MinMaxWidget`,
+`gGraphView::updateScaleTicks()`, `populateMenu()`, `arrangeCardMenu()`),
+`oscar/Graphs/gGraph.cpp` (`autoFitRange()`)
+
+**Symptom:** In the Modern graph menu, "Override scale..." opened a panel whose Min and Max
+were greyed until "Override" was picked again from a "Scaling Mode" list. That list also
+repeated Auto-Fit and Defaults, which are items of the menu itself.
+
+**Root cause:** The Modern menu reused the Classic menu's Y-axis panel unchanged. In Classic
+the mode list is the only way to choose a mode, so it belongs there.
+
+**Fix:** In the card look the panel has Min, Max and reset only, always enabled. A click in
+Min or Max, a change to either, or reset switches the graph to Override with the values
+shown. "Override scale..." is ticked while the graph is on Override. Classic is unchanged.
+
+**Non-obvious:**
+- Opening the panel does not select Override: a sub-menu opens on hover, and that would
+  change a graph's scale by passing the mouse over the item.
+- With no Override range set yet, the panel shows the Auto-Fit range to start from. It is
+  only displayed; it becomes the graph's range when Override is selected.
+- `gGraph::autoFitRange()` is the Auto-Fit part of `roundY()` moved into its own function.
+  The panel needs that range without the old trick of switching the graph to Auto-Fit and
+  back, which also switches Dynamic off.
+- Selecting Override switches Dynamic off, as picking any mode does.
+- Compiled on Windows (MSVC, Qt 6.12). The menu needs a mouse, so the behaviour was left to
+  the developer to check by hand.
