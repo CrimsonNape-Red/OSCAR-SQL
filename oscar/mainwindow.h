@@ -343,7 +343,7 @@ class MainWindow : public QMainWindow
     //! \brief Opens the online How-To Guide (Apnea Board wiki) in the default browser.
     void on_actionOnline_Users_Guide_triggered();
 
-    //! \brief Opens the OSCAR 2 Reference Manual (sleepfiles.com) in the default browser.
+    //! \brief Opens the OSCAR 2 Reference Guide (sleepfiles.com) in the default browser.
     void on_actionOSCAR2_Reference_Manual_triggered();
 
     //! \brief Opens the Frequently Asked Questions at the wiki in the welcome browser.

@@ -814,7 +814,7 @@
   </action>
   <action name="actionOSCAR2_Reference_Manual">
    <property name="text">
-    <string>OSCAR 2 Reference Manual</string>
+    <string>OSCAR 2 Reference Guide</string>
    </property>
   </action>
   <action name="action_Frequently_Asked_Questions">
