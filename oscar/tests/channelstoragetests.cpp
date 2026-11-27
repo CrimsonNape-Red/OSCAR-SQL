@@ -161,6 +161,9 @@ void ChannelStorageTests::testMigrationLeavesUserViewsAlone()
 {
     makeV19Shape();
     exec("CREATE VIEW user_view AS SELECT channel_code FROM channels");
+    // Start from OFF so the restore is tested. Its default depends on the SQLite build:
+    // Apple's system library has it ON, so Homebrew Qt on macOS would otherwise start at 1.
+    exec("PRAGMA legacy_alter_table=OFF");
     const bool migrated = DatabaseSchema::migrateV19ToV20(db());
     const QString sql = scalar("SELECT sql FROM sqlite_master WHERE type='view' AND name='user_view'").toString();
     QSqlQuery select(db());

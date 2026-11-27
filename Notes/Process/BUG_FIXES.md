@@ -9691,3 +9691,27 @@ background (`DailyDetails::zeroEventsImage()`).
 - Checked with screenshots of a test instance on Windows 11: dark mode in Classic and
   Modern, and light mode in Classic, each on a night with events and a night without. Not
   checked: light mode in Modern, the printed report, Linux and macOS.
+
+## 2026-11-26 - Unit test: testMigrationLeavesUserViewsAlone failed on macOS with Homebrew Qt (GitLab #433)
+
+**Files:** `oscar/tests/channelstoragetests.cpp`
+(`ChannelStorageTests::testMigrationLeavesUserViewsAlone()`)
+
+**Symptom:** On macOS with Homebrew Qt 6.12 the test failed with `legacyAlter` 1, expected 0.
+
+**Root cause:** A fault in the test, not in the migration. The test assumed that
+`PRAGMA legacy_alter_table` is 0 on a new connection. That default depends on the SQLite
+build: Homebrew's Qt links Apple's system SQLite, which has it ON. `migrateV19ToV20()`
+correctly put back the 1 it found, and the test compared that with a fixed 0.
+
+**Fix:** The test sets `legacy_alter_table=OFF` before it calls the migration, so the
+starting value is known on every SQLite build.
+
+**Non-obvious:**
+- On a connection that starts at 1, the old test could not have caught a missing restore
+  either (1 -> ON -> 1). Starting from OFF tests the restore everywhere.
+- The test leaves the shared test connection at OFF, which is where builds with Qt's
+  bundled SQLite start anyway (seen on Windows).
+- Checked: ChannelStorageTests 24 passed on Windows (MSVC, Qt 6.12). The reporter checked
+  the same change on macOS with Homebrew Qt 6.12, and that the test fails when the guard's
+  restore is taken out. Not checked: Linux.
