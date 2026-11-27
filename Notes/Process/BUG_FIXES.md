@@ -9816,8 +9816,11 @@ tidal volume lists are resized to the values written.
   the nightly maximum Te stayed at about 10 s (up to 15.9 s). Whether such pauses belong in Te is left
   open.
 - A smoothed Ti of up to 8.6 s remains on the test device, from inspirations of 5-10 s.
-- The unused entries were only in memory: the event files are written up to `count()`, so the stored
-  respiratory rate and tidal volume data is the same before and after the resize.
+- The unused entries were stored as well: the database writes the whole list
+  (`EventDataRepository::serializeEventList()`), not `count()` values, so nights imported between
+  MR !87 and this change have respiratory rate and tidal volume data that ends in unused zeros. Loading
+  reads only `count()` values, so those nights are read correctly. (Corrected after the merge: this
+  entry first said the unused entries were only in memory.)
 - As with MR !87 the values are calculated at import; nights imported earlier keep their values until
   they are imported again.
 - Checked: on Linux (Qt 6) the new FlowParserTests (synthetic breathing at 5 Hz and 25 Hz) pass, and
