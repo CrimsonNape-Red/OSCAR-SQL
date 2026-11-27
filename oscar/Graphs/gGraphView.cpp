@@ -3795,7 +3795,8 @@ void gGraphView::SaveDefaultSettings() {
 
 const quint32 gVmagic = 0x41756728;   //'Aug('
 // extern needed: const at file scope defaults to internal linkage; version 5 has same format as 4 (used to override settings in shg files on upgrade)
-extern const quint16 gVversion = 5;
+// version 6 adds, after the graph records, the names of the graphs that have Dynamic scale on (#202)
+extern const quint16 gVversion = 6;
 
 QString gGraphView::settingsFilename (QString title,QString folderName, QString ext) {
     if (folderName.size()==0) {
@@ -3812,9 +3813,11 @@ QString gGraphView::settingsFilename (QString title,QString folderName, QString 
 * the SHG file will then be
 *   SHG FILE HEADER - Must never change
 *   SHG VERSION 4(5) changes - for all graphs
-*   SHG VERSION 6 changes - for all graphs
+*   SHG VERSION 6 changes - a QStringList: the names of the graphs with Dynamic scale on
 *   SHG VERSION 7 changes - for all graphs
 *   ...
+* A build older than a block's version reads the graph records and ignores what follows them,
+* so the graph count in the header must be the number of records actually written.
 */
 
 QByteArray gGraphView::serializeSettings()
@@ -3826,11 +3829,18 @@ QByteArray gGraphView::serializeSettings()
 
     out << (quint32)gVmagic;
     out << (quint16)gVversion;
-    out << (qint16)size();
 
+    // Clones (snapshots) are not saved. Count only the graphs that are written: the reader
+    // takes this count of records, and the version 6 block follows the last of them.
+    QList<gGraph*> saved;
     for (auto& graph : m_graphs) {
-        if (!graph) continue;
-        if (graph->isSnapshot()) continue;
+        if (graph && !graph->isSnapshot()) saved.append(graph);
+    }
+    out << (qint16)saved.size();
+
+    QStringList dynamicGraphs;
+    for (auto& graph : saved) {
+        if (graph->dynamicScalingOn) dynamicGraphs << graph->name();
         out << graph->name();
         out << graph->height();
         out << graph->visible();
@@ -3849,6 +3859,9 @@ QByteArray gGraphView::serializeSettings()
             out << (quint32)LT_Other;
         }
     }
+
+    // Version 6: the graphs with Dynamic scale on
+    out << dynamicGraphs;
     return buffer;
 }
 
@@ -3975,6 +3988,22 @@ bool gGraphView::deserializeSettings(const QByteArray& buffer)
                     if (version == 4 && gVversion > 4) {
                         lc->resetGraphViewSettings();
                     }
+                }
+            }
+        }
+    }
+
+    // Version 6: the graphs with Dynamic scale on. setZoomY() above switched Dynamic off in
+    // every graph of the layout, so an older layout leaves it off. Only a graph with a line
+    // chart can be Dynamic (see gGraph::isDynamicScalingEnabled()).
+    if (version >= 6) {
+        QStringList dynamicGraphs;
+        in >> dynamicGraphs;
+        if (in.status() == QDataStream::Ok) {
+            for (const QString & graphName : dynamicGraphs) {
+                gi = m_graphsbyname.find(graphName);
+                if (gi != m_graphsbyname.end() && gi.value()->m_lineChart_layer) {
+                    gi.value()->dynamicScalingOn = true;
                 }
             }
         }

@@ -750,7 +750,9 @@ void gGraph::dynamicScaling(EventDataType &miny, EventDataType &maxy) {
 // YAxis Autoscaling code
 void gGraph::roundY(EventDataType &miny, EventDataType &maxy)
 {
-    if (dynamicScalingOn) {
+    // Dynamic is a saved setting (#202), so it can be on in a graph while the "Allow YAxis
+    // Scaling" preference is off: it then has no effect, and the graph keeps its scaling mode.
+    if (dynamicScalingOn && isDynamicScalingEnabled()) {
         dynamicScaling(miny, maxy) ;
         if (maxy > miny) return;
     };

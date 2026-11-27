@@ -326,6 +326,9 @@ class gGraph : public QObject
 
     Layer *getLineChart();
     Layer *m_lineChart_layer =nullptr ;
+    //! \brief True when the user has switched Dynamic scale on for this graph. It is saved with
+    //! the graph layout, and takes effect only while isDynamicScalingEnabled() is true.
+    //! setZoomY() switches it off.
     bool dynamicScalingOn =false;
     QTimer *timer;
 

@@ -9715,3 +9715,43 @@ starting value is known on every SQLite build.
 - Checked: ChannelStorageTests 24 passed on Windows (MSVC, Qt 6.12). The reporter checked
   the same change on macOS with Homebrew Qt 6.12, and that the test fails when the guard's
   restore is taken out. Not checked: Linux.
+
+## 2026-11-27 - Daily graphs: the Dynamic Y-axis scale was not remembered (GitLab #202)
+
+**Files:** `oscar/Graphs/gGraphView.cpp` (`serializeSettings()`, `deserializeSettings()`,
+`gVversion`), `oscar/Graphs/gGraph.cpp` (`roundY()`), `oscar/Graphs/gLineChart.cpp`
+(`paint()`)
+
+**Symptom:** A graph's scaling mode (Auto-Fit, Defaults, Override and its min/max) came back
+after a restart, but Dynamic scale had to be switched on again in every graph, every time.
+
+**Root cause:** Dynamic is a flag on the graph (`gGraph::dynamicScalingOn`) that was never
+written to the saved graph layout. Nothing in the code suggests it was left out on purpose.
+
+**Fix:** The layout format goes to version 6: after the graph records it holds the names of
+the graphs with Dynamic on. Loading sets the flag after `setZoomY()`, which clears it. Saved
+named layouts use the same code and carry the flag too.
+
+**Non-obvious:**
+- The layout header counted every graph, clones included, although clones are not written.
+  With a clone open at save time the reader took more records than there were. It now counts
+  only the graphs written, which the block that follows them depends on.
+- An older 2.x build reads the graph records and ignores what follows, so it still loads a
+  version 6 layout (read from the code, not tried with an older build). Its own save drops
+  the Dynamic block.
+- Dynamic takes its range from the previous paint of the line chart. The first paint after
+  start-up has none and used the graph's scaling mode. In the test the next paint came 8
+  seconds later, with the screenshot. The line chart now asks for one more paint when its
+  range changed while Dynamic is in effect. That also covers a new day and a zoom without
+  mouse movement. The repeat paint finds the same range, so it does not loop.
+- `roundY()` now applies Dynamic only while "Allow YAxis Scaling" is on. Before, Dynamic
+  stayed in effect after the preference was turned off, with its menu item hidden. The saved
+  flag is kept, so Dynamic returns when the preference is turned on again.
+- A graph whose visible data is all zero or negative never updates the Dynamic range
+  (`actual_max_y > 0` in `gLineChart::paint()`). Not changed.
+- Checked on Windows 11 with a test instance: a layout with Dynamic on for Flow Rate and
+  Pressure came up with both graphs on their Dynamic range (screenshot and log), one repeat
+  paint and no more; the flag was still in the layout after exit; with the preference off
+  both graphs used their scaling mode and the flag was kept; a version 5 layout loaded with
+  its scaling modes unchanged. Not checked: switching Dynamic on by hand and restarting, a
+  day change, a saved named layout, a clone open at exit, Linux and macOS.

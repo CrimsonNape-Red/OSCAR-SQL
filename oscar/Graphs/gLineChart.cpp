@@ -1197,8 +1197,17 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
 
     if (actual_max_y>0) {
+        const bool changed = (m_actual_min_y != actual_min_y) || (m_actual_max_y != actual_max_y);
         m_actual_min_y=actual_min_y;
         m_actual_max_y=actual_max_y;
+        // Dynamic scale takes its range from the previous paint (gGraph::dynamicScaling()), so
+        // this paint used the old range. Paint once more when the range moved, or the graph
+        // would keep the old scale until something else repaints it: the first paint after
+        // start-up, a new day, or a zoom without mouse movement. The next paint finds the same
+        // range and asks for nothing.
+        if (changed && w.dynamicScalingOn && w.isDynamicScalingEnabled() && !w.printing()) {
+            w.timedRedraw(0);
+        }
     }
 
 }

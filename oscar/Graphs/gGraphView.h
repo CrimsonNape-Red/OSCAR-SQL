@@ -456,7 +456,8 @@ public:
 
     QString settingsFilename (QString title,QString folderName="" ,QString ext=".shg");
 
-    //! \brief Serializes graph layout state (order, heights, min/max Y, pinning) to a raw byte array.
+    //! \brief Serializes graph layout state (order, heights, min/max Y, scaling mode, Dynamic
+    //! scale, pinning) to a raw byte array.
     QByteArray serializeSettings();
 
     //! \brief Deserializes graph layout state from a raw byte array. Returns false on format error.
