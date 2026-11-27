@@ -87,6 +87,9 @@ public:
 
     void updateProfileList();
     Profile *SelectProfile(QString profname);
+    //! @brief Makes the named profile's row the current one in the list, which also shows its
+    //!        details in the info panel. Does nothing when no row has that name.
+    void selectRow(const QString &name);
     //! @brief Marks the named profile's row as the open one (bold, with an "Open" tag) and
     //!        clears the mark from every other row. An empty name only clears: no profile is open.
     void updateProfileHighlight(QString name);

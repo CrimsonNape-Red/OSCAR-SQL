@@ -482,6 +482,20 @@ Profile *ProfileSelector::SelectProfile(QString profname)
     return prof;
 }
 
+void ProfileSelector::selectRow(const QString &name)
+{
+    if (!proxy || name.isEmpty()) return;
+
+    for (int row = 0; row < proxy->rowCount(); row++) {
+        const QModelIndex idx = proxy->index(row, 0, QModelIndex());
+        if (proxy->data(idx, Qt::UserRole+2).toString() == name) {
+            ui->profileView->setCurrentIndex(idx);
+            ui->profileView->scrollTo(idx);
+            return;
+        }
+    }
+}
+
 void ProfileSelector::on_profileView_doubleClicked(const QModelIndex &index)
 {
     QModelIndex idx = proxy->index(index.row(), 0, QModelIndex());
@@ -580,7 +594,8 @@ void ProfileSelector::on_buttonEditProfile_clicked()
 
             proxy->setData(proxy->index(ui->profileView->currentIndex().row(), 5, QModelIndex()), usersname);
             proxy->setData(proxy->index(ui->profileView->currentIndex().row(), 5, QModelIndex()), nameSortKey(prof->user->lastName(), prof->user->firstName()), MySortFilterProxyModel2::NameSortRole);
-            if (prof == p_profile) updateProfileHighlight(name);
+            // The dialog may have renamed the profile, so ask the profile for its name
+            if (prof == p_profile) updateProfileHighlight(prof->user->userName());
         }
 
         delete newprof;

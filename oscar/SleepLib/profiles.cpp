@@ -228,6 +228,16 @@ bool Profile::Save(QString filename)
     } else return false;
 }
 
+void Profile::setFolder(const QString &path)
+{
+    // Same form as the constructor leaves: a trailing separator on the folder
+    p_path = path;
+    if (!p_path.endsWith("/")) {
+        p_path += "/";
+    }
+    p_filename = p_path + p_name + STR_ext_XML;
+}
+
 bool Profile::removeLock()
 {
     QString filename=p_path+"/lockfile";
@@ -1657,6 +1667,61 @@ Profile *Create(QString name, const QString* in_path)
     }
 
     return p_profile;
+}
+
+RenameResult Rename(Profile *profile, const QString &newName)
+{
+    if (!profile || newName.isEmpty()) {
+        return RenameFolderFailed;
+    }
+    const QString oldName = profile->user->userName();
+    if (oldName == newName) {
+        return RenameOk;
+    }
+
+    QDir profilesDir(p_pref->Get("{home}/Profiles/"));
+    ProfileRepository profileRepo;
+    if (profilesDir.exists(newName) || profileRepo.findByUsername(newName).id != 0) {
+        return RenameNameInUse;
+    }
+
+    // The folder goes first: it is the step most likely to fail (a file inside it open in
+    // another program, no write permission), and it is easy to put back.
+    if (!profilesDir.exists(oldName) || !profilesDir.rename(oldName, newName)) {
+        qWarning() << "Profiles::Rename(): could not rename folder" << oldName << "to" << newName
+                   << "in" << profilesDir.absolutePath();
+        return RenameFolderFailed;
+    }
+
+    // A profile that was never saved has no row yet; its next Save() creates one under
+    // the new name.
+    ProfileData profileData = profileRepo.findByUsername(oldName);
+    if (profileData.id != 0) {
+        profileData.username = newName;
+        profileData.dataFolder = QString("%PROFDIR%/") + newName;
+        if (!profileRepo.update(profileData)) {
+            qWarning() << "Profiles::Rename(): could not update the database row of" << oldName;
+            if (!profilesDir.rename(newName, oldName)) {
+                qWarning() << "Profiles::Rename(): could not put folder" << newName << "back to" << oldName;
+            }
+            return RenameDatabaseFailed;
+        }
+    }
+
+    // Device data paths and database lookups are built from the user name on each use, so
+    // these three are all the in-memory state there is. The lockfile of an open profile
+    // moved with the folder.
+    profile->user->setUserName(newName);
+    profile->setFolder(profilesDir.filePath(newName));
+    profiles.remove(profiles.key(profile, oldName));
+    profiles[newName] = profile;
+
+    if (AppSetting->profileName() == oldName) {
+        AppSetting->setProfileName(newName);
+    }
+
+    qDebug() << "Profiles::Rename(): renamed profile" << oldName << "to" << newName;
+    return RenameOk;
 }
 
 Profile *Get()

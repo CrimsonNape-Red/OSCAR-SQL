@@ -2932,7 +2932,7 @@ void MainWindow::on_actionPrint_Report_triggered()
 
 void MainWindow::on_action_Edit_Profile_triggered()
 {
-    QString name = p_profile ? AppSetting->profileName() : selectedProfileName();
+    QString name = p_profile ? p_profile->user->userName() : selectedProfileName();
     if (name.isEmpty()) return;
     NewProfile *newprof = new NewProfile(this);
     newprof->edit(name);
@@ -4363,6 +4363,18 @@ void MainWindow::refreshProfileSelector()
 {
     if (profileSelector) {
         profileSelector->updateProfileList();
+    }
+}
+
+void MainWindow::profileRenamed(Profile *profile)
+{
+    // The title bar and the profile list are the only places that show the profile name
+    if (profile && profile == p_profile) {
+        setWindowTitle(tr("%1 (Profile: %2)%3").arg(getMainWindowTitle(), p_profile->user->userName(), dbFolderSuffix()));
+    }
+    if (profileSelector) {
+        profileSelector->updateProfileList();
+        profileSelector->selectRow(profile ? profile->user->userName() : QString());
     }
 }
 

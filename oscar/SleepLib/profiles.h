@@ -139,6 +139,10 @@ class Profile : public Preferences
 
     QString path() { return p_path; }
 
+    //! \brief Points this profile at \p path after its data folder was renamed on disk.
+    //!        Only the stored path changes; use Profiles::Rename() to rename a profile.
+    void setFolder(const QString &path);
+
     //! \brief Removes a given day from the date, destroying the daylist date record if empty
     bool unlinkDay(Day * day);
 
@@ -343,6 +347,25 @@ int CleanupProfile(Profile *prof);
 Profile *Create(QString name, const QString* in_path=nullptr);
 Profile *Get(QString name);
 Profile *Get();
+
+//! \brief Outcome of Profiles::Rename()
+enum RenameResult {
+    RenameOk,               //!< Renamed on disk, in the database and in memory
+    RenameNameInUse,        //!< Another profile, or a folder, already has the new name
+    RenameFolderFailed,     //!< The data folder is missing or could not be renamed
+    RenameDatabaseFailed    //!< The database could not be updated; the folder was put back
+};
+
+/*! \brief Renames a profile in place: its data folder, its database row, the Profile
+           object and its key in Profiles::profiles. Works whether or not the profile is
+           open, and needs neither a restart nor a reload of the profile.
+
+    Everything else that depends on the name (device data paths, database lookups) is
+    worked out from Profile::user->userName() each time it is needed. The "last used
+    profile" application setting follows the rename when it names this profile.
+
+    Nothing is changed unless RenameOk is returned. The caller refreshes the UI. */
+RenameResult Rename(Profile *profile, const QString &newName);
 
 }
 

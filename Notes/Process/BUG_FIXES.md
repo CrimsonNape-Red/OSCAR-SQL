@@ -4,6 +4,46 @@ Notable bugs found and fixed during development/investigation.
 
 ---
 
+## 2026-11-26 - Renaming the open profile restarted OSCAR (GitLab #185)
+
+**Files:** `oscar/SleepLib/profiles.cpp/.h` (`Profiles::Rename()`, `Profile::setFolder()`, new),
+`oscar/newprofile.cpp`, `oscar/mainwindow.cpp/.h` (`profileRenamed()`, new),
+`oscar/profileselector.cpp/.h` (`selectRow()`, new), `oscar/tests/profilerenametests.cpp/.h` (new),
+`oscar/oscar.pro`
+
+**Symptom:** Changing the user name of the open profile in Edit Profile closed and restarted OSCAR.
+
+**Root cause:** The restart was a way around stale state, and there was little of it. Device data
+paths and database lookups are built from `Profile::user->userName()` on each use. Only the stored
+folder path (`p_path`, `p_filename`), the key in `Profiles::profiles`, the `profiles` row and the
+"last used profile" setting hold the name.
+
+**Fix:** `Profiles::Rename()` renames the folder, updates the row (putting the folder back if that
+fails), then the user name, the stored path, the map key and the setting. `NewProfile` calls it for
+open and closed profiles alike, before its one `Save()`. `MainWindow::profileRenamed()` updates the
+title bar and the profile list. No restart, no close and reopen.
+
+**Also fixed (found by reading the code while doing this, not reproduced first):**
+- Renaming a profile that was *not* open left its `Profile` object with the old user name and
+  folder. Opening it later in the same run looked the old name up, found no row, and
+  `LoadMachineData()` created a second `profiles` row under the old name; settings were then saved
+  to that row and data paths pointed at the folder that no longer existed.
+- File > Edit Profile did not tell the dialog which profile it was editing, so a changed user name
+  there created a new, empty profile and made it the current one behind the open pages.
+  `NewProfile::edit()` now records the name, and both entry points rename.
+- The dialog set the "last used profile" setting to whichever profile was edited, open or not. Only
+  a new profile sets it now.
+- Answering No to "Accept and save this information?" put the old user name back in the field.
+
+**Non-obvious:**
+- A rename that differs only in letter case is refused as "already in use" on a file system that
+  ignores case (the new folder name "exists"). Unchanged.
+- On Windows the folder rename fails while another program has a file in the profile folder open.
+  Nothing is changed then and the dialog stays on the name page.
+- The `UserName` value in `profile_preferences` is written by the `Save()` that follows the rename.
+
+---
+
 ## 2026-11-25 - A Flag Type change in Preferences > Events was lost at restart (GitLab #430)
 
 **Files:** `oscar/SleepLib/channel_overrides.cpp/.h`, `oscar/SleepLib/schema.cpp/.h`,

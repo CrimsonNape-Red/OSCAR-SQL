@@ -1027,6 +1027,7 @@ test {
         tests/channelstoragetests.cpp \
         tests/channelconversiontests.cpp \
         tests/channelbackuptests.cpp \
+        tests/profilerenametests.cpp \
         tests/machinepropertiestests.cpp \
         tests/portablemodetests.cpp \
         tests/sessionsplittests.cpp \
@@ -1090,6 +1091,7 @@ test {
         tests/channelstoragetests.h \
         tests/channelconversiontests.h \
         tests/channelbackuptests.h \
+        tests/profilerenametests.h \
         tests/machinepropertiestests.h \
         tests/portablemodetests.h \
         tests/sessionsplittests.h \

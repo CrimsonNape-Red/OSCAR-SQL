@@ -24,7 +24,6 @@
 #include <QPalette>
 
 #include "SleepLib/profiles.h"
-#include "database/profile_repository.h"
 
 #include "newprofile.h"
 #include "staticQMessageBox.h"
@@ -250,8 +249,7 @@ void NewProfile::on_nextButton_clicked()
         if (originalProfileName.isEmpty() ) {
             profileName = newProfileName;
         } else {
-            profileName = originalProfileName;
-            ui->userNameEdit->setText(originalProfileName);
+            profileName = originalProfileName;      // looked up by its current name; renamed below
         }
 
         if ( staticQMessageBox::question(this, tr("Profile Changes"), tr("Accept and save this information?"),
@@ -299,92 +297,56 @@ void NewProfile::on_nextButton_clicked()
                 // also call unitsChanged if height also changed. Need for update BMI.
                 if (mainwin && mainwin->getDaily()) { mainwin->getDaily()->UnitsChanged(); }
             }
-            AppSetting->setProfileName(profileName);
+            // A new profile becomes the current one. An existing profile keeps its place:
+            // Profiles::Rename() carries the setting over when it names this profile.
+            if (originalProfileName.isEmpty()) {
+                AppSetting->setProfileName(profileName);
+            }
+
+            // Rename first, so the one Save() below stores everything under the new name.
+            // The rename is done in place, whether or not the profile is open: no restart
+            // and no reload (GitLab #185).
+            const bool renaming = !originalProfileName.isEmpty() && !newProfileName.isEmpty()
+                                  && (originalProfileName != newProfileName);
+            Profiles::RenameResult renamed = Profiles::RenameOk;
+            if (renaming) {
+                renamed = Profiles::Rename(profile, newProfileName);
+            }
 
             profile->Save();
-            if ( !originalProfileName.isEmpty() && !newProfileName.isEmpty() && (originalProfileName != newProfileName)) {
-                QDir profilesDir(p_pref->Get("{home}/Profiles/"));
 
-                // Check for conflicts before attempting the rename.
-                ProfileRepository profileRepo;
-                bool dirConflict = profilesDir.exists(newProfileName);
-                bool dbConflict  = !dirConflict && (profileRepo.findByUsername(newProfileName).id != 0);
-                if (dirConflict || dbConflict) {
+            if (renamed == Profiles::RenameOk) {
+                if (renaming) {
+                    originalProfileName = newProfileName;
+                }
+                if (mainwin) {
+                    if (renaming) {
+                        mainwin->profileRenamed(profile);
+                    }
+                    mainwin->GenerateStatistics();
+                }
+                this->accept();
+            } else {
+                // Everything but the name was saved. Stay on the name page for another try.
+                if (renamed == Profiles::RenameNameInUse) {
                     staticQMessageBox::information(this,
                         tr("Profile Name Already In Use"),
                         tr("The name \"%1\" is already used by another profile. Please choose a different name.").arg(newProfileName),
                         QMessageBox::Ok);
-                    index=1;
-                    ui->stackedWidget->setCurrentIndex(index);
-                    ui->userNameEdit->setText(newProfileName);
-                } else if (profilesDir.exists(originalProfileName)) {
-                    bool status = profilesDir.rename(originalProfileName, newProfileName);
-                    if (status) {  // successful rename
-                        // Fix the in-memory map: remove old key, insert new with correct pointer.
-                        Profiles::profiles.remove(originalProfileName);
-                        Profiles::profiles[newProfileName] = profile;
-
-                        if (profile == p_profile) {
-                            // Renaming the currently open profile: update settings and restart
-                            // so all in-memory state (window title, paths, tabs) picks up the new name.
-                            AppSetting->setProfileName(newProfileName);
-                            if (mainwin) mainwin->CloseProfile();
-                            QCoreApplication::processEvents();
-                            // Update the database AFTER CloseProfile() so that Save() inside
-                            // CloseProfile() can still find "originalProfileName" in the DB.
-                            ProfileData profileData = profileRepo.findByUsername(originalProfileName);
-                            if (profileData.id != 0) {
-                                profileData.username = newProfileName;
-                                profileData.dataFolder = QString("%PROFDIR%/") + newProfileName;
-                                profileRepo.update(profileData);
-                            } else {
-                                qWarning() << "NewProfile: could not find profile in DB for rename:" << originalProfileName;
-                            }
-                            mainwin->RestartApplication();
-                            // Quit through the event loop, never with ::exit(): that runs the
-                            // static destructors without main()'s cleanup, so DatabaseManager's
-                            // destructor queries a connection Qt SQL has already torn down and
-                            // the process crashes on macOS (GitLab #395). RestartApplication()
-                            // has asked for the quit when it could start the new instance; ask
-                            // again so OSCAR also closes when it could not (it has told the user
-                            // to restart by hand). reject() keeps the profile selector from
-                            // refreshing a row for the profile that was just closed.
-                            QApplication::exit(0);
-                            reject();
-                            return;
-                        } else {
-                            // Renaming a non-open profile: update the DB and refresh the
-                            // profile selector — no restart needed.
-                            ProfileData profileData = profileRepo.findByUsername(originalProfileName);
-                            if (profileData.id != 0) {
-                                profileData.username = newProfileName;
-                                profileData.dataFolder = QString("%PROFDIR%/") + newProfileName;
-                                profileRepo.update(profileData);
-                            } else {
-                                qWarning() << "NewProfile: could not find profile in DB for rename:" << originalProfileName;
-                            }
-                            if (mainwin) {
-                                mainwin->refreshProfileSelector();
-                            }
-                            this->accept();
-                        }
-                    } else {
-                        staticQMessageBox::information(this,
-                            tr("Rename Failed"),
-                            tr("Could not rename the profile directory. Check that no files in the profile are open and that you have write permission."),
-                            QMessageBox::Ok);
-                        index=1;
-                        ui->stackedWidget->setCurrentIndex(index);
-                        ui->userNameEdit->setText(newProfileName);
-                    }
+                } else if (renamed == Profiles::RenameDatabaseFailed) {
+                    staticQMessageBox::information(this,
+                        tr("Rename Failed"),
+                        tr("Could not store the new profile name in the database. The profile keeps its old name."),
+                        QMessageBox::Ok);
                 } else {
-                    qWarning() << "Rename Profile failed";
+                    staticQMessageBox::information(this,
+                        tr("Rename Failed"),
+                        tr("Could not rename the profile directory. Check that no files in the profile are open and that you have write permission."),
+                        QMessageBox::Ok);
                 }
-            } else {
-                if (mainwin) {
-                    mainwin->GenerateStatistics();
-                }
-                this->accept();
+                index = 1;
+                ui->stackedWidget->setCurrentIndex(index);
+                ui->userNameEdit->setText(newProfileName);
             }
         }
     }
@@ -448,6 +410,8 @@ void NewProfile::edit(const QString name)
         profile = Profiles::Create(name);
     }
 
+    // Finish compares the name typed against this one to see whether to rename
+    originalProfileName = name;
     ui->userNameEdit->setText(name);
     ui->firstNameEdit->setText(profile->user->firstName());
     ui->lastNameEdit->setText(profile->user->lastName());

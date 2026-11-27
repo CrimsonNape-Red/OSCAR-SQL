@@ -239,8 +239,12 @@ class MainWindow : public QMainWindow
     /// Returns the username highlighted in the profile selector screen, or empty if none.
     QString selectedProfileName() const;
 
-    /// Rebuilds the profile selector list (e.g. after renaming a non-open profile).
+    /// Rebuilds the profile selector list.
     void refreshProfileSelector();
+
+    /*! rief Shows a profile's new name after Profiles::Rename(): in the title bar when it
+               is the open profile, and in the profile list, where its row stays selected. */
+    void profileRenamed(Profile *profile);
 
   protected:
     void closeEvent(QCloseEvent *) override;
