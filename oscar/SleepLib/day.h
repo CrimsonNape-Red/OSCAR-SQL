@@ -236,6 +236,17 @@ class Day
         created but never filled. See Session::channelHasRecordedData(). */
     bool channelHasRecordedData(ChannelID id);
 
+    /*! \brief Returns true if an enabled session of this Day recorded SpO2 or pulse rate
+        \details The device type is not looked at. Oximetry comes from oximeters and from
+        CPAP devices with a sensor attached or built in, and can be filed under a device
+        of another type. */
+    bool hasRecordedOximetry();
+
+    /*! \brief Hours of use of the device types that recorded oximetry on this Day
+        \details For a night from an oximeter this is hours(MT_OXIMETER); for a CPAP device
+        that records its own oximetry, hours(MT_CPAP). 0 if hasRecordedOximetry() is false. */
+    EventDataType oximetryHours();
+
     //! \brief Returns true if this day contains the supplied settings Channel id
     bool settingExists(ChannelID id);
 

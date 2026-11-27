@@ -12,6 +12,7 @@
 #include "SleepLib/profiles.h"
 #include "SleepLib/schema.h"
 #include "SleepLib/session.h"
+#include "statistics.h"
 
 #include <QTemporaryDir>
 
@@ -129,6 +130,152 @@ void DayTests::testRecordedDataIgnoresDisabledSessions()
     QVERIFY(!day.channelHasRecordedData(CPAP_Pressure));
 }
 
+/*! \brief Give \a sess a recorded measurement channel, as its summary holds it
+    \param sess    session to add to
+    \param code    channel
+    \param average time-weighted average
+    \param lowest  minimum
+    \param highest maximum */
+static void recordChannel(Session *sess, ChannelID code, EventDataType average,
+                          EventDataType lowest, EventDataType highest)
+{
+    sess->m_cnt[code] = 3600;
+    sess->m_wavg[code] = average;
+    sess->m_min[code] = lowest;
+    sess->m_max[code] = highest;
+}
+
+// GitLab #439: a night has oximetry when a session recorded SpO2 or pulse, whichever kind of
+// device the session belongs to. A CPAP night without it is not a night of oximetry.
+void DayTests::testOximetryFromAnyDevice()
+{
+    if (OXI_SPO2 == 0) { schema::init(); }
+    ScopedProfile scoped;
+    CPAP cpap(&scoped.profile(), 1);
+    Oximeter oximeter(&scoped.profile(), 2);
+    PositionSensor position(&scoped.profile(), 3);
+    // The type a session takes from its device is the one in the device's info.
+    cpap.setType(MT_CPAP);
+    oximeter.setType(MT_OXIMETER);
+    position.setType(MT_POSITION);
+
+    Day cpapOnly;
+    Session *therapy = addPlainSession(cpapOnly, cpap, 1000000);
+    recordChannel(therapy, CPAP_Pressure, 9, 6, 12);
+    QVERIFY(!cpapOnly.hasRecordedOximetry());
+    QCOMPARE(cpapOnly.oximetryHours(), EventDataType(0));
+
+    // Channels stored empty are not oximetry either.
+    therapy->m_cnt[OXI_SPO2] = 0;
+    therapy->m_wavg[OXI_SPO2] = 0;
+    therapy->m_min[OXI_SPO2] = 0;
+    therapy->m_max[OXI_SPO2] = 0;
+    QVERIFY(!cpapOnly.hasRecordedOximetry());
+
+    // An oximeter beside the CPAP device: the oximeter's hours are the oximetry hours.
+    Day withOximeter;
+    addPlainSession(withOximeter, cpap, 1000000);
+    addPlainSession(withOximeter, cpap, 1010000);
+    recordChannel(addPlainSession(withOximeter, oximeter, 1020000), OXI_Pulse, 60, 50, 80);
+    QVERIFY(withOximeter.hasRecordedOximetry());
+    QCOMPARE(withOximeter.oximetryHours(), EventDataType(1));
+
+    // A CPAP device recording its own oximetry.
+    Day builtIn;
+    recordChannel(addPlainSession(builtIn, cpap, 1000000), OXI_SPO2, 96, 90, 99);
+    QVERIFY(builtIn.hasRecordedOximetry());
+    QCOMPARE(builtIn.oximetryHours(), EventDataType(1));
+
+    // Oximetry filed under a device of another type still counts; disabled, it does not.
+    Day other;
+    Session *filed = addPlainSession(other, position, 1000000);
+    recordChannel(filed, OXI_SPO2, 97, 94, 99);
+    QVERIFY(other.hasRecordedOximetry());
+    QCOMPARE(other.oximetryHours(), EventDataType(1));
+    filed->setEnabled(false);
+    QVERIFY(!other.hasRecordedOximetry());
+    QCOMPARE(other.oximetryHours(), EventDataType(0));
+}
+
+// GitLab #439: the Oximeter Statistics figures come from the nights that have oximetry, so
+// CPAP nights without it are neither counted nor averaged in.
+void DayTests::testOximetryStatisticsUseOximetryNights()
+{
+    if (OXI_SPO2 == 0) { schema::init(); }
+    ScopedProfile scoped;
+    Profile & profile = scoped.profile();
+    CPAP cpap(&profile, 1);
+    Oximeter oximeter(&profile, 2);
+    cpap.setType(MT_CPAP);
+    oximeter.setType(MT_OXIMETER);
+    const QDate first(2026, 3, 1);
+
+    // 1 March: CPAP only.
+    Day *cpapNight = new Day();
+    cpapNight->setDate(first);
+    recordChannel(addPlainSession(*cpapNight, cpap, 1000000), CPAP_Pressure, 9, 6, 12);
+    profile.daylist.insert(cpapNight->date(), cpapNight);
+
+    // 3 March: an hour of CPAP, then an hour of oximeter with SpO2 and pulse.
+    Day *both = new Day();
+    both->setDate(first.addDays(2));
+    addPlainSession(*both, cpap, 1000000);
+    Session *full = addPlainSession(*both, oximeter, 1010000);
+    recordChannel(full, OXI_SPO2, 96, 90, 99);
+    recordChannel(full, OXI_Pulse, 60, 50, 80);
+    full->m_cnt[OXI_PulseChange] = 4;
+    full->m_cnt[OXI_SPO2Drop] = 3;
+    full->m_sum[OXI_SPO2Drop] = 72;         // seconds
+    profile.daylist.insert(both->date(), both);
+
+    // 6 March: an hour of oximeter with pulse only.
+    Day *pulseOnly = new Day();
+    pulseOnly->setDate(first.addDays(5));
+    Session *partial = addPlainSession(*pulseOnly, oximeter, 1000000);
+    recordChannel(partial, OXI_Pulse, 70, 55, 90);
+    partial->m_cnt[OXI_PulseChange] = 2;
+    profile.daylist.insert(pulseOnly->date(), pulseOnly);
+
+    const QDate last = first.addDays(9);
+    const QList<Day *> nights = profile.oximetryDays(first, last);
+    QCOMPARE(nights.size(), 2);
+    QCOMPARE(nights.first(), both);
+    QCOMPARE(nights.last(), pulseOnly);
+    QVERIFY(profile.oximetryDays(first, first.addDays(1)).isEmpty());
+    QCOMPARE(profile.oximetryDays(first.addDays(5), first.addDays(5)).size(), 1);
+    QVERIFY(profile.oximetryDays(QDate(), last).isEmpty());
+
+    auto value = [&](const char *channel, StatCalcType calc) {
+        return StatisticsRow(channel, calc, MT_OXIMETER).oximetryValue(nights, first, last);
+    };
+    QCOMPARE(value("", SC_TOTAL_DAYS), QString("10"));
+    QCOMPARE(value("", SC_DAYS_W_DATA), QString("2"));
+    QCOMPARE(value("", SC_DAYS_WO_DATA), QString("8"));
+    // SpO2 was recorded on one of the two nights only.
+    QCOMPARE(value("SPO2", SC_WAVG), QString("96.00"));
+    QCOMPARE(value("SPO2", SC_MIN), QString("90.00"));
+    // Pulse: 60 over a 2 hour night and 70 over a 1 hour night.
+    QCOMPARE(value("Pulse", SC_WAVG), QString("63.33"));
+    QCOMPARE(value("Pulse", SC_MIN), QString("50.00"));
+    QCOMPARE(value("Pulse", SC_MAX), QString("90.00"));
+    // Indices are per hour of oximetry: 6 pulse changes, and 72 seconds of drops, in 2 hours.
+    QCOMPARE(value("PulseChange", SC_CPH), QString("3.00"));
+    QCOMPARE(value("SPO2Drop", SC_SPH), QString("1.00%"));
+
+    // A column without a night of oximetry has nothing to show.
+    const QList<Day *> none;
+    QCOMPARE(StatisticsRow("SPO2", SC_WAVG, MT_OXIMETER).oximetryValue(none, first, first), QString("-"));
+    QCOMPARE(StatisticsRow("", SC_DAYS_W_DATA, MT_OXIMETER).oximetryValue(none, first, first), QString("0"));
+    // Nights with pulse only: no SpO2 figure rather than 0.00.
+    const QList<Day *> pulseNights = profile.oximetryDays(first.addDays(5), last);
+    QCOMPARE(StatisticsRow("SPO2", SC_MIN, MT_OXIMETER).oximetryValue(pulseNights, first.addDays(5), last),
+             QString("-"));
+
+    // The days hold sessions of the devices above: remove them before the devices go.
+    qDeleteAll(profile.daylist);
+    profile.daylist.clear();
+}
+
 // Every session of the night has summary data only: the day is a summary-only day.
 void DayTests::testAllSummarySessions()
 {
@@ -158,6 +305,8 @@ void DayTests::testOximeterDoesNotCountAsDetail()
 {
     CPAP cpap(nullptr, 1);
     Oximeter oximeter(nullptr, 2);
+    cpap.setType(MT_CPAP);
+    oximeter.setType(MT_OXIMETER);
     Day day;
     addSession(day, cpap, 1000000, true);
     addSession(day, oximeter, 1000500, false);

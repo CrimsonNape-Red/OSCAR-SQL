@@ -9916,8 +9916,8 @@ never looked at, and a period without data prints as 0.00.
 - `Day::channelHasData()` could not be used: it is true for any channel stored with the session,
   and some loaders store a channel they created and never filled (count 0, all summaries 0).
 - Event rows (per-hour indices) are unchanged: zero events in a period is a result.
-- The Oximeter section is unchanged. Its cells already show "-" when a period has no oximeter
-  days, and hiding only its measurement rows would leave the event rows on their own.
+- The Oximeter section is not changed by this fix; it had a fault of its own, see the #439
+  entry below.
 - The decision is per row, over all columns together. A row that stays can still show 0.00 in a
   column whose period has no data for it.
 - Not fixed here, seen while testing (GitLab #438): over a period that mixes days with and without a channel,
@@ -9929,3 +9929,56 @@ never looked at, and a period without data prints as 0.00.
   in range the Leak and Pressure groups are gone, subheadings included, and the event rows remain.
   Not checked: a profile with two makes of device, Monthly, 90 Days and Date Range modes with a
   hidden row, the printed report, Linux, macOS.
+
+---
+
+## 2026-11-27 - Statistics: Oximeter section showed CPAP day counts and zeros (GitLab #439)
+
+**Files:** `oscar/statistics.cpp` (`Statistics::GenerateCPAPUsage`,
+`StatisticsRow::oximetryValue`), `oscar/statistics.h`, `oscar/SleepLib/day.cpp`
+(`Day::hasRecordedOximetry`, `Day::oximetryHours`), `oscar/SleepLib/profiles.cpp`
+(`Profile::oximetryDays`), `oscar/tests/daytests.cpp`
+
+**Symptom:** The Oximeter Statistics section appeared for a report with no oximetry in it.
+"Database has N days of Oximetry Data" gave the number of CPAP days, the usage rows repeated
+the CPAP counts, and every SpO2 and pulse row showed 0.00.
+
+**Root cause:** The section picked one device type to work from. With no oximeter-device day
+in the report range, and SpO2 or Pulse available anywhere in the profile, it used CPAP days
+instead (the fallback added for CPAP devices that record their own oximetry, #98) without
+checking that those days held any oximetry. Two ways to get there: a range that holds none of
+the oximeter's nights, and a profile whose only oximetry is filed under a device that is
+neither an oximeter nor a CPAP device. Present since 2.0.0.
+
+**Fix:**
+1. The section works from the days on which an enabled session recorded SpO2 or pulse,
+   whichever device the session belongs to (`Profile::oximetryDays()`).
+2. The "Database has N days" line, the usage rows and the section's presence all count those
+   days; the section is left out when the report range has none.
+3. `StatisticsRow::oximetryValue()` makes the same sums as the `Profile::calc...()` functions,
+   over those days. `StatisticsRow::value()` lost its device-type override.
+4. An SpO2 or pulse row is left out when the nights shown have only the other one (the #436
+   rule), and a column shows "-" for the one a night does not have.
+
+**Non-obvious:**
+- Oximetry hours for the per-hour indices are the hours of the device types that recorded it
+  that night (`Day::oximetryHours()`), which keeps the figures for an oximeter, and for a CPAP
+  device with its own oximetry, what they were.
+- For a CPAP device that recorded oximetry on some nights only, the old fallback counted and
+  averaged over every CPAP night. Those figures change; the new ones are over the nights with
+  oximetry.
+- `Machine::type()` reads the device's info, not the type its constructor sets, so a device
+  made directly in a test is of type 0 until `setType()` is called. A Day refuses a second
+  device of one type, so the oximeter session of `testOximeterDoesNotCountAsDetail` was never
+  added and the test passed without testing anything. It sets the types now.
+- The Classic Welcome page has a similar CPAP fallback for its "most recent oximetry" line
+  (`Welcome::GenerateOxiHTML`). Not looked into here.
+- Checked: two new unit tests; all 62 suites pass (671 passed, 9 skipped) on Windows, MSVC,
+  Qt 6.12. In the GUI on Windows, with a temporary log line comparing the old device-type
+  figures with the new ones on a profile with two oximeters (48 nights): all 253 cells the same
+  in Standard, Monthly and Date Range modes, and the header's 48 days agrees with a count made
+  in SQL. On a profile whose two nights of oximetry are filed under a position device: 90 Days
+  report, no section; Standard and Monthly, "2 days" with figures in the columns that hold
+  them and "-" elsewhere.
+  Not checked: a CPAP device with its own oximetry (no such data to hand), the printed report,
+  Linux, macOS.

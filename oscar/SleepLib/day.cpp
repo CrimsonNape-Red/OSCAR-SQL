@@ -1247,6 +1247,41 @@ bool Day::channelHasRecordedData(ChannelID id)
     return false;
 }
 
+//! \brief True if \a sess is enabled and recorded SpO2 or pulse rate
+static bool sessionRecordedOximetry(Session * sess)
+{
+    return sess->enabled()
+        && (sess->channelHasRecordedData(OXI_SPO2) || sess->channelHasRecordedData(OXI_Pulse));
+}
+
+bool Day::hasRecordedOximetry()
+{
+    for (auto & sess : sessions) {
+        if (sessionRecordedOximetry(sess)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+EventDataType Day::oximetryHours()
+{
+    QList<MachineType> types;
+    for (auto & sess : sessions) {
+        if (sessionRecordedOximetry(sess) && !types.contains(sess->type())) {
+            types.append(sess->type());
+        }
+    }
+
+    EventDataType total = 0;
+    for (MachineType type : std::as_const(types)) {
+        total += hours(type);
+    }
+
+    return total;
+}
+
 void Day::OpenEvents()
 {
     PERF_TIMER_SCOPE("Day::OpenEvents()");

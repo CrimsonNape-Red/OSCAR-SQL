@@ -140,7 +140,19 @@ struct StatisticsRow {
         return schema::channel[src].id();
     }
 
-    QString value(QDate start, QDate end, MachineType typeOverride = MT_UNKNOWN);
+    /*! \brief Value of this row for one column, from the days of the row's device type
+        \param start first day of the column
+        \param end   last day of the column */
+    QString value(QDate start, QDate end);
+
+    /*! \brief Value of an Oximeter Statistics row for one column
+        \details Works from the nights that have oximetry recorded, whichever device
+        recorded them, where value() works from the days of one device type (GitLab #439).
+        \param days  the oximetry days from \a start to \a end (Profile::oximetryDays())
+        \param start first day of the column
+        \param end   last day of the column
+        \return the formatted value, or "-" when there is nothing to calculate it from */
+    QString oximetryValue(const QList<Day *> & days, QDate start, QDate end);
 };
 
 //! \class Prescription (device) setting

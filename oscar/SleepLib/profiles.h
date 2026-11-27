@@ -229,10 +229,19 @@ class Profile : public Preferences
         with an enabled session of device type \a mt are looked at, as in the calc
         functions. See Day::channelHasRecordedData() for what counts as recorded.
         \param code  channel to look for
-        \param mt    device type the day must have
+        \param mt    device type the day must have; MT_UNKNOWN for any
         \param start first day of the range
         \param end   last day of the range; an invalid date at either end gives false */
     bool channelHasRecordedData(ChannelID code, MachineType mt, QDate start, QDate end);
+
+    /*! \brief The days from \a start to \a end on which oximetry was recorded, oldest first
+        \details A day counts when an enabled session recorded SpO2 or pulse rate, whichever
+        device it came from (Day::hasRecordedOximetry()). Days of device type MT_OXIMETER
+        are not the same thing: a CPAP device can record oximetry, and a range can hold
+        oximeter days and CPAP days with oximetry side by side.
+        \param start first day of the range
+        \param end   last day of the range; an invalid date at either end gives an empty list */
+    QList<Day *> oximetryDays(QDate start, QDate end);
 
 
     //! \brief Calculates the minimum session settings value for channel code, between start and end dates

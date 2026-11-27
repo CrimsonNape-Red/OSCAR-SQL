@@ -2706,6 +2706,27 @@ bool Profile::channelHasRecordedData(ChannelID code, MachineType mt, QDate start
     return false;
 }
 
+QList<Day *> Profile::oximetryDays(QDate start, QDate end)
+{
+    QList<Day *> days;
+    if (!start.isValid() || !end.isValid()) {
+        return days;
+    }
+
+    for (auto it = daylist.lowerBound(start); (it != daylist.end()) && (it.key() <= end); ++it) {
+        Day *day = it.value();
+        if (day == nullptr) {
+            continue;
+        }
+        day->OpenSummary();
+        if (day->hasRecordedOximetry()) {
+            days.append(day);
+        }
+    }
+
+    return days;
+}
+
 bool Profile::hasChannel(ChannelID code)
 {
     QDate d = LastDay();
