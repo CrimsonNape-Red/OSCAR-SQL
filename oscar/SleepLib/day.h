@@ -231,6 +231,11 @@ class Day
     //! \brief Returns true if this Day contains loaded Event Data or a cached count for this channel
     bool channelHasData(ChannelID id);
 
+    /*! \brief Returns true if an enabled session of this Day recorded something on channel \a id
+        \details Stricter than channelHasData(), which is also true for a channel a loader
+        created but never filled. See Session::channelHasRecordedData(). */
+    bool channelHasRecordedData(ChannelID id);
+
     //! \brief Returns true if this day contains the supplied settings Channel id
     bool settingExists(ChannelID id);
 

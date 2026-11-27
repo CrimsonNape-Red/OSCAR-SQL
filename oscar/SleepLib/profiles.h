@@ -223,6 +223,17 @@ class Profile : public Preferences
     //! \brief Looks up if any devices report channel is available
     bool channelAvailable(ChannelID code);
 
+    /*! \brief Returns true if channel \a code was recorded on any day from \a start to \a end
+        \details channelAvailable() says a device of this profile has had the channel at some
+        time; this says whether there is anything to report for a date range. Only days
+        with an enabled session of device type \a mt are looked at, as in the calc
+        functions. See Day::channelHasRecordedData() for what counts as recorded.
+        \param code  channel to look for
+        \param mt    device type the day must have
+        \param start first day of the range
+        \param end   last day of the range; an invalid date at either end gives false */
+    bool channelHasRecordedData(ChannelID code, MachineType mt, QDate start, QDate end);
+
 
     //! \brief Calculates the minimum session settings value for channel code, between start and end dates
     EventDataType calcSettingsMin(ChannelID code, MachineType mt = MT_CPAP, QDate start = QDate(),

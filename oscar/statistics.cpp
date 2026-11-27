@@ -1467,6 +1467,28 @@ QString Statistics::getRDIorAHIText() {
     return STR_TR_AHI;
 }
 
+/*! \brief True for the row types that report a measured value of a channel
+    \details Averages, extremes, percentiles and time beyond a threshold. Event rows
+    (count or time per hour) are not measurements in this sense: no events in a period
+    is a result worth showing, whereas a measurement with nothing recorded is not.
+    \param calc row type to test */
+static bool isMeasurementRow(StatCalcType calc)
+{
+    switch (calc) {
+    case SC_MEDIAN:
+    case SC_AVG:
+    case SC_WAVG:
+    case SC_90P:
+    case SC_MIN:
+    case SC_MAX:
+    case SC_ABOVE:
+    case SC_BELOW:
+        return true;
+    default:
+        return false;
+    }
+}
+
 // Create the HTML for CPAP and Oximetry usage
 QString Statistics::GenerateCPAPUsage()
 {
@@ -1562,6 +1584,13 @@ QString Statistics::GenerateCPAPUsage()
 
     bool skipsection = false;;
     int alternatingColorCounter = 0 ;
+    // First and last day covered by the columns of the current section, and per channel
+    // whether anything was recorded in that range (GitLab #436).
+    QDate shownStart, shownEnd;
+    QHash<ChannelID, bool> recordedInRange;
+    // A subheading is held back until a row is written under it, so that a group whose
+    // rows are all left out does not leave its subheading behind.
+    QString pendingSubheading;
     // Loop through all rows of the Statistics report
     for (QList<StatisticsRow>::iterator i = rows.begin(); i != rows.end(); ++i) {
         StatisticsRow &row = (*i);
@@ -1618,6 +1647,24 @@ QString Statistics::GenerateCPAPUsage()
                     periods.push_back(Period(first,last,finished, last.daysTo(first),false,tr("Everything")));
                 }
             }
+
+            // The range the columns cover between them. Columns without a header are
+            // placeholders and show nothing.
+            shownStart = QDate();
+            shownEnd = QDate();
+            for (const Period & period : periods) {
+                if (period.header.isEmpty()) {
+                    continue;
+                }
+                if (!shownStart.isValid() || (period.start < shownStart)) {
+                    shownStart = period.start;
+                }
+                if (!shownEnd.isValid() || (period.end > shownEnd)) {
+                    shownEnd = period.end;
+                }
+            }
+            recordedInRange.clear();
+            pendingSubheading.clear();
 
             MachineType sectionType = (row.type == MT_OXIMETER) ? oxiSourceType : row.type;
             int days = p_profile->countDays(sectionType, first, last);
@@ -1695,7 +1742,7 @@ QString Statistics::GenerateCPAPUsage()
             continue;
         } else if (row.calc == SC_SUBHEADING) {  // subheading..
             alternatingColorCounter = 0 ;
-            html+=QString("<tr bgcolor='%1'><td colspan=%2 align=center><b>%3</b></td></tr>").
+            pendingSubheading = QString("<tr bgcolor='%1'><td colspan=%2 align=center><b>%3</b></td></tr>").
                     arg(subheading_color).arg(periods.size()+1).arg(row.src);
             continue;
         } else if (row.calc == SC_UNDEFINED) {
@@ -1712,6 +1759,7 @@ QString Statistics::GenerateCPAPUsage()
             continue;
         } else if (row.calc == SC_SPACE) {
             // if (CPAP HAS rows and OXI has rows then add space
+            pendingSubheading.clear();
             html+=QString("<tr bgcolor='%1'><th colspan=%2 align=center><font size='+2'>%3</font></th></tr>").
                         arg(heading_color).arg(periods.size()+1).arg(row.src);
             continue;
@@ -1719,6 +1767,18 @@ QString Statistics::GenerateCPAPUsage()
             ChannelID id = schema::channel[row.src].id();
             if ((id == NoChannel) || (!p_profile->channelAvailable(id))) {
                 continue;
+            }
+            // A CPAP measurement the columns have nothing for would be a row of zeros,
+            // e.g. Pressure beside Pressure Set in a profile that has had devices of two
+            // makes: leave it out (GitLab #436). Event rows stay, zero events is a result.
+            if ((row.type == MT_CPAP) && isMeasurementRow(row.calc)) {
+                if (!recordedInRange.contains(id)) {
+                    recordedInRange.insert(id,
+                        p_profile->channelHasRecordedData(id, MT_CPAP, shownStart, shownEnd));
+                }
+                if (!recordedInRange.value(id)) {
+                    continue;
+                }
             }
             name = calcnames[row.calc].arg(schema::channel[id].fullname());
         }
@@ -1757,6 +1817,8 @@ QString Statistics::GenerateCPAPUsage()
             }
             line += "</td>";
         }
+        html += pendingSubheading;
+        pendingSubheading.clear();
         html += line;
         html += "</tr>";
     }

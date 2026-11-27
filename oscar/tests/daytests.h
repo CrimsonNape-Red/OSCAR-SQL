@@ -9,11 +9,15 @@
 #include "tests/AutoTest.h"
 
 /*! \class DayTests
-    \brief When a day counts as summary-only (Day::summaryOnly()) */
+    \brief When a day counts as summary-only (Day::summaryOnly()), and when a channel
+    counts as recorded on a day (Day::channelHasRecordedData()) */
 class DayTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testRecordedDataNeedsSamplesOrSummary();
+    void testRecordedDataFromEventLists();
+    void testRecordedDataIgnoresDisabledSessions();
     void testAllSummarySessions();
     void testMixedDayIsNotSummaryOnly();
     void testOximeterDoesNotCountAsDetail();

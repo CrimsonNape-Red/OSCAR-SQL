@@ -450,6 +450,15 @@ class Session
     //! \brief Returns true if the channel has event data available (must be loaded first)
     bool channelDataExists(ChannelID id);
 
+    /*! \brief Returns true if this session recorded something on channel \a id
+        \details Recorded means at least one sample or event, or, for a session stored
+        without samples, a summary value (average, minimum, maximum) other than zero. A
+        channel a loader created but never filled is stored with a zero count and zero
+        summaries, and is not recorded data. Works on a session loaded from the database
+        (summaries only) as well as on one with its events in memory. Whether the session
+        is enabled is left to the caller. */
+    bool channelHasRecordedData(ChannelID id) const;
+
     bool IsLoneSession() { return s_lonesession; }
     void SetLoneSession(bool b) { s_lonesession = b; }
 

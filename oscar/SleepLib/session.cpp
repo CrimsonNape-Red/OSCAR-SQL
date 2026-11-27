@@ -1534,6 +1534,33 @@ qint64 Session::last(ChannelID id)
     m_lastchan[id] = max;
     return max + correctionMs();
 }
+bool Session::channelHasRecordedData(ChannelID id) const
+{
+    // Samples or events counted in the summary (the only evidence once the session has
+    // been loaded from the database).
+    if (m_cnt.value(id) > 0) {
+        return true;
+    }
+
+    // Events in memory that have not been summarised yet.
+    const auto lists = eventlist.constFind(id);
+    if (lists != eventlist.constEnd()) {
+        for (const EventList * list : lists.value()) {
+            if ((list != nullptr) && (list->count() > 0)) {
+                return true;
+            }
+        }
+    }
+
+    const auto values = m_valuesummary.constFind(id);
+    if ((values != m_valuesummary.constEnd()) && !values.value().isEmpty()) {
+        return true;
+    }
+
+    // No samples: a summary a loader supplied directly still counts, unless it is all zero.
+    return (m_wavg.value(id) != 0) || (m_min.value(id) != 0) || (m_max.value(id) != 0);
+}
+
 bool Session::channelDataExists(ChannelID id)
 {
     if (s_events_loaded) {

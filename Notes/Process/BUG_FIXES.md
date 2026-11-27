@@ -9886,3 +9886,46 @@ sessions were created from STR.edf only when the day had no files at all.
   removed files was then looked at in the GUI on Windows: Daily looks right, and the card-out
   session shows in Overview's session times graph. Not checked: S9 and series 10 cards, a real
   card-out night, Linux, macOS.
+
+## 2026-11-27 - Statistics: measurement rows with nothing recorded showed as rows of zeros (GitLab #436)
+
+**Files:** `oscar/statistics.cpp` (`Statistics::GenerateCPAPUsage()`, `isMeasurementRow()` new),
+`oscar/SleepLib/session.cpp/.h` (`Session::channelHasRecordedData()` new),
+`oscar/SleepLib/day.cpp/.h` (`Day::channelHasRecordedData()` new),
+`oscar/SleepLib/profiles.cpp/.h` (`Profile::channelHasRecordedData()` new),
+`oscar/tests/daytests.cpp/.h`
+
+**Symptom:** The Statistics page showed pressure rows that were 0.00 in every column, e.g. both
+Pressure and Pressure Set in a profile that has had devices of two makes, one of them all zeros.
+
+**Root cause:** A row was left out only when no device of the profile had ever had the channel
+(`Profile::channelAvailable()`). Whether anything was recorded in the dates the page covers was
+never looked at, and a period without data prints as 0.00.
+
+**Fix:**
+1. A CPAP measurement row (average, minimum, maximum, percentile, time over a threshold) is left
+   out when nothing was recorded on its channel on any day the columns cover between them.
+2. "Recorded" is decided per session by `Session::channelHasRecordedData()`: a count above zero,
+   a filled event list, or a summary that is not all zero.
+3. A subheading is written only when a row follows it, so a group whose rows are all left out
+   (e.g. Leak Statistics) does not leave its subheading behind.
+
+**Non-obvious:**
+- The test is not "the values are zero". A channel with samples that are all zero is a recording
+  (a night with no leak, no flow limitation) and its rows stay.
+- `Day::channelHasData()` could not be used: it is true for any channel stored with the session,
+  and some loaders store a channel they created and never filled (count 0, all summaries 0).
+- Event rows (per-hour indices) are unchanged: zero events in a period is a result.
+- The Oximeter section is unchanged. Its cells already show "-" when a period has no oximeter
+  days, and hiding only its measurement rows would leave the event rows on their own.
+- The decision is per row, over all columns together. A row that stays can still show 0.00 in a
+  column whose period has no data for it.
+- Not fixed here, seen while testing (GitLab #438): over a period that mixes days with and without a channel,
+  `Profile::calcWavg()` divides by the hours of all days and `Profile::calcMin()` takes 0 from the
+  days without it, so the average is too low and the minimum is 0.00.
+- Checked: three new unit tests; all 62 suites pass (669 passed, 9 skipped) on Windows, MSVC,
+  Qt 6.12. In the GUI on Windows with a test profile whose older nights have empty pressure and
+  leak channels: with real data in the last year the page is as before; with only the empty nights
+  in range the Leak and Pressure groups are gone, subheadings included, and the event rows remain.
+  Not checked: a profile with two makes of device, Monthly, 90 Days and Date Range modes with a
+  hidden row, the printed report, Linux, macOS.

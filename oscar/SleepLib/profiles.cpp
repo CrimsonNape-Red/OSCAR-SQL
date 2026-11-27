@@ -2689,6 +2689,23 @@ bool Profile::channelAvailable(ChannelID code)
     return false;
 }
 
+bool Profile::channelHasRecordedData(ChannelID code, MachineType mt, QDate start, QDate end)
+{
+    if (!start.isValid() || !end.isValid()) {
+        return false;
+    }
+
+    // Newest first: a channel in current use is found on the first day looked at.
+    for (QDate date = end; date >= start; date = date.addDays(-1)) {
+        Day *day = GetGoodDay(date, mt);
+        if ((day != nullptr) && day->channelHasRecordedData(code)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool Profile::hasChannel(ChannelID code)
 {
     QDate d = LastDay();

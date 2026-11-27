@@ -1236,6 +1236,17 @@ bool Day::channelHasData(ChannelID id)
     return false;
 }
 
+bool Day::channelHasRecordedData(ChannelID id)
+{
+    for (auto & sess : sessions) {
+        if (sess->enabled() && sess->channelHasRecordedData(id)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void Day::OpenEvents()
 {
     PERF_TIMER_SCOPE("Day::OpenEvents()");
