@@ -1048,6 +1048,7 @@ test {
         tests/welcomecardstests.cpp \
         tests/imagetrimtests.cpp \
         tests/profilepagetests.cpp \
+        tests/profileimporttests.cpp \
         tests/statisticsstyletests.cpp \
         tests/sidebarstyletests.cpp \
         tests/overviewbarstests.cpp \
@@ -1114,6 +1115,7 @@ test {
         tests/welcomecardstests.h \
         tests/imagetrimtests.h \
         tests/profilepagetests.h \
+        tests/profileimporttests.h \
         tests/statisticsstyletests.h \
         tests/sidebarstyletests.h \
         tests/overviewbarstests.h \

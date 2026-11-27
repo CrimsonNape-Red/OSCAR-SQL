@@ -1095,70 +1095,69 @@ bool ProfileImporter::rollbackImport(const QString& profilePath)
 
 Machine* ProfileImporter::findMachineByFolderName(Profile* profile, const QString& folderName)
 {
-    // Folder name format is typically "Brand_Serial" (e.g., "ResMed_22222439696")
-    // Extract the serial number from the folder name
-    QString serial = folderName;
+    Machine* machine = matchMachineFolder(profile->m_machlist, folderName);
+    if (!machine) {
+        qWarning() << "Could not find machine for folder:" << folderName;
+    }
+    return machine;
+}
+
+Machine* ProfileImporter::matchMachineFolder(const QList<Machine*>& machines, const QString& folderName)
+{
+    // The name OSCAR 1.7.1 gives the folder (Machine::getDataPath()): the loader name, then
+    // the serial number, or the device id in hex when there is no serial number.
+    for (Machine* machine : machines) {
+        const QString serial = machine->serial();
+        const QString expected = machine->loaderName() + "_" + (serial.isEmpty() ? machine->hexid() : serial);
+        if (folderName.compare(expected, Qt::CaseInsensitive) == 0) {
+            return machine;
+        }
+    }
+
+    // Folders named some other way. The part after the last underscore is the serial
+    // number or the hex id.
+    QString key = folderName;
     if (folderName.contains('_')) {
-        serial = folderName.section('_', -1);  // Get last part after underscore
+        key = folderName.section('_', -1);
     }
-    
-#ifdef DBDEBUG
-    qDebug() << "Matching folder:" << folderName << "extracted serial:" << serial;
-#endif
 
-    // Try matching by serial number
-    for (Machine* machine : profile->m_machlist) {
-        QString machineSerial = machine->serial();
-#ifdef DBDEBUG
-        qDebug() << "  Checking machine serial:" << machineSerial << "hexid:" << machine->hexid();
-#endif
-        if (machineSerial == serial) {
-#ifdef DBDEBUG
-            qDebug() << "  MATCH! Found machine by serial";
-#endif
+    // A device without a serial number takes no part in the serial tests: an empty serial
+    // equals an empty key and is contained in every folder name.
+    for (Machine* machine : machines) {
+        const QString serial = machine->serial();
+        if (!serial.isEmpty() && (serial == key)) {
             return machine;
         }
     }
 
-    // Try matching by hexid (for older formats)
-    for (Machine* machine : profile->m_machlist) {
-        QString machineFolder = machine->hexid();
-        if (machineFolder == folderName) {
-#ifdef DBDEBUG
-            qDebug() << "  MATCH! Found machine by hexid";
-#endif
+    // By hex id: the whole name (older formats) or the part after the underscore.
+    for (Machine* machine : machines) {
+        const QString hexid = machine->hexid();
+        if ((hexid == folderName) || (hexid.compare(key, Qt::CaseInsensitive) == 0)) {
             return machine;
         }
     }
 
-    // Try partial match
-    for (Machine* machine : profile->m_machlist) {
-        QString machineSerial = machine->serial();
-        QString machineFolder = machine->hexid();
-        if (folderName.contains(machineSerial) || folderName.contains(machineFolder)) {
-#ifdef DBDEBUG
-            qDebug() << "  MATCH! Found machine by partial match";
-#endif
+    // Partial match
+    for (Machine* machine : machines) {
+        const QString serial = machine->serial();
+        if ((!serial.isEmpty() && folderName.contains(serial)) || folderName.contains(machine->hexid())) {
             return machine;
         }
     }
 
     // Last resort: if there's only one CPAP machine, use it
     QList<Machine*> cpapMachines;
-    for (Machine* machine : profile->m_machlist) {
+    for (Machine* machine : machines) {
         if (machine->type() == MT_CPAP) {
             cpapMachines.append(machine);
         }
     }
 
     if (cpapMachines.size() == 1) {
-#ifdef DBDEBUG
-        qDebug() << "  MATCH! Using only CPAP machine";
-#endif
         return cpapMachines.first();
     }
-    
-    qWarning() << "Could not find machine for folder:" << folderName;
+
     return nullptr;
 }
 

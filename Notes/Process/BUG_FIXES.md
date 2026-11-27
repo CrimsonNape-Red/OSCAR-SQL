@@ -9982,3 +9982,50 @@ neither an oximeter nor a CPAP device. Present since 2.0.0.
   them and "-" elsewhere.
   Not checked: a CPAP device with its own oximetry (no such data to hand), the printed report,
   Linux, macOS.
+
+---
+
+## 2026-11-27 - 1.7.1 profile import: sessions of a device without a serial number stored under another device (GitLab #440)
+
+**Files:** `oscar/profileimporter.cpp` (`ProfileImporter::matchMachineFolder`,
+`ProfileImporter::findMachineByFolderName`), `oscar/profileimporter.h`,
+`oscar/tests/profileimporttests.cpp`
+
+**Symptom:** After a profile was imported from OSCAR 1.7.1, an oximeter without a serial
+number had no sessions, and its nights were stored under the profile's position sensor, which
+has no serial number either. Everything that goes by device type then treated the profile as
+having no oximeter nights (this is how #439 was found).
+
+**Root cause:** `findMachineByFolderName()` matches each device folder of the old profile to a
+device of the new one. 1.7.1 names the folder `<loader>_<serial>`, or `<loader>_<id in hex>`
+for a device without a serial number (`Machine::getDataPath()`). For the second form:
+1. the serial test compared the hex id from the folder name with the serials: no match;
+2. the hex id test compared the device's hex id with the whole folder name, loader prefix
+   included: never a match;
+3. the last test, "the folder name contains the device's serial or hex id", is true for every
+   folder when the serial is empty, so the first device without a serial took the folder.
+Devices are loaded in brand order (`MachineRepository::findByProfile()`), so every such folder
+went to the device without a serial whose brand sorts first.
+
+**Fix:** The matching moved to the static `ProfileImporter::matchMachineFolder()`. It first
+tries the exact name 1.7.1 would have given each device's folder. The looser tests that follow
+compare the hex id with the part after the underscore as well, and leave a device without a
+serial number out of the serial tests.
+
+**Non-obvious:**
+- Any 1.7.1 profile with two or more devices without a serial number was affected: oximeters,
+  position sensors and sleep-stage devices imported from files usually have none. With one such
+  device the old test happened to give the right answer.
+- Profiles already imported are not repaired. The sessions are complete, only filed under the
+  wrong device; importing the 1.7.1 profile again puts them right.
+- The importer already logs "Machine ID does not match" for each session whose file names a
+  different device from the one it is being stored under. That line appears for the misfiled
+  sessions, and is the thing to look for in a log from an affected import.
+- Not changed: the last resort (a folder nothing matches goes to the profile's only CPAP
+  device) and the second, process-of-elimination pass in `loadSessionsFromFiles()`.
+- Checked: four new unit tests, three of which fail with the old rules; all 63 suites pass
+  (677 passed, 9 skipped) on Windows, MSVC, Qt 6.12. A trimmed copy of the affected 1.7.1
+  profile (journal, oximeter and position folders) imported into an empty data folder through
+  `ProfileImporter::importProfile()`: with the old rules the oximeter got 0 sessions and the
+  position sensor 3; with the fix 2 and 1, and no "Machine ID does not match" lines.
+  Not checked: an import through the GUI, a full-size profile, Linux, macOS.

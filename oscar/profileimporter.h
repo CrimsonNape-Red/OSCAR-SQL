@@ -14,6 +14,7 @@
 #define PROFILEIMPORTER_H
 
 #include <QString>
+#include <QList>
 #include <QObject>
 #include <QElapsedTimer>
 
@@ -68,6 +69,21 @@ public:
     QString lastError() const { return m_lastError; }
     bool wasCancelled() const { return m_cancelled; }
 
+    /*!
+     * \brief Find the device a device folder of a file-based profile belongs to
+     * \param machines   the devices of the profile being imported into
+     * \param folderName name of the folder, without its path
+     * \return the device, or nullptr if none matches
+     *
+     * OSCAR 1.7.1 names the folder "<loader>_<serial>", or "<loader>_<id in hex>" for a
+     * device without a serial number, as oximeters and position sensors imported from
+     * files usually are. That name is tried first. The looser tests after it are for
+     * folders named some other way, and never match a device through an empty serial
+     * number: an empty string is "contained" in every folder name, which used to send
+     * the sessions of every device without a serial to one of them (GitLab #440).
+     */
+    static Machine* matchMachineFolder(const QList<Machine*>& machines, const QString& folderName);
+
 public slots:
     /*! \brief Request cancellation of an in-progress import. Safe to call from a signal. */
     void cancel() { m_cancelled = true; }
@@ -116,7 +132,7 @@ private:
     // Rollback on failure
     bool rollbackImport(const QString& profilePath);
     
-    // Helper to find machine by folder name
+    // Helper to find machine by folder name; see matchMachineFolder()
     Machine* findMachineByFolderName(Profile* profile, const QString& folderName);
 
     // Read Sessions.info (primary) or Summaries.xml (fallback) from a 1.7.1 machine
