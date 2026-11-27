@@ -171,8 +171,9 @@ QWidget *settingsCard(const QList<Period> &periods, const QString &ahiText)
     QVBoxLayout *col;
     Panel *c = card(InsightsPage::tr("Settings changes"), &col);
     col->addWidget(body(InsightsPage::tr("Each row is a period on the same settings, newest first. Its %1 "
-                                         "is compared with the period before, allowing for normal "
-                                         "night-to-night variation.").arg(ahiText), c, Role::Ink2));
+                                         "is compared with the nearest earlier period of at least %2 "
+                                         "nights, allowing for normal night-to-night variation.")
+                        .arg(ahiText).arg(Insights::kRxMinNights), c, Role::Ink2));
 
     auto *table = new QWidget(c);
     auto *g = new QGridLayout(table);
@@ -222,15 +223,27 @@ QWidget *settingsCard(const QList<Period> &periods, const QString &ahiText)
             fg = Role::AccentInk; bg = Role::AccentSoft;
             text = InsightsPage::tr("New device: %1. Not compared with the previous device, which "
                                     "may score events differently.").arg(deviceName(p.rx.machine));
+        } else if (p.nights.size() < Insights::kRxMinNights) {
+            tag = InsightsPage::tr("Too few nights");
+            fg = Role::Warn; bg = Role::WarnSoft;
+            text = InsightsPage::tr("This period has %1. A comparison needs at least %2.")
+                   .arg(nights(p.nights.size())).arg(Insights::kRxMinNights);
         } else {
-            const Insights::RxComparison cmp = Insights::compareRxPeriods(before->nights, p.nights);
-            const QString from = num(before->ahi, 2), to = num(p.ahi, 2);
+            // A short period can't be compared, so look past it to the nearest earlier period
+            // on the same device that is long enough
+            const Period *base = nullptr;
+            for (int j = i - 1; j >= 0 && !base && sameDevice(periods[j].rx.machine, p.rx.machine); --j) {
+                if (periods[j].nights.size() >= Insights::kRxMinNights) base = &periods[j];
+            }
+            if (!base) {
+                text = InsightsPage::tr("No earlier period of at least %1 nights to compare with.")
+                       .arg(Insights::kRxMinNights);
+            }
+            const Insights::RxComparison cmp = base ? Insights::compareRxPeriods(base->nights, p.nights)
+                                                    : Insights::RxComparison();
+            const QString from = base ? num(base->ahi, 2) : QString(), to = num(p.ahi, 2);
             switch (cmp.label) {
             case Insights::ChangeLabel::NoComparison:
-                tag = InsightsPage::tr("Too few nights");
-                fg = Role::Warn; bg = Role::WarnSoft;
-                text = InsightsPage::tr("Too few nights to compare: each period needs at least %1.")
-                       .arg(Insights::kRxMinNights);
                 break;
             case Insights::ChangeLabel::Lower:
                 tag = InsightsPage::tr("Lower");
@@ -262,6 +275,11 @@ QWidget *settingsCard(const QList<Period> &periods, const QString &ahiText)
                 detail = InsightsPage::tr("Change %1 events/h; 95% range %2 to %3")
                          .arg(signedNum(cmp.ahiAfter - cmp.ahiBefore), signedNum(cmp.ciLow),
                               signedNum(cmp.ciHigh));
+                if (base != before) {
+                    detail += " · " + InsightsPage::tr("Compared with %1 – %2: the periods between are "
+                                                       "too short.")
+                                      .arg(date(base->rx.start), date(base->rx.end));
+                }
             }
         }
         auto *v = new QWidget(table);
@@ -389,19 +407,11 @@ QWidget *qualityCard(const QList<Day *> &days, const QString &ahiText)
 QWidget *usageCard(const QList<Day *> &days)
 {
     const Insights::UsagePattern usage = Insights::usagePattern(days);
-    // A US rule, so only for profiles set to the United States
-    const bool us = p_profile->user->country() == QLocale::territoryToString(QLocale::UnitedStates);
-    Insights::MedicareCheck med = us ? Insights::medicareFirst90Days(p_profile->daylist)
-                                     : Insights::MedicareCheck();
-    // Only useful early on: hidden from a year after the first night
-    if (med.valid && med.firstNight.addYears(1) < QDate::currentDate()) {
-        med = Insights::MedicareCheck();
-    }
-    if (!usage.valid && !med.valid) return nullptr;
+    if (!usage.valid) return nullptr;
 
     QVBoxLayout *col;
     Panel *c = card(InsightsPage::tr("Usage pattern"), &col);
-    if (usage.valid) {
+    {
         auto *g = new QGridLayout();
         g->setVerticalSpacing(3);
         const QList<QStringList> rows = {
@@ -419,37 +429,6 @@ QWidget *usageCard(const QList<Day *> &days)
         }
         g->setColumnStretch(0, 1);
         col->addLayout(g);
-    }
-    if (med.valid) {
-        col->addSpacing(4);
-        col->addWidget(bold(InsightsPage::tr("US Medicare, first 90 days"), c));
-        QString tag, text;
-        Role fg, bg;
-        if (med.met) {
-            tag = InsightsPage::tr("Met");
-            fg = Role::Good; bg = Role::GoodSoft;
-            text = InsightsPage::tr("%1 of %2 nights with %3 h or more, from %4")
-                   .arg(med.bestNights).arg(30).arg(4).arg(date(med.bestFirstNight));
-        } else if (med.complete) {
-            tag = InsightsPage::tr("Not met");
-            fg = Role::Bad; bg = Role::BadSoft;
-            text = InsightsPage::tr("At most %1 of %2 nights with %3 h or more")
-                   .arg(med.bestNights).arg(30).arg(4);
-        } else {
-            tag = InsightsPage::tr("Not met yet");
-            fg = Role::Warn; bg = Role::WarnSoft;
-            text = InsightsPage::tr("%1 of %2 nights with %3 h or more so far")
-                   .arg(med.bestNights).arg(30).arg(4);
-        }
-        auto *m = new QHBoxLayout();
-        m->setSpacing(8);
-        m->addWidget(makeChip(tag, fg, bg, c), 0, Qt::AlignTop);
-        m->addWidget(body(text, c, Role::Ink2), 1);
-        col->addLayout(m);
-        col->addWidget(makeLabel(InsightsPage::tr("%1 or more hours on at least %2 nights in some %3 nights in a "
-                                                  "row, within the first %4 days from the first night "
-                                                  "OSCAR holds (%5).").arg(4).arg(21).arg(30).arg(90)
-                                 .arg(date(med.firstNight)), Theme::font(0.95), Role::Ink3, c, true));
     }
     col->addStretch(1);
     return c;
@@ -491,11 +470,11 @@ QString InsightsPage::dataKey() const
         hours += day->hours(MT_CPAP);
         events += day->count(AllAhiChannels) + day->count(CPAP_RERA);
     }
-    return QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11")
+    return QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10")
            .arg(quintptr(p_profile)).arg(p_profile->daylist.size()).arg(hours, 0, 'f', 4)
            .arg(events, 0, 'f', 2).arg(p_profile->cpap->leakRedline())
            .arg(p_profile->general->calculateRDI()).arg(p_profile->cpap->complianceHours())
-           .arg(p_profile->user->country()).arg(QLocale().name())
+           .arg(QLocale().name())
            .arg(AppSetting->combineSimilarMachines())   // how Statistics groups the periods
            .arg(p_profile->session->daySplitTime().toString());
 }
@@ -535,8 +514,6 @@ void InsightsPage::rebuild()
         column->addWidget(new Callout(Callout::Kind::Info, QString(),
             tr("Insights describes what happened. It doesn't tell you what to change: talk to your "
                "clinician before changing settings.")));
-        const QList<Period> periods = settingsPeriods();
-        if (!periods.isEmpty()) column->addWidget(settingsCard(periods, ahiText));
         if (QWidget *pressure = pressureCards(days)) {
             column->addWidget(new SectionHeader(tr("Pressure (automatic modes), last %1 days")
                                                 .arg(kRangeDays)));
@@ -544,6 +521,12 @@ void InsightsPage::rebuild()
         }
         column->addWidget(new SectionHeader(tr("Data and habits, last %1 days").arg(kRangeDays)));
         column->addWidget(cardRow(qualityCard(days, ahiText), usageCard(days)));
+        // Last: it covers the whole history and can be long
+        const QList<Period> periods = settingsPeriods();
+        if (!periods.isEmpty()) {
+            column->addWidget(new SectionHeader(tr("Settings, whole history")));
+            column->addWidget(settingsCard(periods, ahiText));
+        }
     }
     column->addStretch(1);
     setWidget(page);    // deletes the previous content

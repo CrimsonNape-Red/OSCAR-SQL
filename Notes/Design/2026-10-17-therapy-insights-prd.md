@@ -213,7 +213,9 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
     excludes 0), or "no comparison".
   - A period that starts on a different device is not compared: the page marks "Device
     changed", since devices score events differently.
-  - No comparison when either period has fewer days than the minimum-days pref in §6.
+  - No comparison when either period has fewer days than the minimum-days pref in §6. The
+    page compares a period with the nearest earlier one on the same device that has enough
+    days, so one short period doesn't leave the next one without a verdict.
 - **Gate:** CPAP days with event data.
 - **Surface:** Insights page, "Settings changes": one row per "Changes to Device Settings"
   period, newest first, with the changed setting marked, a verdict and the interval.
@@ -269,8 +271,8 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
   - (b) Median mask-off clock time and its spread.
   - (c) Median sessions per night.
 - **Gate:** CPAP. (a) appears only when first use falls inside the profile's data.
-- **Surface:** Insights page, "Usage pattern". (a) only for profiles whose country is the
-  United States, and only until a year after the first night (agreed after review on !85).
+- **Surface:** Insights page, "Usage pattern": (b) and (c). (a) is calculated and tested but
+  not shown: compliance dates are a matter of contract, not machine data (forum, 2026-11-26).
 - **Accept:** `f4_medicare_just_met` (21 good nights, one exactly 4.0 h) and
   `f4_medicare_just_missed` (20).
 - **Test:** `testMedicareWindowMet`, `testMedicareWindowNotMet`.
