@@ -519,10 +519,16 @@ void FlowParser::calc(bool calcResp, bool calcTv, bool calcTi, bool calcTe, bool
 
         et = start + timeval;
 
+        // An inspiration longer than 10 s is not a breath. It appears when the flow stays above the zero line for a
+        // long time, e.g. while the baseline catches up with a sudden change of leak, and summing the flow over the
+        // whole period would give a tidal volume of several litres. Such breaths get no inspiratory or expiratory
+        // time, no tidal volume and no minute ventilation, and stay out of the smoothing of the following values.
+        const bool implausibleBreath = (mt - st) > 10000.0;
+
         /////////////////////////////////////////////////////////////////////
         // Calculate Inspiratory Time (Ti) for this breath
         /////////////////////////////////////////////////////////////////////
-        if (calcTi) {
+        if (calcTi && !implausibleBreath) {
             // Ti is simply the time between the start of a breath and it's midpoint
 
             // Note the 50.0 is the gain value, to give it better resolution
@@ -542,7 +548,7 @@ void FlowParser::calc(bool calcResp, bool calcTv, bool calcTi, bool calcTe, bool
         /////////////////////////////////////////////////////////////////////
         // Calculate Expiratory Time (Te) for this breath
         /////////////////////////////////////////////////////////////////////
-        if (calcTe) {
+        if (calcTe && !implausibleBreath) {
             // Te is simply the time between the second half of the breath
             te = ((et - mt) / 1000.0) * 50.0;
 
@@ -553,12 +559,6 @@ void FlowParser::calc(bool calcResp, bool calcTv, bool calcTi, bool calcTe, bool
             lastte2 = lastte;
             lastte = te;
         }
-
-        // An inspiration longer than 10 s is not a breath. It appears when the flow stays above the zero line for a
-        // long time, e.g. while the baseline catches up with a sudden change of leak, and summing the flow over the
-        // whole period would give a tidal volume of several litres. Such breaths get no tidal volume and no minute
-        // ventilation.
-        const bool implausibleBreath = (mt - st) > 10000.0;
 
         /////////////////////////////////////////////////////////////////////
         // Calculate TidalVolume
@@ -702,6 +702,9 @@ void FlowParser::calc(bool calcResp, bool calcTv, bool calcTi, bool calcTe, bool
         RR->setFirst(start);
         RR->setLast(et);
         RR->setCount(rr_count);
+        // Breaths at the start of the block and implausible breaths have no value: drop the unused entries
+        RR->getData().resize(rr_count);
+        RR->getTime().resize(rr_count);
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -714,6 +717,8 @@ void FlowParser::calc(bool calcResp, bool calcTv, bool calcTi, bool calcTe, bool
         TV->setFirst(start);
         TV->setLast(et);
         TV->setCount(tv_count);
+        TV->getData().resize(tv_count);
+        TV->getTime().resize(tv_count);
     }
 }
 

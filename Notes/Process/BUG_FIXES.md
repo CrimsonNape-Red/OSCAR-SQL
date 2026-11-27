@@ -9788,3 +9788,42 @@ shown. "Override scale..." is ticked while the graph is on Override. Classic is 
 - Selecting Override switches Dynamic off, as picking any mode does.
 - Compiled on Windows (MSVC, Qt 6.12). The menu needs a mouse, so the behaviour was left to
   the developer to check by hand.
+
+---
+
+## 2026-11-27 - Calculated respiratory values: Ti and Te of implausible breaths, unused list entries (MR !87 follow-up)
+
+**Files:** `oscar/SleepLib/calcs.cpp` (`FlowParser::calc()`), `oscar/tests/flowparsertests.cpp/.h` (new),
+`oscar/oscar.pro`
+
+**Symptom:** After MR !87 a breath with an inspiration longer than 10 s got no tidal volume, but its
+inspiratory and expiratory times were still written. On a 5 Hz Weinmann device the nightly maximum Ti
+was 10.4 s (median of 39 sessions), up to 31.4 s. The respiratory rate and tidal volume lists also
+kept unused entries after their last value.
+
+**Root cause:**
+1. The 10 s test came after the Ti and Te calculation.
+2. Both lists are sized to the number of breaths before the loop, and MR !87 made it possible to
+   write fewer values than that.
+
+**Fix:** The test now comes first: such breaths get no Ti, Te, tidal volume or minute ventilation, and
+stay out of the smoothing of the values that follow. At the end of `calc()` the respiratory rate and
+tidal volume lists are resized to the values written.
+
+**Non-obvious:**
+- Te is skipped for the same breaths only. Long expirations remain: during an apnea the flow stays
+  just below the zero line, so the "breath" around it has an expiration of 10-30 s. On the test device
+  the nightly maximum Te stayed at about 10 s (up to 15.9 s). Whether such pauses belong in Te is left
+  open.
+- A smoothed Ti of up to 8.6 s remains on the test device, from inspirations of 5-10 s.
+- The unused entries were only in memory: the event files are written up to `count()`, so the stored
+  respiratory rate and tidal volume data is the same before and after the resize.
+- As with MR !87 the values are calculated at import; nights imported earlier keep their values until
+  they are imported again.
+- Checked: on Linux (Qt 6) the new FlowParserTests (synthetic breathing at 5 Hz and 25 Hz) pass, and
+  fail with `calcs.cpp` as it was before this change and as it was before MR !87; all 61 test suites
+  pass (654 passed, 8 skipped). 31 daily cards of one Weinmann SOMNObalance e (5 Hz, 39 sessions with
+  flow data) imported with and without the change: 171 of 287,661 breaths lose Ti and Te, the median
+  nightly maximum Ti goes from 10.4 to 6.1 s (largest 31.4 to 8.6 s), the maximum Te stays at 10.1 s
+  (largest 15.9 s), and respiratory rate, tidal volume and minute ventilation are the same in every
+  session. Not checked: real data from a 25 Hz device, Windows, macOS.
