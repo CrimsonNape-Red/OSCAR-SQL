@@ -2,8 +2,8 @@
  *
  * Covers where a bar sits in its day's slot as the date range grows (the gap between days
  * shrinks with the bar, stays at least a pixel while there is room, then disappears), the
- * colour stops of the bar shading, the lighter plain fill, the flat top with rounded corners, and the text colour
- * on a title strip.
+ * colour stops of the bar shading, the lighter plain fill, the flat top with rounded corners, the text colour
+ * on a title strip, and which day a mouse position is in and where that day's cursor line goes.
  *
  * Copyright (c) 2026 The OSCAR Team
  *
@@ -240,4 +240,66 @@ void OverviewBarsTests::testClassicSegmentSquareTop()
     // The slice colour at the left edge, brightening to the right
     QVERIFY(qAbs(qRed(img.pixel(0, 20)) - 0x40) <= 3);
     QVERIFY(qRed(img.pixel(39, 20)) > 0x70);
+}
+
+void OverviewBarsTests::testDaySlot()
+{
+    // A plot from x = 20, 100 pixels wide, showing 10 days: 10 pixels a day
+    QCOMPARE(daySlot(20, 100, 10, 20), 0);
+    QCOMPARE(daySlot(20, 100, 10, 29), 0);
+    QCOMPARE(daySlot(20, 100, 10, 30), 1);      // the line between two days belongs to the later one
+    QCOMPARE(daySlot(20, 100, 10, 119), 9);
+    QCOMPARE(daySlot(20, 100, 10, 120), 9);     // the right edge is still the last day
+    // Outside the plot (and the mouse position of a view the mouse has left)
+    QCOMPARE(daySlot(20, 100, 10, 19), -1);
+    QCOMPARE(daySlot(20, 100, 10, 121), -1);
+    QCOMPARE(daySlot(20, 100, 10, -1), -1);
+    // Nothing to mark
+    QCOMPARE(daySlot(20, 100, 0, 50), -1);
+    QCOMPARE(daySlot(20, 0, 10, 20), -1);
+    // A day width that is not a whole number of pixels (1380 / 90 = 15.33): the line between
+    // days 2 and 3 falls exactly on pixel 126, which must come out as day 3
+    QCOMPARE(daySlot(80, 1380, 90, 125), 2);
+    QCOMPARE(daySlot(80, 1380, 90, 126), 3);
+    // ... and so for every such line across the plot
+    for (int k = 3; k < 90; k += 3) {
+        QCOMPARE(daySlot(80, 1380, 90, 80 + k * 46 / 3), k);
+        QCOMPARE(daySlot(80, 1380, 90, 80 + k * 46 / 3 - 1), k - 1);
+    }
+}
+
+void OverviewBarsTests::testDaySlotLineX()
+{
+    // The middle of the day, on a pixel centre
+    QCOMPARE(daySlotLineX(20, 100, 10, 0), 25.5);
+    QCOMPARE(daySlotLineX(20, 100, 10, 9), 115.5);
+    QCOMPARE(daySlotLineX(0, 100, 3, 1), 50.5);
+    QCOMPARE(daySlotLineX(0, 100, 3, 2), 83.5);     // middle at 83.33
+    // Every position in a day gives that day's line, and the line is inside the day
+    for (int x = 80; x <= 80 + 1380; ++x) {
+        const int slot = daySlot(80, 1380, 90, x);
+        const double line = daySlotLineX(80, 1380, 90, slot);
+        QCOMPARE(daySlot(80, 1380, 90, line), slot);
+    }
+}
+
+void OverviewBarsTests::testDaySlotAtTime()
+{
+    // 90 days from a local midnight, across a plot 1380 pixels wide starting at x = 80
+    const qint64 minx = 1790000000000LL;
+    const qint64 maxx = minx + 90LL * 86400000LL;
+    // The cursor time a graph makes of a mouse position (as gGraph::mouseMoveEvent()) gives the
+    // same day as that mouse position, at every pixel, including those on the line between days
+    const double msPerPixel = double(maxx - minx) / 1380.0;
+    for (int x = 81; x < 80 + 1380; ++x) {
+        const double time = double(x - 80) * msPerPixel + double(minx);
+        QCOMPARE(daySlotAtTime(80, 1380, 90, minx, maxx, time), daySlot(80, 1380, 90, x));
+    }
+    // ... and in a plot of another width (the same day, wherever it now is)
+    QCOMPARE(daySlotAtTime(80, 700, 90, minx, maxx, double(minx) + 3.5 * 86400000.0), 3);
+    // Nothing at or beyond the ends: a mouse position outside the plot is held at them
+    QCOMPARE(daySlotAtTime(80, 1380, 90, minx, maxx, double(minx)), -1);
+    QCOMPARE(daySlotAtTime(80, 1380, 90, minx, maxx, double(maxx)), -1);
+    QCOMPARE(daySlotAtTime(80, 1380, 90, minx, maxx, 0.0), -1);         // no cursor yet
+    QCOMPARE(daySlotAtTime(80, 1380, 90, minx, minx, double(minx)), -1);
 }

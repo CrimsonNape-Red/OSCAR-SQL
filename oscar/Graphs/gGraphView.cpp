@@ -451,6 +451,7 @@ gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
     m_limbo = false;
     m_fadedir = false;
     m_blockUpdates = false;
+    m_currenttime = 0;      // no line cursor until the mouse has been over a graph
     use_pixmap_cache = AppSetting->usePixmapCaching();
 
     pin_graph = nullptr;

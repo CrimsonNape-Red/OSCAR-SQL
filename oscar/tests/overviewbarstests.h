@@ -9,7 +9,8 @@
 #include "tests/AutoTest.h"
 
 /*! \class OverviewBarsTests
-    \brief Bar placement within a day's slot, the bar shading and strip text colour */
+    \brief Bar placement within a day's slot, the bar shading, strip text colour, and the day
+    slot and line position of the day cursor */
 class OverviewBarsTests : public QObject
 {
     Q_OBJECT
@@ -31,5 +32,8 @@ private slots:
     void testContrastingText();
     void testClassicGeometryHasNoGap();
     void testClassicSegmentSquareTop();
+    void testDaySlot();
+    void testDaySlotLineX();
+    void testDaySlotAtTime();
 };
 DECLARE_TEST(OverviewBarsTests)

@@ -170,4 +170,35 @@ QColor contrastingText(const QColor &background)
     return onWhite >= onBlack ? QColor(Qt::white) : QColor(Qt::black);
 }
 
+int daySlot(double plotLeft, double plotWidth, int days, double x)
+{
+    if (days <= 0 || plotWidth <= 0.0) return -1;
+    const double across = x - plotLeft;
+    if (across < 0.0 || across > plotWidth) return -1;
+    // Multiplied before dividing: a mouse position exactly on the line between two days then
+    // comes out as a whole number, and always belongs to the day on its right
+    const int slot = int(std::floor(across * days / plotWidth));
+    return qMin(slot, days - 1);    // the plot's right edge belongs to the last day
+}
+
+int daySlotAtTime(double plotLeft, double plotWidth, int days, qint64 minx, qint64 maxx, double time)
+{
+    // As the Daily page's line cursor: nothing at or beyond the ends, where the time of a mouse
+    // position outside the plot is held
+    if (maxx <= minx || !(time > double(minx)) || !(time < double(maxx))) return -1;
+    const double across = std::round((time - double(minx)) * plotWidth / double(maxx - minx));
+    return daySlot(plotLeft, plotWidth, days, plotLeft + across);
+}
+
+double daySlotLineX(double plotLeft, double plotWidth, int days, int slot)
+{
+    if (days <= 0) return plotLeft;
+    return std::floor(plotLeft + (2 * slot + 1) * plotWidth / (2.0 * days)) + 0.5;
+}
+
+QColor dayCursorColour()
+{
+    return QColor(0, 255, 0);
+}
+
 } // namespace OverviewBars

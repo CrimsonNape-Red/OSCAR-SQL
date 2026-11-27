@@ -17,6 +17,7 @@
 #include "gYAxis.h"
 #include "gOverviewGraph.h"
 #include "graphtheme.h"
+#include "overviewbars.h"
 
 #ifndef REMOVE_FITNESS
 /* To enable this module change the REMOTE_FITNESS define in appsettings.h
@@ -418,32 +419,13 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     bool buttuglydaysteps = false ; //!p_profile->appearance->animations();
 
-    double lcursor = w.graphView()->currentTime();
-    if (days >= 1) {
+    if ((days >= 1) && buttuglydaysteps) {
+        // this kills the beautiful smooth scrolling and makes days stop on day boundaries :(
+        minx = floor(double(minx)/86400000.0);
+        minx *= 86400000L;
 
-        double b = w.max_x - w.min_x;
-        double a = lcursor - w.min_x;
-        double c = a / b;
-
-        if (buttuglydaysteps) {
-            // this kills the beautiful smooth scrolling and makes days stop on day boundaries :(
-            minx = floor(double(minx)/86400000.0);
-            minx *= 86400000L;
-
-            maxx = minx + 86400000L * qint64(days)-1;
-        }
-
-        b = maxx - minx;
-        double d = c * b;
-        lcursor = d + minx;
-
-
+        maxx = minx + 86400000L * qint64(days)-1;
     }
-
-
-    qint64 xx = maxx - minx;
-
-
 
     EventDataType miny = m_physminy;
     EventDataType maxy = m_physmaxy;
@@ -494,23 +476,16 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     lastdaygood = true;
 
-    // Display Line Cursor
-    if (AppSetting->lineCursorMode()) {
-        qint64 time = lcursor;
-        double xmult = double(width) / xx;
-
-        if ((time > minx) && (time < maxx)) {
-            double xpos = (time - minx) * xmult;
-            painter.setPen(QPen(QBrush(QColor(0,255,0,255)),1));
-            painter.drawLine(left+xpos, top-w.marginTop()-3, left+xpos, top+height+w.bottom-1);
+    // Line cursor: a line through the day of the view's cursor time, at the same place as in
+    // the Overview's bar charts (see gSummaryChart::paintDayCursor()), so that one day lines up
+    // down all the graphs. Not on paper.
+    if (AppSetting->lineCursorMode() && !w.printing()) {
+        const int slot = OverviewBars::daySlotAtTime(left, width, days, minx, maxx, w.currentTime());
+        if (slot >= 0) {
+            const double x = OverviewBars::daySlotLineX(left, width, days, slot);
+            painter.setPen(QPen(OverviewBars::dayCursorColour(), 1));
+            painter.drawLine(QPointF(x, top), QPointF(x, top + height));
         }
-
-
-
-
-
-//        int wid, h;
-
     }
 
     for (int i = 0; i < numcodes; i++) {

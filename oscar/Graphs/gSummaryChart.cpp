@@ -302,15 +302,35 @@ void gSummaryChart::showHoverTip(gGraph &graph, const QString &text, const QPoin
 }
 
 bool gSummaryChart::hoverEmptyDay(QPainter &painter, gGraph &graph, const QRectF &plot, const QPoint &mouse,
-                                  const QDate &first, double slotWidth)
+                                  const QDate &first, int days)
 {
-    if (graph.printing() || slotWidth <= 0 || !plot.contains(mouse)) return false;
-    const int slotNumber = int((mouse.x() - plot.left()) / slotWidth);
-    const QRectF slot(plot.left() + slotNumber * slotWidth, plot.top(), slotWidth, plot.height());
-    const QDate date = first.addDays(slotNumber);
-    paintHoverMarker(painter, graph, plot, slot, date, -1, false);
+    if (graph.printing() || !plot.contains(mouse)) return false;
+    const int slot = OverviewBars::daySlot(plot.left(), plot.width(), days, mouse.x());
+    if (slot < 0) return false;
+    const QDate date = first.addDays(slot);
+    paintHoverMarker(painter, graph, plot, days, slot, date, -1, false);
     showHoverTip(graph, date.toString(QLocale::system().dateFormat(QLocale::ShortFormat)), mouse, plot);
     return true;
+}
+
+void gSummaryChart::paintDayCursor(QPainter &painter, gGraph &graph, const QRectF &plot, int days)
+{
+    if (graph.printing() || !AppSetting->lineCursorMode()) return;
+    // From the view's cursor time, not the mouse position: as on the Daily page the line then
+    // stays where it was put when the mouse stops or leaves (the mouse position is forgotten
+    // when the tooltip times out), and a clone, which keeps its own dates, marks the same day
+    const int slot = OverviewBars::daySlotAtTime(plot.left(), plot.width(), days, graph.min_x, graph.max_x,
+                                                 graph.currentTime());
+    if (slot < 0) return;
+    const double x = OverviewBars::daySlotLineX(plot.left(), plot.width(), days, slot);
+    painter.setPen(QPen(OverviewBars::dayCursorColour(), 1));
+    painter.drawLine(QPointF(x, plot.top()), QPointF(x, plot.bottom()));
+}
+
+void gSummaryChart::notHovered(QPainter &painter, gGraph &graph, const QRectF &plot, int days)
+{
+    paintDayCursor(painter, graph, plot, days);
+    clearHover(graph);
 }
 
 void gSummaryChart::paintFrame(QPainter &painter, gGraph &graph, const QRectF &plot)
@@ -334,7 +354,7 @@ void gSummaryChart::clearHover(gGraph &graph)
     }
 }
 
-void gSummaryChart::paintHoverMarker(QPainter &painter, gGraph &graph, const QRectF &plot, const QRectF &slot,
+void gSummaryChart::paintHoverMarker(QPainter &painter, gGraph &graph, const QRectF &plot, int days, int slot,
                                      const QDate &date, int idx, bool hasData)
 {
     m_detailsRect = QRectF();
@@ -347,9 +367,11 @@ void gSummaryChart::paintHoverMarker(QPainter &painter, gGraph &graph, const QRe
     }
     graph.setHoverDate(date);
 
-    // A faint line through the middle of the day
-    const double x = std::floor(slot.center().x()) + 0.5;
-    painter.setPen(QPen(GraphTheme::ink(QColor(0, 0, 0, 110)), 1));
+    // A line through the middle of the day. With the line cursor on it is the green line the
+    // other graphs draw for the same day (see paintDayCursor()); with it off, a faint grey one.
+    const double x = OverviewBars::daySlotLineX(plot.left(), plot.width(), days, slot);
+    painter.setPen(QPen(AppSetting->lineCursorMode() ? OverviewBars::dayCursorColour()
+                                                     : GraphTheme::ink(QColor(0, 0, 0, 110)), 1));
     painter.drawLine(QPointF(x, plot.top()), QPointF(x, plot.bottom()));
     if (!hasData) return;
     // No button on a popped-out or cloned graph: the popup it opens belongs to the Overview page
@@ -721,9 +743,10 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     const QDate chartStart = date;
     const auto emptyHover = [&]() {
         if (!graph.graphView()->cardLook() || graph.printing()) return false;
-        return hoverEmptyDay(painter, graph, rect, graph.graphView()->currentMousePos(), chartStart,
-                             double(rect.width()) / qMax(days, 1));
+        return hoverEmptyDay(painter, graph, rect, graph.graphView()->currentMousePos(), chartStart, days);
     };
+    // No day of this graph is under the mouse: the day pointed at in another graph is still marked
+    const auto notHoveredHere = [&]() { notHovered(painter, graph, rect, days); };
 
     auto it = dayindex.find(date);
     idx_start = 0;
@@ -748,7 +771,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     }
     if (numDaysAfter > days) {      // Nothing to do if this data is off the left edge of the chart
         graph.setHoverDate(QDate());
-        if (!emptyHover()) clearHover(graph);
+        if (!emptyHover()) notHoveredHere();
         return;
     }
 
@@ -764,6 +787,11 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     nousedays = 0;
     totaldays = 0;
 
+    // The day slot under the mouse, counted from the left of the plot; -1 when the mouse is not
+    // over this plot. Worked out as the other graphs do for their line (see paintDayCursor()),
+    // so that they mark the same day as this one.
+    const int mouseSlot = rect.contains(mouse) ? OverviewBars::daySlot(rect.left(), rect.width(), days, mouse.x()) : -1;
+
     QRectF hl_rect;
     QDate hl_date;
     Day * hl_day = nullptr;
@@ -772,7 +800,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
 
     if ((daylist.size() == 0) || (it == dayindex.end())) {
         graph.setHoverDate(QDate());
-        if (!emptyHover()) clearHover(graph);
+        if (!emptyHover()) notHoveredHere();
         return;
     }
 
@@ -872,7 +900,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
 
         bool hlday = false;
         QRectF rec2(lastx1, rect.top(), barw, rect.height());
-        if (rec2.contains(mouse)) {
+        if (mouseSlot >= 0 && qRound((lastx1 - rect.left()) / barw) == mouseSlot) {
             hl_rect = rec2;
             hl_day = day;
             hl_date = it.key();
@@ -934,12 +962,13 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     if (classic) {
         painter.setPen(QPen(GraphTheme::ink(Qt::black), 1));
         painter.drawRects(outlines);
-        // The day under the mouse is washed red
+        // The day under the mouse is washed red; in the other graphs the line cursor marks it
         if (hl) painter.fillRect(hl_rect, QBrush(QColor(255, 0, 0, 64)));
+        else paintDayCursor(painter, graph, rect, days);
     } else if (hl) {
-        paintHoverMarker(painter, graph, rect, hl_rect, hl_date, hl_idx, hl_day != nullptr);
+        paintHoverMarker(painter, graph, rect, days, mouseSlot, hl_date, hl_idx, hl_day != nullptr);
     } else if (!emptyHover()) {
-        clearHover(graph);
+        notHoveredHere();
     }
     if (hl) {
         // In both looks the day's date and numbers are shown in a tooltip

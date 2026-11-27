@@ -16,6 +16,7 @@
 #include <QColor>
 #include <QLinearGradient>
 #include <QRectF>
+#include <QtGlobal>
 
 class QPainter;
 
@@ -83,6 +84,33 @@ void paintClassicSegment(QPainter &p, const QRectF &r, const QColor &c, double b
 
 //! \brief White or black, whichever reads better on \a background
 QColor contrastingText(const QColor &background);
+
+/*! \brief The day slot at \a x in a plot showing \a days days
+
+    The graph under the mouse works out its day with this, and the other graphs get to the same
+    slot through daySlotAtTime(), so that they all mark the same day.
+    \param plotLeft Left edge of the plot
+    \param plotWidth Width of the plot
+    \param days Number of day slots across the plot
+    \returns The slot, counted from 0 at the left edge; -1 when \a x is outside the plot */
+int daySlot(double plotLeft, double plotWidth, int days, double x);
+
+/*! \brief The day slot holding \a time, the view's line-cursor time (gGraphView::currentTime()),
+    in a plot that shows \a minx to \a maxx
+
+    The cursor time is what a graph made of the mouse position (gGraph::mouseMoveEvent()). It is
+    turned back into that position, to the pixel, so the slot is the one daySlot() gives the graph
+    under the mouse. Unlike the mouse position it is kept when the mouse stops or leaves.
+    \returns The slot as daySlot(); -1 when \a time is not between \a minx and \a maxx */
+int daySlotAtTime(double plotLeft, double plotWidth, int days, qint64 minx, qint64 maxx, double time);
+
+/*! \brief Where the vertical line that marks day \a slot is drawn: the middle of the slot, moved
+    onto a pixel centre so that a one-pixel line stays sharp. Parameters as for daySlot(). */
+double daySlotLineX(double plotLeft, double plotWidth, int days, int slot);
+
+/*! \brief Colour of the line that marks the day under the mouse in every graph when the line
+    cursor is on: the green of the Daily page's line cursor */
+QColor dayCursorColour();
 
 } // namespace OverviewBars
 

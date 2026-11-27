@@ -272,19 +272,28 @@ protected:
     //! \brief Mouse Button was released over this area. (jumps to daily view here)
     virtual bool mouseReleaseEvent(QMouseEvent *event, gGraph *graph);
 
-    /*! \brief Marks the day under the mouse: a faint line through \a slot, and a Details button
-        at the top of \a plot when the day has data. Nothing is drawn when printing. */
-    void paintHoverMarker(QPainter &painter, gGraph &graph, const QRectF &plot, const QRectF &slot,
+    /*! \brief Marks the day under the mouse: a line through the middle of day slot \a slot (of
+        the \a days slots across \a plot), and a Details button at the top of \a plot when the day
+        has data. The line is green when the line cursor is on, as in the other graphs (see
+        paintDayCursor()), and a faint grey otherwise. Nothing is drawn when printing. */
+    void paintHoverMarker(QPainter &painter, gGraph &graph, const QRectF &plot, int days, int slot,
                           const QDate &date, int idx, bool hasData);
     //! \brief Called when no day is under the mouse: redraws once so the date label stops being bold
     void clearHover(gGraph &graph);
+    /*! \brief The line cursor in a graph the mouse is not pointing at a day of: a green line
+        through the day of the view's cursor time (gGraphView::currentTime()), so that one day
+        lines up down all the graphs. As on the Daily page it stays where the mouse last put it.
+        Drawn only when the line cursor is on and that day is in \a plot; never on paper. */
+    void paintDayCursor(QPainter &painter, gGraph &graph, const QRectF &plot, int days);
+    //! \brief No day of this graph is under the mouse: paintDayCursor(), then clearHover()
+    void notHovered(QPainter &painter, gGraph &graph, const QRectF &plot, int days);
     /*! \brief Card look: marks the day under the mouse when nothing was drawn for it, and shows
         its date alone in the tooltip, so the tooltip does not keep the last bar's figures
         \param first The date of the leftmost day slot of \a plot
-        \param slotWidth Width of one day's slot
+        \param days Number of day slots across \a plot
         \returns false when the mouse is not over \a plot, or the page is being printed */
     bool hoverEmptyDay(QPainter &painter, gGraph &graph, const QRectF &plot, const QPoint &mouse,
-                       const QDate &first, double slotWidth);
+                       const QDate &first, int days);
     /*! \brief Draws the plot's frame: a black rectangle in the 2.1 look and on paper; in the card
         look only the left and bottom axis lines, in grey */
     void paintFrame(QPainter &painter, gGraph &graph, const QRectF &plot);
