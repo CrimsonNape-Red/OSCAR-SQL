@@ -9882,5 +9882,7 @@ sessions were created from STR.edf only when the day had no files at all.
   Qt 6.12. Batch imports of one series 11 card: untouched card, identical sessions before and after
   the change; middle session's files removed, three sessions with the middle one summary-only, and
   7.15 hours for the night; the same card imported again, no new sessions; night split over two
-  cards, imported in either order, three detailed sessions and no duplicate. Not checked: how the
-  night looks in Daily and Overview, S9 and series 10 cards, a real card-out night, Linux, macOS.
+  cards, imported in either order, three detailed sessions and no duplicate. The night with the
+  removed files was then looked at in the GUI on Windows: Daily looks right, and the card-out
+  session shows in Overview's session times graph. Not checked: S9 and series 10 cards, a real
+  card-out night, Linux, macOS.
