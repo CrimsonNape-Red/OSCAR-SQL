@@ -170,7 +170,7 @@ gGraph::gGraph(QString name, gGraphView *graphview, QString title, QString units
       m_visible(true)
 {
     if (height == 0) {
-        height = AppSetting->graphHeight();
+        height = graphview ? graphview->defaultGraphHeight() : DefaultGraphHeight;
         Q_UNUSED(height)
     }
 

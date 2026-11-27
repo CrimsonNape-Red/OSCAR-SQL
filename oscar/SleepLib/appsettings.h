@@ -34,7 +34,11 @@ enum SteadyBreathingState { SB_OFF, SB_INACTIVE ,SB_ACTIVE};
 // ApplicationWideSettings Strings
 const QString STR_CS_UserEventPieChart = "UserEventPieChart";
 const QString STR_IS_Multithreading = "EnableMultithreading";
-const QString STR_AS_GraphHeight = "GraphHeight";
+const QString STR_AS_GraphHeight = "GraphHeight";            // Obsolete, split into the two below
+const QString STR_AS_DailyGraphHeight = "DailyGraphHeight";
+const QString STR_AS_OverviewGraphHeight = "OverviewGraphHeight";
+//! \brief Default normal (unscaled) height of a graph, in pixels, on the Daily and Overview pages
+const int DefaultGraphHeight = 150;
 const QString STR_AS_DailyPanelWidth = "DailyPanelWidth";
 const QString STR_AS_RightPanelWidth = "RightPanelWidth";
 const QString STR_AS_AntiAliasing = "UseAntiAliasing";
@@ -131,7 +135,7 @@ public:
 
   bool m_usePixmapCaching, m_antiAliasing, m_squareWavePlots,m_graphTooltips, m_lineCursorMode, m_animations, m_useFusionTheme, m_useSystemTooltipColors;
   bool m_showPerformance, m_showDebug;
-  int m_tooltipTimeout, m_graphHeight, m_scrollDampening;
+  int m_tooltipTimeout, m_dailyGraphHeight, m_overviewGraphHeight, m_scrollDampening;
   int m_alternatingColorsCombo;
   bool m_multithreading, m_cacheSessions;
   float m_lineThickness;
@@ -163,8 +167,10 @@ public:
   bool calendarVisible() const { return getPref(STR_AS_CalendarVisible).toBool(); }
   inline int scrollDampening() const { return m_scrollDampening; }
   inline int tooltipTimeout() const { return m_tooltipTimeout; }
-  //! \brief Returns the normal (unscaled) height of a graph
-  inline int graphHeight() const { return m_graphHeight; }
+  //! \brief Returns the normal (unscaled) height of a Daily page graph
+  inline int dailyGraphHeight() const { return m_dailyGraphHeight; }
+  //! \brief Returns the normal (unscaled) height of an Overview page graph
+  inline int overviewGraphHeight() const { return m_overviewGraphHeight; }
   //! \brief Returns the normal (unscaled) height of a graph
   int dailyPanelWidth() const { return getPref(STR_AS_DailyPanelWidth).toInt(); }
   //! \brief Returns the normal (unscaled) height of a graph
@@ -262,8 +268,10 @@ public:
   void setCalendarVisible(bool b) { setPref(STR_AS_CalendarVisible, b); }
   void setScrollDampening(int i) { setPref(STR_US_ScrollDampening, m_scrollDampening=i); }
   void setTooltipTimeout(int i) { setPref(STR_US_TooltipTimeout, m_tooltipTimeout=i); }
-  //! \brief Set the normal (unscaled) height of a graph.
-  void setGraphHeight(int height) { setPref(STR_AS_GraphHeight, m_graphHeight=height); }
+  //! \brief Set the normal (unscaled) height of a Daily page graph.
+  void setDailyGraphHeight(int height) { setPref(STR_AS_DailyGraphHeight, m_dailyGraphHeight=height); }
+  //! \brief Set the normal (unscaled) height of an Overview page graph.
+  void setOverviewGraphHeight(int height) { setPref(STR_AS_OverviewGraphHeight, m_overviewGraphHeight=height); }
   //! \brief Set the normal (unscaled) height of a graph.
   void setDailyPanelWidth(int width) { setPref(STR_AS_DailyPanelWidth, width); }
   //! \brief Set the normal (unscaled) height of a graph.

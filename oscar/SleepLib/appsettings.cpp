@@ -19,7 +19,19 @@ AppWideSetting::AppWideSetting(Preferences *pref) : PrefSettings(pref)
     initPref(STR_AS_CalendarVisible, false);
     m_scrollDampening = initPref(STR_US_ScrollDampening, (int)50).toInt();
     m_tooltipTimeout = initPref(STR_US_TooltipTimeout, (int)2500).toInt();
-    m_graphHeight=initPref(STR_AS_GraphHeight, 180).toInt();
+    // The single Graph Height setting became one for Daily and one for Overview. Whenever the
+    // old key is present (an existing install, or settings just imported from OSCAR 1.x) both
+    // pages take its value; it is then removed so it is not applied again.
+    if (m_pref->contains(STR_AS_GraphHeight)) {
+        const int legacyHeight = getPref(STR_AS_GraphHeight).toInt();
+        if (legacyHeight > 0) {
+            setPref(STR_AS_DailyGraphHeight, legacyHeight);
+            setPref(STR_AS_OverviewGraphHeight, legacyHeight);
+        }
+        m_pref->Erase(STR_AS_GraphHeight);
+    }
+    m_dailyGraphHeight = initPref(STR_AS_DailyGraphHeight, DefaultGraphHeight).toInt();
+    m_overviewGraphHeight = initPref(STR_AS_OverviewGraphHeight, DefaultGraphHeight).toInt();
     initPref(STR_AS_DailyPanelWidth, 250.0);
     initPref(STR_AS_RightPanelWidth, 230.0);
     m_antiAliasing=initPref(STR_AS_AntiAliasing, true).toBool();

@@ -2852,7 +2852,7 @@ Intended for support staff and developers.</string>
                    <item row="6" column="0">
                     <widget class="QLabel" name="label_26">
                      <property name="text">
-                      <string>Graph Height</string>
+                      <string>Daily Graph Height</string>
                      </property>
                      <property name="alignment">
                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2875,7 +2875,7 @@ Intended for support staff and developers.</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="7" column="0">
+                   <item row="8" column="0">
                     <widget class="QLabel" name="label_48">
                      <property name="text">
                       <string>Line Thickness</string>
@@ -2909,7 +2909,7 @@ Intended for support staff and developers.</string>
                      </item>
                     </widget>
                    </item>
-                   <item row="7" column="1" colspan="2">
+                   <item row="8" column="1" colspan="2">
                     <layout class="QHBoxLayout" name="horizontalLayout_10">
                      <item>
                       <widget class="QSlider" name="lineThicknessSlider">
@@ -2935,7 +2935,7 @@ Intended for support staff and developers.</string>
                      </item>
                     </layout>
                    </item>
-                   <item row="8" column="0">
+                   <item row="9" column="0">
                     <widget class="QLabel" name="label_45">
                      <property name="text">
                       <string>Tooltip Timeout</string>
@@ -2945,7 +2945,7 @@ Intended for support staff and developers.</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="9" column="0">
+                   <item row="10" column="0">
                     <widget class="QLabel" name="label_46">
                      <property name="text">
                       <string>Scroll Dampening</string>
@@ -2955,7 +2955,7 @@ Intended for support staff and developers.</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="8" column="1" colspan="2">
+                   <item row="9" column="1" colspan="2">
                     <layout class="QHBoxLayout" name="horizontalLayout_17">
                      <item>
                       <widget class="QSlider" name="tooltipTimeoutSlider">
@@ -3037,7 +3037,7 @@ Intended for support staff and developers.</string>
                     </widget>
                    </item>
                    <item row="6" column="1">
-                    <widget class="QSpinBox" name="graphHeight">
+                    <widget class="QSpinBox" name="dailyGraphHeight">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                        <horstretch>0</horstretch>
@@ -3045,7 +3045,7 @@ Intended for support staff and developers.</string>
                       </sizepolicy>
                      </property>
                      <property name="toolTip">
-                      <string>Default display height of graphs in pixels</string>
+                      <string>Default display height of Daily graphs in pixels</string>
                      </property>
                      <property name="minimum">
                       <number>50</number>
@@ -3057,11 +3057,46 @@ Intended for support staff and developers.</string>
                       <number>10</number>
                      </property>
                      <property name="value">
-                      <number>180</number>
+                      <number>150</number>
                      </property>
                     </widget>
                    </item>
-                   <item row="9" column="1" colspan="2">
+                   <item row="7" column="0">
+                    <widget class="QLabel" name="labelOverviewGraphHeight">
+                     <property name="text">
+                      <string>Overview Graph Height</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="7" column="1">
+                    <widget class="QSpinBox" name="overviewGraphHeight">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="toolTip">
+                      <string>Default display height of Overview graphs in pixels</string>
+                     </property>
+                     <property name="minimum">
+                      <number>50</number>
+                     </property>
+                     <property name="maximum">
+                      <number>600</number>
+                     </property>
+                     <property name="singleStep">
+                      <number>10</number>
+                     </property>
+                     <property name="value">
+                      <number>150</number>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="10" column="1" colspan="2">
                     <layout class="QHBoxLayout" name="horizontalLayout_16">
                      <item>
                       <widget class="QSlider" name="scrollDampeningSlider">
@@ -3128,7 +3163,7 @@ Intended for support staff and developers.</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="10" column="0">
+                   <item row="11" column="0">
                     <widget class="QLabel" name="label_gridLineOpacity">
                      <property name="text">
                       <string>Grid Line Darkness</string>
@@ -3138,7 +3173,7 @@ Intended for support staff and developers.</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="10" column="1" colspan="2">
+                   <item row="11" column="1" colspan="2">
                     <layout class="QHBoxLayout" name="horizontalLayout_gridOpacity">
                      <item>
                       <widget class="QSlider" name="gridLineOpacitySlider">

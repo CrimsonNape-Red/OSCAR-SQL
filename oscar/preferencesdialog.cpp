@@ -397,7 +397,8 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->ignoreOlderSessionsCheck->setChecked(profile->session->ignoreOlderSessions());
     ui->ignoreOlderSessionsDate->setDate(profile->session->ignoreOlderSessionsDate().date());
 
-    ui->graphHeight->setValue(AppSetting->graphHeight());
+    ui->dailyGraphHeight->setValue(AppSetting->dailyGraphHeight());
+    ui->overviewGraphHeight->setValue(AppSetting->overviewGraphHeight());
 
 #ifndef NO_CHECKUPDATES
     ui->automaticallyCheckUpdates->setChecked(AppSetting->updatesAutoCheck());
@@ -1135,9 +1136,13 @@ bool PreferencesDialog::Save()
 
     profile->cpap->setComplianceHours(ui->complianceHours->value());
 
-    if (ui->graphHeight->value() != AppSetting->graphHeight()) {
-        AppSetting->setGraphHeight(ui->graphHeight->value());
+    // A changed height resets only that page's graph heights
+    if (ui->dailyGraphHeight->value() != AppSetting->dailyGraphHeight()) {
+        AppSetting->setDailyGraphHeight(ui->dailyGraphHeight->value());
         mainwin->getDaily()->ResetGraphLayout();
+    }
+    if (ui->overviewGraphHeight->value() != AppSetting->overviewGraphHeight()) {
+        AppSetting->setOverviewGraphHeight(ui->overviewGraphHeight->value());
         mainwin->getOverview()->ResetGraphLayout();
     }
 

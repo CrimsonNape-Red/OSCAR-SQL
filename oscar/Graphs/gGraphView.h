@@ -389,6 +389,13 @@ class gGraphView
     //! \brief How this view frames its graphs (Classic unless set otherwise)
     GraphLook look() const { return m_look; }
 
+    //! \brief Sets the normal (unscaled) graph height this view uses for a reset layout and paging.
+    //! The Daily and Overview pages each have their own (Preferences > Appearance).
+    void setDefaultGraphHeight(int height) { m_defaultGraphHeight = height; }
+
+    //! \brief The normal (unscaled) graph height of this view (see setDefaultGraphHeight())
+    int defaultGraphHeight() const { return m_defaultGraphHeight; }
+
     //! \brief True when graphs are drawn as outlined cards with a header
     bool cardLook() const { return m_look == GraphLook::Card; }
 
@@ -884,6 +891,7 @@ public:
 
     bool m_showAuthorMessage;
     GraphLook m_look = GraphLook::Classic;  //!< How graphs are framed (see setLook())
+    int m_defaultGraphHeight;               //!< See setDefaultGraphHeight()
     bool m_sharedXAxis = false;             //!< See setSharedXAxis()
 
     // Full-height screenshot (beginTallCapture() .. endTallCapture())

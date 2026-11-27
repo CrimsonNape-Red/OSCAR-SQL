@@ -144,6 +144,7 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     // The redesigned page draws its graphs as cards; the original page keeps the 2.1 look
     GraphView->setLook(AppSetting->useNewPages() ? GraphLook::Card : GraphLook::Classic);
     GraphView->setSharedXAxis(AppSetting->useNewPages());
+    GraphView->setDefaultGraphHeight(AppSetting->overviewGraphHeight());
     GraphView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     GraphView->setEmptyText(STR_Empty_NoData);
@@ -687,7 +688,7 @@ void Overview::RebuildGraphs(bool reset)
 // param QString units The units of measurements to show in the popup
 gGraph *Overview::createGraph(QString code, QString name, QString units, YTickerType yttype)
 {
-    int default_height = AppSetting->graphHeight();
+    int default_height = AppSetting->overviewGraphHeight();
     gGraph *g = new gGraph(code, GraphView, name, units, default_height, 0);
 
     gYAxis *yt;
@@ -1072,6 +1073,7 @@ void Overview::on_zoomButton_clicked()
 
 void Overview::ResetGraphLayout()
 {
+    GraphView->setDefaultGraphHeight(AppSetting->overviewGraphHeight());
     GraphView->resetLayout();
 }
 

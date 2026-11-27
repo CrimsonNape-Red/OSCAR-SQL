@@ -325,7 +325,8 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     PERF_TIMER_STOP("Daily::Daily::Phase 3");
 
-    int default_height = AppSetting->graphHeight();
+    int default_height = AppSetting->dailyGraphHeight();
+    GraphView->setDefaultGraphHeight(default_height);
 
     gGraph *GAHI = nullptr,
 //            *TAP = nullptr,
@@ -1602,6 +1603,7 @@ void Daily::on_ReloadDay()
 }
 void Daily::ResetGraphLayout()
 {
+    GraphView->setDefaultGraphHeight(AppSetting->dailyGraphHeight());
     GraphView->resetLayout();
 }
 void Daily::ResetGraphOrder(int type)

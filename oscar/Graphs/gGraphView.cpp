@@ -432,6 +432,7 @@ gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
     this->setMouseTracking(true);
     m_emptytext = STR_Empty_NoData;
     m_emptyimage = QPixmap(":/icons/logo-md.png");
+    m_defaultGraphHeight = DefaultGraphHeight;
     InitGraphGlobals(); // FIXME: sstangl: handle error return.
     m_tooltip = new gToolTip(this);
     m_parent_tooltip = new gParentToolTip(this);
@@ -554,6 +555,7 @@ void gGraphView::popoutGraph()
 
         gGraphView * gv = new gGraphView(newDockWidget, this);
         gv->setLook(m_look);    // a popped-out graph keeps the look of the page it came from
+        gv->setDefaultGraphHeight(m_defaultGraphHeight);    // ...and its graph height
         newDockWidget->setWidget(gv);
         gv->setMouseTracking(true);
         gv->setDay(this->day());
@@ -3669,7 +3671,7 @@ void gGraphView::keyPressEvent(QKeyEvent *event)
 
     if (event->key() == Qt::Key_PageUp) {
         if (m_scrollbar) {
-            m_offsetY -= AppSetting->graphHeight() * 3 * m_scaleY;
+            m_offsetY -= m_defaultGraphHeight * 3 * m_scaleY;
             m_scrollbar->setValue(m_offsetY);
             m_offsetY = m_scrollbar->value();
             redraw();
@@ -3677,7 +3679,7 @@ void gGraphView::keyPressEvent(QKeyEvent *event)
         return;
     } else if (event->key() == Qt::Key_PageDown) {
         if (m_scrollbar) {
-            m_offsetY += AppSetting->graphHeight() * 3 * m_scaleY;
+            m_offsetY += m_defaultGraphHeight * 3 * m_scaleY;
 
             if (m_offsetY < 0) { m_offsetY = 0; }
 
@@ -3822,7 +3824,7 @@ void gGraphView::deselect()
 
 void gGraphView::resetLayout()
 {
-    int default_height = AppSetting->graphHeight();
+    int default_height = m_defaultGraphHeight;
 
     for (auto & graph : m_graphs) {
         if (graph) graph->setHeight(default_height);
@@ -3973,7 +3975,7 @@ void gGraphView::SaveSettings(QString title, QString folderName)
             if (!openOk)
                 qWarning() << "gGraphView::SaveSettings: failed to save layout to DB for" << title;
             else
-                p_profile->Set(layoutHeightKey(title), AppSetting->graphHeight());
+                p_profile->Set(layoutHeightKey(title), m_defaultGraphHeight);
             return;
         }
     }
@@ -4117,11 +4119,11 @@ bool gGraphView::LoadSettings(QString title, QString folderName)
             if (repo.loadCurrentLayout(pd.id, title.toLower(), layoutData)) {
                 bool ok = deserializeSettings(layoutData.data);
                 if (ok) {
-                    // Preferences > Appearance > Graph Height resets only the open profile's
-                    // graphs. A layout saved under another height predates the change, so take
-                    // the preferred height now (order, visibility and pins stay).
+                    // Preferences > Appearance > Daily/Overview Graph Height resets only the open
+                    // profile's graphs. A layout saved under another height predates the change,
+                    // so take the preferred height now (order, visibility and pins stay).
                     const QString key = layoutHeightKey(title);
-                    const int height = AppSetting->graphHeight();
+                    const int height = m_defaultGraphHeight;
                     if (p_profile->contains(key) && (*p_profile)[key].toInt() != height) {
                         qDebug() << "gGraphView::LoadSettings:" << title << "layout saved at graph height"
                                  << (*p_profile)[key].toInt() << "- applying" << height;
