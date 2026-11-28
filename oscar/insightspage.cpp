@@ -402,25 +402,23 @@ QWidget *usageCard(const QList<Day *> &days)
 
     QVBoxLayout *col;
     Panel *c = card(InsightsPage::tr("Usage pattern"), &col);
-    {
-        auto *g = new QGridLayout();
-        g->setVerticalSpacing(3);
-        const QList<QStringList> rows = {
-            { InsightsPage::tr("Mask usually comes off"),
-              QLocale().toString(usage.medianMaskOff, QLocale::ShortFormat) },
-            { InsightsPage::tr("Spread, middle half of nights"),
-              InsightsPage::tr("%1 min").arg(usage.maskOffSpreadMinutes) },
-            { InsightsPage::tr("Sessions a night"), QLocale().toString(usage.medianSessions) },
-        };
-        for (int r = 0; r < rows.size(); ++r) {
-            g->addWidget(body(rows[r][0], c, Role::Ink, false), r, 0);
-            QLabel *v = bold(rows[r][1], c);
-            v->setAlignment(Qt::AlignRight);
-            g->addWidget(v, r, 1);
-        }
-        g->setColumnStretch(0, 1);
-        col->addLayout(g);
+    auto *g = new QGridLayout();
+    g->setVerticalSpacing(3);
+    const QList<QStringList> rows = {
+        { InsightsPage::tr("Mask usually comes off"),
+          QLocale().toString(usage.medianMaskOff, QLocale::ShortFormat) },
+        { InsightsPage::tr("Spread, middle half of nights"),
+          InsightsPage::tr("%1 min").arg(usage.maskOffSpreadMinutes) },
+        { InsightsPage::tr("Sessions a night"), QLocale().toString(usage.medianSessions) },
+    };
+    for (int r = 0; r < rows.size(); ++r) {
+        g->addWidget(body(rows[r][0], c, Role::Ink, false), r, 0);
+        QLabel *v = bold(rows[r][1], c);
+        v->setAlignment(Qt::AlignRight);
+        g->addWidget(v, r, 1);
     }
+    g->setColumnStretch(0, 1);
+    col->addLayout(g);
     col->addStretch(1);
     return c;
 }

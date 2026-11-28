@@ -271,8 +271,9 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
   - (b) Median mask-off clock time and its spread.
   - (c) Median sessions per night.
 - **Gate:** CPAP. (a) appears only when first use falls inside the profile's data.
-- **Surface:** Insights page, "Usage pattern": (b) and (c). (a) is calculated and tested but
-  not shown: compliance dates are a matter of contract, not machine data (forum, 2026-11-26).
+- **Surface:** Insights page, "Usage pattern": (b) and (c). (a) is not shown and the app
+  doesn't calculate it: compliance dates are a matter of contract, not machine data (forum,
+  2026-11-26). `Insights::medicareFirst90Days()` and its tests stay.
 - **Accept:** `f4_medicare_just_met` (21 good nights, one exactly 4.0 h) and
   `f4_medicare_just_missed` (20).
 - **Test:** `testMedicareWindowMet`, `testMedicareWindowNotMet`.
@@ -469,8 +470,8 @@ of the 7 pre-existing failures.
 
 1. ~~Should insights live in a new "Therapy Insights" section on Statistics?~~ Settled on !53
    (2026-11-24): on their own Insights page, opened from the Welcome page.
-2. Is the Medicare criterion (F4-lite a) acceptable in an international app, if it is labelled
-   as US-specific?
+2. ~~Is the Medicare criterion (F4-lite a) acceptable in an international app, if it is
+   labelled as US-specific?~~ Settled on the forum (2026-11-26): the page doesn't show it.
 3. Would they prefer insight thresholds become preferences now, rather than in a follow-up?
 4. Is a separate "first 90 days" view wanted? This PRD deliberately doesn't build one.
 5. The scenario files encode several assumptions; see the decision table in
