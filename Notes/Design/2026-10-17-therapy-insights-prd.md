@@ -214,8 +214,8 @@ are suggestions; the data-driven test in §8.1 replaces most of them.
   - A period that starts on a different device is not compared: the page marks "Device
     changed", since devices score events differently.
   - No comparison when either period has fewer days than the minimum-days pref in §6. The
-    page compares a period with the nearest earlier one on the same device that has enough
-    days, so one short period doesn't leave the next one without a verdict.
+    page leaves out periods shorter than that, except the newest, and compares each row
+    with the row below it, so one short period doesn't leave the next one without a verdict.
 - **Gate:** CPAP days with event data.
 - **Surface:** Insights page, "Settings changes": one row per "Changes to Device Settings"
   period, newest first, with the changed setting marked, a verdict and the interval.

@@ -27,7 +27,7 @@ struct NightCount {
     double hours;
 };
 
-//! \brief Outcome of comparing a prescription period with the one before it.
+//! \brief Outcome of comparing a prescription period with an earlier one.
 enum class ChangeLabel { NoComparison, Within, Lower, Higher };
 
 //! \brief Pooled AHI before and after a settings change, with a bootstrap interval.

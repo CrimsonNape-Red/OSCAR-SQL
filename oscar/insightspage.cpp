@@ -170,9 +170,10 @@ QWidget *settingsCard(const QList<Period> &periods, const QString &ahiText)
 {
     QVBoxLayout *col;
     Panel *c = card(InsightsPage::tr("Settings changes"), &col);
-    col->addWidget(body(InsightsPage::tr("Each row is a period on the same settings, newest first. Its %1 "
-                                         "is compared with the nearest earlier period of at least %2 "
-                                         "nights, allowing for normal night-to-night variation.")
+    col->addWidget(body(InsightsPage::tr("Each row is a period with the same settings, newest first. "
+                                         "Its %1 is compared with the row below, allowing for normal "
+                                         "night-to-night variation. Earlier periods of fewer than %2 "
+                                         "nights are left out.")
                         .arg(ahiText).arg(Insights::kRxMinNights), c, Role::Ink2));
 
     auto *table = new QWidget(c);
@@ -190,7 +191,13 @@ QWidget *settingsCard(const QList<Period> &periods, const QString &ahiText)
     int r = 1;
     for (int i = periods.size() - 1; i >= 0; --i) {
         const Period &p = periods[i];
-        const Period *before = i > 0 ? &periods[i - 1] : nullptr;
+        // A period too short to compare has nothing to report, so it gets no row. The newest
+        // one stays: it is the change the user just made, and it is still filling up.
+        if (p.nights.size() < Insights::kRxMinNights && i < periods.size() - 1) continue;
+        // The row below this one: the nearest earlier period that is long enough
+        int j = i - 1;
+        while (j >= 0 && periods[j].nights.size() < Insights::kRxMinNights) --j;
+        const Period *before = j >= 0 ? &periods[j] : nullptr;
 
         auto *line = new QFrame(table);
         line->setFixedHeight(1);
@@ -206,7 +213,7 @@ QWidget *settingsCard(const QList<Period> &periods, const QString &ahiText)
             QLabel *l = now[s] != then[s]
                         ? makeChip(now[s], Role::AccentInk, Role::AccentSoft, table)
                         : body(now[s], table, Role::Ink, false);
-            if (now[s] != then[s]) l->setToolTip(InsightsPage::tr("Changed at the start of this period"));
+            if (now[s] != then[s]) l->setToolTip(InsightsPage::tr("Different from the row below"));
             g->addWidget(l, r, 2 + s, Qt::AlignLeft | Qt::AlignVCenter);
         }
         g->addWidget(bold(num(p.ahi, 2), table), r, 5);
@@ -229,19 +236,8 @@ QWidget *settingsCard(const QList<Period> &periods, const QString &ahiText)
             text = InsightsPage::tr("This period has %1. A comparison needs at least %2.")
                    .arg(nights(p.nights.size())).arg(Insights::kRxMinNights);
         } else {
-            // A short period can't be compared, so look past it to the nearest earlier period
-            // on the same device that is long enough
-            const Period *base = nullptr;
-            for (int j = i - 1; j >= 0 && !base && sameDevice(periods[j].rx.machine, p.rx.machine); --j) {
-                if (periods[j].nights.size() >= Insights::kRxMinNights) base = &periods[j];
-            }
-            if (!base) {
-                text = InsightsPage::tr("No earlier period of at least %1 nights to compare with.")
-                       .arg(Insights::kRxMinNights);
-            }
-            const Insights::RxComparison cmp = base ? Insights::compareRxPeriods(base->nights, p.nights)
-                                                    : Insights::RxComparison();
-            const QString from = base ? num(base->ahi, 2) : QString(), to = num(p.ahi, 2);
+            const Insights::RxComparison cmp = Insights::compareRxPeriods(before->nights, p.nights);
+            const QString from = num(before->ahi, 2), to = num(p.ahi, 2);
             switch (cmp.label) {
             case Insights::ChangeLabel::NoComparison:
                 break;
@@ -275,11 +271,6 @@ QWidget *settingsCard(const QList<Period> &periods, const QString &ahiText)
                 detail = InsightsPage::tr("Change %1 events/h; 95% range %2 to %3")
                          .arg(signedNum(cmp.ahiAfter - cmp.ahiBefore), signedNum(cmp.ciLow),
                               signedNum(cmp.ciHigh));
-                if (base != before) {
-                    detail += " · " + InsightsPage::tr("Compared with %1 – %2: the periods between are "
-                                                       "too short.")
-                                      .arg(date(base->rx.start), date(base->rx.end));
-                }
             }
         }
         auto *v = new QWidget(table);
