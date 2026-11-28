@@ -2244,7 +2244,9 @@ EventDataType Profile::calcWavg(ChannelID code, MachineType mt, QDate start, QDa
         Day *day = GetGoodDay(date, mt);
 
         if (day) {
-            if (!day->summaryOnly() || day->hasData(code, ST_WAVG)) {
+            // A night that recorded nothing on the channel is left out: it added its hours
+            // to the divisor and nothing to the total, so the average fell (GitLab #438).
+            if ((!day->summaryOnly() || day->hasData(code, ST_WAVG)) && day->channelHasRecordedData(code)) {
                 // Weight by the hours of the device type asked for. day->hours() also
                 // counts other devices used that night (an oximeter beside the CPAP).
                 tmph = (mt == MT_UNKNOWN) ? day->hours() : day->hours(mt);
@@ -2289,7 +2291,8 @@ EventDataType Profile::calcMin(ChannelID code, MachineType mt, QDate start, QDat
         Day *day = GetGoodDay(date, mt);
 
         if (day) {
-            if (!day->summaryOnly() || day->hasData(code, ST_MIN)) {
+            // A night that recorded nothing on the channel would give 0 (GitLab #438).
+            if ((!day->summaryOnly() || day->hasData(code, ST_MIN)) && day->channelHasRecordedData(code)) {
                 tmp = day->Min(code);
 
                 if (first || (min > tmp)) {
@@ -2328,7 +2331,8 @@ EventDataType Profile::calcMax(ChannelID code, MachineType mt, QDate start, QDat
         Day *day = GetGoodDay(date, mt);
 
         if (day) {
-            if (!day->summaryOnly() || day->hasData(code, ST_MAX)) {
+            // As calcMin(): only nights that recorded the channel (GitLab #438).
+            if ((!day->summaryOnly() || day->hasData(code, ST_MAX)) && day->channelHasRecordedData(code)) {
                 tmp = day->Max(code);
 
                 if (first || (max < tmp)) {

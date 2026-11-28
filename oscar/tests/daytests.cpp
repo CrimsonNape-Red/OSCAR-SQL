@@ -315,6 +315,88 @@ void DayTests::testWavgWeightsByDeviceHours()
     profile.daylist.clear();
 }
 
+/*! \brief Give \a sess a channel stored but never filled, as a loader can leave one
+    \details Zero count and all-zero summaries, as loaded from session_channels. */
+static void emptyChannel(Session *sess, ChannelID code)
+{
+    sess->m_cnt[code] = 0;
+    sess->m_wavg[code] = 0;
+    sess->m_min[code] = 0;
+    sess->m_max[code] = 0;
+}
+
+// GitLab #438: a period average, minimum and maximum come from the nights that recorded the
+// channel. A night with the channel stored but never filled, or without it at all, added its
+// hours to the average's divisor and a 0 to the minimum.
+void DayTests::testPeriodLeavesOutNightsWithoutChannel()
+{
+    if (CPAP_Pressure == 0) { schema::init(); }
+    ScopedProfile scoped;
+    Profile & profile = scoped.profile();
+    CPAP cpap(&profile, 1);
+    cpap.setType(MT_CPAP);
+    const QDate first(2026, 3, 1);
+
+    // 1 March: an hour of pressure, 8 to 12, averaging 10.
+    Day *recorded = new Day();
+    recorded->setDate(first);
+    recordChannel(addPlainSession(*recorded, cpap, 1000000), CPAP_Pressure, 10, 8, 12);
+    profile.daylist.insert(recorded->date(), recorded);
+
+    // 2 March: pressure stored but never filled.
+    Day *empty = new Day();
+    empty->setDate(first.addDays(1));
+    emptyChannel(addPlainSession(*empty, cpap, 1100000), CPAP_Pressure);
+    profile.daylist.insert(empty->date(), empty);
+
+    // 3 March: no pressure channel at all, leak only.
+    Day *other = new Day();
+    other->setDate(first.addDays(2));
+    recordChannel(addPlainSession(*other, cpap, 1200000), CPAP_Leak, 4, 0, 20);
+    profile.daylist.insert(other->date(), other);
+
+    const QDate last = first.addDays(2);
+    // Were 3.33 (10 over three nights' hours) and 0.00.
+    QCOMPARE(profile.calcWavg(CPAP_Pressure, MT_CPAP, first, last), EventDataType(10));
+    QCOMPARE(profile.calcMin(CPAP_Pressure, MT_CPAP, first, last), EventDataType(8));
+    QCOMPARE(profile.calcMax(CPAP_Pressure, MT_CPAP, first, last), EventDataType(12));
+
+    // The Statistics columns: a value where a night recorded pressure, "-" where none did.
+    auto value = [&](StatCalcType calc, QDate start) {
+        return StatisticsRow("Pressure", calc, MT_CPAP).value(start, last);
+    };
+    QCOMPARE(value(SC_WAVG, first), QString("10.00"));
+    QCOMPARE(value(SC_MIN, first), QString("8.00"));
+    QCOMPARE(value(SC_MAX, first), QString("12.00"));
+    QCOMPARE(value(SC_WAVG, first.addDays(1)), QString("-"));
+    QCOMPARE(value(SC_MIN, first.addDays(1)), QString("-"));
+
+    qDeleteAll(profile.daylist);
+    profile.daylist.clear();
+}
+
+// The same within a night: a session that recorded nothing on the channel is no part of the
+// night's average, minimum or maximum.
+void DayTests::testDayLeavesOutSessionsWithoutChannel()
+{
+    if (CPAP_Pressure == 0) { schema::init(); }
+    ScopedProfile scoped;
+    CPAP cpap(&scoped.profile(), 1);
+    Day day;
+    recordChannel(addPlainSession(day, cpap, 1000000), CPAP_Pressure, 10, 8, 12);
+    emptyChannel(addPlainSession(day, cpap, 1010000), CPAP_Pressure);
+
+    QCOMPARE(day.wavg(CPAP_Pressure), EventDataType(10));     // was 5
+    QCOMPARE(day.Min(CPAP_Pressure), EventDataType(8));       // was 0
+    QCOMPARE(day.Max(CPAP_Pressure), EventDataType(12));
+
+    // Nothing recorded on the night at all: 0, as before.
+    Day none;
+    emptyChannel(addPlainSession(none, cpap, 1100000), CPAP_Pressure);
+    QCOMPARE(none.wavg(CPAP_Pressure), EventDataType(0));
+    QCOMPARE(none.Min(CPAP_Pressure), EventDataType(0));
+}
+
 QString formatTime(float time);     // statistics.cpp
 
 // Statistics hours are rounded to the nearest minute, not truncated.

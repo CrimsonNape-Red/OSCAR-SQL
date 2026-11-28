@@ -2387,6 +2387,13 @@ QString StatisticsRow::value(QDate start, QDate end)
         //
         ChannelID code=channel();
 
+        // A measurement with nothing recorded in this column's period has no value to show;
+        // "-" rather than 0.00, as the Oximeter section does (GitLab #438).
+        if ((code != NoChannel) && isMeasurementRow(calc)
+                && !p_profile->channelHasRecordedData(code, type, start, end)) {
+            return "-";
+        }
+
         EventDataType val = 0;
         QString fmt = "%1";
         if (code != NoChannel) {

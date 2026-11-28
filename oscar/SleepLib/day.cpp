@@ -651,8 +651,11 @@ EventDataType Day::wavg(ChannelID code)
     double s0 = 0, s1 = 0, s2 = 0;
     qint64 d;
 
+    // A session that recorded nothing on the channel (none, or one a loader created and
+    // never filled, stored with all-zero summaries) is no part of the average: its 0
+    // would pull it down (GitLab #438).
     for (auto & sess : sessions) {
-        if (sess->enabled() && sess->m_wavg.contains(code)) {
+        if (sess->enabled() && sess->m_wavg.contains(code) && sess->channelHasRecordedData(code)) {
             d = sess->length();
             s0 = double(d) / 3600000.0;
 
@@ -933,7 +936,8 @@ EventDataType Day::Min(ChannelID code)
     bool first = true;
 
     for (auto & sess : sessions) {
-        if (sess->enabled() && sess->m_min.contains(code)) {
+        // A session that recorded nothing on the channel would give 0 (GitLab #438).
+        if (sess->enabled() && sess->m_min.contains(code) && sess->channelHasRecordedData(code)) {
 
             tmp = sess->Min(code);
 
@@ -1044,7 +1048,8 @@ EventDataType Day::Max(ChannelID code)
     bool first = true;
 
     for (auto & sess : sessions) {
-        if (sess->enabled() && sess->m_max.contains(code)) {
+        // A session that recorded nothing on the channel would give 0 (GitLab #438).
+        if (sess->enabled() && sess->m_max.contains(code) && sess->channelHasRecordedData(code)) {
 
             tmp = sess->Max(code);
 

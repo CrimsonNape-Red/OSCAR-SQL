@@ -10140,3 +10140,54 @@ Rounding each session to a whole event loses every session under half an event.
   counts); the Standard and 90 Days reports were identical to before, the others changed as
   above. Not checked: ICON or PRS1 summary-only data, a backup restored from before the fix,
   Windows, macOS.
+
+---
+
+## 2026-11-27 - Statistics: averages too low and minimum 0.00 when a period mixes nights with and without a channel (GitLab #438)
+
+**Files:** `oscar/SleepLib/profiles.cpp` (`Profile::calcWavg()`, `calcMin()`, `calcMax()`),
+`oscar/SleepLib/day.cpp` (`Day::wavg()`, `Day::Min()`, `Day::Max()`), `oscar/statistics.cpp`
+(`StatisticsRow::value()`), `oscar/tests/daytests.cpp/.h`
+
+**Symptom:** See #438: a Statistics column whose period mixed nights with data for a channel and
+nights without showed an average that fell as the period grew (Average Pressure 7.29 / 3.45 / 1.80
+on a test profile whose pressure never changed) and a minimum of 0.00.
+
+**Root cause:** `calcWavg()`, `calcMin()` and `calcMax()` took every day that passed
+`!day->summaryOnly() || day->hasData(code, ...)`, which a day with detail data passes whether or not
+it has the channel. Such a day added its hours to the average's divisor and 0 to the total, and
+gave `calcMin()` a 0. The same happened one level down: `Day::wavg()`, `Min()` and `Max()` took
+every session with the channel in its summaries, including a channel a loader created and never
+filled (count 0, all summaries 0), so a night mixing such a session with a real one had its average
+halved and its minimum 0.
+
+**Fix:**
+1. The three period functions leave out a day with nothing recorded on the channel
+   (`Day::channelHasRecordedData()`, #436).
+2. The three day functions leave out a session with nothing recorded on it
+   (`Session::channelHasRecordedData()`).
+3. `StatisticsRow::value()` shows "-" for a measurement row (average, minimum, maximum,
+   percentile, time over or under a threshold) when nothing was recorded on the channel in the
+   column's period, as the Oximeter section does, instead of 0.00.
+
+**Non-obvious:**
+- A channel whose samples are all zero (a night with no leak) is a recording and still counts:
+  "recorded" means samples or a non-zero summary, not non-zero values.
+- Callers checked: Statistics; Overview summary charts (`gSummaryChart`, Calc_Min/Calc_Max); range
+  figures (`rangefigures.cpp`, middle value, and its "calcMax > 0" channel test, which cannot change:
+  a left-out day only ever supplied 0); Welcome leak averages; and the day-level users (Daily
+  details, line charts, Overview graph, daily_summaries). All want the nights or sessions without
+  the channel left out. Over a night that has nothing recorded the day functions still return 0.
+- `calcAvg()` is not affected (a day without the channel adds 0 to sum and count).
+  `calcPercentile()` is not affected either: a channel never filled has no value histogram, so it
+  adds nothing.
+- `calcWavg()` weights a night by the device type's hours even when only some of its sessions
+  recorded the channel; `Day::wavg()` itself now averages over those sessions only.
+- Checked: two new unit tests (a period with a night that has the channel stored but never
+  filled and a night without it: average 10 and minimum 8 where they were 3.33 and 0, and "-" for a
+  column with neither; a night with one filled and one empty session: average 10 and minimum 8
+  where they were 5 and 0); all 63 suites pass (686 passed, 7 skipped) on Linux, GCC, Qt 6.4.2.
+  The Statistics page of a profile with an AirCurve 10 and a Viatom oximeter, written out in all
+  four report modes, is identical to before the fix: its nights without detail data are
+  summary-only and were already left out. Not checked: the #438 test profile itself, a profile
+  with two makes of CPAP, the Overview charts by eye, Windows, macOS.
